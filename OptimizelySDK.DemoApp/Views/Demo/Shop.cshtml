@@ -1,0 +1,51 @@
+﻿@{ 
+/* 
+* Copyright 2017, Optimizely
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
+}
+@model OptimizelySDK.DemoApp.Models.DemoViewModel
+@{
+    ViewBag.Title = "Shop";
+}
+
+<h2>Shop</h2>
+@Html.Partial("_DemoMenu")
+
+
+@if (!string.IsNullOrEmpty(Model.Message))
+{
+<div class="alert alert-success">@Model.Message</div>
+}
+
+<div>Current Simulated Visitor: @Model.CurrentVisitor.Name (@Model.CurrentVisitor.Id) <small><a href="SelectVisitor">(change)</a></small></div>
+
+<hr />
+
+<div class="container">
+    <div class="row">
+        @foreach (var product in Model.Products)
+        {
+            <div class="col-md-4 text-center" style="padding: 10px">
+                <h4>@product.Name</h4>
+                <div>in @product.Color</div>
+                <div>@product.Category, $@product.Price</div>
+                <div>ID: @product.Id</div>
+                <div>
+                    <a href="Buy?visitorId=@Model.CurrentVisitor.Id&productId=@product.Id" class="btn btn-white btn-default active">Buy Now</a>
+                </div>
+            </div>
+        }
+    </div>
+</div>
