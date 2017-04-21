@@ -39,15 +39,16 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <Private>False</Private>
-    </Reference>
     <Reference Include="Moq, Version=4.7.1.0, Culture=neutral, PublicKeyToken=69f491c39445e920, processorArchitecture=MSIL">
       <HintPath>..\packages\Moq.4.7.1\lib\net45\Moq.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="nunit.framework, Version=2.6.4.14350, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
+      <HintPath>..\packages\NUnit.2.6.4\lib\nunit.framework.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -77,6 +78,7 @@
     <Compile Include="BucketerTest.cs" />
     <Compile Include="ProjectConfigTest.cs" />
     <Compile Include="UtilsTests\ConditionEvaluatorTest.cs" />
+    <Compile Include="UtilsTests\PrivateObject.cs" />
     <Compile Include="UtilsTests\ValidatorTest.cs" />
     <Compile Include="ValidEventDispatcher.cs" />
   </ItemGroup>
@@ -87,10 +89,6 @@
     <EmbeddedResource Include="TestData.json" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\OptimizelySDK.DemoApp\OptimizelySDK.DemoApp.csproj">
-      <Project>{9394F666-6397-41C0-8867-C3E4DA9156E3}</Project>
-      <Name>OptimizelySDK.DemoApp</Name>
-    </ProjectReference>
     <ProjectReference Include="..\OptimizelySDK\OptimizelySDK.csproj">
       <Project>{4dde7faa-110d-441c-ab3b-3f31b593e8bf}</Project>
       <Name>OptimizelySDK</Name>

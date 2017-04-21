@@ -1,5 +1,4 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using OptimizelySDK.Entity;
+﻿using OptimizelySDK.Entity;
 using OptimizelySDK.Logger;
 using Moq;
 using OptimizelySDK.Event.Builder;
@@ -8,11 +7,14 @@ using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
 using System;
 using OptimizelySDK.Event.Dispatcher;
+using NUnit.Framework;
 
 namespace OptimizelySDK.Tests.EventTests
 {
+    [TestFixture]
     public class DefaultEventDispatcherTest
     {
+        [Test]
         public void TestDispatchEvent()
         {
             var logEvent = new LogEvent("",
