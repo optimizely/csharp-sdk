@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OptimizelySDK.Entity;
 using OptimizelySDK.Logger;
 using Moq;
+using NUnit.Framework;
 
 namespace OptimizelySDK.Tests
 {
-    [TestClass]
+    [TestFixture]
     public class BucketerTest
     {
         private Mock<ILogger> LoggerMock;
@@ -48,21 +48,21 @@ namespace OptimizelySDK.Tests
             }
         }
 
-        [TestInitialize]
+        [SetUp]
         public void Initialize()
         {
             LoggerMock = new Mock<ILogger>();
             Config = ProjectConfig.Create(TestData.Datafile, LoggerMock.Object, new ErrorHandler.NoOpErrorHandler());
         }
 
-        [TestCleanup]
+        [TestFixtureSetUp]
         public void Cleanup()
         {
             LoggerMock = null;
             Config = null;
         }
 
-        [TestMethod]
+        [Test]
         public void TestGenerateBucketValue()
         {
             var bucketer = new Bucketer(LoggerMock.Object);
@@ -83,7 +83,7 @@ namespace OptimizelySDK.Tests
             }
         }
 
-        [TestMethod]
+        [Test]
         public void TestBucketValidExperimentNotInGroup()
         {
             TestBucketer bucketer = new TestBucketer(LoggerMock.Object);
@@ -114,7 +114,7 @@ namespace OptimizelySDK.Tests
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "User [testUserId] is in no variation."));
         }
 
-        [TestMethod]
+        [Test]
         public void TestBucketValidExperimentInGroup()
         {
             TestBucketer bucketer = new TestBucketer(LoggerMock.Object);
@@ -148,7 +148,7 @@ namespace OptimizelySDK.Tests
             LoggerMock.Verify(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()), Times.Exactly(10));
         }
 
-        [TestMethod]
+        [Test]
         public void TestBucketInvalidExperiment()
         {
             var bucketer = new Bucketer(LoggerMock.Object);
@@ -159,7 +159,7 @@ namespace OptimizelySDK.Tests
             LoggerMock.Verify(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()), Times.Never);
         }
 
-        [TestMethod]
+        [Test]
         public void TestBucketValidExperimentNotInGroupUserInForcedVariation()
         {
             var bucketer = new Bucketer(LoggerMock.Object);
@@ -171,7 +171,7 @@ namespace OptimizelySDK.Tests
             LoggerMock.Verify(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()), Times.Exactly(1));
         }
 
-        [TestMethod]
+        [Test]
         public void TestBucketValidExperimentInGroupUserInForcedVariation()
         {
             var bucketer = new Bucketer(LoggerMock.Object);
