@@ -16,7 +16,6 @@
 using System;
 using System.Collections.Generic;
 using Moq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OptimizelySDK.Logger;
 using OptimizelySDK.Event.Builder;
 using OptimizelySDK.Event.Dispatcher;
@@ -24,10 +23,12 @@ using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Exceptions;
 using OptimizelySDK.Event;
 using OptimizelySDK.Entity;
+using NUnit.Framework;
+using System.Reflection;
 
 namespace OptimizelySDK.Tests
 {
-    [TestClass]
+    [TestFixture]
     public class OptimizelyTest
     {
         private Mock<ILogger> LoggerMock;
@@ -39,7 +40,7 @@ namespace OptimizelySDK.Tests
         private const string TestUserId = "testUserId";
         private OptimizelyHelper Helper;
 
-        [TestInitialize]
+        [SetUp]
         public void Initialize()
         {
             LoggerMock = new Mock<ILogger>();
@@ -74,14 +75,41 @@ namespace OptimizelySDK.Tests
             };
         }
 
-        [TestCleanup]
+        [TestFixtureTearDown]
         public void Cleanup()
         {
             LoggerMock = null;
             Config = null;
             EventBuilderMock = null;
         }
+        private class PrivateObject
+        {
+            private object createdInstance;
+            private Type instanceType;
 
+            public PrivateObject(Type privateObject, Type[] parameterTypes, object[] parameterValues)
+            {
+                instanceType = privateObject;
+                createdInstance = Activator.CreateInstance(instanceType, parameterValues);
+            }
+            private PrivateObject(Type privateObject, object[] parameterValues)
+            {
+                instanceType = privateObject;
+                createdInstance = Activator.CreateInstance(instanceType, parameterValues);
+            }
+
+            public void SetFieldOrProperty(string propertyName, object value)
+            {
+                instanceType.InvokeMember(propertyName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.SetProperty | BindingFlags.NonPublic | BindingFlags.SetField,
+                    Type.DefaultBinder, createdInstance, new object[] { value });
+            }
+
+            public object Invoke(string name, params object[] args)
+            {
+                return instanceType.InvokeMember(name, BindingFlags.Instance | BindingFlags.Public | BindingFlags.InvokeMethod | BindingFlags.NonPublic,
+                    Type.DefaultBinder, createdInstance, args);
+            }
+        }
         private class OptimizelyHelper
         {
             static Type[] ParameterTypes = new[]
@@ -125,7 +153,7 @@ namespace OptimizelySDK.Tests
             }
         }
 
-        [TestMethod]
+        [Test]
         public void TestValidateInputsInvalidFileJsonValidationNotSkipped()
         {
             string datafile = "{\"name\":\"optimizely\"}";
@@ -133,7 +161,7 @@ namespace OptimizelySDK.Tests
             Assert.IsFalse(optimizely.IsValid);
         }
 
-        [TestMethod]
+        [Test]
         public void TestValidateInputsInvalidFileJsonValidationSkipped()
         {
             string datafile = "{\"name\":\"optimizely\"}";
@@ -141,7 +169,7 @@ namespace OptimizelySDK.Tests
             Assert.IsTrue(optimizely.IsValid);
         }
 
-        [TestMethod]
+        [Test]
         public void TestValidatePreconditionsExperimentNotRunning()
         {
             var optly = Helper.CreatePrivateOptimizely();
@@ -151,7 +179,7 @@ namespace OptimizelySDK.Tests
             Assert.IsFalse(result);
         }
 
-        [TestMethod]
+        [Test]
         public void TestValidatePreconditionsExperimentRunning()
         {
             var optly = Helper.CreatePrivateOptimizely();
@@ -167,7 +195,7 @@ namespace OptimizelySDK.Tests
             Assert.IsTrue(result);
         }
 
-        [TestMethod]
+        [Test]
         public void TestValidatePreconditionsUserInForcedVariationNotInExperiment()
         {
             var optly = Helper.CreatePrivateOptimizely();
@@ -177,7 +205,7 @@ namespace OptimizelySDK.Tests
             Assert.IsTrue(result);
         }
 
-        [TestMethod]
+        [Test]
         public void TestValidatePreconditionsUserInForcedVariationInExperiment()
         {
             var optly = Helper.CreatePrivateOptimizely();
@@ -187,7 +215,7 @@ namespace OptimizelySDK.Tests
             Assert.IsTrue(result);
         }
 
-        [TestMethod]
+        [Test]
         public void TestValidatePreconditionsUserNotInForcedVariationNotInExperiment()
         {
             var optly = Helper.CreatePrivateOptimizely();
@@ -197,7 +225,7 @@ namespace OptimizelySDK.Tests
             Assert.IsFalse(result);
         }
 
-        [TestMethod]
+        [Test]
         public void TestValidatePreconditionsUserNotInForcedVariationInExperiment()
         {
             var optly = Helper.CreatePrivateOptimizely();
@@ -213,7 +241,7 @@ namespace OptimizelySDK.Tests
             Assert.IsTrue(result);
         }
 
-        [TestMethod]
+        [Test]
         public void TestActivateInvalidOptimizelyObject()
         {
             var optly = new Optimizely("Random datafile", null, LoggerMock.Object);
@@ -239,7 +267,7 @@ namespace OptimizelySDK.Tests
             Assert.IsNull(result);
         } */
 
-        [TestMethod]
+        [Test]
         public void TestActivateUserInNoVariation()
         {
             var optly = Helper.CreatePrivateOptimizely();
@@ -258,7 +286,7 @@ namespace OptimizelySDK.Tests
             Assert.IsNull(result);
         }
 
-        [TestMethod]
+        [Test]
         public void TestActivateNoAudienceNoAttributes()
         {
             var parameters = new Dictionary<string, object>
@@ -290,7 +318,7 @@ namespace OptimizelySDK.Tests
             Assert.AreEqual("group_exp_1_var_2", variationkey);
         }
 
-        [TestMethod]
+        [Test]
         public void TestActivateAudienceNoAttributes()
         {
             var optly = Helper.CreatePrivateOptimizely();
@@ -308,7 +336,7 @@ namespace OptimizelySDK.Tests
             Assert.IsNull(variationkey);
         }
 
-        [TestMethod]
+        [Test]
         public void TestActivateWithAttributes()
         {
             EventBuilderMock.Setup(b => b.CreateImpressionEvent(It.IsAny<ProjectConfig>(), It.IsAny<Experiment>(),
@@ -332,7 +360,7 @@ namespace OptimizelySDK.Tests
             Assert.AreEqual("control", variationkey);
         }
 
-        [TestMethod]
+        [Test]
         public void TestActivateExperimentNotRunning()
         {
             var optly = Helper.CreatePrivateOptimizely();
@@ -350,7 +378,7 @@ namespace OptimizelySDK.Tests
             Assert.IsNull(variationkey);
         }
 
-        [TestMethod]
+        [Test]
         public void TestGetVariationInvalidOptimizelyObject()
         {
             var optly = new Optimizely("Random datafile", null, LoggerMock.Object);
@@ -376,7 +404,7 @@ namespace OptimizelySDK.Tests
             Assert.IsNull(result);
         } */
 
-        [TestMethod]
+        [Test]
         public void TestGetVariationAudienceMatch()
         {
             var attributes = new UserAttributes
@@ -394,7 +422,7 @@ namespace OptimizelySDK.Tests
             Assert.AreEqual("control", variation);
         }
 
-        [TestMethod]
+        [Test]
         public void TestGetVariationAudienceNoMatch()
         {
             var variation = Optimizely.Activate("test_experiment", "test_user");
@@ -402,7 +430,7 @@ namespace OptimizelySDK.Tests
             Assert.IsNull(variation);
         }
 
-        [TestMethod]
+        [Test]
         public void TestGetVariationExperimentNotRunning()
         {
             var variation = Optimizely.Activate("paused_experiment", "test_user");
@@ -410,7 +438,7 @@ namespace OptimizelySDK.Tests
             Assert.IsNull(variation);
         }
 
-        [TestMethod]
+        [Test]
         public void TestTrackInvalidOptimizelyObject()
         {
             var optly = new Optimizely("Random datafile", null, LoggerMock.Object);
@@ -419,7 +447,7 @@ namespace OptimizelySDK.Tests
             LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'track'."), Times.Once);
         }
 
-        [TestMethod]
+        [Test]
         public void TestTrackInvalidAttributes()
         {
             var attributes = new UserAttributes
@@ -433,7 +461,7 @@ namespace OptimizelySDK.Tests
             ErrorHandlerMock.Verify(e => e.HandleError(It.IsAny<InvalidAttributeException>()), Times.Once);
         }
 
-        [TestMethod]
+        [Test]
         public void TestTrackNoAttributesNoEventValue()
         {
             EventBuilderMock.Setup(b => b.CreateConversionEvent(It.IsAny<ProjectConfig>(), It.IsAny<string>(),
@@ -454,7 +482,7 @@ namespace OptimizelySDK.Tests
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Dispatching conversion event to URL logx.optimizely.com/track with params {\"param1\":\"val1\"}."), Times.Once);
         }
 
-        [TestMethod]
+        [Test]
         public void TestTrackWithAttributesNoEventValue()
         {
             EventBuilderMock.Setup(b => b.CreateConversionEvent(It.IsAny<ProjectConfig>(), It.IsAny<string>(),
@@ -473,7 +501,7 @@ namespace OptimizelySDK.Tests
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Dispatching conversion event to URL logx.optimizely.com/track with params {\"param1\":\"val1\"}."), Times.Once);
         }
 
-        [TestMethod]
+        [Test]
         public void TestTrackNoAttributesWithEventValue()
         {
             EventBuilderMock.Setup(b => b.CreateConversionEvent(It.IsAny<ProjectConfig>(), It.IsAny<string>(),
@@ -497,7 +525,7 @@ namespace OptimizelySDK.Tests
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Dispatching conversion event to URL logx.optimizely.com/track with params {\"param1\":\"val1\"}."), Times.Once);
         }
 
-        [TestMethod]
+        [Test]
         public void TestTrackWithAttributesWithEventValue()
         {
             var attributes = new UserAttributes
@@ -527,7 +555,7 @@ namespace OptimizelySDK.Tests
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Dispatching conversion event to URL logx.optimizely.com/track with params {\"param1\":\"val1\"}."), Times.Once);
         }
 
-        [TestMethod]
+        [Test]
         public void TestInvalidDispatchImpressionEvent()
         {
             EventBuilderMock.Setup(b => b.CreateImpressionEvent(It.IsAny<ProjectConfig>(), It.IsAny<Experiment>(),
@@ -549,7 +577,7 @@ namespace OptimizelySDK.Tests
             Assert.AreEqual("control", variationkey);
         }
 
-        [TestMethod]
+        [Test]
         public void TestInvalidDispatchConversionEvent()
         {
             EventBuilderMock.Setup(b => b.CreateConversionEvent(It.IsAny<ProjectConfig>(), It.IsAny<string>(),
