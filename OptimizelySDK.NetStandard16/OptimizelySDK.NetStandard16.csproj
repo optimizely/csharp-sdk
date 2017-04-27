@@ -41,7 +41,9 @@
     <Compile Include="..\OptimizelySDK\Utils\Schema.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="..\OptimizelySDK\Utils\schema.json" />
+    <EmbeddedResource Include="..\OptimizelySDK\Utils\schema.json">
+      <LogicalName>OptimizelySDK.Utils.schema.json</LogicalName>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="MurmurHash-net-core" Version="1.0.0" />
