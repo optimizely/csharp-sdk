@@ -14,24 +14,24 @@
  * limitations under the License.
  */
 using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Logger;
 using Moq;
 using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
 using OptimizelySDK.Exceptions;
+using NUnit.Framework;
 
 namespace OptimizelySDK.Tests
 {
-    [TestClass]
+    [TestFixture]
     public class ProjectConfigTest
     {
         private Mock<ILogger> LoggerMock;
         private Mock<IErrorHandler> ErrorHandlerMock;
         private ProjectConfig Config;
 
-        [TestInitialize]
+        [SetUp]
         public void Setup()
         {
             LoggerMock = new Mock<ILogger>();
@@ -46,7 +46,7 @@ namespace OptimizelySDK.Tests
             return new Dictionary<string, object>() { { name, entityObject } };
         }
 
-        [TestMethod]
+        [Test]
         public void TestInit()
         {
             // Check Version
@@ -173,19 +173,19 @@ namespace OptimizelySDK.Tests
             Assert.IsTrue(TestData.CompareObjects(variationIdMap, Config.VariationIdMap));
         }
 
-        [TestMethod]
+        [Test]
         public void TestGetAccountId()
         {
             Assert.AreEqual("1592310167", Config.AccountId);
         }
 
-        [TestMethod]
+        [Test]
         public void TestGetProjectId()
         {
             Assert.AreEqual("7720880029", Config.ProjectId);
         }
 
-        [TestMethod]
+        [Test]
         public void TestGetGroupValidId()
         {
             var group = Config.GetGroup("7722400015");
@@ -193,7 +193,7 @@ namespace OptimizelySDK.Tests
             Assert.AreEqual("random", group.Policy);            
         }
 
-        [TestMethod]
+        [Test]
         public void TestGetGroupInvalidId()
         {
 
@@ -210,7 +210,7 @@ namespace OptimizelySDK.Tests
             Assert.IsTrue(TestData.CompareObjects(group, new Entity.Group()));
         }
 
-        [TestMethod]
+        [Test]
         public void TestGetExperimentValidKey()
         {
             var experiment = Config.GetExperimentFromKey("test_experiment");
@@ -218,7 +218,7 @@ namespace OptimizelySDK.Tests
             Assert.AreEqual("7716830082", experiment.Id);
         }
 
-        [TestMethod]
+        [Test]
         public void TestGetExperimentInvalidKey()
         {
             var experiment = Config.GetExperimentFromKey("invalid_key");
@@ -231,7 +231,7 @@ namespace OptimizelySDK.Tests
             Assert.IsTrue(TestData.CompareObjects(new Entity.Experiment(), experiment));
         }
 
-        [TestMethod]
+        [Test]
         public void TestGetExperimentValidId()
         {
             var experiment = Config.GetExperimentFromId("7716830082");
@@ -239,7 +239,7 @@ namespace OptimizelySDK.Tests
             Assert.AreEqual("test_experiment", experiment.Key);
         }
 
-        [TestMethod]
+        [Test]
         public void TestGetExperimentInvalidId()
         {
             var experiment = Config.GetExperimentFromId("42");
@@ -252,7 +252,7 @@ namespace OptimizelySDK.Tests
             Assert.IsTrue(TestData.CompareObjects(new Entity.Experiment(), experiment));
         }
 
-        [TestMethod]
+        [Test]
         public void TestGetEventValidKey()
         {
             var ev = Config.GetEvent("purchase");
@@ -263,7 +263,7 @@ namespace OptimizelySDK.Tests
 
         }
 
-        [TestMethod]
+        [Test]
         public void TestGetEventInvalidKey()
         {
             var ev = Config.GetEvent("invalid_key");
@@ -276,7 +276,7 @@ namespace OptimizelySDK.Tests
             Assert.IsTrue(TestData.CompareObjects(new Entity.Event(), ev));
         }
 
-        [TestMethod]
+        [Test]
         public void TestGetAudienceValidId()
         {
             var audience = Config.GetAudience("7718080042");
@@ -285,7 +285,7 @@ namespace OptimizelySDK.Tests
             Assert.AreEqual("iPhone users in San Francisco", audience.Name);
         }
 
-        [TestMethod]
+        [Test]
         public void TestGetAudienceInvalidKey()
         {
             var audience = Config.GetAudience("invalid_id");
@@ -297,7 +297,7 @@ namespace OptimizelySDK.Tests
             Assert.IsTrue(TestData.CompareObjects(new Entity.Audience(), audience));
         }
 
-        [TestMethod]
+        [Test]
         public void TestGetAttributeValidKey()
         {
             var attribute = Config.GetAttribute("device_type");
@@ -306,7 +306,7 @@ namespace OptimizelySDK.Tests
             Assert.AreEqual("7723280020", attribute.Id);
         }
 
-        [TestMethod]
+        [Test]
         public void TestGetAttributeInvalidKey()
         {
 
@@ -323,7 +323,7 @@ namespace OptimizelySDK.Tests
         /// EK = Experiment Key 
         /// VK = Variation Key
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestGetVariationFromKeyValidEKValidVK()
         {
             var variation = Config.GetVariationFromKey("test_experiment", "control");
@@ -336,7 +336,7 @@ namespace OptimizelySDK.Tests
         /// EK = Experiment Key 
         /// VK = Variation Key
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestGetVariationFromKeyValidEKInvalidVK()
         {
             var variation = Config.GetVariationFromKey("test_experiment", "invalid_key");
@@ -351,7 +351,7 @@ namespace OptimizelySDK.Tests
 
         }
 
-        [TestMethod]
+        [Test]
         public void TestGetVariationFromKeyInvalidEK()
         {
             var variation = Config.GetVariationFromKey("invalid_experiment", "control");
@@ -363,7 +363,7 @@ namespace OptimizelySDK.Tests
             Assert.AreEqual(new Entity.Variation(), variation);
         }
 
-        [TestMethod]
+        [Test]
         public void TestGetVariationFromIdValidEKValidVId()
         {
 
@@ -372,7 +372,7 @@ namespace OptimizelySDK.Tests
             Assert.AreEqual("7722370027", variation.Id);
         }
 
-        [TestMethod]
+        [Test]
         public void TestGetVariationFromIdValidEKInvalidVId()
         {
 
@@ -385,7 +385,7 @@ namespace OptimizelySDK.Tests
             Assert.AreEqual(new Entity.Variation(), variation);
         }
 
-        [TestMethod]
+        [Test]
         public void TestGetVariationFromIdInvalidEK()
         {
             var variation = Config.GetVariationFromId("invalid_experiment", "7722370027");
@@ -397,7 +397,7 @@ namespace OptimizelySDK.Tests
             Assert.AreEqual(new Entity.Variation(), variation);
         }
 
-        [TestMethod]
+        [Test]
         public void TempProjectConfigTest()
         {
             ProjectConfig config = ProjectConfig.Create(TestData.Datafile, new Mock<ILogger>().Object, new DefaultErrorHandler());
