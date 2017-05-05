@@ -1,5 +1,4 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using OptimizelySDK.Entity;
+﻿using OptimizelySDK.Entity;
 using OptimizelySDK.Logger;
 using Moq;
 using OptimizelySDK.Event.Builder;
@@ -7,17 +6,18 @@ using OptimizelySDK.Event;
 using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
 using System;
+using NUnit.Framework;
 
 namespace OptimizelySDK.Tests.EventTests
 {
-    [TestClass]
+    [TestFixture]
     public class EventBuilderTest
     {
         private string TestUserId = string.Empty;
         private ProjectConfig Config;
         private EventBuilder EventBuilder;
 
-        [TestInitialize]
+        [TestFixtureSetUp]
         public void Setup()
         {
             TestUserId = "testUserId";
@@ -30,7 +30,7 @@ namespace OptimizelySDK.Tests.EventTests
             return (long)(DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalSeconds;
         }
 
-        [TestMethod]
+        [Test]
         public void TestCreateImpressionEventNoAttributes()
         {
             var expectedLogEvent = new LogEvent("https://logx.optimizely.com/log/decision",
@@ -65,7 +65,7 @@ namespace OptimizelySDK.Tests.EventTests
 
         }
 
-        [TestMethod]
+        [Test]
         public void TestCreateImpressionEventWithAttributes()
         {
             var expectedLogEvent = new LogEvent("https://logx.optimizely.com/log/decision",
@@ -116,7 +116,7 @@ namespace OptimizelySDK.Tests.EventTests
             Assert.IsTrue(TestData.CompareObjects(expectedLogEvent, logEvent));
         }
 
-        [TestMethod]
+        [Test]
         public void TestCreateConversionEventNoAttributesNovalue()
         {
             var expectedEvent = new LogEvent(
@@ -162,7 +162,7 @@ namespace OptimizelySDK.Tests.EventTests
             Assert.IsTrue(TestData.CompareObjects(expectedEvent, logEvent));
         }
 
-        [TestMethod]
+        [Test]
         public void TestCreateConversionEventWithAttributesNoValue()
         {
             var expectedEvent = new LogEvent(
@@ -229,7 +229,7 @@ namespace OptimizelySDK.Tests.EventTests
             Assert.IsTrue(TestData.CompareObjects(expectedEvent, logEvent));
         }
 
-        [TestMethod]
+        [Test]
         public void TestCreateConversionEventNoAttributesWithValue()
         {
             var expectedEvent = new LogEvent(
@@ -301,7 +301,7 @@ namespace OptimizelySDK.Tests.EventTests
             Assert.IsTrue(TestData.CompareObjects(expectedEvent, logEvent));
         }
 
-        [TestMethod]
+        [Test]
         public void TestCreateConversionEventWithAttributesWithValue()
         {
             var expectedEvent = new LogEvent(
@@ -400,7 +400,7 @@ namespace OptimizelySDK.Tests.EventTests
 
 
         /* Start */
-        [TestMethod]
+        [Test]
         public void TestCreateConversionEventNoAttributesWithInvalidValue()
         {
 

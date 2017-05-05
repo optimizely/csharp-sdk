@@ -23,7 +23,7 @@ namespace OptimizelySDK.Event.Dispatcher
     public class WebRequestClientEventDispatcher35 : IEventDispatcher
     {
         // TODO Catch and Log Errors
-        public ILogger Logger { get; set; }
+        public Logger.ILogger Logger { get; set; }
 
         /// <summary>
         /// Timeout for the HTTP request (10 seconds)
@@ -47,18 +47,20 @@ namespace OptimizelySDK.Event.Dispatcher
             Request.Method = logEvent.HttpVerb;
 
             foreach (var h in logEvent.Headers)
-                Request.Headers[h.Key] = h.Value;
+                if(!WebHeaderCollection.IsRestricted(h.Key)){
+                    Request.Headers[h.Key] = h.Value;
+                } 
 
             Request.ContentType = "application/json";
 
             using (var streamWriter = new StreamWriter(Request.GetRequestStream()))
             {
-                streamWriter.Write(logEvent.GetJson());
+                streamWriter.Write(logEvent.GetParamsAsJson());
                 streamWriter.Flush();
                 streamWriter.Close();
             }
 
-            IAsyncResult result = Request.BeginGetRequestStream(new AsyncCallback(FinaliseHttpAsyncRequest), this);
+            IAsyncResult result = Request.BeginGetResponse(new AsyncCallback(FinaliseHttpAsyncRequest), this);
         }
 
         private static void FinaliseHttpAsyncRequest(IAsyncResult result)

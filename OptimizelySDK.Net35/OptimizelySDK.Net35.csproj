@@ -1,0 +1,164 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{C8FF7012-37B7-4D64-AB45-0C62195302EC}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>OptimizelySDK.Net35</RootNamespace>
+    <AssemblyName>OptimizelySDK.Net35</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;NET35</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE;NET35</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="MurmurHash, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\murmurhash.1.0.0\lib\net35\MurmurHash.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net35\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\OptimizelySDK\Bucketer.cs">
+      <Link>Bucketer.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Entity\Attribute.cs">
+      <Link>Entity\Attribute.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Entity\Audience.cs">
+      <Link>Entity\Audience.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Entity\Entity.cs">
+      <Link>Entity\Entity.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Entity\Event.cs">
+      <Link>Entity\Event.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Entity\EventAttributes.cs">
+      <Link>Entity\EventAttributes.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Entity\Experiment.cs">
+      <Link>Entity\Experiment.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Entity\ForcedVariation.cs">
+      <Link>Entity\ForcedVariation.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Entity\Group.cs">
+      <Link>Entity\Group.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Entity\IdKeyEntity.cs">
+      <Link>Entity\IdKeyEntity.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Entity\TrafficAllocation.cs">
+      <Link>Entity\TrafficAllocation.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Entity\UserAttributes.cs">
+      <Link>Entity\UserAttributes.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Entity\Variation.cs">
+      <Link>Entity\Variation.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\ErrorHandler\DefaultErrorHandler.cs">
+      <Link>ErrorHandler\DefaultErrorHandler.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\ErrorHandler\IErrorHandler.cs">
+      <Link>ErrorHandler\IErrorHandler.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\ErrorHandler\NoOpErrorHandler.cs">
+      <Link>ErrorHandler\NoOpErrorHandler.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Event\Builder\EventBuilder.cs">
+      <Link>Event\EventBuilder.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Event\Builder\Params.cs">
+      <Link>Event\Params.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Event\Dispatcher\DefaultEventDispatcher.cs">
+      <Link>Event\DefaultEventDispatcher.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Event\Dispatcher\IEventDispatcher.cs">
+      <Link>Event\IEventDispatcher.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Event\Dispatcher\WebRequestEventDispatcher35.cs">
+      <Link>Event\WebRequestEventDispatcher35.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Event\LogEvent.cs">
+      <Link>Event\LogEvent.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Exceptions\OptimizelyException.cs">
+      <Link>Exceptions\OptimizelyException.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Logger\DefaultLogger.cs">
+      <Link>Logger\DefaultLogger.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Logger\ILogger.cs">
+      <Link>Logger\ILogger.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Logger\NoOpLogger.cs">
+      <Link>Logger\NoOpLogger.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Optimizely.cs">
+      <Link>Optimizely.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\ProjectConfig.cs">
+      <Link>ProjectConfig.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Utils\ConditionEvaluator.cs">
+      <Link>Utils\ConditionEvaluator.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Utils\ConfigParser.cs">
+      <Link>Utils\ConfigParser.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Utils\EventTagUtils.cs">
+      <Link>Utils\EventTagUtils.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Utils\Schema.cs">
+      <Link>Utils\Schema.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Utils\Validator.cs">
+      <Link>Utils\Validator.cs</Link>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\OptimizelySDK\Utils\schema.json">
+      <Link>Utils\schema.json</Link>
+    </None>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

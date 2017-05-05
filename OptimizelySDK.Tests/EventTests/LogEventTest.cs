@@ -1,5 +1,6 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿
 using Newtonsoft.Json.Linq;
+using NUnit.Framework;
 using OptimizelySDK.Event;
 using System;
 using System.Collections.Generic;
@@ -9,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace OptimizelySDK.Tests.EventTests
 {
-    [TestClass]
+    [TestFixture]
     public class LogEventTest
     {
         private LogEvent LogEvent;
@@ -25,7 +26,7 @@ namespace OptimizelySDK.Tests.EventTests
             return JToken.DeepEquals(jtoken1, jtoken2);
         }
 
-        [TestInitialize]
+        [TestFixtureSetUp]
         public void Setup()
         {
             LogEvent = new LogEvent(
@@ -43,13 +44,13 @@ namespace OptimizelySDK.Tests.EventTests
                 });
         }
 
-        [TestMethod]
+        [Test]
         public void TestGetUrl()
         {
             Assert.AreEqual("https://logx.optimizely.com", LogEvent.Url);
         }
 
-        [TestMethod]
+        [Test]
         public void TestGetParams()
         {
             var testParams = new Dictionary<string, object>
@@ -61,13 +62,13 @@ namespace OptimizelySDK.Tests.EventTests
             Assert.IsTrue(CompareObjects(testParams, LogEvent.Params));
         }
 
-        [TestMethod]
+        [Test]
         public void TestGetHttpVerb()
         {
             Assert.AreEqual("POST", LogEvent.HttpVerb);
         }
 
-        [TestMethod]
+        [Test]
         public void TestGetHeaders()
         {
             var headers = new Dictionary<string, string>

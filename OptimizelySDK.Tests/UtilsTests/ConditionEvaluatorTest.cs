@@ -13,20 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using OptimizelySDK.Entity;
 using OptimizelySDK.Utils;
 
 namespace OptimizelySDK.Tests.UtilsTests
 {
-    [TestClass]
+    [TestFixture]
     public class ConditionEvaluatorTest
     {
         private ConditionEvaluator ConditionEvaluator = null;
         private object[] Conditions = null;
         private const string ConditionsStr = @"[""and"", [""or"", [""or"", {""name"": ""device_type"", ""type"": ""custom_attribute"", ""value"": ""iPhone""}]], [""or"", [""or"", {""name"": ""location"", ""type"": ""custom_attribute"", ""value"": ""San Francisco""}]], [""or"", [""not"", [""or"", {""name"": ""browser"", ""type"": ""custom_attribute"", ""value"": ""Firefox""}]]]]";
 
-        [TestInitialize]
+        [TestFixtureSetUp]
         public void Initialize()
         {
             ConditionEvaluator = new ConditionEvaluator();
@@ -34,14 +34,14 @@ namespace OptimizelySDK.Tests.UtilsTests
             Conditions = Newtonsoft.Json.JsonConvert.DeserializeObject<object[]>(ConditionsStr);
         }
 
-        [TestCleanup]
+        [TestFixtureTearDown]
         public void TestCleanUp()
         {
             Conditions = null;
             ConditionEvaluator = null;
         }
 
-        [TestMethod]
+        [Test]
         public void TestEvaluateConditionsMatch()
         {
             var userAttributes = new UserAttributes
@@ -54,7 +54,7 @@ namespace OptimizelySDK.Tests.UtilsTests
             Assert.IsTrue(ConditionEvaluator.Evaluate(Conditions, userAttributes));
         }
 
-        [TestMethod]
+        [Test]
         public void TestEvaluateConditionsDoNotMatch()
         {
             var userAttributes = new UserAttributes
@@ -67,7 +67,7 @@ namespace OptimizelySDK.Tests.UtilsTests
             Assert.IsFalse(ConditionEvaluator.Evaluate(Conditions, userAttributes));
         }
 
-        [TestMethod]
+        [Test]
         public void TestEvaluateEmptyUserAttributes()
         {
             var userAttributes = new UserAttributes();
@@ -75,7 +75,7 @@ namespace OptimizelySDK.Tests.UtilsTests
             Assert.IsFalse(ConditionEvaluator.Evaluate(Conditions, userAttributes));
         }
 
-        [TestMethod]
+        [Test]
         public void TestEvaluateNullUserAttributes()
         {
             UserAttributes userAttributes = null;
