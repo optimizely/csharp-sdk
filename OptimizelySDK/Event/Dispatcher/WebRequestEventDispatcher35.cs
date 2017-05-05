@@ -47,7 +47,9 @@ namespace OptimizelySDK.Event.Dispatcher
             Request.Method = logEvent.HttpVerb;
 
             foreach (var h in logEvent.Headers)
-                Request.Headers[h.Key] = h.Value;
+                if(!WebHeaderCollection.IsRestricted(h.Key)){
+                    Request.Headers[h.Key] = h.Value;
+                } 
 
             Request.ContentType = "application/json";
 
@@ -58,7 +60,7 @@ namespace OptimizelySDK.Event.Dispatcher
                 streamWriter.Close();
             }
 
-            IAsyncResult result = Request.BeginGetRequestStream(new AsyncCallback(FinaliseHttpAsyncRequest), this);
+            IAsyncResult result = Request.BeginGetResponse(new AsyncCallback(FinaliseHttpAsyncRequest), this);
         }
 
         private static void FinaliseHttpAsyncRequest(IAsyncResult result)
