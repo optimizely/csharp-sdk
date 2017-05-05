@@ -22,12 +22,14 @@ namespace OptimizelySDK.Utils
 {
     public static class Validator
     {
+
         /// <summary>
         /// Validate the ProjectConfig JSON
         /// </summary>
         /// <param name="configJson">ProjectConfig JSON</param>
         /// <param name="schemaJson">Schema JSON for ProjectConfig.  If none is provided, use the one already in the project</param>
         /// <returns>Whether the ProjectConfig is valid</returns>
+#if !NET35
         public static bool ValidateJSONSchema(string configJson, string schemaJson = null)
         {
             try
@@ -43,6 +45,13 @@ namespace OptimizelySDK.Utils
                 return false;
             }
         }
+#endif
+#if NET35
+        public static bool ValidateJSONSchema(string configJson, string schemaJson = null)
+        {
+            return true;
+        }
+#endif
 
         /// <summary>
         /// Determines whether all attributes in an array are valid.

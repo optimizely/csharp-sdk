@@ -20,6 +20,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OptimizelySDK.NetStandard16", "OptimizelySDK.NetStandard16\OptimizelySDK.NetStandard16.csproj", "{EDCF3773-56E7-416E-A379-B6999A8D8570}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OptimizelySDK.Net35", "OptimizelySDK.Net35\OptimizelySDK.Net35.csproj", "{C8FF7012-37B7-4D64-AB45-0C62195302EC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -42,6 +44,10 @@ Global
 		{EDCF3773-56E7-416E-A379-B6999A8D8570}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EDCF3773-56E7-416E-A379-B6999A8D8570}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EDCF3773-56E7-416E-A379-B6999A8D8570}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C8FF7012-37B7-4D64-AB45-0C62195302EC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C8FF7012-37B7-4D64-AB45-0C62195302EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C8FF7012-37B7-4D64-AB45-0C62195302EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C8FF7012-37B7-4D64-AB45-0C62195302EC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -23,7 +23,7 @@ namespace OptimizelySDK.Event.Dispatcher
     public class WebRequestClientEventDispatcher35 : IEventDispatcher
     {
         // TODO Catch and Log Errors
-        public ILogger Logger { get; set; }
+        public Logger.ILogger Logger { get; set; }
 
         /// <summary>
         /// Timeout for the HTTP request (10 seconds)
@@ -53,7 +53,7 @@ namespace OptimizelySDK.Event.Dispatcher
 
             using (var streamWriter = new StreamWriter(Request.GetRequestStream()))
             {
-                streamWriter.Write(logEvent.GetJson());
+                streamWriter.Write(logEvent.GetParamsAsJson());
                 streamWriter.Flush();
                 streamWriter.Close();
             }

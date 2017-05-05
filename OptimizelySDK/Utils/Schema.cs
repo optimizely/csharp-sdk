@@ -26,8 +26,11 @@ namespace OptimizelySDK.Utils
         {
             if (cache != null)
                 return cache;
-
+#if NET35
+            var assembly = Assembly.GetExecutingAssembly();
+#else
             var assembly = typeof(Schema).GetTypeInfo().Assembly;
+#endif
             const string resourceName = "OptimizelySDK.Utils.schema.json";
 
             using (Stream stream = assembly.GetManifestResourceStream(resourceName))
