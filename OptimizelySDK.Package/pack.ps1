@@ -6,13 +6,14 @@ Write-Host "This script requires VS 2017 Community Edition & NuGet CLI"
 Write-Host "-"
 Write-Host "-"
 
-& $msBuildLocation ..\OptimizelySDK.sln /p:Platform="Any CPU" /p:Configuration=Release /p:GenerateDocumentation=true /nr:false /clp:Summary
+& $msBuildLocation ..\OptimizelySDK.sln /p:Platform="Any CPU" /p:Configuration=Release /p:GenerateDocumentation=true  /t:Clean,Build /nr:false /clp:Summary
 
 Write-Host "-"
 Write-Host "-"
 Write-Host "Build complete. Copying files..."
 
 Copy-Item  -Path "..\OptimizelySDK\bin\Release\OptimizelySDK.dll" -Destination ".\lib\net45"  -Recurse -force
+Copy-Item  -Path "..\OptimizelySDK.Net35\bin\Release\OptimizelySDK.Net35.dll" -Destination ".\lib\net35"  -Recurse -force
 Copy-Item  -Path "..\OptimizelySDK.NetStandard16\bin\Release\netstandard1.6\OptimizelySDK.NetStandard16.dll" -Destination ".\lib\netstandard1.6"  -Recurse -force
 
 Write-Host "-"
