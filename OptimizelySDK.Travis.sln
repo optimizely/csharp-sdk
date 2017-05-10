@@ -3,11 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26403.7
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OptimizelySDK.DemoApp", "OptimizelySDK.DemoApp\OptimizelySDK.DemoApp.csproj", "{9394F666-6397-41C0-8867-C3E4DA9156E3}"
-	ProjectSection(ProjectDependencies) = postProject
-		{4DDE7FAA-110D-441C-AB3B-3F31B593E8BF} = {4DDE7FAA-110D-441C-AB3B-3F31B593E8BF}
-	EndProjectSection
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OptimizelySDK.Tests", "OptimizelySDK.Tests\OptimizelySDK.Tests.csproj", "{DB8A546D-DBB3-441A-8687-A5D90B469027}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OptimizelySDK", "OptimizelySDK\OptimizelySDK.csproj", "{4DDE7FAA-110D-441C-AB3B-3F31B593E8BF}"
@@ -18,20 +13,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OptimizelySDK.NetStandard16", "OptimizelySDK.NetStandard16\OptimizelySDK.NetStandard16.csproj", "{EDCF3773-56E7-416E-A379-B6999A8D8570}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OptimizelySDK.Net35", "OptimizelySDK.Net35\OptimizelySDK.Net35.csproj", "{C8FF7012-37B7-4D64-AB45-0C62195302EC}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{9394F666-6397-41C0-8867-C3E4DA9156E3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9394F666-6397-41C0-8867-C3E4DA9156E3}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9394F666-6397-41C0-8867-C3E4DA9156E3}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9394F666-6397-41C0-8867-C3E4DA9156E3}.Release|Any CPU.Build.0 = Release|Any CPU
 		{DB8A546D-DBB3-441A-8687-A5D90B469027}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{DB8A546D-DBB3-441A-8687-A5D90B469027}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DB8A546D-DBB3-441A-8687-A5D90B469027}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -40,14 +27,6 @@ Global
 		{4DDE7FAA-110D-441C-AB3B-3F31B593E8BF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4DDE7FAA-110D-441C-AB3B-3F31B593E8BF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4DDE7FAA-110D-441C-AB3B-3F31B593E8BF}.Release|Any CPU.Build.0 = Release|Any CPU
-		{EDCF3773-56E7-416E-A379-B6999A8D8570}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{EDCF3773-56E7-416E-A379-B6999A8D8570}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{EDCF3773-56E7-416E-A379-B6999A8D8570}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{EDCF3773-56E7-416E-A379-B6999A8D8570}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C8FF7012-37B7-4D64-AB45-0C62195302EC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C8FF7012-37B7-4D64-AB45-0C62195302EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C8FF7012-37B7-4D64-AB45-0C62195302EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C8FF7012-37B7-4D64-AB45-0C62195302EC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
