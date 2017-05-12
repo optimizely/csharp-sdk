@@ -32,12 +32,16 @@ namespace OptimizelySDK
         private EventBuilder EventBuilder;
 
         private IEventDispatcher EventDispatcher;
-
+        
         private ProjectConfig Config;
 
         private ILogger Logger;
 
         private IErrorHandler ErrorHandler;
+
+        private UserProfileService UserProfileService;
+
+        private DecisionService DecisionService;
 
         public bool IsValid { get; private set; }
 
@@ -54,6 +58,7 @@ namespace OptimizelySDK
                           IEventDispatcher eventDispatcher = null,
                           ILogger logger = null,
                           IErrorHandler errorHandler = null,
+                          UserProfileService userProfileService = null,
                           bool skipJsonValidation = false)
         {
             IsValid = false; // invalid until proven valid
@@ -62,6 +67,7 @@ namespace OptimizelySDK
             ErrorHandler = errorHandler ?? new NoOpErrorHandler();
             Bucketer = new Bucketer(Logger);
             EventBuilder = new EventBuilder(Bucketer);
+            UserProfileService = userProfileService;
 
             try
             {
@@ -73,6 +79,7 @@ namespace OptimizelySDK
 
                 Config = ProjectConfig.Create(datafile, Logger, ErrorHandler);
                 IsValid = true;
+                DecisionService = new DecisionService(Bucketer, Config, userProfileService, Logger);
             }
             catch (Exception ex)
             {
@@ -149,7 +156,8 @@ namespace OptimizelySDK
                 return null;
             }
 
-            var variation = Bucketer.Bucket(Config, experiment, userId);
+            //var variation = Bucketer.Bucket(Config, experiment, userId);
+            var variation = DecisionService.GetVariation(experiment, userId, userAttributes);
             var variationKey = variation.Key;
 
             if (variationKey == null)
@@ -277,7 +285,8 @@ namespace OptimizelySDK
             if (experiment.Key == null || !ValidatePreconditions(experiment, userId, userAttributes))
                 return null;
 
-            Variation variation = Bucketer.Bucket(Config, experiment, userId);
+            //Variation variation = Bucketer.Bucket(Config, experiment, userId);
+            Variation variation = DecisionService.GetVariation(experiment, userId, userAttributes);
             return variation.Key;
         }
     }

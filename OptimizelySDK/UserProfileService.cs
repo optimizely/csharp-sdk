@@ -25,16 +25,16 @@ namespace OptimizelySDK
 	/// Override with your own implementation for storing and retrieving the user profile.
 	/// </summary>
 	
-   	abstract public class UserProfile
+   	abstract public class UserProfileService
     {
         public const string USER_ID_KEY = "user_id";
         public const string DECISIONS_KEY = "decisions";
+        public const string VARIATION_ID_KEY = "variation_id";
 
-
-		/// <summary>
-		/// A user's ID.
-		/// </summary>
-		public readonly string UserId;
+        /// <summary>
+        /// A user's ID.
+        /// </summary>
+        public readonly string UserId;
 
 
 		/// <summary>
@@ -48,7 +48,7 @@ namespace OptimizelySDK
 		/// </summary>
 		/// <param name="userId">userId The ID of the user.</param>
 		/// <param name="decisions">The bucketing decisions of the user.</param>
-		public UserProfile(String userId, Dictionary<string, string> decisions)
+		public UserProfileService(String userId, Dictionary<string, string> decisions)
         {
             this.UserId = userId;
             this.Decisions = decisions;
@@ -59,7 +59,7 @@ namespace OptimizelySDK
 		/// Construct a User Profile instance from a Map.
 		/// </summary>
 		/// <param name="userProfileMap">containing the properties of the user profile.</param>
-				public UserProfile(Dictionary<string, object> userProfileMap)
+				public UserProfileService(Dictionary<string, object> userProfileMap)
             : this((string)userProfileMap[USER_ID_KEY], (Dictionary<string, string>)userProfileMap[DECISIONS_KEY])
         {
 

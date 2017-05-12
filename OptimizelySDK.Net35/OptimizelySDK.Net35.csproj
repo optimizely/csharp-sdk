@@ -49,6 +49,12 @@
     <Compile Include="..\OptimizelySDK\Bucketer.cs">
       <Link>Bucketer.cs</Link>
     </Compile>
+	    <Compile Include="..\OptimizelySDK\DecisionService.cs">
+      <Link>Bucketer.cs</Link>
+    </Compile>
+	    <Compile Include="..\OptimizelySDK\UserProfileService.cs">
+      <Link>Bucketer.cs</Link>
+    </Compile>
     <Compile Include="..\OptimizelySDK\Entity\Attribute.cs">
       <Link>Entity\Attribute.cs</Link>
     </Compile>

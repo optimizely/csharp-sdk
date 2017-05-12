@@ -29,7 +29,7 @@ namespace OptimizelySDK
     {
         private readonly Bucketer Bucketer;
         private readonly ProjectConfig ProjectConfig;
-        private readonly UserProfile UserProfile;
+        private readonly UserProfileService UserProfile;
         private ILogger Logger { get; set; }
 		
 		/// <summary>
@@ -40,7 +40,7 @@ namespace OptimizelySDK
 		/// <param name="userProfile"> UserProfile implementation for storing decisions.</param>
 		public DecisionService(Bucketer bucketer,
 						   ProjectConfig projectConfig,
-						   UserProfile userProfile,
+                           UserProfileService userProfile,
                            ILogger logger)
 		{
 			this.Bucketer = bucketer;
@@ -58,9 +58,9 @@ namespace OptimizelySDK
 		 * @return The {@link Variation} the user is allocated into.
 		 */
 
-		public Variation getVariation(Experiment experiment,
-												String userId,
-												Entity.UserAttributes filteredAttributes)
+		public Variation GetVariation(Experiment experiment,
+												string userId,
+												UserAttributes filteredAttributes)
 		{
 
             if (!experiment.IsExperimentRunning)
@@ -71,7 +71,7 @@ namespace OptimizelySDK
 			Variation variation;
 
 			// check for whitelisting
-			variation = getWhitelistedVariation(experiment, userId);
+			variation = GetWhitelistedVariation(experiment, userId);
 			if (variation != null)
 			{
 				return variation;
@@ -83,7 +83,6 @@ namespace OptimizelySDK
 			{
 				return variation;
 			}
-            //TODO: Have to fix     
 
 			if (Validator.IsUserInExperiment(ProjectConfig, experiment, filteredAttributes))
 			{
@@ -109,7 +108,7 @@ namespace OptimizelySDK
 		 * @return null if the user is not whitelisted into any variation
 		 *      {@link Variation} the user is bucketed into if the user has a specified whitelisted variation.
 		 */
-		Variation getWhitelistedVariation(Experiment experiment, String userId)
+		Variation GetWhitelistedVariation(Experiment experiment, String userId)
 		{
             // if a user has a forced variation mapping, return the respective variation
             Dictionary<string, string> userIdToVariationKeyMap = experiment.UserIdToKeyVariations;
@@ -142,17 +141,35 @@ namespace OptimizelySDK
 		 * @return null if the {@link UserProfile} implementation is null or the user was not previously bucketed.
 		 *      else return the {@link Variation} the user was previously bucketed into.
 		 */
+
+        string GetVariationIdFromUserProfile(Dictionary<string, object> userProfile, string experimentId)
+        {
+            var decisions = userProfile[UserProfileService.DECISIONS_KEY];
+
+            if(decisions != null && decisions is Dictionary<string, object>)
+            {
+                var experimentVariations = (Dictionary<string, object>)decisions;
+                var variations = experimentVariations[experimentId];
+                if(variations != null && variations is Dictionary<string, object>)
+                {
+                    var variationsDict = (Dictionary<string, object>)variations;
+                    return variationsDict[UserProfileService.VARIATION_ID_KEY].ToString();
+                }
+            }
+
+            return null;
+        }
 		Variation GetStoredVariation(Experiment experiment, string userId)
 		{
             // ---------- Check User Profile for Sticky Bucketing ----------
             // If a user profile instance is present then check it for a saved variation
-            String experimentId = experiment.Id;
-            String experimentKey = experiment.Key;
+            string experimentId = experiment.Id;
+            string experimentKey = experiment.Key;
 			
             if (UserProfile != null)
 			{
                 //TODO: Find variation ID based on experiment ID
-                var variationId = UserProfile.Lookup(userId).ToString();
+                var variationId = GetVariationIdFromUserProfile(UserProfile.Lookup(userId), experimentId);
 				
                 if (variationId != null)
 				{
