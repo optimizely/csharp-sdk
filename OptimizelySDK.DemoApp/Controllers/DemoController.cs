@@ -40,7 +40,7 @@ namespace OptimizelySDK.DemoApp.Controllers
             new Visitor { Id = 10001, Name = "Mike", Age = 23 },
             new Visitor { Id = 10002, Name = "Ali", Age = 29 },
             new Visitor { Id = 10003, Name = "Sally", Age = 18 },
-            new Visitor { Id = 10004, Name = "Jennifer", Age = 23 },
+            new Visitor { Id = 10004, Name = "Jennifer", Age = 44 },
             new Visitor { Id = 10005, Name = "Randall", Age = 29 },
         };
 
