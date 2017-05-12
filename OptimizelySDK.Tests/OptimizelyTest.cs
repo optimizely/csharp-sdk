@@ -110,6 +110,7 @@ namespace OptimizelySDK.Tests
             public IEventDispatcher EventDispatcher { get; set; }
             public ILogger Logger { get; set; }
             public IErrorHandler ErrorHandler { get; set; }
+            public UserProfileService UserProfileService { get; set; }
             public bool SkipJsonValidation { get; set; }
 
             public PrivateObject CreatePrivateOptimizely()
@@ -121,6 +122,7 @@ namespace OptimizelySDK.Tests
                         EventDispatcher,
                         Logger,
                         ErrorHandler,
+                        UserProfileService,
                         SkipJsonValidation
                     });
             }
