@@ -1,5 +1,4 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using OptimizelySDK.Entity;
+﻿using OptimizelySDK.Entity;
 using OptimizelySDK.Logger;
 using Moq;
 using OptimizelySDK.Event.Builder;
@@ -7,17 +6,18 @@ using OptimizelySDK.Event;
 using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
 using System;
+using NUnit.Framework;
 
 namespace OptimizelySDK.Tests.EventTests
 {
-    [TestClass]
+    [TestFixture]
     public class EventBuilderTest
     {
         private string TestUserId = string.Empty;
         private ProjectConfig Config;
         private EventBuilder EventBuilder;
 
-        [TestInitialize]
+        [TestFixtureSetUp]
         public void Setup()
         {
             TestUserId = "testUserId";
@@ -30,7 +30,7 @@ namespace OptimizelySDK.Tests.EventTests
             return (long)(DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalSeconds;
         }
 
-        [TestMethod]
+        [Test]
         public void TestCreateImpressionEventNoAttributes()
         {
             var expectedLogEvent = new LogEvent("https://logx.optimizely.com/log/decision",
@@ -41,7 +41,7 @@ namespace OptimizelySDK.Tests.EventTests
                     {"layerId", "7719770039" },
                     {"visitorId", "testUserId" },
                     {"clientEngine", "csharp-sdk" },
-                    {"clientVersion", "0.0.1" },
+                    {"clientVersion", "1.0.0" },
                     {"timestamp", SecondsSince1970() * 1000L },
                     {"isGlobalHoldback", false },
                     {"userFeatures", new string[0] },
@@ -65,7 +65,7 @@ namespace OptimizelySDK.Tests.EventTests
 
         }
 
-        [TestMethod]
+        [Test]
         public void TestCreateImpressionEventWithAttributes()
         {
             var expectedLogEvent = new LogEvent("https://logx.optimizely.com/log/decision",
@@ -76,7 +76,7 @@ namespace OptimizelySDK.Tests.EventTests
                     {"layerId", "7719770039" },
                     {"visitorId", "testUserId" },
                     {"clientEngine", "csharp-sdk" },
-                    {"clientVersion", "0.0.1" },
+                    {"clientVersion", "1.0.0" },
                     {"timestamp", SecondsSince1970() * 1000L},
                     {"isGlobalHoldback", false },
                     {"userFeatures",
@@ -116,7 +116,7 @@ namespace OptimizelySDK.Tests.EventTests
             Assert.IsTrue(TestData.CompareObjects(expectedLogEvent, logEvent));
         }
 
-        [TestMethod]
+        [Test]
         public void TestCreateConversionEventNoAttributesNovalue()
         {
             var expectedEvent = new LogEvent(
@@ -127,7 +127,7 @@ namespace OptimizelySDK.Tests.EventTests
                     {"accountId", "1592310167"},
                     {"visitorId", TestUserId},
                     {"clientEngine", "csharp-sdk"},
-                    {"clientVersion", "0.0.1"},
+                    {"clientVersion", "1.0.0"},
                     {"userFeatures", new string[0]},
                     {"isGlobalHoldback", false},
                     {"timestamp", SecondsSince1970() * 1000L} ,
@@ -162,7 +162,7 @@ namespace OptimizelySDK.Tests.EventTests
             Assert.IsTrue(TestData.CompareObjects(expectedEvent, logEvent));
         }
 
-        [TestMethod]
+        [Test]
         public void TestCreateConversionEventWithAttributesNoValue()
         {
             var expectedEvent = new LogEvent(
@@ -173,7 +173,7 @@ namespace OptimizelySDK.Tests.EventTests
                     {"accountId", "1592310167"},
                     {"visitorId", TestUserId},
                     {"clientEngine", "csharp-sdk"},
-                    {"clientVersion", "0.0.1"},
+                    {"clientVersion", "1.0.0"},
 
                     {"isGlobalHoldback", false},
                     {"timestamp", SecondsSince1970() * 1000L} ,
@@ -229,7 +229,7 @@ namespace OptimizelySDK.Tests.EventTests
             Assert.IsTrue(TestData.CompareObjects(expectedEvent, logEvent));
         }
 
-        [TestMethod]
+        [Test]
         public void TestCreateConversionEventNoAttributesWithValue()
         {
             var expectedEvent = new LogEvent(
@@ -240,7 +240,7 @@ namespace OptimizelySDK.Tests.EventTests
                     {"accountId", "1592310167"},
                     {"visitorId", TestUserId},
                     {"clientEngine", "csharp-sdk"},
-                    {"clientVersion", "0.0.1"},
+                    {"clientVersion", "1.0.0"},
 
                     {"isGlobalHoldback", false},
                     {"timestamp", SecondsSince1970() * 1000L} ,
@@ -301,7 +301,7 @@ namespace OptimizelySDK.Tests.EventTests
             Assert.IsTrue(TestData.CompareObjects(expectedEvent, logEvent));
         }
 
-        [TestMethod]
+        [Test]
         public void TestCreateConversionEventWithAttributesWithValue()
         {
             var expectedEvent = new LogEvent(
@@ -312,7 +312,7 @@ namespace OptimizelySDK.Tests.EventTests
                     {"accountId", "1592310167"},
                     {"visitorId", TestUserId},
                     {"clientEngine", "csharp-sdk"},
-                    {"clientVersion", "0.0.1"},
+                    {"clientVersion", "1.0.0"},
                     {"isGlobalHoldback", false},
                     {"timestamp", SecondsSince1970() * 1000L} ,
                     {"eventFeatures",
@@ -400,7 +400,7 @@ namespace OptimizelySDK.Tests.EventTests
 
 
         /* Start */
-        [TestMethod]
+        [Test]
         public void TestCreateConversionEventNoAttributesWithInvalidValue()
         {
 
@@ -411,7 +411,7 @@ namespace OptimizelySDK.Tests.EventTests
                 {"visitorId", "testUserId"},
                 // {"revision", "15"}, TODO: It should be a part of project config file, have to check it.
                 {"clientEngine", "csharp-sdk"},
-                {"clientVersion", "0.0.1"},
+                {"clientVersion", "1.0.0"},
                 {"userFeatures" , new object[0]},
                 {"isGlobalHoldback", false},
                 {"timestamp", SecondsSince1970() * 1000L },

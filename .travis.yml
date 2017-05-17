@@ -1,0 +1,9 @@
+language: csharp
+solution: "./OptimizelySDK.Travis.sln"
+install:
+  - nuget restore ./OptimizelySDK.Travis.sln
+  - nuget install ./OptimizelySDK.Tests/packages.config -OutputDirectory ./packages
+  - nuget install NUnit.Runners -Version 2.6.4 -OutputDirectory ./testrunner
+script:
+  - xbuild /p:Configuration=Release ./OptimizelySDK.Travis.sln
+  - mono ./testrunner/NUnit.Runners.2.6.4/tools/nunit-console.exe ./OptimizelySDK.Tests/bin/Release/OptimizelySDK.Tests.dll 

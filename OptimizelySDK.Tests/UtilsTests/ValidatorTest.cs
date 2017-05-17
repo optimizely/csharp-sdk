@@ -13,22 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Logger;
 using OptimizelySDK.Utils;
 using OptimizelySDK.Entity;
+using NUnit.Framework;
 
 namespace OptimizelySDK.Tests.UtilsTests
 {
-    [TestClass]
+    [TestFixture]
     public class ValidatorTest
     {
         private ILogger Logger;
         private IErrorHandler ErrorHandler;
         private ProjectConfig Config;
 
-        [TestInitialize]
+        [TestFixtureSetUp]
         public void Setup()
         {
             Logger = new DefaultLogger();
@@ -37,7 +37,7 @@ namespace OptimizelySDK.Tests.UtilsTests
             Config = ProjectConfig.Create(TestData.Datafile, Logger, ErrorHandler);
         }
 
-        [TestMethod]
+        [Test]
         public void TestValidateJsonSchemaValidFileWithAdditionalProperty()
         {
             Assert.IsTrue(Validator.ValidateJSONSchema(TestData.Datafile));
@@ -46,13 +46,13 @@ namespace OptimizelySDK.Tests.UtilsTests
             Assert.IsTrue(testDataJSON.ContainsKey("tempproperty"));
         }
 
-        [TestMethod]
+        [Test]
         public void TestValidateJsonSchemaValidFile()
         {
             Assert.IsTrue(Validator.ValidateJSONSchema(TestData.Datafile));
         }
 
-        [TestMethod]
+        [Test]
         public void TestValidateJsonSchemaInvalidFile()
         {
             var invalidScehma = @"{""key1"": ""val1""}";
@@ -60,7 +60,7 @@ namespace OptimizelySDK.Tests.UtilsTests
         }
 
 
-        [TestMethod]
+        [Test]
         public void TestValidateJsonSchemaNoJsonContent()
         {
             var invalidDataFile = @"Some Randaom file";
@@ -77,13 +77,13 @@ namespace OptimizelySDK.Tests.UtilsTests
          */
 
 
-        [TestMethod]
+        [Test]
         public void TestIsUserInExperimentNoAudienceUsedInExperiment()
         {
             Assert.IsTrue(Validator.IsUserInExperiment(Config, Config.GetExperimentFromKey("paused_experiment"), new UserAttributes()));
         }
 
-        [TestMethod]
+        [Test]
         public void TestIsUserInExperimentAudienceUsedInExperimentNoAttributesProvided()
         {
             Assert.IsFalse(Validator.IsUserInExperiment(Config, Config.GetExperimentFromKey("test_experiment"), new UserAttributes()));
@@ -91,7 +91,7 @@ namespace OptimizelySDK.Tests.UtilsTests
             Assert.IsFalse(Validator.IsUserInExperiment(Config, Config.GetExperimentFromKey("test_experiment"), null));
         }
 
-        [TestMethod]
+        [Test]
         public void TestUserInExperimentAudienceMatch()
         {
             var userAttributes = new UserAttributes
@@ -102,7 +102,7 @@ namespace OptimizelySDK.Tests.UtilsTests
             Assert.IsTrue(Validator.IsUserInExperiment(Config, Config.GetExperimentFromKey("test_experiment"), userAttributes));
         }
 
-        [TestMethod]
+        [Test]
         public void TestIsUserInExperimentAudienceNoMatch()
         {
             var userAttributes = new UserAttributes
@@ -114,7 +114,7 @@ namespace OptimizelySDK.Tests.UtilsTests
             Assert.IsFalse(Validator.IsUserInExperiment(Config, Config.GetExperimentFromKey("test_experiment"), null));
         }
 
-        [TestMethod]
+        [Test]
         public void TestAreEventTagsValidValidEventTags()
         {
             Assert.IsTrue(Validator.AreEventTagsValid(new System.Collections.Generic.Dictionary<string, object>()));

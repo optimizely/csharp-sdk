@@ -1,5 +1,6 @@
 # Optimizely C# SDK
 ![Semantic](https://img.shields.io/badge/sem-ver-lightgrey.svg?style=plastic)
+[![Build Status](https://travis-ci.org/optimizely/csharp-sdk.svg?branch=master)](https://travis-ci.org/optimizely/csharp-sdk)
 [![NuGet](https://img.shields.io/nuget/v/Optimizely.SDK.svg?style=plastic)](https://www.nuget.org/packages/Optimizely.SDK/)
 [![Apache 2.0](https://img.shields.io/github/license/nebula-plugins/gradle-extra-configurations-plugin.svg)](http://www.apache.org/licenses/LICENSE-2.0)
 
@@ -22,7 +23,7 @@ PM> Install-Package Optimizely.SDK.Sample
 ```
 
 Simply compile and run the Sample application to see it in use.
-Note that the way the Demo App stores data in memory is not recommended for production use 
+Note that the way the Demo App stores data in memory is not recommended for production use
 and is merely illustrates how to use the SDK.
 
 ### Using the SDK
@@ -36,7 +37,7 @@ See the Optimizely Full Stack [developer documentation](https://developers.optim
 Create the Optimizely Client, for example:
 
 ```
-private static Optimizely Optimizely = 
+private static Optimizely Optimizely =
     new Optimizely(
         datafile: myProjectConfig,
         eventDispatcher: myEventDispatcher,
@@ -54,7 +55,7 @@ This class exposes three main calls:
 2. Track
 3. GetVariation
 
-Activate and Track are used in the demonstration app.  See the Optimizely documentation regarding how to use these.  
+Activate and Track are used in the demonstration app.  See the Optimizely documentation regarding how to use these.
 
 #### Plug-in Interfaces
 
