@@ -26,6 +26,14 @@ namespace OptimizelySDK.Exceptions
         }
     }
 
+    public class OptimizelyRuntimeException : OptimizelyException
+    {
+        public OptimizelyRuntimeException(string message)
+            : base(message)
+        {
+        }
+    }
+
     public class InvalidAttributeException : OptimizelyException
     {
         public InvalidAttributeException(string message)

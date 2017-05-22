@@ -79,7 +79,7 @@ namespace OptimizelySDK
 
                 Config = ProjectConfig.Create(datafile, Logger, ErrorHandler);
                 IsValid = true;
-                DecisionService = new DecisionService(Bucketer, Config, userProfileService, Logger);
+                DecisionService = new DecisionService(Bucketer, errorHandler, Config, userProfileService, Logger);
             }
             catch (Exception ex)
             {
@@ -117,11 +117,11 @@ namespace OptimizelySDK
                 return true;
             }
 
-            if (!Validator.IsUserInExperiment(Config, experiment, userAttributes))
-            {
-                Logger.Log(LogLevel.INFO, string.Format("User {0} does not meet conditions to be in experiment {1}.", userId, experiment.Key));
-                return false;
-            }
+            //if (!Validator.IsUserInExperiment(Config, experiment, userAttributes))
+            //{
+            //    Logger.Log(LogLevel.INFO, string.Format("User {0} does not meet conditions to be in experiment {1}.", userId, experiment.Key));
+            //    return false;
+            //}
 
             return true;
         }
@@ -231,7 +231,8 @@ namespace OptimizelySDK
             foreach (string id in eevent.ExperimentIds)
             {
                 var experiment = Config.GetExperimentFromId(id);
-                if (ValidatePreconditions(experiment, userId, userAttributes))
+                var variation = DecisionService.GetVariation(experiment, userId, userAttributes);
+                if (variation.Key != null)
                 {
                     validExperiments.Add(experiment);
                 }

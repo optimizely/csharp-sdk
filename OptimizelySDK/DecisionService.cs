@@ -25,196 +25,299 @@ using Attribute = OptimizelySDK.Entity.Attribute;
 
 namespace OptimizelySDK
 {
+    public class Decision
+    {
+
+        /// <summary>
+        /// The ID of the {@link com.optimizely.ab.config.Variation} the user was bucketed into.
+        /// </summary>
+        public string VariationId;
+
+        /// <summary>
+        /// Initialize a Decision object.
+        /// </summary>
+        /// <param name="variationId">The ID of the variation the user was bucketed into.</param>
+        public Decision(string variationId)
+        {
+            this.VariationId = variationId;
+        }
+
+        public int HashCode()
+        {
+            return VariationId.GetHashCode();
+        }
+
+        public Dictionary<string, string> ToMap()
+        {
+            Dictionary<string, string> decisionMap = new Dictionary<string, string>();
+
+            decisionMap[UserProfileService.VARIATION_ID_KEY] = VariationId;
+
+            return decisionMap;
+        }
+    }
+
+    /// <summary>
+    /// Optimizely's decision service that determines which variation of an experiment the user will be allocated to.
+    /// The decision service contains all logic around how a user decision is made.This includes all of the following:
+    /// 1. Checking experiment status
+    /// 2. Checking whitelisting
+    /// 3. Checking sticky bucketing
+    /// 4. Checking audience targeting
+    /// 5. Using Murmurhash3 to bucket the user.
+    /// </summary>
     public class DecisionService
     {
-        private readonly Bucketer Bucketer;
-        private readonly ProjectConfig ProjectConfig;
-        private readonly UserProfileService UserProfile;
-        private ILogger Logger { get; set; }
-		
-		/// <summary>
-		/// Initialize a decision service for the Optimizely client.
-		/// </summary>
-		/// <param name="bucketer"> Base bucketer to allocate new users to an experiment.</param>
-		/// <param name="projectConfig"> Optimizely Project Config representing the datafile.</param>
-		/// <param name="userProfile"> UserProfile implementation for storing decisions.</param>
-		public DecisionService(Bucketer bucketer,
-						   ProjectConfig projectConfig,
-                           UserProfileService userProfile,
-                           ILogger logger)
-		{
-			this.Bucketer = bucketer;
-			this.ProjectConfig = projectConfig;
-			this.UserProfile = userProfile;
+
+        private Bucketer Bucketer;
+        private IErrorHandler ErrorHandler;
+        private ProjectConfig ProjectConfig;
+        private UserProfileService UserProfileService;
+        private ILogger Logger;
+
+
+        /**
+         * Initialize a decision service for the Optimizely client.
+         * @param bucketer Base bucketer to allocate new users to an experiment.
+         * @param errorHandler The error handler of the Optimizely client.
+         * @param projectConfig Optimizely Project Config representing the datafile.
+         * @param userProfileService UserProfileService implementation for storing user info.
+         */
+        public DecisionService(Bucketer bucketer,
+                               IErrorHandler errorHandler,
+                               ProjectConfig projectConfig,
+                               UserProfileService userProfileService,
+                               ILogger logger)
+        {
+            this.Bucketer = bucketer;
+            this.ErrorHandler = errorHandler;
+            this.ProjectConfig = projectConfig;
+            this.UserProfileService = userProfileService;
             this.Logger = logger;
-		}
+        }
 
-		/**
-		 * Get a {@link Variation} of an {@link Experiment} for a user to be allocated into.
-		 *
-		 * @param experiment The Experiment the user will be bucketed into.
-		 * @param userId The userId of the user.
-		 * @param filteredAttributes The user's attributes. This should be filtered to just attributes in the Datafile.
-		 * @return The {@link Variation} the user is allocated into.
-		 */
-
-		public Variation GetVariation(Experiment experiment,
-												string userId,
-												UserAttributes filteredAttributes)
-		{
+        /// <summary>
+        /// Get a { @link Variation } of an { @link Experiment } for a user to be allocated into.
+        /// </summary>
+        /// <param name="experiment">The Experiment the user will be bucketed into.</param>
+        /// <param name="userId">The userId of the user.
+        /// <param name="filteredAttributes">The user's attributes. This should be filtered to just attributes in the Datafile.</param>
+        /// <returns>The { @link Variation} the user is allocated into.</returns>
+        public Variation GetVariation(Experiment experiment,
+                                                string userId,
+                                                UserAttributes filteredAttributes)
+        {
 
             if (!experiment.IsExperimentRunning)
-			{
-				return null;
-			}
-
-			Variation variation;
-
-			// check for whitelisting
-			variation = GetWhitelistedVariation(experiment, userId);
-			if (variation != null)
-			{
-				return variation;
-			}
-
-			// check if user exists in user profile
-			variation = GetStoredVariation(experiment, userId);
-			if (variation != null)
-			{
-				return variation;
-			}
-
-			if (Validator.IsUserInExperiment(ProjectConfig, experiment, filteredAttributes))
-			{
-				Variation bucketedVariation = Bucketer.Bucket(ProjectConfig,experiment, userId);
-
-				if (bucketedVariation != null)
-				{
-					storeVariation(experiment, bucketedVariation, userId);
-				}
-
-				return bucketedVariation;
-			}
-
-            Logger.Log(LogLevel.INFO, string.Format("User \"{0}\" does not meet conditions to be in experiment \"{1}\".", userId, experiment.Id));
-
-            return null;
-		}
-
-		/**
-		 * Get the variation the user has been whitelisted into.
-		 * @param experiment {@link Experiment} in which user is to be bucketed.
-		 * @param userId User Identifier
-		 * @return null if the user is not whitelisted into any variation
-		 *      {@link Variation} the user is bucketed into if the user has a specified whitelisted variation.
-		 */
-		Variation GetWhitelistedVariation(Experiment experiment, String userId)
-		{
-            // if a user has a forced variation mapping, return the respective variation
-            Dictionary<string, string> userIdToVariationKeyMap = experiment.UserIdToKeyVariations;
-			
-            if (userIdToVariationKeyMap.ContainsKey(userId))
-			{
-                string forcedVariationKey = userIdToVariationKeyMap[userId];
-
-                Variation forcedVariation = experiment.VariationKeyToVariationMap[forcedVariationKey];
-				
-				if (forcedVariation != null)
-				{
-                    Logger.Log(LogLevel.INFO, string.Format("User \"{0}\" is forced in variation \"{1}\".", userId, forcedVariationKey));
-				}
-				else
-				{
-					Logger.Log(LogLevel.ERROR, string.Format("Variation \"{0}\" is not in the datafile. Not activating user \"{1}\".", forcedVariationKey, userId));
-				}
-
-				return forcedVariation;
-			}
-
-			return null;
-		}
-
-		/**
-		 * Get the {@link Variation} that has been stored for the user in the {@link UserProfile} implementation.
-		 * @param experiment {@link Experiment} in which the user was bucketed.
-		 * @param userId User Identifier
-		 * @return null if the {@link UserProfile} implementation is null or the user was not previously bucketed.
-		 *      else return the {@link Variation} the user was previously bucketed into.
-		 */
-
-        string GetVariationIdFromUserProfile(Dictionary<string, object> userProfile, string experimentId)
-        {
-            var decisions = userProfile[UserProfileService.DECISIONS_KEY];
-
-            if(decisions != null && decisions is Dictionary<string, object>)
             {
-                var experimentVariations = (Dictionary<string, object>)decisions;
-                var variations = experimentVariations[experimentId];
-                if(variations != null && variations is Dictionary<string, object>)
+                return new Variation();
+            }
+
+            // check for whitelisting
+            Variation variation = GetWhitelistedVariation(experiment, userId);
+            if (variation != null)
+            {
+                return variation;
+            }
+
+            // fetch the user profile map from the user profile service
+            UserProfile userProfile = null;
+            if (UserProfileService != null)
+            {
+                try
                 {
-                    var variationsDict = (Dictionary<string, object>)variations;
-                    return variationsDict[UserProfileService.VARIATION_ID_KEY].ToString();
+                    Dictionary<string, object> userProfileMap = UserProfileService.Lookup(userId);
+                    if (userProfileMap == null)
+                    {
+                        Logger.Log(LogLevel.INFO, "We were unable to get a user profile map from the UserProfileService.");
+                    }
+                    else if (UserProfileUtils.IsValidUserProfileMap(userProfileMap))
+                    {
+                        userProfile = UserProfileUtils.ConvertMapToUserProfile(userProfileMap);
+                    }
+                    else
+                    {
+                        //logger.warn("The UserProfileService returned an invalid map.");
+                    }
                 }
+                catch (Exception exception)
+                {
+                    //logger.error(exception.getMessage());
+                    //errorHandler.handleError(new OptimizelyRuntimeException(exception));
+                }
+            }
+
+            // check if user exists in user profile
+            if (userProfile != null)
+            {
+                variation = GetStoredVariation(experiment, userProfile);
+                // return the stored variation if it exists
+                if (variation != null)
+                {
+                    return variation;
+                }
+            }
+            else
+            { // if we could not find a user profile, make a new one
+                userProfile = new UserProfile(userId, new Dictionary<string, Decision>());
+            }
+
+            if (Validator.IsUserInExperiment(ProjectConfig, experiment, filteredAttributes))
+            {
+                variation = Bucketer.Bucket(ProjectConfig, experiment, userId);
+
+                if (variation != null)
+                {
+                    if (UserProfileService != null)
+                    {
+                        SaveVariation(experiment, variation, userProfile);
+                    }
+                    else
+                    {
+                        //logger.info("This decision will not be saved since the UserProfileService is null.");
+                    }
+                }
+
+                return variation;
+
+            }
+            else
+            {
+                Logger.Log(LogLevel.INFO, string.Format("User \"{0}\" does not meet conditions to be in experiment \"{1}\".", userId, experiment.Key));
+            }
+
+            return new Variation();
+        }
+
+        /**
+         * Get the variation the user has been whitelisted into.
+         * @param experiment {@link Experiment} in which user is to be bucketed.
+         * @param userId User Identifier
+         * @return null if the user is not whitelisted into any variation
+         *      {@link Variation} the user is bucketed into if the user has a specified whitelisted variation.
+         */
+        public Variation GetWhitelistedVariation(Experiment experiment, string userId)
+        {
+            // if a user has a forced variation mapping, return the respective variation
+            experiment.GenerateKeyMap();
+            Dictionary<string, string> userIdToVariationKeyMap = experiment.UserIdToKeyVariations;
+
+            if (userIdToVariationKeyMap.ContainsKey(userId))
+            {
+                string forcedVariationKey = userIdToVariationKeyMap[userId];
+                Variation forcedVariation = experiment.VariationKeyToVariationMap.ContainsKey(forcedVariationKey) 
+                    ? experiment.VariationKeyToVariationMap[forcedVariationKey] : null;
+                if (forcedVariation != null)
+                {
+                    Logger.Log(LogLevel.INFO, string.Format("User \"{0}\" is forced in variation \"{1}\".", userId, forcedVariationKey));
+                }
+                else
+                {
+                    Logger.Log(LogLevel.ERROR, string.Format("Variation \"{0}\" is not in the datafile. Not activating user \"{1}\".", forcedVariationKey, userId));
+                }
+
+                return forcedVariation;
             }
 
             return null;
         }
-		Variation GetStoredVariation(Experiment experiment, string userId)
-		{
+
+        /// <summary>
+        /// Get the { @link Variation } that has been stored for the user in the {@link UserProfileService} implementation.
+        /// </summary>
+        /// <param name="experiment">which the user was bucketed</param>
+        /// <param name="userProfile">User profile of the user</param>
+        /// <returns>The user was previously bucketed into.</returns>
+        public Variation GetStoredVariation(Experiment experiment,
+                                               UserProfile userProfile)
+        {
             // ---------- Check User Profile for Sticky Bucketing ----------
             // If a user profile instance is present then check it for a saved variation
             string experimentId = experiment.Id;
             string experimentKey = experiment.Key;
-			
-            if (UserProfile != null)
-			{
-                //TODO: Find variation ID based on experiment ID
-                var variationId = GetVariationIdFromUserProfile(UserProfile.Lookup(userId), experimentId);
-				
-                if (variationId != null)
-				{
-                    Variation savedVariation = ProjectConfig.ExperimentIdMap[experimentId].VariationIdToVariationMap[variationId];
 
-					Logger.Log(LogLevel.INFO, string.Format("Returning previously activated variation \"{0}\" of experiment \"{1}\" "
-					      + "for user \"{}\" from user profile.",
-					savedVariation.Key, experimentKey, userId
-					));
+            Decision decision = userProfile.ExperimentBucketMap.ContainsKey(experimentId) ? 
+                userProfile.ExperimentBucketMap[experimentId] : null;
 
-					// A variation is stored for this combined bucket id
-					return savedVariation;
-				}
-				else
-				{
+            if (decision != null)
+            {
+                try
+                {
+                    string variationId = decision.VariationId;
 
-					Logger.Log(LogLevel.INFO, string.Format("No previously activated variation of experiment \"{0}\" for user \"{1}\" found in user profile.",
-                            experimentKey, userId));
-				}
-			}
+                    Variation savedVariation = ProjectConfig
+                            .ExperimentIdMap[experimentId].VariationIdToVariationMap.ContainsKey(variationId) ?
+                            ProjectConfig.ExperimentIdMap[experimentId].VariationIdToVariationMap[variationId] : null; 
 
-			return null;
-		}
+                    if (savedVariation != null)
+                    {
+                        Logger.Log(LogLevel.INFO, string.Format("Returning previously activated variation \"{0}\" of experiment \"{1}\" for user \"{2}\" from user profile.",
+                        savedVariation.Key, experimentKey, userProfile.UserId));
+                        return savedVariation;
+                    }
+                    else
+                    {
+                        Logger.Log(LogLevel.INFO, string.Format("User \"{0}\" was previously bucketed into variation with ID \"{1}\" for experiment \"{2}\", but no matching variation was found for that user. We will re-bucket the user.", 
+                            userProfile.UserId, variationId, experimentId));
 
-		/**
-		 * Store a {@link Variation} of an {@link Experiment} for a user in the {@link UserProfile}.
-		 *
-		 * @param experiment The experiment the user was buck
-		 * @param variation The Variation to store.
-		 * @param userId The ID of the user.
-		 */
-		void storeVariation(Experiment experiment, Variation variation, String userId)
-		{
-			String experimentId = experiment.Id;
-			
-            // ---------- Save Variation to User Profile ----------
-			// If a user profile is present give it a variation to store
-			if (UserProfile != null)
-			{
-                string bucketedVariationId = variation.Id;
+                        return null;
+                    }
+                }
+                catch(Exception ex)
+                {
+                    return null;
+                }
+            }
+            else
+            {
+                Logger.Log(LogLevel.INFO, string.Format("No previously activated variation of experiment \"{0}\" for user \"{1}\" found in user profile.", experimentKey, userProfile.UserId));
 
-				UserProfile.Save(UserProfile.ToMap());
-				Logger.Log(LogLevel.INFO, string.Format("Saved variation \"{0}\" of experiment \"{1}\" for user \"{2}\".",
-                                                        bucketedVariationId, experimentId, userId));
-			}
-		}
+                return null;
+            }
+        }
+
+        /**
+         * Save a {@link Variation} of an {@link Experiment} for a user in the {@link UserProfileService}.
+         *
+         * @param experiment The experiment the user was buck
+         * @param variation The Variation to save.
+         * @param userProfile A {@link UserProfile} instance of the user information.
+         */
+        public void SaveVariation(Experiment experiment,
+                           Variation variation,
+                           UserProfile userProfile)
+        {
+            // only save if the user has implemented a user profile service
+            if (UserProfileService != null)
+            {
+                String experimentId = experiment.Id;
+                String variationId = variation.Id;
+                Decision decision;
+                if (userProfile.ExperimentBucketMap.ContainsKey(experimentId))
+                {
+                    decision = userProfile.ExperimentBucketMap[experimentId];
+                    decision.VariationId = variationId;
+                }
+                else
+                {
+                    decision = new Decision(variationId);
+                }
+                userProfile.ExperimentBucketMap[experimentId] = decision;
+
+                try
+                {
+                    UserProfileService.Save(userProfile.ToMap());
+                    Logger.Log(LogLevel.INFO, string.Format("Saved variation \"{0}\" of experiment \"{1}\" for user \"{2}\".",
+                    variationId, experimentId, userProfile.UserId));
+
+                }
+                catch (Exception exception)
+                {
+                    Logger.Log(LogLevel.ERROR, string.Format("Failed to save variation \"{0}\" of experiment \"{1}\" for user \"{2}\".",
+                    variationId, experimentId, userProfile.UserId));
+                    ErrorHandler.HandleError(new Exceptions.OptimizelyRuntimeException(exception.Message));
+                }
+            }
+        }
     }
 }

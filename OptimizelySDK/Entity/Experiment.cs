@@ -69,15 +69,29 @@ namespace OptimizelySDK.Entity
         /// </summary>
         public TrafficAllocation[] TrafficAllocation { get; set; }
 
-        private Dictionary<string, Variation> _VariationKeyToVariationMap;
-        public Dictionary<string, Variation> VariationKeyToVariationMap { get { return _VariationKeyToVariationMap; } }
+        bool isGenerateKeyMapCalled = false;
 
+        private Dictionary<string, Variation> _VariationKeyToVariationMap;
+        public Dictionary<string, Variation> VariationKeyToVariationMap {
+            get {
+                if (!isGenerateKeyMapCalled) GenerateKeyMap();
+                return _VariationKeyToVariationMap;
+            }
+        }
+        
 
 		private Dictionary<string, Variation> _VariationIdToVariationMap;
-		public Dictionary<string, Variation> VariationIdToVariationMap { get { return _VariationIdToVariationMap; } }
+		public Dictionary<string, Variation> VariationIdToVariationMap {
+            get
+            {
+                if (!isGenerateKeyMapCalled) GenerateKeyMap();
+                return _VariationIdToVariationMap;
+            }
+        }
 
         public void GenerateKeyMap()
         {
+            if (Variations == null) return;
             _VariationIdToVariationMap = ConfigParser<Variation>.GenerateMap(entities: Variations, getKey: a => a.Id, clone: true);
             _VariationKeyToVariationMap = ConfigParser<Variation>.GenerateMap(entities: Variations, getKey: a => a.Key, clone: true);
         }

@@ -155,7 +155,14 @@ namespace OptimizelySDK.DemoApp.Controllers
             // buy the item (record the conversion)
             var visitor = VisitorRepo.Single(v => v.Id == visitorId);
 
-            Optimizely.Track("AddToCart", Convert.ToString(visitorId), visitor.GetUserAttributes());
+            Entity.EventTags eventTags = new Entity.EventTags()
+            {
+                {"int_param", 4242 },
+                {"string_param", "4242" },
+                {"bool_param", true },
+                {"revenue", 1337 }
+            };
+            Optimizely.Track("AddToCart", Convert.ToString(visitorId), visitor.GetUserAttributes(), eventTags);
             TempData["Message"] = string.Format("Successfully Purchased item {0} for visitor {1}", productId, visitorId);
 
             return RedirectToAction("Shop");

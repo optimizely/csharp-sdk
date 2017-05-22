@@ -42,7 +42,7 @@ namespace OptimizelySDK.Tests
 			}
 		}
 
-        public static string ValidCachedDataFileV3
+        public static string ValidDataFileV3
 		{
 			get
 			{
