@@ -210,13 +210,6 @@ namespace OptimizelySDK
                 return;
             }
 
-            //if (attributes != null)
-            //{
-            //    Logger.Log(LogLevel.ERROR, "Provided attributes are in an invalid format.");
-            //    ErrorHandler.HandleError(new InvalidAttributeException("Provided attributes are in an invalid format."));
-            //    return;
-            //}
-
             var eevent = Config.GetEvent(eventKey);
 
             if (eevent.Key == null)
@@ -231,10 +224,13 @@ namespace OptimizelySDK
             foreach (string id in eevent.ExperimentIds)
             {
                 var experiment = Config.GetExperimentFromId(id);
-                var variation = DecisionService.GetVariation(experiment, userId, userAttributes);
-                if (variation.Key != null)
+                if (experiment.IsExperimentRunning)
                 {
-                    validExperiments.Add(experiment);
+                    var variation = DecisionService.GetVariation(experiment, userId, userAttributes);
+                    if (variation.Key != null)
+                    {
+                        validExperiments.Add(experiment);
+                    }
                 }
                 else
                 {

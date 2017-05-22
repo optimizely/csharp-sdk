@@ -137,13 +137,13 @@ namespace OptimizelySDK
                     }
                     else
                     {
-                        //logger.warn("The UserProfileService returned an invalid map.");
+                        Logger.Log(LogLevel.ERROR, "The UserProfileService returned an invalid map.");
                     }
                 }
                 catch (Exception exception)
                 {
-                    //logger.error(exception.getMessage());
-                    //errorHandler.handleError(new OptimizelyRuntimeException(exception));
+                    Logger.Log(LogLevel.ERROR, exception.Message);
+                    ErrorHandler.HandleError(new Exceptions.OptimizelyRuntimeException(exception.Message));
                 }
             }
 
@@ -174,7 +174,7 @@ namespace OptimizelySDK
                     }
                     else
                     {
-                        //logger.info("This decision will not be saved since the UserProfileService is null.");
+                        Logger.Log(LogLevel.INFO, "This decision will not be saved since the UserProfileService is null.");
                     }
                 }
 
