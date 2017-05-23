@@ -124,17 +124,13 @@ namespace OptimizelySDK
             try
             {
                 experimentBucketMap = (Dictionary<string, Dictionary<string, string>>)map[UserProfileService.EXPERIMENT_BUCKET_MAP_KEY];
+                if (experimentBucketMap.Values.Count == 0) return false;
             }
             catch (Exception e)
             {
                 return false;
             }
 
-            //// Check each Decision in the map to make sure it has a variation Id Key
-            //foreach(var decision in experimentBucketMap)
-            //{
-            //    if(!decision.Key))
-            //}
             foreach (Dictionary<string, string> decision in experimentBucketMap.Values)
             {
                 if (!decision.ContainsKey(UserProfileService.VARIATION_ID_KEY))

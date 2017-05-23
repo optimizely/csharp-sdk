@@ -149,7 +149,7 @@ namespace OptimizelySDK
                 Logger.Log(LogLevel.INFO, string.Format("Not activating user {0}.", userId));
                 return null;
             }
-
+            //DecisionService.GetVariation(experiment, userId, userAttributes);
             if (!ValidatePreconditions(experiment, userId, userAttributes))
             {
                 Logger.Log(LogLevel.INFO, string.Format("Not activating user {0}.", userId));
