@@ -24,13 +24,14 @@ namespace OptimizelySDK
     /// Class encapsulating user profile service functionality.
     /// Override with your own implementation for storing and retrieving the user profile.
     /// </summary>
-
     public abstract class UserProfileService
     {
         /** The key for the user ID. Returns a String.*/
         public const string USER_ID_KEY = "user_id";
+
         /** The key for the decisions Map. Returns a {@code Map<String, Map<String, String>>}.*/
         public const string EXPERIMENT_BUCKET_MAP_KEY = "experiment_bucket_map";
+
         /** The key for the variation Id within a decision Map. */
         public const string VARIATION_ID_KEY = "variation_id";
 
