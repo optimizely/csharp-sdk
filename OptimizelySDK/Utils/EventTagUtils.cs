@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 
 namespace OptimizelySDK.Utils
 {
@@ -11,24 +8,13 @@ namespace OptimizelySDK.Utils
 
         public static object GetRevenueValue(Dictionary<string, object> eventTags)
         {
-            if(eventTags == null)
-            {
+            if (eventTags == null 
+                || !eventTags.ContainsKey(REVENUE_EVENT_METRIC_NAME) 
+                || eventTags[REVENUE_EVENT_METRIC_NAME] == null 
+                || !(eventTags[REVENUE_EVENT_METRIC_NAME] is int))
                 return null;
-            }
-            
-            if(!eventTags.ContainsKey(REVENUE_EVENT_METRIC_NAME) || eventTags[REVENUE_EVENT_METRIC_NAME] == null)
-            {
-                return null;
-            }
 
-            if (!(eventTags[REVENUE_EVENT_METRIC_NAME] is int))
-            {
-                return null;
-            }
-
-            return eventTags[REVENUE_EVENT_METRIC_NAME];
-
+           return eventTags[REVENUE_EVENT_METRIC_NAME];
         }
-
     }
 }
