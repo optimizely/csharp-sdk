@@ -23,7 +23,7 @@ namespace OptimizelySDK
 
         /// <summary>
         /// The ID of the { @link com.optimizely.ab.config.Variation }
-        //the user was bucketed into.
+        /// the user was bucketed into.
         /// </summary>
         public string VariationId;
 
@@ -38,11 +38,10 @@ namespace OptimizelySDK
 
         public Dictionary<string, string> ToMap()
         {
-            Dictionary<string, string> decisionMap = new Dictionary<string, string>();
-
-            decisionMap[UserProfileService.VARIATION_ID_KEY] = VariationId;
-
-            return decisionMap;
+            return new Dictionary<string, string>
+            {
+                { UserProfileService.VARIATION_ID_KEY, VariationId }
+            };
         }
     }
 }

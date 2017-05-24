@@ -21,6 +21,7 @@ using OptimizelySDK.Logger;
 using OptimizelySDK.Utils;
 using System;
 using System.Collections.Generic;
+using static OptimizelySDK.DecisionService;
 
 namespace OptimizelySDK
 {
@@ -149,8 +150,10 @@ namespace OptimizelySDK
                 Logger.Log(LogLevel.INFO, string.Format("Not activating user {0}.", userId));
                 return null;
             }
+
             //DecisionService.GetVariation(experiment, userId, userAttributes);
-            if (!DecisionService.IsValid(experiment, userId, userAttributes))
+            DecisionType dt = DecisionService.GetDecisionType(experiment, userId, userAttributes);
+            if (!DecisionService.IsValid(dt))
             {
                 //Logger.Log(LogLevel.INFO, string.Format("Not activating user {0}.", userId));
                 return null;
