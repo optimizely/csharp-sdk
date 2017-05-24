@@ -39,6 +39,11 @@
     <Compile Include="..\OptimizelySDK\Utils\Validator.cs" />
     <Compile Include="..\OptimizelySDK\Utils\ConfigParser.cs" />
     <Compile Include="..\OptimizelySDK\Utils\Schema.cs" />
+    <Compile Include="..\OptimizelySDK\Utils\UserProfileUtil.cs" />
+    <Compile Include="..\OptimizelySDK\Decision.cs" />
+    <Compile Include="..\OptimizelySDK\DecisionService.cs" />
+    <Compile Include="..\OptimizelySDK\UserProfile.cs" />
+    <Compile Include="..\OptimizelySDK\UserProfileService.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="..\OptimizelySDK\Utils\schema.json">
