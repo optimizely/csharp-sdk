@@ -15,6 +15,7 @@
  */
 
 using System.Collections.Generic;
+using System.Linq;
 
 namespace OptimizelySDK
 {
@@ -24,6 +25,7 @@ namespace OptimizelySDK
         /// A user's ID.
         /// </summary>
         public string UserId;
+
         /// <summary>
         /// The bucketing experimentBucketMap of the user.
         /// </summary>
@@ -47,28 +49,18 @@ namespace OptimizelySDK
             return result;
         }
 
-
         /// <summary>
         /// Convert a User Profile instance to a Map.
         /// </summary>
         /// <returns>A map representation of the user profile instance.</returns>
         public Dictionary<string, object> ToMap()
         {
-            Dictionary<string, object> userProfileMap = new Dictionary<string, object>();
-
-            userProfileMap[UserProfileService.USER_ID_KEY] = UserId;
-
-            var decisionsMap = new Dictionary<string, Dictionary<string, string>>();
-            //var decisionMap = new Dictionary<string, object>();
-
-            foreach (var row in ExperimentBucketMap)
+            return new Dictionary<string, object>
             {
-                decisionsMap[row.Key] = row.Value.ToMap();
-            }
-
-            userProfileMap[UserProfileService.EXPERIMENT_BUCKET_MAP_KEY] = decisionsMap;
-
-            return userProfileMap;
+                { UserProfileService.USER_ID_KEY, UserId },
+                { UserProfileService.EXPERIMENT_BUCKET_MAP_KEY,
+                    ExperimentBucketMap.ToDictionary(row => row.Key, row => row.Value.ToMap()) }
+            };
         }
     }
 }
