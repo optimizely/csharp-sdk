@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>Optimizely.SDK</id>
-    <version>0.1.0</version>
+    <version>1.0.0</version>
     <title>Optimizely C# SDK</title>
     <authors>Optimizely Development Team</authors>
     <owners>fullstack.optimizely</owners>
@@ -10,7 +10,7 @@
     <!-->projectUrl></projectUrl-->
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>C# SDK for Optimizely X Fullstack</description>
-    <releaseNotes>This is a Beta Pre-Release.</releaseNotes>
+    <releaseNotes>General Availability</releaseNotes>
     <copyright>Copyright 2017</copyright>
     <tags>Optimizely</tags>
   </metadata>
