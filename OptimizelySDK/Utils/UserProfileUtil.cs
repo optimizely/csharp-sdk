@@ -51,7 +51,7 @@ namespace OptimizelySDK.Utils
                 experimentBucketMap = (Dictionary<string, Dictionary<string, string>>)map[UserProfileService.EXPERIMENT_BUCKET_MAP_KEY];
                 if (experimentBucketMap.Values.Count == 0) return false;
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return false;
             }
