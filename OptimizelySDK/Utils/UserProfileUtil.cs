@@ -14,81 +14,51 @@
  * limitations under the License.
  */
 
-using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace OptimizelySDK.Utils
 {
     public class UserProfileUtils
     {
-
         /// <summary>
-        /// Validate whether a {@code Map<String, Object>} can be transformed into a {@link UserProfile}.
+        /// Validate whether a Dictionary<String, Object> can be transformed into a UserProfile.
         /// </summary>
         /// <param name="map"The map to check.></param>
-        /// <returns>True if the map can be converted into a {@link UserProfile}. False if the map cannot be converted.</returns>
+        /// <returns>True if the map can be converted into a UserProfile. False if the map cannot be converted.</returns>
         public static bool IsValidUserProfileMap(Dictionary<string, object> map)
         {
-            // The Map must contain a value for the user ID
-            if (!map.ContainsKey(UserProfileService.USER_ID_KEY))
-            {
+            // The Map must contain a value for the user ID and experiment bucket map
+            if (!map.ContainsKey(UserProfileService.USER_ID_KEY) ||
+                !map.ContainsKey(UserProfileService.EXPERIMENT_BUCKET_MAP_KEY))
                 return false;
-            }
-            // The Map must contain a value for the experiment bucket map
-            if (!map.ContainsKey(UserProfileService.EXPERIMENT_BUCKET_MAP_KEY))
-            {
-                return false;
-            }
-            // The value for the experimentBucketMapKey must be a map
-            //if (!(map[UserProfileService.EXPERIMENT_BUCKET_MAP_KEY] is Dictionary<string, object>))
-            //{
-            //    return false;
-            //}
-            // Try and cast the experimentBucketMap value to a typed map
-            Dictionary<string, Dictionary<string, string>> experimentBucketMap;
-            try
-            {
-                experimentBucketMap = (Dictionary<string, Dictionary<string, string>>)map[UserProfileService.EXPERIMENT_BUCKET_MAP_KEY];
-                if (experimentBucketMap.Values.Count == 0) return false;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
 
-            foreach (Dictionary<string, string> decision in experimentBucketMap.Values)
-            {
-                if (!decision.ContainsKey(UserProfileService.VARIATION_ID_KEY))
-                {
-                    return false;
-                }
-            }
+            // Try and cast the experimentBucketMap value to a typed map
+            var experimentBucketMap = map[UserProfileService.EXPERIMENT_BUCKET_MAP_KEY] as Dictionary<string, Dictionary<string, string>>;
+            if (experimentBucketMap == null || 
+                !experimentBucketMap.Values.Any() ||
+                experimentBucketMap.Values.Any(decision => !decision.ContainsKey(UserProfileService.VARIATION_ID_KEY)))
+                return false;
 
             // the map is good enough for us to use
             return true;
         }
 
-
-
         /// <summary>
-        /// Convert a Map to a {@link UserProfile} instance.
+        /// Convert a Map to a UserProfile instance.
         /// </summary>
-        /// <param name="map">The map to construct the { @link UserProfile }</param>
-        /// <returns>A {@link UserProfile}instance.</returns>
+        /// <param name="map">The map to construct the UserProfile</param>
+        /// <returns>A UserProfile instance.</returns>
         public static UserProfile ConvertMapToUserProfile(Dictionary<string, object> map)
         {
-            string userId = (string)map[UserProfileService.USER_ID_KEY];
+            var ebm = (Dictionary<string, Dictionary<string, string>>)map[UserProfileService.EXPERIMENT_BUCKET_MAP_KEY];
+            Dictionary<string, Decision> decisions = ebm.ToDictionary(
+                keySelector: kvp => kvp.Key, 
+                elementSelector: kvp => new Decision(kvp.Value[UserProfileService.VARIATION_ID_KEY]));
 
-            var experimentBucketMap = (Dictionary<string, Dictionary<string, string>>)map[UserProfileService.EXPERIMENT_BUCKET_MAP_KEY];
-
-            Dictionary<string, Decision> decisions = new Dictionary<string, Decision>();
-
-            foreach (var entry in experimentBucketMap)
-            {
-                Decision decision = new Decision(entry.Value[UserProfileService.VARIATION_ID_KEY]);
-                decisions[entry.Key] = decision;
-            }
-            return new UserProfile(userId, decisions);
+            return new UserProfile(
+                userId: (string)map[UserProfileService.USER_ID_KEY], 
+                experimentBucketMap: decisions);
         }
     }
 }

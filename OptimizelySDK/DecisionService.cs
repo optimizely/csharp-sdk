@@ -250,6 +250,8 @@ namespace OptimizelySDK
         /// <returns>The user was previously bucketed into.</returns>
         public Variation GetStoredVariation(Experiment experiment, UserProfile userProfile)
         {
+            // ---------- Check User Profile for Sticky Bucketing ----------
+            // If a user profile instance is present then check it for a saved variation
             string experimentId = experiment.Id;
             string experimentKey = experiment.Key;
 
@@ -299,31 +301,29 @@ namespace OptimizelySDK
             if (UserProfileService == null)
                 return;
 
-            String experimentId = experiment.Id;
-            String variationId = variation.Id;
             Decision decision;
-            if (userProfile.ExperimentBucketMap.ContainsKey(experimentId))
+            if (userProfile.ExperimentBucketMap.ContainsKey(experiment.Id))
             {
-                decision = userProfile.ExperimentBucketMap[experimentId];
-                decision.VariationId = variationId;
+                decision = userProfile.ExperimentBucketMap[experiment.Id];
+                decision.VariationId = variation.Id;
             }
             else
             {
-                decision = new Decision(variationId);
+                decision = new Decision(variation.Id);
             }
 
-            userProfile.ExperimentBucketMap[experimentId] = decision;
+            userProfile.ExperimentBucketMap[experiment.Id] = decision;
 
             try
             {
                 UserProfileService.Save(userProfile.ToMap());
                 Logger.Log(LogLevel.INFO, string.Format("Saved variation \"{0}\" of experiment \"{1}\" for user \"{2}\".",
-                variationId, experimentId, userProfile.UserId));
+                    variation.Id, experiment.Id, userProfile.UserId));
             }
             catch (Exception exception)
             {
                 Logger.Log(LogLevel.ERROR, string.Format("Failed to save variation \"{0}\" of experiment \"{1}\" for user \"{2}\".",
-                variationId, experimentId, userProfile.UserId));
+                    variation.Id, experiment.Id, userProfile.UserId));
                 ErrorHandler.HandleError(new Exceptions.OptimizelyRuntimeException(exception.Message));
             }
         }

@@ -24,12 +24,12 @@ namespace OptimizelySDK
         /// <summary>
         /// A user's ID.
         /// </summary>
-        public string UserId;
+        public string UserId { get; set; }
 
         /// <summary>
-        /// The bucketing experimentBucketMap of the user.
+        /// Map ExperimentId to Decision for the User.
         /// </summary>
-        public Dictionary<string, Decision> ExperimentBucketMap;
+        public readonly Dictionary<string, Decision> ExperimentBucketMap;
 
         /// <summary>
         /// Construct a User Profile instance from explicit components.
@@ -38,15 +38,13 @@ namespace OptimizelySDK
         /// <param name="experimentBucketMap">The bucketing experimentBucketMap of the user.</param>
         public UserProfile(string userId, Dictionary<string, Decision> experimentBucketMap)
         {
-            this.UserId = userId;
-            this.ExperimentBucketMap = experimentBucketMap;
+            UserId = userId;
+            ExperimentBucketMap = experimentBucketMap;
         }
 
         public int HashCode()
         {
-            int result = UserId.GetHashCode();
-            result = 31 * result + ExperimentBucketMap.GetHashCode();
-            return result;
+            return 31 * UserId.GetHashCode() + ExperimentBucketMap.GetHashCode();
         }
 
         /// <summary>

@@ -26,10 +26,14 @@ namespace OptimizelySDK
     /// </summary>
     public abstract class UserProfileService
     {
-        /** The key for the user ID. Returns a String.*/
+        /// <summary>
+        /// The key for the user ID. Returns a String.
+        /// </summary>
         public const string USER_ID_KEY = "user_id";
 
-        /** The key for the decisions Map. Returns a {@code Map<String, Map<String, String>>}.*/
+        /// <summary>
+        /// The key for the decisions Map. Returns a Dictionary<String, Map<String, String>>
+        /// </summary>
         public const string EXPERIMENT_BUCKET_MAP_KEY = "experiment_bucket_map";
 
         /** The key for the variation Id within a decision Map. */

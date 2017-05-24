@@ -22,18 +22,17 @@ namespace OptimizelySDK
     {
 
         /// <summary>
-        /// The ID of the { @link com.optimizely.ab.config.Variation }
-        /// the user was bucketed into.
+        /// The ID of the Variation into which the user was bucketed.
         /// </summary>
-        public string VariationId;
+        public string VariationId { get; set; }
 
         /// <summary>
         /// Initialize a Decision object.
         /// </summary>
-        /// <param name = "variationId" > The ID of the variation the user was bucketed into.</param>
+        /// <param name="variationId">The ID of the variation into which the user was bucketed.</param>
         public Decision(string variationId)
         {
-            this.VariationId = variationId;
+            VariationId = variationId;
         }
 
         public Dictionary<string, string> ToMap()
