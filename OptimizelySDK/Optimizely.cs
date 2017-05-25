@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+using OptimizelySDK.Bucketing;
 using OptimizelySDK.Entity;
 using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Event.Builder;
@@ -21,7 +22,6 @@ using OptimizelySDK.Logger;
 using OptimizelySDK.Utils;
 using System;
 using System.Collections.Generic;
-using static OptimizelySDK.DecisionService;
 
 namespace OptimizelySDK
 {
@@ -152,7 +152,7 @@ namespace OptimizelySDK
             }
 
             //DecisionService.GetVariation(experiment, userId, userAttributes);
-            DecisionType dt = DecisionService.GetDecisionType(experiment, userId, userAttributes);
+            var dt = DecisionService.GetDecisionType(experiment, userId, userAttributes);
             if (!DecisionService.IsValid(dt))
             {
                 //Logger.Log(LogLevel.INFO, string.Format("Not activating user {0}.", userId));

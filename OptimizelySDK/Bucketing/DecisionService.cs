@@ -21,7 +21,7 @@ using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Logger;
 using OptimizelySDK.Utils;
 
-namespace OptimizelySDK
+namespace OptimizelySDK.Bucketing
 {
     /// <summary>
     /// Optimizely's decision service that determines which variation of an experiment the user will be allocated to.

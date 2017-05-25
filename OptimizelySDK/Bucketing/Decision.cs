@@ -16,7 +16,7 @@
 
 using System.Collections.Generic;
 
-namespace OptimizelySDK
+namespace OptimizelySDK.Bucketing
 {
     public class Decision
     {

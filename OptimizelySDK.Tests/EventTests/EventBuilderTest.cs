@@ -4,9 +4,9 @@ using Moq;
 using OptimizelySDK.Event.Builder;
 using OptimizelySDK.Event;
 using System.Collections.Generic;
-using Newtonsoft.Json.Linq;
 using System;
 using NUnit.Framework;
+using OptimizelySDK.Bucketing;
 
 namespace OptimizelySDK.Tests.EventTests
 {
@@ -34,7 +34,7 @@ namespace OptimizelySDK.Tests.EventTests
         public void TestCreateImpressionEventNoAttributes()
         {
             var expectedLogEvent = new LogEvent("https://logx.optimizely.com/log/decision",
-                new System.Collections.Generic.Dictionary<string, object>
+                new Dictionary<string, object>
                 {
                     {"projectId", "7720880029" },
                     {"accountId", "1592310167" },
@@ -56,7 +56,6 @@ namespace OptimizelySDK.Tests.EventTests
                 }, "POST", new Dictionary<string, string>
                 {
                     { "Content-Type", "application/json" }
-
                 });
 
             var logEvent = EventBuilder.CreateImpressionEvent(Config, Config.GetExperimentFromKey("test_experiment"), "77210100090", TestUserId, null);
@@ -69,7 +68,7 @@ namespace OptimizelySDK.Tests.EventTests
         public void TestCreateImpressionEventWithAttributes()
         {
             var expectedLogEvent = new LogEvent("https://logx.optimizely.com/log/decision",
-                new System.Collections.Generic.Dictionary<string, object>
+                new Dictionary<string, object>
                 {
                     {"projectId", "7720880029" },
                     {"accountId", "1592310167" },

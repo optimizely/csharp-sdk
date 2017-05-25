@@ -1,59 +1,61 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>netstandard1.6</TargetFramework>
-  </PropertyGroup>
-  
-  <ItemGroup>
-    <Compile Include="..\OptimizelySDK\Bucketer.cs" />
-    <Compile Include="..\OptimizelySDK\Entity\Attribute.cs" />
-    <Compile Include="..\OptimizelySDK\Entity\Audience.cs" />
-    <Compile Include="..\OptimizelySDK\Entity\Entity.cs" />
-    <Compile Include="..\OptimizelySDK\Entity\Event.cs" />
-    <Compile Include="..\OptimizelySDK\Entity\EventAttributes.cs" />
-    <Compile Include="..\OptimizelySDK\Entity\Experiment.cs" />
-    <Compile Include="..\OptimizelySDK\Entity\ForcedVariation.cs" />
-    <Compile Include="..\OptimizelySDK\Entity\Group.cs" />
-    <Compile Include="..\OptimizelySDK\Entity\IdKeyEntity.cs" />
-    <Compile Include="..\OptimizelySDK\Entity\TrafficAllocation.cs" />
-    <Compile Include="..\OptimizelySDK\Entity\UserAttributes.cs" />
-    <Compile Include="..\OptimizelySDK\Entity\Variation.cs" />
-    <Compile Include="..\OptimizelySDK\ErrorHandler\DefaultErrorHandler.cs" />
-    <Compile Include="..\OptimizelySDK\ErrorHandler\IErrorHandler.cs" />
-    <Compile Include="..\OptimizelySDK\ErrorHandler\NoOpErrorHandler.cs" />
-    <Compile Include="..\OptimizelySDK\Event\Builder\EventBuilder.cs" />
-    <Compile Include="..\OptimizelySDK\Event\Builder\Params.cs" />
-    <Compile Include="..\OptimizelySDK\Event\Dispatcher\DefaultEventDispatcher.cs" />
-    <Compile Include="..\OptimizelySDK\Event\Dispatcher\WebRequestEventDispatcher35.cs" />
-    <Compile Include="..\OptimizelySDK\Event\Dispatcher\HttpClientEventDispatcher45.cs" />
-    <Compile Include="..\OptimizelySDK\Event\Dispatcher\IEventDispatcher.cs" />
-    <Compile Include="..\OptimizelySDK\Event\LogEvent.cs" />
-    <Compile Include="..\OptimizelySDK\Exceptions\OptimizelyException.cs" />
-    <Compile Include="..\OptimizelySDK\Logger\DefaultLogger.cs" />
-    <Compile Include="..\OptimizelySDK\Logger\ILogger.cs" />
-    <Compile Include="..\OptimizelySDK\Logger\NoOpLogger.cs" />
-    <Compile Include="..\OptimizelySDK\Optimizely.cs" />
-    <Compile Include="..\OptimizelySDK\ProjectConfig.cs" />
-    <Compile Include="..\OptimizelySDK\Utils\ConditionEvaluator.cs" />
-    <Compile Include="..\OptimizelySDK\Utils\EventTagUtils.cs" />
-    <Compile Include="..\OptimizelySDK\Utils\Validator.cs" />
-    <Compile Include="..\OptimizelySDK\Utils\ConfigParser.cs" />
-    <Compile Include="..\OptimizelySDK\Utils\Schema.cs" />
-    <Compile Include="..\OptimizelySDK\Utils\UserProfileUtil.cs" />
-    <Compile Include="..\OptimizelySDK\Decision.cs" />
-    <Compile Include="..\OptimizelySDK\DecisionService.cs" />
-    <Compile Include="..\OptimizelySDK\UserProfile.cs" />
-    <Compile Include="..\OptimizelySDK\UserProfileService.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="..\OptimizelySDK\Utils\schema.json">
-      <LogicalName>OptimizelySDK.Utils.schema.json</LogicalName>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="MurmurHash-net-core" Version="1.0.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
-    <PackageReference Include="NJsonSchema" Version="8.33.6323.36213" />
-  </ItemGroup>  
-  
+    <PropertyGroup>
+        <TargetFramework>netstandard1.6</TargetFramework>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Compile Include="..\OptimizelySDK\Entity\Attribute.cs" />
+        <Compile Include="..\OptimizelySDK\Entity\Audience.cs" />
+        <Compile Include="..\OptimizelySDK\Entity\Entity.cs" />
+        <Compile Include="..\OptimizelySDK\Entity\Event.cs" />
+        <Compile Include="..\OptimizelySDK\Entity\EventAttributes.cs" />
+        <Compile Include="..\OptimizelySDK\Entity\Experiment.cs" />
+        <Compile Include="..\OptimizelySDK\Entity\ForcedVariation.cs" />
+        <Compile Include="..\OptimizelySDK\Entity\Group.cs" />
+        <Compile Include="..\OptimizelySDK\Entity\IdKeyEntity.cs" />
+        <Compile Include="..\OptimizelySDK\Entity\TrafficAllocation.cs" />
+        <Compile Include="..\OptimizelySDK\Entity\UserAttributes.cs" />
+        <Compile Include="..\OptimizelySDK\Entity\Variation.cs" />
+        <Compile Include="..\OptimizelySDK\ErrorHandler\DefaultErrorHandler.cs" />
+        <Compile Include="..\OptimizelySDK\ErrorHandler\IErrorHandler.cs" />
+        <Compile Include="..\OptimizelySDK\ErrorHandler\NoOpErrorHandler.cs" />
+        <Compile Include="..\OptimizelySDK\Event\Builder\EventBuilder.cs" />
+        <Compile Include="..\OptimizelySDK\Event\Builder\Params.cs" />
+        <Compile Include="..\OptimizelySDK\Event\Dispatcher\DefaultEventDispatcher.cs" />
+        <Compile Include="..\OptimizelySDK\Event\Dispatcher\WebRequestEventDispatcher35.cs" />
+        <Compile Include="..\OptimizelySDK\Event\Dispatcher\HttpClientEventDispatcher45.cs" />
+        <Compile Include="..\OptimizelySDK\Event\Dispatcher\IEventDispatcher.cs" />
+        <Compile Include="..\OptimizelySDK\Event\LogEvent.cs" />
+        <Compile Include="..\OptimizelySDK\Exceptions\OptimizelyException.cs" />
+        <Compile Include="..\OptimizelySDK\Logger\DefaultLogger.cs" />
+        <Compile Include="..\OptimizelySDK\Logger\ILogger.cs" />
+        <Compile Include="..\OptimizelySDK\Logger\NoOpLogger.cs" />
+        <Compile Include="..\OptimizelySDK\Optimizely.cs" />
+        <Compile Include="..\OptimizelySDK\ProjectConfig.cs" />
+        <Compile Include="..\OptimizelySDK\Utils\ConditionEvaluator.cs" />
+        <Compile Include="..\OptimizelySDK\Utils\EventTagUtils.cs" />
+        <Compile Include="..\OptimizelySDK\Utils\Validator.cs" />
+        <Compile Include="..\OptimizelySDK\Utils\ConfigParser.cs" />
+        <Compile Include="..\OptimizelySDK\Utils\Schema.cs" />
+
+        <Compile Include="..\OptimizelySDK\Bucketing\Bucketer.cs" />
+        <Compile Include="..\OptimizelySDK\Bucketing\Decision.cs" />
+        <Compile Include="..\OptimizelySDK\Bucketing\DecisionService.cs" />
+        <Compile Include="..\OptimizelySDK\Bucketing\UserProfile.cs" />
+        <Compile Include="..\OptimizelySDK\Bucketing\UserProfileService.cs" />
+        <Compile Include="..\OptimizelySDK\Bucketing\UserProfileUtil.cs" />
+        
+    </ItemGroup>
+    <ItemGroup>
+        <EmbeddedResource Include="..\OptimizelySDK\Utils\schema.json">
+            <LogicalName>OptimizelySDK.Utils.schema.json</LogicalName>
+        </EmbeddedResource>
+    </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="MurmurHash-net-core" Version="1.0.0" />
+        <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
+        <PackageReference Include="NJsonSchema" Version="8.33.6323.36213" />
+    </ItemGroup>
+
 </Project>

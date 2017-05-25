@@ -19,7 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace OptimizelySDK
+namespace OptimizelySDK.Bucketing
 {
     public class Bucketer
     {

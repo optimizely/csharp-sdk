@@ -18,14 +18,10 @@ using System;
 using System.Collections.Generic;
 using Moq;
 using OptimizelySDK.Logger;
-using OptimizelySDK.Event.Builder;
-using OptimizelySDK.Event.Dispatcher;
 using OptimizelySDK.ErrorHandler;
-using OptimizelySDK.Exceptions;
-using OptimizelySDK.Event;
 using OptimizelySDK.Entity;
 using NUnit.Framework;
-using OptimizelySDK.Tests.UtilsTests;
+using OptimizelySDK.Bucketing;
 
 namespace OptimizelySDK.Tests
 {

@@ -25,6 +25,7 @@ using OptimizelySDK.Event;
 using OptimizelySDK.Entity;
 using NUnit.Framework;
 using OptimizelySDK.Tests.UtilsTests;
+using OptimizelySDK.Bucketing;
 
 namespace OptimizelySDK.Tests
 {

@@ -17,7 +17,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace OptimizelySDK
+namespace OptimizelySDK.Bucketing
 {
     public class UserProfile
     {

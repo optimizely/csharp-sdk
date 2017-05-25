@@ -17,7 +17,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace OptimizelySDK
+namespace OptimizelySDK.Bucketing
 {
 
     /// <summary>
