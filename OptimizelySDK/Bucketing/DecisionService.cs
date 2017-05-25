@@ -132,7 +132,6 @@ namespace OptimizelySDK.Bucketing
             if (experiment.IsExperimentRunning)
                 return true;
 
-            Logger.Log(LogLevel.INFO, string.Format("Not activating user test_user.", experiment.Key));
             Logger.Log(LogLevel.INFO, string.Format("Experiment {0} is not running.", experiment.Key));
 
             return false;
@@ -144,9 +143,7 @@ namespace OptimizelySDK.Bucketing
                 return false;
 
             Dictionary<string, object> userProfileMap = UserProfileService.Lookup(userId);
-            return userProfileMap == null 
-                ? false 
-                : UserProfileUtils.IsValidUserProfileMap(userProfileMap);
+            return userProfileMap != null && UserProfileUtils.IsValidUserProfileMap(userProfileMap);
         }
 
         private bool ValidateAudienceFromTargeting(Experiment experiment, UserAttributes filteredAttributes, string userId)
@@ -154,8 +151,7 @@ namespace OptimizelySDK.Bucketing
             if (Validator.IsUserInExperiment(ProjectConfig, experiment, filteredAttributes))
                 return true;
 
-            Logger.Log(LogLevel.INFO, string.Format("Not activating user {0}.", userId));
-            Logger.Log(LogLevel.INFO, string.Format("User \"{0}\" does not meet conditions to be in experiment \"{1}\".", userId, experiment.Key));
+            Logger.Log(LogLevel.INFO, string.Format("Not activating user {0}.  User does not meet conditions to be in experiment \"{1}\".", userId, experiment.Key));
 
             return false;
         }
