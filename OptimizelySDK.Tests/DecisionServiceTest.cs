@@ -66,7 +66,7 @@ namespace OptimizelySDK.Tests
             Variation expectedVariation = experiment.Variations[0];
 
             // user excluded without audiences and whitelisting
-            Assert.IsNull(decisionService.GetVariation(experiment, GenericUserId, new UserAttributes()).Key);
+            Assert.IsNull(decisionService.GetVariation(experiment, GenericUserId, new UserAttributes()));
 
             var actualVariation = decisionService.GetVariation(experiment, WhitelistedUserId, new UserAttributes());
 

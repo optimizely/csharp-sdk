@@ -35,15 +35,6 @@ namespace OptimizelySDK.Bucketing
     /// </summary>
     public class DecisionService
     {
-        public enum DecisionType
-        {
-            Unknown,
-            ExperimentNotRunning,
-            Whitelisting,
-            StickyBucketing,
-            AudienceTargeting
-        }
-
         private Bucketer Bucketer;
         private IErrorHandler ErrorHandler;
         private ProjectConfig ProjectConfig;
@@ -76,139 +67,74 @@ namespace OptimizelySDK.Bucketing
         /// <returns>The Variation the user is allocated into.</returns>
         public Variation GetVariation(Experiment experiment, string userId, UserAttributes filteredAttributes)
         {
-            switch (GetDecisionType(experiment, userId, filteredAttributes))
-            {
-                case DecisionType.Whitelisting:
-                    return GetWhitelistedVariation(experiment, userId);
+            if (!ExperimentUtils.IsExperimentActive(experiment, Logger)) return null;
 
-                case DecisionType.StickyBucketing:
-                    return StoreAndFetchUserProfile(userId, experiment);
+            var variation = GetWhitelistedVariation(experiment, userId);
 
-                case DecisionType.AudienceTargeting:
-                    return GetAndSaveVariationFromAudienceTargeting(experiment, filteredAttributes, userId);
-
-                default:
-                case DecisionType.Unknown:
-                case DecisionType.ExperimentNotRunning:
-                    return new Variation();
-            }
-        }
-
-        public DecisionType GetDecisionType(Experiment experiment, string userId, UserAttributes filteredAttributes)
-        {
-            if (!ValidateExperimentStatus(experiment))
-                return DecisionType.ExperimentNotRunning;
-
-            if (IsInWhiteListing(experiment, userId))
-                return DecisionType.Whitelisting;
-
-            if (ValidateUserProfile(userId))
-                return DecisionType.StickyBucketing;
-
-            if (ValidateAudienceFromTargeting(experiment, filteredAttributes, userId))
-                return DecisionType.AudienceTargeting;
-
-            return DecisionType.Unknown;
-        }
-
-        public static bool IsValid(DecisionType decisionType)
-        {
-            switch (decisionType)
-            {
-                case DecisionType.Whitelisting:
-                case DecisionType.StickyBucketing:
-                case DecisionType.AudienceTargeting:
-                    return true;
-
-                default:
-                case DecisionType.Unknown:
-                case DecisionType.ExperimentNotRunning:
-                    return false;
-            }
-        }
-
-        private bool ValidateExperimentStatus(Experiment experiment)
-        {
-            if (experiment.IsExperimentRunning)
-                return true;
-
-            Logger.Log(LogLevel.INFO, string.Format("Not activating user test_user.", experiment.Key));
-            Logger.Log(LogLevel.INFO, string.Format("Experiment {0} is not running.", experiment.Key));
-
-            return false;
-        }
-
-        private bool ValidateUserProfile(string userId)
-        {
-            if (UserProfileService == null)
-                return false;
-
-            Dictionary<string, object> userProfileMap = UserProfileService.Lookup(userId);
-            return userProfileMap != null && UserProfileUtils.IsValidUserProfileMap(userProfileMap);
-        }
-
-        private bool ValidateAudienceFromTargeting(Experiment experiment, UserAttributes filteredAttributes, string userId)
-        {
-            if (Validator.IsUserInExperiment(ProjectConfig, experiment, filteredAttributes))
-                return true;
-
-            Logger.Log(LogLevel.INFO, string.Format("Not activating user {0}.", userId));
-            Logger.Log(LogLevel.INFO, string.Format("User \"{0}\" does not meet conditions to be in experiment \"{1}\".", userId, experiment.Key));
-
-            return false;
-        }
-
-        private bool IsInWhiteListing(Experiment experiment, string userId)
-        {
-            return experiment.IsUserInForcedVariation(userId);
-        }
-
-        private bool CheckStickyBucketing()
-        {
-            return UserProfileService != null;
-        }
-
-        private Variation StoreAndFetchUserProfile(string userId, Experiment experiment)
-        {
-            if (UserProfileService == null)
-                return null;
+            if (variation != null)   return variation;
 
             UserProfile userProfile = null;
-
-            try
+            if (UserProfileService != null)
             {
-                Dictionary<string, object> userProfileMap = UserProfileService.Lookup(userId);
+                try
+                {
+                    Dictionary<string, object> userProfileMap = UserProfileService.Lookup(userId);
 
-                if (userProfileMap == null)
-                    Logger.Log(LogLevel.INFO, "Unable to retrieve a UserProfile map from the UserProfileService.");
-                else if (!UserProfileUtils.IsValidUserProfileMap(userProfileMap))
-                    Logger.Log(LogLevel.ERROR, "The UserProfileService returned an invalid map.");
-                else
-                    userProfile = UserProfileUtils.ConvertMapToUserProfile(userProfileMap);
+                    if (userProfileMap == null)
+                    {
+                        Logger.Log(LogLevel.INFO, "We were unable to get a user profile map from the UserProfileService.");
+                    }
+                    else if (UserProfileUtils.IsValidUserProfileMap(userProfileMap))
+                    {
+                        userProfile = UserProfileUtils.ConvertMapToUserProfile(userProfileMap);
+                    }
+                    else
+                    {
+                        Logger.Log(LogLevel.ERROR, "The UserProfileService returned an invalid map.");
+                    }
+                }
+                catch (Exception exception)
+                {
+                    Logger.Log(LogLevel.ERROR, exception.Message);
+                    ErrorHandler.HandleError(new Exceptions.OptimizelyRuntimeException(exception.Message));
+                }
             }
-            catch (Exception exception)
+            if (userProfile != null)
             {
-                Logger.Log(LogLevel.ERROR, exception.Message);
-                ErrorHandler.HandleError(new Exceptions.OptimizelyRuntimeException(exception.Message));
+                variation = GetStoredVariation(experiment, userProfile);
+                // return the stored variation if it exists
+                if (variation != null)
+                {
+                    return variation;
+                }
             }
-
-            return GetStoredVariation(experiment, userProfile ?? new UserProfile(userId, new Dictionary<string, Decision>()));
-        }
-
-        private Variation GetAndSaveVariationFromAudienceTargeting(Experiment experiment, UserAttributes filteredAttributes, string userId)
-        {
-            UserProfile userProfile = new UserProfile(userId, new Dictionary<string, Decision>());
-            Variation variation = Bucketer.Bucket(ProjectConfig, experiment, userId);
-
-            if (variation == null)
-                return null;
-
-            if (UserProfileService == null)
-                Logger.Log(LogLevel.INFO, "This decision will not be saved since the UserProfileService is null.");
             else
-                SaveVariation(experiment, variation, userProfile);
+            { // if we could not find a user profile, make a new one
+                userProfile = new UserProfile(userId, new Dictionary<string, Decision>());
+            }
 
-            return variation;
+            if (ExperimentUtils.IsUserInExperiment(ProjectConfig, experiment, filteredAttributes))
+            {
+                
+                variation = Bucketer.Bucket(ProjectConfig, experiment, userId);
+
+                if (variation != null)
+                {
+                    if (UserProfileService != null)
+                    {
+                        SaveVariation(experiment, variation, userProfile);
+                    }
+                    else
+                    {
+                        Logger.Log(LogLevel.INFO, "This decision will not be saved since the UserProfileService is null.");
+                    }
+                }
+
+                return variation;
+            }
+            Logger.Log(LogLevel.INFO, string.Format("User \"{0}\" does not meet conditions to be in experiment \"{1}\".", userId, experiment.Key));
+
+            return null;
         }
 
         /// <summary>
@@ -221,7 +147,6 @@ namespace OptimizelySDK.Bucketing
         public Variation GetWhitelistedVariation(Experiment experiment, string userId)
         {
             //if a user has a forced variation mapping, return the respective variation
-            experiment.GenerateKeyMap();
             Dictionary<string, string> userIdToVariationKeyMap = experiment.UserIdToKeyVariations;
 
             if (!userIdToVariationKeyMap.ContainsKey(userId))

@@ -71,29 +71,6 @@ namespace OptimizelySDK.Utils
             return !int.TryParse(attribute.Key, out key);
         }
 
-        /// <summary>
-        /// Representing whether user meets audience conditions to be in experiment or not
-        /// </summary>
-        /// <param name="config">ProjectConfig Configuration for the project</param>
-        /// <param name="experiment">Experiment Entity representing the experiment</param>
-        /// <param name="userAttributes">array Attributes of the user</param>
-        /// <returns>whether user meets audience conditions to be in experiment or not</returns>
-        public static bool IsUserInExperiment(ProjectConfig config, Experiment experiment, UserAttributes userAttributes)
-        {
-            var audienceIds = experiment.AudienceIds;
-
-            if (!audienceIds.Any())
-                return true;
-
-            if (userAttributes == null || !userAttributes.Any())
-                return false;
-
-            var conditionEvaluator = new ConditionEvaluator();
-
-            return audienceIds.Any(id => conditionEvaluator.Evaluate(config.GetAudience(id).ConditionList, userAttributes));
-        }
-
-
         public static bool AreEventTagsValid(Dictionary<string, object> eventTags) {
             int key;
             return eventTags.All(tag => !int.TryParse(tag.Key, out key));

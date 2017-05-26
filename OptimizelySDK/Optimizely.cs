@@ -118,7 +118,7 @@ namespace OptimizelySDK
                 return true;
             }
 
-            if (!Validator.IsUserInExperiment(Config, experiment, userAttributes))
+            if (!ExperimentUtils.IsUserInExperiment(Config, experiment, userAttributes))
             {
                 Logger.Log(LogLevel.INFO, string.Format("User \"{0}\" does not meet conditions to be in experiment \"{1}\".", userId, experiment.Key));
                 return false;
@@ -152,18 +152,17 @@ namespace OptimizelySDK
             }
 
             //DecisionService.GetVariation(experiment, userId, userAttributes);
-            var dt = DecisionService.GetDecisionType(experiment, userId, userAttributes);
-            if (!DecisionService.IsValid(dt))
-            {
-                //Logger.Log(LogLevel.INFO, string.Format("Not activating user {0}.", userId));
-                return null;
-            }
+            //var dt = DecisionService.GetDecisionType(experiment, userId, userAttributes);
+            //if (!DecisionService.IsValid(dt))
+            //{
+            //    //Logger.Log(LogLevel.INFO, string.Format("Not activating user {0}.", userId));
+            //    return null;
+            //}
 
             //var variation = Bucketer.Bucket(Config, experiment, userId);
             var variation = DecisionService.GetVariation(experiment, userId, userAttributes);
-            var variationKey = variation.Key;
 
-            if (variationKey == null)
+            if (variation == null || variation.Key == null)
             {
                 Logger.Log(LogLevel.INFO, string.Format("Not activating user {0}.", userId));
                 return null;
@@ -183,7 +182,7 @@ namespace OptimizelySDK
                 Logger.Log(LogLevel.ERROR, string.Format("Unable to dispatch impression event. Error {0}", exception.Message));
             }
 
-            return variationKey;
+            return variation.Key;
         }
 
         /// <summary>
@@ -227,7 +226,9 @@ namespace OptimizelySDK
             foreach (string id in eevent.ExperimentIds)
             {
                 var experiment = Config.GetExperimentFromId(id);
-                if (ValidatePreconditions(experiment, userId, userAttributes))
+                //Validate experiment
+                var variation = DecisionService.GetVariation(experiment, userId, userAttributes);
+                if (variation != null && variation.Key != null)
                 {
                     validExperiments.Add(experiment);
                 }
@@ -278,12 +279,12 @@ namespace OptimizelySDK
             }
 
             Experiment experiment = Config.GetExperimentFromKey(experimentKey);
-            if (experiment.Key == null || !ValidatePreconditions(experiment, userId, userAttributes))
+            if (experiment.Key == null)
                 return null;
 
             //Variation variation = Bucketer.Bucket(Config, experiment, userId);
             Variation variation = DecisionService.GetVariation(experiment, userId, userAttributes);
-            return variation.Key;
+            return variation == null ? null : variation.Key;
         }
     }
 }
