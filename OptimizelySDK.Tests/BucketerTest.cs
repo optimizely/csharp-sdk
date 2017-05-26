@@ -17,6 +17,7 @@ using OptimizelySDK.Entity;
 using OptimizelySDK.Logger;
 using Moq;
 using NUnit.Framework;
+using OptimizelySDK.Bucketing;
 
 namespace OptimizelySDK.Tests
 {

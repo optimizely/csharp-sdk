@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-namespace OptimizelySDK.Tests
+
+ namespace OptimizelySDK.Tests
 {
-    internal class TestBucketer : Bucketer
+    internal class TestBucketer : Bucketing.Bucketer
     {
         public TestBucketer(Logger.ILogger logger)
             : base(logger)
