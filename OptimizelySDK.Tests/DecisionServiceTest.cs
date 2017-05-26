@@ -50,7 +50,6 @@ namespace OptimizelySDK.Tests
             ValidProjectConfig          = ProjectConfig.Create(TestData.ValidDataFileV3, LoggerMock.Object, ErrorHandlerMock.Object);
             NoAudienceProjectConfig     = ProjectConfig.Create(TestData.NoAudienceProjectConfigV3, LoggerMock.Object, ErrorHandlerMock.Object);
             WhitelistedExperiment       = ValidProjectConfig.ExperimentIdMap["223"];
-            WhitelistedExperiment.GenerateKeyMap();
             WhitelistedVariation        = WhitelistedExperiment.VariationKeyToVariationMap["vtag1"];
         }
 
@@ -153,7 +152,6 @@ namespace OptimizelySDK.Tests
                 TrafficAllocation = trafficAllocation,
                 ForcedVariations = userIdToVariationKeyMap
             };
-            experiment.GenerateKeyMap();
 
             //Experiment experiment = new Experiment("1234", "exp_key", "Running", "1", Collections.< String > emptyList(),
             //        variations, userIdToVariationKeyMap, trafficAllocations);

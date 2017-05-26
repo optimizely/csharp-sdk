@@ -160,10 +160,10 @@
             <Link>Bucketing\UserProfile.cs</Link>
         </Compile>
         <Compile Include="..\OptimizelySDK\Utils\ExperimentUtils.cs" >
-            <Link>Bucketing\UserProfileUtil</Link>
-        </Compile>
-        <Compile Include="..\OptimizelySDK\Utils\ExperimentUtils.cs" >
             <Link>Bucketing\ExperimentUtils</Link>
+        </Compile>
+		<Compile Include="..\OptimizelySDK\Bucketing\UserprofileUtil.cs" >
+            <Link>Bucketing\UserprofileUtil</Link>
         </Compile>
 		
     </ItemGroup>

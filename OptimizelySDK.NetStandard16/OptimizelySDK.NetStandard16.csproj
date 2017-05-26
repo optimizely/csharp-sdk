@@ -45,6 +45,7 @@
         <Compile Include="..\OptimizelySDK\Bucketing\UserProfile.cs" />
         <Compile Include="..\OptimizelySDK\Bucketing\UserProfileService.cs" />
         <Compile Include="..\OptimizelySDK\Bucketing\UserProfileUtil.cs" />
+      <Compile Include="..\OptimizelySDK\Utils\ExperimentUtils.cs" />
         
     </ItemGroup>
     <ItemGroup>
