@@ -74,7 +74,7 @@ namespace OptimizelySDK.Entity
         private Dictionary<string, Variation> _VariationKeyToVariationMap;
         public Dictionary<string, Variation> VariationKeyToVariationMap {
             get {
-                if (!isGenerateKeyMapCalled) GenerateKeyMap();
+                if (!isGenerateKeyMapCalled) GenerateVariationKeyMap();
                 return _VariationKeyToVariationMap;
             }
         }
@@ -84,12 +84,12 @@ namespace OptimizelySDK.Entity
 		public Dictionary<string, Variation> VariationIdToVariationMap {
             get
             {
-                if (!isGenerateKeyMapCalled) GenerateKeyMap();
+                if (!isGenerateKeyMapCalled) GenerateVariationKeyMap();
                 return _VariationIdToVariationMap;
             }
         }
 
-        public void GenerateKeyMap()
+        public void GenerateVariationKeyMap()
         {
             if (Variations == null) return;
             _VariationIdToVariationMap = ConfigParser<Variation>.GenerateMap(entities: Variations, getKey: a => a.Id, clone: true);
