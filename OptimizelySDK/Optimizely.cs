@@ -228,13 +228,13 @@ namespace OptimizelySDK
                 var experiment = Config.GetExperimentFromId(id);
                 //Validate experiment
                 var variation = DecisionService.GetVariation(experiment, userId, userAttributes);
-                if (variation != null && variation.Key != null)
+                if (variation != null)
                 {
                     validExperiments.Add(experiment);
                 }
                 else
                 {
-                    Logger.Log(LogLevel.INFO, string.Format("Not tracking user {0} for experiment {1}", userId, experiment.Key));
+                    Logger.Log(LogLevel.INFO, string.Format("Not tracking user \"{0}\" for experiment \"{1}\"", userId, experiment.Key));
                 }
             }
 

@@ -118,7 +118,7 @@ namespace OptimizelySDK.Bucketing
                 
                 variation = Bucketer.Bucket(ProjectConfig, experiment, userId);
 
-                if (variation != null)
+                if (variation != null && variation.Key != null)
                 {
                     if (UserProfileService != null)
                     {
