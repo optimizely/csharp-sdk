@@ -73,20 +73,20 @@ namespace OptimizelySDK.Bucketing
 
             if (variation != null)   return variation;
 
-            UserProfile userProfile = null;
             if (UserProfileService != null)
             {
                 try
                 {
                     Dictionary<string, object> userProfileMap = UserProfileService.Lookup(userId);
-
-                    if (userProfileMap == null)
+                    if (UserProfileUtils.IsValidUserProfileMap(userProfileMap))
+                    {
+                        var userProfile = UserProfileUtils.ConvertMapToUserProfile(userProfileMap);
+                        variation = GetStoredVariation(experiment, userProfile);
+                        if (variation != null) return variation;
+                    }
+                    else if (userProfileMap == null)
                     {
                         Logger.Log(LogLevel.INFO, "We were unable to get a user profile map from the UserProfileService.");
-                    }
-                    else if (UserProfileUtils.IsValidUserProfileMap(userProfileMap))
-                    {
-                        userProfile = UserProfileUtils.ConvertMapToUserProfile(userProfileMap);
                     }
                     else
                     {
@@ -99,19 +99,6 @@ namespace OptimizelySDK.Bucketing
                     ErrorHandler.HandleError(new Exceptions.OptimizelyRuntimeException(exception.Message));
                 }
             }
-            if (userProfile != null)
-            {
-                variation = GetStoredVariation(experiment, userProfile);
-                // return the stored variation if it exists
-                if (variation != null)
-                {
-                    return variation;
-                }
-            }
-            else
-            { // if we could not find a user profile, make a new one
-                userProfile = new UserProfile(userId, new Dictionary<string, Decision>());
-            }
 
             if (ExperimentUtils.IsUserInExperiment(ProjectConfig, experiment, filteredAttributes))
             {
@@ -121,14 +108,10 @@ namespace OptimizelySDK.Bucketing
                 if (variation != null && variation.Key != null)
                 {
                     if (UserProfileService != null)
-                    {
-                        SaveVariation(experiment, variation, userProfile);
-                    }
+                        SaveVariation(experiment, variation, new UserProfile(userId, new Dictionary<string, Decision>()));
                     else
-                    {
                         Logger.Log(LogLevel.INFO, "This decision will not be saved since the UserProfileService is null.");
-                    }
-                }
+                 }
 
                 return variation;
             }
