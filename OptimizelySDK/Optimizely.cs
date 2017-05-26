@@ -21,7 +21,6 @@ using OptimizelySDK.Logger;
 using OptimizelySDK.Utils;
 using System;
 using System.Collections.Generic;
-using static OptimizelySDK.DecisionService;
 
 namespace OptimizelySDK
 {
@@ -33,16 +32,12 @@ namespace OptimizelySDK
         private EventBuilder EventBuilder;
 
         private IEventDispatcher EventDispatcher;
-        
+
         private ProjectConfig Config;
 
         private ILogger Logger;
 
         private IErrorHandler ErrorHandler;
-
-        private UserProfileService UserProfileService;
-
-        private DecisionService DecisionService;
 
         public bool IsValid { get; private set; }
 
@@ -59,7 +54,6 @@ namespace OptimizelySDK
                           IEventDispatcher eventDispatcher = null,
                           ILogger logger = null,
                           IErrorHandler errorHandler = null,
-                          UserProfileService userProfileService = null,
                           bool skipJsonValidation = false)
         {
             IsValid = false; // invalid until proven valid
@@ -68,7 +62,6 @@ namespace OptimizelySDK
             ErrorHandler = errorHandler ?? new NoOpErrorHandler();
             Bucketer = new Bucketer(Logger);
             EventBuilder = new EventBuilder(Bucketer);
-            UserProfileService = userProfileService;
 
             try
             {
@@ -80,7 +73,6 @@ namespace OptimizelySDK
 
                 Config = ProjectConfig.Create(datafile, Logger, ErrorHandler);
                 IsValid = true;
-                DecisionService = new DecisionService(Bucketer, errorHandler, Config, userProfileService, Logger);
             }
             catch (Exception ex)
             {
@@ -97,16 +89,6 @@ namespace OptimizelySDK
         /// <param name="userAttributes">associative array of Attributes for the user</param>
         private bool ValidatePreconditions(Experiment experiment, string userId, UserAttributes userAttributes = null)
         {
-            //if (attributes != null)
-            //{
-            //    /*Removed areAttributesValid because it was checking
-            //    attributes are key paired or not. It's strongly typed, no need of it.
-            //     */
-            //    Logger.Log(LogLevel.ERROR, "Provided attributes are in an invalid format.");
-            //    ErrorHandler.HandleError(new InvalidAttributeException("Provided attributes are in an invalid format."));
-            //    return false;
-            //}
-
             if (!experiment.IsExperimentRunning)
             {
                 Logger.Log(LogLevel.INFO, string.Format("Experiment {0} is not running.", experiment.Key));
@@ -120,7 +102,7 @@ namespace OptimizelySDK
 
             if (!Validator.IsUserInExperiment(Config, experiment, userAttributes))
             {
-                Logger.Log(LogLevel.INFO, string.Format("User \"{0}\" does not meet conditions to be in experiment \"{1}\".", userId, experiment.Key));
+                Logger.Log(LogLevel.INFO, string.Format("User {0} does not meet conditions to be in experiment {1}.", userId, experiment.Key));
                 return false;
             }
 
@@ -151,16 +133,13 @@ namespace OptimizelySDK
                 return null;
             }
 
-            //DecisionService.GetVariation(experiment, userId, userAttributes);
-            DecisionType dt = DecisionService.GetDecisionType(experiment, userId, userAttributes);
-            if (!DecisionService.IsValid(dt))
+            if (!ValidatePreconditions(experiment, userId, userAttributes))
             {
-                //Logger.Log(LogLevel.INFO, string.Format("Not activating user {0}.", userId));
+                Logger.Log(LogLevel.INFO, string.Format("Not activating user {0}.", userId));
                 return null;
             }
 
-            //var variation = Bucketer.Bucket(Config, experiment, userId);
-            var variation = DecisionService.GetVariation(experiment, userId, userAttributes);
+            var variation = Bucketer.Bucket(Config, experiment, userId);
             var variationKey = variation.Key;
 
             if (variationKey == null)
@@ -212,10 +191,9 @@ namespace OptimizelySDK
                 Logger.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'track'.");
                 return;
             }
+            var eventToTrack = Config.GetEvent(eventKey);
 
-            var eevent = Config.GetEvent(eventKey);
-
-            if (eevent.Key == null)
+            if (eventToTrack.Key == null)
             {
                 Logger.Log(LogLevel.ERROR, string.Format("Not tracking user {0} for event {1}.", userId, eventKey));
                 return;
@@ -223,8 +201,8 @@ namespace OptimizelySDK
 
             // Filter out experiments that are not running or when user(s) do not meet conditions.
             var validExperiments = new List<Experiment>();
-            var experimentIds = eevent.ExperimentIds;
-            foreach (string id in eevent.ExperimentIds)
+            var experimentIds = eventToTrack.ExperimentIds;
+            foreach (string id in eventToTrack.ExperimentIds)
             {
                 var experiment = Config.GetExperimentFromId(id);
                 if (ValidatePreconditions(experiment, userId, userAttributes))
@@ -281,8 +259,7 @@ namespace OptimizelySDK
             if (experiment.Key == null || !ValidatePreconditions(experiment, userId, userAttributes))
                 return null;
 
-            //Variation variation = Bucketer.Bucket(Config, experiment, userId);
-            Variation variation = DecisionService.GetVariation(experiment, userId, userAttributes);
+            Variation variation = Bucketer.Bucket(Config, experiment, userId);
             return variation.Key;
         }
     }

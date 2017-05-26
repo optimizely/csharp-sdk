@@ -49,12 +49,6 @@
     <Compile Include="..\OptimizelySDK\Bucketer.cs">
       <Link>Bucketer.cs</Link>
     </Compile>
-    <Compile Include="..\OptimizelySDK\DecisionService.cs">
-      <Link>Bucketer.cs</Link>
-    </Compile>
-    <Compile Include="..\OptimizelySDK\UserProfileService.cs">
-      <Link>Bucketer.cs</Link>
-    </Compile>
     <Compile Include="..\OptimizelySDK\Entity\Attribute.cs">
       <Link>Entity\Attribute.cs</Link>
     </Compile>
@@ -151,10 +145,7 @@
     <Compile Include="..\OptimizelySDK\Utils\Validator.cs">
       <Link>Utils\Validator.cs</Link>
     </Compile>
-    <Compile Include="..\OptimizelySDK\Decision.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="..\OptimizelySDK\UserProfile.cs" />
-    <Compile Include="..\OptimizelySDK\Utils\UserProfileUtil.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\OptimizelySDK\Utils\schema.json">
