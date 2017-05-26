@@ -89,16 +89,6 @@ namespace OptimizelySDK
         /// <param name="userAttributes">associative array of Attributes for the user</param>
         private bool ValidatePreconditions(Experiment experiment, string userId, UserAttributes userAttributes = null)
         {
-            //if (attributes != null)
-            //{
-            //    /*Removed areAttributesValid because it was checking
-            //    attributes are key paired or not. It's strongly typed, no need of it.
-            //     */
-            //    Logger.Log(LogLevel.ERROR, "Provided attributes are in an invalid format.");
-            //    ErrorHandler.HandleError(new InvalidAttributeException("Provided attributes are in an invalid format."));
-            //    return false;
-            //}
-
             if (!experiment.IsExperimentRunning)
             {
                 Logger.Log(LogLevel.INFO, string.Format("Experiment {0} is not running.", experiment.Key));
@@ -201,17 +191,9 @@ namespace OptimizelySDK
                 Logger.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'track'.");
                 return;
             }
+            var eventToTrack = Config.GetEvent(eventKey);
 
-            //if (attributes != null)
-            //{
-            //    Logger.Log(LogLevel.ERROR, "Provided attributes are in an invalid format.");
-            //    ErrorHandler.HandleError(new InvalidAttributeException("Provided attributes are in an invalid format."));
-            //    return;
-            //}
-
-            var eevent = Config.GetEvent(eventKey);
-
-            if (eevent.Key == null)
+            if (eventToTrack.Key == null)
             {
                 Logger.Log(LogLevel.ERROR, string.Format("Not tracking user {0} for event {1}.", userId, eventKey));
                 return;
@@ -219,8 +201,8 @@ namespace OptimizelySDK
 
             // Filter out experiments that are not running or when user(s) do not meet conditions.
             var validExperiments = new List<Experiment>();
-            var experimentIds = eevent.ExperimentIds;
-            foreach (string id in eevent.ExperimentIds)
+            var experimentIds = eventToTrack.ExperimentIds;
+            foreach (string id in eventToTrack.ExperimentIds)
             {
                 var experiment = Config.GetExperimentFromId(id);
                 if (ValidatePreconditions(experiment, userId, userAttributes))

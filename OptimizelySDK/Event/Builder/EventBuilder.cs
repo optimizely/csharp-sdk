@@ -25,7 +25,7 @@ namespace OptimizelySDK.Event.Builder
     {
         private const string SDK_TYPE = "csharp-sdk";
 
-        private const string SDK_VERSION = "0.0.1";
+        private const string SDK_VERSION = "1.0.0";
 
         private const string IMPRESSION_ENDPOINT = "https://logx.optimizely.com/log/decision";
 
@@ -158,17 +158,6 @@ namespace OptimizelySDK.Event.Builder
                 EventParams[Params.EVENT_METRICS] = eventMetrics;
             }
 
-            //if (eventValue.HasValue && eventValue != 0)
-            //{
-            //    EventParams[Params.EVENT_METRICS] = new object[]
-            //    {
-            //        new Dictionary<string, object>
-            //        {
-            //            {"name", "revenue" },
-            //            {"value", eventValue }
-            //        }
-            //    };
-            //}
 
             var eventEntity = config.GetEvent(eventKey);
             EventParams[Params.EVENT_ID] = eventEntity.Id;
