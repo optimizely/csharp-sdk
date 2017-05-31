@@ -39,7 +39,7 @@ namespace OptimizelySDK.Bucketing
         {
             return new Dictionary<string, string>
             {
-                { UserProfileService.VARIATION_ID_KEY, VariationId }
+                { UserProfile.VARIATION_ID_KEY, VariationId }
             };
         }
     }

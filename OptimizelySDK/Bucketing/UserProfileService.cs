@@ -24,23 +24,10 @@ namespace OptimizelySDK.Bucketing
     /// Class encapsulating user profile service functionality.
     /// Override with your own implementation for storing and retrieving the user profile.
     /// </summary>
-    public abstract class UserProfileService
+    public interface UserProfileService
     {
-        /// <summary>
-        /// The key for the user ID. Returns a String.
-        /// </summary>
-        public const string USER_ID_KEY = "user_id";
+		Dictionary<string, object> Lookup(String userId);
 
-        /// <summary>
-        /// The key for the decisions Map. Returns a Dictionary<String, Map<String, String>>
-        /// </summary>
-        public const string EXPERIMENT_BUCKET_MAP_KEY = "experiment_bucket_map";
-
-        /** The key for the variation Id within a decision Map. */
-        public const string VARIATION_ID_KEY = "variation_id";
-
-		public abstract Dictionary<string, object> Lookup(String userId);
-
-        public abstract void Save(Dictionary<string, object> userProfile);
+        void Save(Dictionary<string, object> userProfile);
     }
 }

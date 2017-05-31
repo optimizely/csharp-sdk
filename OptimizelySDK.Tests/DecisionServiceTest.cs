@@ -56,11 +56,9 @@ namespace OptimizelySDK.Tests
         [Test]
         public void GetVariationForcedVariationPrecedesAudienceEval()
         {
-            Bucketer bucketer = new Bucketer(LoggerMock.Object);
+            var BucketerMock = new Mock<Bucketer>(LoggerMock.Object);
 
-            bucketer.Bucket(ValidProjectConfig, WhitelistedExperiment, WhitelistedUserId);
-
-            DecisionService decisionService = new DecisionService(bucketer, ErrorHandlerMock.Object, ValidProjectConfig, null, LoggerMock.Object);
+            DecisionService decisionService = new DecisionService(BucketerMock.Object, ErrorHandlerMock.Object, ValidProjectConfig, null, LoggerMock.Object);
             Experiment experiment = ValidProjectConfig.Experiments[0];
             Variation expectedVariation = experiment.Variations[0];
 
@@ -72,18 +70,16 @@ namespace OptimizelySDK.Tests
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, string.Format("User \"{0}\" is forced in variation \"vtag1\".", WhitelistedUserId)), Times.Once);
             // no attributes provided for a experiment that has an audience
             Assert.IsTrue(TestData.CompareObjects(actualVariation, expectedVariation));
-            
-            //verify(decisionService).getWhitelistedVariation(experiment, whitelistedUserId);
-            //verify(decisionService, never()).getStoredVariation(eq(experiment), any(UserProfile.class));
+            BucketerMock.Verify(_ => _.Bucket(It.IsAny<ProjectConfig>(), It.IsAny<Experiment>(), It.IsAny<string>()), Times.Never);
         }
 
         [Test]
         public void GetVariationEvaluatesUserProfileBeforeAudienceTargeting()
         {
+            var BucketerMock = new Mock<Bucketer>(LoggerMock.Object);
             Experiment experiment = ValidProjectConfig.Experiments[0];
             Variation variation = experiment.Variations[0];
 
-            Bucketer bucketer = new Bucketer(LoggerMock.Object);
             Decision decision = new Decision(variation.Id);
             UserProfile userProfile = new UserProfile(UserProfileId, new Dictionary<string, Decision>
             {
@@ -92,7 +88,7 @@ namespace OptimizelySDK.Tests
 
             UserProfileServiceMock.Setup(up => up.Lookup(WhitelistedUserId)).Returns(userProfile.ToMap());
 
-            DecisionService decisionService = new DecisionService(bucketer, ErrorHandlerMock.Object, ValidProjectConfig, UserProfileServiceMock.Object, LoggerMock.Object);
+            DecisionService decisionService = new DecisionService(BucketerMock.Object, ErrorHandlerMock.Object, ValidProjectConfig, UserProfileServiceMock.Object, LoggerMock.Object);
 
             decisionService.GetVariation(experiment, GenericUserId, new UserAttributes());
 
@@ -101,31 +97,32 @@ namespace OptimizelySDK.Tests
 
             // ensure that a user with a saved user profile, sees the same variation regardless of audience evaluation
             decisionService.GetVariation(experiment, UserProfileId, new UserAttributes());
+
+            BucketerMock.Verify(_ => _.Bucket(It.IsAny<ProjectConfig>(), It.IsAny<Experiment>(), It.IsAny<string>()), Times.Never);
         }
 
         [Test]
         public void GetForcedVariationReturnsForcedVariation()
         {
-            Bucketer bucketer = new Bucketer(LoggerMock.Object);
-            DecisionService decisionService = new DecisionService(bucketer, ErrorHandlerMock.Object, ValidProjectConfig, null, LoggerMock.Object);
+            var BucketerMock = new Mock<Bucketer>(LoggerMock.Object);
+
+            DecisionService decisionService = new DecisionService(BucketerMock.Object, ErrorHandlerMock.Object, ValidProjectConfig, null, LoggerMock.Object);
 
             Assert.IsTrue(TestData.CompareObjects(WhitelistedVariation, decisionService.GetWhitelistedVariation(WhitelistedExperiment, WhitelistedUserId)));
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, string.Format("User \"{0}\" is forced in variation \"{1}\".",
                 WhitelistedUserId, WhitelistedVariation.Key)), Times.Once);
 
-            //logbackVerifier.expectMessage(Level.INFO, "User \"" + whitelistedUserId + "\" is forced in variation \""
-            //        + whitelistedVariation.getKey() + "\".");
-
-            //assertEquals(whitelistedVariation, decisionService.getWhitelistedVariation(whitelistedExperiment, whitelistedUserId));
+            BucketerMock.Verify(_ => _.Bucket(It.IsAny<ProjectConfig>(), It.IsAny<Experiment>(), It.IsAny<string>()), Times.Never);
         }
+
         [Test]
         public void GetForcedVariationWithInvalidVariation()
         {
             string userId = "testUser1";
             string invalidVariationKey = "invalidVarKey";
 
-            Bucketer bucketer = new Bucketer(LoggerMock.Object);
-            DecisionService decisionService = new DecisionService(bucketer, ErrorHandlerMock.Object, ValidProjectConfig, null, LoggerMock.Object);
+            var BucketerMock = new Mock<Bucketer>(LoggerMock.Object);
+            DecisionService decisionService = new DecisionService(BucketerMock.Object, ErrorHandlerMock.Object, ValidProjectConfig, null, LoggerMock.Object);
 
             var variations = new Variation[]
             {
@@ -153,12 +150,12 @@ namespace OptimizelySDK.Tests
                 ForcedVariations = userIdToVariationKeyMap
             };
 
-            //Experiment experiment = new Experiment("1234", "exp_key", "Running", "1", Collections.< String > emptyList(),
-            //        variations, userIdToVariationKeyMap, trafficAllocations);
             Assert.IsNull(decisionService.GetWhitelistedVariation(experiment, userId));
             LoggerMock.Verify(l => l.Log(LogLevel.ERROR,
                 string.Format("Variation \"{0}\" is not in the datafile. Not activating user \"{1}\".", invalidVariationKey, userId)), 
                 Times.Once);
+
+            BucketerMock.Verify(_ => _.Bucket(It.IsAny<ProjectConfig>(), It.IsAny<Experiment>(), It.IsAny<string>()), Times.Never);
         }
 
         [Test]
@@ -176,6 +173,7 @@ namespace OptimizelySDK.Tests
             Experiment experiment = NoAudienceProjectConfig.Experiments[0];
             Variation variation = experiment.Variations[0];
             Decision decision = new Decision(variation.Id);
+            var BucketerMock = new Mock<Bucketer>(LoggerMock.Object);
 
             UserProfile userProfile = new UserProfile(UserProfileId, new Dictionary<string, Decision>
             {
@@ -184,35 +182,16 @@ namespace OptimizelySDK.Tests
 
             UserProfileServiceMock.Setup(_ => _.Lookup(UserProfileId)).Returns(userProfile.ToMap());
 
-            Bucketer bucketer = new Bucketer(LoggerMock.Object);
-            DecisionService decisionService = new DecisionService(bucketer, ErrorHandlerMock.Object, NoAudienceProjectConfig, UserProfileServiceMock.Object, LoggerMock.Object);
+
+            DecisionService decisionService = new DecisionService(BucketerMock.Object, ErrorHandlerMock.Object, NoAudienceProjectConfig, UserProfileServiceMock.Object, LoggerMock.Object);
 
             Assert.IsTrue(TestData.CompareObjects(variation, decisionService.GetVariation(experiment, UserProfileId, new UserAttributes())));
 
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, string.Format("Returning previously activated variation \"{0}\" of experiment \"{1}\" for user \"{2}\" from user profile.",
                 variation.Key, experiment.Key, UserProfileId)));
 
+            //BucketerMock.Verify(_ => _.Bucket(It.IsAny<ProjectConfig>(), It.IsAny<Experiment>(), It.IsAny<string>()), Times.Once);
 
-
-
-            //    UserProfileService userProfileService = mock(UserProfileService.class);
-            //when(userProfileService.lookup(userProfileId)).thenReturn(userProfile.toMap());
-
-            //Bucketer bucketer = new Bucketer(noAudienceProjectConfig);
-            //DecisionService decisionService = new DecisionService(bucketer,
-            //        mockErrorHandler,
-            //        noAudienceProjectConfig,
-            //        userProfileService);
-
-            //logbackVerifier.expectMessage(Level.INFO,
-            //        "Returning previously activated variation \"" + variation.getKey() + "\" of experiment \"" + experiment.getKey() + "\""
-            //                + " for user \"" + userProfileId + "\" from user profile.");
-
-            //// ensure user with an entry in the user profile is bucketed into the corresponding stored variation
-            //assertEquals(variation,
-            //        decisionService.getVariation(experiment, userProfileId, Collections.<String, String>emptyMap()));
-
-            //verify(userProfileService).lookup(userProfileId);
         }
             
         [Test]
@@ -285,6 +264,7 @@ namespace OptimizelySDK.Tests
 
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, string.Format("Saved variation \"{0}\" of experiment \"{1}\" for user \"{2}\".", variation.Id,
                         experiment.Id, UserProfileId)), Times.Once);
+            UserProfileServiceMock.Verify(_ => _.Save(It.IsAny<Dictionary<string, object>>()), Times.Once);
     }
         [Test]
         [ExpectedException]
@@ -336,6 +316,7 @@ namespace OptimizelySDK.Tests
                 UserProfileServiceMock.Object, LoggerMock.Object);
 
             Assert.IsTrue(TestData.CompareObjects(variation, decisionService.GetVariation(experiment, UserProfileId, new UserAttributes())));
-    }
+            UserProfileServiceMock.Verify(_ => _.Save(It.IsAny<Dictionary<string, object>>()), Times.Once);
+        }
     }
 }

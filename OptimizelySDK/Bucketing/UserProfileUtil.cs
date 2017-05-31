@@ -19,7 +19,7 @@ using System.Linq;
 
 namespace OptimizelySDK.Bucketing
 {
-    public class UserProfileUtils
+    public class UserProfileUtil
     {
         /// <summary>
         /// Validate whether a Dictionary<String, Object> can be transformed into a UserProfile.
@@ -29,15 +29,8 @@ namespace OptimizelySDK.Bucketing
         public static bool IsValidUserProfileMap(Dictionary<string, object> map)
         {
             // The Map must contain a value for the user ID and experiment bucket map
-            if (!map.ContainsKey(UserProfileService.USER_ID_KEY) ||
-                !map.ContainsKey(UserProfileService.EXPERIMENT_BUCKET_MAP_KEY))
-                return false;
-
-            // Try and cast the experimentBucketMap value to a typed map
-            var experimentBucketMap = map[UserProfileService.EXPERIMENT_BUCKET_MAP_KEY] as Dictionary<string, Dictionary<string, string>>;
-            if (experimentBucketMap == null || 
-                !experimentBucketMap.Values.Any() ||
-                experimentBucketMap.Values.Any(decision => !decision.ContainsKey(UserProfileService.VARIATION_ID_KEY)))
+            if (!map.ContainsKey(UserProfile.USER_ID_KEY) ||
+                !map.ContainsKey(UserProfile.EXPERIMENT_BUCKET_MAP_KEY))
                 return false;
 
             // the map is good enough for us to use
@@ -51,13 +44,13 @@ namespace OptimizelySDK.Bucketing
         /// <returns>A UserProfile instance.</returns>
         public static UserProfile ConvertMapToUserProfile(Dictionary<string, object> map)
         {
-            var ebm = (Dictionary<string, Dictionary<string, string>>)map[UserProfileService.EXPERIMENT_BUCKET_MAP_KEY];
+            var ebm = (Dictionary<string, Dictionary<string, string>>)map[UserProfile.EXPERIMENT_BUCKET_MAP_KEY];
             Dictionary<string, Decision> decisions = ebm.ToDictionary(
                 keySelector: kvp => kvp.Key, 
-                elementSelector: kvp => new Decision(kvp.Value[UserProfileService.VARIATION_ID_KEY]));
+                elementSelector: kvp => new Decision(kvp.Value[UserProfile.VARIATION_ID_KEY]));
 
             return new UserProfile(
-                userId: (string)map[UserProfileService.USER_ID_KEY], 
+                userId: (string)map[UserProfile.USER_ID_KEY], 
                 experimentBucketMap: decisions);
         }
     }

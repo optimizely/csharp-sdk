@@ -22,6 +22,20 @@ namespace OptimizelySDK.Bucketing
     public class UserProfile
     {
         /// <summary>
+        /// The key for the user ID. Returns a String.
+        /// </summary>
+        public const string USER_ID_KEY = "user_id";
+
+        /// <summary>
+        /// The key for the decisions Map. Returns a Dictionary<String, Map<String, String>>
+        /// </summary>
+        public const string EXPERIMENT_BUCKET_MAP_KEY = "experiment_bucket_map";
+
+        /** The key for the variation Id within a decision Map. */
+        public const string VARIATION_ID_KEY = "variation_id";
+
+
+        /// <summary>
         /// A user's ID.
         /// </summary>
         public string UserId { get; set; }
@@ -55,8 +69,8 @@ namespace OptimizelySDK.Bucketing
         {
             return new Dictionary<string, object>
             {
-                { UserProfileService.USER_ID_KEY, UserId },
-                { UserProfileService.EXPERIMENT_BUCKET_MAP_KEY,
+                { UserProfile.USER_ID_KEY, UserId },
+                { UserProfile.EXPERIMENT_BUCKET_MAP_KEY,
                     ExperimentBucketMap.ToDictionary(row => row.Key, row => row.Value.ToMap()) }
             };
         }

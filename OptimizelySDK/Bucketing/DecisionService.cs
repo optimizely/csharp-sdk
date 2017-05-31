@@ -72,15 +72,15 @@ namespace OptimizelySDK.Bucketing
             var variation = GetWhitelistedVariation(experiment, userId);
 
             if (variation != null)   return variation;
-
+            UserProfile userProfile = null;
             if (UserProfileService != null)
             {
                 try
                 {
                     Dictionary<string, object> userProfileMap = UserProfileService.Lookup(userId);
-                    if (UserProfileUtils.IsValidUserProfileMap(userProfileMap))
+                    if (UserProfileUtil.IsValidUserProfileMap(userProfileMap))
                     {
-                        var userProfile = UserProfileUtils.ConvertMapToUserProfile(userProfileMap);
+                        userProfile = UserProfileUtil.ConvertMapToUserProfile(userProfileMap);
                         variation = GetStoredVariation(experiment, userProfile);
                         if (variation != null) return variation;
                     }
@@ -108,7 +108,7 @@ namespace OptimizelySDK.Bucketing
                 if (variation != null && variation.Key != null)
                 {
                     if (UserProfileService != null)
-                        SaveVariation(experiment, variation, new UserProfile(userId, new Dictionary<string, Decision>()));
+                        SaveVariation(experiment, variation, userProfile ?? new UserProfile(userId, new Dictionary<string, Decision>()));
                     else
                         Logger.Log(LogLevel.INFO, "This decision will not be saved since the UserProfileService is null.");
                  }

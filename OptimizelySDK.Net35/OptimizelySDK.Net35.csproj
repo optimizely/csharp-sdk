@@ -163,7 +163,7 @@
             <Link>Bucketing\ExperimentUtils</Link>
         </Compile>
 		<Compile Include="..\OptimizelySDK\Bucketing\UserprofileUtil.cs" >
-            <Link>Bucketing\UserprofileUtil</Link>
+            <Link>Bucketing\UserProfileUtil</Link>
         </Compile>
 		
     </ItemGroup>

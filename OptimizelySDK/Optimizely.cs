@@ -97,16 +97,6 @@ namespace OptimizelySDK
         /// <param name="userAttributes">associative array of Attributes for the user</param>
         private bool ValidatePreconditions(Experiment experiment, string userId, UserAttributes userAttributes = null)
         {
-            //if (attributes != null)
-            //{
-            //    /*Removed areAttributesValid because it was checking
-            //    attributes are key paired or not. It's strongly typed, no need of it.
-            //     */
-            //    Logger.Log(LogLevel.ERROR, "Provided attributes are in an invalid format.");
-            //    ErrorHandler.HandleError(new InvalidAttributeException("Provided attributes are in an invalid format."));
-            //    return false;
-            //}
-
             if (!experiment.IsExperimentRunning)
             {
                 Logger.Log(LogLevel.INFO, string.Format("Experiment {0} is not running.", experiment.Key));
@@ -151,15 +141,6 @@ namespace OptimizelySDK
                 return null;
             }
 
-            //DecisionService.GetVariation(experiment, userId, userAttributes);
-            //var dt = DecisionService.GetDecisionType(experiment, userId, userAttributes);
-            //if (!DecisionService.IsValid(dt))
-            //{
-            //    //Logger.Log(LogLevel.INFO, string.Format("Not activating user {0}.", userId));
-            //    return null;
-            //}
-
-            //var variation = Bucketer.Bucket(Config, experiment, userId);
             var variation = DecisionService.GetVariation(experiment, userId, userAttributes);
 
             if (variation == null || variation.Key == null)
