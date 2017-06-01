@@ -22,6 +22,9 @@ namespace OptimizelySDK.Tests
     public class TestData
     {
         private static string cachedDataFile = null;
+        private static string validCachedDataFileV3 = null;
+        private static string noAudienceProjectConfigV3 = null;
+
 
         public static string Datafile
         {
@@ -31,10 +34,26 @@ namespace OptimizelySDK.Tests
             }
         }
 
-        private static string LoadJsonData()
+		public static string NoAudienceProjectConfigV3
+		{
+			get
+			{
+				return noAudienceProjectConfigV3 ?? (noAudienceProjectConfigV3 = LoadJsonData("NoAudienceProjectConfigV3.json"));
+			}
+		}
+
+        public static string ValidDataFileV3
+		{
+			get
+			{
+				return validCachedDataFileV3 ?? (validCachedDataFileV3 = LoadJsonData("ValidCachedDataFileV3.json"));
+			}
+		}
+
+        private static string LoadJsonData(string fileName = "TestData.json")
         {
             var assembly = Assembly.GetExecutingAssembly();
-            var resourceName = "OptimizelySDK.Tests.TestData.json";
+            var resourceName = string.Format("OptimizelySDK.Tests.{0}", fileName);
 
             using (Stream stream = assembly.GetManifestResourceStream(resourceName))
             using (StreamReader reader = new StreamReader(stream))

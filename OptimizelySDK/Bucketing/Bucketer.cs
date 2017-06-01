@@ -19,7 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace OptimizelySDK
+namespace OptimizelySDK.Bucketing
 {
     public class Bucketer
     {
@@ -101,7 +101,7 @@ namespace OptimizelySDK
         /// <param name="experiment">Experiment Experiment in which user is to be bucketed</param>
         /// <param name="userId">User identifier</param>
         /// <returns>Variation which will be shown to the user</returns>
-        public Variation Bucket(ProjectConfig config, Experiment experiment, string userId)
+        public virtual Variation Bucket(ProjectConfig config, Experiment experiment, string userId)
         {
             string message;
             Variation variation;

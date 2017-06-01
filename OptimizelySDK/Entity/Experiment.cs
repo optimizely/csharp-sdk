@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 using System.Collections.Generic;
+using OptimizelySDK.Utils;
 
 namespace OptimizelySDK.Entity
 {
@@ -48,6 +49,11 @@ namespace OptimizelySDK.Entity
         /// </summary>
         public Dictionary<string, string> ForcedVariations { get; set; }
 
+		/// <summary>
+		/// ForcedVariations for the experiment
+		/// </summary>
+       	public Dictionary<string, string> UserIdToKeyVariations { get { return ForcedVariations; } }
+
         /// <summary>
         /// Policy of the experiment group
         /// </summary>
@@ -63,9 +69,35 @@ namespace OptimizelySDK.Entity
         /// </summary>
         public TrafficAllocation[] TrafficAllocation { get; set; }
 
+        bool isGenerateKeyMapCalled = false;
 
+        private Dictionary<string, Variation> _VariationKeyToVariationMap;
+        public Dictionary<string, Variation> VariationKeyToVariationMap {
+            get {
+                if (!isGenerateKeyMapCalled) GenerateVariationKeyMap();
+                return _VariationKeyToVariationMap;
+            }
+        }
+        
 
-        // Code from PHP, need to build traffic and variations from config
+		private Dictionary<string, Variation> _VariationIdToVariationMap;
+		public Dictionary<string, Variation> VariationIdToVariationMap {
+            get
+            {
+                if (!isGenerateKeyMapCalled) GenerateVariationKeyMap();
+                return _VariationIdToVariationMap;
+            }
+        }
+
+        public void GenerateVariationKeyMap()
+        {
+            if (Variations == null) return;
+            _VariationIdToVariationMap = ConfigParser<Variation>.GenerateMap(entities: Variations, getKey: a => a.Id, clone: true);
+            _VariationKeyToVariationMap = ConfigParser<Variation>.GenerateMap(entities: Variations, getKey: a => a.Key, clone: true);
+            isGenerateKeyMapCalled = true;
+        }
+
+		// Code from PHP, need to build traffic and variations from config
 #if false
         /**
          * @param $variations array Variations in experiment.
@@ -84,10 +116,10 @@ namespace OptimizelySDK.Entity
         }
 #endif
 
-        /// <summary>
-        /// Determine if experiment is in a mutually exclusive group
-        /// </summary>
-        public bool IsInMutexGroup
+		/// <summary>
+		/// Determine if experiment is in a mutually exclusive group
+		/// </summary>
+		public bool IsInMutexGroup
         {
             get
             {
