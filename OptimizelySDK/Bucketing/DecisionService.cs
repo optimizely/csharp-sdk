@@ -108,7 +108,11 @@ namespace OptimizelySDK.Bucketing
                 if (variation != null && variation.Key != null)
                 {
                     if (UserProfileService != null)
-                        SaveVariation(experiment, variation, userProfile ?? new UserProfile(userId, new Dictionary<string, Decision>()));
+                    {
+                        var bucketerUserProfile = userProfile ?? new UserProfile(userId, new Dictionary<string, Decision>());
+                        SaveVariation(experiment, variation, bucketerUserProfile);
+
+                    }
                     else
                         Logger.Log(LogLevel.INFO, "This decision will not be saved since the UserProfileService is null.");
                  }

@@ -94,6 +94,7 @@ namespace OptimizelySDK.Entity
             if (Variations == null) return;
             _VariationIdToVariationMap = ConfigParser<Variation>.GenerateMap(entities: Variations, getKey: a => a.Id, clone: true);
             _VariationKeyToVariationMap = ConfigParser<Variation>.GenerateMap(entities: Variations, getKey: a => a.Key, clone: true);
+            isGenerateKeyMapCalled = true;
         }
 
 		// Code from PHP, need to build traffic and variations from config

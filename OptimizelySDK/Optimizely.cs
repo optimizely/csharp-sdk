@@ -263,7 +263,6 @@ namespace OptimizelySDK
             if (experiment.Key == null)
                 return null;
 
-            //Variation variation = Bucketer.Bucket(Config, experiment, userId);
             Variation variation = DecisionService.GetVariation(experiment, userId, userAttributes);
             return variation == null ? null : variation.Key;
         }
