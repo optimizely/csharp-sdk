@@ -80,7 +80,7 @@ namespace OptimizelySDK
 
                 Config = ProjectConfig.Create(datafile, Logger, ErrorHandler);
                 IsValid = true;
-                DecisionService = new DecisionService(Bucketer, errorHandler, Config, userProfileService, Logger);
+                DecisionService = new DecisionService(Bucketer, ErrorHandler, Config, userProfileService, Logger);
             }
             catch (Exception ex)
             {
