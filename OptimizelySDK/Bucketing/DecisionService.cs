@@ -78,7 +78,7 @@ namespace OptimizelySDK.Bucketing
                 try
                 {
                     Dictionary<string, object> userProfileMap = UserProfileService.Lookup(userId);
-                    if (UserProfileUtil.IsValidUserProfileMap(userProfileMap))
+                    if (userProfileMap != null && UserProfileUtil.IsValidUserProfileMap(userProfileMap))
                     {
                         userProfile = UserProfileUtil.ConvertMapToUserProfile(userProfileMap);
                         variation = GetStoredVariation(experiment, userProfile);
@@ -232,8 +232,8 @@ namespace OptimizelySDK.Bucketing
             }
             catch (Exception exception)
             {
-                Logger.Log(LogLevel.ERROR, string.Format("Failed to save variation \"{0}\" of experiment \"{1}\" for user \"{2}\".",
-                    variation.Id, experiment.Id, userProfile.UserId));
+                Logger.Log(LogLevel.ERROR, string.Format("Failed to save variation \"{0}\" of experiment \"{1}\" for user \"{2}\": {3}.",
+                    variation.Id, experiment.Id, userProfile.UserId, exception.Message));
                 ErrorHandler.HandleError(new Exceptions.OptimizelyRuntimeException(exception.Message));
             }
         }
