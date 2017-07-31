@@ -14,22 +14,29 @@
     <copyright>Copyright 2017</copyright>
     <tags>Optimizely</tags>
     <dependencies>
-            <group targetFramework=".NETFramework4.5">
-	    	<dependency id="JsonNet.PrivateSettersContractResolvers.Source" version="0.1.0" />
-		<dependency id="murmurhash" version="1.0.0" />
-		<dependency id="Newtonsoft.Json" version="9.0.1" />
-		<dependency id="NJsonSchema" version="8.30.6304.31883" />		   
+        <group targetFramework=".NETFramework4.5">
+			<dependency id="JsonNet.PrivateSettersContractResolvers.Source" version="0.1.0" />
+			<dependency id="murmurhash" version="1.0.0" />
+			<dependency id="Newtonsoft.Json" version="9.0.1" />
+			<dependency id="NJsonSchema" version="8.30.6304.31883" />		   
 	    </group>
-            <group targetFramework=".NETFramework3.5">
-		<dependency id="murmurhash" version="1.0.0" />
-		<dependency id="Newtonsoft.Json" version="9.0.1" />
+		
+		<group targetFramework=".NETFramework3.5">
+			<dependency id="murmurhash" version="1.0.0" />
+			<dependency id="Newtonsoft.Json" version="9.0.1" />
 	    </group>
-            <group targetFramework=".NETStandard1.6">
-                <dependency id="NETStandard.Library" version="1.6.1" />
-                <dependency id="MurmurHash-net-core" version="1.0.0" />
-		<dependency id="Newtonsoft.Json" version="9.0.1" />
-		<dependency id="NJsonSchema" version="8.33.6323.36213" />
-            </group>
+        
+		<group targetFramework=".NETFramework4.0">
+			<dependency id="murmurhash" version="1.0.0" />
+			<dependency id="Newtonsoft.Json" version="9.0.1" />
+	    </group>
+        
+		<group targetFramework=".NETStandard1.6">
+            <dependency id="NETStandard.Library" version="1.6.1" />
+            <dependency id="MurmurHash-net-core" version="1.0.0" />
+			<dependency id="Newtonsoft.Json" version="9.0.1" />
+			<dependency id="NJsonSchema" version="8.33.6323.36213" />
+        </group>
     </dependencies>
   </metadata>
   <files>
