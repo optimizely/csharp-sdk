@@ -14,7 +14,7 @@ Write-Host "Build complete. Copying files..."
 
 Copy-Item  -Path "..\OptimizelySDK\bin\Release\OptimizelySDK.dll" -Destination ".\lib\net45"  -Recurse -force
 Copy-Item  -Path "..\OptimizelySDK.Net35\bin\Release\OptimizelySDK.Net35.dll" -Destination ".\lib\net35"  -Recurse -force
-Copy-Item  -Path "..\OptimizelySDK.Net35\bin\Release\OptimizelySDK.Net35.dll" -Destination ".\lib\net40\"  -Recurse -force
+Copy-Item  -Path "..\OptimizelySDK.Net40\bin\Release\OptimizelySDK.Net40.dll" -Destination ".\lib\net40"  -Recurse -force
 Copy-Item  -Path "..\OptimizelySDK.NetStandard16\bin\Release\netstandard1.6\OptimizelySDK.NetStandard16.dll" -Destination ".\lib\netstandard1.6"  -Recurse -force
 
 
