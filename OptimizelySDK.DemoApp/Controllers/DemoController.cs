@@ -160,7 +160,8 @@ namespace OptimizelySDK.DemoApp.Controllers
                 {"int_param", 4242 },
                 {"string_param", "4242" },
                 {"bool_param", true },
-                {"revenue", 1337 }
+                {"revenue", 1337 },
+                {"value", 100 }
             };
             Optimizely.Track("AddToCart", Convert.ToString(visitorId), visitor.GetUserAttributes(), eventTags);
             TempData["Message"] = string.Format("Successfully Purchased item {0} for visitor {1}", productId, visitorId);
