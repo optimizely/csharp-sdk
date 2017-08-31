@@ -69,6 +69,11 @@ namespace OptimizelySDK.Bucketing
         {
             if (!ExperimentUtils.IsExperimentActive(experiment, Logger)) return null;
 
+            // check if a forced variation is set
+            var forcedVariation = ProjectConfig.GetForcedVariation(experiment.Key, userId);
+            if (forcedVariation != null)
+                return forcedVariation;
+
             var variation = GetWhitelistedVariation(experiment, userId);
 
             if (variation != null)   return variation;

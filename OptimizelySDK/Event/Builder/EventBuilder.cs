@@ -28,11 +28,15 @@ namespace OptimizelySDK.Event.Builder
 
         private const string SDK_VERSION = "1.1.0";
 
-        private const string IMPRESSION_ENDPOINT = "https://logx.optimizely.com/log/decision";
+        private const string IMPRESSION_ENDPOINT = "https://logx.optimizely.com/v1/events";
 
-        private const string CONVERSION_ENDPOINT = "https://logx.optimizely.com/log/event";
+        private const string CONVERSION_ENDPOINT = "https://logx.optimizely.com/v1/events";
 
         private const string HTTP_VERB = "POST";
+
+        private const string CUSTOM_ATTRIBUTE_FEATURE_TYPE = "custom";
+
+        private const string ACTIVATE_EVENT_KEY = "campaign_activated";
 
         private static readonly Dictionary<string, string> HTTP_HEADERS = new Dictionary<string, string>
         {
@@ -74,16 +78,24 @@ namespace OptimizelySDK.Event.Builder
         /// <param name="config">ProjectConfig Configuration for the project</param>
         /// <param name="userId">string ID of user</param>
         /// <param name="userAttributes">associative array of Attributes for the user</param>
-        public void SetCommonParams(ProjectConfig config, string userId, UserAttributes userAttributes)
+        private Dictionary<string, object> GetCommonParams(ProjectConfig config, string userId, UserAttributes userAttributes)
         {
-            EventParams[Params.PROJECT_ID] = config.ProjectId;
-            EventParams[Params.ACCOUNT_ID] = config.AccountId;
-            EventParams[Params.VISITOR_ID] = userId;
-            EventParams[Params.CLIENT_ENGINE] = SDK_TYPE;
-            EventParams[Params.CLIENT_VERSION] = SDK_VERSION;
-            EventParams[Params.IS_GLOBAL_HOLDBACK] = false;
-            EventParams[Params.TIME] = SecondsSince1970 * 1000L;
-            userAttributes = userAttributes ?? new UserAttributes();
+            var comonParams = new Dictionary<string, object>();
+
+            var visitor = new Dictionary<string, object>
+            {
+                { "snapshots", new object[0]},
+                { "visitor_id", userId },
+                { "attributes", new object[0] }
+            };
+
+            comonParams[Params.VISITORS] = new object[] { visitor };
+            comonParams[Params.PROJECT_ID] = config.ProjectId;
+            comonParams[Params.ACCOUNT_ID] = config.AccountId;
+            comonParams[Params.CLIENT_ENGINE] = SDK_TYPE;
+            comonParams[Params.CLIENT_VERSION] = SDK_VERSION;
+            comonParams[Params.REVISION] = config.Revision;
+
 
             var userFeatures = new List<Dictionary<string, object>>();
 
@@ -94,101 +106,128 @@ namespace OptimizelySDK.Event.Builder
                 {
                     var userFeature = new Dictionary<string, object>
                     {
-                        { "id", attributeEntity.Id },
-                        { "name", attributeEntity.Key },
-                        { "type", "custom" },
-                        { "value",  userAttribute.Value},
-                        { "shouldIndex", true }
+                        { "entity_id", attributeEntity.Id },
+                        { "key", attributeEntity.Key },
+                        { "type", CUSTOM_ATTRIBUTE_FEATURE_TYPE },
+                        { "value",  userAttribute.Value}
+                        //{ "shouldIndex", true }
                     };
                     userFeatures.Add(userFeature);
                 }
             }
-            EventParams[Params.USER_FEATURES] = userFeatures;
+            visitor["attributes"] = userFeatures;
+
+            return comonParams;
         }
 
-        private void SetImpressionParams(Experiment experiment, string variationId)
+        private Dictionary<string, object> GetImpressionParams(Experiment experiment, string variationId)
         {
-            EventParams[Params.LAYER_ID] = experiment.LayerId;
-            EventParams[Params.DECISION] = new Dictionary<string, object>
+
+            var impressionEvent = new Dictionary<string, object>();
+
+            var decisions = new object[]
             {
-                { Params.EXPERIMENT_ID, experiment.Id },
-                { Params.VARIATION_ID, variationId },
-                { Params.IS_LAYER_HOLDBACK, false }
+                new Dictionary<string, object>
+                {
+                    { Params.CAMPAIGN_ID,   experiment.LayerId },
+                    { Params.EXPERIMENT_ID, experiment.Id },
+                    { Params.VARIATION_ID,  variationId }
+                }
             };
+                
+
+            var events = new object[]
+            {
+                new Dictionary<string, object>
+                {
+                    { "entity_id", experiment.LayerId },
+                    {"timestamp", SecondsSince1970*1000 },
+                    {"key", ACTIVATE_EVENT_KEY },
+                    {"uuid", Guid.NewGuid() }
+                }
+            };
+
+            impressionEvent[Params.DECISIONS] = decisions;
+            impressionEvent[Params.EVENTS] = events;
+
+            return impressionEvent;
         }
 
-        private void SetConversionParams(ProjectConfig config, string eventKey, Experiment[] experiments, string userId, Dictionary<string, object> eventTags)
+        private List<object> GetConversionParams(ProjectConfig config, string eventKey, Experiment[] experiments, string userId, Dictionary<string, object> eventTags)
         {
-            EventParams[Params.EVENT_FEATURES] = new object[0];
-            EventParams[Params.EVENT_METRICS] = new object[0];
 
-            var eventFeatures = new List<Dictionary<string, object>>();
-            var eventMetrics = new List<Dictionary<string, object>>();
-
-            if (eventTags != null)
-            {
-                foreach (var keyValuePair in eventTags)
-                {
-                    if (keyValuePair.Value == null)
-                    {
-                        continue;
-                    }
-
-                    var eventFeature = new Dictionary<string, object>
-                    {
-                        {"name", keyValuePair.Key },
-                        {"type", "custom" },
-                        {"value", keyValuePair.Value },
-                        {"shouldIndex", false }
-                    };
-                    eventFeatures.Add(eventFeature);
-                }
-                var eventValue = EventTagUtils.GetRevenueValue(eventTags);
-
-                if (eventValue != null)
-                {
-                    var eventMetric = new Dictionary<string, object>
-                        {
-                            {"name", EventTagUtils.REVENUE_EVENT_METRIC_NAME },
-                            {"value", eventValue }
-                        };
-                    eventMetrics.Add(eventMetric);
-                }
-
-                EventParams[Params.EVENT_FEATURES] = eventFeatures;
-                EventParams[Params.EVENT_METRICS] = eventMetrics;
-            }
-
-
-            var eventEntity = config.GetEvent(eventKey);
-            EventParams[Params.EVENT_ID] = eventEntity.Id;
-            EventParams[Params.EVENT_NAME] = eventKey;
-            var layerStates = new List<Dictionary<string, object>>();
-
+            var conversionEventParams = new List<object>();
             foreach (var experiment in experiments)
             {
                 var variation = Bucketer.Bucket(config, experiment, userId);
-                if (!string.IsNullOrEmpty(variation.Key))
+                var eventEntity = config.EventKeyMap[eventKey];
+
+                if (string.IsNullOrEmpty(variation.Key)) continue;
+                var decision = new Dictionary<string, object>
                 {
-                    layerStates.Add(new Dictionary<string, object>
                     {
-                        { Params.LAYER_ID, experiment.LayerId },
-                        { Params.ACTION_TRIGGERED, true },
+                        Params.DECISIONS, new object[]
                         {
-                            Params.DECISION, new Dictionary<string, object>
+                            new Dictionary<string, object>
                             {
-                                { Params.EXPERIMENT_ID, experiment.Id },
-                                { Params.VARIATION_ID, variation.Id },
-                                { Params.IS_LAYER_HOLDBACK, false }
+                                { Params.CAMPAIGN_ID, experiment.LayerId },
+                                {Params.EXPERIMENT_ID, experiment.Id },
+                                {Params.VARIATION_ID, variation.Id }
                             }
                         }
-                    });
+                    },
+                    {
+                        Params.EVENTS, new object[0]
+                    }
+                };
+
+                var eventDict = new Dictionary<string, object>
+                {
+                    {Params.ENTITY_ID, eventEntity.Id },
+                    {Params.TIMESTAMP, SecondsSince1970*1000 },
+                    {"uuid", Guid.NewGuid()},
+                    {"key", eventKey }
+                };
+
+                if(eventTags != null)
+                {
+                    var revenue = EventTagUtils.GetRevenueValue(eventTags);
+
+                    if (revenue != null)
+                    {
+                        eventDict[EventTagUtils.REVENUE_EVENT_METRIC_NAME] = revenue;
+                    }
+
+                    var eventVallue = EventTagUtils.GetEventValue(eventTags);
+
+                    if(eventVallue != null)
+                    {
+                        eventDict[EventTagUtils.VALUE_EVENT_METRIC_NAME] = eventVallue;
+                    }
+
+                    eventDict["tags"] = eventTags;
                 }
+
+                decision[Params.EVENTS] = new object[] { eventDict };
+
+                conversionEventParams.Add(decision);
             }
 
-            EventParams[Params.LAYER_STATES] = layerStates;
+            return conversionEventParams;
         }
 
+        private Dictionary<string, object> GetImpressionOrConversionParamsWithCommonParams(Dictionary<string, object> commonParams, object[] conversionOrImpressionOnlyParams)
+        {
+            var visitors = commonParams[Params.VISITORS] as object[];
+
+            if(visitors.Length > 0)
+            {
+                var visitor = visitors[0] as Dictionary<string, object>;
+                visitor["snapshots"] = conversionOrImpressionOnlyParams;
+            }
+
+            return commonParams;
+        }
 
         /// <summary>
         /// Create impression event to be sent to the logging endpoint.
@@ -202,11 +241,13 @@ namespace OptimizelySDK.Event.Builder
         public virtual LogEvent CreateImpressionEvent(ProjectConfig config, Experiment experiment, string variationId,
             string userId, UserAttributes userAttributes)
         {
-            ResetParams();
-            SetCommonParams(config, userId, userAttributes);
-            SetImpressionParams(experiment, variationId);
 
-            return new LogEvent(IMPRESSION_ENDPOINT, EventParams, HTTP_VERB, HTTP_HEADERS);
+            var commonParams = GetCommonParams(config, userId, userAttributes ?? new UserAttributes());
+            var impressionOnlyParams = GetImpressionParams(experiment, variationId);
+
+            var impressionParams = GetImpressionOrConversionParamsWithCommonParams(commonParams, new object[] { impressionOnlyParams });
+
+            return new LogEvent(IMPRESSION_ENDPOINT, impressionParams, HTTP_VERB, HTTP_HEADERS);
         }
 
 
@@ -223,10 +264,13 @@ namespace OptimizelySDK.Event.Builder
         public virtual LogEvent CreateConversionEvent(ProjectConfig config, string eventKey, IEnumerable<Experiment> experiments,
             string userId, UserAttributes userAttributes, EventTags eventTags)
         {
-            ResetParams();
-            SetCommonParams(config, userId, userAttributes);
-            SetConversionParams(config, eventKey, experiments.ToArray(), userId, eventTags);
-            return new LogEvent(CONVERSION_ENDPOINT, EventParams, HTTP_VERB, HTTP_HEADERS);
+            var commonParams = GetCommonParams(config, userId, userAttributes ?? new UserAttributes());
+
+            var conversionOnlyParams = GetConversionParams(config, eventKey, experiments.ToArray(), userId, eventTags).ToArray();
+
+            var conversionParams = GetImpressionOrConversionParamsWithCommonParams(commonParams, conversionOnlyParams);
+
+            return new LogEvent(CONVERSION_ENDPOINT, conversionParams, HTTP_VERB, HTTP_HEADERS);
         }
     }
 }

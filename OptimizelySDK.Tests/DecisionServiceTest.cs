@@ -54,7 +54,7 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
-        public void GetVariationForcedVariationPrecedesAudienceEval()
+        public void TestGetVariationForcedVariationPrecedesAudienceEval()
         {
             var BucketerMock = new Mock<Bucketer>(LoggerMock.Object);
 
@@ -74,7 +74,7 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
-        public void GetVariationEvaluatesUserProfileBeforeAudienceTargeting()
+        public void TestGetVariationEvaluatesUserProfileBeforeAudienceTargeting()
         {
             var BucketerMock = new Mock<Bucketer>(LoggerMock.Object);
             Experiment experiment = ValidProjectConfig.Experiments[0];
@@ -102,7 +102,7 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
-        public void GetForcedVariationReturnsForcedVariation()
+        public void TestGetForcedVariationReturnsForcedVariation()
         {
             var BucketerMock = new Mock<Bucketer>(LoggerMock.Object);
 
@@ -116,7 +116,7 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
-        public void GetForcedVariationWithInvalidVariation()
+        public void TestGetForcedVariationWithInvalidVariation()
         {
             string userId = "testUser1";
             string invalidVariationKey = "invalidVarKey";
@@ -159,7 +159,7 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
-        public void GetForcedVariationReturnsNullWhenUserIsNotWhitelisted()
+        public void TestGetForcedVariationReturnsNullWhenUserIsNotWhitelisted()
         {
             Bucketer bucketer = new Bucketer(LoggerMock.Object);
             DecisionService decisionService = new DecisionService(bucketer, ErrorHandlerMock.Object, ValidProjectConfig, null, LoggerMock.Object);
@@ -168,7 +168,7 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
-        public void BucketReturnsVariationStoredInUserProfile()
+        public void TestBucketReturnsVariationStoredInUserProfile()
         {
             Experiment experiment = NoAudienceProjectConfig.Experiments[0];
             Variation variation = experiment.Variations[0];
@@ -195,7 +195,7 @@ namespace OptimizelySDK.Tests
         }
             
         [Test]
-        public void GetStoredVariationLogsWhenLookupReturnsNull()
+        public void TestGetStoredVariationLogsWhenLookupReturnsNull()
         {
             Experiment experiment = NoAudienceProjectConfig.Experiments[0];
 
@@ -215,7 +215,7 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
-        public void GetStoredVariationReturnsNullWhenVariationIsNoLongerInConfig()
+        public void TestGetStoredVariationReturnsNullWhenVariationIsNoLongerInConfig()
         {
             Experiment experiment = NoAudienceProjectConfig.Experiments[0];
             string storedVariationId = "missingVariation";
@@ -238,7 +238,7 @@ namespace OptimizelySDK.Tests
                 , UserProfileId, storedVariationId, experiment.Id)), Times.Once);
     }
         [Test]
-        public void GetVariationSavesBucketedVariationIntoUserProfile() 
+        public void TestGetVariationSavesBucketedVariationIntoUserProfile() 
         {
             Experiment experiment = NoAudienceProjectConfig.Experiments[0];
             Variation variation = experiment.Variations[0];
@@ -268,7 +268,7 @@ namespace OptimizelySDK.Tests
     }
         [Test]
         [ExpectedException]
-        public void BucketLogsCorrectlyWhenUserProfileFailsToSave()
+        public void TestBucketLogsCorrectlyWhenUserProfileFailsToSave()
         {
             Experiment experiment = NoAudienceProjectConfig.Experiments[0];
             Variation variation = experiment.Variations[0];
@@ -294,7 +294,7 @@ namespace OptimizelySDK.Tests
                 , Times.Once);
     }
         [Test]
-        public void GetVariationSavesANewUserProfile()
+        public void TestGetVariationSavesANewUserProfile()
         {
             Experiment experiment = NoAudienceProjectConfig.Experiments[0];
             Variation variation = experiment.Variations[0];
@@ -317,6 +317,48 @@ namespace OptimizelySDK.Tests
 
             Assert.IsTrue(TestData.CompareObjects(variation, decisionService.GetVariation(experiment, UserProfileId, new UserAttributes())));
             UserProfileServiceMock.Verify(_ => _.Save(It.IsAny<Dictionary<string, object>>()), Times.Once);
+        }
+
+        [Test]
+        public void TestGetVariationUserWithSetForcedVariation()
+        {
+            var experimentKey = "test_experiment";
+            var pausedExperimentKey = "paused_experiment";
+            var userId = "test_user";
+            var expectedForcedVariationKey = "variation";
+            var expectedVariationKey = "control";
+            var optlyObject = new Optimizely(TestData.Datafile, new ValidEventDispatcher(), LoggerMock.Object);
+
+            var userAttributes = new UserAttributes
+            {
+                {"device_type", "iPhone" },
+                {"location", "San Francisco" }
+            };
+            
+            optlyObject.Activate(experimentKey, userId, userAttributes);
+
+            // confirm normal bucketing occurs before setting the forced variation
+            var actualVariationKey = optlyObject.GetVariation(experimentKey, userId, userAttributes);
+
+            Assert.AreEqual(expectedVariationKey, actualVariationKey);
+            
+            // test valid experiment
+            Assert.IsTrue(optlyObject.SetForcedVariation(experimentKey, userId, expectedForcedVariationKey), string.Format(@"Set variation to ""{0}"" failed.", expectedForcedVariationKey));
+
+            var actualForcedVariationKey = optlyObject.GetVariation(experimentKey, userId, userAttributes);
+            Assert.AreEqual(expectedForcedVariationKey, actualForcedVariationKey);
+            
+            // clear forced variation and confirm that normal bucketing occurs
+            Assert.IsTrue(optlyObject.SetForcedVariation(experimentKey, userId, null));
+
+            actualVariationKey = optlyObject.GetVariation(experimentKey, userId, userAttributes);
+            Assert.AreEqual(expectedVariationKey, actualVariationKey);
+            
+            // check that a paused experiment returns null
+            Assert.IsTrue(optlyObject.SetForcedVariation(pausedExperimentKey, userId, expectedForcedVariationKey), string.Format(@"Set variation to ""{0}"" failed.", expectedForcedVariationKey));
+            actualForcedVariationKey = optlyObject.GetVariation(pausedExperimentKey, userId, userAttributes);
+
+            Assert.IsNull(actualForcedVariationKey);
         }
     }
 }

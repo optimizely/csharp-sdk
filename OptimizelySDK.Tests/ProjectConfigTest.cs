@@ -21,6 +21,7 @@ using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
 using OptimizelySDK.Exceptions;
 using NUnit.Framework;
+using OptimizelySDK.Entity;
 
 namespace OptimizelySDK.Tests
 {
@@ -403,6 +404,101 @@ namespace OptimizelySDK.Tests
             ProjectConfig config = ProjectConfig.Create(TestData.Datafile, new Mock<ILogger>().Object, new DefaultErrorHandler());
             Assert.IsNotNull(config);
             Assert.AreEqual("1592310167", config.AccountId);
+        }
+
+        // test set/get forced variation for the following cases:
+        //      - valid and invalid user ID
+        //      - valid and invalid experiment key
+        //      - valid and invalid variation key, null variation key
+        [Test]
+        public void TestSetGetForcedVariation()
+        {
+            var userId = "test_user";
+            var invalidUserId = "invalid_user";
+            var experimentKey = "test_experiment";
+            var invalidExperimentKey = "invalid_experiment";
+            var expectedVariationKey = "control";
+            var invalidVariationKey = "invalid_variation";
+
+            var userAttributes = new UserAttributes
+            {
+                {"device_type", "iPhone" },
+                {"location", "San Francisco" }
+            };
+
+            var optlyObject = new Optimizely(TestData.Datafile, new ValidEventDispatcher(), LoggerMock.Object);
+            optlyObject.Activate("test_experiment", "test_user", userAttributes);
+
+            // invalid experiment key should return a null variation
+            Assert.False(Config.SetForcedVariation(invalidExperimentKey, userId, expectedVariationKey));
+            Assert.Null(Config.GetForcedVariation(invalidExperimentKey, userId));
+
+            // setting a null variation should return a null variation
+            Assert.True(Config.SetForcedVariation(experimentKey, userId, null));
+            Assert.Null(Config.GetForcedVariation(experimentKey, userId));
+
+            // setting an invalid variation should return a null variation
+            Assert.False(Config.SetForcedVariation(experimentKey, userId, invalidVariationKey));
+            Assert.Null(Config.GetForcedVariation(experimentKey, userId));
+
+            // confirm the forced variation is returned after a set
+            Assert.True(Config.SetForcedVariation(experimentKey, userId, expectedVariationKey));
+            var actualForcedVariation = Config.GetForcedVariation(experimentKey, userId);
+            Assert.AreEqual(expectedVariationKey, actualForcedVariation.Key);
+
+            // an invalid user ID should return a null variation
+            Assert.Null(Config.GetForcedVariation(experimentKey, invalidUserId));
+        }
+
+        // test that all the logs in setForcedVariation are getting called
+        [Test]
+        public void TestSetForcedVariationLogs()
+        {
+            var userId = "test_user";
+            var experimentKey = "test_experiment";
+            var experimentId = "7716830082";
+            var invalidExperimentKey = "invalid_experiment";
+            var variationKey = "control";
+            var variationId = "7722370027";
+            var invalidVariationKey = "invalid_variation";
+            
+            Config.SetForcedVariation(invalidExperimentKey, userId, variationKey);
+            Config.SetForcedVariation(experimentKey, userId, null);
+            Config.SetForcedVariation(experimentKey, userId, invalidVariationKey);
+            Config.SetForcedVariation(experimentKey, userId, variationKey);
+
+            LoggerMock.Verify(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()), Times.Exactly(4));
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, string.Format(@"Experiment key ""{0}"" is not in datafile.", invalidExperimentKey)));
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, string.Format(@"Variation mapped to experiment ""{0}"" has been removed for user ""{1}"".", experimentKey, userId)));
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, string.Format(@"No variation key ""{0}"" defined in datafile for experiment ""{1}"".", invalidVariationKey, experimentKey)));
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, string.Format(@"Set variation ""{0}"" for experiment ""{1}"" and user ""{2}"" in the forced variation map.", variationId, experimentId, userId)));
+        }
+
+        // test that all the logs in getForcedVariation are getting called
+        [Test]
+        public void TestGetForcedVariationLogs()
+        {
+            var userId = "test_user";
+            var invalidUserId = "invalid_user";
+            var experimentKey = "test_experiment";
+            var experimentId = "7716830082";
+            var invalidExperimentKey = "invalid_experiment";
+            var pausedExperimentKey = "paused_experiment";
+            var variationKey = "control";
+            var variationId = "7722370027";
+
+            Config.SetForcedVariation(experimentKey, userId, variationKey);
+            Config.GetForcedVariation(experimentKey, invalidUserId);
+            Config.GetForcedVariation(invalidExperimentKey, userId);
+            Config.GetForcedVariation(pausedExperimentKey, userId);
+            Config.GetForcedVariation(experimentKey, userId);
+
+            LoggerMock.Verify(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()), Times.Exactly(5));
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, string.Format(@"Set variation ""{0}"" for experiment ""{1}"" and user ""{2}"" in the forced variation map.", variationId, experimentId, userId)));
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, string.Format(@"User ""{0}"" is not in the forced variation map.", invalidUserId)));
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, string.Format(@"Experiment key ""{0}"" is not in datafile.", invalidExperimentKey)));
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, string.Format(@"No experiment ""{0}"" mapped to user ""{1}"" in the forced variation map.", pausedExperimentKey, userId)));
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, string.Format(@"Variation ""{0}"" is mapped to experiment ""{1}"" and user ""{2}"" in the forced variation map", variationKey, experimentKey, userId)));
         }
     }
 }

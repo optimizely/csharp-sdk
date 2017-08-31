@@ -55,12 +55,7 @@ namespace OptimizelySDK.Bucketing
             UserId = userId;
             ExperimentBucketMap = experimentBucketMap;
         }
-
-        public int HashCode()
-        {
-            return 31 * UserId.GetHashCode() + ExperimentBucketMap.GetHashCode();
-        }
-
+        
         /// <summary>
         /// Convert a User Profile instance to a Map.
         /// </summary>
