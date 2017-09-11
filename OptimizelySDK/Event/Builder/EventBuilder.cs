@@ -26,7 +26,7 @@ namespace OptimizelySDK.Event.Builder
     {
         private const string SDK_TYPE = "csharp-sdk";
 
-        private const string SDK_VERSION = "1.1.0";
+        private const string SDK_VERSION = "1.1.1";
 
         private const string IMPRESSION_ENDPOINT = "https://logx.optimizely.com/log/decision";
 

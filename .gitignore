@@ -240,4 +240,5 @@ ModelManifest.xml
 
 # FAKE - F# Make
 .fake/
-OptimizelySDK/nuget.exe
+OptimizelySDK.Package/nuget.exe
+OptimizelySDK.Package/lib
