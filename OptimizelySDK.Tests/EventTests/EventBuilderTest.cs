@@ -74,7 +74,7 @@ namespace OptimizelySDK.Tests.EventTests
                 {"project_id", "7720880029" },
                 {"account_id", "1592310167" },
                 {"client_name", "csharp-sdk" },
-                {"client_version", "1.1.0" },
+                {"client_version", "1.1.1" },
                 {"revision", 15 }
             };
 
@@ -152,7 +152,7 @@ namespace OptimizelySDK.Tests.EventTests
                 {"project_id", "7720880029" },
                 {"account_id", "1592310167" },
                 {"client_name", "csharp-sdk" },
-                {"client_version", "1.1.0" },
+                {"client_version", "1.1.1" },
                 {"revision", 15 }
             };
             
@@ -226,7 +226,7 @@ namespace OptimizelySDK.Tests.EventTests
                 {"project_id", "7720880029"},
                 {"account_id", "1592310167"},
                 {"client_name", "csharp-sdk"},
-                {"client_version", "1.1.0"},
+                {"client_version", "1.1.1"},
                 {"revision", 15}
             };
             
@@ -304,7 +304,7 @@ namespace OptimizelySDK.Tests.EventTests
                 {"project_id", "7720880029"},
                 {"account_id", "1592310167"},
                 {"client_name", "csharp-sdk"},
-                {"client_version", "1.1.0"},
+                {"client_version", "1.1.1"},
                 {"revision", 15}
             };
 
@@ -385,7 +385,7 @@ namespace OptimizelySDK.Tests.EventTests
                 {"project_id", "7720880029" },
                 {"account_id", "1592310167" },
                 {"client_name", "csharp-sdk" },
-                {"client_version", "1.1.0" },
+                {"client_version", "1.1.1" },
                 {"revision", 15 }
             };
 
@@ -476,7 +476,7 @@ namespace OptimizelySDK.Tests.EventTests
                 {"project_id", "7720880029" },
                 {"account_id", "1592310167" },
                 {"client_name", "csharp-sdk" },
-                {"client_version", "1.1.0" },
+                {"client_version", "1.1.1" },
                 {"revision", 15 }
             };
 
@@ -562,7 +562,7 @@ namespace OptimizelySDK.Tests.EventTests
                 {"project_id", "7720880029" },
                 {"account_id", "1592310167" },
                 {"client_name", "csharp-sdk" },
-                {"client_version", "1.1.0" },
+                {"client_version", "1.1.1" },
                 {"revision", 15 }
             };
             
@@ -644,7 +644,7 @@ namespace OptimizelySDK.Tests.EventTests
                 {"project_id", "7720880029" },
                 {"account_id", "1592310167" },
                 {"client_name", "csharp-sdk" },
-                {"client_version", "1.1.0" },
+                {"client_version", "1.1.1" },
                 {"revision", 15 }
             };
 
