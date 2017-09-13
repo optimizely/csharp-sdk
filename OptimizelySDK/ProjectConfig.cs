@@ -101,7 +101,10 @@ namespace OptimizelySDK
         public Dictionary<string, Audience> AudienceIdMap { get { return _AudienceIdMap; } }
 
         /// <summary>
-        /// Associative array of user IDs to an associative array of experiments to variations.
+        /// Associative array of user IDs to an associative array
+        /// of experiments to variations.This contains all the forced variations
+        /// set by the user by calling setForcedVariation (it is not the same as the
+        /// whitelisting forcedVariations data structure in the Experiments class).
         /// </summary>
         private Dictionary<string, Dictionary<string, string>> _ForcedVariationMap;
         public Dictionary<string, Dictionary<string, string>> ForcedVariationMap { get { return _ForcedVariationMap; } }
@@ -359,15 +362,21 @@ namespace OptimizelySDK
             ErrorHandler.HandleError(new Exceptions.InvalidVariationException("Provided variation is not in datafile."));
             return new Variation();
         }
-        
+
         /// <summary>
         /// Gets the forced variation for the given user and experiment.  
         /// </summary>
-        /// <param name="experimentKey">key for Experiment</param>
-        /// <param name="userId">The User ID</param>
-        /// <returns>Variation entity on which the given user and experiment should be forced into.</returns>
+        /// <param name="experimentKey">The experiment key</param>
+        /// <param name="userId">The user ID</param>
+        /// <returns>Variation entity which the given user and experiment should be forced into.</returns>
         public Variation GetForcedVariation(string experimentKey, string userId)
         {
+            if (string.IsNullOrEmpty(userId))
+            {
+                Logger.Log(LogLevel.DEBUG, string.Format("User ID is invalid.", userId));
+                return null;
+            }
+
             if (_ForcedVariationMap.ContainsKey(userId) == false)
             {
                 Logger.Log(LogLevel.DEBUG, string.Format(@"User ""{0}"" is not in the forced variation map.", userId));
@@ -408,25 +417,40 @@ namespace OptimizelySDK
 
             return variation;
         }
-        
+
         /// <summary>
         /// Sets an associative array of user IDs to an associative array of experiments to forced variations.
         /// </summary>
-        /// <param name="experimentKey">key for Experiment</param>
-        /// <param name="userId">The User ID</param>
-        /// <param name="variationKey">key for Variation</param>
+        /// <param name="experimentKey">The experiment key</param>
+        /// <param name="userId">The user ID</param>
+        /// <param name="variationKey">The variation key</param>
         /// <returns>A boolean value that indicates if the set completed successfully.</returns>
         public bool SetForcedVariation(string experimentKey, string userId, string variationKey)
         {
+            if (string.IsNullOrEmpty(userId))
+            {
+                Logger.Log(LogLevel.DEBUG, string.Format("User ID is invalid.", userId));
+                return false;
+            }
+
+            if (string.IsNullOrEmpty(experimentKey))
+            {
+                Logger.Log(LogLevel.DEBUG, string.Format("Experiment key is invalid.", experimentKey));
+                return false;
+            }
+
             var experimentId = GetExperimentFromKey(experimentKey).Id;
 
             // this case is logged in getExperimentFromKey
             if (string.IsNullOrEmpty(experimentId))
                 return false;
 
+            // clear the forced variation if the variation key is null
             if (string.IsNullOrEmpty(variationKey))
             {
-                _ForcedVariationMap.Remove(userId);
+                if (_ForcedVariationMap.ContainsKey(userId) && _ForcedVariationMap[userId].ContainsKey(experimentId))
+                    _ForcedVariationMap[userId].Remove(experimentId);
+
                 Logger.Log(LogLevel.DEBUG, string.Format(@"Variation mapped to experiment ""{0}"" has been removed for user ""{1}"".", experimentKey, userId));
                 return true;
             }
@@ -437,10 +461,13 @@ namespace OptimizelySDK
             if (string.IsNullOrEmpty(variationId))
                 return false;
 
-            _ForcedVariationMap[userId] = new Dictionary<string, string> {
-                {experimentId, variationId }
-            };
-            
+            // Add User if not exist.
+            if (_ForcedVariationMap.ContainsKey(userId) == false)
+                _ForcedVariationMap[userId] = new Dictionary<string, string>();
+
+            // Add/Replace Experiment to Variation ID map.
+            _ForcedVariationMap[userId][experimentId] = variationId;
+
             Logger.Log(LogLevel.DEBUG, string.Format(@"Set variation ""{0}"" for experiment ""{1}"" and user ""{2}"" in the forced variation map.", variationId, experimentId, userId));
             return true;
         }

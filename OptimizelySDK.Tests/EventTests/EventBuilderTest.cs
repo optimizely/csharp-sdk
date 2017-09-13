@@ -25,31 +25,12 @@ namespace OptimizelySDK.Tests.EventTests
             Config = ProjectConfig.Create(TestData.Datafile, logger, new ErrorHandler.NoOpErrorHandler());
             EventBuilder = new EventBuilder(new Bucketer(logger));
         }
-        public long SecondsSince1970()
-        {
-            return (long)(DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalSeconds;
-        }
-
-        private void ChangeGUIDAndTimeStamp(Dictionary<string, object> paramsObj, long timeStamp, Guid guid)
-        {
-            // Path from where to find
-            // visitors.[0].snapshots.[0].events.[0].uuid or timestamp
-
-            var visitor = (paramsObj["visitors"] as object[])[0] as Dictionary<string, object>;
-
-            var snapshot = (visitor["snapshots"] as object[])[0] as Dictionary<string, object>;
-
-            var @event = (snapshot["events"] as object[])[0] as Dictionary<string, object>;
-
-            @event["uuid"] = guid;
-            @event["timestamp"] = timeStamp;
-        }
 
         [Test]
         public void TestCreateImpressionEventNoAttributes()
         {
             var guid = Guid.NewGuid();
-            var timeStamp = SecondsSince1970();
+            var timeStamp = TestData.SecondsSince1970();
 
             var payloadParams = new Dictionary<string, object>
             {
@@ -107,7 +88,7 @@ namespace OptimizelySDK.Tests.EventTests
 
             var logEvent = EventBuilder.CreateImpressionEvent(Config, Config.GetExperimentFromKey("test_experiment"), "77210100090", TestUserId, null);
 
-            ChangeGUIDAndTimeStamp(logEvent.Params, timeStamp, guid);
+            TestData.ChangeGUIDAndTimeStamp(logEvent.Params, timeStamp, guid);
 
             Assert.IsTrue(TestData.CompareObjects(expectedLogEvent, logEvent));
 
@@ -117,7 +98,7 @@ namespace OptimizelySDK.Tests.EventTests
         public void TestCreateImpressionEventWithAttributes()
         {
             var guid = Guid.NewGuid();
-            var timeStamp = SecondsSince1970();
+            var timeStamp = TestData.SecondsSince1970();
 
             var payloadParams = new Dictionary<string, object>
             {
@@ -192,7 +173,7 @@ namespace OptimizelySDK.Tests.EventTests
 
             var logEvent = EventBuilder.CreateImpressionEvent(Config, Config.GetExperimentFromKey("test_experiment"), "77210100090", TestUserId, userAttributes);
 
-            ChangeGUIDAndTimeStamp(logEvent.Params, timeStamp, guid);
+            TestData.ChangeGUIDAndTimeStamp(logEvent.Params, timeStamp, guid);
 
             Assert.IsTrue(TestData.CompareObjects(expectedLogEvent, logEvent));
         }
@@ -201,7 +182,7 @@ namespace OptimizelySDK.Tests.EventTests
         public void TestCreateConversionEventNoAttributesNoValue()
         {
             var guid = Guid.NewGuid();
-            var timeStamp = SecondsSince1970();
+            var timeStamp = TestData.SecondsSince1970();
 
             var payloadParams = new Dictionary<string, object>
             {
@@ -260,7 +241,7 @@ namespace OptimizelySDK.Tests.EventTests
 
             var logEvent = EventBuilder.CreateConversionEvent(Config, "purchase", new Experiment[] { Config.GetExperimentFromKey("test_experiment") }, TestUserId, null, null);
 
-            ChangeGUIDAndTimeStamp(logEvent.Params, timeStamp, guid);
+            TestData.ChangeGUIDAndTimeStamp(logEvent.Params, timeStamp, guid);
 
             Assert.IsTrue(TestData.CompareObjects(expectedEvent, logEvent));
         }
@@ -269,7 +250,7 @@ namespace OptimizelySDK.Tests.EventTests
         public void TestCreateConversionEventWithAttributesNoValue()
         {
             var guid = Guid.NewGuid();
-            var timeStamp = SecondsSince1970();
+            var timeStamp = TestData.SecondsSince1970();
             
             var payloadParams = new Dictionary<string, object>
             {
@@ -344,7 +325,7 @@ namespace OptimizelySDK.Tests.EventTests
 
             var logEvent = EventBuilder.CreateConversionEvent(Config, "purchase", new Experiment[] { Config.GetExperimentFromKey("test_experiment") }, TestUserId, userAttributes, null);
 
-            ChangeGUIDAndTimeStamp(logEvent.Params, timeStamp, guid);
+            TestData.ChangeGUIDAndTimeStamp(logEvent.Params, timeStamp, guid);
 
             Assert.IsTrue(TestData.CompareObjects(expectedEvent, logEvent));
         }
@@ -353,7 +334,7 @@ namespace OptimizelySDK.Tests.EventTests
         public void TestCreateConversionEventNoAttributesWithValue()
         {
             var guid = Guid.NewGuid();
-            var timeStamp = SecondsSince1970();
+            var timeStamp = TestData.SecondsSince1970();
 
             var payloadParams = new Dictionary<string, object>
             {
@@ -424,7 +405,7 @@ namespace OptimizelySDK.Tests.EventTests
                     {"revenue", 42 }
             });
 
-            ChangeGUIDAndTimeStamp(logEvent.Params, timeStamp, guid);
+            TestData.ChangeGUIDAndTimeStamp(logEvent.Params, timeStamp, guid);
 
             Assert.IsTrue(TestData.CompareObjects(expectedEvent, logEvent));
         }
@@ -433,7 +414,7 @@ namespace OptimizelySDK.Tests.EventTests
         public void TestCreateConversionEventWithAttributesWithValue()
         {
             var guid = Guid.NewGuid();
-            var timeStamp = SecondsSince1970();
+            var timeStamp = TestData.SecondsSince1970();
 
             var payloadParams = new Dictionary<string, object>
             {
@@ -521,18 +502,16 @@ namespace OptimizelySDK.Tests.EventTests
                     {"non-revenue", "definitely" }
                 });
 
-            ChangeGUIDAndTimeStamp(logEvent.Params, timeStamp, guid);
+            TestData.ChangeGUIDAndTimeStamp(logEvent.Params, timeStamp, guid);
 
             Assert.IsTrue(TestData.CompareObjects(expectedEvent, logEvent));
         }
-
-
-        /* Start */
+        
         [Test]
         public void TestCreateConversionEventNoAttributesWithInvalidValue()
         {
             var guid = Guid.NewGuid();
-            var timeStamp = SecondsSince1970();
+            var timeStamp = TestData.SecondsSince1970();
 
             var payloadParams = new Dictionary<string, object>
             {
@@ -603,7 +582,7 @@ namespace OptimizelySDK.Tests.EventTests
                     {"non-revenue", "definitely" }
                 });
 
-            ChangeGUIDAndTimeStamp(logEvent.Params, timeStamp, guid);
+            TestData.ChangeGUIDAndTimeStamp(logEvent.Params, timeStamp, guid);
 
             Assert.IsTrue(TestData.CompareObjects(expectedEvent, logEvent));
         }
@@ -612,7 +591,7 @@ namespace OptimizelySDK.Tests.EventTests
         public void TestConversionEventWithNumericTag()
         {
             var guid = Guid.NewGuid();
-            var timeStamp = SecondsSince1970();
+            var timeStamp = TestData.SecondsSince1970();
 
             var payloadParams = new Dictionary<string, object>
             {
@@ -686,13 +665,9 @@ namespace OptimizelySDK.Tests.EventTests
                     {"value", 400 }
             });
 
-            ChangeGUIDAndTimeStamp(logEvent.Params, timeStamp, guid);
+            TestData.ChangeGUIDAndTimeStamp(logEvent.Params, timeStamp, guid);
 
             Assert.IsTrue(TestData.CompareObjects(expectedEvent, logEvent));
         }
-
-        /* End */
-
-
     }
 }

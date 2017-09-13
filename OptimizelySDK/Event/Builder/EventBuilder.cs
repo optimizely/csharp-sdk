@@ -110,7 +110,6 @@ namespace OptimizelySDK.Event.Builder
                         { "key", attributeEntity.Key },
                         { "type", CUSTOM_ATTRIBUTE_FEATURE_TYPE },
                         { "value",  userAttribute.Value}
-                        //{ "shouldIndex", true }
                     };
                     userFeatures.Add(userFeature);
                 }

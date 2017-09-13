@@ -19,7 +19,6 @@ namespace OptimizelySDK.Event.Builder
     {
         public const string ACCOUNT_ID = "account_id";
         public const string PROJECT_ID = "project_id";
-        public const string LAYER_ID = "layerId";
         public const string ENTITY_ID = "entity_id";
         public const string TIMESTAMP = "timestamp";
         public const string VISITORS = "visitors";
@@ -35,12 +34,9 @@ namespace OptimizelySDK.Event.Builder
         public const string USER_FEATURES = "userFeatures";
         public const string DECISIONS = "decisions";
         public const string EVENTS = "events";
-        public const string LAYER_STATES = "layerStates";
         public const string TIME = "timestamp";
         public const string CLIENT_ENGINE = "client_name";
         public const string CLIENT_VERSION = "client_version";
-        public const string ACTION_TRIGGERED = "actionTriggered";
-        public const string IS_GLOBAL_HOLDBACK = "isGlobalHoldback";
         public const string IS_LAYER_HOLDBACK = "isLayerHoldback";
     }
 }

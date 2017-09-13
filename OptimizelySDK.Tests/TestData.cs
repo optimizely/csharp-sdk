@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 using Newtonsoft.Json.Linq;
+using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 
@@ -62,7 +64,6 @@ namespace OptimizelySDK.Tests
 
         public static bool CompareObjects(object o1, object o2)
         {
-
             var str1 = Newtonsoft.Json.JsonConvert.SerializeObject(o1);
             var str2 = Newtonsoft.Json.JsonConvert.SerializeObject(o2);
             var jtoken1 = JToken.Parse(Newtonsoft.Json.JsonConvert.SerializeObject(o1));
@@ -71,5 +72,24 @@ namespace OptimizelySDK.Tests
             return JToken.DeepEquals(jtoken1, jtoken2);
         }
 
+        public static long SecondsSince1970()
+        {
+            return (long)(DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalSeconds;
+        }
+
+        public static void ChangeGUIDAndTimeStamp(Dictionary<string, object> paramsObj, long timeStamp, Guid guid)
+        {
+            // Path from where to find
+            // visitors.[0].snapshots.[0].events.[0].uuid or timestamp
+
+            var visitor = (paramsObj["visitors"] as object[])[0] as Dictionary<string, object>;
+
+            var snapshot = (visitor["snapshots"] as object[])[0] as Dictionary<string, object>;
+
+            var @event = (snapshot["events"] as object[])[0] as Dictionary<string, object>;
+
+            @event["uuid"] = guid;
+            @event["timestamp"] = timeStamp;
+        }
     }
 }
