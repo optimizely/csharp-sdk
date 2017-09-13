@@ -1,4 +1,4 @@
-﻿using OptimizelySDK.Entity;
+using OptimizelySDK.Entity;
 using OptimizelySDK.Logger;
 using Moq;
 using OptimizelySDK.Event.Builder;
