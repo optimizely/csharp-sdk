@@ -96,23 +96,23 @@ namespace OptimizelySDK.Tests.UtilsTests
             };
 
             // Invalid data.
-            Assert.Null(EventTagUtils.GetEventValue(null));
-            Assert.Null(EventTagUtils.GetEventValue(invalidTag));
-            Assert.Null(EventTagUtils.GetEventValue(nullValue));
+            Assert.Null(EventTagUtils.GetNumericValue(null));
+            Assert.Null(EventTagUtils.GetNumericValue(invalidTag));
+            Assert.Null(EventTagUtils.GetNumericValue(nullValue));
 
 
             // Valid data.
-            Assert.AreEqual(42, EventTagUtils.GetEventValue(validTagStr));
-            Assert.AreEqual("42.3", EventTagUtils.GetEventValue(validTagStr1).ToString());
-            Assert.AreEqual(EventTagUtils.GetEventValue(validTag), expectedValue);
-            Assert.AreEqual(EventTagUtils.GetEventValue(validTag2), expectedValue2);
-            Assert.AreEqual(EventTagUtils.GetEventValue(validTag3).ToString(), expectedValue3.ToString());
+            Assert.AreEqual(42, EventTagUtils.GetNumericValue(validTagStr));
+            Assert.AreEqual("42.3", EventTagUtils.GetNumericValue(validTagStr1).ToString());
+            Assert.AreEqual(EventTagUtils.GetNumericValue(validTag), expectedValue);
+            Assert.AreEqual(EventTagUtils.GetNumericValue(validTag2), expectedValue2);
+            Assert.AreEqual(EventTagUtils.GetNumericValue(validTag3).ToString(), expectedValue3.ToString());
         }
 
         [Test]
         public void TestGetNumericMetricInvalidArgs()
         {
-            Assert.IsNull(EventTagUtils.GetEventValue(null));
+            Assert.IsNull(EventTagUtils.GetNumericValue(null));
 
             //Errors for all, because it accepts only dictionary// 
             // Not valid test cases in C# 
@@ -129,8 +129,8 @@ namespace OptimizelySDK.Tests.UtilsTests
         public void TestGetNumericMetricNoValueTag()
         {
             // Test that numeric value is not returned when there's no numeric event tag.
-            Assert.IsNull(EventTagUtils.GetEventValue(new Dictionary<string, object> { }));
-            Assert.IsNull(EventTagUtils.GetEventValue(new Dictionary<string, object> {
+            Assert.IsNull(EventTagUtils.GetNumericValue(new Dictionary<string, object> { }));
+            Assert.IsNull(EventTagUtils.GetNumericValue(new Dictionary<string, object> {
                 { "non-value", 42 }
             }));
 
@@ -144,14 +144,14 @@ namespace OptimizelySDK.Tests.UtilsTests
             
             // Test that numeric value is not returned when revenue event tag has invalid data type.
 
-            Assert.IsNull(EventTagUtils.GetEventValue(new Dictionary<string, object> { { "non-value", null } }));
-            Assert.IsNull(EventTagUtils.GetEventValue(new Dictionary<string, object> { { "non-value",  0.5} }));
-            Assert.IsNull(EventTagUtils.GetEventValue(new Dictionary<string, object> { { "non-value",  12345} }));
-            Assert.IsNull(EventTagUtils.GetEventValue(new Dictionary<string, object> { { "non-value", "65536" } }));
-            Assert.IsNull(EventTagUtils.GetEventValue(new Dictionary<string, object> { { "non-value", true } }));
-            Assert.IsNull(EventTagUtils.GetEventValue(new Dictionary<string, object> { { "non-value", false } }));
-            Assert.IsNull(EventTagUtils.GetEventValue(new Dictionary<string, object> { { "non-value", new object[] { 1, 2, 3 } } }));
-            Assert.IsNull(EventTagUtils.GetEventValue(new Dictionary<string, object> { { "non-value", new object[] { 'a', 'b', 'c' } } }));
+            Assert.IsNull(EventTagUtils.GetNumericValue(new Dictionary<string, object> { { "non-value", null } }));
+            Assert.IsNull(EventTagUtils.GetNumericValue(new Dictionary<string, object> { { "non-value",  0.5} }));
+            Assert.IsNull(EventTagUtils.GetNumericValue(new Dictionary<string, object> { { "non-value",  12345} }));
+            Assert.IsNull(EventTagUtils.GetNumericValue(new Dictionary<string, object> { { "non-value", "65536" } }));
+            Assert.IsNull(EventTagUtils.GetNumericValue(new Dictionary<string, object> { { "non-value", true } }));
+            Assert.IsNull(EventTagUtils.GetNumericValue(new Dictionary<string, object> { { "non-value", false } }));
+            Assert.IsNull(EventTagUtils.GetNumericValue(new Dictionary<string, object> { { "non-value", new object[] { 1, 2, 3 } } }));
+            Assert.IsNull(EventTagUtils.GetNumericValue(new Dictionary<string, object> { { "non-value", new object[] { 'a', 'b', 'c' } } }));
         }
 
         [Test]
@@ -160,39 +160,39 @@ namespace OptimizelySDK.Tests.UtilsTests
         {
 
             // An integer should be cast to a float
-            Assert.AreEqual(12345.0, EventTagUtils.GetEventValue(new Dictionary<string, object> { { "value", 12345 } }, new Logger.DefaultLogger()));
+            Assert.AreEqual(12345.0, EventTagUtils.GetNumericValue(new Dictionary<string, object> { { "value", 12345 } }, new Logger.DefaultLogger()));
 
             // A string should be cast to a float
-            Assert.AreEqual(12345.0, EventTagUtils.GetEventValue(new Dictionary<string, object> { { "value", "12345" } }, new Logger.DefaultLogger()));
+            Assert.AreEqual(12345.0, EventTagUtils.GetNumericValue(new Dictionary<string, object> { { "value", "12345" } }, new Logger.DefaultLogger()));
             
             // Valid float values
             float someFloat = 1.2345F;
 
-            Assert.AreEqual(someFloat, EventTagUtils.GetEventValue(new Dictionary<string, object> { { "value", someFloat } }, new Logger.DefaultLogger()));
+            Assert.AreEqual(someFloat, EventTagUtils.GetNumericValue(new Dictionary<string, object> { { "value", someFloat } }, new Logger.DefaultLogger()));
 
             float maxFloat = float.MaxValue;
-            Assert.AreEqual(maxFloat, EventTagUtils.GetEventValue(new Dictionary<string, object> { { "value", maxFloat } }, new Logger.DefaultLogger()));
+            Assert.AreEqual(maxFloat, EventTagUtils.GetNumericValue(new Dictionary<string, object> { { "value", maxFloat } }, new Logger.DefaultLogger()));
 
 
             float minFloat = float.MinValue;
-            Assert.AreEqual(minFloat, EventTagUtils.GetEventValue(new Dictionary<string, object> { { "value", minFloat } }, new Logger.DefaultLogger()));
+            Assert.AreEqual(minFloat, EventTagUtils.GetNumericValue(new Dictionary<string, object> { { "value", minFloat } }, new Logger.DefaultLogger()));
 
             // Invalid values
-            Assert.IsNull(EventTagUtils.GetEventValue(new Dictionary<string, object> { { "value", false } }, new Logger.DefaultLogger()));
-            Assert.IsNull(EventTagUtils.GetEventValue(new Dictionary<string, object> { { "value", null } }, new Logger.DefaultLogger()));
+            Assert.IsNull(EventTagUtils.GetNumericValue(new Dictionary<string, object> { { "value", false } }, new Logger.DefaultLogger()));
+            Assert.IsNull(EventTagUtils.GetNumericValue(new Dictionary<string, object> { { "value", null } }, new Logger.DefaultLogger()));
 
-            var numericValueArray = EventTagUtils.GetEventValue(new Dictionary<string, object> { { "value", new object[] { }} });
+            var numericValueArray = EventTagUtils.GetNumericValue(new Dictionary<string, object> { { "value", new object[] { }} });
             Assert.IsNull(numericValueArray, string.Format("Array numeric value is {0}", numericValueArray));
 
 
-            var numericValueNone = EventTagUtils.GetEventValue(new Dictionary<string, object> { { "value", null } });
+            var numericValueNone = EventTagUtils.GetNumericValue(new Dictionary<string, object> { { "value", null } });
             Assert.IsNull(numericValueNone, string.Format("None numeric value is {0}", numericValueNone));
 
 
-            var numericValueOverflow = EventTagUtils.GetEventValue(new Dictionary<string, object> { { "value", float.MaxValue * 10 } });
+            var numericValueOverflow = EventTagUtils.GetNumericValue(new Dictionary<string, object> { { "value", float.MaxValue * 10 } });
             Assert.IsNull(numericValueOverflow, string.Format("Max numeric value is {0}", float.MaxValue * 10 ));
 
-            Assert.AreEqual(0.0, EventTagUtils.GetEventValue(new Dictionary<string, object> { { "value", 0.0 } }));
+            Assert.AreEqual(0.0, EventTagUtils.GetNumericValue(new Dictionary<string, object> { { "value", 0.0 } }));
 
 
             /* Value is converted into 1234F */

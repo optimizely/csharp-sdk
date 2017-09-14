@@ -19,7 +19,7 @@ namespace OptimizelySDK.Utils
            return eventTags[REVENUE_EVENT_METRIC_NAME];
         }
 
-        public static object GetEventValue(Dictionary<string, object> eventTags, ILogger logger  = null)
+        public static object GetNumericValue(Dictionary<string, object> eventTags, ILogger logger  = null)
         {
             string debugMessage = string.Empty;
             bool isCasted = false;
