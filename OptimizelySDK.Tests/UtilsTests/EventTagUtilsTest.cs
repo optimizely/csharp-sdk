@@ -88,17 +88,22 @@ namespace OptimizelySDK.Tests.UtilsTests
             var nullValue = new Dictionary<string, object>() {
                 { "value", null }
             };
-            var invalidValue = new Dictionary<string, object>() {
+            var validTagStr = new Dictionary<string, object>() {
                 { "value", "42" }
+            };
+            var validTagStr1 = new Dictionary<string, object>() {
+                { "value", "42.32" }
             };
 
             // Invalid data.
             Assert.Null(EventTagUtils.GetEventValue(null));
             Assert.Null(EventTagUtils.GetEventValue(invalidTag));
             Assert.Null(EventTagUtils.GetEventValue(nullValue));
-            Assert.Null(EventTagUtils.GetEventValue(invalidValue));
+
 
             // Valid data.
+            Assert.AreEqual(EventTagUtils.GetEventValue(validTagStr), "42");
+            Assert.AreEqual(EventTagUtils.GetEventValue(validTagStr1), "42.32");
             Assert.AreEqual(EventTagUtils.GetEventValue(validTag), expectedValue);
             Assert.AreEqual(EventTagUtils.GetEventValue(validTag2), expectedValue2);
             Assert.AreEqual(EventTagUtils.GetEventValue(validTag3), expectedValue3);

@@ -20,12 +20,17 @@ namespace OptimizelySDK.Utils
 
         public static object GetEventValue(Dictionary<string, object> eventTags)
         {
+            decimal refVar = 0;
+
             if ( eventTags == null
                 || !eventTags.ContainsKey(VALUE_EVENT_METRIC_NAME)
                 || eventTags[VALUE_EVENT_METRIC_NAME] == null
                 || ((!(eventTags[VALUE_EVENT_METRIC_NAME] is int)) 
                     && (!(eventTags[VALUE_EVENT_METRIC_NAME] is float)) 
-                    && (!(eventTags[VALUE_EVENT_METRIC_NAME] is double))))
+                    && (!(eventTags[VALUE_EVENT_METRIC_NAME] is double))
+                    && !decimal.TryParse(eventTags[VALUE_EVENT_METRIC_NAME].ToString(), out refVar))
+                )
+
                 return null;
 
             return eventTags[VALUE_EVENT_METRIC_NAME];
