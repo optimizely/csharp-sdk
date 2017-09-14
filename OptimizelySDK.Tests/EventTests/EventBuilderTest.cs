@@ -622,7 +622,7 @@ namespace OptimizelySDK.Tests.EventTests
                                                     {"uuid", guid },
                                                     {"key", "purchase" },
                                                     {"revenue", 42 },
-                                                    {"value", 400 },
+                                                    {"value", 400.0 },
                                                     {"tags",
                                                         new Dictionary<string, object>
                                                         {

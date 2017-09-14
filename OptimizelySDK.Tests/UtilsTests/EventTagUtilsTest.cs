@@ -92,7 +92,7 @@ namespace OptimizelySDK.Tests.UtilsTests
                 { "value", "42" }
             };
             var validTagStr1 = new Dictionary<string, object>() {
-                { "value", "42.32" }
+                { "value", "42.3" }
             };
 
             // Invalid data.
@@ -102,11 +102,107 @@ namespace OptimizelySDK.Tests.UtilsTests
 
 
             // Valid data.
-            Assert.AreEqual(EventTagUtils.GetEventValue(validTagStr), "42");
-            Assert.AreEqual(EventTagUtils.GetEventValue(validTagStr1), "42.32");
+            Assert.AreEqual(42, EventTagUtils.GetEventValue(validTagStr));
+            Assert.AreEqual("42.3", EventTagUtils.GetEventValue(validTagStr1).ToString());
             Assert.AreEqual(EventTagUtils.GetEventValue(validTag), expectedValue);
             Assert.AreEqual(EventTagUtils.GetEventValue(validTag2), expectedValue2);
-            Assert.AreEqual(EventTagUtils.GetEventValue(validTag3), expectedValue3);
+            Assert.AreEqual(EventTagUtils.GetEventValue(validTag3).ToString(), expectedValue3.ToString());
         }
+
+        [Test]
+        public void TestGetNumericMetricInvalidArgs()
+        {
+            Assert.IsNull(EventTagUtils.GetEventValue(null));
+
+            //Errors for all, because it accepts only dictionary// 
+            // Not valid test cases in C# 
+            //Assert.IsNull(EventTagUtils.GetEventValue(0.5));
+            //Assert.IsNull(EventTagUtils.GetEventValue(65536));
+            //Assert.IsNull(EventTagUtils.GetEventValue(9223372036854775807));
+            //Assert.IsNull(EventTagUtils.GetEventValue('9223372036854775807'));
+            //Assert.IsNull(EventTagUtils.GetEventValue(True));
+            //Assert.IsNull(EventTagUtils.GetEventValue(False));
+        }
+
+        
+        [Test]
+        public void TestGetNumericMetricNoValueTag()
+        {
+            // Test that numeric value is not returned when there's no numeric event tag.
+            Assert.IsNull(EventTagUtils.GetEventValue(new Dictionary<string, object> { }));
+            Assert.IsNull(EventTagUtils.GetEventValue(new Dictionary<string, object> {
+                { "non-value", 42 }
+            }));
+
+            //Errors for all, because it accepts only dictionary// 
+            //Assert.IsNull(EventTagUtils.GetEventValue(new object[] { }));
+        }
+
+        [Test]
+        public void TestGetNumericMetricInvalidValueTag()
+        {
+            
+            // Test that numeric value is not returned when revenue event tag has invalid data type.
+
+            Assert.IsNull(EventTagUtils.GetEventValue(new Dictionary<string, object> { { "non-value", null } }));
+            Assert.IsNull(EventTagUtils.GetEventValue(new Dictionary<string, object> { { "non-value",  0.5} }));
+            Assert.IsNull(EventTagUtils.GetEventValue(new Dictionary<string, object> { { "non-value",  12345} }));
+            Assert.IsNull(EventTagUtils.GetEventValue(new Dictionary<string, object> { { "non-value", "65536" } }));
+            Assert.IsNull(EventTagUtils.GetEventValue(new Dictionary<string, object> { { "non-value", true } }));
+            Assert.IsNull(EventTagUtils.GetEventValue(new Dictionary<string, object> { { "non-value", false } }));
+            Assert.IsNull(EventTagUtils.GetEventValue(new Dictionary<string, object> { { "non-value", new object[] { 1, 2, 3 } } }));
+            Assert.IsNull(EventTagUtils.GetEventValue(new Dictionary<string, object> { { "non-value", new object[] { 'a', 'b', 'c' } } }));
+        }
+
+        [Test]
+
+        public void TestGetNumericMetricValueTag()
+        {
+
+            // An integer should be cast to a float
+            Assert.AreEqual(12345.0, EventTagUtils.GetEventValue(new Dictionary<string, object> { { "value", 12345 } }, new Logger.DefaultLogger()));
+
+            // A string should be cast to a float
+            Assert.AreEqual(12345.0, EventTagUtils.GetEventValue(new Dictionary<string, object> { { "value", "12345" } }, new Logger.DefaultLogger()));
+            
+            // Valid float values
+            float someFloat = 1.2345F;
+
+            Assert.AreEqual(someFloat, EventTagUtils.GetEventValue(new Dictionary<string, object> { { "value", someFloat } }, new Logger.DefaultLogger()));
+
+            float maxFloat = float.MaxValue;
+            Assert.AreEqual(maxFloat, EventTagUtils.GetEventValue(new Dictionary<string, object> { { "value", maxFloat } }, new Logger.DefaultLogger()));
+
+
+            float minFloat = float.MinValue;
+            Assert.AreEqual(minFloat, EventTagUtils.GetEventValue(new Dictionary<string, object> { { "value", minFloat } }, new Logger.DefaultLogger()));
+
+            // Invalid values
+            Assert.IsNull(EventTagUtils.GetEventValue(new Dictionary<string, object> { { "value", false } }, new Logger.DefaultLogger()));
+            Assert.IsNull(EventTagUtils.GetEventValue(new Dictionary<string, object> { { "value", null } }, new Logger.DefaultLogger()));
+
+            var numericValueArray = EventTagUtils.GetEventValue(new Dictionary<string, object> { { "value", new object[] { }} });
+            Assert.IsNull(numericValueArray, string.Format("Array numeric value is {0}", numericValueArray));
+
+
+            var numericValueNone = EventTagUtils.GetEventValue(new Dictionary<string, object> { { "value", null } });
+            Assert.IsNull(numericValueNone, string.Format("None numeric value is {0}", numericValueNone));
+
+
+            var numericValueOverflow = EventTagUtils.GetEventValue(new Dictionary<string, object> { { "value", float.MaxValue * 10 } });
+            Assert.IsNull(numericValueOverflow, string.Format("Max numeric value is {0}", float.MaxValue * 10 ));
+
+            Assert.AreEqual(0.0, EventTagUtils.GetEventValue(new Dictionary<string, object> { { "value", 0.0 } }));
+
+
+            /* Value is converted into 1234F */
+            //var numericValueInvalidLiteral = EventTagUtils.GetEventValue(new Dictionary<string, object> { { "value", "1,234" } });
+            //Assert.IsNull(numericValueInvalidLiteral, string.Format("Invalid string literal value is {0}", numericValueInvalidLiteral));
+
+            /* Not valid use cases in C# */
+            // float - inf is not possible.
+            // float -inf is not possible.
+        }
+
     }
 }
