@@ -655,6 +655,7 @@ namespace OptimizelySDK.Tests
             var experimentId = "etag1";
             var userId = "testUser3";
             var variationId = "vtag2";
+            var fbVariationId = "vtag1";
 
             UserProfile userProfile = new UserProfile(userId, new Dictionary<string, Decision>
             {
@@ -670,28 +671,26 @@ namespace OptimizelySDK.Tests
             Assert.AreEqual(variationUserProfile, variationId);
 
             //assign same user with different variation, forced variation have higher priority
-            Assert.IsTrue(optimizely.SetForcedVariation("etag1", "testUser3", "vtag1"));
+            Assert.IsTrue(optimizely.SetForcedVariation(experimentId, userId, fbVariationId));
 
-            var variation2 = optimizely.GetVariation("etag1", "testUser1");
+            var variation2 = optimizely.GetVariation(experimentId, userId);
 
-            Assert.AreEqual("vtag1", variation2);
+            Assert.AreEqual(fbVariationId, variation2);
 
             //remove forced variation and re-check userprofile
-            Assert.IsTrue(optimizely.SetForcedVariation("etag1", "testUser3", null));
+            Assert.IsTrue(optimizely.SetForcedVariation(experimentId, userId, null));
 
             var variationUserProfile2 = optimizely.GetVariation(experimentId, userId);
 
             Assert.AreEqual(variationUserProfile2, variationId);
 
-            LoggerMock.Verify(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()), Times.Exactly(14));
+            LoggerMock.Verify(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()), Times.Exactly(13));
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "User \"testUser3\" is not in the forced variation map."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "No previously activated variation of experiment \"etag1\" for user \"testUser3\" found in user profile."), Times.Exactly(2));
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Assigned bucket [4969] to user [testUser3]"), Times.Exactly(2));
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "User [testUser3] is in variation [vtag2] of experiment [etag1]."), Times.Exactly(2));
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "Saved variation \"277\" of experiment \"223\" for user \"testUser3\"."), Times.Exactly(2));
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Set variation \"276\" for experiment \"223\" and user \"testUser3\" in the forced variation map."), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "User \"testUser1\" is not in the forced variation map."), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.INFO, "User \"testUser1\" is forced in variation \"vtag1\"."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Variation mapped to experiment \"etag1\" has been removed for user \"testUser3\"."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "No experiment \"etag1\" mapped to user \"testUser3\" in the forced variation map."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "User \"testUser3\" is not in the forced variation map."), Times.Once);
