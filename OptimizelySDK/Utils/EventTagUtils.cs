@@ -56,15 +56,17 @@ namespace OptimizelySDK.Utils
                         isCasted = true;
                 }
             }
-                
 
-            if (isCasted)
-                logger.Log(LogLevel.INFO, string.Format("The numeric metric value {0} will be sent to results.", refVar));
-            else
-                if (string.IsNullOrEmpty(debugMessage))
-                    logger.Log(LogLevel.ERROR, string.Format("The provided numeric metric value {0} is in an invalid format and will not be sent to results.", eventTags[VALUE_EVENT_METRIC_NAME]));
+            if (logger != null)
+            {
+                if (isCasted)
+                    logger.Log(LogLevel.INFO, string.Format("The numeric metric value {0} will be sent to results.", refVar));
                 else
-                    logger.Log(LogLevel.ERROR, debugMessage);
+                    if (string.IsNullOrEmpty(debugMessage))
+                        logger.Log(LogLevel.ERROR, string.Format("The provided numeric metric value {0} is in an invalid format and will not be sent to results.", eventTags[VALUE_EVENT_METRIC_NAME]));
+                    else
+                        logger.Log(LogLevel.ERROR, debugMessage);
+            }
 
             object o = refVar;
 
