@@ -373,7 +373,7 @@ namespace OptimizelySDK
         {
             if (string.IsNullOrEmpty(userId))
             {
-                Logger.Log(LogLevel.DEBUG, string.Format("User ID is invalid.", userId));
+                Logger.Log(LogLevel.DEBUG, "User ID is invalid.");
                 return null;
             }
 
@@ -429,13 +429,13 @@ namespace OptimizelySDK
         {
             if (string.IsNullOrEmpty(userId))
             {
-                Logger.Log(LogLevel.DEBUG, string.Format("User ID is invalid.", userId));
+                Logger.Log(LogLevel.DEBUG, "User ID is invalid.");
                 return false;
             }
 
             if (string.IsNullOrEmpty(experimentKey))
             {
-                Logger.Log(LogLevel.DEBUG, string.Format("Experiment key is invalid.", experimentKey));
+                Logger.Log(LogLevel.DEBUG, "Experiment key is invalid.");
                 return false;
             }
 
