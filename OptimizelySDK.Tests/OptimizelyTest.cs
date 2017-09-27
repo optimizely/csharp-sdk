@@ -576,7 +576,9 @@ namespace OptimizelySDK.Tests
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "Tracking event purchase for user test_user."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Dispatching conversion event to URL logx.optimizely.com/track with params {\"param1\":\"val1\"}."), Times.Once);
         }
+        #endregion
 
+        #region Test Invalid Dispatch
         [Test]
         public void TestInvalidDispatchImpressionEvent()
         {
@@ -598,9 +600,7 @@ namespace OptimizelySDK.Tests
 
             Assert.AreEqual("control", variationkey);
         }
-        #endregion
 
-        #region Test Invalid Dispatch
         [Test]
         public void TestInvalidDispatchConversionEvent()
         {
