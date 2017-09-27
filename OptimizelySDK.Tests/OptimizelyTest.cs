@@ -41,6 +41,7 @@ namespace OptimizelySDK.Tests
         private const string TestUserId = "testUserId";
         private OptimizelyHelper Helper;
 
+        #region Test Life Cycle
         [SetUp]
         public void Initialize()
         {
@@ -83,7 +84,9 @@ namespace OptimizelySDK.Tests
             Config = null;
             EventBuilderMock = null;
         }
-        
+        #endregion
+
+        #region OptimizelyHelper
         private class OptimizelyHelper
         {
             static Type[] ParameterTypes = new[]
@@ -128,7 +131,9 @@ namespace OptimizelySDK.Tests
                     });
             }
         }
+        #endregion
 
+        #region Test Validate
         [Test]
         public void TestValidateInputsInvalidFileJsonValidationNotSkipped()
         {
@@ -293,7 +298,9 @@ namespace OptimizelySDK.Tests
 
             Assert.AreEqual("group_exp_1_var_2", variationkey);
         }
+        #endregion
 
+        #region Test Activate
         [Test]
         public void TestActivateAudienceNoAttributes()
         {
@@ -353,7 +360,9 @@ namespace OptimizelySDK.Tests
 
             Assert.IsNull(variationkey);
         }
+        #endregion
 
+        #region Test GetVariation
         [Test]
         public void TestGetVariationInvalidOptimizelyObject()
         {
@@ -379,7 +388,6 @@ namespace OptimizelySDK.Tests
 
             Assert.IsNull(result);
         } */
-
         [Test]
         public void TestGetVariationAudienceMatch()
         {
@@ -423,7 +431,9 @@ namespace OptimizelySDK.Tests
             LoggerMock.Verify(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()), Times.Exactly(2));
             LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'track'."), Times.Once);
         }
+        #endregion
 
+        #region Test Track
         [Test]
         public void TestTrackInvalidAttributes()
         {
@@ -549,7 +559,9 @@ namespace OptimizelySDK.Tests
 
             Assert.AreEqual("control", variationkey);
         }
+        #endregion
 
+        #region Test Invalid Dispatch
         [Test]
         public void TestInvalidDispatchConversionEvent()
         {
@@ -571,7 +583,9 @@ namespace OptimizelySDK.Tests
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "Tracking event purchase for user test_user."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Dispatching conversion event to URL logx.optimizely.com/track with params {\"param1\":\"val1\"}."), Times.Once);
         }
+        #endregion
 
+        #region Test Misc
         /* Start 1 */
      public void TestTrackNoAttributesWithInvalidEventValue()
      {
@@ -714,5 +728,6 @@ namespace OptimizelySDK.Tests
     }
 
     /* End */
+        #endregion
 }
 }
