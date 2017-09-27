@@ -110,6 +110,18 @@ namespace OptimizelySDK.Tests
                 { "location", "San Francisco" }
             };
 
+            // NullUserAttributes extends copy of UserAttributes with key-value
+            // pairs containing null values which should not be sent to OPTIMIZELY.COM .
+            public static UserAttributes NullUserAttributes = new UserAttributes
+            {
+                { "device_type", "iPhone" },
+                { "company", "Optimizely" },
+                { "location", "San Francisco" },
+                { "null_value", null},
+                { "wont_be_sent", null},
+                { "bad_food", null}
+            };
+
             public string Datafile { get; set; }
             public IEventDispatcher EventDispatcher { get; set; }
             public ILogger Logger { get; set; }
@@ -337,6 +349,33 @@ namespace OptimizelySDK.Tests
             LoggerMock.Verify(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()), Times.Exactly(5));
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Assigned bucket [3037] to user [test_user]"), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "User [test_user] is in variation [control] of experiment [test_experiment]."), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.INFO, "Activating user test_user in experiment test_experiment."), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Dispatching impression event to URL OptimizelySDK.Event.LogEvent with params {\"param1\":\"val1\"}."), Times.Once);
+
+            Assert.AreEqual("control", variationkey);
+        }
+
+        [Test]
+        public void TestActivateWithNullAttributes()
+        {
+            EventBuilderMock.Setup(b => b.CreateImpressionEvent(It.IsAny<ProjectConfig>(), It.IsAny<Experiment>(),
+              It.IsAny<string>(), It.IsAny<string>(), It.IsAny<UserAttributes>()))
+              .Returns(new LogEvent("logx.optimizely.com/decision", OptimizelyHelper.SingleParameter, "POST", new Dictionary<string, string> { }));
+
+            var optly = Helper.CreatePrivateOptimizely();
+            optly.SetFieldOrProperty("EventBuilder", EventBuilderMock.Object);
+
+            var variationkey = optly.Invoke("Activate", "test_experiment", "test_user", OptimizelyHelper.NullUserAttributes);
+
+            EventBuilderMock.Verify(b => b.CreateImpressionEvent(It.IsAny<ProjectConfig>(), Config.GetExperimentFromKey("test_experiment"),
+                    "7722370027", "test_user", OptimizelyHelper.UserAttributes), Times.Once);
+
+            LoggerMock.Verify(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()), Times.Exactly(8));
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Assigned bucket [3037] to user [test_user]"), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.INFO, "User [test_user] is in variation [control] of experiment [test_experiment]."), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "[UserAttributes] Null value for key null_value removed and will not be sent to results."), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "[UserAttributes] Null value for key wont_be_sent removed and will not be sent to results."), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "[UserAttributes] Null value for key bad_food removed and will not be sent to results."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "Activating user test_user in experiment test_experiment."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Dispatching impression event to URL OptimizelySDK.Event.LogEvent with params {\"param1\":\"val1\"}."), Times.Once);
 
