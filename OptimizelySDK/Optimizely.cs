@@ -149,6 +149,10 @@ namespace OptimizelySDK
                 return null;
             }
 
+            if (userAttributes != null) {
+                userAttributes = userAttributes.FilterNullValues(Logger);
+            }
+
             var impressionEvent = EventBuilder.CreateImpressionEvent(Config, experiment, variation.Id, userId, userAttributes);
             Logger.Log(LogLevel.INFO, string.Format("Activating user {0} in experiment {1}.", userId, experimentKey));
             Logger.Log(LogLevel.DEBUG, string.Format("Dispatching impression event to URL {0} with params {1}.", 
@@ -221,6 +225,17 @@ namespace OptimizelySDK
 
             if (validExperiments.Count > 0)
             {
+
+                if (userAttributes != null)
+                {
+                    userAttributes = userAttributes.FilterNullValues(Logger);
+                }
+
+                if (eventTags != null)
+                {
+                    eventTags = eventTags.FilterNullValues(Logger);
+                }
+
                 var conversionEvent = EventBuilder.CreateConversionEvent(Config, eventKey, validExperiments,
                     userId, userAttributes, eventTags);
                 Logger.Log(LogLevel.INFO, string.Format("Tracking event {0} for user {1}.", eventKey, userId));
