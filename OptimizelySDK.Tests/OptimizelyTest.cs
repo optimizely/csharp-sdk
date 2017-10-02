@@ -41,6 +41,7 @@ namespace OptimizelySDK.Tests
         private const string TestUserId = "testUserId";
         private OptimizelyHelper Helper;
 
+        #region Test Life Cycle
         [SetUp]
         public void Initialize()
         {
@@ -83,7 +84,9 @@ namespace OptimizelySDK.Tests
             Config = null;
             EventBuilderMock = null;
         }
+        #endregion
 
+        #region OptimizelyHelper
         private class OptimizelyHelper
         {
             static Type[] ParameterTypes = new[]
@@ -107,6 +110,18 @@ namespace OptimizelySDK.Tests
                 { "location", "San Francisco" }
             };
 
+            // NullUserAttributes extends copy of UserAttributes with key-value
+            // pairs containing null values which should not be sent to OPTIMIZELY.COM .
+            public static UserAttributes NullUserAttributes = new UserAttributes
+            {
+                { "device_type", "iPhone" },
+                { "company", "Optimizely" },
+                { "location", "San Francisco" },
+                { "null_value", null},
+                { "wont_be_sent", null},
+                { "bad_food", null}
+            };
+
             public string Datafile { get; set; }
             public IEventDispatcher EventDispatcher { get; set; }
             public ILogger Logger { get; set; }
@@ -128,7 +143,9 @@ namespace OptimizelySDK.Tests
                     });
             }
         }
+        #endregion
 
+        #region Test Validate
         [Test]
         public void TestValidateInputsInvalidFileJsonValidationNotSkipped()
         {
@@ -298,7 +315,9 @@ namespace OptimizelySDK.Tests
 
             Assert.AreEqual("group_exp_1_var_2", variationkey);
         }
+        #endregion
 
+        #region Test Activate
         [Test]
         public void TestActivateAudienceNoAttributes()
         {
@@ -342,6 +361,33 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
+        public void TestActivateWithNullAttributes()
+        {
+            EventBuilderMock.Setup(b => b.CreateImpressionEvent(It.IsAny<ProjectConfig>(), It.IsAny<Experiment>(),
+              It.IsAny<string>(), It.IsAny<string>(), It.IsAny<UserAttributes>()))
+              .Returns(new LogEvent("logx.optimizely.com/decision", OptimizelyHelper.SingleParameter, "POST", new Dictionary<string, string> { }));
+
+            var optly = Helper.CreatePrivateOptimizely();
+            optly.SetFieldOrProperty("EventBuilder", EventBuilderMock.Object);
+
+            var variationkey = optly.Invoke("Activate", "test_experiment", "test_user", OptimizelyHelper.NullUserAttributes);
+
+            EventBuilderMock.Verify(b => b.CreateImpressionEvent(It.IsAny<ProjectConfig>(), Config.GetExperimentFromKey("test_experiment"),
+                    "7722370027", "test_user", OptimizelyHelper.UserAttributes), Times.Once);
+
+            LoggerMock.Verify(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()), Times.Exactly(8));
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Assigned bucket [3037] to user [test_user]"), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.INFO, "User [test_user] is in variation [control] of experiment [test_experiment]."), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "[UserAttributes] Null value for key null_value removed and will not be sent to results."), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "[UserAttributes] Null value for key wont_be_sent removed and will not be sent to results."), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "[UserAttributes] Null value for key bad_food removed and will not be sent to results."), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.INFO, "Activating user test_user in experiment test_experiment."), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Dispatching impression event to URL OptimizelySDK.Event.LogEvent with params {\"param1\":\"val1\"}."), Times.Once);
+
+            Assert.AreEqual("control", variationkey);
+        }
+
+        [Test]
         public void TestActivateExperimentNotRunning()
         {
             var optly = Helper.CreatePrivateOptimizely();
@@ -358,7 +404,9 @@ namespace OptimizelySDK.Tests
 
             Assert.IsNull(variationkey);
         }
+        #endregion
 
+        #region Test GetVariation
         [Test]
         public void TestGetVariationInvalidOptimizelyObject()
         {
@@ -384,7 +432,6 @@ namespace OptimizelySDK.Tests
 
             Assert.IsNull(result);
         } */
-
         [Test]
         public void TestGetVariationAudienceMatch()
         {
@@ -428,7 +475,9 @@ namespace OptimizelySDK.Tests
             LoggerMock.Verify(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()), Times.Exactly(2));
             LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'track'."), Times.Once);
         }
+        #endregion
 
+        #region Test Track
         [Test]
         public void TestTrackInvalidAttributes()
         {
@@ -534,6 +583,45 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
+        public void TestTrackWithNullAttributesWithNullEventValue()
+        {
+            EventBuilderMock.Setup(b => b.CreateConversionEvent(It.IsAny<ProjectConfig>(), It.IsAny<string>(),
+                It.IsAny<IEnumerable<Experiment>>(), It.IsAny<string>(), It.IsAny<UserAttributes>(), It.IsAny<EventTags>()))
+             .Returns(new LogEvent("logx.optimizely.com/track", OptimizelyHelper.SingleParameter,
+                                       "POST", new Dictionary<string, string> { }));
+
+            var optly = Helper.CreatePrivateOptimizely();
+            optly.SetFieldOrProperty("EventBuilder", EventBuilderMock.Object);
+            optly.Invoke("Track", "purchase", "test_user", OptimizelyHelper.NullUserAttributes, new EventTags
+            {
+                { "revenue", 42 },
+                { "wont_send_null", null}
+            });
+
+            LoggerMock.Verify(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()), Times.Exactly(18));
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Assigned bucket [3037] to user [test_user]"));
+            LoggerMock.Verify(l => l.Log(LogLevel.INFO, "User [test_user] is in variation [control] of experiment [test_experiment]."));
+            LoggerMock.Verify(l => l.Log(LogLevel.INFO, "This decision will not be saved since the UserProfileService is null."));
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Assigned bucket [4517] to user [test_user]"));
+            LoggerMock.Verify(l => l.Log(LogLevel.INFO, "User [test_user] is not in experiment [group_experiment_1] of group [7722400015]."));
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Assigned bucket [4517] to user [test_user]"));
+            LoggerMock.Verify(l => l.Log(LogLevel.INFO, "User [test_user] is in experiment [group_experiment_2] of group [7722400015]."));
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Assigned bucket [9871] to user [test_user]"));
+            LoggerMock.Verify(l => l.Log(LogLevel.INFO, "User [test_user] is in variation [group_exp_2_var_2] of experiment [group_experiment_2]."));
+            LoggerMock.Verify(l => l.Log(LogLevel.INFO, "This decision will not be saved since the UserProfileService is null."));
+            LoggerMock.Verify(l => l.Log(LogLevel.INFO, "Experiment \"paused_experiment\" is not running."));
+            LoggerMock.Verify(l => l.Log(LogLevel.INFO, "Not tracking user \"test_user\" for experiment \"paused_experiment\""));
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "[UserAttributes] Null value for key null_value removed and will not be sent to results."));
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "[UserAttributes] Null value for key wont_be_sent removed and will not be sent to results."));
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "[UserAttributes] Null value for key bad_food removed and will not be sent to results."));
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "[EventTags] Null value for key wont_send_null removed and will not be sent to results."));
+            LoggerMock.Verify(l => l.Log(LogLevel.INFO, "Tracking event purchase for user test_user."));
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Dispatching conversion event to URL logx.optimizely.com/track with params {\"param1\":\"val1\"}."));
+        }
+        #endregion
+
+        #region Test Invalid Dispatch
+        [Test]
         public void TestInvalidDispatchImpressionEvent()
         {
             EventBuilderMock.Setup(b => b.CreateImpressionEvent(It.IsAny<ProjectConfig>(), It.IsAny<Experiment>(),
@@ -576,7 +664,9 @@ namespace OptimizelySDK.Tests
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "Tracking event purchase for user test_user."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Dispatching conversion event to URL logx.optimizely.com/track with params {\"param1\":\"val1\"}."), Times.Once);
         }
+        #endregion
 
+        #region Test Misc
         /* Start 1 */
         public void TestTrackNoAttributesWithInvalidEventValue()
         {
@@ -967,5 +1057,6 @@ namespace OptimizelySDK.Tests
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "Tracking event purchase for user test_user."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Dispatching conversion event to URL logx.optimizely.com/track with params {\"param1\":\"val1\"}."), Times.Once);
         }
+        #endregion
     }
 }

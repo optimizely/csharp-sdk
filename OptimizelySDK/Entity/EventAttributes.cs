@@ -14,10 +14,22 @@
  * limitations under the License.
  */
 using System.Collections.Generic;
+using OptimizelySDK.Logger;
 
 namespace OptimizelySDK.Entity
 {
     public class EventTags : Dictionary<string, object>
     {
+        public EventTags FilterNullValues(ILogger logger) {
+            EventTags answer = new EventTags();
+            foreach (KeyValuePair<string, object> pair in this) {
+                if (pair.Value != null) {
+                    answer[pair.Key] = pair.Value;
+                } else {
+                    logger.Log(LogLevel.ERROR, string.Format("[EventTags] Null value for key {0} removed and will not be sent to results.", pair.Key));
+                }
+            }
+            return answer;
+        }
     }
 }
