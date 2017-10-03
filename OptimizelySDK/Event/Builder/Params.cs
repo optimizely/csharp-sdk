@@ -17,24 +17,26 @@ namespace OptimizelySDK.Event.Builder
 {
     public static class Params
     {
-        public const string ACCOUNT_ID = "accountId";
-        public const string PROJECT_ID = "projectId";
-        public const string LAYER_ID = "layerId";
-        public const string EXPERIMENT_ID = "experimentId";
-        public const string VARIATION_ID = "variationId";
+        public const string ACCOUNT_ID = "account_id";
+        public const string PROJECT_ID = "project_id";
+        public const string ENTITY_ID = "entity_id";
+        public const string TIMESTAMP = "timestamp";
+        public const string VISITORS = "visitors";
+        public const string REVISION = "revision";
+        public const string EXPERIMENT_ID = "experiment_id";
+        public const string VARIATION_ID = "variation_id";
+        public const string CAMPAIGN_ID = "campaign_id";
         public const string VISITOR_ID = "visitorId";
         public const string EVENT_ID = "eventEntityId";
         public const string EVENT_NAME = "eventName";
         public const string EVENT_METRICS = "eventMetrics";
         public const string EVENT_FEATURES = "eventFeatures";
         public const string USER_FEATURES = "userFeatures";
-        public const string DECISION = "decision";
-        public const string LAYER_STATES = "layerStates";
+        public const string DECISIONS = "decisions";
+        public const string EVENTS = "events";
         public const string TIME = "timestamp";
-        public const string CLIENT_ENGINE = "clientEngine";
-        public const string CLIENT_VERSION = "clientVersion";
-        public const string ACTION_TRIGGERED = "actionTriggered";
-        public const string IS_GLOBAL_HOLDBACK = "isGlobalHoldback";
+        public const string CLIENT_ENGINE = "client_name";
+        public const string CLIENT_VERSION = "client_version";
         public const string IS_LAYER_HOLDBACK = "isLayerHoldback";
     }
 }

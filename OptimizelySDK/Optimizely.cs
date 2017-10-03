@@ -281,5 +281,31 @@ namespace OptimizelySDK
             Variation variation = DecisionService.GetVariation(experiment, userId, userAttributes);
             return variation == null ? null : variation.Key;
         }
+
+        /// <summary>
+        /// Force a user into a variation for a given experiment.
+        /// </summary>
+        /// <param name="experimentKey">The experiment key</param>
+        /// <param name="userId">The user ID</param>
+        /// <param name="variationKey">The variation key specifies the variation which the user will be forced into.
+        /// If null, then clear the existing experiment-to-variation mapping.</param>
+        /// <returns>A boolean value that indicates if the set completed successfully.</returns>
+        public bool SetForcedVariation(string experimentKey, string userId, string variationKey)
+        {
+            return Config.SetForcedVariation(experimentKey, userId, variationKey);
+        }
+
+        /// <summary>
+        /// Gets the forced variation key for the given user and experiment.  
+        /// </summary>
+        /// <param name="experimentKey">The experiment key</param>
+        /// <param name="userId">The user ID</param>
+        /// <returns>null|string The variation key.</returns>
+        public Variation GetForcedVariation(string experimentKey, string userId)
+        {
+            var forcedVariation = Config.GetForcedVariation(experimentKey, userId);
+
+            return forcedVariation;
+        }
     }
 }
