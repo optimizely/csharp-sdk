@@ -301,11 +301,11 @@ namespace OptimizelySDK
         /// <param name="experimentKey">The experiment key</param>
         /// <param name="userId">The user ID</param>
         /// <returns>null|string The variation key.</returns>
-        public string GetForcedVariation(string experimentKey, string userId)
+        public Variation GetForcedVariation(string experimentKey, string userId)
         {
             var forcedVariation = Config.GetForcedVariation(experimentKey, userId);
 
-            return forcedVariation != null ? forcedVariation.Key : null;
+            return forcedVariation;
         }
     }
 }

@@ -868,8 +868,8 @@ namespace OptimizelySDK.Tests
         public void TestGetForcedVariation()
         {
             var experimentKey = "test_experiment";
-            var expectedForcedVariation = "variation";
-
+            var expectedForcedVariation = new Variation { Key = "variation", Id = "7721010009" };
+            var expectedForcedVariation2 = new Variation { Key = "variation", Id = "7721010509" };
             var userAttributes = new UserAttributes
             {
                 {"device_type", "iPhone" },
@@ -878,29 +878,32 @@ namespace OptimizelySDK.Tests
 
             Optimizely.Activate(experimentKey, TestUserId, userAttributes);
 
-            Assert.IsTrue(Optimizely.SetForcedVariation(experimentKey, TestUserId, expectedForcedVariation), "Set variation to 'variation' failed.");
+            Assert.IsTrue(Optimizely.SetForcedVariation(experimentKey, TestUserId, expectedForcedVariation.Key), "Set variation to 'variation' failed.");
 
             // call getForcedVariation with valid experiment key and valid user ID
-            var actualForcedVariationKey = Optimizely.GetForcedVariation("test_experiment", TestUserId);
-            Assert.AreEqual(expectedForcedVariation, actualForcedVariationKey);
-
+            var actualForcedVariation = Optimizely.GetForcedVariation("test_experiment", TestUserId);
+            Assert.IsTrue(TestData.CompareObjects(expectedForcedVariation, actualForcedVariation));
+            
             // call getForcedVariation with invalid experiment and valid userID
-            actualForcedVariationKey = Optimizely.GetForcedVariation("invalid_experiment", TestUserId);
-            Assert.Null(actualForcedVariationKey);
+            actualForcedVariation = Optimizely.GetForcedVariation("invalid_experiment", TestUserId);
+            Assert.Null(actualForcedVariation);
 
             // call getForcedVariation with valid experiment and invalid userID
-            actualForcedVariationKey = Optimizely.GetForcedVariation("test_experiment", "invalid_user");
-            Assert.Null(actualForcedVariationKey);
+            actualForcedVariation = Optimizely.GetForcedVariation("test_experiment", "invalid_user");
+
+            Assert.Null(actualForcedVariation);
 
             // call getForcedVariation with an experiment that"s not running
             Assert.IsTrue(Optimizely.SetForcedVariation("paused_experiment", "test_user2", "variation"), "Set variation to 'variation' failed.");
-            actualForcedVariationKey = Optimizely.GetForcedVariation("paused_experiment", "test_user2");
 
-            Assert.AreEqual("variation", actualForcedVariationKey);
+            actualForcedVariation = Optimizely.GetForcedVariation("paused_experiment", "test_user2");
+
+            Assert.IsTrue(TestData.CompareObjects(expectedForcedVariation2, actualForcedVariation));
+            
             // confirm that the second setForcedVariation call did not invalidate the first call to that method
-            actualForcedVariationKey = Optimizely.GetForcedVariation("test_experiment", TestUserId);
+            actualForcedVariation = Optimizely.GetForcedVariation("test_experiment", TestUserId);
 
-            Assert.AreEqual(expectedForcedVariation, actualForcedVariationKey);
+            Assert.IsTrue(TestData.CompareObjects(expectedForcedVariation, actualForcedVariation));
         }
 
         [Test]
