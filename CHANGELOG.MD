@@ -1,3 +1,24 @@
+## 1.2.0
+October 4, 2017
+
+### New Features
+* Introduce Numeric Metrics - This allows you to include a floating point value that is used to track numeric values in your experiments.
+```
+var eventTags = new EventTags()
+    {
+        { "value", 10.00 },
+    };
+
+OptimizelyClient.Track(eventKey, userId, attributes, eventTags);
+```
+
+* Introduce Forced Variation - This allows you to force users into variations programmatically in real time for QA purposes without requiring datafile downloads from the network. 
+```
+var result = OptimizelyClient.setForcedVariation(experimentKey, userId, forcedVariationKey);
+```
+
+* Upgrade to use new [event API](https://developers.optimizely.com/x/events/api/index.html).
+
 ## 1.1.1
  - Add .Net 4.0 build in nuget package.
 

@@ -74,7 +74,7 @@ namespace OptimizelySDK.Tests.EventTests
                 {"project_id", "7720880029" },
                 {"account_id", "1592310167" },
                 {"client_name", "csharp-sdk" },
-                {"client_version", "1.1.1" },
+                {"client_version", "1.2.0" },
                 {"revision", 15 },
                 {"anonymize_ip", false}
             };
@@ -153,7 +153,7 @@ namespace OptimizelySDK.Tests.EventTests
                 {"project_id", "7720880029" },
                 {"account_id", "1592310167" },
                 {"client_name", "csharp-sdk" },
-                {"client_version", "1.1.1" },
+                {"client_version", "1.2.0" },
                 {"revision", 15 },
                 {"anonymize_ip", false}
             };
@@ -228,8 +228,8 @@ namespace OptimizelySDK.Tests.EventTests
                 {"project_id", "7720880029"},
                 {"account_id", "1592310167"},
                 {"client_name", "csharp-sdk"},
-                {"client_version", "1.1.1"},
-                {"revision", 15},
+                {"client_version", "1.2.0" },
+                {"revision", 15 },
                 {"anonymize_ip", false}
             };
             
@@ -307,8 +307,8 @@ namespace OptimizelySDK.Tests.EventTests
                 {"project_id", "7720880029"},
                 {"account_id", "1592310167"},
                 {"client_name", "csharp-sdk"},
-                {"client_version", "1.1.1"},
-                {"revision", 15},
+                {"client_version", "1.2.0" },
+                {"revision", 15 },
                 {"anonymize_ip", false}
             };
 
@@ -389,7 +389,7 @@ namespace OptimizelySDK.Tests.EventTests
                 {"project_id", "7720880029" },
                 {"account_id", "1592310167" },
                 {"client_name", "csharp-sdk" },
-                {"client_version", "1.1.1" },
+<<              {"client_version", "1.2.0" },
                 {"revision", 15 },
                 {"anonymize_ip", false}
             };
@@ -481,7 +481,7 @@ namespace OptimizelySDK.Tests.EventTests
                 {"project_id", "7720880029" },
                 {"account_id", "1592310167" },
                 {"client_name", "csharp-sdk" },
-                {"client_version", "1.1.1" },
+                {"client_version", "1.2.0" },
                 {"revision", 15 },
                 {"anonymize_ip", false}
             };
@@ -568,7 +568,7 @@ namespace OptimizelySDK.Tests.EventTests
                 {"project_id", "7720880029" },
                 {"account_id", "1592310167" },
                 {"client_name", "csharp-sdk" },
-                {"client_version", "1.1.1" },
+                {"client_version", "1.2.0" },
                 {"revision", 15 },
                 {"anonymize_ip", false}
             };
@@ -651,7 +651,7 @@ namespace OptimizelySDK.Tests.EventTests
                 {"project_id", "7720880029" },
                 {"account_id", "1592310167" },
                 {"client_name", "csharp-sdk" },
-                {"client_version", "1.1.1" },
+                {"client_version", "1.2.0" },
                 {"revision", 15 },
                 {"anonymize_ip", false}
             };
