@@ -38,5 +38,6 @@ namespace OptimizelySDK.Event.Builder
         public const string CLIENT_ENGINE = "client_name";
         public const string CLIENT_VERSION = "client_version";
         public const string IS_LAYER_HOLDBACK = "isLayerHoldback";
+        public const string ANONYMIZE_IP = "anonymize_ip";
     }
 }

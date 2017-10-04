@@ -49,7 +49,7 @@ namespace OptimizelySDK.Event.Builder
 
         public EventBuilder(Bucketer bucketer)
         {
-            Bucketer = bucketer;
+            Bucketer = bucketer; 
             ResetParams();
         }
 
@@ -95,7 +95,7 @@ namespace OptimizelySDK.Event.Builder
             comonParams[Params.CLIENT_ENGINE] = SDK_TYPE;
             comonParams[Params.CLIENT_VERSION] = SDK_VERSION;
             comonParams[Params.REVISION] = config.Revision;
-
+            comonParams[Params.ANONYMIZE_IP] = config.AnonymizeIP;
 
             var userFeatures = new List<Dictionary<string, object>>();
 

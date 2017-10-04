@@ -75,7 +75,8 @@ namespace OptimizelySDK.Tests.EventTests
                 {"account_id", "1592310167" },
                 {"client_name", "csharp-sdk" },
                 {"client_version", "1.2.0" },
-                {"revision", 15 }
+                {"revision", 15 },
+                {"anonymize_ip", false}
             };
 
             var expectedLogEvent = new LogEvent("https://logx.optimizely.com/v1/events",
@@ -153,7 +154,8 @@ namespace OptimizelySDK.Tests.EventTests
                 {"account_id", "1592310167" },
                 {"client_name", "csharp-sdk" },
                 {"client_version", "1.2.0" },
-                {"revision", 15 }
+                {"revision", 15 },
+                {"anonymize_ip", false}
             };
             
             var expectedLogEvent = new LogEvent("https://logx.optimizely.com/v1/events",
@@ -226,8 +228,9 @@ namespace OptimizelySDK.Tests.EventTests
                 {"project_id", "7720880029"},
                 {"account_id", "1592310167"},
                 {"client_name", "csharp-sdk"},
-                {"client_version", "1.2.0"},
-                {"revision", 15}
+                {"client_version", "1.2.0" },
+                {"revision", 15 },
+                {"anonymize_ip", false}
             };
             
             var expectedEvent = new LogEvent(
@@ -304,8 +307,9 @@ namespace OptimizelySDK.Tests.EventTests
                 {"project_id", "7720880029"},
                 {"account_id", "1592310167"},
                 {"client_name", "csharp-sdk"},
-                {"client_version", "1.2.0"},
-                {"revision", 15}
+                {"client_version", "1.2.0" },
+                {"revision", 15 },
+                {"anonymize_ip", false}
             };
 
             var expectedEvent = new LogEvent(
@@ -386,7 +390,8 @@ namespace OptimizelySDK.Tests.EventTests
                 {"account_id", "1592310167" },
                 {"client_name", "csharp-sdk" },
                 {"client_version", "1.2.0" },
-                {"revision", 15 }
+                {"revision", 15 },
+                {"anonymize_ip", false}
             };
 
             var expectedEvent = new LogEvent(
@@ -477,7 +482,8 @@ namespace OptimizelySDK.Tests.EventTests
                 {"account_id", "1592310167" },
                 {"client_name", "csharp-sdk" },
                 {"client_version", "1.2.0" },
-                {"revision", 15 }
+                {"revision", 15 },
+                {"anonymize_ip", false}
             };
 
             var expectedEvent = new LogEvent(
@@ -563,7 +569,8 @@ namespace OptimizelySDK.Tests.EventTests
                 {"account_id", "1592310167" },
                 {"client_name", "csharp-sdk" },
                 {"client_version", "1.2.0" },
-                {"revision", 15 }
+                {"revision", 15 },
+                {"anonymize_ip", false}
             };
             
             var expectedEvent = new LogEvent(
@@ -645,7 +652,8 @@ namespace OptimizelySDK.Tests.EventTests
                 {"account_id", "1592310167" },
                 {"client_name", "csharp-sdk" },
                 {"client_version", "1.2.0" },
-                {"revision", 15 }
+                {"revision", 15 },
+                {"anonymize_ip", false}
             };
 
             var expectedEvent = new LogEvent(

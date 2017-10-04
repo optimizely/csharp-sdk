@@ -48,6 +48,11 @@ namespace OptimizelySDK
         /// </summary>
         public int Revision { get; set; }
 
+        /// <summary>
+        /// Allow Anonymize IP by truncating the last block of visitors' IP address.
+        /// </summary>
+        public bool AnonymizeIP { get; set; }
+
         //========================= Mappings ===========================
 
         /// <summary>
