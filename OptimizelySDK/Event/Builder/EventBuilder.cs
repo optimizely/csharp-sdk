@@ -152,13 +152,14 @@ namespace OptimizelySDK.Event.Builder
             return impressionEvent;
         }
 
-        private List<object> GetConversionParams(ProjectConfig config, string eventKey, Experiment[] experiments, string userId, Dictionary<string, object> eventTags)
+        private List<object> GetConversionParams(ProjectConfig config, string eventKey, Dictionary<string, Variation> experimentIdVariationMap, string userId, Dictionary<string, object> eventTags)
         {
 
             var conversionEventParams = new List<object>();
-            foreach (var experiment in experiments)
+            foreach (var experimentId in experimentIdVariationMap.Keys)
             {
-                var variation = Bucketer.Bucket(config, experiment, userId);
+                var variation = experimentIdVariationMap[experimentId];
+                var experiment = config.ExperimentIdMap[experimentId];
                 var eventEntity = config.EventKeyMap[eventKey];
 
                 if (string.IsNullOrEmpty(variation.Key)) continue;
@@ -255,17 +256,16 @@ namespace OptimizelySDK.Event.Builder
         /// </summary>
         /// <param name="config">ProjectConfig Configuration for the project.</param>
         /// <param name="eventKey">Event Key representing the event</param>
-        /// <param name="experiments">collection of Experiments for which conversion event needs to be recorded</param>
+        /// <param name="ExperimentIdVariationMap">Map of experiment ID to the variation that the user is bucketed into.</param>
         /// <param name="userId">ID of user</param>
         /// <param name="userAttributes">associative array of Attributes for the user</param>
         /// <param name="eventValue">integer Value associated with the event</param>
         /// <returns>LogEvent object to be sent to dispatcher</returns>
-        public virtual LogEvent CreateConversionEvent(ProjectConfig config, string eventKey, IEnumerable<Experiment> experiments,
-            string userId, UserAttributes userAttributes, EventTags eventTags)
+        public virtual LogEvent CreateConversionEvent(ProjectConfig config, string eventKey, Dictionary<string, Variation> experimentIdVariationMap, string userId, UserAttributes userAttributes, EventTags eventTags)
         {
             var commonParams = GetCommonParams(config, userId, userAttributes ?? new UserAttributes());
 
-            var conversionOnlyParams = GetConversionParams(config, eventKey, experiments.ToArray(), userId, eventTags).ToArray();
+            var conversionOnlyParams = GetConversionParams(config, eventKey, experimentIdVariationMap, userId, eventTags).ToArray();
 
             var conversionParams = GetImpressionOrConversionParamsWithCommonParams(commonParams, conversionOnlyParams);
 

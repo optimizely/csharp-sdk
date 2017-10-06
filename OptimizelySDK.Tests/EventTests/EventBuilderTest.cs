@@ -241,8 +241,12 @@ namespace OptimizelySDK.Tests.EventTests
                 {
                     { "Content-Type", "application/json"}
                 });
+            var experimentToVariationMap = new Dictionary<string, Variation>
+            {
+                {"7716830082", new Variation{Id="7722370027", Key="control"} }
+            };
 
-            var logEvent = EventBuilder.CreateConversionEvent(Config, "purchase", new Experiment[] { Config.GetExperimentFromKey("test_experiment") }, TestUserId, null, null);
+            var logEvent = EventBuilder.CreateConversionEvent(Config, "purchase", experimentToVariationMap, TestUserId, null, null);
 
             TestData.ChangeGUIDAndTimeStamp(logEvent.Params, timeStamp, guid);
 
@@ -326,8 +330,11 @@ namespace OptimizelySDK.Tests.EventTests
                 { "device_type", "iPhone" },
                 {"company", "Optimizely" }
             };
-
-            var logEvent = EventBuilder.CreateConversionEvent(Config, "purchase", new Experiment[] { Config.GetExperimentFromKey("test_experiment") }, TestUserId, userAttributes, null);
+            var experimentToVariationMap = new Dictionary<string, Variation>
+            {
+                {"7716830082", new Variation{Id="7722370027", Key="control"} }
+            };
+            var logEvent = EventBuilder.CreateConversionEvent(Config, "purchase", experimentToVariationMap, TestUserId, userAttributes, null);
 
             TestData.ChangeGUIDAndTimeStamp(logEvent.Params, timeStamp, guid);
 
@@ -403,8 +410,13 @@ namespace OptimizelySDK.Tests.EventTests
                     { "Content-Type", "application/json"}
                 });
 
+            var experimentToVariationMap = new Dictionary<string, Variation>
+            {
+                {"7716830082", new Variation{Id="7722370027", Key="control"} }
+            };
 
-            var logEvent = EventBuilder.CreateConversionEvent(Config, "purchase", new Experiment[] { Config.GetExperimentFromKey("test_experiment") }, TestUserId, null,
+
+            var logEvent = EventBuilder.CreateConversionEvent(Config, "purchase", experimentToVariationMap, TestUserId, null,
                 new EventTags
             {
                     {"revenue", 42 }
@@ -501,7 +513,12 @@ namespace OptimizelySDK.Tests.EventTests
                 {"company", "Optimizely" }
             };
 
-            var logEvent = EventBuilder.CreateConversionEvent(Config, "purchase", new Experiment[] { Config.GetExperimentFromKey("test_experiment") }, TestUserId, userAttributes,
+            var experimentToVariationMap = new Dictionary<string, Variation>
+            {
+                {"7716830082", new Variation{Id="7722370027", Key="control"} }
+            };
+
+            var logEvent = EventBuilder.CreateConversionEvent(Config, "purchase", experimentToVariationMap, TestUserId, userAttributes,
                 new EventTags
                 {
                     {"revenue", 42 },
@@ -582,7 +599,12 @@ namespace OptimizelySDK.Tests.EventTests
                     { "Content-Type", "application/json"}
                 });
 
-            var logEvent = EventBuilder.CreateConversionEvent(Config, "purchase", new Experiment[] { Config.GetExperimentFromKey("test_experiment") }, TestUserId, null,
+            var experimentToVariationMap = new Dictionary<string, Variation>
+            {
+                {"7716830082", new Variation{Id="7722370027", Key="control"} }
+            };
+
+            var logEvent = EventBuilder.CreateConversionEvent(Config, "purchase", experimentToVariationMap, TestUserId, null,
                 new EventTags
                 {
                     {"revenue", "42" },
@@ -665,8 +687,12 @@ namespace OptimizelySDK.Tests.EventTests
                     { "Content-Type", "application/json"}
                 });
 
+            var experimentToVariationMap = new Dictionary<string, Variation>
+            {
+                {"7716830082", new Variation{Id="7722370027", Key="control"} }
+            };
 
-            var logEvent = EventBuilder.CreateConversionEvent(Config, "purchase", new Experiment[] { Config.GetExperimentFromKey("test_experiment") }, TestUserId, null,
+            var logEvent = EventBuilder.CreateConversionEvent(Config, "purchase", experimentToVariationMap, TestUserId, null,
                 new EventTags
             {
                     {"revenue", 42 },
