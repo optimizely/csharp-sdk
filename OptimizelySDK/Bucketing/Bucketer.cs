@@ -49,12 +49,12 @@ namespace OptimizelySDK.Bucketing
         /// <summary>
         /// Generate a hash value to be used in determining which variation the user will be put in
         /// </summary>
-        /// <param name="bucketingId">string ID to be used to bucket the user in the experiment</param>
+        /// <param name="bucketingKey">string value used for the key of the murmur hash.</param>
         /// <returns>integer Unsigned value denoting the hash value for the user</returns>
-        private uint GenerateHashCode(string bucketingId)
+        private uint GenerateHashCode(string bucketingKey)
         {
             var murmer32 = Murmur.MurmurHash.Create32(seed: HASH_SEED, managed: true);
-            byte[] data = Encoding.UTF8.GetBytes(bucketingId);
+            byte[] data = Encoding.UTF8.GetBytes(bucketingKey);
             byte[] hash = murmer32.ComputeHash(data);
             return BitConverter.ToUInt32(hash, 0);
         }
@@ -63,11 +63,11 @@ namespace OptimizelySDK.Bucketing
         /// <summary>
         /// Generate an integer to be used in bucketing user to a particular variation
         /// </summary>
-        /// <param name="bucketingId">string ID to be used to bucket the user in the experiment</param>
+        /// <param name="bucketingKey">string Value used for the key of the murmur hash.</param>
         /// <returns>integer Value in the closed range [0, 9999] denoting the bucket the user belongs to</returns>
-        public virtual int GenerateBucketValue(string bucketingId)
+        public virtual int GenerateBucketValue(string bucketingKey)
         {
-            uint hashCode = GenerateHashCode(bucketingId);
+            uint hashCode = GenerateHashCode(bucketingKey);
             double ratio = hashCode / (double)MAX_HASH_VALUE;
             return (int)(ratio * MAX_TRAFFIC_VALUE);
         }
@@ -75,17 +75,19 @@ namespace OptimizelySDK.Bucketing
         /// <summary>
         /// Find the bucket for the user and group/experiment given traffic allocations
         /// </summary>
+        /// <param name="bucketingId">A customer-assigned value used to create the key for the murmur hash.</param>
         /// <param name="userId">string ID for user</param>
         /// <param name="parentId">mixed ID representing Experiment or Group</param>
         /// <param name="trafficAllocations">array Traffic allocations for variation or experiment</param>
         /// <returns>string ID representing experiment or variation, returns null if not found</returns>
-        private string FindBucket(string userId, string parentId, IEnumerable<TrafficAllocation> trafficAllocations)
+        private string FindBucket(string bucketingId, string userId, string parentId, IEnumerable<TrafficAllocation> trafficAllocations)
         {
-            // Generate bucketing ID based on combination of user ID and experiment ID or group ID.
-            string bucketingId = userId + parentId;
-            int bucketingNumber = GenerateBucketValue(bucketingId);
+            // Generate the bucketing key based on combination of user ID and experiment ID or group ID.
+            string bucketingKey = bucketingId + parentId;
+            int bucketingNumber = GenerateBucketValue(bucketingKey);
 
-            Logger.Log(LogLevel.DEBUG, string.Format("Assigned bucket [{0}] to user [{1}]", bucketingNumber, userId));
+            Logger.Log(LogLevel.DEBUG, string.Format("Assigned bucket [{0}] to user [{1}] with bucketing ID [{1}].", 
+                bucketingNumber, userId, bucketingId));
 
             foreach (var ta in trafficAllocations)
                 if (bucketingNumber < ta.EndOfRange)
@@ -99,9 +101,10 @@ namespace OptimizelySDK.Bucketing
         /// </summary>
         /// <param name="config">ProjectConfig Configuration for the project</param>
         /// <param name="experiment">Experiment Experiment in which user is to be bucketed</param>
+        /// <param name="bucketingId">A customer-assigned value used to create the key for the murmur hash.</param>
         /// <param name="userId">User identifier</param>
         /// <returns>Variation which will be shown to the user</returns>
-        public virtual Variation Bucket(ProjectConfig config, Experiment experiment, string userId)
+        public virtual Variation Bucket(ProjectConfig config, Experiment experiment, string bucketingId, string userId)
         {
             string message;
             Variation variation;
@@ -130,7 +133,7 @@ namespace OptimizelySDK.Bucketing
                 if (string.IsNullOrEmpty(group.Id))
                     return new Variation();
 
-                string userExperimentId = FindBucket(userId, group.Id, group.TrafficAllocation);
+                string userExperimentId = FindBucket(bucketingId, userId, group.Id, group.TrafficAllocation);
                 if (string.IsNullOrEmpty(userExperimentId))
                 {
                     message = string.Format("User [{0}] is in no experiment.", userId);
@@ -152,7 +155,7 @@ namespace OptimizelySDK.Bucketing
             }
 
             // Bucket user if not in whitelist and in group (if any).
-            string variationId = FindBucket(userId, experiment.Id, experiment.TrafficAllocation);
+            string variationId = FindBucket(bucketingId, userId, experiment.Id, experiment.TrafficAllocation);
             if (string.IsNullOrEmpty(variationId))
             {
                 Logger.Log(LogLevel.INFO, string.Format("User [{0}] is in no variation.", userId));

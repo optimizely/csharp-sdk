@@ -38,6 +38,8 @@ namespace OptimizelySDK.Event.Builder
 
         private const string ACTIVATE_EVENT_KEY = "campaign_activated";
 
+        private const string RESERVED_ATTRIBUTE_KEY_BUCKETING_ID_EVENT_PARAM_KEY = "optimizely_bucketing_id";
+
         private static readonly Dictionary<string, string> HTTP_HEADERS = new Dictionary<string, string>
         {
             { "Content-Type", "application/json" },
@@ -101,19 +103,35 @@ namespace OptimizelySDK.Event.Builder
 
             foreach (var userAttribute in userAttributes.Where(a => !string.IsNullOrEmpty(a.Key)))
             {
-                var attributeEntity = config.GetAttribute(userAttribute.Key);
-                if (attributeEntity != null && attributeEntity.Key != null)
+                if (string.Equals(userAttribute.Key, DecisionService.RESERVED_ATTRIBUTE_KEY_BUCKETING_ID))
                 {
                     var userFeature = new Dictionary<string, object>
                     {
-                        { "entity_id", attributeEntity.Id },
-                        { "key", attributeEntity.Key },
+                        { "entity_id", DecisionService.RESERVED_ATTRIBUTE_KEY_BUCKETING_ID },
+                        { "key", RESERVED_ATTRIBUTE_KEY_BUCKETING_ID_EVENT_PARAM_KEY },
                         { "type", CUSTOM_ATTRIBUTE_FEATURE_TYPE },
-                        { "value",  userAttribute.Value}
+                        { "value", userAttribute.Value}
                     };
                     userFeatures.Add(userFeature);
                 }
+                else
+                {
+                    var attributeEntity = config.GetAttribute(userAttribute.Key);
+                    if (attributeEntity != null && attributeEntity.Key != null)
+                    {
+                        var userFeature = new Dictionary<string, object>
+                        {
+                            { "entity_id", attributeEntity.Id },
+                            { "key", attributeEntity.Key },
+                            { "type", CUSTOM_ATTRIBUTE_FEATURE_TYPE },
+                            { "value",  userAttribute.Value}
+                        };
+                        userFeatures.Add(userFeature);
+                    }
+                }
             }
+
+
             visitor["attributes"] = userFeatures;
 
             return comonParams;

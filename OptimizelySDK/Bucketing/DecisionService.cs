@@ -35,6 +35,8 @@ namespace OptimizelySDK.Bucketing
     /// </summary>
     public class DecisionService
     {
+        public const string RESERVED_ATTRIBUTE_KEY_BUCKETING_ID = "$opt_bucketing_id";
+
         private Bucketer Bucketer;
         private IErrorHandler ErrorHandler;
         private ProjectConfig ProjectConfig;
@@ -67,6 +69,15 @@ namespace OptimizelySDK.Bucketing
         /// <returns>The Variation the user is allocated into.</returns>
         public Variation GetVariation(Experiment experiment, string userId, UserAttributes filteredAttributes)
         {
+            string bucketingId = userId;
+
+            // If the bucketing ID key is defined in attributes, then use that in place of the userID for the murmur hash key
+            if(filteredAttributes != null && filteredAttributes.ContainsKey(RESERVED_ATTRIBUTE_KEY_BUCKETING_ID))
+            {
+                bucketingId = filteredAttributes[RESERVED_ATTRIBUTE_KEY_BUCKETING_ID];
+                Logger.Log(LogLevel.DEBUG, string.Format("Setting the bucketing ID to \"{0}\"", bucketingId));
+            }
+
             if (!ExperimentUtils.IsExperimentActive(experiment, Logger)) return null;
 
             // check if a forced variation is set
@@ -108,7 +119,7 @@ namespace OptimizelySDK.Bucketing
             if (ExperimentUtils.IsUserInExperiment(ProjectConfig, experiment, filteredAttributes))
             {
                 
-                variation = Bucketer.Bucket(ProjectConfig, experiment, userId);
+                variation = Bucketer.Bucket(ProjectConfig, experiment, bucketingId, userId);
 
                 if (variation != null && variation.Key != null)
                 {
