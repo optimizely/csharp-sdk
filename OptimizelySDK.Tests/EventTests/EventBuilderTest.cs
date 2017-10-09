@@ -755,7 +755,8 @@ namespace OptimizelySDK.Tests.EventTests
                                     },
                                     new Dictionary<string, object>
                                     {
-                                        {"key", EventBuilder.RESERVED_ATTRIBUTE_KEY_BUCKETING_ID_EVENT_PARAM_KEY },
+                                        {"entity_id", "$opt_bucketing_id" },
+                                        {"key", "optimizely_bucketing_id" },
                                         {"type", "custom" },
                                         {"value", "variation"}
                                     }
@@ -852,7 +853,8 @@ namespace OptimizelySDK.Tests.EventTests
                                     },
                                     new Dictionary<string, object>
                                     {
-                                        {"key", EventBuilder.RESERVED_ATTRIBUTE_KEY_BUCKETING_ID_EVENT_PARAM_KEY },
+                                        {"entity_id", "$opt_bucketing_id" },
+                                        {"key", "optimizely_bucketing_id" },
                                         {"type", "custom" },
                                         {"value", "variation"}
                                     }

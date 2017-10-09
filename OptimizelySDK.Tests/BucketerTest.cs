@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-using OptimizelySDK.Entity;
-using OptimizelySDK.Logger;
 using Moq;
 using NUnit.Framework;
 using OptimizelySDK.Bucketing;
+using OptimizelySDK.Entity;
+using OptimizelySDK.Logger;
 
 namespace OptimizelySDK.Tests
 {
@@ -191,15 +191,15 @@ namespace OptimizelySDK.Tests
         {
             var bucketer = new Bucketer(LoggerMock.Object);
             var experiment = Config.GetExperimentFromKey("test_experiment");
+            var expectedVariation = new Variation { Id = "7722370027", Key = "control" };
+            var expectedVariation2 = new Variation { Id = "7721010009", Key = "variation" };
 
             // check that a non null bucketing ID should bucket to a variation
             // different than the one expected with the userId
-            Assert.AreEqual(new Variation { Id = "7722370027", Key = "control" },
-                bucketer.Bucket(Config, experiment, TestBucketingIdControl, TestUserId));
+            Assert.AreEqual(expectedVariation, bucketer.Bucket(Config, experiment, TestBucketingIdControl, TestUserId));
 
             // check that the null bucketing ID defaults to bucketing with the userId
-            Assert.AreEqual(new Variation { Id = "7721010009", Key = "variation" },
-                bucketer.Bucket(Config, experiment, null, TestUserId));
+            Assert.AreEqual(expectedVariation2, bucketer.Bucket(Config, experiment, null, TestUserId));
         }
 
         // Test for invalid experiment keys, null variation should be returned
@@ -207,8 +207,9 @@ namespace OptimizelySDK.Tests
         public void TestBucketVariationInvalidExperimentsWithBucketingId()
         {
             var bucketer = new Bucketer(LoggerMock.Object);
+            var expectedVariation = new Variation();
 
-            Assert.AreEqual(new Variation(),
+            Assert.AreEqual(expectedVariation, 
                 bucketer.Bucket(Config, Config.GetExperimentFromKey("invalid_experiment"), TestBucketingIdVariation, TestUserId));
         }
 
@@ -217,17 +218,19 @@ namespace OptimizelySDK.Tests
         public void TestBucketVariationGroupedExperimentsWithBucketingId()
         {
             var bucketer = new Bucketer(LoggerMock.Object);
+            var expectedVariation = new Variation();
+            var expectedGroupVariation = new Variation{ Id = "7725250007", Key = "group_exp_2_var_2" };
 
-            Assert.AreEqual(new Variation { Id = "7725250007", Key = "group_exp_2_var_2" },
+            Assert.AreEqual(expectedGroupVariation,
                 bucketer.Bucket(Config, Config.GetExperimentFromKey("group_experiment_2"), TestBucketingIdVariation, TestUserId));
 
-            Assert.AreEqual(new Variation(),
+            Assert.AreEqual(expectedVariation,
                 bucketer.Bucket(Config, Config.GetExperimentFromKey("group_experiment_1"), TestBucketingIdVariation, TestUserId));
 
-            Assert.AreEqual(new Variation { Id = "7725250007", Key = "group_exp_2_var_2" },
+            Assert.AreEqual(expectedGroupVariation,
                 bucketer.Bucket(Config, Config.GetExperimentFromKey("group_experiment_2"), null, TestUserId));
 
-            Assert.AreEqual(new Variation(),
+            Assert.AreEqual(expectedVariation,
                 bucketer.Bucket(Config, Config.GetExperimentFromKey("group_experiment_1"), null, TestUserId));
         }
     }

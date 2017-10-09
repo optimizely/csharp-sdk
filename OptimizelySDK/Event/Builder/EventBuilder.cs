@@ -107,6 +107,7 @@ namespace OptimizelySDK.Event.Builder
                 {
                     var userFeature = new Dictionary<string, object>
                     {
+                        { "entity_id", DecisionService.RESERVED_ATTRIBUTE_KEY_BUCKETING_ID },
                         { "key", RESERVED_ATTRIBUTE_KEY_BUCKETING_ID_EVENT_PARAM_KEY },
                         { "type", CUSTOM_ATTRIBUTE_FEATURE_TYPE },
                         { "value", userAttribute.Value}
