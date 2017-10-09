@@ -27,8 +27,8 @@ namespace OptimizelySDK.Tests
         private Mock<ILogger> LoggerMock;
         private ProjectConfig Config;
         private const string TestUserId = "testUserId";
-        public string TestBucketingIdControl { get; set; }
-        public string TestBucketingIdVariation { get; set; }
+        public string TestBucketingIdControl { get; } = "testBucketingIdControl!"; // generates bucketing number 3741
+        public string TestBucketingIdVariation { get; } = "123456789'"; // generates bucketing number 4567
 
         /// <summary>
         /// Bucket Testing helper class
@@ -56,8 +56,6 @@ namespace OptimizelySDK.Tests
         {
             LoggerMock = new Mock<ILogger>();
             Config = ProjectConfig.Create(TestData.Datafile, LoggerMock.Object, new ErrorHandler.NoOpErrorHandler());
-            this.TestBucketingIdControl = "testBucketingIdControl!";  // generates bucketing number 3741
-            this.TestBucketingIdVariation = "123456789'"; // generates bucketing number 4567
         }
 
         [TestFixtureSetUp]
