@@ -86,7 +86,7 @@ namespace OptimizelySDK.Bucketing
             string bucketingKey = bucketingId + parentId;
             int bucketingNumber = GenerateBucketValue(bucketingKey);
 
-            Logger.Log(LogLevel.DEBUG, string.Format("Assigned bucket [{0}] to user [{1}] with bucketing ID [{1}].", 
+            Logger.Log(LogLevel.DEBUG, string.Format("Assigned bucket [{0}] to user [{1}] with bucketing ID [{2}].", 
                 bucketingNumber, userId, bucketingId));
 
             foreach (var ta in trafficAllocations)

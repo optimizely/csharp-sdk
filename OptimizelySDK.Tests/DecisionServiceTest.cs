@@ -236,7 +236,8 @@ namespace OptimizelySDK.Tests
             Assert.IsNull(decisionService.GetStoredVariation(experiment, storedUserProfile));
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, string.Format("User \"{0}\" was previously bucketed into variation with ID \"{1}\" for experiment \"{2}\", but no matching variation was found for that user. We will re-bucket the user."
                 , UserProfileId, storedVariationId, experiment.Id)), Times.Once);
-    }
+        }
+
         [Test]
         public void TestGetVariationSavesBucketedVariationIntoUserProfile() 
         {
@@ -256,7 +257,7 @@ namespace OptimizelySDK.Tests
                 });
 
             var mockBucketer = new Mock<Bucketer>(LoggerMock.Object);
-            mockBucketer.Setup(m => m.Bucket(ValidProjectConfig, experiment, "ignored_bucketing_id", UserProfileId)).Returns(variation);
+            mockBucketer.Setup(m => m.Bucket(ValidProjectConfig, experiment, UserProfileId, UserProfileId)).Returns(variation);
 
             DecisionService decisionService = new DecisionService(mockBucketer.Object, ErrorHandlerMock.Object, ValidProjectConfig, UserProfileServiceMock.Object, LoggerMock.Object);
 
@@ -265,7 +266,8 @@ namespace OptimizelySDK.Tests
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, string.Format("Saved variation \"{0}\" of experiment \"{1}\" for user \"{2}\".", variation.Id,
                         experiment.Id, UserProfileId)), Times.Once);
             UserProfileServiceMock.Verify(_ => _.Save(It.IsAny<Dictionary<string, object>>()), Times.Once);
-    }
+        }
+
         [Test]
         [ExpectedException]
         public void TestBucketLogsCorrectlyWhenUserProfileFailsToSave()
@@ -292,7 +294,8 @@ namespace OptimizelySDK.Tests
             LoggerMock.Verify(l => l.Log(LogLevel.ERROR, string.Format
                 ("Failed to save variation \"{0}\" of experiment \"{1}\" for user \"{2}\".", UserProfileId, variation.Id, experiment.Id))
                 , Times.Once);
-    }
+        }
+
         [Test]
         public void TestGetVariationSavesANewUserProfile()
         {
@@ -306,7 +309,7 @@ namespace OptimizelySDK.Tests
             });
 
             var mockBucketer = new Mock<Bucketer>(LoggerMock.Object);
-            mockBucketer.Setup(m => m.Bucket(NoAudienceProjectConfig, experiment, "ignored_bucketing_id", UserProfileId)).Returns(variation);
+            mockBucketer.Setup(m => m.Bucket(NoAudienceProjectConfig, experiment, UserProfileId, UserProfileId)).Returns(variation);
 
             Dictionary<string, object> userProfile = null;
             
@@ -359,6 +362,84 @@ namespace OptimizelySDK.Tests
             actualForcedVariationKey = optlyObject.GetVariation(pausedExperimentKey, userId, userAttributes);
 
             Assert.IsNull(actualForcedVariationKey);
+        }
+
+        [Test]
+        public void TestGetVariationWithBucketingId()
+        {
+            var pausedExperimentKey = "paused_experiment";
+            var userId = "test_user";
+            var testUserIdWhitelisted = "user1";
+            var experimentKey = "test_experiment";
+            var testBucketingIdControl = "testBucketingIdControl!";  // generates bucketing number 3741
+            var testBucketingIdVariation = "123456789"; // generates bucketing number 4567
+            var variationKeyControl = "control";
+            var variationKeyVariation = "variation";
+
+            var testUserAttributes = new UserAttributes
+            {
+                {"device_type", "iPhone" },
+                {"company", "Optimizely" },
+                {"location", "San Francisco" }
+            };
+
+            var userAttributesWithBucketingId = new UserAttributes
+            {
+                {"device_type", "iPhone"},
+                {"company", "Optimizely"},
+                {"location", "San Francisco"},
+                {DecisionService.RESERVED_ATTRIBUTE_KEY_BUCKETING_ID, testBucketingIdVariation}
+            };
+
+            var invalidUserAttributesWithBucketingId = new UserAttributes
+            {
+                {"company", "Optimizely"},
+                {DecisionService.RESERVED_ATTRIBUTE_KEY_BUCKETING_ID, testBucketingIdControl}
+            };
+
+            var optlyObject = new Optimizely(TestData.Datafile, new ValidEventDispatcher(), LoggerMock.Object);
+
+            // confirm normal bucketing occurs before setting the bucketing ID
+            var actualVariationKey = optlyObject.GetVariation(experimentKey, userId, testUserAttributes);
+            Assert.AreEqual(variationKeyControl, actualVariationKey);
+
+            // confirm valid bucketing with bucketing ID set in attributes
+            actualVariationKey = optlyObject.GetVariation(experimentKey, userId, userAttributesWithBucketingId);
+            Assert.AreEqual(variationKeyVariation, actualVariationKey);
+
+            // check invalid audience with bucketing ID
+            actualVariationKey = optlyObject.GetVariation(experimentKey, userId, invalidUserAttributesWithBucketingId);
+            Assert.AreEqual(null, actualVariationKey);
+
+            // check null audience with bucketing Id
+            actualVariationKey = optlyObject.GetVariation(experimentKey, userId, null);
+            Assert.AreEqual(null, actualVariationKey);
+
+            // test that an experiment that's not running returns a null variation
+            actualVariationKey = optlyObject.GetVariation(pausedExperimentKey, userId, userAttributesWithBucketingId);
+            Assert.AreEqual(null, actualVariationKey);
+
+            // check forced variation
+            Assert.IsTrue(optlyObject.SetForcedVariation(experimentKey, userId, variationKeyControl), string.Format("Set variation to \"{0}\" failed.", variationKeyControl));
+            actualVariationKey = optlyObject.GetVariation(experimentKey, userId, userAttributesWithBucketingId);
+            Assert.AreEqual(variationKeyControl, actualVariationKey);
+
+            // check whitelisted variation
+            actualVariationKey = optlyObject.GetVariation(experimentKey, testUserIdWhitelisted, userAttributesWithBucketingId);
+            Assert.AreEqual(variationKeyControl, actualVariationKey);
+
+            var bucketerMock = new Mock<Bucketer>(LoggerMock.Object);
+            var decision = new Decision("7722370027");
+            UserProfile storedUserProfile = new UserProfile(userId, new Dictionary<string, Decision>
+            {
+                { "7716830082", decision }
+            });
+
+            UserProfileServiceMock.Setup(up => up.Lookup(userId)).Returns(storedUserProfile.ToMap());
+            DecisionService decisionService = new DecisionService(bucketerMock.Object, ErrorHandlerMock.Object, ValidProjectConfig, UserProfileServiceMock.Object, LoggerMock.Object);
+
+            actualVariationKey = optlyObject.GetVariation(experimentKey, userId, userAttributesWithBucketingId);
+            Assert.AreEqual(variationKeyControl, actualVariationKey, string.Format("Variation \"{0}\" does not match expected user profile variation \"{1}\".", actualVariationKey, variationKeyControl));
         }
     }
 }

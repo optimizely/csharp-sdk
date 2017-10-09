@@ -38,7 +38,7 @@ namespace OptimizelySDK.Event.Builder
 
         private const string ACTIVATE_EVENT_KEY = "campaign_activated";
 
-        private const string RESERVED_ATTRIBUTE_KEY_BUCKETING_ID_EVENT_PARAM_KEY = "optimizely_bucketing_id";
+        public const string RESERVED_ATTRIBUTE_KEY_BUCKETING_ID_EVENT_PARAM_KEY = "optimizely_bucketing_id";
 
         private static readonly Dictionary<string, string> HTTP_HEADERS = new Dictionary<string, string>
         {
@@ -107,7 +107,6 @@ namespace OptimizelySDK.Event.Builder
                 {
                     var userFeature = new Dictionary<string, object>
                     {
-                        { "entity_id", DecisionService.RESERVED_ATTRIBUTE_KEY_BUCKETING_ID },
                         { "key", RESERVED_ATTRIBUTE_KEY_BUCKETING_ID_EVENT_PARAM_KEY },
                         { "type", CUSTOM_ATTRIBUTE_FEATURE_TYPE },
                         { "value", userAttribute.Value}
