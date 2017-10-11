@@ -29,6 +29,9 @@ namespace OptimizelySDK.Tests
         private const string TestUserId = "testUserId";
         public string TestBucketingIdControl { get; } = "testBucketingIdControl!"; // generates bucketing number 3741
         public string TestBucketingIdVariation { get; } = "123456789'"; // generates bucketing number 4567
+        public string TestBucketingIdGroupExp2Var2 { get; } = "123456789"; // group_exp_2_var_2
+        public string TestUserIdBucketsToVariation { get; } = "bucketsToVariation!";
+        public string TestUserIdBucketsToNoGroup { get; } = "testUserId";
 
         /// <summary>
         /// Bucket Testing helper class
@@ -194,12 +197,9 @@ namespace OptimizelySDK.Tests
             var expectedVariation = new Variation { Id = "7722370027", Key = "control" };
             var expectedVariation2 = new Variation { Id = "7721010009", Key = "variation" };
 
-            // check that a non null bucketing ID should bucket to a variation
-            // different than the one expected with the userId
-            Assert.AreEqual(expectedVariation, bucketer.Bucket(Config, experiment, TestBucketingIdControl, TestUserId));
-
-            // check that the null bucketing ID defaults to bucketing with the userId
-            Assert.AreEqual(expectedVariation2, bucketer.Bucket(Config, experiment, null, TestUserId));
+            // make sure that the bucketing ID is used for the variation bucketing and not the user ID
+            Assert.AreEqual(expectedVariation, 
+                bucketer.Bucket(Config, experiment, TestBucketingIdControl, TestUserIdBucketsToVariation));
         }
 
         // Test for invalid experiment keys, null variation should be returned
@@ -213,7 +213,7 @@ namespace OptimizelySDK.Tests
                 bucketer.Bucket(Config, Config.GetExperimentFromKey("invalid_experiment"), TestBucketingIdVariation, TestUserId));
         }
 
-        // Make sure that bucketing works with experiments in group
+        // Make sure that the bucketing ID is used to bucket the user into a group and not the user ID
         [Test]
         public void TestBucketVariationGroupedExperimentsWithBucketingId()
         {
@@ -222,16 +222,8 @@ namespace OptimizelySDK.Tests
             var expectedGroupVariation = new Variation{ Id = "7725250007", Key = "group_exp_2_var_2" };
 
             Assert.AreEqual(expectedGroupVariation,
-                bucketer.Bucket(Config, Config.GetExperimentFromKey("group_experiment_2"), TestBucketingIdVariation, TestUserId));
-
-            Assert.AreEqual(expectedVariation,
-                bucketer.Bucket(Config, Config.GetExperimentFromKey("group_experiment_1"), TestBucketingIdVariation, TestUserId));
-
-            Assert.AreEqual(expectedGroupVariation,
-                bucketer.Bucket(Config, Config.GetExperimentFromKey("group_experiment_2"), null, TestUserId));
-
-            Assert.AreEqual(expectedVariation,
-                bucketer.Bucket(Config, Config.GetExperimentFromKey("group_experiment_1"), null, TestUserId));
+                bucketer.Bucket(Config, Config.GetExperimentFromKey("group_experiment_2"), 
+                TestBucketingIdGroupExp2Var2, TestUserIdBucketsToNoGroup));
         }
     }
 }
