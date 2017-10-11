@@ -206,16 +206,17 @@ namespace OptimizelySDK
             }
 
             // Filter out experiments that are not running or when user(s) do not meet conditions.
-            var validExperiments = new List<Experiment>();
+            var validExperimentIdToVariationMap = new Dictionary<string, Variation>();
             var experimentIds = eevent.ExperimentIds;
             foreach (string id in eevent.ExperimentIds)
             {
                 var experiment = Config.GetExperimentFromId(id);
                 //Validate experiment
                 var variation = DecisionService.GetVariation(experiment, userId, userAttributes);
+
                 if (variation != null)
                 {
-                    validExperiments.Add(experiment);
+                    validExperimentIdToVariationMap[experiment.Id] = variation;
                 }
                 else
                 {
@@ -223,7 +224,7 @@ namespace OptimizelySDK
                 }
             }
 
-            if (validExperiments.Count > 0)
+            if (validExperimentIdToVariationMap.Count > 0)
             {
 
                 if (userAttributes != null)
@@ -236,7 +237,7 @@ namespace OptimizelySDK
                     eventTags = eventTags.FilterNullValues(Logger);
                 }
 
-                var conversionEvent = EventBuilder.CreateConversionEvent(Config, eventKey, validExperiments,
+                var conversionEvent = EventBuilder.CreateConversionEvent(Config, eventKey, validExperimentIdToVariationMap,
                     userId, userAttributes, eventTags);
                 Logger.Log(LogLevel.INFO, string.Format("Tracking event {0} for user {1}.", eventKey, userId));
                 Logger.Log(LogLevel.DEBUG, string.Format("Dispatching conversion event to URL {0} with params {1}.", 
