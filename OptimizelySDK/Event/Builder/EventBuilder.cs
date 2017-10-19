@@ -24,10 +24,6 @@ namespace OptimizelySDK.Event.Builder
 {
     public class EventBuilder
     {
-        private const string SDK_TYPE = "csharp-sdk";
-
-        private const string SDK_VERSION = "1.2.0";
-
         private const string IMPRESSION_ENDPOINT = "https://logx.optimizely.com/v1/events";
 
         private const string CONVERSION_ENDPOINT = "https://logx.optimizely.com/v1/events";
@@ -94,8 +90,8 @@ namespace OptimizelySDK.Event.Builder
             comonParams[Params.VISITORS] = new object[] { visitor };
             comonParams[Params.PROJECT_ID] = config.ProjectId;
             comonParams[Params.ACCOUNT_ID] = config.AccountId;
-            comonParams[Params.CLIENT_ENGINE] = SDK_TYPE;
-            comonParams[Params.CLIENT_VERSION] = SDK_VERSION;
+            comonParams[Params.CLIENT_ENGINE] = Optimizely.SDK_TYPE;
+            comonParams[Params.CLIENT_VERSION] = Optimizely.SDK_VERSION;
             comonParams[Params.REVISION] = config.Revision;
             comonParams[Params.ANONYMIZE_IP] = config.AnonymizeIP;
 

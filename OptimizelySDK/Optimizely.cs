@@ -22,6 +22,7 @@ using OptimizelySDK.Logger;
 using OptimizelySDK.Utils;
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 
 namespace OptimizelySDK
 {
@@ -46,6 +47,27 @@ namespace OptimizelySDK
 
         public bool IsValid { get; private set; }
 
+        internal static String SDK_VERSION {
+            get {
+                // Example output: "1.2.1" .  Should be kept in synch with NuGet package version.
+#if NET35
+                Assembly assembly = Assembly.GetExecutingAssembly();
+#else
+                Assembly assembly = typeof(Optimizely).GetTypeInfo().Assembly;
+#endif
+                // Microsoft    Major.Minor.Build.Revision
+                // Semantic     Major.Minor.Patch
+                Version version = assembly.GetName().Version;
+                String answer = String.Format("{0}.{1}.{2}", version.Major, version.Minor, version.Build);
+                return answer;
+            }
+        }
+
+        internal static String SDK_TYPE {
+            get {
+                return "csharp-sdk";
+            }
+        }
 
         /// <summary>
         /// Optimizely constructor for managing Full Stack .NET projects.
