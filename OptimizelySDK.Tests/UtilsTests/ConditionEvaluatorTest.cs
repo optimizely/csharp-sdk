@@ -26,7 +26,7 @@ namespace OptimizelySDK.Tests.UtilsTests
         private object[] Conditions = null;
         private const string ConditionsStr = @"[""and"", [""or"", [""or"", {""name"": ""device_type"", ""type"": ""custom_attribute"", ""value"": ""iPhone""}]], [""or"", [""or"", {""name"": ""location"", ""type"": ""custom_attribute"", ""value"": ""San Francisco""}]], [""or"", [""not"", [""or"", {""name"": ""browser"", ""type"": ""custom_attribute"", ""value"": ""Firefox""}]]]]";
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Initialize()
         {
             ConditionEvaluator = new ConditionEvaluator();
@@ -34,7 +34,7 @@ namespace OptimizelySDK.Tests.UtilsTests
             Conditions = Newtonsoft.Json.JsonConvert.DeserializeObject<object[]>(ConditionsStr);
         }
 
-        [TestFixtureTearDown]
+        [OneTimeTearDown]
         public void TestCleanUp()
         {
             Conditions = null;

@@ -269,7 +269,6 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
-        [ExpectedException]
         public void TestBucketLogsCorrectlyWhenUserProfileFailsToSave()
         {
             Experiment experiment = NoAudienceProjectConfig.Experiments[0];

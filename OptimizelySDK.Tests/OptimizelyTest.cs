@@ -77,7 +77,7 @@ namespace OptimizelySDK.Tests
             };
         }
 
-        [TestFixtureTearDown]
+        [OneTimeTearDown]
         public void Cleanup()
         {
             LoggerMock = null;
