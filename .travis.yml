@@ -1,4 +1,6 @@
 language: csharp
+mono:
+- 5.2.0
 solution: "./OptimizelySDK.Travis.sln"
 install:
   - nuget restore ./OptimizelySDK.Travis.sln

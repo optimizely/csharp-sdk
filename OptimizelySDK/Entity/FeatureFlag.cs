@@ -13,30 +13,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 using OptimizelySDK.Utils;
 using System.Collections.Generic;
 
 namespace OptimizelySDK.Entity
 {
-    public class Variation : IdKeyEntity
+    public class FeatureFlag : IdKeyEntity
     {
-        private List<FeatureVariableUsage> _FeatureVariableUsageInstances;
-        public List<FeatureVariableUsage> FeatureVariableUsageInstances
+        public string RolloutId { get; set; }
+
+        public List<string> ExperimentIds { get; set; }
+
+        private List<FeatureVariable> _Variables;
+        public List<FeatureVariable> Variables
         {
             get
             {
-                return _FeatureVariableUsageInstances;
+                return _Variables;
             }
             set
             {
-                _FeatureVariableUsageInstances = value;
+                _Variables = value;
 
-                // Generating Variable Usage key map.
-                if (_FeatureVariableUsageInstances != null)
-                    VariableIdToVariableUsageInstanceMap = ConfigParser<FeatureVariableUsage>.GenerateMap(entities: _FeatureVariableUsageInstances, getKey: v => v.Id.ToString(), clone: true);
+                // Generating Feature Variable key map.
+                if (_Variables != null)
+                    VariableKeyToFeatureVariableMap = ConfigParser<FeatureVariable>.GenerateMap(entities: _Variables, getKey: v => v.Key, clone: true);
             }
         }
-
-        public Dictionary<string, FeatureVariableUsage> VariableIdToVariableUsageInstanceMap { get; set; }
+        
+        public Dictionary<string, FeatureVariable> VariableKeyToFeatureVariableMap { get; set; }
     }
 }
