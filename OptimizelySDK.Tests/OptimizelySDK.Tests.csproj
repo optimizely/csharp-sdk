@@ -18,6 +18,8 @@
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
     <ReleaseVersion>1.2.1</ReleaseVersion>
+    <SignAssembly>true</SignAssembly>
+    <DelaySign>true</DelaySign>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>

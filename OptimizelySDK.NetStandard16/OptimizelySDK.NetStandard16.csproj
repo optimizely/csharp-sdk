@@ -3,6 +3,8 @@
     <PropertyGroup>
         <TargetFramework>netstandard1.6</TargetFramework>
         <ReleaseVersion>1.2.1</ReleaseVersion>
+        <SignAssembly>true</SignAssembly>
+        <DelaySign>true</DelaySign>
     </PropertyGroup>
 
     <ItemGroup>
