@@ -28,7 +28,7 @@ namespace OptimizelySDK.Tests.UtilsTests
         private IErrorHandler ErrorHandler;
         private ProjectConfig Config;
 
-        [OneTimeSetUp]
+        [TestFixtureSetUp]
         public void Setup()
         {
             Logger = new DefaultLogger();

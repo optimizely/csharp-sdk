@@ -61,7 +61,7 @@ namespace OptimizelySDK.Tests
             Config = ProjectConfig.Create(TestData.Datafile, LoggerMock.Object, new ErrorHandler.NoOpErrorHandler());
         }
 
-        [OneTimeSetUp]
+        [TestFixtureSetUp]
         public void Cleanup()
         {
             LoggerMock = null;
