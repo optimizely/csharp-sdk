@@ -16,9 +16,9 @@ Write-Host "-"
 Write-Host "Build complete. Copying files..."
 
 New-Item -Path ".\content" -ItemType "directory" -force
-Copy-Item -Path "..\licenses" -Destination ".\content\licenses" -Recurse -force
+Copy-Item -Path "..\licenses" -Destination ".\content" -Recurse -force
 New-Item -Path ".\content\licenses\Optimizely" -ItemType "directory" -force
-Copy-Item -Path "..\LICENSE" -Destination ".\content\licenses\Optimizely\LICENSE" -force
+Copy-Item -Path "..\LICENSE" -Destination ".\content\licenses\Optimizely" -force
 
 New-Item -Path ".\lib\net45" -ItemType "directory" -force
 Copy-Item -Path "..\OptimizelySDK\bin\Release\*.dll" -Destination ".\lib\net45" -Recurse -force
