@@ -89,4 +89,20 @@ namespace OptimizelySDK.Exceptions
         {
         }
     }
+
+    public class InvalidFeatureException : OptimizelyException
+    {
+        public InvalidFeatureException(string message)
+            : base(message)
+        {
+        }
+    }
+
+    public class InvalidRolloutException : OptimizelyException
+    {
+        public InvalidRolloutException(string message)
+            : base(message)
+        {
+        }
+    }
 }

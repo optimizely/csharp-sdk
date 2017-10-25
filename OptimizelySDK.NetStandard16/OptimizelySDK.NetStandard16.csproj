@@ -17,6 +17,10 @@
         <Compile Include="..\OptimizelySDK\Entity\TrafficAllocation.cs" />
         <Compile Include="..\OptimizelySDK\Entity\UserAttributes.cs" />
         <Compile Include="..\OptimizelySDK\Entity\Variation.cs" />
+		<Compile Include="..\OptimizelySDK\Entity\FeatureVariableUsage.cs" />
+		<Compile Include="..\OptimizelySDK\Entity\FeatureFlag.cs" />
+		<Compile Include="..\OptimizelySDK\Entity\FeatureVariable.cs" />
+		<Compile Include="..\OptimizelySDK\Entity\Rollout.cs"/>
         <Compile Include="..\OptimizelySDK\ErrorHandler\DefaultErrorHandler.cs" />
         <Compile Include="..\OptimizelySDK\ErrorHandler\IErrorHandler.cs" />
         <Compile Include="..\OptimizelySDK\ErrorHandler\NoOpErrorHandler.cs" />
@@ -45,7 +49,7 @@
         <Compile Include="..\OptimizelySDK\Bucketing\UserProfile.cs" />
         <Compile Include="..\OptimizelySDK\Bucketing\UserProfileService.cs" />
         <Compile Include="..\OptimizelySDK\Bucketing\UserProfileUtil.cs" />
-      <Compile Include="..\OptimizelySDK\Utils\ExperimentUtils.cs" />
+		<Compile Include="..\OptimizelySDK\Utils\ExperimentUtils.cs" />
         
     </ItemGroup>
     <ItemGroup>

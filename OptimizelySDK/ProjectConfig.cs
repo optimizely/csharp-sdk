@@ -114,6 +114,18 @@ namespace OptimizelySDK
         private Dictionary<string, Dictionary<string, string>> _ForcedVariationMap;
         public Dictionary<string, Dictionary<string, string>> ForcedVariationMap { get { return _ForcedVariationMap; } }
 
+        /// <summary>
+        /// Associative array of Feature Key to Feature(s) in the datafile
+        /// </summary>
+        private Dictionary<string, FeatureFlag> _FeatureKeyMap;
+        public Dictionary<string, FeatureFlag> FeatureKeyMap { get { return _FeatureKeyMap; } }
+
+        /// <summary>
+        /// Associative array of Rollout ID to Rollout(s) in the datafile
+        /// </summary>
+        private Dictionary<string, Rollout> _RolloutIdMap;
+        public Dictionary<string, Rollout> RolloutIdMap { get { return _RolloutIdMap; } }
+        
         //========================= Callbacks ===========================
 
         /// <summary>
@@ -155,7 +167,15 @@ namespace OptimizelySDK
         /// </summary>
         public Audience[] Audiences { get; set; }
 
+        /// <summary>
+        /// Associative list of FeatureFlags.
+        /// </summary>
+        public FeatureFlag[] FeatureFlags { get; set; }
 
+        /// <summary>
+        /// Associative list of Rollouts.
+        /// </summary>
+        public Rollout[] Rollouts { get; set; }
 
         //========================= Initialization ===========================
 
@@ -177,6 +197,8 @@ namespace OptimizelySDK
             Events = Events ?? new Entity.Event[0];
             Attributes = Attributes ?? new Attribute[0];
             Audiences = Audiences ?? new Audience[0];
+            FeatureFlags = FeatureFlags ?? new FeatureFlag[0];
+            Rollouts = Rollouts ?? new Rollout[0];
 
             _ForcedVariationMap = new Dictionary<string, Dictionary<string, string>>();
             _GroupIdMap = ConfigParser<Group>.GenerateMap(entities: Groups, getKey: g => g.Id.ToString(), clone: true);
@@ -184,6 +206,8 @@ namespace OptimizelySDK
             _EventKeyMap = ConfigParser<Entity.Event>.GenerateMap(entities: Events, getKey: e => e.Key, clone: true);
             _AttributeKeyMap = ConfigParser<Attribute>.GenerateMap(entities: Attributes, getKey: a => a.Key, clone: true);
             _AudienceIdMap = ConfigParser<Audience>.GenerateMap(entities: Audiences, getKey: a => a.Id.ToString(), clone: true);
+            _FeatureKeyMap = ConfigParser<FeatureFlag>.GenerateMap(entities: FeatureFlags, getKey: f => f.Key, clone: true);
+            _RolloutIdMap = ConfigParser<Rollout>.GenerateMap(entities: Rollouts, getKey: r => r.Id.ToString(), clone: true);
 
             foreach (Group group in Groups)
             {
@@ -475,6 +499,38 @@ namespace OptimizelySDK
 
             Logger.Log(LogLevel.DEBUG, string.Format(@"Set variation ""{0}"" for experiment ""{1}"" and user ""{2}"" in the forced variation map.", variationId, experimentId, userId));
             return true;
+        }
+
+        /// <summary>
+        /// Get the feature from the key
+        /// </summary>
+        /// <param name="featureKey">Key of the feature</param>
+        /// <returns>Feature Flag Entity corresponding to the key or a dummy entity if key is invalid</returns>
+        public FeatureFlag GetFeatureFlagFromKey(string featureKey)
+        {
+            if (_FeatureKeyMap.ContainsKey(featureKey))
+                return _FeatureKeyMap[featureKey];
+
+            string message = string.Format(@"Feature key ""{0}"" is not in datafile.", featureKey);
+            Logger.Log(LogLevel.ERROR, message);
+            ErrorHandler.HandleError(new Exceptions.InvalidFeatureException("Provided feature is not in datafile."));
+            return new FeatureFlag();
+        }
+
+        /// <summary>
+        /// Get the rollout from the ID
+        /// </summary>
+        /// <param name="rolloutId">ID for rollout</param>
+        /// <returns>Rollout Entity corresponding to the rollout ID or a dummy entity if ID is invalid</returns>
+        public Rollout GetRolloutFromId(string rolloutId)
+        {
+            if (_RolloutIdMap.ContainsKey(rolloutId))
+                return _RolloutIdMap[rolloutId];
+
+            string message = string.Format(@"Rollout ID ""{0}"" is not in datafile.", rolloutId);
+            Logger.Log(LogLevel.ERROR, message);
+            ErrorHandler.HandleError(new Exceptions.InvalidRolloutException("Provided rollout is not in datafile."));
+            return new Rollout();
         }
     }
 }
