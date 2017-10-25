@@ -20,8 +20,10 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // Make types and members with internal scope visible to friend
-// OptimizelySDK.Tests unit tests.
-[assembly: InternalsVisibleTo("OptimizelySDK.Tests")]
+// OptimizelySDK.Tests unit tests. 
+#pragma warning disable 1700
+[assembly: InternalsVisibleTo("OptimizelySDK.Tests, PublicKey=ThePublicKey")]
+#pragma warning restore 1700
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
 [assembly: Guid("4dde7faa-110d-441c-ab3b-3f31b593e8bf")]

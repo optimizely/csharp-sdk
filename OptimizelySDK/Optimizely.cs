@@ -47,7 +47,7 @@ namespace OptimizelySDK
 
         public bool IsValid { get; private set; }
 
-        internal static String SDK_VERSION {
+        public static String SDK_VERSION {
             get {
                 // Example output: "1.2.1" .  Should be kept in synch with NuGet package version.
 #if NET35
@@ -63,7 +63,7 @@ namespace OptimizelySDK
             }
         }
 
-        internal static String SDK_TYPE {
+        public static String SDK_TYPE {
             get {
                 return "csharp-sdk";
             }

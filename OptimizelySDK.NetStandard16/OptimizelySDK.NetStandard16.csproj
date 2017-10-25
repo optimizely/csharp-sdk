@@ -4,7 +4,7 @@
         <TargetFramework>netstandard1.6</TargetFramework>
         <ReleaseVersion>1.2.1</ReleaseVersion>
         <SignAssembly>true</SignAssembly>
-        <DelaySign>true</DelaySign>
+        <AssemblyOriginatorKeyFile>..\keypair.snk</AssemblyOriginatorKeyFile>
     </PropertyGroup>
 
     <ItemGroup>
