@@ -229,6 +229,19 @@ namespace OptimizelySDK.Tests
             };
 
             Assert.IsTrue(TestData.CompareObjects(expectedVariationIdMap, Config.VariationIdMap));
+            
+
+            // Check Variation returns correct variable usage
+            var featureVariableUsageInstance = new List<FeatureVariableUsage>
+            {
+                new FeatureVariableUsage{Id="155560", Value="F"},
+                new FeatureVariableUsage{Id="155561", Value="red"},
+            };
+            var expectedVariationUsage = new Variation { Id = "122231", Key = "Fred", FeatureVariableUsageInstances = featureVariableUsageInstance};
+
+            var actualVariationUsage = Config.GetVariationFromKey("test_experiment_multivariate", "Fred");
+
+            Assert.IsTrue(TestData.CompareObjects(expectedVariationUsage, actualVariationUsage));
 
 
             // Check Feature Key map.

@@ -16,7 +16,17 @@
 
 namespace OptimizelySDK.Entity
 {
-    public class FeatureVariableUsage : IdKeyEntity
+    public class FeatureVariableUsage : Entity
     {
+        /// <summary>
+        /// Audience ID
+        /// </summary>
+        public string Id { get; set; }
+
+        /// <summary>
+        /// Audience Name
+        /// </summary>
+        public string Value { get; set; }
+
     }
 }

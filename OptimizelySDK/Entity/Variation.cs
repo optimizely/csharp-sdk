@@ -21,6 +21,7 @@ namespace OptimizelySDK.Entity
     public class Variation : IdKeyEntity
     {
         private List<FeatureVariableUsage> _FeatureVariableUsageInstances;
+        [Newtonsoft.Json.JsonProperty("variables")]
         public List<FeatureVariableUsage> FeatureVariableUsageInstances
         {
             get
