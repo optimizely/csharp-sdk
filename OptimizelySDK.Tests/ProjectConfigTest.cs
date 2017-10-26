@@ -113,7 +113,7 @@ namespace OptimizelySDK.Tests
             var audienceIdMap = new Dictionary<string, object>
             {
                 { "7718080042", Config.GetAudience("7718080042") },
-                { "11155", Config.GetAudience("11155") }
+                { "11154", Config.GetAudience("11154") }
             };
             Assert.IsTrue(TestData.CompareObjects(audienceIdMap, Config.AudienceIdMap));
 
@@ -229,19 +229,19 @@ namespace OptimizelySDK.Tests
             };
 
             Assert.IsTrue(TestData.CompareObjects(expectedVariationIdMap, Config.VariationIdMap));
-            
 
-            // Check Variation returns correct variable usage
+			// Check Variation returns correct variable usage
             var featureVariableUsageInstance = new List<FeatureVariableUsage>
             {
                 new FeatureVariableUsage{Id="155560", Value="F"},
                 new FeatureVariableUsage{Id="155561", Value="red"},
             };
-            var expectedVariationUsage = new Variation { Id = "122231", Key = "Fred", FeatureVariableUsageInstances = featureVariableUsageInstance};
+                       var expectedVariationUsage = new Variation { Id = "122231", Key = "Fred", FeatureVariableUsageInstances = featureVariableUsageInstance};
+ 
+             var actualVariationUsage = Config.GetVariationFromKey("test_experiment_multivariate", "Fred");
+ 
+             Assert.IsTrue(TestData.CompareObjects(expectedVariationUsage, actualVariationUsage));
 
-            var actualVariationUsage = Config.GetVariationFromKey("test_experiment_multivariate", "Fred");
-
-            Assert.IsTrue(TestData.CompareObjects(expectedVariationUsage, actualVariationUsage));
 
 
             // Check Feature Key map.
@@ -254,7 +254,8 @@ namespace OptimizelySDK.Tests
                 { "string_single_variable_feature", Config.GetFeatureFlagFromKey("string_single_variable_feature") },
                 { "multi_variate_feature", Config.GetFeatureFlagFromKey("multi_variate_feature") },
                 { "mutex_group_feature", Config.GetFeatureFlagFromKey("mutex_group_feature") },
-                { "empty_feature", Config.GetFeatureFlagFromKey("empty_feature") }
+                { "empty_feature", Config.GetFeatureFlagFromKey("empty_feature") },
+                { "no_rollout_experiment_feature", Config.GetFeatureFlagFromKey("no_rollout_experiment_feature") }
             };
 
             Assert.IsTrue(TestData.CompareObjects(expectedFeatureKeyMap, Config.FeatureKeyMap));
@@ -263,7 +264,8 @@ namespace OptimizelySDK.Tests
             var expectedRolloutIdMap = new Dictionary<string, Rollout>
             {
                 { "166660", Config.GetRolloutFromId("166660") },
-                { "166661", Config.GetRolloutFromId("166661") }
+                { "166661", Config.GetRolloutFromId("166661") },
+                { "166662", Config.GetRolloutFromId("166662") }
             };
 
             Assert.IsTrue(TestData.CompareObjects(expectedRolloutIdMap, Config.RolloutIdMap));

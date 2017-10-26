@@ -27,18 +27,21 @@ namespace OptimizelySDK.Tests
 {
     public class DecisionServiceTest
     {
-
         private string GenericUserId = "genericUserId";
         private string WhitelistedUserId = "testUser1";
         private string UserProfileId = "userProfileId";
         private Mock<ILogger> LoggerMock;
         private Mock<IErrorHandler> ErrorHandlerMock;
         private Mock<UserProfileService> UserProfileServiceMock;
+        private Mock<Bucketer> BucketerMock;
+        private Mock<DecisionService> DecisionServiceMock;
 
         private ProjectConfig NoAudienceProjectConfig;
         private ProjectConfig ValidProjectConfig;
+        private ProjectConfig ProjectConfig;
         private Experiment WhitelistedExperiment;
         private Variation WhitelistedVariation;
+        private DecisionService DecisionService;
 
         [SetUp]
         public void SetUp()
@@ -46,11 +49,16 @@ namespace OptimizelySDK.Tests
             LoggerMock              = new Mock<ILogger>();
             ErrorHandlerMock        = new Mock<IErrorHandler>();
             UserProfileServiceMock  = new Mock<UserProfileService>();
+            BucketerMock            = new Mock<Bucketer>(LoggerMock.Object);
+            
+            ValidProjectConfig      = ProjectConfig.Create(TestData.ValidDataFileV3, LoggerMock.Object, ErrorHandlerMock.Object);
+            NoAudienceProjectConfig = ProjectConfig.Create(TestData.NoAudienceProjectConfigV3, LoggerMock.Object, ErrorHandlerMock.Object);
+            WhitelistedExperiment   = ValidProjectConfig.ExperimentIdMap["223"];
+            WhitelistedVariation    = WhitelistedExperiment.VariationKeyToVariationMap["vtag1"];
+            ProjectConfig           = ProjectConfig.Create(TestData.Datafile, LoggerMock.Object, ErrorHandlerMock.Object);
+            DecisionService         = new DecisionService(new Bucketer(LoggerMock.Object), ErrorHandlerMock.Object, ProjectConfig, null, LoggerMock.Object);
 
-            ValidProjectConfig          = ProjectConfig.Create(TestData.ValidDataFileV3, LoggerMock.Object, ErrorHandlerMock.Object);
-            NoAudienceProjectConfig     = ProjectConfig.Create(TestData.NoAudienceProjectConfigV3, LoggerMock.Object, ErrorHandlerMock.Object);
-            WhitelistedExperiment       = ValidProjectConfig.ExperimentIdMap["223"];
-            WhitelistedVariation        = WhitelistedExperiment.VariationKeyToVariationMap["vtag1"];
+            DecisionServiceMock     = new Mock<DecisionService>(BucketerMock.Object, ErrorHandlerMock.Object, ProjectConfig, null, LoggerMock.Object) { CallBase = true };
         }
 
         [Test]
@@ -152,7 +160,7 @@ namespace OptimizelySDK.Tests
 
             Assert.IsNull(decisionService.GetWhitelistedVariation(experiment, userId));
             LoggerMock.Verify(l => l.Log(LogLevel.ERROR,
-                string.Format("Variation \"{0}\" is not in the datafile. Not activating user \"{1}\".", invalidVariationKey, userId)), 
+                string.Format("Variation \"{0}\" is not in the datafile. Not activating user \"{1}\".", invalidVariationKey, userId)),
                 Times.Once);
 
             BucketerMock.Verify(_ => _.Bucket(It.IsAny<ProjectConfig>(), It.IsAny<Experiment>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
@@ -193,7 +201,7 @@ namespace OptimizelySDK.Tests
             //BucketerMock.Verify(_ => _.Bucket(It.IsAny<ProjectConfig>(), It.IsAny<Experiment>(), It.IsAny<string>()), Times.Once);
 
         }
-            
+
         [Test]
         public void TestGetStoredVariationLogsWhenLookupReturnsNull()
         {
@@ -204,9 +212,9 @@ namespace OptimizelySDK.Tests
 
             Bucketer bucketer = new Bucketer(LoggerMock.Object);
             UserProfileServiceMock.Setup(_ => _.Lookup(UserProfileId)).Returns(userProfile.ToMap());
- 
-           DecisionService decisionService = new DecisionService(bucketer,
-                ErrorHandlerMock.Object, NoAudienceProjectConfig, userProfileService, LoggerMock.Object);
+
+            DecisionService decisionService = new DecisionService(bucketer,
+                 ErrorHandlerMock.Object, NoAudienceProjectConfig, userProfileService, LoggerMock.Object);
 
             Assert.IsNull(decisionService.GetStoredVariation(experiment, userProfile));
 
@@ -239,7 +247,7 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
-        public void TestGetVariationSavesBucketedVariationIntoUserProfile() 
+        public void TestGetVariationSavesBucketedVariationIntoUserProfile()
         {
             Experiment experiment = NoAudienceProjectConfig.Experiments[0];
             Variation variation = experiment.Variations[0];
@@ -250,7 +258,7 @@ namespace OptimizelySDK.Tests
                 new Dictionary<string, Decision>());
             UserProfileServiceMock.Setup(ups => ups.Lookup(UserProfileId)).Returns(originalUserProfile.ToMap());
 
-        UserProfile expectedUserProfile = new UserProfile(UserProfileId,
+            UserProfile expectedUserProfile = new UserProfile(UserProfileId,
                 new Dictionary<string, Decision>
                 {
                     {experiment.Id, decision }
@@ -312,7 +320,7 @@ namespace OptimizelySDK.Tests
             mockBucketer.Setup(m => m.Bucket(NoAudienceProjectConfig, experiment, UserProfileId, UserProfileId)).Returns(variation);
 
             Dictionary<string, object> userProfile = null;
-            
+
             UserProfileServiceMock.Setup(up => up.Lookup(UserProfileId)).Returns(userProfile);
 
             DecisionService decisionService = new DecisionService(mockBucketer.Object, ErrorHandlerMock.Object, NoAudienceProjectConfig,
@@ -337,26 +345,26 @@ namespace OptimizelySDK.Tests
                 {"device_type", "iPhone" },
                 {"location", "San Francisco" }
             };
-            
+
             optlyObject.Activate(experimentKey, userId, userAttributes);
 
             // confirm normal bucketing occurs before setting the forced variation
             var actualVariationKey = optlyObject.GetVariation(experimentKey, userId, userAttributes);
 
             Assert.AreEqual(expectedVariationKey, actualVariationKey);
-            
+
             // test valid experiment
             Assert.IsTrue(optlyObject.SetForcedVariation(experimentKey, userId, expectedForcedVariationKey), string.Format(@"Set variation to ""{0}"" failed.", expectedForcedVariationKey));
 
             var actualForcedVariationKey = optlyObject.GetVariation(experimentKey, userId, userAttributes);
             Assert.AreEqual(expectedForcedVariationKey, actualForcedVariationKey);
-            
+
             // clear forced variation and confirm that normal bucketing occurs
             Assert.IsTrue(optlyObject.SetForcedVariation(experimentKey, userId, null));
 
             actualVariationKey = optlyObject.GetVariation(experimentKey, userId, userAttributes);
             Assert.AreEqual(expectedVariationKey, actualVariationKey);
-            
+
             // check that a paused experiment returns null
             Assert.IsTrue(optlyObject.SetForcedVariation(pausedExperimentKey, userId, expectedForcedVariationKey), string.Format(@"Set variation to ""{0}"" failed.", expectedForcedVariationKey));
             actualForcedVariationKey = optlyObject.GetVariation(pausedExperimentKey, userId, userAttributes);
@@ -441,5 +449,283 @@ namespace OptimizelySDK.Tests
             actualVariationKey = optlyObject.GetVariation(experimentKey, userId, userAttributesWithBucketingId);
             Assert.AreEqual(variationKeyControl, actualVariationKey, string.Format("Variation \"{0}\" does not match expected user profile variation \"{1}\".", actualVariationKey, variationKeyControl));
         }
+
+
+        #region GetVariationForFeature Tests
+
+        // Should return null and log a message when the feature flag's experiment ids array is empty
+        [Test]
+        public void TestGetVariationForFeatureExperimentGivenNullExperimentIds()
+        {
+            var featureFlag = ProjectConfig.GetFeatureFlagFromKey("empty_feature");
+
+            Assert.IsNull(DecisionService.GetVariationForFeatureExperiment(featureFlag, GenericUserId, new UserAttributes() { }));
+
+            LoggerMock.Verify(l => l.Log(LogLevel.INFO, $"The feature flag \"{featureFlag.Key}\" is not used in any experiments."));
+        }
+
+        // Should return null and log when the experiment is not in the datafile 
+        [Test]
+        public void TestGetVariationForFeatureExperimentGivenExperimentNotInDataFile()
+        {
+            var booleanFeature = ProjectConfig.GetFeatureFlagFromKey("boolean_feature");
+            var featureFlag = new FeatureFlag
+            {
+                Id = booleanFeature.Id,
+                Key = booleanFeature.Key,
+                RolloutId = booleanFeature.RolloutId,
+                ExperimentIds = new List<string> { "29039203" }
+            };
+            
+            Assert.IsNull(DecisionService.GetVariationForFeatureExperiment(featureFlag, GenericUserId, new UserAttributes() { }));
+
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Experiment ID \"29039203\" is not in datafile."));
+        }
+
+        // Should return null and log when the user is not bucketed into the feature flag's experiments
+        [Test]
+        public void TestGetVariationForFeatureExperimentGivenNonMutexGroupAndUserNotBucketed()
+        {
+            var multiVariateExp = ProjectConfig.GetExperimentFromKey("test_experiment_multivariate");
+
+            DecisionServiceMock.Setup(ds => ds.GetVariation(multiVariateExp, "user1", null)).Returns<Variation>(null);
+            var featureFlag = ProjectConfig.GetFeatureFlagFromKey("multi_variate_feature");
+
+            Assert.IsNull(DecisionServiceMock.Object.GetVariationForFeatureExperiment(featureFlag, "user1", new UserAttributes()));
+
+            LoggerMock.Verify(l => l.Log(LogLevel.INFO, "The user \"user1\" is not bucketed into any of the experiments on the feature \"multi_variate_feature\"."));
+        }
+
+        // Should return the variation when the user is bucketed into a variation for the experiment on the feature flag
+        [Test]
+        public void TestGetVariationForFeatureExperimentGivenNonMutexGroupAndUserIsBucketed()
+        {
+            var expectedVariation = ProjectConfig.GetVariationFromId("test_experiment_multivariate", "122231");
+            var userAttributes = new UserAttributes();
+
+            DecisionServiceMock.Setup(ds => ds.GetVariation(ProjectConfig.GetExperimentFromKey("test_experiment_multivariate"), "user1", userAttributes)).Returns(expectedVariation);
+
+            var featureFlag = ProjectConfig.GetFeatureFlagFromKey("multi_variate_feature");
+            var variation = DecisionServiceMock.Object.GetVariationForFeatureExperiment(featureFlag, "user1", userAttributes);
+
+            Assert.AreEqual(expectedVariation, variation);
+
+            LoggerMock.Verify(l => l.Log(LogLevel.INFO, "The user \"user1\" is bucketed into experiment \"test_experiment_multivariate\" of feature \"multi_variate_feature\"."));
+        }
+
+        // Should return the variation the user is bucketed into when the user is bucketed into one of the experiments
+        [Test]
+        public void TestGetVariationForFeatureExperimentGivenMutexGroupAndUserIsBucketed()
+        {
+            var mutexExperiment = ProjectConfig.GetExperimentFromKey("group_experiment_1");
+            var expectedVariation = mutexExperiment.Variations[0];
+            var userAttributes = new UserAttributes();
+
+            DecisionServiceMock.Setup(ds => ds.GetVariation(ProjectConfig.GetExperimentFromKey("group_experiment_1"), "user1", userAttributes)).Returns(expectedVariation);
+
+            var featureFlag = ProjectConfig.GetFeatureFlagFromKey("boolean_feature");
+            var variation = DecisionServiceMock.Object.GetVariationForFeatureExperiment(featureFlag, "user1", userAttributes);
+
+            Assert.AreEqual(expectedVariation, variation);
+
+            LoggerMock.Verify(l => l.Log(LogLevel.INFO, "The user \"user1\" is bucketed into experiment \"group_experiment_1\" of feature \"boolean_feature\"."));
+        }
+
+        // Should return null and log a message when the user is not bucketed into any of the mutex experiments 
+        [Test]
+        public void TestGetVariationForFeatureExperimentGivenMutexGroupAndUserNotBucketed()
+        {
+            var mutexExperiment = ProjectConfig.GetExperimentFromKey("group_experiment_1");
+            
+            DecisionServiceMock.Setup(ds => ds.GetVariation(It.IsAny<Experiment>(), It.IsAny<string>(), It.IsAny<UserAttributes>())).Returns<Variation>(null);
+
+            var featureFlag = ProjectConfig.GetFeatureFlagFromKey("boolean_feature");
+            var actualVariation = DecisionServiceMock.Object.GetVariationForFeatureExperiment(featureFlag, "user1", new UserAttributes());
+
+            Assert.IsNull(actualVariation);
+
+            LoggerMock.Verify(l => l.Log(LogLevel.INFO, "The user \"user1\" is not bucketed into any of the experiments on the feature \"boolean_feature\"."));
+        }
+
+        // Should return the bucketed experiment and variation 
+        [Test]
+        public void TestGetVariationForFeatureWhenTheUserIsBucketedIntoFeatureExperiment()
+        {
+            var featureFlag = ProjectConfig.GetFeatureFlagFromKey("string_single_variable_feature");
+            var expectedExperimentId = featureFlag.ExperimentIds[0];
+            var expectedExperiment = ProjectConfig.GetExperimentFromId(expectedExperimentId);
+            var expectedVariation = expectedExperiment.Variations[0];
+
+            DecisionServiceMock.Setup(ds => ds.GetVariationForFeatureExperiment(It.IsAny<FeatureFlag>(), It.IsAny<string>(), It.IsAny<UserAttributes>())).Returns(expectedVariation);
+
+            var actualVariation = DecisionServiceMock.Object.GetVariationForFeature(featureFlag, "user1", new UserAttributes());
+
+            Assert.AreEqual(expectedVariation, actualVariation);
+        }
+
+        // Should return the bucketed variation and null experiment 
+        [Test]
+        public void TestGetVariationForFeatureWhenTheUserIsNotBucketedIntoFeatureExperimentAndBucketedToFeatureRollout()
+        {
+            var featureFlag = ProjectConfig.GetFeatureFlagFromKey("string_single_variable_feature");
+            var rolloutId = featureFlag.RolloutId;
+            var rollout = ProjectConfig.GetRolloutFromId(rolloutId);
+            var expectedExperiment = rollout.Experiments[0];
+            var expectedVariation = expectedExperiment.Variations[0];
+
+            DecisionServiceMock.Setup(ds => ds.GetVariationForFeatureExperiment(It.IsAny<FeatureFlag>(), It.IsAny<string>(), It.IsAny<UserAttributes>())).Returns<Variation>(null);
+            DecisionServiceMock.Setup(ds => ds.GetVariationForFeatureRollout(It.IsAny<FeatureFlag>(), It.IsAny<string>(), It.IsAny<UserAttributes>())).Returns(expectedVariation);
+
+            var actualVariation = DecisionServiceMock.Object.GetVariationForFeature(featureFlag, "user1", new UserAttributes());
+
+            Assert.AreEqual(expectedVariation, actualVariation);
+
+            LoggerMock.Verify(l => l.Log(LogLevel.INFO, "The user \"user1\" is bucketed into a rollout for feature flag \"string_single_variable_feature\"."));
+        }
+        
+        [Test]
+        public void TestGetVariationForFeatureWhenTheUserIsNeitherBucketedIntoFeatureExperimentNorToFeatureRollout()
+        {
+            var featureFlag = ProjectConfig.GetFeatureFlagFromKey("string_single_variable_feature");
+
+            DecisionServiceMock.Setup(ds => ds.GetVariationForFeatureExperiment(It.IsAny<FeatureFlag>(), It.IsAny<string>(), It.IsAny<UserAttributes>())).Returns<Variation>(null);
+            DecisionServiceMock.Setup(ds => ds.GetVariationForFeatureRollout(It.IsAny<FeatureFlag>(), It.IsAny<string>(), It.IsAny<UserAttributes>())).Returns<Variation>(null);
+
+            var actualVariation = DecisionServiceMock.Object.GetVariationForFeature(featureFlag, "user1", new UserAttributes());
+            Assert.IsNull(actualVariation);
+
+            LoggerMock.Verify(l => l.Log(LogLevel.INFO, "The user \"user1\" is not bucketed into a rollout for feature flag \"string_single_variable_feature\"."));
+        }
+
+        [Test]
+        public void TestGetVariationForFeatureRolloutWhenRolloutIsNotInDataFile()
+        {
+            var featureFlag = ProjectConfig.GetFeatureFlagFromKey("boolean_feature");
+            var invalidRolloutFeature = new FeatureFlag {
+                RolloutId = "invalid_rollout_id",
+                Id = featureFlag.Id,
+                Key = featureFlag.Key,
+                ExperimentIds = new List<string>(featureFlag.ExperimentIds),
+                Variables = featureFlag.Variables
+                };
+
+            DecisionServiceMock.Setup(ds => ds.GetVariationForFeatureExperiment(It.IsAny<FeatureFlag>(), It.IsAny<string>(), It.IsAny<UserAttributes>())).Returns<Variation>(null);
+
+            var actualVariation = DecisionServiceMock.Object.GetVariationForFeatureRollout(featureFlag, "user1", new UserAttributes());
+            Assert.IsNull(actualVariation);
+
+            LoggerMock.Verify(l => l.Log(LogLevel.INFO, "The feature flag \"boolean_feature\" is not used in a rollout."));
+        }
+
+        [Test]
+        public void TestGetVariationForFeatureRolloutWhenRolloutDoesNotHaveExperiment()
+        {
+            var featureFlag = ProjectConfig.GetFeatureFlagFromKey("no_rollout_experiment_feature");
+            
+            var actualVariation = DecisionService.GetVariationForFeatureRollout(featureFlag, "user1", new UserAttributes());
+            Assert.IsNull(actualVariation);
+        }
+        
+        // Should return the variation the user is bucketed into when the user is bucketed into the targeting rule
+        [Test]
+        public void TestGetVariationForFeatureRolloutWhenUserIsBucketedInTheTargetingRule()
+        {
+            var featureFlag = ProjectConfig.GetFeatureFlagFromKey("boolean_single_variable_feature");
+            var rolloutId = featureFlag.RolloutId;
+            var rollout = ProjectConfig.GetRolloutFromId(rolloutId);
+            var experiment = rollout.Experiments[0];
+            var expectedVariation = experiment.Variations[0];
+
+            var userAttributes = new UserAttributes {
+                { "browser_type", "chrome" }
+            };
+
+            BucketerMock.Setup(bm => bm.Bucket(It.IsAny<ProjectConfig>(), It.IsAny<Experiment>(), It.IsAny<string>(), It.IsAny<string>())).Returns(expectedVariation);
+            var decisionService = new DecisionService(BucketerMock.Object, ErrorHandlerMock.Object, ProjectConfig, null, LoggerMock.Object);
+
+            var actualVariation = decisionService.GetVariationForFeatureRollout(featureFlag, "user_1", userAttributes);
+            Assert.AreEqual(expectedVariation, actualVariation);
+
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, $"Attempting to bucket user \"user_1\" into rollout rule \"{experiment.Key}\"."));
+        }
+
+        // Should return the variation the user is bucketed into when the user is bucketed into the "Everyone Else" rule
+        // and the user is not bucketed into the targeting rule
+        [Test]
+        public void TestGetVariationForFeatureRolloutWhenUserIsNotBucketedInTheTargetingRuleButBucketedToEveryoneElseRule()
+        {
+            var featureFlag = ProjectConfig.GetFeatureFlagFromKey("boolean_single_variable_feature");
+            var rolloutId = featureFlag.RolloutId;
+            var rollout = ProjectConfig.GetRolloutFromId(rolloutId);
+            var experiment = rollout.Experiments[0];
+            var everyoneElseRule = rollout.Experiments[rollout.Experiments.Count - 1];
+            var expectedVariation = everyoneElseRule.Variations[0];
+
+            var userAttributes = new UserAttributes {
+                { "browser_type", "chrome" }
+            };
+
+            BucketerMock.Setup(bm => bm.Bucket(It.IsAny<ProjectConfig>(), experiment, It.IsAny<string>(), It.IsAny<string>())).Returns<Variation>(null);
+            BucketerMock.Setup(bm => bm.Bucket(It.IsAny<ProjectConfig>(), everyoneElseRule, It.IsAny<string>(), It.IsAny<string>())).Returns(expectedVariation);
+            var decisionService = new DecisionService(BucketerMock.Object, ErrorHandlerMock.Object, ProjectConfig, null, LoggerMock.Object);
+
+            var actualVariation = decisionService.GetVariationForFeatureRollout(featureFlag, "user_1", userAttributes);
+            Assert.AreEqual(expectedVariation, actualVariation);
+
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, $"Attempting to bucket user \"user_1\" into rollout rule \"{experiment.Key}\"."));
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "User \"user_1\" is excluded due to traffic allocation. Checking \"Eveyrone Else\" rule now."));
+        }
+
+        // Should log and return null when  the user is not bucketed into the targeting rule 
+        // as well as "Everyone Else" rule.
+        [Test]
+        public void TestGetVariationForFeatureRolloutWhenUserIsNeitherBucketedInTheTargetingRuleNorToEveryoneElseRule()
+        {
+            var featureFlag = ProjectConfig.GetFeatureFlagFromKey("boolean_single_variable_feature");
+            var rolloutId = featureFlag.RolloutId;
+            var rollout = ProjectConfig.GetRolloutFromId(rolloutId);
+            var experiment = rollout.Experiments[0];
+            var everyoneElseRule = rollout.Experiments[rollout.Experiments.Count - 1];
+            
+            var userAttributes = new UserAttributes {
+                { "browser_type", "chrome" }
+            };
+
+            BucketerMock.Setup(bm => bm.Bucket(It.IsAny<ProjectConfig>(), It.IsAny<Experiment>(), It.IsAny<string>(), It.IsAny<string>())).Returns<Variation>(null);
+            var decisionService = new DecisionService(BucketerMock.Object, ErrorHandlerMock.Object, ProjectConfig, null, LoggerMock.Object);
+
+            var actualVariation = decisionService.GetVariationForFeatureRollout(featureFlag, "user_1", userAttributes);
+            Assert.IsNull(actualVariation);
+
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, $"Attempting to bucket user \"user_1\" into rollout rule \"{experiment.Key}\"."));
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "User \"user_1\" is excluded due to traffic allocation. Checking \"Eveyrone Else\" rule now."));
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, $"User \"user_1\" is excluded from \"Everyone Else\" rule for feature flag \"{featureFlag.Key}\"."));
+        }
+        
+        // Should return expected variation when the user is attempted to be bucketed into all targeting rules
+        // including Everyone Else rule
+        [Test]
+        public void TestGetVariationForFeatureRolloutWhenUserDoesNotQualifyForAnyTargetingRule()
+        {
+            var featureFlag = ProjectConfig.GetFeatureFlagFromKey("boolean_single_variable_feature");
+            var rolloutId = featureFlag.RolloutId;
+            var rollout = ProjectConfig.GetRolloutFromId(rolloutId);
+            var experiment0 = rollout.Experiments[0];
+            var experiment1 = rollout.Experiments[1];
+            var everyoneElseRule = rollout.Experiments[rollout.Experiments.Count - 1];
+            var expectedVariation = everyoneElseRule.Variations[0];
+
+            BucketerMock.Setup(bm => bm.Bucket(It.IsAny<ProjectConfig>(), everyoneElseRule, It.IsAny<string>(), It.IsAny<string>())).Returns(expectedVariation);
+            var decisionService = new DecisionService(BucketerMock.Object, ErrorHandlerMock.Object, ProjectConfig, null, LoggerMock.Object);
+
+            // Provide null attributes so that user does not qualify for audience.
+            var actualVariation = decisionService.GetVariationForFeatureRollout(featureFlag, "user_1", null);
+            Assert.AreEqual(expectedVariation, actualVariation);
+
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, $"User \"user_1\" does not meet the audience conditions to be in rollout rule \"{experiment0.Key}\"."));
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, $"User \"user_1\" does not meet the audience conditions to be in rollout rule \"{experiment1.Key}\"."));
+        }
+
+        #endregion // GetVariationForFeature Tests
     }
 }
