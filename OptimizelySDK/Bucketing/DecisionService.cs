@@ -67,17 +67,8 @@ namespace OptimizelySDK.Bucketing
         /// <param name = "userId" > The userId of the user.
         /// <param name = "filteredAttributes" > The user's attributes. This should be filtered to just attributes in the Datafile.</param>
         /// <returns>The Variation the user is allocated into.</returns>
-        public Variation GetVariation(Experiment experiment, string userId, UserAttributes filteredAttributes)
+        public virtual Variation GetVariation(Experiment experiment, string userId, UserAttributes filteredAttributes)
         {
-            string bucketingId = userId;
-
-            // If the bucketing ID key is defined in attributes, then use that in place of the userID for the murmur hash key
-            if(filteredAttributes != null && filteredAttributes.ContainsKey(RESERVED_ATTRIBUTE_KEY_BUCKETING_ID))
-            {
-                bucketingId = filteredAttributes[RESERVED_ATTRIBUTE_KEY_BUCKETING_ID];
-                Logger.Log(LogLevel.DEBUG, string.Format("Setting the bucketing ID to \"{0}\"", bucketingId));
-            }
-
             if (!ExperimentUtils.IsExperimentActive(experiment, Logger)) return null;
 
             // check if a forced variation is set
@@ -118,7 +109,9 @@ namespace OptimizelySDK.Bucketing
 
             if (ExperimentUtils.IsUserInExperiment(ProjectConfig, experiment, filteredAttributes))
             {
-                
+                // Get Bucketing ID from user attributes.
+                string bucketingId = GetBucketingId(userId, filteredAttributes);
+
                 variation = Bucketer.Bucket(ProjectConfig, experiment, bucketingId, userId);
 
                 if (variation != null && variation.Key != null)
@@ -252,6 +245,160 @@ namespace OptimizelySDK.Bucketing
                     variation.Id, experiment.Id, userProfile.UserId, exception.Message));
                 ErrorHandler.HandleError(new Exceptions.OptimizelyRuntimeException(exception.Message));
             }
+        }
+
+        /// <summary>
+        /// Try to bucket the user into a rollout rule.
+        /// Evaluate the user for rules in priority order by seeing if the user satisfies the audience.
+        /// Fall back onto the everyone else rule if the user is ever excluded from a rule due to traffic allocation.
+        /// </summary>
+        /// <param name = "featureFlag" >The feature flag the user wants to access.</param>
+        /// <param name = "userId" >User Identifier</param>
+        /// <param name = "filteredAttributes" >The user's attributes. This should be filtered to just attributes in the Datafile.</param>
+        /// <returns>null if the user is not bucketed into the rollout or if the feature flag was not attached to a rollout.
+        /// otherwise the Variation the user is bucketed into</returns>
+        public virtual Variation GetVariationForFeatureRollout(FeatureFlag featureFlag, string userId, UserAttributes filteredAttributes)
+        {
+            if (string.IsNullOrEmpty(featureFlag.RolloutId))
+            {
+                Logger.Log(LogLevel.INFO, $"The feature flag \"{featureFlag.Key}\" is not used in a rollout.");
+                return null;
+            }
+
+            Rollout rollout = ProjectConfig.GetRolloutFromId(featureFlag.RolloutId);
+
+            if (string.IsNullOrEmpty(rollout.Id))
+            {
+                Logger.Log(LogLevel.ERROR, $"The rollout with id \"{featureFlag.RolloutId}\" is not found in the datafile for feature flag \"{featureFlag.Key}\"");
+                return null;
+            }
+
+            Variation variation = null;
+            var rolloutRulesLength = rollout.Experiments.Count;
+
+            if (rolloutRulesLength == 0)
+                return null;
+
+            // Get Bucketing ID from user attributes.
+            string bucketingId = GetBucketingId(userId, filteredAttributes);
+
+            // For all rules before the everyone else rule
+            for (int i=0; i < rolloutRulesLength - 1; i++)
+            {
+                var rolloutRule = rollout.Experiments[i];
+
+                if (ExperimentUtils.IsUserInExperiment(ProjectConfig, rolloutRule, filteredAttributes))
+                {
+                    Logger.Log(LogLevel.DEBUG, $"Attempting to bucket user \"{userId}\" into rollout rule \"{rolloutRule.Key}\".");
+                    variation = Bucketer.Bucket(ProjectConfig, rolloutRule, bucketingId, userId);
+
+                    if (variation == null)
+                    {
+                        Logger.Log(LogLevel.DEBUG, $"User \"{userId}\" is excluded due to traffic allocation. Checking \"Eveyrone Else\" rule now.");
+                        break;
+                    }
+
+                    return variation;
+                }
+                else
+                {
+                    Logger.Log(LogLevel.DEBUG, $"User \"{userId}\" does not meet the audience conditions to be in rollout rule \"{rolloutRule.Key}\".");
+                }
+            }
+
+            // Bucket the user into the last rule which is everyone else rule
+            var everyoneElseRolloutRule = rollout.Experiments[rolloutRulesLength - 1];
+            variation = Bucketer.Bucket(ProjectConfig, everyoneElseRolloutRule, bucketingId, userId);
+
+            if (variation == null)
+            {
+                Logger.Log(LogLevel.DEBUG, $"User \"{userId}\" is excluded from \"Everyone Else\" rule for feature flag \"{featureFlag.Key}\".");
+            }
+
+            return variation;
+        }
+
+        /// <summary>
+        /// Get the variation if the user is bucketed for one of the experiments on this feature flag.
+        /// </summary>
+        /// <param name = "featureFlag" >The feature flag the user wants to access.</param>
+        /// <param name = "userId" >User Identifier</param>
+        /// <param name = "filteredAttributes" >The user's attributes. This should be filtered to just attributes in the Datafile.</param>
+        /// <returns>null if the user is not bucketed into the rollout or if the feature flag was not attached to a rollout.
+        /// otherwise the Variation the user is bucketed into</returns>
+        public virtual Variation GetVariationForFeatureExperiment(FeatureFlag featureFlag, string userId, UserAttributes filteredAttributes)
+        {
+            if (featureFlag.ExperimentIds == null || featureFlag.ExperimentIds.Count == 0)
+            {
+                Logger.Log(LogLevel.INFO, $"The feature flag \"{featureFlag.Key}\" is not used in any experiments.");
+                return null;
+            }
+
+            foreach (var experimentId in featureFlag.ExperimentIds)
+            {
+                var experiment = ProjectConfig.GetExperimentFromId(experimentId);
+
+                if (string.IsNullOrEmpty(experiment.Key))
+                    continue;
+
+                var variation = GetVariation(experiment, userId, filteredAttributes);
+
+                if (variation != null)
+                {
+                    Logger.Log(LogLevel.INFO, $"The user \"{userId}\" is bucketed into experiment \"{experiment.Key}\" of feature \"{featureFlag.Key}\".");
+                    return variation;
+                }
+            }
+
+            Logger.Log(LogLevel.INFO, $"The user \"{userId}\" is not bucketed into any of the experiments on the feature \"{featureFlag.Key}\".");
+            return null;
+        }
+
+        /// <summary>
+        /// Get the variation the user is bucketed into for the FeatureFlag
+        /// </summary>
+        /// <param name = "featureFlag" >The feature flag the user wants to access.</param>
+        /// <param name = "userId" >User Identifier</param>
+        /// <param name = "filteredAttributes" >The user's attributes. This should be filtered to just attributes in the Datafile.</param>
+        /// <returns>null if the user is not bucketed into any variation or the Variation the user is bucketed into
+        /// if the user is successfully bucketed.</returns>
+        public Variation GetVariationForFeature(FeatureFlag featureFlag, string userId, UserAttributes filteredAttributes)
+        {
+            // Check if the feature flag has an experiment and the the user is bucketed into that experiment.
+            var variation = GetVariationForFeatureExperiment(featureFlag, userId, filteredAttributes);
+
+            if (variation != null)
+                return variation;
+
+            // Check if the feature flag has rollout and the the user is bucketed into one of its rules.
+            variation = GetVariationForFeatureRollout(featureFlag, userId, filteredAttributes);
+
+            if (variation != null)
+                Logger.Log(LogLevel.INFO, $"The user \"{userId}\" is bucketed into a rollout for feature flag \"{featureFlag.Key}\".");
+            else
+                Logger.Log(LogLevel.INFO, $"The user \"{userId}\" is not bucketed into a rollout for feature flag \"{featureFlag.Key}\".");
+
+            return variation;
+        }
+
+        /// <summary>
+        /// Get Bucketing ID from user attributes.
+        /// </summary>
+        /// <param name = "userId" >User Identifier</param>
+        /// <param name = "filteredAttributes" >The user's attributes.</param>
+        /// <returns>User ID if bucketing Id is not provided in user attributes, bucketing Id otherwise.</returns>
+        private string GetBucketingId(string userId, UserAttributes filteredAttributes)
+        {
+            string bucketingId = userId;
+
+            // If the bucketing ID key is defined in attributes, then use that in place of the userID for the murmur hash key
+            if (filteredAttributes != null && filteredAttributes.ContainsKey(RESERVED_ATTRIBUTE_KEY_BUCKETING_ID))
+            {
+                bucketingId = filteredAttributes[RESERVED_ATTRIBUTE_KEY_BUCKETING_ID];
+                Logger.Log(LogLevel.DEBUG, string.Format("Setting the bucketing ID to \"{0}\"", bucketingId));
+            }
+
+            return bucketingId;
         }
     }
 }
