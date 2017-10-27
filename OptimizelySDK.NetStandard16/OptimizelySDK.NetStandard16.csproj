@@ -7,6 +7,17 @@
         <AssemblyOriginatorKeyFile>..\keypair.snk</AssemblyOriginatorKeyFile>
     </PropertyGroup>
 
+    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+      <CustomCommands>
+        <CustomCommands>
+          <Command>
+            <type>AfterBuild</type>
+            <command>sn -R "bin/Release/netstandard1.6/OptimizelySDK.NetStandard16.dll" "../keypair.snk"</command>
+            <workingdir>${ProjectDir}</workingdir>
+          </Command>
+        </CustomCommands>
+      </CustomCommands>
+    </PropertyGroup>
     <ItemGroup>
         <Compile Include="..\OptimizelySDK\Entity\Attribute.cs" />
         <Compile Include="..\OptimizelySDK\Entity\Audience.cs" />
