@@ -80,9 +80,13 @@
     <Compile Include="Entity\Event.cs" />
     <Compile Include="Entity\EventAttributes.cs" />
     <Compile Include="Entity\Experiment.cs" />
+    <Compile Include="Entity\FeatureFlag.cs" />
+    <Compile Include="Entity\FeatureVariable.cs" />
+    <Compile Include="Entity\FeatureVariableUsage.cs" />
     <Compile Include="Entity\ForcedVariation.cs" />
     <Compile Include="Entity\Group.cs" />
     <Compile Include="Entity\IdKeyEntity.cs" />
+    <Compile Include="Entity\Rollout.cs" />
     <Compile Include="Entity\TrafficAllocation.cs" />
     <Compile Include="Entity\UserAttributes.cs" />
     <Compile Include="Entity\Variation.cs" />

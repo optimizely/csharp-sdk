@@ -51,7 +51,7 @@ namespace OptimizelySDK.Tests
         public void TestInit()
         {
             // Check Version
-            Assert.AreEqual(2, Config.Version);
+            Assert.AreEqual(4, Config.Version);
 
             // Check Account ID
             Assert.AreEqual("1592310167", Config.AccountId);
@@ -71,6 +71,10 @@ namespace OptimizelySDK.Tests
             {
                 {"test_experiment",Config.GetExperimentFromKey("test_experiment") },
                 { "paused_experiment",Config.GetExperimentFromKey("paused_experiment") },
+                { "test_experiment_multivariate",Config.GetExperimentFromKey("test_experiment_multivariate") },
+                { "test_experiment_with_feature_rollout",Config.GetExperimentFromKey("test_experiment_with_feature_rollout") },
+                { "test_experiment_double_feature",Config.GetExperimentFromKey("test_experiment_double_feature") },
+                { "test_experiment_integer_feature",Config.GetExperimentFromKey("test_experiment_integer_feature") },
                 { "group_experiment_1",Config.GetExperimentFromKey("group_experiment_1") },
                 {"group_experiment_2",Config.GetExperimentFromKey("group_experiment_2") }
             };
@@ -83,14 +87,17 @@ namespace OptimizelySDK.Tests
             {
                 {"7716830082",Config.GetExperimentFromId("7716830082") },
                 {"7716830585",Config.GetExperimentFromId("7716830585") },
+                {"122230",Config.GetExperimentFromId("122230") },
+                {"122235",Config.GetExperimentFromId("122235") },
+                {"122238",Config.GetExperimentFromId("122238") },
+                {"122241",Config.GetExperimentFromId("122241") },
                 { "7723330021",Config.GetExperimentFromId("7723330021") },
                 { "7718750065",Config.GetExperimentFromId("7718750065") }
             };
 
-                   Assert.IsTrue(TestData.CompareObjects(experimentIdMap, Config.ExperimentIdMap));
+            Assert.IsTrue(TestData.CompareObjects(experimentIdMap, Config.ExperimentIdMap));
 
-//            Check Event key Map
-
+            // Check Event key Map
             var eventKeyMap = new Dictionary<string, object> { { "purchase", Config.GetEvent("purchase") } };
             Assert.IsTrue(TestData.CompareObjects(eventKeyMap, Config.EventKeyMap));
 
@@ -105,12 +112,13 @@ namespace OptimizelySDK.Tests
             // Check Audience ID Map
             var audienceIdMap = new Dictionary<string, object>
             {
-                { "7718080042", Config.GetAudience("7718080042") }
+                { "7718080042", Config.GetAudience("7718080042") },
+                { "11155", Config.GetAudience("11155") }
             };
             Assert.IsTrue(TestData.CompareObjects(audienceIdMap, Config.AudienceIdMap));
 
             // Check Variation Key Map
-            var variationKeyMap = new Dictionary<string, object>
+            var expectedVariationKeyMap = new Dictionary<string, object>
             {
                 { "test_experiment", new Dictionary<string, object>
                  {
@@ -130,21 +138,44 @@ namespace OptimizelySDK.Tests
                     { "group_exp_1_var_2", Config.GetVariationFromKey("group_experiment_1", "group_exp_1_var_2") }
                  }
                 },
-                {
-                    "group_experiment_2", new Dictionary<string, object>
+                { "group_experiment_2", new Dictionary<string, object>
                  {
                      {"group_exp_2_var_1", Config.GetVariationFromKey("group_experiment_2", "group_exp_2_var_1") },
                      { "group_exp_2_var_2", Config.GetVariationFromKey("group_experiment_2", "group_exp_2_var_2") }
                  }
+                },
+                { "test_experiment_multivariate", new Dictionary<string, object>
+                 {
+                     {"Fred", Config.GetVariationFromKey("test_experiment_multivariate", "Fred") },
+                     { "Feorge", Config.GetVariationFromKey("test_experiment_multivariate", "Feorge") },
+                     { "Gred", Config.GetVariationFromKey("test_experiment_multivariate", "Gred") },
+                     { "George", Config.GetVariationFromKey("test_experiment_multivariate", "George") }
+                 }
+                },
+                { "test_experiment_with_feature_rollout", new Dictionary<string, object>
+                 {
+                     {"control", Config.GetVariationFromKey("test_experiment_with_feature_rollout", "control") },
+                     { "variation", Config.GetVariationFromKey("test_experiment_with_feature_rollout", "variation") }
+                 }
+                },
+                { "test_experiment_double_feature", new Dictionary<string, object>
+                 {
+                     {"control", Config.GetVariationFromKey("test_experiment_double_feature", "control") },
+                     { "variation", Config.GetVariationFromKey("test_experiment_double_feature", "variation") }
+                 }
+                },
+                { "test_experiment_integer_feature", new Dictionary<string, object>
+                 {
+                     {"control", Config.GetVariationFromKey("test_experiment_integer_feature", "control") },
+                     { "variation", Config.GetVariationFromKey("test_experiment_integer_feature", "variation") }
+                 }
                 }
             };
 
-
-
-            Assert.IsTrue(TestData.CompareObjects(variationKeyMap, Config.VariationKeyMap));
+            Assert.IsTrue(TestData.CompareObjects(expectedVariationKeyMap, Config.VariationKeyMap));
 
             // Check Variation ID Map
-            var variationIdMap = new Dictionary<string, object>
+            var expectedVariationIdMap = new Dictionary<string, object>
             {
                 { "test_experiment", new Dictionary<string, object>
                  {
@@ -156,6 +187,32 @@ namespace OptimizelySDK.Tests
                  {
                      {"7722370427", Config.GetVariationFromId("paused_experiment", "7722370427") },
                      { "7721010509", Config.GetVariationFromId("paused_experiment", "7721010509") }
+                 }
+                },
+                { "test_experiment_multivariate", new Dictionary<string, object>
+                 {
+                     { "122231", Config.GetVariationFromId("test_experiment_multivariate", "122231") },
+                     { "122232", Config.GetVariationFromId("test_experiment_multivariate", "122232") },
+                     { "122233", Config.GetVariationFromId("test_experiment_multivariate", "122233") },
+                     { "122234", Config.GetVariationFromId("test_experiment_multivariate", "122234") }
+                 }
+                },
+                { "test_experiment_with_feature_rollout", new Dictionary<string, object>
+                 {
+                     { "122236", Config.GetVariationFromId("test_experiment_with_feature_rollout", "122236") },
+                     { "122237", Config.GetVariationFromId("test_experiment_with_feature_rollout", "122237") }
+                 }
+                },
+                { "test_experiment_double_feature", new Dictionary<string, object>
+                 {
+                     { "122239", Config.GetVariationFromId("test_experiment_double_feature", "122239") },
+                     { "122240", Config.GetVariationFromId("test_experiment_double_feature", "122240") }
+                 }
+                },
+                { "test_experiment_integer_feature", new Dictionary<string, object>
+                 {
+                     { "122242", Config.GetVariationFromId("test_experiment_integer_feature", "122242") },
+                     { "122243", Config.GetVariationFromId("test_experiment_integer_feature", "122243") }
                  }
                 },
                 { "group_experiment_1", new Dictionary<string, object>
@@ -171,7 +228,45 @@ namespace OptimizelySDK.Tests
                 }
             };
 
-            Assert.IsTrue(TestData.CompareObjects(variationIdMap, Config.VariationIdMap));
+            Assert.IsTrue(TestData.CompareObjects(expectedVariationIdMap, Config.VariationIdMap));
+            
+
+            // Check Variation returns correct variable usage
+            var featureVariableUsageInstance = new List<FeatureVariableUsage>
+            {
+                new FeatureVariableUsage{Id="155560", Value="F"},
+                new FeatureVariableUsage{Id="155561", Value="red"},
+            };
+            var expectedVariationUsage = new Variation { Id = "122231", Key = "Fred", FeatureVariableUsageInstances = featureVariableUsageInstance};
+
+            var actualVariationUsage = Config.GetVariationFromKey("test_experiment_multivariate", "Fred");
+
+            Assert.IsTrue(TestData.CompareObjects(expectedVariationUsage, actualVariationUsage));
+
+
+            // Check Feature Key map.
+            var expectedFeatureKeyMap = new Dictionary<string, FeatureFlag>
+            {
+                { "boolean_feature", Config.GetFeatureFlagFromKey("boolean_feature") },
+                { "double_single_variable_feature", Config.GetFeatureFlagFromKey("double_single_variable_feature") },
+                { "integer_single_variable_feature", Config.GetFeatureFlagFromKey("integer_single_variable_feature") },
+                { "boolean_single_variable_feature", Config.GetFeatureFlagFromKey("boolean_single_variable_feature") },
+                { "string_single_variable_feature", Config.GetFeatureFlagFromKey("string_single_variable_feature") },
+                { "multi_variate_feature", Config.GetFeatureFlagFromKey("multi_variate_feature") },
+                { "mutex_group_feature", Config.GetFeatureFlagFromKey("mutex_group_feature") },
+                { "empty_feature", Config.GetFeatureFlagFromKey("empty_feature") }
+            };
+
+            Assert.IsTrue(TestData.CompareObjects(expectedFeatureKeyMap, Config.FeatureKeyMap));
+
+            // Check Feature Key map.
+            var expectedRolloutIdMap = new Dictionary<string, Rollout>
+            {
+                { "166660", Config.GetRolloutFromId("166660") },
+                { "166661", Config.GetRolloutFromId("166661") }
+            };
+
+            Assert.IsTrue(TestData.CompareObjects(expectedRolloutIdMap, Config.RolloutIdMap));
         }
 
         [Test]
@@ -197,8 +292,6 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestGetGroupInvalidId()
         {
-
-
             var group = Config.GetGroup("invalid_id");
 
             LoggerMock.Verify(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()), Times.Exactly(1));
