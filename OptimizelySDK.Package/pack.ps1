@@ -36,6 +36,7 @@ Copy-Item -Path "..\OptimizelySDK.Net35\bin\Release\*.pdb" -Destination ".\lib\n
 Copy-Item -Path "..\OptimizelySDK.Net35\bin\Release\*.xml" -Destination ".\lib\net35" -Recurse -force
 
 New-Item -Path ".\lib\netstandard1.6" -ItemType "directory" -force
+Copy-Item -Path ".\netstandard1.6\*" -Destination ".\lib\netstandard1.6" -Recurse -force
 Copy-Item -Path "..\OptimizelySDK.NetStandard16\bin\Release\netstandard1.6\*.dll" -Destination ".\lib\netstandard1.6" -Recurse -force
 Copy-Item -Path "..\OptimizelySDK.NetStandard16\bin\Release\netstandard1.6\*.pdb" -Destination ".\lib\netstandard1.6" -Recurse -force
 Copy-Item -Path "..\OptimizelySDK.NetStandard16\bin\Release\netstandard1.6\*.xml" -Destination ".\lib\netstandard1.6" -Recurse -force

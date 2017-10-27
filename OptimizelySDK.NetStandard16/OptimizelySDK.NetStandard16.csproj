@@ -57,9 +57,9 @@
         </EmbeddedResource>
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="MurmurHash-net-core" Version="1.0.0" />
         <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
         <PackageReference Include="NJsonSchema" Version="8.33.6323.36213" />
+        <PackageReference Include="murmurhash-signed" Version="1.0.2" />
     </ItemGroup>
 
 </Project>
