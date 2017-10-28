@@ -10,7 +10,7 @@
         <projectUrl>https://github.com/optimizely/csharp-sdk</projectUrl>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <description>C# SDK for Optimizely X Fullstack</description>
-        <releaseNotes>General Availability</releaseNotes>
+        <releaseNotes>https://github.com/optimizely/csharp-sdk/blob/master/CHANGELOG.MD</releaseNotes>
         <copyright>Copyright 2017</copyright>
         <tags>Optimizely</tags>
         <dependencies>
