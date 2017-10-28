@@ -8,6 +8,7 @@
         <owners>fullstack.optimizely</owners>
         <licenseUrl>http://www.apache.org/licenses/LICENSE-2.0</licenseUrl>
         <projectUrl>https://github.com/optimizely/csharp-sdk</projectUrl>
+        <iconUrl>https://github.com/optimizely/csharp-sdk/tree/master/OptimizelySDK.png</iconUrl>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <description>C# SDK for Optimizely X Fullstack</description>
         <releaseNotes>https://github.com/optimizely/csharp-sdk/blob/master/CHANGELOG.MD</releaseNotes>
