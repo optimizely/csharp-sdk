@@ -31,7 +31,7 @@ if ($PSVersionTable["Platform"] -eq "Unix") {
 ################################################################
 # Compiling (msbuild.exe)
 ################################################################
-#& $msbuild ..\OptimizelySDK.sln /p:Platform="Any CPU" /p:Configuration=Release /p:GenerateDocumentation=true  /t:Clean,Build /nr:false /clp:Summary
+& $msbuild ..\OptimizelySDK.sln /p:Platform="Any CPU" /p:Configuration=Release /p:GenerateDocumentation=true  /t:Clean,Build /nr:false /clp:Summary
 Write-Host "-"
 Write-Host "Build complete. Copying files..."
 
