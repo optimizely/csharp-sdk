@@ -262,8 +262,7 @@ namespace OptimizelySDK.Tests
             var expectedRolloutIdMap = new Dictionary<string, Rollout>
             {
                 { "166660", Config.GetRolloutFromId("166660") },
-                { "166661", Config.GetRolloutFromId("166661") },
-                { "166662", Config.GetRolloutFromId("166662") }
+                { "166661", Config.GetRolloutFromId("166661") }
             };
 
             Assert.IsTrue(TestData.CompareObjects(expectedRolloutIdMap, Config.RolloutIdMap));

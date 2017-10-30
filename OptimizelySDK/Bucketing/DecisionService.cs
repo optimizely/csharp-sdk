@@ -275,10 +275,7 @@ namespace OptimizelySDK.Bucketing
 
             Variation variation = null;
             var rolloutRulesLength = rollout.Experiments.Count;
-
-            if (rolloutRulesLength == 0)
-                return null;
-
+            
             // Get Bucketing ID from user attributes.
             string bucketingId = GetBucketingId(userId, filteredAttributes);
 
@@ -364,7 +361,7 @@ namespace OptimizelySDK.Bucketing
         /// if the user is successfully bucketed.</returns>
         public Variation GetVariationForFeature(FeatureFlag featureFlag, string userId, UserAttributes filteredAttributes)
         {
-            // Check if the feature flag has an experiment and the the user is bucketed into that experiment.
+            // Check if the feature flag has an experiment and the user is bucketed into that experiment.
             var variation = GetVariationForFeatureExperiment(featureFlag, userId, filteredAttributes);
 
             if (variation != null)
