@@ -34,7 +34,7 @@
 		<Compile Include="..\OptimizelySDK\Entity\FeatureVariableUsage.cs" />
 		<Compile Include="..\OptimizelySDK\Entity\FeatureFlag.cs" />
 		<Compile Include="..\OptimizelySDK\Entity\FeatureVariable.cs" />
-		<Compile Include="..\OptimizelySDK\Entity\Rollout.cs"/>
+		<Compile Include="..\OptimizelySDK\Entity\Rollout.cs" />
         <Compile Include="..\OptimizelySDK\ErrorHandler\DefaultErrorHandler.cs" />
         <Compile Include="..\OptimizelySDK\ErrorHandler\IErrorHandler.cs" />
         <Compile Include="..\OptimizelySDK\ErrorHandler\NoOpErrorHandler.cs" />

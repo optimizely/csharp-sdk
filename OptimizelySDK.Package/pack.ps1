@@ -39,14 +39,14 @@ Write-Host "Build complete. Copying files..."
 # Strong Naming (sn.exe)
 ################################################################
 # One can use 'find . -name "Optimizely*.dll" -print | grep "bin/Release" | grep -v ".Tests"'
-# to find the Optimizely*.dll that we need this PowerShell script to sign.
+# to find the Optimizely*.dll that we need this PowerShell script to strongname (sn.exe).
 & $sn  -R "../OptimizelySDK/bin/Release/OptimizelySDK.dll" "../keypair.snk"
 & $sn  -R "../OptimizelySDK.Net35/bin/Release/OptimizelySDK.Net35.dll" "../keypair.snk"
 & $sn  -R "../OptimizelySDK.Net40/bin/Release/OptimizelySDK.Net40.dll" "../keypair.snk"
 & $sn  -R "../OptimizelySDK.NetStandard16/bin/Release/netstandard1.6/OptimizelySDK.NetStandard16.dll" "../keypair.snk"
 
 ################################################################
-# NuGet Packaging
+# NuGet lib
 ################################################################
 New-Item -Path ".\content" -ItemType "directory" -force
 Copy-Item -Path ".\Licenses" -Destination ".\content" -Recurse -force
@@ -74,7 +74,36 @@ Copy-Item -Path "..\OptimizelySDK.NetStandard16\bin\Release\netstandard1.6\*.dll
 Copy-Item -Path "..\OptimizelySDK.NetStandard16\bin\Release\netstandard1.6\*.pdb" -Destination ".\lib\netstandard1.6" -Recurse -force
 Copy-Item -Path "..\OptimizelySDK.NetStandard16\bin\Release\netstandard1.6\*.xml" -Destination ".\lib\netstandard1.6" -Recurse -force
 
+################################################################
+# Digital Signing (signtool.exe)
+################################################################
+if ($PSVersionTable["Platform"] -eq "Unix") {
+    # Including macOS
+} elseif (Test-Path "C:\Program Files (x86)\Windows Kits\10\bin\x64") {
+    $signtool="C:\Program Files (x86)\Windows Kits\10\bin\x64\signtool.exe"
+    Write-Host "-"
+    Write-Host "Digitally Signing (signtool.exe)"
+    # One can use 'find "" -name "*.dll" -print  '
+    # to find the *.dll that we need this PowerShell script to digitally sign (signtool.exe).
+    & $signtool sign /tr http://timestamp.digicert.com /td sha256 /fd sha256 /n "Optimizely, Inc." "\lib\net35\MurmurHash.dll"
+    & $signtool sign /tr http://timestamp.digicert.com /td sha256 /fd sha256 /n "Optimizely, Inc." "\lib\net35\Newtonsoft.Json.dll"
+    & $signtool sign /tr http://timestamp.digicert.com /td sha256 /fd sha256 /n "Optimizely, Inc." "\lib\net35\OptimizelySDK.Net35.dll"
+    & $signtool sign /tr http://timestamp.digicert.com /td sha256 /fd sha256 /n "Optimizely, Inc." "\lib\net40\MurmurHash.dll"
+    & $signtool sign /tr http://timestamp.digicert.com /td sha256 /fd sha256 /n "Optimizely, Inc." "\lib\net40\Newtonsoft.Json.dll"
+    & $signtool sign /tr http://timestamp.digicert.com /td sha256 /fd sha256 /n "Optimizely, Inc." "\lib\net40\OptimizelySDK.Net40.dll"
+    & $signtool sign /tr http://timestamp.digicert.com /td sha256 /fd sha256 /n "Optimizely, Inc." "\lib\net45\MurmurHash.dll"
+    & $signtool sign /tr http://timestamp.digicert.com /td sha256 /fd sha256 /n "Optimizely, Inc." "\lib\net45\Newtonsoft.Json.dll"
+    & $signtool sign /tr http://timestamp.digicert.com /td sha256 /fd sha256 /n "Optimizely, Inc." "\lib\net45\NJsonSchema.dll"
+    & $signtool sign /tr http://timestamp.digicert.com /td sha256 /fd sha256 /n "Optimizely, Inc." "\lib\net45\OptimizelySDK.dll"
+    & $signtool sign /tr http://timestamp.digicert.com /td sha256 /fd sha256 /n "Optimizely, Inc." "\lib\netstandard1.6\MurmurHash.dll"
+    & $signtool sign /tr http://timestamp.digicert.com /td sha256 /fd sha256 /n "Optimizely, Inc." "\lib\netstandard1.6\Newtonsoft.Json.dll"
+    & $signtool sign /tr http://timestamp.digicert.com /td sha256 /fd sha256 /n "Optimizely, Inc." "\lib\netstandard1.6\NJsonSchema.dll"
+    & $signtool sign /tr http://timestamp.digicert.com /td sha256 /fd sha256 /n "Optimizely, Inc." "\lib\netstandard1.6\OptimizelySDK.NetStandard16.dll"
+}
+
+################################################################
+# Creating NuGet package
+################################################################
 Write-Host "-"
 Write-Host "Creating NuGet package"
-
 nuget pack OptimizelySDK.nuspec
