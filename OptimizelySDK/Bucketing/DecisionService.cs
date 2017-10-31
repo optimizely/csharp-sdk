@@ -283,6 +283,7 @@ namespace OptimizelySDK.Bucketing
             for (int i=0; i < rolloutRulesLength - 1; i++)
             {
                 var rolloutRule = rollout.Experiments[i];
+                var audience = ProjectConfig.AudienceIdMap[rolloutRule.AudienceIds[0]];
 
                 if (ExperimentUtils.IsUserInExperiment(ProjectConfig, rolloutRule, filteredAttributes))
                 {
@@ -299,7 +300,7 @@ namespace OptimizelySDK.Bucketing
                 }
                 else
                 {
-                    Logger.Log(LogLevel.DEBUG, $"User \"{userId}\" does not meet the audience conditions to be in rollout rule \"{rolloutRule.Key}\".");
+                    Logger.Log(LogLevel.DEBUG, $"User \"{userId}\" does not meet the conditions to be in rollout rule for audience \"{audience.Name}\".");
                 }
             }
 

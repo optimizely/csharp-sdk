@@ -550,6 +550,7 @@ namespace OptimizelySDK.Tests
 
         #region GetVariationForFeatureRollout Tests
 
+        // Should return null when rollout doesn't exist for the feature.
         [Test]
         public void TestGetVariationForFeatureRolloutWhenRolloutIsNotInDataFile()
         {
@@ -666,15 +667,15 @@ namespace OptimizelySDK.Tests
             var actualVariation = decisionService.GetVariationForFeatureRollout(featureFlag, "user_1", null);
             Assert.AreEqual(expectedVariation, actualVariation);
 
-            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, $"User \"user_1\" does not meet the audience conditions to be in rollout rule \"{experiment0.Key}\"."));
-            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, $"User \"user_1\" does not meet the audience conditions to be in rollout rule \"{experiment1.Key}\"."));
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, $"User \"user_1\" does not meet the conditions to be in rollout rule for audience \"{ProjectConfig.AudienceIdMap[experiment0.AudienceIds[0]].Name}\"."));
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, $"User \"user_1\" does not meet the conditions to be in rollout rule for audience \"{ProjectConfig.AudienceIdMap[experiment1.AudienceIds[0]].Name}\"."));
         }
 
         #endregion // GetVariationForFeatureRollout Tests
 
         #region GetVariationForFeature Tests
 
-        // Should return the bucketed experiment and variation 
+        // Should return the variation the user was bucketed into when the user is in the feature flag's experiment.
         [Test]
         public void TestGetVariationForFeatureWhenTheUserIsBucketedIntoFeatureExperiment()
         {
@@ -690,7 +691,8 @@ namespace OptimizelySDK.Tests
             Assert.AreEqual(expectedVariation, actualVariation);
         }
 
-        // Should return the bucketed variation and null experiment 
+        // Should return the bucketed variation when the user is not bucketed in the feature flag experiment, 
+        // but is bucketed into a variation of the feature flag's rollout.
         [Test]
         public void TestGetVariationForFeatureWhenTheUserIsNotBucketedIntoFeatureExperimentAndBucketedToFeatureRollout()
         {
@@ -710,6 +712,7 @@ namespace OptimizelySDK.Tests
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "The user \"user1\" is bucketed into a rollout for feature flag \"string_single_variable_feature\"."));
         }
 
+        // Should return null when the user neither gets bucketed into feature experiment nor in feature rollout.
         [Test]
         public void TestGetVariationForFeatureWhenTheUserIsNeitherBucketedIntoFeatureExperimentNorToFeatureRollout()
         {
@@ -722,6 +725,41 @@ namespace OptimizelySDK.Tests
             Assert.IsNull(actualVariation);
 
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "The user \"user1\" is not bucketed into a rollout for feature flag \"string_single_variable_feature\"."));
+        }
+
+        // Verify that the user is bucketed into the experiment's variation when the user satisfies bucketing and traffic allocation 
+        // for feature flag experiment and feature flag rollout.
+        [Test]
+        public void TestGetVariationForFeatureWhenTheUserIsBuckedtedInBothExperimentAndRollout()
+        {
+            var featureFlag = ProjectConfig.GetFeatureFlagFromKey("string_single_variable_feature");
+            var experiment = ProjectConfig.GetExperimentFromKey("test_experiment_with_feature_rollout");
+            var expectedVariation = ProjectConfig.GetVariationFromId("test_experiment_with_feature_rollout", "122236");
+
+            var rollout = ProjectConfig.GetRolloutFromId(featureFlag.RolloutId);
+            var rolloutExperiment = rollout.Experiments[0];
+            var expectedRolloutVariation = rolloutExperiment.Variations[0];
+
+            var userAttributes = new UserAttributes {
+                { "browser_type", "chrome" }
+            };
+
+            DecisionServiceMock.Setup(ds => ds.GetVariation(experiment, "user1", userAttributes)).Returns(expectedVariation);
+            var experimentVariation = DecisionServiceMock.Object.GetVariationForFeatureExperiment(featureFlag, "user1", userAttributes);
+
+            // The user is bucketed into feature experiment's variation.
+            Assert.AreEqual(expectedVariation, experimentVariation);
+
+            BucketerMock.Setup(bm => bm.Bucket(ProjectConfig, rolloutExperiment, It.IsAny<string>(), It.IsAny<string>())).Returns(expectedRolloutVariation);
+            var rolloutVariation = DecisionServiceMock.Object.GetVariationForFeatureRollout(featureFlag, "user1", userAttributes);
+
+            // The user is bucketed into feature rollout's variation.
+            Assert.AreEqual(expectedRolloutVariation, rolloutVariation);
+
+            var featureVariation = DecisionServiceMock.Object.GetVariationForFeature(featureFlag, "user1", userAttributes);
+
+            // The user is bucketed into feature experiment's variation and not the rollout's variation.
+            Assert.AreEqual(expectedVariation, featureVariation);
         }
 
         #endregion // GetVariationForFeature Tests
