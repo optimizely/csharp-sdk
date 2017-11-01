@@ -76,6 +76,32 @@ namespace OptimizelySDK.Utils
             return eventTags.All(tag => !int.TryParse(tag.Key, out key));
 
         }
+
+        /// <summary>
+        /// Determines whether all the experiments in the feature flag
+        /// belongs to the same mutex group
+        /// </summary>
+        /// <param name="projectConfig">The project config object</param>
+        /// <param name="featureFlag">Feature flag to validate</param>
+        /// <returns>true if feature flag is valid.</returns>
+        public static bool IsFeatureFlagValid(ProjectConfig projectConfig, FeatureFlag featureFlag)
+        {
+            var experimentIds = featureFlag.ExperimentIds;
+            
+            if (experimentIds == null || experimentIds.Count <= 1)
+                return true;
+
+            var groupId = projectConfig.GetExperimentFromId(experimentIds[0]).GroupId;
+
+            for (int i = 1; i < experimentIds.Count; i++)
+            {
+                // Every experiment should have the same group Id.
+                if (projectConfig.GetExperimentFromId(experimentIds[i]).GroupId != groupId)
+                    return false;
+            }
+
+            return true;
+        }
     }
 }
 

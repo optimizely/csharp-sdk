@@ -360,7 +360,7 @@ namespace OptimizelySDK.Bucketing
         /// <param name = "filteredAttributes" >The user's attributes. This should be filtered to just attributes in the Datafile.</param>
         /// <returns>null if the user is not bucketed into any variation or the Variation the user is bucketed into
         /// if the user is successfully bucketed.</returns>
-        public Variation GetVariationForFeature(FeatureFlag featureFlag, string userId, UserAttributes filteredAttributes)
+        public virtual Variation GetVariationForFeature(FeatureFlag featureFlag, string userId, UserAttributes filteredAttributes)
         {
             // Check if the feature flag has an experiment and the user is bucketed into that experiment.
             var variation = GetVariationForFeatureExperiment(featureFlag, userId, filteredAttributes);

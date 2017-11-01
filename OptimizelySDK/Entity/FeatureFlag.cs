@@ -43,5 +43,15 @@ namespace OptimizelySDK.Entity
         }
         
         public Dictionary<string, FeatureVariable> VariableKeyToFeatureVariableMap { get; set; }
+
+        public FeatureVariable GetFeatureVariableFromKey(string variableKey)
+        {
+            if (VariableKeyToFeatureVariableMap != null && VariableKeyToFeatureVariableMap.ContainsKey(variableKey))
+            {
+                return VariableKeyToFeatureVariableMap[variableKey];
+            }
+
+            return null;
+        }
     }
 }
