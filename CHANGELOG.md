@@ -8,7 +8,7 @@ November 6, 2017
 
 * Feature Flag and Rollout models added.
 
-* Implemented Bucketing ID feature.
+* Implemented Bucketing ID feature. 
 
 ## 1.2.0
 October 4, 2017
