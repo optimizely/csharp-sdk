@@ -2,41 +2,29 @@
 <package>
     <metadata>
         <id>Optimizely.SDK</id>
-        <version>1.2.0</version>
+        <version>1.2.1</version>
         <title>Optimizely C# SDK</title>
         <authors>Optimizely Development Team</authors>
         <owners>fullstack.optimizely</owners>
         <licenseUrl>http://www.apache.org/licenses/LICENSE-2.0</licenseUrl>
-        <!-->projectUrl></projectUrl-->
+        <projectUrl>https://github.com/optimizely/csharp-sdk</projectUrl>
+        <iconUrl>https://github.com/optimizely/csharp-sdk/tree/master/OptimizelySDK.png</iconUrl>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <description>C# SDK for Optimizely X Fullstack</description>
-        <releaseNotes>General Availability</releaseNotes>
+        <releaseNotes>https://github.com/optimizely/csharp-sdk/blob/master/CHANGELOG.md</releaseNotes>
         <copyright>Copyright 2017</copyright>
         <tags>Optimizely</tags>
         <dependencies>
             <group targetFramework=".NETFramework4.5">
                 <dependency id="JsonNet.PrivateSettersContractResolvers.Source" version="0.1.0" />
-                <dependency id="murmurhash" version="1.0.0" />
-                <dependency id="Newtonsoft.Json" version="9.0.1" />
-                <dependency id="NJsonSchema" version="8.30.6304.31883" />
-            </group>
-            <group targetFramework=".NETFramework3.5">
-                <dependency id="murmurhash" version="1.0.0" />
-                <dependency id="Newtonsoft.Json" version="9.0.1" />
-            </group>
-            <group targetFramework=".NETFramework4.0">
-                <dependency id="murmurhash" version="1.0.0" />
-                <dependency id="Newtonsoft.Json" version="9.0.1" />
             </group>
             <group targetFramework=".NETStandard1.6">
                 <dependency id="NETStandard.Library" version="1.6.1" />
-                <dependency id="MurmurHash-net-core" version="1.0.0" />
-                <dependency id="Newtonsoft.Json" version="9.0.1" />
-                <dependency id="NJsonSchema" version="8.33.6323.36213" />
             </group>
         </dependencies>
     </metadata>
     <files>
+        <file src="content\**" target="content" />
         <file src="lib\**" target="lib" />
     </files>
 </package>

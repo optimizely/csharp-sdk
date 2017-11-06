@@ -2,8 +2,22 @@
 
     <PropertyGroup>
         <TargetFramework>netstandard1.6</TargetFramework>
+        <ReleaseVersion>1.2.1</ReleaseVersion>
+        <SignAssembly>true</SignAssembly>
+        <AssemblyOriginatorKeyFile>..\keypair.snk</AssemblyOriginatorKeyFile>
     </PropertyGroup>
 
+    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+      <CustomCommands>
+        <CustomCommands>
+          <Command>
+            <type>AfterBuild</type>
+            <command>sn -R "bin/Release/netstandard1.6/OptimizelySDK.NetStandard16.dll" "../keypair.snk"</command>
+            <workingdir>${ProjectDir}</workingdir>
+          </Command>
+        </CustomCommands>
+      </CustomCommands>
+    </PropertyGroup>
     <ItemGroup>
         <Compile Include="..\OptimizelySDK\Entity\Attribute.cs" />
         <Compile Include="..\OptimizelySDK\Entity\Audience.cs" />
@@ -20,7 +34,7 @@
 		<Compile Include="..\OptimizelySDK\Entity\FeatureVariableUsage.cs" />
 		<Compile Include="..\OptimizelySDK\Entity\FeatureFlag.cs" />
 		<Compile Include="..\OptimizelySDK\Entity\FeatureVariable.cs" />
-		<Compile Include="..\OptimizelySDK\Entity\Rollout.cs"/>
+		<Compile Include="..\OptimizelySDK\Entity\Rollout.cs" />
         <Compile Include="..\OptimizelySDK\ErrorHandler\DefaultErrorHandler.cs" />
         <Compile Include="..\OptimizelySDK\ErrorHandler\IErrorHandler.cs" />
         <Compile Include="..\OptimizelySDK\ErrorHandler\NoOpErrorHandler.cs" />
@@ -58,9 +72,9 @@
         </EmbeddedResource>
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="MurmurHash-net-core" Version="1.0.0" />
         <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
         <PackageReference Include="NJsonSchema" Version="8.33.6323.36213" />
+        <PackageReference Include="murmurhash-signed" Version="1.0.2" />
     </ItemGroup>
 
 </Project>

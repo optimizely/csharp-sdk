@@ -75,3 +75,16 @@ The sample project contains unit tests as well which can be run from the built-i
 ### Contributing
 
 Please see [CONTRIBUTING](CONTRIBUTING.md).
+
+## Third Party Licenses
+
+Optimizely SDK uses third party software:
+[murmurhash-signed](https://www.nuget.org/packages/murmurhash-signed/),
+[Newtonsoft.Json](https://www.nuget.org/packages/Newtonsoft.Json/), and
+[NJsonSchema](https://www.nuget.org/packages/NJsonSchema/).
+Optimizely's NuGet package digitally signs these third party DLL's.
+Third party software licenses are included in the folder Licenses when Optimizely is installed.
+ 
+
+
+
