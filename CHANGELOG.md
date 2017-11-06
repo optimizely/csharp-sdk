@@ -1,5 +1,5 @@
 ## 1.2.1
-October 31, 2017
+November 6, 2017
 
 ### New Features
 * Package DLL's including third party component DLL's are strongnamed and digitally signed by Optimizely.
