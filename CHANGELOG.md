@@ -1,3 +1,15 @@
+## 1.2.1
+November 6, 2017
+
+### New Features
+* Package DLL's including third party component DLL's are strongnamed and digitally signed by Optimizely.
+
+* DecisionService GetVariationForFeatureRollout added.
+
+* Feature Flag and Rollout models added.
+
+* Implemented Bucketing ID feature. 
+
 ## 1.2.0
 October 4, 2017
 
