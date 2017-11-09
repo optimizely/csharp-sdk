@@ -19,10 +19,6 @@ using System.Runtime.InteropServices;
 // COM, set the ComVisible attribute to true on that type.
 [assembly: ComVisible(false)]
 
-// Strong naming
-[assembly: AssemblyKeyFileAttribute("keypair.snk")]
-[assembly: AssemblyDelaySignAttribute(false)]
-
 // Make types and members with internal scope visible to friend
 // OptimizelySDK.Tests unit tests. 
 #pragma warning disable 1700
