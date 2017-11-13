@@ -125,7 +125,13 @@ namespace OptimizelySDK
         /// </summary>
         private Dictionary<string, Rollout> _RolloutIdMap;
         public Dictionary<string, Rollout> RolloutIdMap { get { return _RolloutIdMap; } }
-        
+
+        /// <summary>
+        /// Associative array of Variation ID to Experiments(s) in the datafile
+        /// </summary>
+        private Dictionary<string, Experiment> _VariationIdToExperimentMap = new Dictionary<string, Experiment>();
+        public Dictionary<string, Experiment> VariationIdToExperimentMap{ get { return _VariationIdToExperimentMap; } }
+
         //========================= Callbacks ===========================
 
         /// <summary>
@@ -236,6 +242,9 @@ namespace OptimizelySDK
                     {
                         _VariationKeyMap[experiment.Key][variation.Key] = variation;
                         _VariationIdMap[experiment.Key][variation.Id] = variation;
+
+                        // Generate Variation ID to Experiment map.
+                        _VariationIdToExperimentMap[variation.Id] = experiment;
                     }
                 }
             }
@@ -531,6 +540,22 @@ namespace OptimizelySDK
             Logger.Log(LogLevel.ERROR, message);
             ErrorHandler.HandleError(new Exceptions.InvalidRolloutException("Provided rollout is not in datafile."));
             return new Rollout();
+        }
+
+        /// <summary>
+        /// Get experiment from variation ID.
+        /// </summary>
+        /// <param name="variationId">Variation ID</param>
+        /// <returns>Experiment Entity corresponding to the variation ID or a dummy entity if ID is invalid</returns>
+        public Experiment GetExperimentForVariationId(string variationId)
+        {
+            if (_VariationIdToExperimentMap.ContainsKey(variationId))
+                return _VariationIdToExperimentMap[variationId];
+            
+            Logger.Log(LogLevel.ERROR, $@"No experiment has been defined in datafile for variation ""{variationId}"".");
+            ErrorHandler.HandleError(new Exceptions.InvalidVariationException("No experiment has been found for provided variation Id in the datafile."));
+
+            return new Experiment();
         }
     }
 }
