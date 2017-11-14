@@ -39,5 +39,15 @@ namespace OptimizelySDK.Entity
         }
 
         public Dictionary<string, FeatureVariableUsage> VariableIdToVariableUsageInstanceMap { get; set; }
+
+        public FeatureVariableUsage GetFeatureVariableUsageFromId(string variableId)
+        {
+            if (VariableIdToVariableUsageInstanceMap != null && VariableIdToVariableUsageInstanceMap.ContainsKey(variableId))
+            {
+                return VariableIdToVariableUsageInstanceMap[variableId];
+            }
+
+            return null;
+        }
     }
 }
