@@ -20,6 +20,7 @@ using OptimizelySDK.Event.Builder;
 using OptimizelySDK.Event.Dispatcher;
 using OptimizelySDK.Logger;
 using OptimizelySDK.Utils;
+using OptimizelySDK.Notifications;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -28,7 +29,6 @@ namespace OptimizelySDK
 {
     public class Optimizely
     {
-
         private Bucketer Bucketer;
 
         private EventBuilder EventBuilder;
@@ -44,6 +44,8 @@ namespace OptimizelySDK
         private UserProfileService UserProfileService;
 
         private DecisionService DecisionService;
+
+        private NotificationCenter NotificationCenter;
 
         public bool IsValid { get; private set; }
 
@@ -91,6 +93,7 @@ namespace OptimizelySDK
             Bucketer = new Bucketer(Logger);
             EventBuilder = new EventBuilder(Bucketer);
             UserProfileService = userProfileService;
+            NotificationCenter = new NotificationCenter(Logger);
 
             try
             {
@@ -175,7 +178,7 @@ namespace OptimizelySDK
                 userAttributes = userAttributes.FilterNullValues(Logger);
             }
 
-            SendImpressionEvent(experiment, variation.Id, userId, userAttributes);
+            SendImpressionEvent(experiment, variation, userId, userAttributes);
 
             return variation.Key;
         }
@@ -262,6 +265,8 @@ namespace OptimizelySDK
                     Logger.Log(LogLevel.ERROR, string.Format("Unable to dispatch conversion event. Error {0}", exception.Message));
                 }
 
+                NotificationCenter.FireNotifications(NotificationCenter.NotificationType.Track, eventKey, userId, 
+                    userAttributes, eventTags, conversionEvent);
             }
             else
             {
@@ -360,11 +365,14 @@ namespace OptimizelySDK
             var experiment = Config.GetExperimentForVariationId(variation.Id);
 
             if (!string.IsNullOrEmpty(experiment.Key))
-                SendImpressionEvent(experiment, variation.Id, userId, userAttributes);
+                SendImpressionEvent(experiment, variation, userId, userAttributes);
             else
                 Logger.Log(LogLevel.INFO, $@"The user ""{userId}"" is not being experimented on feature ""{featureKey}"".");
 
             Logger.Log(LogLevel.INFO, $@"Feature flag ""{featureKey}"" is enabled for user ""{userId}"".");
+            NotificationCenter.FireNotifications(NotificationCenter.NotificationType.FeatureAccess, featureKey, userId,
+                    userAttributes, variation);
+
             return true;
         }
 
@@ -533,15 +541,15 @@ namespace OptimizelySDK
         /// Sends impression event.
         /// </summary>
         /// <param name="experiment">The experiment</param>
-        /// <param name="variationId">The variation Id</param>
+        /// <param name="variationId">The variation entity</param>
         /// <param name="userId">The user ID</param>
         /// <param name="userAttributes">The user's attributes</param>
-        private void SendImpressionEvent(Experiment experiment, string variationId, string userId, 
+        private void SendImpressionEvent(Experiment experiment, Variation variation, string userId, 
         UserAttributes userAttributes)
         {
             if (experiment.IsExperimentRunning)
             {
-                var impressionEvent = EventBuilder.CreateImpressionEvent(Config, experiment, variationId, userId, userAttributes);
+                var impressionEvent = EventBuilder.CreateImpressionEvent(Config, experiment, variation.Id, userId, userAttributes);
                 Logger.Log(LogLevel.INFO, string.Format("Activating user {0} in experiment {1}.", userId, experiment.Key));
                 Logger.Log(LogLevel.DEBUG, string.Format("Dispatching impression event to URL {0} with params {1}.",
                     impressionEvent.Url, impressionEvent.GetParamsAsJson()));
@@ -554,6 +562,9 @@ namespace OptimizelySDK
                 {
                     Logger.Log(LogLevel.ERROR, string.Format("Unable to dispatch impression event. Error {0}", exception.Message));
                 }
+
+                NotificationCenter.FireNotifications(NotificationCenter.NotificationType.Decision, experiment, userId,
+                    userAttributes, variation, impressionEvent);
             }
             else
             {

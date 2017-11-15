@@ -38,6 +38,7 @@
         <Compile Include="..\OptimizelySDK\Logger\DefaultLogger.cs" />
         <Compile Include="..\OptimizelySDK\Logger\ILogger.cs" />
         <Compile Include="..\OptimizelySDK\Logger\NoOpLogger.cs" />
+		<Compile Include="..\OptimizelySDK\Notifications\NotificationCenter.cs" />
         <Compile Include="..\OptimizelySDK\Optimizely.cs" />
         <Compile Include="..\OptimizelySDK\ProjectConfig.cs" />
         <Compile Include="..\OptimizelySDK\Utils\ConditionEvaluator.cs" />

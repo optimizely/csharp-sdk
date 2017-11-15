@@ -93,6 +93,7 @@
     <Compile Include="Logger\DefaultLogger.cs" />
     <Compile Include="Logger\ILogger.cs" />
     <Compile Include="Logger\NoOpLogger.cs" />
+    <Compile Include="Notifications\NotificationCenter.cs" />
     <Compile Include="Optimizely.cs" />
     <Compile Include="ProjectConfig.cs" />
     <Compile Include="Bucketing\UserProfile.cs" />
