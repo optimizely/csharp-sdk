@@ -25,11 +25,6 @@ namespace OptimizelySDK.Event.Dispatcher
         // TODO Catch and Log Errors
         public Logger.ILogger Logger { get; set; }
 
-        /// <summary>
-        /// Timeout for the HTTP request (10 seconds)
-        /// </summary>
-        private const int TIMEOUT_MS = 10000;
-
         private HttpWebRequest Request = null;
 
         /// <summary>
@@ -43,7 +38,6 @@ namespace OptimizelySDK.Event.Dispatcher
             Request = (HttpWebRequest)WebRequest.Create(logEvent.Url);
 
             Request.UserAgent = "Optimizely-csharp-SDKv01";
-            Request.Timeout = TIMEOUT_MS;
             Request.Method = logEvent.HttpVerb;
 
             foreach (var h in logEvent.Headers)

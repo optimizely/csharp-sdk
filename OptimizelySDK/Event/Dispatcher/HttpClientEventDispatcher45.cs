@@ -26,9 +26,17 @@ namespace OptimizelySDK.Event.Dispatcher
         public ILogger Logger { get; set; } = new DefaultLogger();
 
         /// <summary>
-        /// Timeout for the HTTP request (10 seconds)
+        /// HTTP client object.
         /// </summary>
-        const int TIMEOUT_MS = 10000;
+        private static readonly HttpClient Client;
+
+        /// <summary>
+        /// Constructor for initializing static members.
+        /// </summary>
+        static HttpClientEventDispatcher45()
+        {
+            Client = new HttpClient();
+        }
 
         /// <summary>
         /// Dispatch an Event asynchronously
@@ -38,26 +46,20 @@ namespace OptimizelySDK.Event.Dispatcher
             try
             {
                 string json = logEvent.GetParamsAsJson();
-
-                using (var client = new HttpClient())
+                var request = new HttpRequestMessage
                 {
-                    client.Timeout = TimeSpan.FromMilliseconds(TIMEOUT_MS);
+                    RequestUri = new Uri(logEvent.Url),
+                    Method = HttpMethod.Post,
+                    // The Content-Type header applies to the Content, not the Request itself
+                    Content = new StringContent(json, System.Text.Encoding.UTF8, "application/json"),
+                };
 
-                    var request = new HttpRequestMessage
-                    {
-                        RequestUri = new Uri(logEvent.Url),
-                        Method = HttpMethod.Post,
-                        // The Content-Type header applies to the Content, not the Request itself
-                        Content = new StringContent(json, System.Text.Encoding.UTF8, "application/json"),
-                    };
+                foreach (var h in logEvent.Headers)
+                    if (h.Key.ToLower() != "content-type")
+                        request.Content.Headers.Add(h.Key, h.Value);
 
-                    foreach (var h in logEvent.Headers)
-                        if (h.Key.ToLower() != "content-type")
-                            request.Content.Headers.Add(h.Key, h.Value);
-
-                    var result = await client.SendAsync(request);
-                    result.EnsureSuccessStatusCode();
-                }
+                var result = await Client.SendAsync(request);
+                result.EnsureSuccessStatusCode();
             }
             catch (Exception ex)
             {
