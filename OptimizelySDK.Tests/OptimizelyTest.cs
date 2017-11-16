@@ -1536,9 +1536,9 @@ namespace OptimizelySDK.Tests
                 "POST", new Dictionary<string, string> { });
 
             // Mocking objects.
-            NotificationCallbackMock.Setup(nc => nc.TestDecisionCallback(It.IsAny<Experiment>(), It.IsAny<string>(),
+            NotificationCallbackMock.Setup(nc => nc.TestActivateCallback(It.IsAny<Experiment>(), It.IsAny<string>(),
                 It.IsAny<UserAttributes>(), It.IsAny<Variation>(), It.IsAny<LogEvent>()));
-            NotificationCallbackMock.Setup(nc => nc.TestAnotherDecisionCallback(It.IsAny<Experiment>(), It.IsAny<string>(),
+            NotificationCallbackMock.Setup(nc => nc.TestAnotherActivateCallback(It.IsAny<Experiment>(), It.IsAny<string>(),
                 It.IsAny<UserAttributes>(), It.IsAny<Variation>(), It.IsAny<LogEvent>()));
             NotificationCallbackMock.Setup(nc => nc.TestTrackCallback(It.IsAny<string>(), It.IsAny<string>(),
                 It.IsAny<UserAttributes>(), It.IsAny<EventTags>(), It.IsAny<LogEvent>()));
@@ -1548,9 +1548,9 @@ namespace OptimizelySDK.Tests
             DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, userAttributes)).Returns(variation);
 
             // Adding notification listeners.
-            var notificationType = NotificationCenter.NotificationType.Decision;
-            NotificationCenter.AddNotification(notificationType, NotificationCallbackMock.Object.TestDecisionCallback);
-            NotificationCenter.AddNotification(notificationType, NotificationCallbackMock.Object.TestAnotherDecisionCallback);
+            var notificationType = NotificationCenter.NotificationType.Activate;
+            NotificationCenter.AddNotification(notificationType, NotificationCallbackMock.Object.TestActivateCallback);
+            NotificationCenter.AddNotification(notificationType, NotificationCallbackMock.Object.TestAnotherActivateCallback);
 
             var optly = Helper.CreatePrivateOptimizely();
             optly.SetFieldOrProperty("NotificationCenter", NotificationCenter);
@@ -1562,8 +1562,8 @@ namespace OptimizelySDK.Tests
             optly.Invoke("IsFeatureEnabled", featureKey, TestUserId, userAttributes);
 
             // Verify that all the registered callbacks are called once for both Activate and IsFeatureEnabled.
-            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(experiment, TestUserId, userAttributes, variation, logEvent), Times.Exactly(2));
-            NotificationCallbackMock.Verify(nc => nc.TestAnotherDecisionCallback(experiment, TestUserId, userAttributes, variation, logEvent), Times.Exactly(2));
+            NotificationCallbackMock.Verify(nc => nc.TestActivateCallback(experiment, TestUserId, userAttributes, variation, logEvent), Times.Exactly(2));
+            NotificationCallbackMock.Verify(nc => nc.TestAnotherActivateCallback(experiment, TestUserId, userAttributes, variation, logEvent), Times.Exactly(2));
         }
 
         [Test]
@@ -1642,7 +1642,7 @@ namespace OptimizelySDK.Tests
         }
         
         [Test]
-        public void TestFeatureAccessListenerWithFeatureExperiment()
+        public void TestFeatureExperimentListener()
         {
             var featureKey = "boolean_feature";
             var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
@@ -1658,19 +1658,19 @@ namespace OptimizelySDK.Tests
             };
 
             // Mocking objects.
-            NotificationCallbackMock.Setup(nc => nc.TestDecisionCallback(It.IsAny<Experiment>(), It.IsAny<string>(),
+            NotificationCallbackMock.Setup(nc => nc.TestActivateCallback(It.IsAny<Experiment>(), It.IsAny<string>(),
                 It.IsAny<UserAttributes>(), It.IsAny<Variation>(), It.IsAny<LogEvent>()));
-            NotificationCallbackMock.Setup(nc => nc.TestFeatureAccessCallback(It.IsAny<string>(), It.IsAny<string>(),
-                It.IsAny<UserAttributes>(), It.IsAny<Variation>()));
+            NotificationCallbackMock.Setup(nc => nc.TestFeatureExperimentCallback(It.IsAny<string>(), It.IsAny<string>(),
+                It.IsAny<UserAttributes>(), It.IsAny<Experiment>(), It.IsAny<Variation>()));
             EventBuilderMock.Setup(ebm => ebm.CreateImpressionEvent(It.IsAny<ProjectConfig>(), It.IsAny<Experiment>(),
                 It.IsAny<string>(), It.IsAny<string>(), It.IsAny<UserAttributes>())).Returns(logEvent);
             DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, userAttributes)).Returns(variation);
 
             // Adding notification listeners.
-            NotificationCenter.AddNotification(NotificationCenter.NotificationType.Decision, 
-                NotificationCallbackMock.Object.TestDecisionCallback);
-            NotificationCenter.AddNotification(NotificationCenter.NotificationType.FeatureAccess, 
-                NotificationCallbackMock.Object.TestFeatureAccessCallback);
+            NotificationCenter.AddNotification(NotificationCenter.NotificationType.Activate, 
+                NotificationCallbackMock.Object.TestActivateCallback);
+            NotificationCenter.AddNotification(NotificationCenter.NotificationType.FeatureExperiment, 
+                NotificationCallbackMock.Object.TestFeatureExperimentCallback);
 
             var optly = Helper.CreatePrivateOptimizely();
             optly.SetFieldOrProperty("NotificationCenter", NotificationCenter);
@@ -1680,13 +1680,13 @@ namespace OptimizelySDK.Tests
             // Calling IsFeatureEnabled.
             optly.Invoke("IsFeatureEnabled", featureKey, TestUserId, userAttributes);
 
-            // Verify that both of the decision and feature access callbacks are called in case of feature experiment.
-            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(experiment, TestUserId, userAttributes, variation, logEvent), Times.Exactly(1));
-            NotificationCallbackMock.Verify(nc => nc.TestFeatureAccessCallback(featureKey, TestUserId, userAttributes, variation), Times.Exactly(1));
+            // Verify that both of the activate and feature experiment callbacks are called in case of feature experiment.
+            NotificationCallbackMock.Verify(nc => nc.TestActivateCallback(experiment, TestUserId, userAttributes, variation, logEvent), Times.Exactly(1));
+            NotificationCallbackMock.Verify(nc => nc.TestFeatureExperimentCallback(featureKey, TestUserId, userAttributes, experiment, variation), Times.Exactly(1));
         }
 
         [Test]
-        public void TestFeatureAccessListenerWithRolloutRule()
+        public void TestFeatureRolloutListener()
         {
             var featureKey = "boolean_single_variable_feature";
             var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
@@ -1703,19 +1703,19 @@ namespace OptimizelySDK.Tests
             };
 
             // Mocking objects.
-            NotificationCallbackMock.Setup(nc => nc.TestDecisionCallback(It.IsAny<Experiment>(), It.IsAny<string>(),
+            NotificationCallbackMock.Setup(nc => nc.TestActivateCallback(It.IsAny<Experiment>(), It.IsAny<string>(),
                 It.IsAny<UserAttributes>(), It.IsAny<Variation>(), It.IsAny<LogEvent>()));
-            NotificationCallbackMock.Setup(nc => nc.TestFeatureAccessCallback(It.IsAny<string>(), It.IsAny<string>(),
-                It.IsAny<UserAttributes>(), It.IsAny<Variation>()));
+            NotificationCallbackMock.Setup(nc => nc.TestFeatureRolloutCallback(It.IsAny<string>(), It.IsAny<string>(),
+                It.IsAny<UserAttributes>(), It.IsAny<Audience>()));
             EventBuilderMock.Setup(ebm => ebm.CreateImpressionEvent(It.IsAny<ProjectConfig>(), It.IsAny<Experiment>(),
                 It.IsAny<string>(), It.IsAny<string>(), It.IsAny<UserAttributes>())).Returns(logEvent);
             DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, userAttributes)).Returns(variation);
 
             // Adding notification listeners.
-            NotificationCenter.AddNotification(NotificationCenter.NotificationType.Decision,
-                NotificationCallbackMock.Object.TestDecisionCallback);
-            NotificationCenter.AddNotification(NotificationCenter.NotificationType.FeatureAccess,
-                NotificationCallbackMock.Object.TestFeatureAccessCallback);
+            NotificationCenter.AddNotification(NotificationCenter.NotificationType.Activate,
+                NotificationCallbackMock.Object.TestActivateCallback);
+            NotificationCenter.AddNotification(NotificationCenter.NotificationType.FeatureRollout,
+                NotificationCallbackMock.Object.TestFeatureRolloutCallback);
 
             var optly = Helper.CreatePrivateOptimizely();
             optly.SetFieldOrProperty("NotificationCenter", NotificationCenter);
@@ -1725,9 +1725,9 @@ namespace OptimizelySDK.Tests
             // Calling IsFeatureEnabled.
             optly.Invoke("IsFeatureEnabled", featureKey, TestUserId, userAttributes);
 
-            // Verify that only feature access callback gets called in case of rollout rule.
-            NotificationCallbackMock.Verify(nc => nc.TestFeatureAccessCallback(featureKey, TestUserId, userAttributes, variation), Times.Exactly(1));
-            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(experiment, TestUserId, userAttributes, variation, logEvent), Times.Never);
+            // Verify that only feature rollout callback gets called in case of rollout rule.
+            NotificationCallbackMock.Verify(nc => nc.TestFeatureRolloutCallback(featureKey, TestUserId, userAttributes, It.IsAny<Audience>()), Times.Exactly(1));
+            NotificationCallbackMock.Verify(nc => nc.TestActivateCallback(experiment, TestUserId, userAttributes, variation, logEvent), Times.Never);
         }
 
         #endregion // Test NotificationCenter

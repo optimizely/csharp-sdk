@@ -365,14 +365,29 @@ namespace OptimizelySDK
             var experiment = Config.GetExperimentForVariationId(variation.Id);
 
             if (!string.IsNullOrEmpty(experiment.Key))
+            {
                 SendImpressionEvent(experiment, variation, userId, userAttributes);
+                NotificationCenter.FireNotifications(NotificationCenter.NotificationType.FeatureExperiment, featureKey, userId,
+                    userAttributes, experiment, variation);
+            }
             else
+            {
+                Audience audience = null;
+                var rolloutRule = Config.GetRolloutRuleForVariationId(variation.Id);
+
+                if (!string.IsNullOrEmpty(rolloutRule.Key)
+                    && rolloutRule.AudienceIds != null
+                    && rolloutRule.AudienceIds.Length > 0)
+                {
+                    audience = Config.GetAudience(rolloutRule.AudienceIds[0]);
+                }
+
+                NotificationCenter.FireNotifications(NotificationCenter.NotificationType.FeatureRollout, featureKey, userId,
+                        userAttributes, audience);
                 Logger.Log(LogLevel.INFO, $@"The user ""{userId}"" is not being experimented on feature ""{featureKey}"".");
+            }
 
             Logger.Log(LogLevel.INFO, $@"Feature flag ""{featureKey}"" is enabled for user ""{userId}"".");
-            NotificationCenter.FireNotifications(NotificationCenter.NotificationType.FeatureAccess, featureKey, userId,
-                    userAttributes, variation);
-
             return true;
         }
 
@@ -563,7 +578,7 @@ namespace OptimizelySDK
                     Logger.Log(LogLevel.ERROR, string.Format("Unable to dispatch impression event. Error {0}", exception.Message));
                 }
 
-                NotificationCenter.FireNotifications(NotificationCenter.NotificationType.Decision, experiment, userId,
+                NotificationCenter.FireNotifications(NotificationCenter.NotificationType.Activate, experiment, userId,
                     userAttributes, variation, impressionEvent);
             }
             else

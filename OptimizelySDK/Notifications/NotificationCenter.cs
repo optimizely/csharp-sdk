@@ -33,20 +33,21 @@ namespace OptimizelySDK.Notifications
         /// </summary>
         public enum NotificationType
         {
-            Decision, // Activate called.
+            Activate, // Activate called.
             Track, // Event tracked.
-            FeatureAccess // Feature accessed
+            FeatureExperiment, // Feature accessed from experiment.
+            FeatureRollout // Feature accessed from rollout rule.
         };
 
         /// <summary>
-        /// Delegate for decision notifcations.
+        /// Delegate for activate notifcations.
         /// </summary>
         /// <param name="experiment">The experiment entity</param>
         /// <param name="userId">The user identifier</param>
         /// <param name="userAttributes">Associative array of attributes for the user</param>
         /// <param name="variation">The variation entity</param>
         /// <param name="logEvent">The impression event</param>
-        public delegate void DecisionCallback(Experiment experiment, string userId, UserAttributes userAttributes,
+        public delegate void ActivateCallback(Experiment experiment, string userId, UserAttributes userAttributes,
             Variation variation, LogEvent logEvent);
 
         /// <summary>
@@ -61,15 +62,26 @@ namespace OptimizelySDK.Notifications
             LogEvent logEvent);
 
         /// <summary>
-        /// Delegate for feature access notifcations.
+        /// Delegate for feature experiment notifcations.
         /// </summary>
         /// <param name="featureKey">The feature key</param>
         /// <param name="userId">The user identifier</param>
         /// <param name="userAttributes">Associative array of attributes for the user</param>
+        /// <param name="experiment">The experiment entity</param>
         /// <param name="variation">The variation entity</param>
-        public delegate void FeatureAccessCallback(string featureKey, string userId, UserAttributes userAttributes,
-            Variation variation);
-        
+        public delegate void FeatureExperimentCallback(string featureKey, string userId, UserAttributes userAttributes,
+            Experiment experiment, Variation variation);
+
+        /// <summary>
+        /// Delegate for feature rollout notifcations.
+        /// </summary>
+        /// <param name="featureKey">The feature key</param>
+        /// <param name="userId">The user identifier</param>
+        /// <param name="userAttributes">Associative array of attributes for the user</param>
+        /// <param name="audience">The audience entity</param>
+        public delegate void FeatureRolloutCallback(string featureKey, string userId, UserAttributes userAttributes,
+            Audience audience);
+
         private ILogger Logger;
 
         // Notification Id represeting number of notifications.
@@ -117,12 +129,12 @@ namespace OptimizelySDK.Notifications
         /// <param name="decisionCallBack">Callback function to call when event gets triggered</param>
         /// <returns>int | 0 for invalid notification type, -1 for adding existing notification
         /// or the notification id of newly added notification.</returns>
-        public int AddNotification(NotificationType notificationType, DecisionCallback decisionCallBack)
+        public int AddNotification(NotificationType notificationType, ActivateCallback activateCallback)
         {
-            if (!IsNotificationTypeValid(notificationType, NotificationType.Decision))
+            if (!IsNotificationTypeValid(notificationType, NotificationType.Activate))
                 return 0;
 
-            return AddNotification(notificationType, (object)decisionCallBack);
+            return AddNotification(notificationType, (object)activateCallback);
         }
 
         /// <summary>
@@ -141,18 +153,33 @@ namespace OptimizelySDK.Notifications
         }
 
         /// <summary>
-        /// Add a notification callback of feature access type to the notification center.
+        /// Add a notification callback of feature experiment type to the notification center.
         /// </summary>
         /// <param name="notificationType">Notification type</param>
-        /// <param name="featureAccessCallback">Callback function to call when event gets triggered</param>
+        /// <param name="featureExperimentCallback">Callback function to call when event gets triggered</param>
         /// <returns>int | 0 for invalid notification type, -1 for adding existing notification
         /// or the notification id of newly added notification.</returns>
-        public int AddNotification(NotificationType notificationType, FeatureAccessCallback featureAccessCallback)
+        public int AddNotification(NotificationType notificationType, FeatureExperimentCallback featureExperimentCallback)
         {
-            if (!IsNotificationTypeValid(notificationType, NotificationType.FeatureAccess))
+            if (!IsNotificationTypeValid(notificationType, NotificationType.FeatureExperiment))
                 return 0;
 
-            return AddNotification(notificationType, (object)featureAccessCallback);
+            return AddNotification(notificationType, (object)featureExperimentCallback);
+        }
+
+        /// <summary>
+        /// Add a notification callback of feature rollout type to the notification center.
+        /// </summary>
+        /// <param name="notificationType">Notification type</param>
+        /// <param name="featureRolloutCallback">Callback function to call when event gets triggered</param>
+        /// <returns>int | 0 for invalid notification type, -1 for adding existing notification
+        /// or the notification id of newly added notification.</returns>
+        public int AddNotification(NotificationType notificationType, FeatureRolloutCallback featureRolloutCallback)
+        {
+            if (!IsNotificationTypeValid(notificationType, NotificationType.FeatureRollout))
+                return 0;
+
+            return AddNotification(notificationType, (object)featureRolloutCallback);
         }
 
         /// <summary>
@@ -171,7 +198,6 @@ namespace OptimizelySDK.Notifications
 
             return true;
         }
-
 
         /// <summary>
         /// Add a notification callback to the notification center.
