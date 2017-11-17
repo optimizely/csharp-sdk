@@ -78,9 +78,9 @@ namespace OptimizelySDK.Notifications
         /// <param name="featureKey">The feature key</param>
         /// <param name="userId">The user identifier</param>
         /// <param name="userAttributes">Associative array of attributes for the user</param>
-        /// <param name="audience">The audience entity</param>
+        /// <param name="audiences">Array of audience</param>
         public delegate void FeatureRolloutCallback(string featureKey, string userId, UserAttributes userAttributes,
-            Audience audience);
+            Audience[] audiences);
 
         private ILogger Logger;
 
@@ -275,7 +275,7 @@ namespace OptimizelySDK.Notifications
         /// </summary>
         /// <param name="notificationType">The notification type</param>
         /// <param name="args">Arguments to pass in notification callbacks</param>
-        public void FireNotifications(NotificationType notificationType, params object[] args)
+        public void SendNotifications(NotificationType notificationType, params object[] args)
         {
             foreach (var notification in Notifications[notificationType])
             {

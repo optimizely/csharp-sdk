@@ -152,7 +152,7 @@ namespace OptimizelySDK.Tests.NotificationTests
         }
 
         [Test]
-        public void TestFireNotifications()
+        public void TestSendNotifications()
         {
             var config = ProjectConfig.Create(TestData.Datafile, LoggerMock.Object, new NoOpErrorHandler());
 
@@ -171,7 +171,7 @@ namespace OptimizelySDK.Tests.NotificationTests
             NotificationCenter.AddNotification(NotificationTypeTrack, notificationCallbackMock.Object.TestTrackCallback);
             
             // Firing decision type notifications.
-            NotificationCenter.FireNotifications(NotificationTypeActivate, config.GetExperimentFromKey("test_experiment"), 
+            NotificationCenter.SendNotifications(NotificationTypeActivate, config.GetExperimentFromKey("test_experiment"), 
                 "testUser", new UserAttributes(), config.GetVariationFromId("test_experiment", "7722370027"), null);
 
             // Verify that only the registered notifications of decision type are called.
@@ -182,9 +182,9 @@ namespace OptimizelySDK.Tests.NotificationTests
             notificationCallbackMock.Verify(nc => nc.TestTrackCallback(It.IsAny<string>(), It.IsAny<string>(),
                 It.IsAny<UserAttributes>(), It.IsAny<EventTags>(), It.IsAny<LogEvent>()), Times.Never);
 
-            // Verify that FireNotifications does not break when no notification exists.
+            // Verify that SendNotifications does not break when no notification exists.
             NotificationCenter.ClearAllNotifications();
-            NotificationCenter.FireNotifications(NotificationTypeActivate, config.GetExperimentFromKey("test_experiment"),
+            NotificationCenter.SendNotifications(NotificationTypeActivate, config.GetExperimentFromKey("test_experiment"),
                 "testUser", new UserAttributes(), config.GetVariationFromId("test_experiment", "7722370027"), null);
         }
     }
@@ -217,7 +217,7 @@ namespace OptimizelySDK.Tests.NotificationTests
         }
 
         public virtual void TestFeatureRolloutCallback(string featureKey, string userId, UserAttributes userAttributes,
-            Audience audience)
+            Audience[] audiences)
         {
         }
     }

@@ -265,7 +265,7 @@ namespace OptimizelySDK
                     Logger.Log(LogLevel.ERROR, string.Format("Unable to dispatch conversion event. Error {0}", exception.Message));
                 }
 
-                NotificationCenter.FireNotifications(NotificationCenter.NotificationType.Track, eventKey, userId, 
+                NotificationCenter.SendNotifications(NotificationCenter.NotificationType.Track, eventKey, userId, 
                     userAttributes, eventTags, conversionEvent);
             }
             else
@@ -367,23 +367,23 @@ namespace OptimizelySDK
             if (!string.IsNullOrEmpty(experiment.Key))
             {
                 SendImpressionEvent(experiment, variation, userId, userAttributes);
-                NotificationCenter.FireNotifications(NotificationCenter.NotificationType.FeatureExperiment, featureKey, userId,
+                NotificationCenter.SendNotifications(NotificationCenter.NotificationType.FeatureExperiment, featureKey, userId,
                     userAttributes, experiment, variation);
             }
             else
             {
-                Audience audience = null;
+                var audiences = new Audience[1];
                 var rolloutRule = Config.GetRolloutRuleForVariationId(variation.Id);
 
                 if (!string.IsNullOrEmpty(rolloutRule.Key)
                     && rolloutRule.AudienceIds != null
                     && rolloutRule.AudienceIds.Length > 0)
                 {
-                    audience = Config.GetAudience(rolloutRule.AudienceIds[0]);
+                    audiences[0] = Config.GetAudience(rolloutRule.AudienceIds[0]);
                 }
 
-                NotificationCenter.FireNotifications(NotificationCenter.NotificationType.FeatureRollout, featureKey, userId,
-                        userAttributes, audience);
+                NotificationCenter.SendNotifications(NotificationCenter.NotificationType.FeatureRollout, featureKey, userId,
+                        userAttributes, audiences);
                 Logger.Log(LogLevel.INFO, $@"The user ""{userId}"" is not being experimented on feature ""{featureKey}"".");
             }
 
@@ -578,7 +578,7 @@ namespace OptimizelySDK
                     Logger.Log(LogLevel.ERROR, string.Format("Unable to dispatch impression event. Error {0}", exception.Message));
                 }
 
-                NotificationCenter.FireNotifications(NotificationCenter.NotificationType.Activate, experiment, userId,
+                NotificationCenter.SendNotifications(NotificationCenter.NotificationType.Activate, experiment, userId,
                     userAttributes, variation, impressionEvent);
             }
             else

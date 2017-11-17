@@ -1706,7 +1706,7 @@ namespace OptimizelySDK.Tests
             NotificationCallbackMock.Setup(nc => nc.TestActivateCallback(It.IsAny<Experiment>(), It.IsAny<string>(),
                 It.IsAny<UserAttributes>(), It.IsAny<Variation>(), It.IsAny<LogEvent>()));
             NotificationCallbackMock.Setup(nc => nc.TestFeatureRolloutCallback(It.IsAny<string>(), It.IsAny<string>(),
-                It.IsAny<UserAttributes>(), It.IsAny<Audience>()));
+                It.IsAny<UserAttributes>(), It.IsAny<Audience[]>()));
             EventBuilderMock.Setup(ebm => ebm.CreateImpressionEvent(It.IsAny<ProjectConfig>(), It.IsAny<Experiment>(),
                 It.IsAny<string>(), It.IsAny<string>(), It.IsAny<UserAttributes>())).Returns(logEvent);
             DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, userAttributes)).Returns(variation);
@@ -1726,7 +1726,7 @@ namespace OptimizelySDK.Tests
             optly.Invoke("IsFeatureEnabled", featureKey, TestUserId, userAttributes);
 
             // Verify that only feature rollout callback gets called in case of rollout rule.
-            NotificationCallbackMock.Verify(nc => nc.TestFeatureRolloutCallback(featureKey, TestUserId, userAttributes, It.IsAny<Audience>()), Times.Exactly(1));
+            NotificationCallbackMock.Verify(nc => nc.TestFeatureRolloutCallback(featureKey, TestUserId, userAttributes, It.IsAny<Audience[]>()), Times.Exactly(1));
             NotificationCallbackMock.Verify(nc => nc.TestActivateCallback(experiment, TestUserId, userAttributes, variation, logEvent), Times.Never);
         }
 
