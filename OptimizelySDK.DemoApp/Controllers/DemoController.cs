@@ -47,7 +47,7 @@ namespace OptimizelySDK.DemoApp.Controllers
         private static Config ConfigRepo = new Config();
         private static Optimizely Optimizely = null;
         private static InMemoryHandler InMemoryHandler = new InMemoryHandler();
-        private static Logger.ILogger Logger = new MultiLogger(new[] { (Logger.ILogger)InMemoryHandler, new Log4NetLogger() });
+        private static Logger.ILogger Logger = new MultiLogger(new[] { new Logger.DefaultLogger(), (Logger.ILogger)InMemoryHandler, new Log4NetLogger() });
 
         [HttpGet]
         public ActionResult Index()
