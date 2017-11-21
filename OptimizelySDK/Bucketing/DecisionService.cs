@@ -241,8 +241,8 @@ namespace OptimizelySDK.Bucketing
             }
             catch (Exception exception)
             {
-                Logger.Log(LogLevel.ERROR, string.Format("Failed to save variation \"{0}\" of experiment \"{1}\" for user \"{2}\": {3}.",
-                    variation.Id, experiment.Id, userProfile.UserId, exception.Message));
+                Logger.Log(LogLevel.ERROR, string.Format("Failed to save variation \"{0}\" of experiment \"{1}\" for user \"{2}\".",
+                    variation.Id, experiment.Id, userProfile.UserId));
                 ErrorHandler.HandleError(new Exceptions.OptimizelyRuntimeException(exception.Message));
             }
         }

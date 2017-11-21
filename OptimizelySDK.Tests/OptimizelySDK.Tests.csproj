@@ -71,6 +71,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DecisionServiceTest.cs" />
+    <Compile Include="DefaultErrorHandlerTest.cs" />
     <Compile Include="EventTests\DefaultEventDispatcherTest.cs" />
     <Compile Include="EventTests\EventBuilderTest.cs" />
     <Compile Include="EventTests\LogEventTest.cs" />

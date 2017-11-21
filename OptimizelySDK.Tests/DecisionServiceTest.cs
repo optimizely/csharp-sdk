@@ -277,7 +277,6 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
-        [ExpectedException]
         public void TestBucketLogsCorrectlyWhenUserProfileFailsToSave()
         {
             Experiment experiment = NoAudienceProjectConfig.Experiments[0];
@@ -300,8 +299,9 @@ namespace OptimizelySDK.Tests
             decisionService.SaveVariation(experiment, variation, saveUserProfile);
 
             LoggerMock.Verify(l => l.Log(LogLevel.ERROR, string.Format
-                ("Failed to save variation \"{0}\" of experiment \"{1}\" for user \"{2}\".", UserProfileId, variation.Id, experiment.Id))
+                ("Failed to save variation \"{0}\" of experiment \"{1}\" for user \"{2}\".", variation.Id, experiment.Id, UserProfileId))
                 , Times.Once);
+            ErrorHandlerMock.Verify(er => er.HandleError(It.IsAny<OptimizelySDK.Exceptions.OptimizelyRuntimeException>()), Times.Once);
         }
 
         [Test]

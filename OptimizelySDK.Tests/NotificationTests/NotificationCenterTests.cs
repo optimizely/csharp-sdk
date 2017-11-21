@@ -21,6 +21,7 @@ using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Event;
 using OptimizelySDK.Logger;
 using OptimizelySDK.Notifications;
+using NotificationType = OptimizelySDK.Notifications.NotificationCenter.NotificationType;
 
 namespace OptimizelySDK.Tests.NotificationTests
 {
@@ -29,9 +30,11 @@ namespace OptimizelySDK.Tests.NotificationTests
         private Mock<ILogger> LoggerMock;
         private NotificationCenter NotificationCenter;
         private TestNotificationCallbacks TestNotificationCallbacks;
-        private NotificationCenter.NotificationType NotificationTypeActivate = NotificationCenter.NotificationType.Activate;
-        private NotificationCenter.NotificationType NotificationTypeTrack = NotificationCenter.NotificationType.Track;
-        private NotificationCenter.NotificationType NotificationTypeFeatureExperiment = NotificationCenter.NotificationType.FeatureExperiment;
+
+        private NotificationType NotificationTypeActivate = NotificationType.Activate;
+        private NotificationType NotificationTypeTrack = NotificationType.Track;
+        private NotificationType NotificationTypeFeatureExperiment = NotificationType.FeatureExperiment;
+        private NotificationType NotificationTypeFeatureRollout = NotificationType.FeatureRollout;
 
         [SetUp]
         public void Setup()
@@ -53,6 +56,13 @@ namespace OptimizelySDK.Tests.NotificationTests
             // Verify that callback removed successfully.
             Assert.AreEqual(true, NotificationCenter.RemoveNotification(1));
             Assert.AreEqual(0, NotificationCenter.NotificationsCount);
+
+            //Verify return false with invalid ID. 
+            Assert.AreEqual(false, NotificationCenter.RemoveNotification(1));
+
+            // Verify that callback added successfully and return right notification ID.
+            Assert.AreEqual(NotificationCenter.NotificationId, NotificationCenter.AddNotification(NotificationTypeActivate, TestNotificationCallbacks.TestActivateCallback));
+            Assert.AreEqual(1, NotificationCenter.NotificationsCount);
         }
 
         [Test]
@@ -158,34 +168,69 @@ namespace OptimizelySDK.Tests.NotificationTests
 
             // Mocking notification callbacks.
             var notificationCallbackMock = new Mock<TestNotificationCallbacks>();
+
             notificationCallbackMock.Setup(nc => nc.TestActivateCallback(It.IsAny<Experiment>(), It.IsAny<string>(),
                 It.IsAny<UserAttributes>(), It.IsAny<Variation>(), It.IsAny<LogEvent>()));
+
             notificationCallbackMock.Setup(nc => nc.TestAnotherActivateCallback(It.IsAny<Experiment>(), 
                 It.IsAny<string>(), It.IsAny<UserAttributes>(), It.IsAny<Variation>(), It.IsAny<LogEvent>()));
+
+            notificationCallbackMock.Setup(nc => nc.TestFeatureRolloutCallback(It.IsAny<string>(), It.IsAny<string>(),
+                It.IsAny<UserAttributes>(), It.IsAny<Audience[]>()));
 
             // Adding decision notifications.
             NotificationCenter.AddNotification(NotificationTypeActivate, notificationCallbackMock.Object.TestActivateCallback);
             NotificationCenter.AddNotification(NotificationTypeActivate, notificationCallbackMock.Object.TestAnotherActivateCallback);
+            NotificationCenter.AddNotification(NotificationTypeFeatureRollout, notificationCallbackMock.Object.TestFeatureRolloutCallback);
+
 
             // Adding track notifications.
             NotificationCenter.AddNotification(NotificationTypeTrack, notificationCallbackMock.Object.TestTrackCallback);
             
-            // Firing decision type notifications.
+            // Fire decision type notifications.
             NotificationCenter.SendNotifications(NotificationTypeActivate, config.GetExperimentFromKey("test_experiment"), 
                 "testUser", new UserAttributes(), config.GetVariationFromId("test_experiment", "7722370027"), null);
 
             // Verify that only the registered notifications of decision type are called.
             notificationCallbackMock.Verify(nc => nc.TestActivateCallback(It.IsAny<Experiment>(), It.IsAny<string>(), 
-                It.IsAny<UserAttributes>(), It.IsAny<Variation>(), It.IsAny<LogEvent>()), Times.Exactly(1));
+                It.IsAny<UserAttributes>(), It.IsAny<Variation>(), It.IsAny<LogEvent>()), Times.Once);
+
             notificationCallbackMock.Verify(nc => nc.TestAnotherActivateCallback(It.IsAny<Experiment>(), It.IsAny<string>(),
-                It.IsAny<UserAttributes>(), It.IsAny<Variation>(), It.IsAny<LogEvent>()), Times.Exactly(1));
+                It.IsAny<UserAttributes>(), It.IsAny<Variation>(), It.IsAny<LogEvent>()), Times.Once);
+
             notificationCallbackMock.Verify(nc => nc.TestTrackCallback(It.IsAny<string>(), It.IsAny<string>(),
                 It.IsAny<UserAttributes>(), It.IsAny<EventTags>(), It.IsAny<LogEvent>()), Times.Never);
 
-            // Verify that SendNotifications does not break when no notification exists.
+
+            // Fire feature rollout notification
+            NotificationCenter.SendNotifications(NotificationTypeFeatureRollout, "featureKey", "testUser", new UserAttributes(), null);
+
+            notificationCallbackMock.Verify(nc => nc.TestFeatureRolloutCallback(It.IsAny<string>(), It.IsAny<string>(),
+                It.IsAny<UserAttributes>(), It.IsAny<Audience[]>()), Times.Once);
+
+
+            // Verify that after clearing notifications, SendNotification should not call any notification
+            // which were previously registered. 
             NotificationCenter.ClearAllNotifications();
+            notificationCallbackMock.ResetCalls();
+
             NotificationCenter.SendNotifications(NotificationTypeActivate, config.GetExperimentFromKey("test_experiment"),
                 "testUser", new UserAttributes(), config.GetVariationFromId("test_experiment", "7722370027"), null);
+
+            
+            // Again verify notifications which were registered are not called. 
+            notificationCallbackMock.Verify(nc => nc.TestActivateCallback(It.IsAny<Experiment>(), It.IsAny<string>(),
+                It.IsAny<UserAttributes>(), It.IsAny<Variation>(), It.IsAny<LogEvent>()), Times.Never);
+
+            notificationCallbackMock.Verify(nc => nc.TestAnotherActivateCallback(It.IsAny<Experiment>(), It.IsAny<string>(),
+                It.IsAny<UserAttributes>(), It.IsAny<Variation>(), It.IsAny<LogEvent>()), Times.Never);
+
+            notificationCallbackMock.Verify(nc => nc.TestTrackCallback(It.IsAny<string>(), It.IsAny<string>(),
+                It.IsAny<UserAttributes>(), It.IsAny<EventTags>(), It.IsAny<LogEvent>()), Times.Never);
+
+            notificationCallbackMock.Verify(nc => nc.TestFeatureRolloutCallback(It.IsAny<string>(), It.IsAny<string>(),
+                It.IsAny<UserAttributes>(), It.IsAny<Audience[]>()), Times.Never);
+
         }
     }
 
