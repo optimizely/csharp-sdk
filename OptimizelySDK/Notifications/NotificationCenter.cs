@@ -34,9 +34,7 @@ namespace OptimizelySDK.Notifications
         public enum NotificationType
         {
             Activate, // Activate called.
-            Track, // Event tracked.
-            FeatureExperiment, // Feature accessed from experiment.
-            FeatureRollout // Feature accessed from rollout rule.
+            Track
         };
 
         /// <summary>
@@ -60,27 +58,6 @@ namespace OptimizelySDK.Notifications
         /// <param name="logEvent">The conversion event</param>
         public delegate void TrackCallback(string eventKey, string userId, UserAttributes userAttributes, EventTags eventTags,
             LogEvent logEvent);
-
-        /// <summary>
-        /// Delegate for feature experiment notifcations.
-        /// </summary>
-        /// <param name="featureKey">The feature key</param>
-        /// <param name="userId">The user identifier</param>
-        /// <param name="userAttributes">Associative array of attributes for the user</param>
-        /// <param name="experiment">The experiment entity</param>
-        /// <param name="variation">The variation entity</param>
-        public delegate void FeatureExperimentCallback(string featureKey, string userId, UserAttributes userAttributes,
-            Experiment experiment, Variation variation);
-
-        /// <summary>
-        /// Delegate for feature rollout notifcations.
-        /// </summary>
-        /// <param name="featureKey">The feature key</param>
-        /// <param name="userId">The user identifier</param>
-        /// <param name="userAttributes">Associative array of attributes for the user</param>
-        /// <param name="audiences">Array of audience</param>
-        public delegate void FeatureRolloutCallback(string featureKey, string userId, UserAttributes userAttributes,
-            Audience[] audiences);
 
         private ILogger Logger;
 
@@ -152,35 +129,6 @@ namespace OptimizelySDK.Notifications
             return AddNotification(notificationType, (object)trackCallback);
         }
 
-        /// <summary>
-        /// Add a notification callback of feature experiment type to the notification center.
-        /// </summary>
-        /// <param name="notificationType">Notification type</param>
-        /// <param name="featureExperimentCallback">Callback function to call when event gets triggered</param>
-        /// <returns>int | 0 for invalid notification type, -1 for adding existing notification
-        /// or the notification id of newly added notification.</returns>
-        public int AddNotification(NotificationType notificationType, FeatureExperimentCallback featureExperimentCallback)
-        {
-            if (!IsNotificationTypeValid(notificationType, NotificationType.FeatureExperiment))
-                return 0;
-
-            return AddNotification(notificationType, (object)featureExperimentCallback);
-        }
-
-        /// <summary>
-        /// Add a notification callback of feature rollout type to the notification center.
-        /// </summary>
-        /// <param name="notificationType">Notification type</param>
-        /// <param name="featureRolloutCallback">Callback function to call when event gets triggered</param>
-        /// <returns>int | 0 for invalid notification type, -1 for adding existing notification
-        /// or the notification id of newly added notification.</returns>
-        public int AddNotification(NotificationType notificationType, FeatureRolloutCallback featureRolloutCallback)
-        {
-            if (!IsNotificationTypeValid(notificationType, NotificationType.FeatureRollout))
-                return 0;
-
-            return AddNotification(notificationType, (object)featureRolloutCallback);
-        }
 
         /// <summary>
         /// Validate notification type.

@@ -367,8 +367,6 @@ namespace OptimizelySDK
             if (!string.IsNullOrEmpty(experiment.Key))
             {
                 SendImpressionEvent(experiment, variation, userId, userAttributes);
-                NotificationCenter.SendNotifications(NotificationCenter.NotificationType.FeatureExperiment, featureKey, userId,
-                    userAttributes, experiment, variation);
             }
             else
             {
@@ -382,8 +380,6 @@ namespace OptimizelySDK
                     audiences[0] = Config.GetAudience(rolloutRule.AudienceIds[0]);
                 }
 
-                NotificationCenter.SendNotifications(NotificationCenter.NotificationType.FeatureRollout, featureKey, userId,
-                        userAttributes, audiences);
                 Logger.Log(LogLevel.INFO, $@"The user ""{userId}"" is not being experimented on feature ""{featureKey}"".");
             }
 

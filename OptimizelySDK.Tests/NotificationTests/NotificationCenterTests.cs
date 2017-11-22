@@ -33,8 +33,6 @@ namespace OptimizelySDK.Tests.NotificationTests
 
         private NotificationType NotificationTypeActivate = NotificationType.Activate;
         private NotificationType NotificationTypeTrack = NotificationType.Track;
-        private NotificationType NotificationTypeFeatureExperiment = NotificationType.FeatureExperiment;
-        private NotificationType NotificationTypeFeatureRollout = NotificationType.FeatureRollout;
 
         [SetUp]
         public void Setup()
@@ -96,16 +94,9 @@ namespace OptimizelySDK.Tests.NotificationTests
             // Verify that AddNotification gets failed on adding invalid notification listeners.
             Assert.AreEqual(0, NotificationCenter.AddNotification(NotificationTypeTrack,
                 TestNotificationCallbacks.TestActivateCallback));
-            Assert.AreEqual(0, NotificationCenter.AddNotification(NotificationTypeFeatureExperiment,
-                TestNotificationCallbacks.TestTrackCallback));
-            Assert.AreEqual(0, NotificationCenter.AddNotification(NotificationTypeActivate,
-                TestNotificationCallbacks.TestFeatureExperimentCallback));
+
 
             LoggerMock.Verify(l => l.Log(LogLevel.ERROR, $@"Invalid notification type provided for ""{NotificationTypeActivate}"" callback."),
-                Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, $@"Invalid notification type provided for ""{NotificationTypeTrack}"" callback."),
-                Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, $@"Invalid notification type provided for ""{NotificationTypeFeatureExperiment}"" callback."),
                 Times.Once);
 
             // Verify that no notifion has been added.
@@ -181,7 +172,6 @@ namespace OptimizelySDK.Tests.NotificationTests
             // Adding decision notifications.
             NotificationCenter.AddNotification(NotificationTypeActivate, notificationCallbackMock.Object.TestActivateCallback);
             NotificationCenter.AddNotification(NotificationTypeActivate, notificationCallbackMock.Object.TestAnotherActivateCallback);
-            NotificationCenter.AddNotification(NotificationTypeFeatureRollout, notificationCallbackMock.Object.TestFeatureRolloutCallback);
 
 
             // Adding track notifications.
@@ -202,11 +192,6 @@ namespace OptimizelySDK.Tests.NotificationTests
                 It.IsAny<UserAttributes>(), It.IsAny<EventTags>(), It.IsAny<LogEvent>()), Times.Never);
 
 
-            // Fire feature rollout notification
-            NotificationCenter.SendNotifications(NotificationTypeFeatureRollout, "featureKey", "testUser", new UserAttributes(), null);
-
-            notificationCallbackMock.Verify(nc => nc.TestFeatureRolloutCallback(It.IsAny<string>(), It.IsAny<string>(),
-                It.IsAny<UserAttributes>(), It.IsAny<Audience[]>()), Times.Once);
 
 
             // Verify that after clearing notifications, SendNotification should not call any notification
@@ -227,10 +212,6 @@ namespace OptimizelySDK.Tests.NotificationTests
 
             notificationCallbackMock.Verify(nc => nc.TestTrackCallback(It.IsAny<string>(), It.IsAny<string>(),
                 It.IsAny<UserAttributes>(), It.IsAny<EventTags>(), It.IsAny<LogEvent>()), Times.Never);
-
-            notificationCallbackMock.Verify(nc => nc.TestFeatureRolloutCallback(It.IsAny<string>(), It.IsAny<string>(),
-                It.IsAny<UserAttributes>(), It.IsAny<Audience[]>()), Times.Never);
-
         }
     }
 
