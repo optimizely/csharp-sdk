@@ -21,6 +21,7 @@ using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Event;
 using OptimizelySDK.Logger;
 using OptimizelySDK.Notifications;
+using System.Collections.Generic;
 using NotificationType = OptimizelySDK.Notifications.NotificationCenter.NotificationType;
 
 namespace OptimizelySDK.Tests.NotificationTests
@@ -156,7 +157,7 @@ namespace OptimizelySDK.Tests.NotificationTests
         public void TestSendNotifications()
         {
             var config = ProjectConfig.Create(TestData.Datafile, LoggerMock.Object, new NoOpErrorHandler());
-
+            var logEventMocker = new Mock<LogEvent>("http://mockedurl", new Dictionary<string, object>(), "POST", new Dictionary<string, string>());
             // Mocking notification callbacks.
             var notificationCallbackMock = new Mock<TestNotificationCallbacks>();
 
@@ -170,14 +171,14 @@ namespace OptimizelySDK.Tests.NotificationTests
             // Adding decision notifications.
             NotificationCenter.AddNotification(NotificationTypeActivate, notificationCallbackMock.Object.TestActivateCallback);
             NotificationCenter.AddNotification(NotificationTypeActivate, notificationCallbackMock.Object.TestAnotherActivateCallback);
-
+            
 
             // Adding track notifications.
             NotificationCenter.AddNotification(NotificationTypeTrack, notificationCallbackMock.Object.TestTrackCallback);
             
             // Fire decision type notifications.
             NotificationCenter.SendNotifications(NotificationTypeActivate, config.GetExperimentFromKey("test_experiment"), 
-                "testUser", new UserAttributes(), config.GetVariationFromId("test_experiment", "7722370027"), LoggerMock.Object);
+                "testUser", new UserAttributes(), config.GetVariationFromId("test_experiment", "7722370027"), logEventMocker.Object);
 
             // Verify that only the registered notifications of decision type are called.
             notificationCallbackMock.Verify(nc => nc.TestActivateCallback(It.IsAny<Experiment>(), It.IsAny<string>(), 
