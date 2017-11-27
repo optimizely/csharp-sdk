@@ -166,8 +166,6 @@ namespace OptimizelySDK.Tests.NotificationTests
             notificationCallbackMock.Setup(nc => nc.TestAnotherActivateCallback(It.IsAny<Experiment>(), 
                 It.IsAny<string>(), It.IsAny<UserAttributes>(), It.IsAny<Variation>(), It.IsAny<LogEvent>()));
 
-            notificationCallbackMock.Setup(nc => nc.TestFeatureRolloutCallback(It.IsAny<string>(), It.IsAny<string>(),
-                It.IsAny<UserAttributes>(), It.IsAny<Audience[]>()));
 
             // Adding decision notifications.
             NotificationCenter.AddNotification(NotificationTypeActivate, notificationCallbackMock.Object.TestActivateCallback);
@@ -179,7 +177,7 @@ namespace OptimizelySDK.Tests.NotificationTests
             
             // Fire decision type notifications.
             NotificationCenter.SendNotifications(NotificationTypeActivate, config.GetExperimentFromKey("test_experiment"), 
-                "testUser", new UserAttributes(), config.GetVariationFromId("test_experiment", "7722370027"), null);
+                "testUser", new UserAttributes(), config.GetVariationFromId("test_experiment", "7722370027"), LoggerMock.Object);
 
             // Verify that only the registered notifications of decision type are called.
             notificationCallbackMock.Verify(nc => nc.TestActivateCallback(It.IsAny<Experiment>(), It.IsAny<string>(), 
@@ -236,15 +234,6 @@ namespace OptimizelySDK.Tests.NotificationTests
 
         public virtual void TestAnotherTrackCallback(string eventKey, string userId, UserAttributes userAttributes,
             EventTags eventTags, LogEvent logEvent) {
-        }
-
-        public virtual void TestFeatureExperimentCallback(string featureKey, string userId, UserAttributes userAttributes,
-            Experiment experiment, Variation variation) {
-        }
-
-        public virtual void TestFeatureRolloutCallback(string featureKey, string userId, UserAttributes userAttributes,
-            Audience[] audiences)
-        {
         }
     }
     #endregion // Test Notification callbacks class.
