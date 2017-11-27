@@ -1391,11 +1391,11 @@ namespace OptimizelySDK.Tests
         {
             var featureKey = "featureKey";
 
-            Assert.Null(Optimizely.IsFeatureEnabled(featureKey, null, null));
-            Assert.Null(Optimizely.IsFeatureEnabled(featureKey, "", null));
-
-            Assert.Null(Optimizely.IsFeatureEnabled(null, TestUserId, null));
-            Assert.Null(Optimizely.IsFeatureEnabled("", TestUserId, null));
+            Assert.IsFalse(Optimizely.IsFeatureEnabled(featureKey, null, null));
+            Assert.IsFalse(Optimizely.IsFeatureEnabled(featureKey, "", null));
+                   
+            Assert.IsFalse(Optimizely.IsFeatureEnabled(null, TestUserId, null));
+            Assert.IsFalse(Optimizely.IsFeatureEnabled("", TestUserId, null));
 
             LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "User ID must not be empty."), Times.Exactly(2));
             LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Feature flag key must not be empty."), Times.Exactly(2));
@@ -1406,7 +1406,7 @@ namespace OptimizelySDK.Tests
         public void TestIsFeatureEnabledGivenFeatureFlagNotFound()
         {
             var featureKey = "feature_not_found";
-            Assert.Null(Optimizely.IsFeatureEnabled(featureKey, TestUserId, null));
+            Assert.IsFalse(Optimizely.IsFeatureEnabled(featureKey, TestUserId, null));
             
             LoggerMock.Verify(l => l.Log(LogLevel.ERROR, $@"Feature key ""{featureKey}"" is not in datafile."));
         }
