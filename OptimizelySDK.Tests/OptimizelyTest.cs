@@ -26,6 +26,8 @@ using OptimizelySDK.Entity;
 using NUnit.Framework;
 using OptimizelySDK.Tests.UtilsTests;
 using OptimizelySDK.Bucketing;
+using OptimizelySDK.Notifications;
+using OptimizelySDK.Tests.NotificationTests;
 
 namespace OptimizelySDK.Tests
 {
@@ -42,6 +44,8 @@ namespace OptimizelySDK.Tests
         private OptimizelyHelper Helper;
         private Mock<Optimizely> OptimizelyMock;
         private Mock<DecisionService> DecisionServiceMock;
+        private NotificationCenter NotificationCenter;
+        private Mock<TestNotificationCallbacks> NotificationCallbackMock;
 
         #region Test Life Cycle
         [SetUp]
@@ -85,6 +89,9 @@ namespace OptimizelySDK.Tests
 
             DecisionServiceMock = new Mock<DecisionService>(new Bucketer(LoggerMock.Object), ErrorHandlerMock.Object,
                 Config, null, LoggerMock.Object);
+
+            NotificationCenter = new NotificationCenter(LoggerMock.Object);
+            NotificationCallbackMock = new Mock<TestNotificationCallbacks>();
         }
 
         [TestFixtureTearDown]
@@ -1495,5 +1502,145 @@ namespace OptimizelySDK.Tests
         }
 
         #endregion // Test IsFeatureEnabled method
+
+        #region Test NotificationCenter
+
+        [Test]
+        public void TestActivateListenerWithoutAttributes()
+        {
+            TestActivateListener(null);
+        }
+
+        [Test]
+        public void TestActivateListenerWithAttributes()
+        {
+            var userAttributes = new UserAttributes
+            {
+               { "device_type", "iPhone" },
+               { "company", "Optimizely" },
+               { "location", "San Francisco" }
+            };
+
+            TestActivateListener(userAttributes);
+        }
+
+        public void TestActivateListener(UserAttributes userAttributes)
+        {
+            var experimentKey = "test_experiment";
+            var variationKey = "control";
+            var featureKey = "boolean_feature";
+            var experiment = Config.GetExperimentFromKey(experimentKey);
+            var variation = Config.GetVariationFromKey(experimentKey, variationKey);
+            var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
+            var logEvent = new LogEvent("https://logx.optimizely.com/v1/events", OptimizelyHelper.SingleParameter,
+                "POST", new Dictionary<string, string> { });
+
+            // Mocking objects.
+            NotificationCallbackMock.Setup(nc => nc.TestActivateCallback(It.IsAny<Experiment>(), It.IsAny<string>(),
+                It.IsAny<UserAttributes>(), It.IsAny<Variation>(), It.IsAny<LogEvent>()));
+            NotificationCallbackMock.Setup(nc => nc.TestAnotherActivateCallback(It.IsAny<Experiment>(), It.IsAny<string>(),
+                It.IsAny<UserAttributes>(), It.IsAny<Variation>(), It.IsAny<LogEvent>()));
+            NotificationCallbackMock.Setup(nc => nc.TestTrackCallback(It.IsAny<string>(), It.IsAny<string>(),
+                It.IsAny<UserAttributes>(), It.IsAny<EventTags>(), It.IsAny<LogEvent>()));
+            EventBuilderMock.Setup(ebm => ebm.CreateImpressionEvent(It.IsAny<ProjectConfig>(), It.IsAny<Experiment>(),
+                It.IsAny<string>(), It.IsAny<string>(), It.IsAny<UserAttributes>())).Returns(logEvent);
+            DecisionServiceMock.Setup(ds => ds.GetVariation(experiment, TestUserId, userAttributes)).Returns(variation);
+            DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, userAttributes)).Returns(variation);
+
+            // Adding notification listeners.
+            var notificationType = NotificationCenter.NotificationType.Activate;
+            NotificationCenter.AddNotification(notificationType, NotificationCallbackMock.Object.TestActivateCallback);
+            NotificationCenter.AddNotification(notificationType, NotificationCallbackMock.Object.TestAnotherActivateCallback);
+
+            var optly = Helper.CreatePrivateOptimizely();
+            optly.SetFieldOrProperty("NotificationCenter", NotificationCenter);
+            optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
+            optly.SetFieldOrProperty("EventBuilder", EventBuilderMock.Object);
+
+            // Calling Activate and IsFeatureEnabled.
+            optly.Invoke("Activate", experimentKey, TestUserId, userAttributes);
+            optly.Invoke("IsFeatureEnabled", featureKey, TestUserId, userAttributes);
+
+            // Verify that all the registered callbacks are called once for both Activate and IsFeatureEnabled.
+            NotificationCallbackMock.Verify(nc => nc.TestActivateCallback(experiment, TestUserId, userAttributes, variation, logEvent), Times.Exactly(2));
+            NotificationCallbackMock.Verify(nc => nc.TestAnotherActivateCallback(experiment, TestUserId, userAttributes, variation, logEvent), Times.Exactly(2));
+        }
+
+        [Test]
+        public void TestTrackListenerWithoutAttributesAndEventTags()
+        {
+            TestTrackListener(null, null);
+        }
+
+        [Test]
+        public void TestTrackListenerWithAttributesWithoutEventTags()
+        {
+            var userAttributes = new UserAttributes
+            {
+               { "device_type", "iPhone" },
+               { "company", "Optimizely" },
+               { "location", "San Francisco" }
+            };
+
+            TestTrackListener(userAttributes, null);
+        }
+
+        [Test]
+        public void TestTrackListenerWithAttributesAndEventTags()
+        {
+            var userAttributes = new UserAttributes
+            {
+               { "device_type", "iPhone" },
+               { "company", "Optimizely" },
+               { "location", "San Francisco" }
+            };
+
+            var eventTags = new EventTags
+            {
+                { "revenue", 42 }
+            };
+
+            TestTrackListener(userAttributes, eventTags);
+        }
+
+        public void TestTrackListener(UserAttributes userAttributes, EventTags eventTags)
+        {
+            var experimentKey = "test_experiment";
+            var variationKey = "control";
+            var eventKey = "purchase";
+            var experiment = Config.GetExperimentFromKey(experimentKey);
+            var variation = Config.GetVariationFromKey(experimentKey, variationKey);
+            var logEvent = new LogEvent("https://logx.optimizely.com/v1/events", OptimizelyHelper.SingleParameter,
+                "POST", new Dictionary<string, string> { });
+
+            // Mocking objects.
+            NotificationCallbackMock.Setup(nc => nc.TestTrackCallback(It.IsAny<string>(), It.IsAny<string>(),
+                It.IsAny<UserAttributes>(), It.IsAny<EventTags>(), It.IsAny<LogEvent>()));
+            NotificationCallbackMock.Setup(nc => nc.TestAnotherTrackCallback(It.IsAny<string>(), It.IsAny<string>(),
+                It.IsAny<UserAttributes>(), It.IsAny<EventTags>(), It.IsAny<LogEvent>()));
+            EventBuilderMock.Setup(ebm => ebm.CreateConversionEvent(It.IsAny<ProjectConfig>(), It.IsAny<string>(),
+                It.IsAny<Dictionary<string, Variation>>(), It.IsAny<string>(), It.IsAny<UserAttributes>(), 
+                It.IsAny<EventTags>())).Returns(logEvent);
+            DecisionServiceMock.Setup(ds => ds.GetVariation(experiment, TestUserId, userAttributes)).Returns(variation);
+            
+            // Adding notification listeners.
+            var notificationType = NotificationCenter.NotificationType.Track;
+            NotificationCenter.AddNotification(notificationType, NotificationCallbackMock.Object.TestTrackCallback);
+            NotificationCenter.AddNotification(notificationType, NotificationCallbackMock.Object.TestAnotherTrackCallback);
+            
+            var optly = Helper.CreatePrivateOptimizely();
+            optly.SetFieldOrProperty("NotificationCenter", NotificationCenter);
+            optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
+            optly.SetFieldOrProperty("EventBuilder", EventBuilderMock.Object);
+
+            // Calling Track.
+            optly.Invoke("Track", eventKey, TestUserId, userAttributes, eventTags);
+
+            // Verify that all the registered callbacks for Track are called.
+            NotificationCallbackMock.Verify(nc => nc.TestTrackCallback(eventKey, TestUserId, userAttributes, eventTags, logEvent), Times.Exactly(1));
+            NotificationCallbackMock.Verify(nc => nc.TestAnotherTrackCallback(eventKey, TestUserId, userAttributes, eventTags, logEvent), Times.Exactly(1));
+        }
+
+        #endregion // Test NotificationCenter
     }
 }

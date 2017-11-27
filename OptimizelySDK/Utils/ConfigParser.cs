@@ -32,17 +32,5 @@ namespace OptimizelySDK.Utils
         {
             return entities.ToDictionary(e => getKey(e), e => clone ? (T)e.Clone() : e);
         }
-
-        /// <summary>
-        /// Creates an array of entities from the entity
-        /// (not sure this is really needed)
-        /// </summary>
-        /// <param name="entities">Original Entities</param>
-        /// <param name="clone">Whether or not to clone the original entity</param>
-        /// <returns>array of entities</returns>
-        public static T[] GenerateMap(IEnumerable<T> entities, bool clone)
-        {
-            return entities.Select(e => clone ? (T)e.Clone() : e).ToArray();
-        }
     }
 }

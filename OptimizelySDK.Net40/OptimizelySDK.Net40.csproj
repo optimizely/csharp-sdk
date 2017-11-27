@@ -121,6 +121,9 @@
     <Compile Include="..\OptimizelySDK\Logger\NoOpLogger.cs">
       <Link>Logger\NoOpLogger.cs</Link>
     </Compile>
+	<Compile Include="..\OptimizelySDK\Notifications\NotificationCenter.cs">
+      <Link>Notifications\NotificationCenter.cs</Link>
+    </Compile>
     <Compile Include="..\OptimizelySDK\Optimizely.cs">
       <Link>Optimizely.cs</Link>
     </Compile>
