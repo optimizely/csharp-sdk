@@ -51,7 +51,7 @@ namespace OptimizelySDK
 
         public static String SDK_VERSION {
             get {
-                // Example output: "1.2.1" .  Should be kept in synch with NuGet package version.
+                // Example output: "1.3.0" .  Should be kept in synch with NuGet package version.
 #if NET35
                 Assembly assembly = Assembly.GetExecutingAssembly();
 #else
