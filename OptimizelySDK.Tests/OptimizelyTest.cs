@@ -1547,13 +1547,15 @@ namespace OptimizelySDK.Tests
             DecisionServiceMock.Setup(ds => ds.GetVariation(experiment, TestUserId, userAttributes)).Returns(variation);
             DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, userAttributes)).Returns(variation);
 
+            var optly = Helper.CreatePrivateOptimizely();
+            var optStronglyTyped = optly.GetObject() as Optimizely;
+
+
             // Adding notification listeners.
             var notificationType = NotificationCenter.NotificationType.Activate;
-            NotificationCenter.AddNotification(notificationType, NotificationCallbackMock.Object.TestActivateCallback);
-            NotificationCenter.AddNotification(notificationType, NotificationCallbackMock.Object.TestAnotherActivateCallback);
-
-            var optly = Helper.CreatePrivateOptimizely();
-            optly.SetFieldOrProperty("NotificationCenter", NotificationCenter);
+            optStronglyTyped. NotificationCenter.AddNotification(notificationType, NotificationCallbackMock.Object.TestActivateCallback);
+            optStronglyTyped.NotificationCenter.AddNotification(notificationType, NotificationCallbackMock.Object.TestAnotherActivateCallback);
+                        
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
             optly.SetFieldOrProperty("EventBuilder", EventBuilderMock.Object);
 
@@ -1613,6 +1615,9 @@ namespace OptimizelySDK.Tests
             var logEvent = new LogEvent("https://logx.optimizely.com/v1/events", OptimizelyHelper.SingleParameter,
                 "POST", new Dictionary<string, string> { });
 
+            var optly = Helper.CreatePrivateOptimizely();
+            var optStronglyTyped = optly.GetObject() as Optimizely;
+
             // Mocking objects.
             NotificationCallbackMock.Setup(nc => nc.TestTrackCallback(It.IsAny<string>(), It.IsAny<string>(),
                 It.IsAny<UserAttributes>(), It.IsAny<EventTags>(), It.IsAny<LogEvent>()));
@@ -1625,11 +1630,9 @@ namespace OptimizelySDK.Tests
             
             // Adding notification listeners.
             var notificationType = NotificationCenter.NotificationType.Track;
-            NotificationCenter.AddNotification(notificationType, NotificationCallbackMock.Object.TestTrackCallback);
-            NotificationCenter.AddNotification(notificationType, NotificationCallbackMock.Object.TestAnotherTrackCallback);
+            optStronglyTyped.NotificationCenter.AddNotification(notificationType, NotificationCallbackMock.Object.TestTrackCallback);
+            optStronglyTyped.NotificationCenter.AddNotification(notificationType, NotificationCallbackMock.Object.TestAnotherTrackCallback);
             
-            var optly = Helper.CreatePrivateOptimizely();
-            optly.SetFieldOrProperty("NotificationCenter", NotificationCenter);
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
             optly.SetFieldOrProperty("EventBuilder", EventBuilderMock.Object);
 

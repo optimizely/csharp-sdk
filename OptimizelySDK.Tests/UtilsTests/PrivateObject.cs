@@ -30,5 +30,10 @@ namespace OptimizelySDK.Tests.UtilsTests
             return instanceType.InvokeMember(name, BindingFlags.Instance | BindingFlags.Public | BindingFlags.InvokeMethod | BindingFlags.NonPublic,
                 Type.DefaultBinder, createdInstance, args);
         }
+
+        public object GetObject()
+        {
+            return createdInstance;
+        }
     }
 }
