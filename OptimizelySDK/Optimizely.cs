@@ -334,23 +334,23 @@ namespace OptimizelySDK
         /// <param name="userId">The user ID</param>
         /// <param name="userAttributes">The user's attributes.</param>
         /// <returns>True if feature is enabled, false or null otherwise</returns>
-        public bool IsFeatureEnabled(string featureKey, string userId, UserAttributes userAttributes = null)
+        public bool? IsFeatureEnabled(string featureKey, string userId, UserAttributes userAttributes = null)
         {
             if (string.IsNullOrEmpty(userId))
             {
                 Logger.Log(LogLevel.ERROR, "User ID must not be empty.");
-                return false;
+                return null;
             }
 
             if (string.IsNullOrEmpty(featureKey))
             {
                 Logger.Log(LogLevel.ERROR, "Feature flag key must not be empty.");
-                return false;
+                return null;
             }
 
             var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
             if (string.IsNullOrEmpty(featureFlag.Key))
-                return false;
+                return null;
 
             if (!Validator.IsFeatureFlagValid(Config, featureFlag))
                 return false;
