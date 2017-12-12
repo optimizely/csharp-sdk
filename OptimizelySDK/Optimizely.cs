@@ -45,7 +45,7 @@ namespace OptimizelySDK
 
         private DecisionService DecisionService;
 
-        private NotificationCenter NotificationCenter;
+        public NotificationCenter NotificationCenter;
 
         public bool IsValid { get; private set; }
 
