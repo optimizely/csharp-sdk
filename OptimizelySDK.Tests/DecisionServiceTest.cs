@@ -43,6 +43,9 @@ namespace OptimizelySDK.Tests
         private Variation WhitelistedVariation;
         private DecisionService DecisionService;
 
+        private Variation VariationWithKeyControl;
+        private Variation VariationWithKeyVariation;
+
         [SetUp]
         public void SetUp()
         {
@@ -59,6 +62,9 @@ namespace OptimizelySDK.Tests
             DecisionService         = new DecisionService(new Bucketer(LoggerMock.Object), ErrorHandlerMock.Object, ProjectConfig, null, LoggerMock.Object);
 
             DecisionServiceMock     = new Mock<DecisionService>(BucketerMock.Object, ErrorHandlerMock.Object, ProjectConfig, null, LoggerMock.Object) { CallBase = true };
+
+            VariationWithKeyControl     = ProjectConfig.GetVariationFromKey("test_experiment", "control");
+            VariationWithKeyVariation   = ProjectConfig.GetVariationFromKey("test_experiment", "variation");
         }
 
         [Test]
@@ -350,20 +356,19 @@ namespace OptimizelySDK.Tests
 
             // confirm normal bucketing occurs before setting the forced variation
             var actualVariation = optlyObject.GetVariation(experimentKey, userId, userAttributes);
-
-            Assert.AreEqual(expectedVariationKey, actualVariation?.Key);
+            Assert.IsTrue(TestData.CompareObjects(VariationWithKeyControl, actualVariation));
 
             // test valid experiment
             Assert.IsTrue(optlyObject.SetForcedVariation(experimentKey, userId, expectedForcedVariationKey), string.Format(@"Set variation to ""{0}"" failed.", expectedForcedVariationKey));
 
             var actualForcedVariation = optlyObject.GetVariation(experimentKey, userId, userAttributes);
-            Assert.AreEqual(expectedForcedVariationKey, actualForcedVariation?.Key);
+            Assert.IsTrue(TestData.CompareObjects(VariationWithKeyVariation, actualForcedVariation));
 
             // clear forced variation and confirm that normal bucketing occurs
             Assert.IsTrue(optlyObject.SetForcedVariation(experimentKey, userId, null));
 
             actualVariation = optlyObject.GetVariation(experimentKey, userId, userAttributes);
-            Assert.AreEqual(expectedVariationKey, actualVariation?.Key);
+            Assert.IsTrue(TestData.CompareObjects(VariationWithKeyControl, actualVariation));
 
             // check that a paused experiment returns null
             Assert.IsTrue(optlyObject.SetForcedVariation(pausedExperimentKey, userId, expectedForcedVariationKey), string.Format(@"Set variation to ""{0}"" failed.", expectedForcedVariationKey));
@@ -409,11 +414,11 @@ namespace OptimizelySDK.Tests
 
             // confirm normal bucketing occurs before setting the bucketing ID
             var actualVariation = optlyObject.GetVariation(experimentKey, userId, testUserAttributes);
-            Assert.AreEqual(variationKeyControl, actualVariation?.Key);
+            Assert.IsTrue(TestData.CompareObjects(VariationWithKeyControl, actualVariation));
 
             // confirm valid bucketing with bucketing ID set in attributes
             actualVariation = optlyObject.GetVariation(experimentKey, userId, userAttributesWithBucketingId);
-            Assert.AreEqual(variationKeyVariation, actualVariation?.Key);
+            Assert.IsTrue(TestData.CompareObjects(VariationWithKeyVariation, actualVariation));
 
             // check invalid audience with bucketing ID
             actualVariation = optlyObject.GetVariation(experimentKey, userId, invalidUserAttributesWithBucketingId);
@@ -430,11 +435,11 @@ namespace OptimizelySDK.Tests
             // check forced variation
             Assert.IsTrue(optlyObject.SetForcedVariation(experimentKey, userId, variationKeyControl), string.Format("Set variation to \"{0}\" failed.", variationKeyControl));
             actualVariation = optlyObject.GetVariation(experimentKey, userId, userAttributesWithBucketingId);
-            Assert.AreEqual(variationKeyControl, actualVariation?.Key);
+            Assert.IsTrue(TestData.CompareObjects(VariationWithKeyControl, actualVariation));
 
             // check whitelisted variation
             actualVariation = optlyObject.GetVariation(experimentKey, testUserIdWhitelisted, userAttributesWithBucketingId);
-            Assert.AreEqual(variationKeyControl, actualVariation?.Key);
+            Assert.IsTrue(TestData.CompareObjects(VariationWithKeyControl, actualVariation));
 
             var bucketerMock = new Mock<Bucketer>(LoggerMock.Object);
             var decision = new Decision("7722370027");
@@ -447,8 +452,7 @@ namespace OptimizelySDK.Tests
             DecisionService decisionService = new DecisionService(bucketerMock.Object, ErrorHandlerMock.Object, ValidProjectConfig, UserProfileServiceMock.Object, LoggerMock.Object);
 
             actualVariation = optlyObject.GetVariation(experimentKey, userId, userAttributesWithBucketingId);
-            var actualVariationKey = actualVariation?.Key;
-            Assert.AreEqual(variationKeyControl, actualVariationKey, string.Format("Variation \"{0}\" does not match expected user profile variation \"{1}\".", actualVariationKey, variationKeyControl));
+            Assert.IsTrue(TestData.CompareObjects(VariationWithKeyControl, actualVariation), string.Format("Variation \"{0}\" does not match expected user profile variation \"{1}\".", actualVariation?.Key, variationKeyControl));
         }
 
         #region GetVariationForFeatureExperiment Tests

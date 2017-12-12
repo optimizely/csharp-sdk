@@ -46,6 +46,9 @@ namespace OptimizelySDK.Tests
         private Mock<DecisionService> DecisionServiceMock;
         private NotificationCenter NotificationCenter;
         private Mock<TestNotificationCallbacks> NotificationCallbackMock;
+        private Variation VariationWithKeyControl;
+        private Variation VariationWithKeyVariation;
+        private Variation GroupVariation;
 
         #region Test Life Cycle
         [SetUp]
@@ -92,6 +95,10 @@ namespace OptimizelySDK.Tests
 
             NotificationCenter = new NotificationCenter(LoggerMock.Object);
             NotificationCallbackMock = new Mock<TestNotificationCallbacks>();
+
+            VariationWithKeyControl = Config.GetVariationFromKey("test_experiment", "control");
+            VariationWithKeyVariation = Config.GetVariationFromKey("test_experiment", "variation");
+            GroupVariation = Config.GetVariationFromKey("group_experiment_1", "group_exp_1_var_2");
         }
 
         [TestFixtureTearDown]
@@ -253,7 +260,7 @@ namespace OptimizelySDK.Tests
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "User [test_user] is in variation [control] of experiment [test_experiment]."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "This decision will not be saved since the UserProfileService is null."), Times.Once);
 
-            Assert.AreEqual("control", variation?.Key);
+            Assert.IsTrue(TestData.CompareObjects(VariationWithKeyControl, variation));
         }
 
         [Test]
@@ -330,7 +337,7 @@ namespace OptimizelySDK.Tests
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "Activating user user_1 in experiment group_experiment_1."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, @"Dispatching impression event to URL logx.optimizely.com/decision with params {""param1"":""val1"",""param2"":""val2""}."), Times.Once);
 
-            Assert.AreEqual("group_exp_1_var_2", variation?.Key);
+            Assert.IsTrue(TestData.CompareObjects(GroupVariation, variation));
         }
         #endregion
 
@@ -374,7 +381,7 @@ namespace OptimizelySDK.Tests
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "Activating user test_user in experiment test_experiment."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, @"Dispatching impression event to URL logx.optimizely.com/decision with params {""param1"":""val1""}."), Times.Once);
 
-            Assert.AreEqual("control", variation?.Key);
+            Assert.IsTrue(TestData.CompareObjects(VariationWithKeyControl, variation));
         }
 
         [Test]
@@ -404,7 +411,7 @@ namespace OptimizelySDK.Tests
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "Activating user test_user in experiment test_experiment."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, @"Dispatching impression event to URL logx.optimizely.com/decision with params {""param1"":""val1""}."), Times.Once);
 
-            Assert.AreEqual("control", variation?.Key);
+            Assert.IsTrue(TestData.CompareObjects(VariationWithKeyControl, variation));
         }
 
         [Test]
@@ -468,7 +475,7 @@ namespace OptimizelySDK.Tests
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "User [test_user] is in variation [control] of experiment [test_experiment]."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "This decision will not be saved since the UserProfileService is null."), Times.Once);
 
-            Assert.AreEqual("control", variation?.Key);
+            Assert.IsTrue(TestData.CompareObjects(VariationWithKeyControl, variation));
         }
 
         [Test]
@@ -663,7 +670,7 @@ namespace OptimizelySDK.Tests
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, @"Dispatching impression event to URL logx.optimizely.com/decision with params {""param1"":""val1""}."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Unable to dispatch impression event. Error Invalid dispatch event"), Times.Once);
 
-            Assert.AreEqual("control", variation?.Key);
+            Assert.IsTrue(TestData.CompareObjects(VariationWithKeyControl, variation));
         }
 
         [Test]
@@ -733,23 +740,26 @@ namespace OptimizelySDK.Tests
         public void TestForcedVariationPreceedsWhitelistedVariation()
         {
             var optimizely = new Optimizely(TestData.ValidDataFileV3, EventDispatcher, LoggerMock.Object, ErrorHandlerMock.Object);
+            var projectConfig = ProjectConfig.Create(TestData.ValidDataFileV3, LoggerMock.Object, ErrorHandlerMock.Object);
+            Variation expectedVariation1 = projectConfig.GetVariationFromKey("etag1", "vtag1");
+            Variation expectedVariation2 = projectConfig.GetVariationFromKey("etag1", "vtag2");
 
             //Check whitelisted experiment
             var variation = optimizely.GetVariation("etag1", "testUser1");
-            Assert.AreEqual("vtag1", variation?.Key);
+            Assert.IsTrue(TestData.CompareObjects(expectedVariation1, variation));
 
             //Set forced variation
             Assert.IsTrue(optimizely.SetForcedVariation("etag1", "testUser1", "vtag2"));
-            var variation2 = optimizely.GetVariation("etag1", "testUser1");
+            variation = optimizely.GetVariation("etag1", "testUser1");
 
             // verify forced variation preceeds whitelisted variation
-            Assert.AreEqual("vtag2", variation2?.Key);
+            Assert.IsTrue(TestData.CompareObjects(expectedVariation2, variation));
 
             // remove forced variation and verify whitelisted should be returned.
             Assert.IsTrue(optimizely.SetForcedVariation("etag1", "testUser1", null));
-            var variation3 = optimizely.GetVariation("etag1", "testUser1");
+            variation = optimizely.GetVariation("etag1", "testUser1");
 
-            Assert.AreEqual("vtag1", variation3?.Key);
+            Assert.IsTrue(TestData.CompareObjects(expectedVariation1, variation));
 
             LoggerMock.Verify(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()), Times.Exactly(7));
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "User \"testUser1\" is not in the forced variation map."), Times.Once);
@@ -764,35 +774,38 @@ namespace OptimizelySDK.Tests
         public void TestForcedVariationPreceedsUserProfile()
         {
             var userProfileServiceMock = new Mock<UserProfileService>();
-            var experimentId = "etag1";
+            var experimentKey = "etag1";
             var userId = "testUser3";
-            var variationId = "vtag2";
-            var fbVariationId = "vtag1";
+            var variationKey = "vtag2";
+            var fbVariationKey = "vtag1";
+            
 
             UserProfile userProfile = new UserProfile(userId, new Dictionary<string, Decision>
             {
-                { experimentId, new Decision(variationId)}
+                { experimentKey, new Decision(variationKey)}
             });
 
             userProfileServiceMock.Setup(_ => _.Lookup(userId)).Returns(userProfile.ToMap());
 
             var optimizely = new Optimizely(TestData.NoAudienceProjectConfigV3, EventDispatcher, LoggerMock.Object, ErrorHandlerMock.Object, userProfileServiceMock.Object);
+            var projectConfig = ProjectConfig.Create(TestData.NoAudienceProjectConfigV3, LoggerMock.Object, ErrorHandlerMock.Object);
+            Variation expectedFbVariation = projectConfig.GetVariationFromKey(experimentKey, fbVariationKey);
+            Variation expectedVariation = projectConfig.GetVariationFromKey(experimentKey, variationKey);
 
-            var variationUserProfile = optimizely.GetVariation(experimentId, userId);
-            Assert.AreEqual(variationUserProfile?.Key, variationId);
+            var variationUserProfile = optimizely.GetVariation(experimentKey, userId);
+            Assert.IsTrue(TestData.CompareObjects(expectedVariation, variationUserProfile));
 
             //assign same user with different variation, forced variation have higher priority
-            Assert.IsTrue(optimizely.SetForcedVariation(experimentId, userId, fbVariationId));
+            Assert.IsTrue(optimizely.SetForcedVariation(experimentKey, userId, fbVariationKey));
 
-            var variation2 = optimizely.GetVariation(experimentId, userId);
-            Assert.AreEqual(fbVariationId, variation2?.Key);
-
+            var variation2 = optimizely.GetVariation(experimentKey, userId);
+            Assert.IsTrue(TestData.CompareObjects(expectedFbVariation, variation2));
+            
             //remove forced variation and re-check userprofile
-            Assert.IsTrue(optimizely.SetForcedVariation(experimentId, userId, null));
+            Assert.IsTrue(optimizely.SetForcedVariation(experimentKey, userId, null));
 
-            var variationUserProfile2 = optimizely.GetVariation(experimentId, userId);
-
-            Assert.AreEqual(variationUserProfile2?.Key, variationId);
+            variationUserProfile = optimizely.GetVariation(experimentKey, userId);
+            Assert.IsTrue(TestData.CompareObjects(expectedVariation, variationUserProfile));
 
             LoggerMock.Verify(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()), Times.Exactly(13));
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "User \"testUser3\" is not in the forced variation map."), Times.Once);
@@ -812,7 +825,6 @@ namespace OptimizelySDK.Tests
         public void TestSetForcedVariationNullVariation()
         {
             var expectedForcedVariationKey = "variation";
-            var expectedVarationKey = "control";
             var experimentKey = "test_experiment";
 
             var userAttributes = new UserAttributes
@@ -827,15 +839,13 @@ namespace OptimizelySDK.Tests
             Assert.IsTrue(Optimizely.SetForcedVariation(experimentKey, TestUserId, expectedForcedVariationKey), "Set forced variation to variation failed.");
 
             var actualForcedVariation = Optimizely.GetVariation(experimentKey, TestUserId, userAttributes);
-            var actualVariationKey = actualForcedVariation?.Key;
-            Assert.AreEqual(expectedForcedVariationKey, actualVariationKey, string.Format(@"Forced variation key should be variation, but got ""{0}"".", actualVariationKey));
+            Assert.IsTrue(TestData.CompareObjects(VariationWithKeyVariation, actualForcedVariation), string.Format(@"Forced variation key should be variation, but got ""{0}"".", actualForcedVariation?.Key));
 
             // clear variation and check that the user gets bucketed normally
             Assert.IsTrue(Optimizely.SetForcedVariation(experimentKey, TestUserId, null), "Clear forced variation failed.");
 
             var actualVariation = Optimizely.GetVariation("test_experiment", "test_user", userAttributes);
-            actualVariationKey = actualVariation?.Key;
-            Assert.AreEqual(expectedVarationKey, actualVariationKey, string.Format(@"Variation key should be control, but got ""{0}"".", actualVariationKey));
+            Assert.IsTrue(TestData.CompareObjects(VariationWithKeyControl, actualVariation), string.Format(@"Variation key should be control, but got ""{0}"".", actualVariation?.Key));
         }
 
         // check that the forced variation is set correctly
@@ -843,7 +853,6 @@ namespace OptimizelySDK.Tests
         public void TestSetForcedVariation()
         {
             var experimentKey = "test_experiment";
-            var expectedVariationKey = "control";
             var expectedForcedVariationKey = "variation";
 
             var userAttributes = new UserAttributes
@@ -858,25 +867,25 @@ namespace OptimizelySDK.Tests
             Assert.IsFalse(Optimizely.SetForcedVariation("bad_experiment", TestUserId, "bad_control"), "Set variation to 'variation' should have failed  because of invalid experiment.");
 
             var variation = Optimizely.GetVariation(experimentKey, TestUserId, userAttributes);
-            Assert.AreEqual(expectedVariationKey, variation?.Key);
+            Assert.IsTrue(TestData.CompareObjects(VariationWithKeyControl, variation));
 
             // test invalid variation -. normal bucketing should occur
             Assert.IsFalse(Optimizely.SetForcedVariation("test_experiment", TestUserId, "bad_variation"), "Set variation to 'bad_variation' should have failed.");
 
             variation = Optimizely.GetVariation("test_experiment", "test_user", userAttributes);
-            Assert.AreEqual(expectedVariationKey, variation?.Key);
+            Assert.IsTrue(TestData.CompareObjects(VariationWithKeyControl, variation));
 
             // test valid variation -. the user should be bucketed to the specified forced variation
             Assert.IsTrue(Optimizely.SetForcedVariation(experimentKey, TestUserId, expectedForcedVariationKey), "Set variation to 'variation' failed.");
 
             var actualForcedVariation = Optimizely.GetVariation(experimentKey, TestUserId, userAttributes);
-            Assert.AreEqual(expectedForcedVariationKey, actualForcedVariation?.Key);
+            Assert.IsTrue(TestData.CompareObjects(VariationWithKeyVariation, actualForcedVariation));
 
             // make sure another setForcedVariation call sets a new forced variation correctly
             Assert.IsTrue(Optimizely.SetForcedVariation(experimentKey, "test_user2", expectedForcedVariationKey), "Set variation to 'variation' failed.");
             actualForcedVariation = Optimizely.GetVariation(experimentKey, "test_user2", userAttributes);
 
-            Assert.AreEqual(expectedForcedVariationKey, actualForcedVariation?.Key);
+            Assert.IsTrue(TestData.CompareObjects(VariationWithKeyVariation, actualForcedVariation));
         }
 
         // check that the get forced variation is correct.
@@ -943,8 +952,8 @@ namespace OptimizelySDK.Tests
             LoggerMock.Verify(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()), Times.Exactly(2));
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, string.Format(@"Set variation ""{0}"" for experiment ""{1}"" and user ""{2}"" in the forced variation map.", variationId, experimentId, userId)));
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, string.Format(@"Variation ""{0}"" is mapped to experiment ""{1}"" and user ""{2}"" in the forced variation map", variationKey, experimentKey, userId)));
-            
-            Assert.AreEqual("control", variation?.Key);
+
+            Assert.IsTrue(TestData.CompareObjects(VariationWithKeyControl, variation));
         }
 
         [Test]
@@ -988,7 +997,7 @@ namespace OptimizelySDK.Tests
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, string.Format(@"Set variation ""{0}"" for experiment ""{1}"" and user ""{2}"" in the forced variation map.", variationId, experimentId, userId)));
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, string.Format(@"Variation ""{0}"" is mapped to experiment ""{1}"" and user ""{2}"" in the forced variation map", variationKey, experimentKey, userId)));
 
-            Assert.AreEqual("variation", variation?.Key);
+            Assert.IsTrue(TestData.CompareObjects(VariationWithKeyVariation, variation));
         }
 
         [Test]
@@ -1035,7 +1044,7 @@ namespace OptimizelySDK.Tests
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "Activating user user_1 in experiment group_experiment_1."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, @"Dispatching impression event to URL logx.optimizely.com/decision with params {""param1"":""val1"",""param2"":""val2""}."), Times.Once);
 
-            Assert.AreEqual("group_exp_1_var_2", variation?.Key);
+            Assert.IsTrue(TestData.CompareObjects(GroupVariation, variation));
         }
 
         [Test]
@@ -1087,8 +1096,6 @@ namespace OptimizelySDK.Tests
         {
             var testBucketingIdControl = "testBucketingIdControl!"; // generates bucketing number 3741
             var testBucketingIdVariation = "123456789"; // generates bucketing number 4567
-            var variationKeyControl = "control";
-            var variationKeyVariation = "variation";
             var userId = "test_user";
             var experimentKey = "test_experiment";
 
@@ -1109,8 +1116,7 @@ namespace OptimizelySDK.Tests
 
             // confirm that a valid variation is bucketed without the bucketing ID
             var actualVariation = Optimizely.GetVariation(experimentKey, userId, userAttributes);
-            var actualVariationKey = actualVariation?.Key;
-            Assert.AreEqual(variationKeyControl, actualVariationKey, string.Format("Invalid variation key \"{0}\" for getVariation.", actualVariationKey));
+            Assert.IsTrue(TestData.CompareObjects(VariationWithKeyControl, actualVariation), string.Format("Invalid variation key \"{0}\" for getVariation.", actualVariation?.Key));
 
             // confirm that invalid audience returns null
             actualVariation = Optimizely.GetVariation(experimentKey, userId);
@@ -1118,8 +1124,7 @@ namespace OptimizelySDK.Tests
 
             // confirm that a valid variation is bucketed with the bucketing ID
             actualVariation = Optimizely.GetVariation(experimentKey, userId, userAttributesWithBucketingId);
-            actualVariationKey = actualVariation?.Key;
-            Assert.AreEqual(variationKeyVariation, actualVariationKey, string.Format("Invalid variation key \"{0}\" for getVariation with bucketing ID \"{1}\".", actualVariationKey, testBucketingIdVariation));
+            Assert.IsTrue(TestData.CompareObjects(VariationWithKeyVariation, actualVariation), string.Format("Invalid variation key \"{0}\" for getVariation with bucketing ID \"{1}\".", actualVariation?.Key, testBucketingIdVariation));
 
             // confirm that invalid experiment with the bucketing ID returns null
             actualVariation = Optimizely.GetVariation("invalidExperimentKey", userId, userAttributesWithBucketingId);
