@@ -48,11 +48,6 @@ Write-Host "Build complete. Copying files..."
 ################################################################
 # NuGet lib
 ################################################################
-New-Item -Path ".\content" -ItemType "directory" -force
-Copy-Item -Path ".\Licenses" -Destination ".\content" -Recurse -force
-New-Item -Path ".\content\Licenses\Optimizely.SDK" -ItemType "directory" -force
-Copy-Item -Path "..\LICENSE" -Destination ".\content\Licenses\Optimizely.SDK" -force
-
 New-Item -Path ".\lib\net45" -ItemType "directory" -force
 Copy-Item -Path "..\OptimizelySDK\bin\Release\*.dll" -Destination ".\lib\net45" -Recurse -force
 Copy-Item -Path "..\OptimizelySDK\bin\Release\*.pdb" -Destination ".\lib\net45" -Recurse -force
@@ -69,7 +64,6 @@ Copy-Item -Path "..\OptimizelySDK.Net35\bin\Release\*.pdb" -Destination ".\lib\n
 Copy-Item -Path "..\OptimizelySDK.Net35\bin\Release\*.xml" -Destination ".\lib\net35" -Recurse -force
 
 New-Item -Path ".\lib\netstandard1.6" -ItemType "directory" -force
-Copy-Item -Path ".\netstandard1.6\*" -Destination ".\lib\netstandard1.6" -Recurse -force
 Copy-Item -Path "..\OptimizelySDK.NetStandard16\bin\Release\netstandard1.6\*.dll" -Destination ".\lib\netstandard1.6" -Recurse -force
 Copy-Item -Path "..\OptimizelySDK.NetStandard16\bin\Release\netstandard1.6\*.pdb" -Destination ".\lib\netstandard1.6" -Recurse -force
 Copy-Item -Path "..\OptimizelySDK.NetStandard16\bin\Release\netstandard1.6\*.xml" -Destination ".\lib\netstandard1.6" -Recurse -force
@@ -85,19 +79,9 @@ if ($PSVersionTable["Platform"] -eq "Unix") {
     Write-Host "Digitally Signing (signtool.exe)"
     # One can use 'find "" -name "*.dll" -print  '
     # to find the *.dll that we need this PowerShell script to digitally sign (signtool.exe).
-    & $signtool sign /tr http://timestamp.digicert.com /td sha256 /fd sha256 /n "Optimizely, Inc." ".\lib\net35\MurmurHash.dll"
-    & $signtool sign /tr http://timestamp.digicert.com /td sha256 /fd sha256 /n "Optimizely, Inc." ".\lib\net35\Newtonsoft.Json.dll"
     & $signtool sign /tr http://timestamp.digicert.com /td sha256 /fd sha256 /n "Optimizely, Inc." ".\lib\net35\OptimizelySDK.Net35.dll"
-    & $signtool sign /tr http://timestamp.digicert.com /td sha256 /fd sha256 /n "Optimizely, Inc." ".\lib\net40\MurmurHash.dll"
-    & $signtool sign /tr http://timestamp.digicert.com /td sha256 /fd sha256 /n "Optimizely, Inc." ".\lib\net40\Newtonsoft.Json.dll"
     & $signtool sign /tr http://timestamp.digicert.com /td sha256 /fd sha256 /n "Optimizely, Inc." ".\lib\net40\OptimizelySDK.Net40.dll"
-    & $signtool sign /tr http://timestamp.digicert.com /td sha256 /fd sha256 /n "Optimizely, Inc." ".\lib\net45\MurmurHash.dll"
-    & $signtool sign /tr http://timestamp.digicert.com /td sha256 /fd sha256 /n "Optimizely, Inc." ".\lib\net45\Newtonsoft.Json.dll"
-    & $signtool sign /tr http://timestamp.digicert.com /td sha256 /fd sha256 /n "Optimizely, Inc." ".\lib\net45\NJsonSchema.dll"
     & $signtool sign /tr http://timestamp.digicert.com /td sha256 /fd sha256 /n "Optimizely, Inc." ".\lib\net45\OptimizelySDK.dll"
-    & $signtool sign /tr http://timestamp.digicert.com /td sha256 /fd sha256 /n "Optimizely, Inc." ".\lib\netstandard1.6\MurmurHash.dll"
-    & $signtool sign /tr http://timestamp.digicert.com /td sha256 /fd sha256 /n "Optimizely, Inc." ".\lib\netstandard1.6\Newtonsoft.Json.dll"
-    & $signtool sign /tr http://timestamp.digicert.com /td sha256 /fd sha256 /n "Optimizely, Inc." ".\lib\netstandard1.6\NJsonSchema.dll"
     & $signtool sign /tr http://timestamp.digicert.com /td sha256 /fd sha256 /n "Optimizely, Inc." ".\lib\netstandard1.6\OptimizelySDK.NetStandard16.dll"
 }
 
