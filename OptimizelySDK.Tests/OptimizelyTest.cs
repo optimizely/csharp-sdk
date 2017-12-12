@@ -328,7 +328,7 @@ namespace OptimizelySDK.Tests
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Assigned bucket [9525] to user [user_1] with bucketing ID [user_1]."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "User [user_1] is in variation [group_exp_1_var_2] of experiment [group_experiment_1]."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "Activating user user_1 in experiment group_experiment_1."), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Dispatching impression event to URL OptimizelySDK.Event.LogEvent with params {\"param1\":\"val1\",\"param2\":\"val2\"}."), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Dispatching impression event to URL logx.optimizely.com/decision with params {\"param1\":\"val1\",\"param2\":\"val2\"}."), Times.Once);
 
             Assert.AreEqual("group_exp_1_var_2", variationkey);
         }
@@ -372,7 +372,7 @@ namespace OptimizelySDK.Tests
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Assigned bucket [3037] to user [test_user] with bucketing ID [test_user]."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "User [test_user] is in variation [control] of experiment [test_experiment]."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "Activating user test_user in experiment test_experiment."), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Dispatching impression event to URL OptimizelySDK.Event.LogEvent with params {\"param1\":\"val1\"}."), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Dispatching impression event to URL logx.optimizely.com/decision with params {\"param1\":\"val1\"}."), Times.Once);
 
             Assert.AreEqual("control", variationkey);
         }
@@ -402,7 +402,7 @@ namespace OptimizelySDK.Tests
             LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "[UserAttributes] Null value for key wont_be_sent removed and will not be sent to results."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "[UserAttributes] Null value for key bad_food removed and will not be sent to results."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "Activating user test_user in experiment test_experiment."), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Dispatching impression event to URL OptimizelySDK.Event.LogEvent with params {\"param1\":\"val1\"}."), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Dispatching impression event to URL logx.optimizely.com/decision with params {\"param1\":\"val1\"}."), Times.Once);
 
             Assert.AreEqual("control", variationkey);
         }
@@ -660,7 +660,7 @@ namespace OptimizelySDK.Tests
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Assigned bucket [3037] to user [test_user] with bucketing ID [test_user]."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "User [test_user] is in variation [control] of experiment [test_experiment]."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "Activating user test_user in experiment test_experiment."), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Dispatching impression event to URL OptimizelySDK.Event.LogEvent with params {\"param1\":\"val1\"}."), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Dispatching impression event to URL logx.optimizely.com/decision with params {\"param1\":\"val1\"}."), Times.Once);
 
             Assert.AreEqual("control", variationkey);
         }
@@ -1034,7 +1034,7 @@ namespace OptimizelySDK.Tests
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "User [user_1] is in variation [group_exp_1_var_2] of experiment [group_experiment_1]."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "This decision will not be saved since the UserProfileService is null."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "Activating user user_1 in experiment group_experiment_1."), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Dispatching impression event to URL OptimizelySDK.Event.LogEvent with params {\"param1\":\"val1\",\"param2\":\"val2\"}."), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Dispatching impression event to URL logx.optimizely.com/decision with params {\"param1\":\"val1\",\"param2\":\"val2\"}."), Times.Once);
 
             Assert.AreEqual("group_exp_1_var_2", variationkey);
         }
@@ -1169,7 +1169,6 @@ namespace OptimizelySDK.Tests
             EventBuilderMock.Setup(ebm => ebm.CreateImpressionEvent(It.IsAny<ProjectConfig>(), It.IsAny<Experiment>(),
                 It.IsAny<string>(), It.IsAny<string>(), It.IsAny<UserAttributes>())).Returns(logEvent);
             DecisionServiceMock.Setup(ds => ds.GetVariation(experiment, TestUserId, userAttributes)).Returns(variation);
-            DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, userAttributes)).Returns(variation);
 
             // Adding notification listeners.
             var notificationType = NotificationCenter.NotificationType.Activate;
@@ -1181,13 +1180,12 @@ namespace OptimizelySDK.Tests
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
             optly.SetFieldOrProperty("EventBuilder", EventBuilderMock.Object);
 
-            // Calling Activate and IsFeatureEnabled.
+            // Calling Activate.
             optly.Invoke("Activate", experimentKey, TestUserId, userAttributes);
-            optly.Invoke("IsFeatureEnabled", featureKey, TestUserId, userAttributes);
 
-            // Verify that all the registered callbacks are called once for both Activate and IsFeatureEnabled.
-            NotificationCallbackMock.Verify(nc => nc.TestActivateCallback(experiment, TestUserId, userAttributes, variation, logEvent), Times.Exactly(2));
-            NotificationCallbackMock.Verify(nc => nc.TestAnotherActivateCallback(experiment, TestUserId, userAttributes, variation, logEvent), Times.Exactly(2));
+            // Verify that all the registered callbacks are called once for Activate.
+            NotificationCallbackMock.Verify(nc => nc.TestActivateCallback(experiment, TestUserId, userAttributes, variation, logEvent), Times.Exactly(1));
+            NotificationCallbackMock.Verify(nc => nc.TestAnotherActivateCallback(experiment, TestUserId, userAttributes, variation, logEvent), Times.Exactly(1));
         }
 
         [Test]
