@@ -132,7 +132,7 @@ namespace OptimizelySDK.DemoApp.Controllers
 
             return View(new DemoViewModel
             {
-                Products = GetProducts(variation).ToArray(),
+                Products = GetProducts(variation?.Key).ToArray(),
                 CurrentVisitor = visitor,
                 Message = TempData.ContainsKey("Message") ? (string)TempData["Message"] : null,
             });
