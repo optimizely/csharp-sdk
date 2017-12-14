@@ -34,19 +34,5 @@ namespace OptimizelySDK.Entity
             VariationId = variationId;
             Source = source;
         }
-
-        public override bool Equals(object obj)
-        {
-            var decision = obj as FeatureDecision;
-            return decision != null &&
-                   ExperimentId == decision.ExperimentId &&
-                   VariationId == decision.VariationId &&
-                   Source == decision.Source;
-        }
-
-        public override int GetHashCode()
-        {
-            return (ExperimentId + VariationId + Source).GetHashCode();
-        }
     }
 }
