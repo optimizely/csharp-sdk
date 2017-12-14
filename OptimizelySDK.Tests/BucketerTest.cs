@@ -225,5 +225,18 @@ namespace OptimizelySDK.Tests
                 bucketer.Bucket(Config, Config.GetExperimentFromKey("group_experiment_2"), 
                 TestBucketingIdGroupExp2Var2, TestUserIdBucketsToNoGroup));
         }
+
+        // Make sure that user gets bucketed into the rollout rule.
+        [Test]
+        public void TestBucketRolloutRule()
+        {
+            var bucketer = new Bucketer(LoggerMock.Object);
+            var rollout = Config.GetRolloutFromId("166660");
+            var rolloutRule = rollout.Experiments[1];
+            var expectedVariation = Config.GetVariationFromId(rolloutRule.Key, "177773");
+
+            Assert.True(TestData.CompareObjects(expectedVariation, 
+                bucketer.Bucket(Config, rolloutRule, "testBucketingId", TestUserId)));
+        }
     }
 }

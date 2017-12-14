@@ -314,13 +314,11 @@ namespace OptimizelySDK.Bucketing
             var everyoneElseRolloutRule = rollout.Experiments[rolloutRulesLength - 1];
             variation = Bucketer.Bucket(ProjectConfig, everyoneElseRolloutRule, bucketingId, userId);
 
-            if (variation == null)
-            {
-                Logger.Log(LogLevel.DEBUG, $"User \"{userId}\" is excluded from \"Everyone Else\" rule for feature flag \"{featureFlag.Key}\".");
-                return null;
-            }
+            if (variation != null && variation.Id != null)
+                return new FeatureDecision(everyoneElseRolloutRule.Id, variation.Id, FeatureDecision.DECISION_SOURCE_ROLLOUT);
 
-            return new FeatureDecision(everyoneElseRolloutRule.Id, variation.Id, FeatureDecision.DECISION_SOURCE_ROLLOUT);
+            Logger.Log(LogLevel.DEBUG, $"User \"{userId}\" is excluded from \"Everyone Else\" rule for feature flag \"{featureFlag.Key}\".");
+            return null;
         }
 
         /// <summary>
@@ -354,7 +352,7 @@ namespace OptimizelySDK.Bucketing
 
                 var variation = GetVariation(experiment, userId, filteredAttributes);
 
-                if (variation != null)
+                if (variation != null && variation.Id != null)
                 {
                     Logger.Log(LogLevel.INFO, $"The user \"{userId}\" is bucketed into experiment \"{experiment.Key}\" of feature \"{featureFlag.Key}\".");
                     return new FeatureDecision(experimentId, variation.Id, FeatureDecision.DECISION_SOURCE_EXPERIMENT);

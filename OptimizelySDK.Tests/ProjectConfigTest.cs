@@ -169,6 +169,31 @@ namespace OptimizelySDK.Tests
                      {"control", Config.GetVariationFromKey("test_experiment_integer_feature", "control") },
                      { "variation", Config.GetVariationFromKey("test_experiment_integer_feature", "variation") }
                  }
+                },
+                { "177770", new Dictionary<string, object>
+                 {
+                     {"177771", Config.GetVariationFromKey("177770", "177771") }
+                 }
+                },
+                { "177772", new Dictionary<string, object>
+                 {
+                     {"177773", Config.GetVariationFromKey("177772", "177773") }
+                 }
+                },
+                { "177776", new Dictionary<string, object>
+                 {
+                     {"177778", Config.GetVariationFromKey("177776", "177778") }
+                 }
+                },
+                { "177774", new Dictionary<string, object>
+                 {
+                     {"177775", Config.GetVariationFromKey("177774", "177775") }
+                 }
+                },
+                { "177779", new Dictionary<string, object>
+                 {
+                     {"177780", Config.GetVariationFromKey("177779", "177780") }
+                 }
                 }
             };
 
@@ -221,9 +246,35 @@ namespace OptimizelySDK.Tests
                      { "7722360022", Config.GetVariationFromId("group_experiment_1", "7722360022")}
                  }
                 },
-                { "group_experiment_2", new Dictionary<string, object>                 {
+                { "group_experiment_2", new Dictionary<string, object>
+                 {
                      {"7713030086", Config.GetVariationFromId("group_experiment_2", "7713030086") },
                      { "7725250007", Config.GetVariationFromId("group_experiment_2", "7725250007")}
+                 }
+                },
+                { "177770", new Dictionary<string, object>
+                 {
+                     {"177771", Config.GetVariationFromId("177770", "177771") }
+                 }
+                },
+                { "177772", new Dictionary<string, object>
+                 {
+                     {"177773", Config.GetVariationFromId("177772", "177773") }
+                 }
+                },
+                { "177776", new Dictionary<string, object>
+                 {
+                     {"177778", Config.GetVariationFromId("177776", "177778") }
+                 }
+                },
+                { "177774", new Dictionary<string, object>
+                 {
+                     {"177775", Config.GetVariationFromId("177774", "177775") }
+                 }
+                },
+                { "177779", new Dictionary<string, object>
+                 {
+                     {"177780", Config.GetVariationFromId("177779", "177780") }
                  }
                 }
             };

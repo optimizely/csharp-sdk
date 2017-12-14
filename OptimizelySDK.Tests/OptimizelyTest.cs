@@ -1513,6 +1513,28 @@ namespace OptimizelySDK.Tests
                 $@"Feature flag ""{featureKey}"" is enabled for user ""{TestUserId}""."));
         }
 
+        // Verify that IsFeatureEnabled returns true if a variation does not get found in the feature
+        // flag experiment but found in the rollout rule.
+        [Test]
+        public void TestIsFeatureEnabledGivenVariationNotFoundInFeatureExperimentButInRolloutRule()
+        {
+            var featureKey = "boolean_single_variable_feature";
+            var userAttributes = new UserAttributes
+            {
+                { "device_type", "iPhone" },
+                { "company", "Optimizely" }
+            };
+
+            Assert.True(Optimizely.IsFeatureEnabled(featureKey, TestUserId, userAttributes));
+
+            LoggerMock.Verify(l => l.Log(LogLevel.INFO, "The feature flag \"boolean_single_variable_feature\" is not used in any experiments."), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "User \"testUserId\" does not meet the conditions to be in rollout rule for audience \"Chrome users\"."), Times.Exactly(2));
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Assigned bucket [8408] to user [testUserId] with bucketing ID [testUserId]."), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.INFO, "The user \"testUserId\" is bucketed into a rollout for feature flag \"boolean_single_variable_feature\"."), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.INFO, "The user \"testUserId\" is not being experimented on feature \"boolean_single_variable_feature\"."), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.INFO, "Feature flag \"boolean_single_variable_feature\" is enabled for user \"testUserId\"."), Times.Once);
+        }
+
         #endregion // Test IsFeatureEnabled method
 
         #region Test NotificationCenter
