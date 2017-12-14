@@ -259,6 +259,12 @@ namespace OptimizelySDK.Bucketing
         /// otherwise the FeatureDecision entity</returns>
         public virtual FeatureDecision GetVariationForFeatureRollout(FeatureFlag featureFlag, string userId, UserAttributes filteredAttributes)
         {
+            if (featureFlag == null)
+            {
+                Logger.Log(LogLevel.ERROR, "Invalid feature flag provided.");
+                return null;
+            }
+
             if (string.IsNullOrEmpty(featureFlag.RolloutId))
             {
                 Logger.Log(LogLevel.INFO, $"The feature flag \"{featureFlag.Key}\" is not used in a rollout.");
@@ -327,6 +333,12 @@ namespace OptimizelySDK.Bucketing
         /// Otherwise the FeatureDecision entity</returns>
         public virtual FeatureDecision GetVariationForFeatureExperiment(FeatureFlag featureFlag, string userId, UserAttributes filteredAttributes)
         {
+            if (featureFlag == null)
+            {
+                Logger.Log(LogLevel.ERROR, "Invalid feature flag provided.");
+                return null;
+            }
+
             if (featureFlag.ExperimentIds == null || featureFlag.ExperimentIds.Count == 0)
             {
                 Logger.Log(LogLevel.INFO, $"The feature flag \"{featureFlag.Key}\" is not used in any experiments.");

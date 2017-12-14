@@ -19,14 +19,14 @@ using System.Collections.Generic;
 
 namespace OptimizelySDK.Entity
 {
-    public class FeatureDecision : IEquatable<object>
+    public class FeatureDecision
     {
         public const string DECISION_SOURCE_EXPERIMENT = "experiment";
         public const string DECISION_SOURCE_ROLLOUT = "rollout";
 
-        public string ExperimentId { get; set; }
-        public string VariationId { get; set; }
-        public string Source { get; set; }
+        public string ExperimentId { get; }
+        public string VariationId { get; }
+        public string Source { get; }
 
         public FeatureDecision(string experimentId, string variationId, string source)
         {
