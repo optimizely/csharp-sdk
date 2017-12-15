@@ -354,31 +354,21 @@ namespace OptimizelySDK
             if (!Validator.IsFeatureFlagValid(Config, featureFlag))
                 return false;
 
-            var variation = DecisionService.GetVariationForFeature(featureFlag, userId, userAttributes);
-            if ( variation == null )
+            var decision = DecisionService.GetVariationForFeature(featureFlag, userId, userAttributes);
+            if (decision == null)
             {
                 Logger.Log(LogLevel.INFO, $@"Feature flag ""{featureKey}"" is not enabled for user ""{userId}"".");
                 return false;
             }
 
-            var experiment = Config.GetExperimentForVariationId(variation.Id);
-
-            if (!string.IsNullOrEmpty(experiment.Key))
+            if (decision.Source == FeatureDecision.DECISION_SOURCE_EXPERIMENT)
             {
+                var experiment = Config.GetExperimentFromId(decision.ExperimentId);
+                var variation = Config.GetVariationFromId(experiment.Key, decision.VariationId);
                 SendImpressionEvent(experiment, variation, userId, userAttributes);
             }
             else
             {
-                var audiences = new Audience[1];
-                var rolloutRule = Config.GetRolloutRuleForVariationId(variation.Id);
-
-                if (!string.IsNullOrEmpty(rolloutRule.Key)
-                    && rolloutRule.AudienceIds != null
-                    && rolloutRule.AudienceIds.Length > 0)
-                {
-                    audiences[0] = Config.GetAudience(rolloutRule.AudienceIds[0]);
-                }
-
                 Logger.Log(LogLevel.INFO, $@"The user ""{userId}"" is not being experimented on feature ""{featureKey}"".");
             }
 
@@ -435,11 +425,14 @@ namespace OptimizelySDK
             }
 
             var variableValue = featureVariable.DefaultValue;
-            var variation = DecisionService.GetVariationForFeature(featureFlag, userId, userAttributes);
+            var decision = DecisionService.GetVariationForFeature(featureFlag, userId, userAttributes);
 
-            if (variation != null)
+            if (decision != null)
             {
+                var experiment = Config.GetExperimentFromId(decision.ExperimentId);
+                var variation = Config.GetVariationFromId(experiment.Key, decision.VariationId);
                 var featureVariableUsageInstance = variation.GetFeatureVariableUsageFromId(featureVariable.Id);
+
                 if (featureVariableUsageInstance != null)
                 {
                     variableValue = featureVariableUsageInstance.Value;
