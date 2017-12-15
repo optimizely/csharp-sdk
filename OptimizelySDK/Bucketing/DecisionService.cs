@@ -296,7 +296,7 @@ namespace OptimizelySDK.Bucketing
                     Logger.Log(LogLevel.DEBUG, $"Attempting to bucket user \"{userId}\" into rollout rule \"{rolloutRule.Key}\".");
                     variation = Bucketer.Bucket(ProjectConfig, rolloutRule, bucketingId, userId);
 
-                    if (variation == null)
+                    if (variation == null || string.IsNullOrEmpty(variation.Id))
                     {
                         Logger.Log(LogLevel.DEBUG, $"User \"{userId}\" is excluded due to traffic allocation. Checking \"Eveyrone Else\" rule now.");
                         break;
@@ -314,7 +314,7 @@ namespace OptimizelySDK.Bucketing
             var everyoneElseRolloutRule = rollout.Experiments[rolloutRulesLength - 1];
             variation = Bucketer.Bucket(ProjectConfig, everyoneElseRolloutRule, bucketingId, userId);
 
-            if (variation != null && variation.Id != null)
+            if (variation != null && !string.IsNullOrEmpty(variation.Id))
                 return new FeatureDecision(everyoneElseRolloutRule.Id, variation.Id, FeatureDecision.DECISION_SOURCE_ROLLOUT);
 
             Logger.Log(LogLevel.DEBUG, $"User \"{userId}\" is excluded from \"Everyone Else\" rule for feature flag \"{featureFlag.Key}\".");
@@ -352,7 +352,7 @@ namespace OptimizelySDK.Bucketing
 
                 var variation = GetVariation(experiment, userId, filteredAttributes);
 
-                if (variation != null && variation.Id != null)
+                if (variation != null && !string.IsNullOrEmpty(variation.Id))
                 {
                     Logger.Log(LogLevel.INFO, $"The user \"{userId}\" is bucketed into experiment \"{experiment.Key}\" of feature \"{featureFlag.Key}\".");
                     return new FeatureDecision(experimentId, variation.Id, FeatureDecision.DECISION_SOURCE_EXPERIMENT);
