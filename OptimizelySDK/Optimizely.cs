@@ -333,7 +333,7 @@ namespace OptimizelySDK
         /// <param name="userId">The user ID</param>
         /// <param name="userAttributes">The user's attributes.</param>
         /// <returns>True if feature is enabled, false or null otherwise</returns>
-        public bool IsFeatureEnabled(string featureKey, string userId, UserAttributes userAttributes = null)
+        public virtual bool IsFeatureEnabled(string featureKey, string userId, UserAttributes userAttributes = null)
         {
             if (string.IsNullOrEmpty(userId))
             {
@@ -580,6 +580,32 @@ namespace OptimizelySDK
             {
                 Logger.Log(LogLevel.ERROR, @"Experiment has ""Launched"" status so not dispatching event during activation.");
             }
+        }
+
+        /// <summary>
+        /// Get the list of features that are enabled for the user.
+        /// </summary>
+        /// <param name="userId">The user Id</param>
+        /// <param name="userAttributes">The user's attributes</param>
+        /// <returns>List of the feature keys that are enabled for the user.</returns>
+        public List<string> GetEnabledFeatures(string userId, UserAttributes userAttributes)
+        {
+            List<string> enabledFeaturesList = new List<string>();
+
+            if (!IsValid)
+            {
+                Logger.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'GetEnabledFeatures'.");
+                return enabledFeaturesList;
+            }
+
+            foreach (var feature in Config.FeatureKeyMap.Values)
+            {
+                var featureKey = feature.Key;
+                if (IsFeatureEnabled(featureKey, userId, userAttributes))
+                    enabledFeaturesList.Add(featureKey);
+            }
+
+            return enabledFeaturesList;
         }
 
         #endregion // FeatureFlag APIs
