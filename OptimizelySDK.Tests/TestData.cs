@@ -66,8 +66,8 @@ namespace OptimizelySDK.Tests
         {
             var str1 = Newtonsoft.Json.JsonConvert.SerializeObject(o1);
             var str2 = Newtonsoft.Json.JsonConvert.SerializeObject(o2);
-            var jtoken1 = JToken.Parse(str1);
-            var jtoken2 = JToken.Parse(str2);
+            var jtoken1 = JToken.Parse(Newtonsoft.Json.JsonConvert.SerializeObject(o1));
+            var jtoken2 = JToken.Parse(Newtonsoft.Json.JsonConvert.SerializeObject(o2));
 
             return JToken.DeepEquals(jtoken1, jtoken2);
         }

@@ -149,8 +149,8 @@ namespace OptimizelySDK
         /// <param name="experimentKey">experimentKey string Key identifying the experiment</param>
         /// <param name="userId">string ID for user</param>
         /// <param name="attributes">associative array of Attributes for the user</param>
-        /// <returns>null|Variation Representing variation</returns>
-        public Variation Activate(string experimentKey, string userId, UserAttributes userAttributes = null)
+        /// <returns>null|string Representing variation</returns>
+        public string Activate(string experimentKey, string userId, UserAttributes userAttributes = null)
         {
             if (!IsValid)
             {
@@ -180,7 +180,7 @@ namespace OptimizelySDK
 
             SendImpressionEvent(experiment, variation, userId, userAttributes);
 
-            return variation;
+            return variation.Key;
         }
 
         /// <summary>
@@ -281,8 +281,8 @@ namespace OptimizelySDK
         /// <param name="experimentKey">experimentKey string Key identifying the experiment</param>
         /// <param name="userId">ID for the user</param>
         /// <param name="userAttributes">Attributes for the users</param>
-        /// <returns>null|Variation Representing variation</returns>
-        public Variation GetVariation(string experimentKey, string userId, UserAttributes userAttributes = null)
+        /// <returns>null|string Representing variation</returns>
+        public string GetVariation(string experimentKey, string userId, UserAttributes userAttributes = null)
         {
             if (!IsValid)
             {
@@ -294,7 +294,8 @@ namespace OptimizelySDK
             if (experiment.Key == null)
                 return null;
 
-            return DecisionService.GetVariation(experiment, userId, userAttributes);
+            Variation variation = DecisionService.GetVariation(experiment, userId, userAttributes);
+            return variation == null ? null : variation.Key;
         }
 
         /// <summary>
