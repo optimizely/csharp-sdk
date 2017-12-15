@@ -256,9 +256,15 @@ namespace OptimizelySDK.Bucketing
         /// <param name = "userId" >User Identifier</param>
         /// <param name = "filteredAttributes" >The user's attributes. This should be filtered to just attributes in the Datafile.</param>
         /// <returns>null if the user is not bucketed into the rollout or if the feature flag was not attached to a rollout.
-        /// otherwise the Variation the user is bucketed into</returns>
-        public virtual Variation GetVariationForFeatureRollout(FeatureFlag featureFlag, string userId, UserAttributes filteredAttributes)
+        /// otherwise the FeatureDecision entity</returns>
+        public virtual FeatureDecision GetVariationForFeatureRollout(FeatureFlag featureFlag, string userId, UserAttributes filteredAttributes)
         {
+            if (featureFlag == null)
+            {
+                Logger.Log(LogLevel.ERROR, "Invalid feature flag provided.");
+                return null;
+            }
+
             if (string.IsNullOrEmpty(featureFlag.RolloutId))
             {
                 Logger.Log(LogLevel.INFO, $"The feature flag \"{featureFlag.Key}\" is not used in a rollout.");
@@ -290,13 +296,13 @@ namespace OptimizelySDK.Bucketing
                     Logger.Log(LogLevel.DEBUG, $"Attempting to bucket user \"{userId}\" into rollout rule \"{rolloutRule.Key}\".");
                     variation = Bucketer.Bucket(ProjectConfig, rolloutRule, bucketingId, userId);
 
-                    if (variation == null)
+                    if (variation == null || string.IsNullOrEmpty(variation.Id))
                     {
                         Logger.Log(LogLevel.DEBUG, $"User \"{userId}\" is excluded due to traffic allocation. Checking \"Eveyrone Else\" rule now.");
                         break;
                     }
 
-                    return variation;
+                    return new FeatureDecision(rolloutRule.Id, variation.Id, FeatureDecision.DECISION_SOURCE_ROLLOUT);
                 }
                 else
                 {
@@ -308,12 +314,11 @@ namespace OptimizelySDK.Bucketing
             var everyoneElseRolloutRule = rollout.Experiments[rolloutRulesLength - 1];
             variation = Bucketer.Bucket(ProjectConfig, everyoneElseRolloutRule, bucketingId, userId);
 
-            if (variation == null)
-            {
-                Logger.Log(LogLevel.DEBUG, $"User \"{userId}\" is excluded from \"Everyone Else\" rule for feature flag \"{featureFlag.Key}\".");
-            }
+            if (variation != null && !string.IsNullOrEmpty(variation.Id))
+                return new FeatureDecision(everyoneElseRolloutRule.Id, variation.Id, FeatureDecision.DECISION_SOURCE_ROLLOUT);
 
-            return variation;
+            Logger.Log(LogLevel.DEBUG, $"User \"{userId}\" is excluded from \"Everyone Else\" rule for feature flag \"{featureFlag.Key}\".");
+            return null;
         }
 
         /// <summary>
@@ -323,9 +328,15 @@ namespace OptimizelySDK.Bucketing
         /// <param name = "userId" >User Identifier</param>
         /// <param name = "filteredAttributes" >The user's attributes. This should be filtered to just attributes in the Datafile.</param>
         /// <returns>null if the user is not bucketed into the rollout or if the feature flag was not attached to a rollout.
-        /// otherwise the Variation the user is bucketed into</returns>
-        public virtual Variation GetVariationForFeatureExperiment(FeatureFlag featureFlag, string userId, UserAttributes filteredAttributes)
+        /// Otherwise the FeatureDecision entity</returns>
+        public virtual FeatureDecision GetVariationForFeatureExperiment(FeatureFlag featureFlag, string userId, UserAttributes filteredAttributes)
         {
+            if (featureFlag == null)
+            {
+                Logger.Log(LogLevel.ERROR, "Invalid feature flag provided.");
+                return null;
+            }
+
             if (featureFlag.ExperimentIds == null || featureFlag.ExperimentIds.Count == 0)
             {
                 Logger.Log(LogLevel.INFO, $"The feature flag \"{featureFlag.Key}\" is not used in any experiments.");
@@ -341,10 +352,10 @@ namespace OptimizelySDK.Bucketing
 
                 var variation = GetVariation(experiment, userId, filteredAttributes);
 
-                if (variation != null)
+                if (variation != null && !string.IsNullOrEmpty(variation.Id))
                 {
                     Logger.Log(LogLevel.INFO, $"The user \"{userId}\" is bucketed into experiment \"{experiment.Key}\" of feature \"{featureFlag.Key}\".");
-                    return variation;
+                    return new FeatureDecision(experimentId, variation.Id, FeatureDecision.DECISION_SOURCE_EXPERIMENT);
                 }
             }
 
@@ -358,25 +369,25 @@ namespace OptimizelySDK.Bucketing
         /// <param name = "featureFlag" >The feature flag the user wants to access.</param>
         /// <param name = "userId" >User Identifier</param>
         /// <param name = "filteredAttributes" >The user's attributes. This should be filtered to just attributes in the Datafile.</param>
-        /// <returns>null if the user is not bucketed into any variation or the Variation the user is bucketed into
-        /// if the user is successfully bucketed.</returns>
-        public virtual Variation GetVariationForFeature(FeatureFlag featureFlag, string userId, UserAttributes filteredAttributes)
+        /// <returns>null if the user is not bucketed into any variation or the FeatureDecision entity if the user is 
+        /// successfully bucketed.</returns>
+        public virtual FeatureDecision GetVariationForFeature(FeatureFlag featureFlag, string userId, UserAttributes filteredAttributes)
         {
             // Check if the feature flag has an experiment and the user is bucketed into that experiment.
-            var variation = GetVariationForFeatureExperiment(featureFlag, userId, filteredAttributes);
+            var decision = GetVariationForFeatureExperiment(featureFlag, userId, filteredAttributes);
 
-            if (variation != null)
-                return variation;
+            if (decision != null)
+                return decision;
 
             // Check if the feature flag has rollout and the the user is bucketed into one of its rules.
-            variation = GetVariationForFeatureRollout(featureFlag, userId, filteredAttributes);
+            decision = GetVariationForFeatureRollout(featureFlag, userId, filteredAttributes);
 
-            if (variation != null)
+            if (decision != null)
                 Logger.Log(LogLevel.INFO, $"The user \"{userId}\" is bucketed into a rollout for feature flag \"{featureFlag.Key}\".");
             else
                 Logger.Log(LogLevel.INFO, $"The user \"{userId}\" is not bucketed into a rollout for feature flag \"{featureFlag.Key}\".");
 
-            return variation;
+            return decision;
         }
 
         /// <summary>

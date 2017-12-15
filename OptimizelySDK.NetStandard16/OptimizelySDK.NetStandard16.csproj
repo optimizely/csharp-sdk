@@ -14,6 +14,7 @@
         <Compile Include="..\OptimizelySDK\Entity\Event.cs" />
         <Compile Include="..\OptimizelySDK\Entity\EventAttributes.cs" />
         <Compile Include="..\OptimizelySDK\Entity\Experiment.cs" />
+		<Compile Include="..\OptimizelySDK\Entity\FeatureDecision.cs" />
         <Compile Include="..\OptimizelySDK\Entity\ForcedVariation.cs" />
         <Compile Include="..\OptimizelySDK\Entity\Group.cs" />
         <Compile Include="..\OptimizelySDK\Entity\IdKeyEntity.cs" />

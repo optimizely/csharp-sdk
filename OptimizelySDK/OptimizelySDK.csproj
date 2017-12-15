@@ -69,6 +69,7 @@
     <Compile Include="Entity\Event.cs" />
     <Compile Include="Entity\EventAttributes.cs" />
     <Compile Include="Entity\Experiment.cs" />
+    <Compile Include="Entity\FeatureDecision.cs" />
     <Compile Include="Entity\FeatureFlag.cs" />
     <Compile Include="Entity\FeatureVariable.cs" />
     <Compile Include="Entity\FeatureVariableUsage.cs" />
