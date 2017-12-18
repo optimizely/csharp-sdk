@@ -729,8 +729,8 @@ namespace OptimizelySDK.Tests
             expectedDecision = new FeatureDecision(expWithNoAudience.Id, varWithNoAudience.Id, FeatureDecision.DECISION_SOURCE_ROLLOUT);
             Assert.IsTrue(TestData.CompareObjects(expectedDecision, actualDecision));
 
-            // Calling with audience 'Chrome users' and traffice allocation '11000'.
-            mockBucketer.Setup(bm => bm.GenerateBucketValue(It.IsAny<string>())).Returns(11000);
+            // Calling with audience 'Chrome users' and traffice allocation '9500'.
+            mockBucketer.Setup(bm => bm.GenerateBucketValue(It.IsAny<string>())).Returns(9500);
             actualDecision = decisionService.GetVariationForFeatureRollout(featureFlag, GenericUserId, new UserAttributes
             {
                 { "browser_type", "chrome" }
