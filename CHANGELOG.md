@@ -1,13 +1,20 @@
+## 1.3.0
+December 18, 2017
+
+### New Features
+* Feature Notification Center
+* Third party component DLL's dependencies unbundled to NUGET.ORG .
+
+### Bug Fixes
+* Httpclient issues - object initializing multiple times and default timeout.
+
 ## 1.2.1
 November 6, 2017
 
 ### New Features
 * Package DLL's including third party component DLL's are strongnamed and digitally signed by Optimizely.
-
 * DecisionService GetVariationForFeatureRollout added.
-
 * Feature Flag and Rollout models added.
-
 * Implemented Bucketing ID feature. 
 
 ## 1.2.0
