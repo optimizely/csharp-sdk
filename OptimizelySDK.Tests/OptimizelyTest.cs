@@ -1156,12 +1156,12 @@ namespace OptimizelySDK.Tests
             OptimizelyMock.Setup(om => om.GetFeatureVariableValueForType(It.IsAny<string>(), variableKeyNonBoolean, It.IsAny<string>(),
                 It.IsAny<UserAttributes>(), featureVariableType)).Returns("non_boolean_value");
 
-            Assert.AreEqual(null, OptimizelyMock.Object.GetFeatureVariableBoolean(featureKey, variableKeyNonBoolean, TestUserId, null));
+            Assert.Null(OptimizelyMock.Object.GetFeatureVariableBoolean(featureKey, variableKeyNonBoolean, TestUserId, null));
             LoggerMock.Verify(l => l.Log(LogLevel.ERROR, $@"Unable to cast variable value ""non_boolean_value"" to type ""{featureVariableType}""."));
 
             OptimizelyMock.Setup(om => om.GetFeatureVariableValueForType(It.IsAny<string>(), variableKeyNull, It.IsAny<string>(),
                 It.IsAny<UserAttributes>(), featureVariableType)).Returns<string>(null);
-            Assert.AreEqual(null, OptimizelyMock.Object.GetFeatureVariableBoolean(featureKey, variableKeyNull, TestUserId, null));
+            Assert.Null(OptimizelyMock.Object.GetFeatureVariableBoolean(featureKey, variableKeyNull, TestUserId, null));
         }
 
         [Test]
@@ -1185,12 +1185,12 @@ namespace OptimizelySDK.Tests
             OptimizelyMock.Setup(om => om.GetFeatureVariableValueForType(It.IsAny<string>(), variableKeyNonDouble, It.IsAny<string>(),
                 It.IsAny<UserAttributes>(), featureVariableType)).Returns("non_double_value");
 
-            Assert.AreEqual(null, OptimizelyMock.Object.GetFeatureVariableDouble(featureKey, variableKeyNonDouble, TestUserId, null));
+            Assert.Null(OptimizelyMock.Object.GetFeatureVariableDouble(featureKey, variableKeyNonDouble, TestUserId, null));
             LoggerMock.Verify(l => l.Log(LogLevel.ERROR, $@"Unable to cast variable value ""non_double_value"" to type ""{featureVariableType}""."));
 
             OptimizelyMock.Setup(om => om.GetFeatureVariableValueForType(It.IsAny<string>(), variableKeyNull, It.IsAny<string>(),
                 It.IsAny<UserAttributes>(), featureVariableType)).Returns<string>(null);
-            Assert.AreEqual(null, OptimizelyMock.Object.GetFeatureVariableDouble(featureKey, variableKeyNull, TestUserId, null));
+            Assert.Null(OptimizelyMock.Object.GetFeatureVariableDouble(featureKey, variableKeyNull, TestUserId, null));
         }
 
         [Test]
@@ -1210,18 +1210,18 @@ namespace OptimizelySDK.Tests
             OptimizelyMock.Setup(om => om.GetFeatureVariableValueForType(It.IsAny<string>(), variableKeyDouble, It.IsAny<string>(),
                 It.IsAny<UserAttributes>(), featureVariableType)).Returns("100.45");
 
-            Assert.AreEqual(null, OptimizelyMock.Object.GetFeatureVariableInteger(featureKey, variableKeyDouble, TestUserId, null));
+            Assert.Null(OptimizelyMock.Object.GetFeatureVariableInteger(featureKey, variableKeyDouble, TestUserId, null));
             LoggerMock.Verify(l => l.Log(LogLevel.ERROR, $@"Unable to cast variable value ""100.45"" to type ""{featureVariableType}""."));
 
             OptimizelyMock.Setup(om => om.GetFeatureVariableValueForType(It.IsAny<string>(), variableNonInt, It.IsAny<string>(),
                 It.IsAny<UserAttributes>(), featureVariableType)).Returns("non_integer_value");
 
-            Assert.AreEqual(null, OptimizelyMock.Object.GetFeatureVariableInteger(featureKey, variableNonInt, TestUserId, null));
+            Assert.Null(OptimizelyMock.Object.GetFeatureVariableInteger(featureKey, variableNonInt, TestUserId, null));
             LoggerMock.Verify(l => l.Log(LogLevel.ERROR, $@"Unable to cast variable value ""non_integer_value"" to type ""{featureVariableType}""."));
 
             OptimizelyMock.Setup(om => om.GetFeatureVariableValueForType(It.IsAny<string>(), variableKeyNull, It.IsAny<string>(),
                 It.IsAny<UserAttributes>(), featureVariableType)).Returns<string>(null);
-            Assert.AreEqual(null, OptimizelyMock.Object.GetFeatureVariableInteger(featureKey, variableKeyNull, TestUserId, null));
+            Assert.Null(OptimizelyMock.Object.GetFeatureVariableInteger(featureKey, variableKeyNull, TestUserId, null));
         }
 
         [Test]
@@ -1243,7 +1243,7 @@ namespace OptimizelySDK.Tests
 
             OptimizelyMock.Setup(om => om.GetFeatureVariableValueForType(It.IsAny<string>(), variableKeyNull, It.IsAny<string>(),
                 It.IsAny<UserAttributes>(), featureVariableType)).Returns<string>(null);
-            Assert.AreEqual(null, OptimizelyMock.Object.GetFeatureVariableString(featureKey, variableKeyNull, TestUserId, null));
+            Assert.Null(OptimizelyMock.Object.GetFeatureVariableString(featureKey, variableKeyNull, TestUserId, null));
         }
 
         #endregion // Test GetFeatureVariable<Type> TypeCasting
@@ -1325,7 +1325,7 @@ namespace OptimizelySDK.Tests
             var variableType = FeatureVariable.VariableType.DOUBLE;
             var expectedValue = "14.99";
 
-            DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, null)).Returns<Variation>(null);
+            DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, null)).Returns<FeatureDecision>(null);
 
             var optly = Helper.CreatePrivateOptimizely();
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
@@ -1344,13 +1344,15 @@ namespace OptimizelySDK.Tests
         {
             var featureKey = "double_single_variable_feature";
             var featureFlag = Config.GetFeatureFlagFromKey("double_single_variable_feature");
+            var experiment = Config.GetExperimentFromKey("test_experiment_integer_feature");
             var differentVariation = Config.GetVariationFromKey("test_experiment_integer_feature", "control");
+            var expectedDecision = new FeatureDecision(experiment.Id, differentVariation.Id, FeatureDecision.DECISION_SOURCE_EXPERIMENT);
             var variableKey = "double_variable";
             var variableType = FeatureVariable.VariableType.DOUBLE;
             var expectedValue = "14.99";
 
             // Mock GetVariationForFeature method to return variation of different feature.
-            DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, null)).Returns(differentVariation);
+            DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, null)).Returns(expectedDecision);
 
             var optly = Helper.CreatePrivateOptimizely();
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
@@ -1372,9 +1374,11 @@ namespace OptimizelySDK.Tests
             var variableKey = "double_variable";
             var variableType = FeatureVariable.VariableType.DOUBLE;
             var expectedValue = "42.42";
-
+            var experiment = Config.GetExperimentFromKey("test_experiment_double_feature");
             var variation = Config.GetVariationFromKey("test_experiment_double_feature", "control");
-            DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, null)).Returns(variation);
+            var decision = new FeatureDecision(experiment.Id, variation.Id, FeatureDecision.DECISION_SOURCE_EXPERIMENT);
+
+            DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, null)).Returns(decision);
 
             var optly = Helper.CreatePrivateOptimizely();
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
@@ -1442,7 +1446,7 @@ namespace OptimizelySDK.Tests
             var featureKey = "double_single_variable_feature";
             var featureFlag = Config.GetFeatureFlagFromKey("double_single_variable_feature");
             
-            DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, null)).Returns<Variation>(null);
+            DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, null)).Returns<FeatureDecision>(null);
 
             var optly = Helper.CreatePrivateOptimizely();
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
@@ -1464,8 +1468,9 @@ namespace OptimizelySDK.Tests
             var experiment = rollout.Experiments[0];
             var variation = experiment.Variations[0];
             var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
+            var decision = new FeatureDecision(experiment.Id, variation.Id, FeatureDecision.DECISION_SOURCE_ROLLOUT);
 
-            DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, null)).Returns(variation);
+            DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, null)).Returns(decision);
 
             var optly = Helper.CreatePrivateOptimizely();
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
@@ -1487,10 +1492,12 @@ namespace OptimizelySDK.Tests
         public void TestIsFeatureEnabledGivenFeatureFlagIsEnabledAndUserIsBeingExperimented()
         {
             var featureKey = "double_single_variable_feature";
+            var experiment = Config.GetExperimentFromKey("test_experiment_double_feature");
             var variation = Config.GetVariationFromKey("test_experiment_double_feature", "control");
             var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
+            var decision = new FeatureDecision(experiment.Id, variation.Id, FeatureDecision.DECISION_SOURCE_EXPERIMENT);
 
-            DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, null)).Returns(variation);
+            DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, null)).Returns(decision);
 
             var optly = Helper.CreatePrivateOptimizely();
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
@@ -1537,6 +1544,7 @@ namespace OptimizelySDK.Tests
             var experiment = Config.GetExperimentFromKey(experimentKey);
             var variation = Config.GetVariationFromKey(experimentKey, variationKey);
             var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
+            var decision = new FeatureDecision(experiment.Id, variation.Id, FeatureDecision.DECISION_SOURCE_EXPERIMENT);
             var logEvent = new LogEvent("https://logx.optimizely.com/v1/events", OptimizelyHelper.SingleParameter,
                 "POST", new Dictionary<string, string> { });
 
@@ -1550,7 +1558,7 @@ namespace OptimizelySDK.Tests
             EventBuilderMock.Setup(ebm => ebm.CreateImpressionEvent(It.IsAny<ProjectConfig>(), It.IsAny<Experiment>(),
                 It.IsAny<string>(), It.IsAny<string>(), It.IsAny<UserAttributes>())).Returns(logEvent);
             DecisionServiceMock.Setup(ds => ds.GetVariation(experiment, TestUserId, userAttributes)).Returns(variation);
-            DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, userAttributes)).Returns(variation);
+            DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, userAttributes)).Returns(decision);
 
             var optly = Helper.CreatePrivateOptimizely();
             var optStronglyTyped = optly.GetObject() as Optimizely;

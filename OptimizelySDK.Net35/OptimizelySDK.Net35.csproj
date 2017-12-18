@@ -63,6 +63,9 @@
     <Compile Include="..\OptimizelySDK\Entity\Experiment.cs">
       <Link>Entity\Experiment.cs</Link>
     </Compile>
+	<Compile Include="..\OptimizelySDK\Entity\FeatureDecision.cs">
+      <Link>Entity\FeatureDecision.cs</Link>
+    </Compile>
     <Compile Include="..\OptimizelySDK\Entity\ForcedVariation.cs">
       <Link>Entity\ForcedVariation.cs</Link>
     </Compile>
