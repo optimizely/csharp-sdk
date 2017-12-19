@@ -1681,5 +1681,68 @@ namespace OptimizelySDK.Tests
         }
 
         #endregion // Test NotificationCenter
+
+        #region Test GetEnabledFeatures
+
+        [Test]
+        public void TestGetEnabledFeaturesWithInvalidDatafile()
+        {
+            var optly = new Optimizely("Random datafile", null, LoggerMock.Object);
+            Assert.IsEmpty(optly.GetEnabledFeatures("some_user", null));
+            
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'GetEnabledFeatures'."), Times.Once);
+
+        }
+
+        [Test]
+        public void TestGetEnabledFeaturesWithNoFeatureEnabledForUser()
+        {
+            var userAttributes = new UserAttributes
+            {
+                { "device_type", "iPhone" },
+                { "location", "San Francisco" }
+            };
+
+            OptimizelyMock.Setup(om => om.IsFeatureEnabled(It.IsAny<string>(), TestUserId, It.IsAny<UserAttributes>())).Returns(false);
+            Assert.IsEmpty(OptimizelyMock.Object.GetEnabledFeatures(TestUserId, userAttributes));
+        }
+
+        [Test]
+        public void TestGetEnabledFeaturesWithSomeFeaturesEnabledForUser()
+        {
+            string[] enabledFeatures = 
+            {
+                "boolean_feature",
+                "double_single_variable_feature",
+                "string_single_variable_feature",
+                "multi_variate_feature",
+                "empty_feature"
+            };
+            string[] notEnabledFeatures =
+            {
+                "integer_single_variable_feature",
+                "boolean_single_variable_feature",
+                "mutex_group_feature",
+                "no_rollout_experiment_feature"
+            };
+            var userAttributes = new UserAttributes
+            {
+                { "device_type", "iPhone" },
+                { "location", "San Francisco" }
+            };
+
+            OptimizelyMock.Setup(om => om.IsFeatureEnabled(It.IsIn<string>(enabledFeatures), TestUserId, 
+                It.IsAny<UserAttributes>())).Returns(true);
+            OptimizelyMock.Setup(om => om.IsFeatureEnabled(It.IsIn<string>(notEnabledFeatures), TestUserId,
+                It.IsAny<UserAttributes>())).Returns(false);
+
+            var actualFeaturesList = OptimizelyMock.Object.GetEnabledFeatures(TestUserId, userAttributes);
+            
+            // Verify that the returned feature list contains only enabledFeatures.
+            CollectionAssert.AreEquivalent(enabledFeatures, actualFeaturesList);
+            Array.ForEach(notEnabledFeatures, nef => CollectionAssert.DoesNotContain(actualFeaturesList, nef));
+        }
+
+        #endregion // Test GetEnabledFeatures
     }
 }
