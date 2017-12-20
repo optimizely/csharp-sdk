@@ -126,6 +126,12 @@ namespace OptimizelySDK
         private Dictionary<string, Rollout> _RolloutIdMap;
         public Dictionary<string, Rollout> RolloutIdMap { get { return _RolloutIdMap; } }
 
+        /// Associative array of Rollout Rule ID to Rollout Rule(s) in the datafile
+        /// </summary>
+        private Dictionary<string, Experiment> _RolloutRuleIdMap
+            = new Dictionary<string, Experiment>();
+        public Dictionary<string, Experiment> RolloutRuleIdMap { get { return _RolloutRuleIdMap; } }
+
         //========================= Callbacks ===========================
 
         /// <summary>
@@ -247,6 +253,7 @@ namespace OptimizelySDK
                 {
                     _VariationKeyMap[rolloutRule.Key] = new Dictionary<string, Variation>();
                     _VariationIdMap[rolloutRule.Key] = new Dictionary<string, Variation>();
+                    _RolloutRuleIdMap[rolloutRule.Id] = rolloutRule;
 
                     if (rolloutRule.Variations != null)
                     {
@@ -550,6 +557,22 @@ namespace OptimizelySDK
             Logger.Log(LogLevel.ERROR, message);
             ErrorHandler.HandleError(new Exceptions.InvalidRolloutException("Provided rollout is not in datafile."));
             return new Rollout();
+        }
+
+        /// <summary>
+        /// Get the rollout rule from the ID
+        /// </summary>
+        /// <param name="rolloutRuleId">ID of the rollout rule</param>
+        /// <returns>Experiment Entity corresponding to the ID or a dummy entity if ID is invalid</returns>
+        public Experiment GetRolloutRuleFromId(string rolloutRuleId)
+        {
+            if (_RolloutRuleIdMap.ContainsKey(rolloutRuleId))
+                return _RolloutRuleIdMap[rolloutRuleId];
+
+            string message = string.Format(@"Rollout Rule ID ""{0}"" is not in datafile.", rolloutRuleId);
+            Logger.Log(LogLevel.ERROR, message);
+            ErrorHandler.HandleError(new Exceptions.InvalidExperimentException("Provided rollout rule is not in datafile."));
+            return new Experiment();
         }
     }
 }

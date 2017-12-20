@@ -1390,6 +1390,29 @@ namespace OptimizelySDK.Tests
                 $@"Returning variable value ""{variableValue}"" for variation ""{variation.Key}"" of feature flag ""{featureKey}""."));
         }
 
+        // Verify that GetFeatureVariableValueForType returns correct variable value for rollout rule.
+        [Test]
+        public void TestGetFeatureVariableValueForTypeWithRolloutRule()
+        {
+            var featureKey = "boolean_single_variable_feature";
+            var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
+            var variableKey = "boolean_variable";
+            var decision = new FeatureDecision("177772", "177773", FeatureDecision.DECISION_SOURCE_ROLLOUT);
+            var expectedVariableValue = false;
+
+            DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, null)).Returns(decision);
+
+            var optly = Helper.CreatePrivateOptimizely();
+            optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
+
+            // Calling GetFeatureVariableBoolean to get GetFeatureVariableValueForType returned value casted in bool.
+            var actualVariableValue = (bool?)optly.Invoke("GetFeatureVariableBoolean", featureKey, variableKey, TestUserId, null);
+
+            // Verify that variable value 'false' has been returned from GetFeatureVariableValueForType as it is the value
+            // stored in rollout rule '177772'.
+            Assert.AreEqual(expectedVariableValue, actualVariableValue);
+        }
+
         #endregion // Test GetFeatureVariableValueForType method
 
         #region Test IsFeatureEnabled method

@@ -429,7 +429,8 @@ namespace OptimizelySDK
 
             if (decision != null)
             {
-                var experiment = Config.GetExperimentFromId(decision.ExperimentId);
+                var experiment = decision.Source == FeatureDecision.DECISION_SOURCE_EXPERIMENT ?
+                    Config.GetExperimentFromId(decision.ExperimentId) : Config.GetRolloutRuleFromId(decision.ExperimentId);
                 var variation = Config.GetVariationFromId(experiment.Key, decision.VariationId);
                 var featureVariableUsageInstance = variation.GetFeatureVariableUsageFromId(featureVariable.Id);
 
