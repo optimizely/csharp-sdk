@@ -363,9 +363,8 @@ namespace OptimizelySDK
 
             if (decision.Source == FeatureDecision.DECISION_SOURCE_EXPERIMENT)
             {
-                var experiment = Config.GetExperimentFromId(decision.ExperimentId);
-                var variation = Config.GetVariationFromId(experiment.Key, decision.VariationId);
-                SendImpressionEvent(experiment, variation, userId, userAttributes);
+                
+                SendImpressionEvent(decision.Experiment, decision.Variation, userId, userAttributes);
             }
             else
             {
@@ -429,9 +428,7 @@ namespace OptimizelySDK
 
             if (decision != null)
             {
-                var experiment = decision.Source == FeatureDecision.DECISION_SOURCE_EXPERIMENT ?
-                    Config.GetExperimentFromId(decision.ExperimentId) : Config.GetRolloutRuleFromId(decision.ExperimentId);
-                var variation = Config.GetVariationFromId(experiment.Key, decision.VariationId);
+                var variation = decision.Variation;
                 var featureVariableUsageInstance = variation.GetFeatureVariableUsageFromId(featureVariable.Id);
 
                 if (featureVariableUsageInstance != null)

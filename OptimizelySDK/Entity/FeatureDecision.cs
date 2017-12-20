@@ -24,14 +24,14 @@ namespace OptimizelySDK.Entity
         public const string DECISION_SOURCE_EXPERIMENT = "experiment";
         public const string DECISION_SOURCE_ROLLOUT = "rollout";
 
-        public string ExperimentId { get; }
-        public string VariationId { get; }
+        public Experiment Experiment { get; }
+        public Variation Variation { get; }
         public string Source { get; }
 
-        public FeatureDecision(string experimentId, string variationId, string source)
+        public FeatureDecision(Experiment experiment, Variation variation, string source)
         {
-            ExperimentId = experimentId;
-            VariationId = variationId;
+            Experiment = experiment;
+            Variation = variation;
             Source = source;
         }
     }
