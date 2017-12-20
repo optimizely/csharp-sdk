@@ -45,7 +45,7 @@ namespace OptimizelySDK
 
         private DecisionService DecisionService;
 
-        private NotificationCenter NotificationCenter;
+        public NotificationCenter NotificationCenter;
 
         public bool IsValid { get; private set; }
 
@@ -324,230 +324,6 @@ namespace OptimizelySDK
             return forcedVariation;
         }
 
-        #region  FeatureFlag APIs
-
-        /// <summary>
-        /// Determine whether a feature is enabled.
-        /// Send an impression event if the user is bucketed into an experiment using the feature.
-        /// </summary>
-        /// <param name="experimentKey">The experiment key</param>
-        /// <param name="userId">The user ID</param>
-        /// <param name="userAttributes">The user's attributes.</param>
-        /// <returns>True if feature is enabled, false or null otherwise</returns>
-        public bool IsFeatureEnabled(string featureKey, string userId, UserAttributes userAttributes = null)
-        {
-            if (string.IsNullOrEmpty(userId))
-            {
-                Logger.Log(LogLevel.ERROR, "User ID must not be empty.");
-                return false;
-            }
-
-            if (string.IsNullOrEmpty(featureKey))
-            {
-                Logger.Log(LogLevel.ERROR, "Feature flag key must not be empty.");
-                return false;
-            }
-
-            var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
-            if (string.IsNullOrEmpty(featureFlag.Key))
-                return false;
-
-            if (!Validator.IsFeatureFlagValid(Config, featureFlag))
-                return false;
-
-            var variation = DecisionService.GetVariationForFeature(featureFlag, userId, userAttributes);
-            if ( variation == null )
-            {
-                Logger.Log(LogLevel.INFO, $@"Feature flag ""{featureKey}"" is not enabled for user ""{userId}"".");
-                return false;
-            }
-
-            var experiment = Config.GetExperimentForVariationId(variation.Id);
-
-            if (!string.IsNullOrEmpty(experiment.Key))
-            {
-                SendImpressionEvent(experiment, variation, userId, userAttributes);
-            }
-            else
-            {
-                var audiences = new Audience[1];
-                var rolloutRule = Config.GetRolloutRuleForVariationId(variation.Id);
-
-                if (!string.IsNullOrEmpty(rolloutRule.Key)
-                    && rolloutRule.AudienceIds != null
-                    && rolloutRule.AudienceIds.Length > 0)
-                {
-                    audiences[0] = Config.GetAudience(rolloutRule.AudienceIds[0]);
-                }
-
-                Logger.Log(LogLevel.INFO, $@"The user ""{userId}"" is not being experimented on feature ""{featureKey}"".");
-            }
-
-            Logger.Log(LogLevel.INFO, $@"Feature flag ""{featureKey}"" is enabled for user ""{userId}"".");
-            return true;
-        }
-
-        /// <summary>
-        /// Gets the feature variable value for given type.
-        /// </summary>
-        /// <param name="featureKey">The feature flag key</param>
-        /// <param name="variableKey">The variable key</param>
-        /// <param name="userId">The user ID</param>
-        /// <param name="userAttributes">The user's attributes</param>
-        /// <param name="variableType">Variable type</param>
-        /// <returns>string | null Feature variable value</returns>
-        public virtual string GetFeatureVariableValueForType(string featureKey, string variableKey, string userId, 
-            UserAttributes userAttributes, FeatureVariable.VariableType variableType)
-        {
-            if (string.IsNullOrEmpty(featureKey))
-            {
-                Logger.Log(LogLevel.ERROR, "Feature flag key must not be empty.");
-                return null;
-            }
-
-            if (string.IsNullOrEmpty(variableKey))
-            {
-                Logger.Log(LogLevel.ERROR, "Variable key must not be empty.");
-                return null;
-            }
-
-            if (string.IsNullOrEmpty(userId))
-            {
-                Logger.Log(LogLevel.ERROR, "User ID must not be empty.");
-                return null;
-            }
-
-            var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
-            if (string.IsNullOrEmpty(featureFlag.Key))
-                return null;
-
-            var featureVariable = featureFlag.GetFeatureVariableFromKey(variableKey);
-            if (featureVariable == null)
-            {
-                Logger.Log(LogLevel.ERROR,
-                    $@"No feature variable was found for key ""{variableKey}"" in feature flag ""{featureKey}"".");
-                return null;
-            }
-            else if (featureVariable.Type != variableType)
-            {
-                Logger.Log(LogLevel.ERROR,
-                    $@"Variable is of type ""{featureVariable.Type}"", but you requested it as type ""{variableType}"".");
-                return null;
-            }
-
-            var variableValue = featureVariable.DefaultValue;
-            var variation = DecisionService.GetVariationForFeature(featureFlag, userId, userAttributes);
-
-            if (variation != null)
-            {
-                var featureVariableUsageInstance = variation.GetFeatureVariableUsageFromId(featureVariable.Id);
-                if (featureVariableUsageInstance != null)
-                {
-                    variableValue = featureVariableUsageInstance.Value;
-                    Logger.Log(LogLevel.INFO,
-                        $@"Returning variable value ""{variableValue}"" for variation ""{variation.Key}"" of feature flag ""{featureFlag.Key}"".");
-                }
-                else
-                {
-                    Logger.Log(LogLevel.INFO,
-                        $@"Variable ""{variableKey}"" is not used in variation ""{variation.Key}"", returning default value ""{variableValue}"".");
-                }
-            }
-            else
-            {
-                Logger.Log(LogLevel.INFO,
-                    $@"User ""{userId}"" is not in any variation for feature flag ""{featureFlag.Key}"", returning default value ""{variableValue}"".");
-            }
-
-            return variableValue;
-        }
-
-        /// <summary>
-        /// Gets boolean feature variable value.
-        /// </summary>
-        /// <param name="featureKey">The feature flag key</param>
-        /// <param name="variableKey">The variable key</param>
-        /// <param name="userId">The user ID</param>
-        /// <param name="userAttributes">The user's attributes</param>
-        /// <returns>bool | Feature variable value or null</returns>
-        public bool? GetFeatureVariableBoolean(string featureKey, string variableKey, string userId, UserAttributes userAttributes)
-        {
-            var variableType = FeatureVariable.VariableType.BOOLEAN;
-            var variableValue = GetFeatureVariableValueForType(featureKey, variableKey, userId, userAttributes, variableType);
-            
-            if (variableValue != null)
-            {
-                if (Boolean.TryParse(variableValue, out bool booleanValue))
-                    return booleanValue;
-                else
-                    Logger.Log(LogLevel.ERROR, $@"Unable to cast variable value ""{variableValue}"" to type ""{variableType}"".");
-            }
-            
-            return null;
-        }
-
-        /// <summary>
-        /// Gets double feature variable value.
-        /// </summary>
-        /// <param name="featureKey">The feature flag key</param>
-        /// <param name="variableKey">The variable key</param>
-        /// <param name="userId">The user ID</param>
-        /// <param name="userAttributes">The user's attributes</param>
-        /// <returns>double | Feature variable value or null</returns>
-        public double? GetFeatureVariableDouble(string featureKey, string variableKey, string userId, UserAttributes userAttributes)
-        {
-            var variableType = FeatureVariable.VariableType.DOUBLE;
-            var variableValue = GetFeatureVariableValueForType(featureKey, variableKey, userId, userAttributes, variableType);
-
-            if (variableValue != null)
-            {
-                if (Double.TryParse(variableValue, out double doubleValue))
-                    return doubleValue;
-                else
-                    Logger.Log(LogLevel.ERROR, $@"Unable to cast variable value ""{variableValue}"" to type ""{variableType}"".");
-            }
-
-            return null;
-        }
-
-        /// <summary>
-        /// Gets integer feature variable value.
-        /// </summary>
-        /// <param name="featureKey">The feature flag key</param>
-        /// <param name="variableKey">The variable key</param>
-        /// <param name="userId">The user ID</param>
-        /// <param name="userAttributes">The user's attributes</param>
-        /// <returns>int | Feature variable value or null</returns>
-        public int? GetFeatureVariableInteger(string featureKey, string variableKey, string userId, UserAttributes userAttributes)
-        {
-            var variableType = FeatureVariable.VariableType.INTEGER;
-            var variableValue = GetFeatureVariableValueForType(featureKey, variableKey, userId, userAttributes, variableType);
-
-            if (variableValue != null)
-            {
-                if (Int32.TryParse(variableValue, out int intValue))
-                    return intValue;
-                else
-                    Logger.Log(LogLevel.ERROR, $@"Unable to cast variable value ""{variableValue}"" to type ""{variableType}"".");
-            }
-
-            return null;
-        }
-
-        /// <summary>
-        /// Gets string feature variable value.
-        /// </summary>
-        /// <param name="featureKey">The feature flag key</param>
-        /// <param name="variableKey">The variable key</param>
-        /// <param name="userId">The user ID</param>
-        /// <param name="userAttributes">The user's attributes</param>
-        /// <returns>string | Feature variable value or null</returns>
-        public string GetFeatureVariableString(string featureKey, string variableKey, string userId, UserAttributes userAttributes)
-        {
-            return GetFeatureVariableValueForType(featureKey, variableKey, userId, userAttributes, 
-                FeatureVariable.VariableType.STRING);
-        }
-
         /// <summary>
         /// Sends impression event.
         /// </summary>
@@ -555,34 +331,26 @@ namespace OptimizelySDK
         /// <param name="variationId">The variation entity</param>
         /// <param name="userId">The user ID</param>
         /// <param name="userAttributes">The user's attributes</param>
-        private void SendImpressionEvent(Experiment experiment, Variation variation, string userId, 
+        private void SendImpressionEvent(Experiment experiment, Variation variation, string userId,
         UserAttributes userAttributes)
         {
-            if (experiment.IsExperimentRunning)
-            {
+            if (experiment.IsExperimentRunning) {
                 var impressionEvent = EventBuilder.CreateImpressionEvent(Config, experiment, variation.Id, userId, userAttributes);
                 Logger.Log(LogLevel.INFO, string.Format("Activating user {0} in experiment {1}.", userId, experiment.Key));
                 Logger.Log(LogLevel.DEBUG, string.Format("Dispatching impression event to URL {0} with params {1}.",
                     impressionEvent.Url, impressionEvent.GetParamsAsJson()));
 
-                try
-                {
+                try {
                     EventDispatcher.DispatchEvent(impressionEvent);
-                }
-                catch (Exception exception)
-                {
+                } catch (Exception exception) {
                     Logger.Log(LogLevel.ERROR, string.Format("Unable to dispatch impression event. Error {0}", exception.Message));
                 }
 
                 NotificationCenter.SendNotifications(NotificationCenter.NotificationType.Activate, experiment, userId,
                     userAttributes, variation, impressionEvent);
-            }
-            else
-            {
+            } else {
                 Logger.Log(LogLevel.ERROR, @"Experiment has ""Launched"" status so not dispatching event during activation.");
             }
         }
-
-        #endregion // FeatureFlag APIs
     }
 }
