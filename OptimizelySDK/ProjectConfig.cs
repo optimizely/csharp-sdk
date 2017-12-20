@@ -126,18 +126,6 @@ namespace OptimizelySDK
         private Dictionary<string, Rollout> _RolloutIdMap;
         public Dictionary<string, Rollout> RolloutIdMap { get { return _RolloutIdMap; } }
 
-        /// <summary>
-        /// Associative array of Variation ID to Experiments(s) in the datafile
-        /// </summary>
-        private Dictionary<string, Experiment> _VariationIdToExperimentMap = new Dictionary<string, Experiment>();
-        public Dictionary<string, Experiment> VariationIdToExperimentMap{ get { return _VariationIdToExperimentMap; } }
-
-        /// <summary>
-        /// Associative array of Variation ID to Rollout Rules(s) in the datafile
-        /// </summary>
-        private Dictionary<string, Experiment> _VariationIdToRolloutRuleMap = new Dictionary<string, Experiment>();
-        public Dictionary<string, Experiment> VariationIdToRolloutRuleMap { get { return _VariationIdToRolloutRuleMap; } }
-
         //========================= Callbacks ===========================
 
         /// <summary>
@@ -248,22 +236,25 @@ namespace OptimizelySDK
                     {
                         _VariationKeyMap[experiment.Key][variation.Key] = variation;
                         _VariationIdMap[experiment.Key][variation.Id] = variation;
-
-                        // Generate Variation ID to Experiment map.
-                        _VariationIdToExperimentMap[variation.Id] = experiment;
                     }
                 }
             }
 
-            // Generate Variation ID to Rollout Rule map. 
+            // Adding Rollout variations in variation id and key maps.
             foreach (var rollout in Rollouts)
             {
                 foreach (var rolloutRule in rollout.Experiments)
                 {
+                    _VariationKeyMap[rolloutRule.Key] = new Dictionary<string, Variation>();
+                    _VariationIdMap[rolloutRule.Key] = new Dictionary<string, Variation>();
+
                     if (rolloutRule.Variations != null)
                     {
                         foreach (var variation in rolloutRule.Variations)
-                            _VariationIdToRolloutRuleMap[variation.Id] = rolloutRule;
+                        {
+                            _VariationKeyMap[rolloutRule.Key][variation.Key] = variation;
+                            _VariationIdMap[rolloutRule.Key][variation.Id] = variation;
+                        }
                     }
                 }
             }
@@ -559,38 +550,6 @@ namespace OptimizelySDK
             Logger.Log(LogLevel.ERROR, message);
             ErrorHandler.HandleError(new Exceptions.InvalidRolloutException("Provided rollout is not in datafile."));
             return new Rollout();
-        }
-
-        /// <summary>
-        /// Get experiment from variation ID.
-        /// </summary>
-        /// <param name="variationId">Variation ID</param>
-        /// <returns>Experiment Entity corresponding to the variation ID or a dummy entity if ID is invalid</returns>
-        public Experiment GetExperimentForVariationId(string variationId)
-        {
-            if (_VariationIdToExperimentMap.ContainsKey(variationId))
-                return _VariationIdToExperimentMap[variationId];
-            
-            Logger.Log(LogLevel.ERROR, $@"No experiment has been defined in datafile for variation ""{variationId}"".");
-            ErrorHandler.HandleError(new Exceptions.InvalidVariationException("No experiment has been found for provided variation Id in the datafile."));
-
-            return new Experiment();
-        }
-
-        /// <summary>
-        /// Get rollout rule for variation.
-        /// </summary>
-        /// <param name="variationId">Variation ID</param>
-        /// <returns>Rollout Rule corresponding to the variation ID or a dummy entity if ID is invalid</returns>
-        public Experiment GetRolloutRuleForVariationId(string variationId)
-        {
-            if (_VariationIdToRolloutRuleMap.ContainsKey(variationId))
-                return _VariationIdToRolloutRuleMap[variationId];
-
-            Logger.Log(LogLevel.ERROR, $@"No rollout rule has been defined in datafile for variation ""{variationId}"".");
-            ErrorHandler.HandleError(new Exceptions.InvalidVariationException("No rollout rule has been found for provided variation Id in the datafile."));
-
-            return new Experiment();
         }
     }
 }

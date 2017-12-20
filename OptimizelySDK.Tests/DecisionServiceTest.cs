@@ -682,6 +682,63 @@ namespace OptimizelySDK.Tests
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, $"User \"user_1\" does not meet the conditions to be in rollout rule for audience \"{ProjectConfig.AudienceIdMap[experiment0.AudienceIds[0]].Name}\"."));
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, $"User \"user_1\" does not meet the conditions to be in rollout rule for audience \"{ProjectConfig.AudienceIdMap[experiment1.AudienceIds[0]].Name}\"."));
         }
+        
+        [Test]
+        public void TestGetVariationForFeatureRolloutAudienceAndTrafficeAllocationCheck()
+        {
+            var featureFlag = ProjectConfig.GetFeatureFlagFromKey("boolean_single_variable_feature");
+            var rolloutId = featureFlag.RolloutId;
+            var rollout = ProjectConfig.GetRolloutFromId(rolloutId);
+            var expWithAudienceiPhoneUsers = rollout.Experiments[1];
+            var expWithAudienceChromeUsers = rollout.Experiments[0];
+            var expWithNoAudience = rollout.Experiments[2];
+            var varWithAudienceiPhoneUsers = expWithAudienceiPhoneUsers.Variations[0];
+            var varWithAudienceChromeUsers = expWithAudienceChromeUsers.Variations[0];
+            var varWithNoAudience = expWithNoAudience.Variations[0];
+
+            var mockBucketer = new Mock<Bucketer>(LoggerMock.Object) { CallBase = true };
+            mockBucketer.Setup(bm => bm.GenerateBucketValue(It.IsAny<string>())).Returns(980);
+            var decisionService = new DecisionService(mockBucketer.Object, ErrorHandlerMock.Object, ProjectConfig, null, LoggerMock.Object);
+
+            // Calling with audience iPhone users in San Francisco.
+            var actualDecision = decisionService.GetVariationForFeatureRollout(featureFlag, GenericUserId, new UserAttributes
+            {
+                { "device_type", "iPhone" },
+                { "location", "San Francisco" }
+            });
+
+            // Returned variation id should be '177773' because of audience 'iPhone users in San Francisco'.
+            var expectedDecision = new FeatureDecision(expWithAudienceiPhoneUsers.Id, varWithAudienceiPhoneUsers.Id, FeatureDecision.DECISION_SOURCE_ROLLOUT);
+            Assert.IsTrue(TestData.CompareObjects(expectedDecision, actualDecision));
+
+            // Calling with audience Chrome users.
+            actualDecision = decisionService.GetVariationForFeatureRollout(featureFlag, GenericUserId, new UserAttributes
+            {
+                { "browser_type", "chrome" }
+            });
+
+            // Returned variation id should be '177771' because of audience 'Chrome users'.
+            expectedDecision = new FeatureDecision(expWithAudienceChromeUsers.Id, varWithAudienceChromeUsers.Id, FeatureDecision.DECISION_SOURCE_ROLLOUT);
+            Assert.IsTrue(TestData.CompareObjects(expectedDecision, actualDecision));
+
+            // Calling with no audience.
+            mockBucketer.Setup(bm => bm.GenerateBucketValue(It.IsAny<string>())).Returns(8000);
+            actualDecision = decisionService.GetVariationForFeatureRollout(featureFlag, GenericUserId, new UserAttributes());
+
+            // Returned variation id should be of everyone else rule because of no audience.
+            expectedDecision = new FeatureDecision(expWithNoAudience.Id, varWithNoAudience.Id, FeatureDecision.DECISION_SOURCE_ROLLOUT);
+            Assert.IsTrue(TestData.CompareObjects(expectedDecision, actualDecision));
+
+            // Calling with audience 'Chrome users' and traffice allocation '9500'.
+            mockBucketer.Setup(bm => bm.GenerateBucketValue(It.IsAny<string>())).Returns(9500);
+            actualDecision = decisionService.GetVariationForFeatureRollout(featureFlag, GenericUserId, new UserAttributes
+            {
+                { "browser_type", "chrome" }
+            });
+
+            // Returned decision entity should be null because bucket value exceeds traffice allocation of everyone else rule.
+            Assert.Null(actualDecision);
+        }
 
         #endregion // GetVariationForFeatureRollout Tests
 
