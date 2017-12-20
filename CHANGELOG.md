@@ -1,5 +1,5 @@
 ## 1.3.0
-December 18, 2017
+December 19, 2017
 
 ### New Features
 * Feature Notification Center
