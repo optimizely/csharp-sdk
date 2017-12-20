@@ -40,33 +40,33 @@ Write-Host "Build complete. Copying files..."
 ################################################################
 # One can use 'find . -name "Optimizely*.dll" -print | grep "bin/Release" | grep -v ".Tests"'
 # to find the Optimizely*.dll that we need this PowerShell script to strongname (sn.exe).
-& $sn  -R "../OptimizelySDK/bin/Release/OptimizelySDK.dll" "../keypair.snk"
-& $sn  -R "../OptimizelySDK.Net35/bin/Release/OptimizelySDK.Net35.dll" "../keypair.snk"
-& $sn  -R "../OptimizelySDK.Net40/bin/Release/OptimizelySDK.Net40.dll" "../keypair.snk"
-& $sn  -R "../OptimizelySDK.NetStandard16/bin/Release/netstandard1.6/OptimizelySDK.NetStandard16.dll" "../keypair.snk"
+& $sn -R "../OptimizelySDK/bin/Release/OptimizelySDK.dll" "../keypair.snk"
+& $sn -R "../OptimizelySDK.Net35/bin/Release/OptimizelySDK.Net35.dll" "../keypair.snk"
+& $sn -R "../OptimizelySDK.Net40/bin/Release/OptimizelySDK.Net40.dll" "../keypair.snk"
+& $sn -R "../OptimizelySDK.NetStandard16/bin/Release/netstandard1.6/OptimizelySDK.NetStandard16.dll" "../keypair.snk"
 
 ################################################################
 # NuGet lib
 ################################################################
 New-Item -Path ".\lib\net45" -ItemType "directory" -force
-Copy-Item -Path "..\OptimizelySDK\bin\Release\*.dll" -Destination ".\lib\net45" -Recurse -force
-Copy-Item -Path "..\OptimizelySDK\bin\Release\*.pdb" -Destination ".\lib\net45" -Recurse -force
-Copy-Item -Path "..\OptimizelySDK\bin\Release\*.xml" -Destination ".\lib\net45" -Recurse -force
+Copy-Item -Path "..\OptimizelySDK\bin\Release\Optimizely*.dll" -Destination ".\lib\net45" -Recurse -force
+Copy-Item -Path "..\OptimizelySDK\bin\Release\Optimizely*.pdb" -Destination ".\lib\net45" -Recurse -force
+Copy-Item -Path "..\OptimizelySDK\bin\Release\Optimizely*.xml" -Destination ".\lib\net45" -Recurse -force
 
 New-Item -Path ".\lib\net40" -ItemType "directory" -force
-Copy-Item -Path "..\OptimizelySDK.Net40\bin\Release\*.dll" -Destination ".\lib\net40" -Recurse -force
-Copy-Item -Path "..\OptimizelySDK.Net40\bin\Release\*.pdb" -Destination ".\lib\net40" -Recurse -force
-Copy-Item -Path "..\OptimizelySDK.Net40\bin\Release\*.xml" -Destination ".\lib\net40" -Recurse -force
+Copy-Item -Path "..\OptimizelySDK.Net40\bin\Release\Optimizely*.dll" -Destination ".\lib\net40" -Recurse -force
+Copy-Item -Path "..\OptimizelySDK.Net40\bin\Release\Optimizely*.pdb" -Destination ".\lib\net40" -Recurse -force
+Copy-Item -Path "..\OptimizelySDK.Net40\bin\Release\Optimizely*.xml" -Destination ".\lib\net40" -Recurse -force
 
 New-Item -Path ".\lib\net35" -ItemType "directory" -force
-Copy-Item -Path "..\OptimizelySDK.Net35\bin\Release\*.dll" -Destination ".\lib\net35" -Recurse -force
-Copy-Item -Path "..\OptimizelySDK.Net35\bin\Release\*.pdb" -Destination ".\lib\net35" -Recurse -force
-Copy-Item -Path "..\OptimizelySDK.Net35\bin\Release\*.xml" -Destination ".\lib\net35" -Recurse -force
+Copy-Item -Path "..\OptimizelySDK.Net35\bin\Release\Optimizely*.dll" -Destination ".\lib\net35" -Recurse -force
+Copy-Item -Path "..\OptimizelySDK.Net35\bin\Release\Optimizely*.pdb" -Destination ".\lib\net35" -Recurse -force
+Copy-Item -Path "..\OptimizelySDK.Net35\bin\Release\Optimizely*.xml" -Destination ".\lib\net35" -Recurse -force
 
 New-Item -Path ".\lib\netstandard1.6" -ItemType "directory" -force
-Copy-Item -Path "..\OptimizelySDK.NetStandard16\bin\Release\netstandard1.6\*.dll" -Destination ".\lib\netstandard1.6" -Recurse -force
-Copy-Item -Path "..\OptimizelySDK.NetStandard16\bin\Release\netstandard1.6\*.pdb" -Destination ".\lib\netstandard1.6" -Recurse -force
-Copy-Item -Path "..\OptimizelySDK.NetStandard16\bin\Release\netstandard1.6\*.xml" -Destination ".\lib\netstandard1.6" -Recurse -force
+Copy-Item -Path "..\OptimizelySDK.NetStandard16\bin\Release\netstandard1.6\Optimizely*.dll" -Destination ".\lib\netstandard1.6" -Recurse -force
+Copy-Item -Path "..\OptimizelySDK.NetStandard16\bin\Release\netstandard1.6\Optimizely*.pdb" -Destination ".\lib\netstandard1.6" -Recurse -force
+Copy-Item -Path "..\OptimizelySDK.NetStandard16\bin\Release\netstandard1.6\Optimizely*.xml" -Destination ".\lib\netstandard1.6" -Recurse -force
 
 ################################################################
 # Digital Signing (signtool.exe)

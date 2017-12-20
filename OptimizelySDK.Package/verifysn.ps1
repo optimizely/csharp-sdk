@@ -31,17 +31,7 @@ Expand-Archive -Path $nupkg -DestinationPath "./VerifySn"
 ################################################################
 # Verify Strong Names (sn.exe)
 ################################################################
-& $sn -v "./VerifySn/lib/net35/MurmurHash.dll"
-& $sn -v "./VerifySn/lib/net35/Newtonsoft.Json.dll"
 & $sn -v "./VerifySn/lib/net35/OptimizelySDK.Net35.dll"
-& $sn -v "./VerifySn/lib/net40/MurmurHash.dll"
-& $sn -v "./VerifySn/lib/net40/Newtonsoft.Json.dll"
 & $sn -v "./VerifySn/lib/net40/OptimizelySDK.Net40.dll"
-& $sn -v "./VerifySn/lib/net45/MurmurHash.dll"
-& $sn -v "./VerifySn/lib/net45/Newtonsoft.Json.dll"
-& $sn -v "./VerifySn/lib/net45/NJsonSchema.dll"
 & $sn -v "./VerifySn/lib/net45/OptimizelySDK.dll"
-& $sn -v "./VerifySn/lib/netstandard1.6/MurmurHash.dll"
-& $sn -v "./VerifySn/lib/netstandard1.6/Newtonsoft.Json.dll"
-& $sn -v "./VerifySn/lib/netstandard1.6/NJsonSchema.dll"
 & $sn -v "./VerifySn/lib/netstandard1.6/OptimizelySDK.NetStandard16.dll"
