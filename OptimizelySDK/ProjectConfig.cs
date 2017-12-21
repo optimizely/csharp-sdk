@@ -125,12 +125,7 @@ namespace OptimizelySDK
         /// </summary>
         private Dictionary<string, Rollout> _RolloutIdMap;
         public Dictionary<string, Rollout> RolloutIdMap { get { return _RolloutIdMap; } }
-
-        /// Associative array of Rollout Rule ID to Rollout Rule(s) in the datafile
-        /// </summary>
-        private Dictionary<string, Experiment> _RolloutRuleIdMap
-            = new Dictionary<string, Experiment>();
-        public Dictionary<string, Experiment> RolloutRuleIdMap { get { return _RolloutRuleIdMap; } }
+        
 
         //========================= Callbacks ===========================
 
@@ -253,8 +248,7 @@ namespace OptimizelySDK
                 {
                     _VariationKeyMap[rolloutRule.Key] = new Dictionary<string, Variation>();
                     _VariationIdMap[rolloutRule.Key] = new Dictionary<string, Variation>();
-                    _RolloutRuleIdMap[rolloutRule.Id] = rolloutRule;
-
+                    
                     if (rolloutRule.Variations != null)
                     {
                         foreach (var variation in rolloutRule.Variations)
