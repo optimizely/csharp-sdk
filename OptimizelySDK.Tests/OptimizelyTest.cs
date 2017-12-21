@@ -1397,8 +1397,8 @@ namespace OptimizelySDK.Tests
             var featureKey = "boolean_single_variable_feature";
             var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
             var variableKey = "boolean_variable";
-            
-            var experiment = Config.GetRolloutRuleFromId("177772");
+
+            var experiment = Config.RolloutRuleIdMap["177772"];
             var variation = Config.GetVariationFromId(experiment.Key, "177773");
             var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT);
             var expectedVariableValue = false;

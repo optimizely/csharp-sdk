@@ -558,21 +558,5 @@ namespace OptimizelySDK
             ErrorHandler.HandleError(new Exceptions.InvalidRolloutException("Provided rollout is not in datafile."));
             return new Rollout();
         }
-
-        /// <summary>
-        /// Get the rollout rule from the ID
-        /// </summary>
-        /// <param name="rolloutRuleId">ID of the rollout rule</param>
-        /// <returns>Experiment Entity corresponding to the ID or a dummy entity if ID is invalid</returns>
-        public Experiment GetRolloutRuleFromId(string rolloutRuleId)
-        {
-            if (_RolloutRuleIdMap.ContainsKey(rolloutRuleId))
-                return _RolloutRuleIdMap[rolloutRuleId];
-
-            string message = string.Format(@"Rollout Rule ID ""{0}"" is not in datafile.", rolloutRuleId);
-            Logger.Log(LogLevel.ERROR, message);
-            ErrorHandler.HandleError(new Exceptions.InvalidExperimentException("Provided rollout rule is not in datafile."));
-            return new Experiment();
-        }
     }
 }
