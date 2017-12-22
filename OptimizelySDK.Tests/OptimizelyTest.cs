@@ -1346,7 +1346,7 @@ namespace OptimizelySDK.Tests
             var featureFlag = Config.GetFeatureFlagFromKey("double_single_variable_feature");
             var experiment = Config.GetExperimentFromKey("test_experiment_integer_feature");
             var differentVariation = Config.GetVariationFromKey("test_experiment_integer_feature", "control");
-            var expectedDecision = new FeatureDecision(experiment.Id, differentVariation.Id, FeatureDecision.DECISION_SOURCE_EXPERIMENT);
+            var expectedDecision = new FeatureDecision(experiment, differentVariation, FeatureDecision.DECISION_SOURCE_EXPERIMENT);
             var variableKey = "double_variable";
             var variableType = FeatureVariable.VariableType.DOUBLE;
             var expectedValue = "14.99";
@@ -1376,7 +1376,7 @@ namespace OptimizelySDK.Tests
             var expectedValue = "42.42";
             var experiment = Config.GetExperimentFromKey("test_experiment_double_feature");
             var variation = Config.GetVariationFromKey("test_experiment_double_feature", "control");
-            var decision = new FeatureDecision(experiment.Id, variation.Id, FeatureDecision.DECISION_SOURCE_EXPERIMENT);
+            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_EXPERIMENT);
 
             DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, null)).Returns(decision);
 
@@ -1388,6 +1388,32 @@ namespace OptimizelySDK.Tests
 
             LoggerMock.Verify(l => l.Log(LogLevel.INFO,
                 $@"Returning variable value ""{variableValue}"" for variation ""{variation.Key}"" of feature flag ""{featureKey}""."));
+        }
+
+        // Verify that GetFeatureVariableValueForType returns correct variable value for rollout rule.
+        [Test]
+        public void TestGetFeatureVariableValueForTypeWithRolloutRule()
+        {
+            var featureKey = "boolean_single_variable_feature";
+            var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
+            var variableKey = "boolean_variable";
+            //experimentid - 177772
+            var experiment = Config.Rollouts[0].Experiments[1]; 
+            var variation = Config.GetVariationFromId(experiment.Key, "177773");
+            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT);
+            var expectedVariableValue = false;
+
+            DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, null)).Returns(decision);
+
+            var optly = Helper.CreatePrivateOptimizely();
+            optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
+
+            // Calling GetFeatureVariableBoolean to get GetFeatureVariableValueForType returned value casted in bool.
+            var actualVariableValue = (bool?)optly.Invoke("GetFeatureVariableBoolean", featureKey, variableKey, TestUserId, null);
+
+            // Verify that variable value 'false' has been returned from GetFeatureVariableValueForType as it is the value
+            // stored in rollout rule '177772'.
+            Assert.AreEqual(expectedVariableValue, actualVariableValue);
         }
 
         #endregion // Test GetFeatureVariableValueForType method
@@ -1468,7 +1494,7 @@ namespace OptimizelySDK.Tests
             var experiment = rollout.Experiments[0];
             var variation = experiment.Variations[0];
             var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
-            var decision = new FeatureDecision(experiment.Id, variation.Id, FeatureDecision.DECISION_SOURCE_ROLLOUT);
+            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT);
 
             DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, null)).Returns(decision);
 
@@ -1495,7 +1521,7 @@ namespace OptimizelySDK.Tests
             var experiment = Config.GetExperimentFromKey("test_experiment_double_feature");
             var variation = Config.GetVariationFromKey("test_experiment_double_feature", "control");
             var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
-            var decision = new FeatureDecision(experiment.Id, variation.Id, FeatureDecision.DECISION_SOURCE_EXPERIMENT);
+            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_EXPERIMENT);
 
             DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, null)).Returns(decision);
 
@@ -1567,7 +1593,7 @@ namespace OptimizelySDK.Tests
             var experiment = Config.GetExperimentFromKey(experimentKey);
             var variation = Config.GetVariationFromKey(experimentKey, variationKey);
             var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
-            var decision = new FeatureDecision(experiment.Id, variation.Id, FeatureDecision.DECISION_SOURCE_EXPERIMENT);
+            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_EXPERIMENT);
             var logEvent = new LogEvent("https://logx.optimizely.com/v1/events", OptimizelyHelper.SingleParameter,
                 "POST", new Dictionary<string, string> { });
 

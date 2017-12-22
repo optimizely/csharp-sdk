@@ -501,7 +501,7 @@ namespace OptimizelySDK.Tests
         {
             var experiment = ProjectConfig.GetExperimentFromKey("test_experiment_multivariate");
             var variation = ProjectConfig.GetVariationFromId("test_experiment_multivariate", "122231");
-            var expectedDecision = new FeatureDecision(experiment.Id, variation.Id, FeatureDecision.DECISION_SOURCE_EXPERIMENT);
+            var expectedDecision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_EXPERIMENT);
             var userAttributes = new UserAttributes();
 
             DecisionServiceMock.Setup(ds => ds.GetVariation(ProjectConfig.GetExperimentFromKey("test_experiment_multivariate"), 
@@ -522,7 +522,7 @@ namespace OptimizelySDK.Tests
             var mutexExperiment = ProjectConfig.GetExperimentFromKey("group_experiment_1");
             var variation = mutexExperiment.Variations[0];
             var userAttributes = new UserAttributes();
-            var expectedDecision = new FeatureDecision(mutexExperiment.Id, variation.Id, FeatureDecision.DECISION_SOURCE_EXPERIMENT);
+            var expectedDecision = new FeatureDecision(mutexExperiment, variation, FeatureDecision.DECISION_SOURCE_EXPERIMENT);
 
             DecisionServiceMock.Setup(ds => ds.GetVariation(ProjectConfig.GetExperimentFromKey("group_experiment_1"), "user1", 
                 userAttributes)).Returns(variation);
@@ -585,7 +585,7 @@ namespace OptimizelySDK.Tests
             var rollout = ProjectConfig.GetRolloutFromId(rolloutId);
             var experiment = rollout.Experiments[0];
             var variation = experiment.Variations[0];
-            var expectedDecision = new FeatureDecision(experiment.Id, variation.Id, FeatureDecision.DECISION_SOURCE_ROLLOUT);
+            var expectedDecision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT);
 
             var userAttributes = new UserAttributes {
                 { "browser_type", "chrome" }
@@ -613,7 +613,7 @@ namespace OptimizelySDK.Tests
             var experiment = rollout.Experiments[0];
             var everyoneElseRule = rollout.Experiments[rollout.Experiments.Count - 1];
             var variation = everyoneElseRule.Variations[0];
-            var expectedDecision = new FeatureDecision(everyoneElseRule.Id, variation.Id, FeatureDecision.DECISION_SOURCE_ROLLOUT);
+            var expectedDecision = new FeatureDecision(everyoneElseRule, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT);
 
             var userAttributes = new UserAttributes {
                 { "browser_type", "chrome" }
@@ -669,7 +669,7 @@ namespace OptimizelySDK.Tests
             var experiment1 = rollout.Experiments[1];
             var everyoneElseRule = rollout.Experiments[rollout.Experiments.Count - 1];
             var variation = everyoneElseRule.Variations[0];
-            var expectedDecision = new FeatureDecision(everyoneElseRule.Id, variation.Id, FeatureDecision.DECISION_SOURCE_ROLLOUT);
+            var expectedDecision = new FeatureDecision(everyoneElseRule, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT);
 
             BucketerMock.Setup(bm => bm.Bucket(It.IsAny<ProjectConfig>(), everyoneElseRule, It.IsAny<string>(), It.IsAny<string>())).Returns(variation);
             var decisionService = new DecisionService(BucketerMock.Object, ErrorHandlerMock.Object, ProjectConfig, null, LoggerMock.Object);
@@ -708,7 +708,7 @@ namespace OptimizelySDK.Tests
             });
 
             // Returned variation id should be '177773' because of audience 'iPhone users in San Francisco'.
-            var expectedDecision = new FeatureDecision(expWithAudienceiPhoneUsers.Id, varWithAudienceiPhoneUsers.Id, FeatureDecision.DECISION_SOURCE_ROLLOUT);
+            var expectedDecision = new FeatureDecision(expWithAudienceiPhoneUsers, varWithAudienceiPhoneUsers, FeatureDecision.DECISION_SOURCE_ROLLOUT);
             Assert.IsTrue(TestData.CompareObjects(expectedDecision, actualDecision));
 
             // Calling with audience Chrome users.
@@ -718,7 +718,7 @@ namespace OptimizelySDK.Tests
             });
 
             // Returned variation id should be '177771' because of audience 'Chrome users'.
-            expectedDecision = new FeatureDecision(expWithAudienceChromeUsers.Id, varWithAudienceChromeUsers.Id, FeatureDecision.DECISION_SOURCE_ROLLOUT);
+            expectedDecision = new FeatureDecision(expWithAudienceChromeUsers, varWithAudienceChromeUsers, FeatureDecision.DECISION_SOURCE_ROLLOUT);
             Assert.IsTrue(TestData.CompareObjects(expectedDecision, actualDecision));
 
             // Calling with no audience.
@@ -726,7 +726,7 @@ namespace OptimizelySDK.Tests
             actualDecision = decisionService.GetVariationForFeatureRollout(featureFlag, GenericUserId, new UserAttributes());
 
             // Returned variation id should be of everyone else rule because of no audience.
-            expectedDecision = new FeatureDecision(expWithNoAudience.Id, varWithNoAudience.Id, FeatureDecision.DECISION_SOURCE_ROLLOUT);
+            expectedDecision = new FeatureDecision(expWithNoAudience, varWithNoAudience, FeatureDecision.DECISION_SOURCE_ROLLOUT);
             Assert.IsTrue(TestData.CompareObjects(expectedDecision, actualDecision));
 
             // Calling with audience 'Chrome users' and traffice allocation '9500'.
@@ -752,7 +752,7 @@ namespace OptimizelySDK.Tests
             var expectedExperimentId = featureFlag.ExperimentIds[0];
             var expectedExperiment = ProjectConfig.GetExperimentFromId(expectedExperimentId);
             var variation = expectedExperiment.Variations[0];
-            var expectedDecision = new FeatureDecision(expectedExperimentId, variation.Id, FeatureDecision.DECISION_SOURCE_EXPERIMENT);
+            var expectedDecision = new FeatureDecision(expectedExperiment, variation, FeatureDecision.DECISION_SOURCE_EXPERIMENT);
 
             DecisionServiceMock.Setup(ds => ds.GetVariationForFeatureExperiment(It.IsAny<FeatureFlag>(), It.IsAny<string>(), 
                 It.IsAny<UserAttributes>())).Returns(expectedDecision);
@@ -771,7 +771,7 @@ namespace OptimizelySDK.Tests
             var rollout = ProjectConfig.GetRolloutFromId(rolloutId);
             var expectedExperiment = rollout.Experiments[0];
             var variation = expectedExperiment.Variations[0];
-            var expectedDecision = new FeatureDecision(expectedExperiment.Id, variation.Id, FeatureDecision.DECISION_SOURCE_ROLLOUT);
+            var expectedDecision = new FeatureDecision(expectedExperiment, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT);
 
             DecisionServiceMock.Setup(ds => ds.GetVariationForFeatureExperiment(It.IsAny<FeatureFlag>(), It.IsAny<string>(), 
                 It.IsAny<UserAttributes>())).Returns<Variation>(null);
@@ -808,7 +808,7 @@ namespace OptimizelySDK.Tests
             var featureFlag = ProjectConfig.GetFeatureFlagFromKey("string_single_variable_feature");
             var experiment = ProjectConfig.GetExperimentFromKey("test_experiment_with_feature_rollout");
             var variation = ProjectConfig.GetVariationFromId("test_experiment_with_feature_rollout", "122236");
-            var expectedDecision = new FeatureDecision(experiment.Id, variation.Id, FeatureDecision.DECISION_SOURCE_EXPERIMENT);
+            var expectedDecision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_EXPERIMENT);
             var userAttributes = new UserAttributes {
                 { "browser_type", "chrome" }
             };
@@ -822,7 +822,7 @@ namespace OptimizelySDK.Tests
             var rollout = ProjectConfig.GetRolloutFromId(featureFlag.RolloutId);
             var rolloutExperiment = rollout.Experiments[0];
             var rolloutVariation = rolloutExperiment.Variations[0];
-            var expectedRolloutDecision = new FeatureDecision(rolloutExperiment.Id, rolloutVariation.Id, FeatureDecision.DECISION_SOURCE_ROLLOUT);
+            var expectedRolloutDecision = new FeatureDecision(rolloutExperiment, rolloutVariation, FeatureDecision.DECISION_SOURCE_ROLLOUT);
 
             BucketerMock.Setup(bm => bm.Bucket(ProjectConfig, rolloutExperiment, It.IsAny<string>(), It.IsAny<string>())).Returns(rolloutVariation);
             var actualRolloutDecision = DecisionServiceMock.Object.GetVariationForFeatureRollout(featureFlag, "user1", userAttributes);

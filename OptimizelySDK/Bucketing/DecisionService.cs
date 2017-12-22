@@ -302,7 +302,7 @@ namespace OptimizelySDK.Bucketing
                         break;
                     }
 
-                    return new FeatureDecision(rolloutRule.Id, variation.Id, FeatureDecision.DECISION_SOURCE_ROLLOUT);
+                    return new FeatureDecision(rolloutRule, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT);
                 }
                 else
                 {
@@ -315,7 +315,7 @@ namespace OptimizelySDK.Bucketing
             variation = Bucketer.Bucket(ProjectConfig, everyoneElseRolloutRule, bucketingId, userId);
 
             if (variation != null && !string.IsNullOrEmpty(variation.Id))
-                return new FeatureDecision(everyoneElseRolloutRule.Id, variation.Id, FeatureDecision.DECISION_SOURCE_ROLLOUT);
+                return new FeatureDecision(everyoneElseRolloutRule, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT);
 
             Logger.Log(LogLevel.DEBUG, $"User \"{userId}\" is excluded from \"Everyone Else\" rule for feature flag \"{featureFlag.Key}\".");
             return null;
@@ -355,7 +355,7 @@ namespace OptimizelySDK.Bucketing
                 if (variation != null && !string.IsNullOrEmpty(variation.Id))
                 {
                     Logger.Log(LogLevel.INFO, $"The user \"{userId}\" is bucketed into experiment \"{experiment.Key}\" of feature \"{featureFlag.Key}\".");
-                    return new FeatureDecision(experimentId, variation.Id, FeatureDecision.DECISION_SOURCE_EXPERIMENT);
+                    return new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_EXPERIMENT);
                 }
             }
 

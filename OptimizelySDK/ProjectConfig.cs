@@ -125,6 +125,7 @@ namespace OptimizelySDK
         /// </summary>
         private Dictionary<string, Rollout> _RolloutIdMap;
         public Dictionary<string, Rollout> RolloutIdMap { get { return _RolloutIdMap; } }
+        
 
         //========================= Callbacks ===========================
 
@@ -247,7 +248,7 @@ namespace OptimizelySDK
                 {
                     _VariationKeyMap[rolloutRule.Key] = new Dictionary<string, Variation>();
                     _VariationIdMap[rolloutRule.Key] = new Dictionary<string, Variation>();
-
+                    
                     if (rolloutRule.Variations != null)
                     {
                         foreach (var variation in rolloutRule.Variations)
