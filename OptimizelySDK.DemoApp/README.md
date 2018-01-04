@@ -1,4 +1,4 @@
-add_to_cart# C# SDK Demo App
+# C# SDK Demo App
 
 This demo uses the C# SDK, a part of Optimizely's Full Stack solution. It will walk you through:
 
@@ -15,23 +15,28 @@ Using the instructions below, you can run the app locally and mimic bucketing we
 ### Deploying and Running the App
 
 1. Login or create an [Optimizely Account](https://app.optimizely.com/signin).
-2. Create a C# project containing a new experiment via the Optimizely dashboard. [Instructions](https://developers.optimizely.com/x/solutions/sdks/getting-started/?language=csharp)
-3. For the C# DemoApp to bucket users properly, the following values need to be defined in the experiment.
-	* Variation Keys: The experiment must contain at least two variations with keys "sort_by_price" and "sort_by_name".
-	* Event Key: The tracked event with key "add_to_cart".
+2. See Optimizely's [Get Started with the C# SDK](https://developers.optimizely.com/x/solutions/sdks/getting-started/?language=csharp) for basic information on how to create an Optimizely C# project and experiment.
+3. Create a C# project containing a new experiment via the Optimizely dashboard.
+    * OPTIMIZELY.COM, "Projects Dashboard", "Switch Project", "New Project", "Create C# Project", "Name", "csharp_demo_app", "Create Project".  These actions create a project directing you to a URL that looks like https://app.optimizely.com/v2/projects/ProjectId/experiments .  Make note of your ProjectId .
+    * Experiment Key: "my_experiment" ("Create New", "Experiment", "my_experiment").
+4. Add the following to your experiment:
+	* Variation Keys: "sort_by_price" and "sort_by_name".
+	* Metrics: "Overall revenue"
+	* Event Key: "add_to_cart".
 	("Create New Event...", "Add to Experiment")
-4. In "Audiences" tab of your project's Optimizely dashboard, create 
+5. Save and start your experment
+   ("Create Experiment", "Start Experiment")
+6. In "Audiences" tab of your project's Optimizely dashboard, create 
     * 3 Audience attributes "user_id", "user_name", and "age".
     ("Audiences", "Add an Audience",
     "New Attribute", "age", "Save Attribute",
     "New Custom Attribute" "user_name" "Save Attribute",
     "New Custom Attribute" "user_id" "Save Attribute")
-5. Save and start your experment
-   ("Create Experiment", "Start Experiment")
-6. Run the application OptimizelySDK.DemoApp.
-7. Click the "Demo App" link to go to the "Configuration" page.
-8. Provide ProjectId, ExperimentKey and EventKey values and hit Save to load the datafile of your project in ProjectConfigJson textbox. The Optimizely client is now initialized with your project configuration and is ready to serve the requests.
-9. You’re all set. Play around and view the experiment's results! 
+    * You can use these Audience attributes later to define Audience Conditions and Audiences for your experiment, if you wish.
+7. Build and Run the OptimizelySDK.DemoApp C# application.  The DemoApp is an "ASP.NET Core Web App" that typically opens at http://127.0.0.1:8080/ in your default web browser.
+8. Click the "Demo App" button to go to the "Configuration" page.
+9. Enter your ProjectId, ExperimentKey and EventKey values and click Save to load the datafile of your project in ProjectConfigJson textbox. The Optimizely client is now initialized with your project configuration and is ready to serve the requests.
+10. You’re all set. Play around and view the experiment's results! "Select Simulated Visitor", "Shop", and "Messages" from the toolbar.
 
 To better understand this experiment, we recommend that you select a few different visitors on the "Select Visitor" page and bucket them into variations and simulate a conversion event by clicking the "Buy Now" button on the "Shop" page. Within a few seconds, you should see the results populate on the Optimizely results page.
 
