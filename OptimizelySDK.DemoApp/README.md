@@ -19,10 +19,12 @@ Using the instructions below, you can run the app locally and mimic bucketing we
 3. For the application to bucket users properly, the following values need to be defined for the experiment.
 	* Variation Keys: The experiment must contain at least two variations with keys "sort_by_price" and "sort_by_name".
 	* Event Key: The tracked event with key "AddToCart".
-4. Run the application OptimizelySDK.DemoApp.
-5. Click the "Demo App" link to go to the "Configuration" page.
-6. Provide ProjectId, ExperimentKey and EventKey values and hit Save to load the datafile of your project in ProjectConfigJson textbox. The Optimizely client is now initialized with your project configuration and is ready to serve the requests.
-7. You’re all set. Play around and view the experiment's results! 
+4. In "Audiences" tab of your project's Optimizely dashboard, create 
+    * 3 Audience attributes "user_id", "user_name", and "age".
+5. Run the application OptimizelySDK.DemoApp.
+6. Click the "Demo App" link to go to the "Configuration" page.
+7. Provide ProjectId, ExperimentKey and EventKey values and hit Save to load the datafile of your project in ProjectConfigJson textbox. The Optimizely client is now initialized with your project configuration and is ready to serve the requests.
+8. You’re all set. Play around and view the experiment's results! 
 
 To better understand this experiment, we recommend that you select a few different visitors on the "Select Visitor" page and bucket them into variations and simulate a conversion event by clicking the "Buy Now" button on the "Shop" page. Within a few seconds, you should see the results populate on the Optimizely results page.
 
