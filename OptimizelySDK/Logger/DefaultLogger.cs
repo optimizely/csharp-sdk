@@ -22,14 +22,21 @@ namespace OptimizelySDK.Logger
     /// </summary>
     public class DefaultLogger : ILogger
     {
+        public volatile LogLevel Verbosity;
+        public DefaultLogger()
+        {
+            Verbosity=LogLevel.ALL;
+        }
         public void Log(LogLevel level, string message)
         {
             // NOTE: Optimizely's csharp-sdk *.nupkg only includes Release *.dll's .
             // Hence, csharp-sdk DefaultLogger's Log must use Console.WriteLine here
             // instead of Debug.WriteLine because the latter would turn into NOP's
             // in *.nupkg Release *.dll's .
-            string line = string.Format("[{0}] : {1}", level, message);
-            Console.WriteLine(line);
+            if (level>=Verbosity) {
+                string line = string.Format("[{0}] : {1}",level,message);
+                Console.WriteLine(line);
+            }
         }
     }
 }

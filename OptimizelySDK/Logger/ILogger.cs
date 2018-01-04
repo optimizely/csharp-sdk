@@ -15,11 +15,13 @@
  */
 namespace OptimizelySDK.Logger
 {
-    public enum LogLevel
-    {
+    public enum LogLevel {
+        ALL,
         DEBUG,
         INFO,
+        WARN,
         ERROR,
+        OFF
     }
 
     public interface ILogger
