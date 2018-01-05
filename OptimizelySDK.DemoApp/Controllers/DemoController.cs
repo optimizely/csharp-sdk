@@ -152,6 +152,9 @@ namespace OptimizelySDK.DemoApp.Controllers
         [HttpGet] // should be a post, but keeping demo simple
         public ActionResult Buy(int visitorId, int productId)
         {
+            if (ConfigRepo == null || ConfigRepo.EventKey == null)
+                return RedirectToAction("Config");
+
             // buy the item (record the conversion)
             var visitor = VisitorRepo.Single(v => v.Id == visitorId);
 
@@ -163,7 +166,7 @@ namespace OptimizelySDK.DemoApp.Controllers
                 {"revenue", 1337 },
                 {"value", 100 }
             };
-            Optimizely.Track("AddToCart", Convert.ToString(visitorId), visitor.GetUserAttributes(), eventTags);
+            Optimizely.Track(ConfigRepo.EventKey, Convert.ToString(visitorId), visitor.GetUserAttributes(), eventTags);
             TempData["Message"] = string.Format("Successfully Purchased item {0} for visitor {1}", productId, visitorId);
 
             return RedirectToAction("Shop");

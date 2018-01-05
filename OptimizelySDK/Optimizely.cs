@@ -37,7 +37,7 @@ namespace OptimizelySDK
         
         private ProjectConfig Config;
 
-        private ILogger Logger;
+        public ILogger Logger;
 
         private IErrorHandler ErrorHandler;
 
@@ -86,17 +86,17 @@ namespace OptimizelySDK
                           UserProfileService userProfileService = null,
                           bool skipJsonValidation = false)
         {
-            IsValid = false; // invalid until proven valid
-            Logger = logger ?? new NoOpLogger();
-            EventDispatcher = eventDispatcher ?? new DefaultEventDispatcher(Logger);
-            ErrorHandler = errorHandler ?? new NoOpErrorHandler();
-            Bucketer = new Bucketer(Logger);
-            EventBuilder = new EventBuilder(Bucketer);
-            UserProfileService = userProfileService;
-            NotificationCenter = new NotificationCenter(Logger);
-
             try
             {
+                IsValid=false; // invalid until proven valid
+                Logger=logger??new DefaultLogger();
+                EventDispatcher=eventDispatcher??new DefaultEventDispatcher(Logger);
+                ErrorHandler=errorHandler??new NoOpErrorHandler();
+                Bucketer=new Bucketer(Logger);
+                EventBuilder=new EventBuilder(Bucketer);
+                UserProfileService=userProfileService;
+                NotificationCenter=new NotificationCenter(Logger);
+
                 if (!ValidateInputs(datafile, skipJsonValidation))
                 {
                     Logger.Log(LogLevel.ERROR, "Provided 'datafile' has invalid schema.");
@@ -109,7 +109,9 @@ namespace OptimizelySDK
             }
             catch (Exception ex)
             {
-                Logger.Log(LogLevel.ERROR, "Provided 'datafile' is in an invalid format. " + ex.Message);
+                if (Logger!=null) {
+                    Logger.Log(LogLevel.ERROR,"Optimizely failed to initialize. "+ex.Message);
+                }
             }
         }
 
