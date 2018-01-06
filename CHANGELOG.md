@@ -1,9 +1,10 @@
 ## 1.3.0
-December 19, 2017
+January 5, 2018
 
 ### New Features
 * Feature Notification Center
 * Third party component DLL's dependencies unbundled to NUGET.ORG .
+* DemoApp README.md
 
 ### Bug Fixes
 * Httpclient issues - object initializing multiple times and default timeout.
