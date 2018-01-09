@@ -72,9 +72,19 @@ namespace OptimizelySDK.Event.Dispatcher
         /// Async version of DispatchEvent
         /// This is a "Fire and Forget" option
         /// </summary>
-        public void DispatchEvent(LogEvent logEvent)
+        public void DispatchEventSilently(LogEvent logEvent)
         {
             Task.Run(() => DispatchEventAsync(logEvent));
+        }
+
+        /// <summary>
+        /// Dispatch an event Asynchronously by creating a new task and calls the
+        /// Async version of DispatchEvent
+        /// This is a "sequential" option
+        /// </summary>
+        public void DispatchEvent(LogEvent logEvent)
+        {
+            DispatchEventAsync(logEvent);
         }
     }
 }
