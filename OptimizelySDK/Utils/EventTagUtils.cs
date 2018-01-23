@@ -13,7 +13,7 @@ namespace OptimizelySDK.Utils
             if (eventTags == null 
                 || !eventTags.ContainsKey(REVENUE_EVENT_METRIC_NAME) 
                 || eventTags[REVENUE_EVENT_METRIC_NAME] == null 
-                || !(eventTags[REVENUE_EVENT_METRIC_NAME] is int))
+                || !int.TryParse(eventTags[REVENUE_EVENT_METRIC_NAME].ToString(), out int result))
                 return null;
 
            return eventTags[REVENUE_EVENT_METRIC_NAME];

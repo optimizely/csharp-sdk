@@ -564,6 +564,7 @@ namespace OptimizelySDK.Tests.EventTests
                                                     {"timestamp", timeStamp },
                                                     {"uuid", guid },
                                                     {"key", "purchase" },
+                                                    {"revenue", "42" },
                                                     {"tags",
                                                         new Dictionary<string, object>
                                                         {
