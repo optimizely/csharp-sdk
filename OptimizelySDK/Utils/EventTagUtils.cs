@@ -10,13 +10,14 @@ namespace OptimizelySDK.Utils
 
         public static object GetRevenueValue(Dictionary<string, object> eventTags)
         {
+            int result = 0;
             if (eventTags == null 
                 || !eventTags.ContainsKey(REVENUE_EVENT_METRIC_NAME) 
                 || eventTags[REVENUE_EVENT_METRIC_NAME] == null 
-                || !(eventTags[REVENUE_EVENT_METRIC_NAME] is int))
+                || !int.TryParse(eventTags[REVENUE_EVENT_METRIC_NAME].ToString(), out result))
                 return null;
 
-           return eventTags[REVENUE_EVENT_METRIC_NAME];
+           return  result;
         }
 
         public static object GetNumericValue(Dictionary<string, object> eventTags, ILogger logger  = null)
