@@ -35,11 +35,15 @@ namespace OptimizelySDK.Tests.UtilsTests
         {
             var expectedValue = 42;
             var expectedValue2 = 100;
+            var expectedValueString = 123;
             var validTag = new Dictionary<string, object>() {
                 { "revenue", 42 }
             };
             var validTag2 = new Dictionary<string, object>() {
                 { "revenue", 100 }
+            };
+            var validTagStringValue = new Dictionary<string, object>() {
+                { "revenue", "123" }
             };
 
             var invalidTag = new Dictionary<string, object>() {
@@ -51,16 +55,22 @@ namespace OptimizelySDK.Tests.UtilsTests
             var invalidValue = new Dictionary<string, object>() {
                 { "revenue", 42.5 }
             };
+            var invalidTagNonRevenue = new Dictionary<string, object>()
+            {
+                {"non-revenue", 123 }
+            };
 
             // Invalid data.
             Assert.Null(EventTagUtils.GetRevenueValue(null));
             Assert.Null(EventTagUtils.GetRevenueValue(invalidTag));
             Assert.Null(EventTagUtils.GetRevenueValue(nullValue));
             Assert.Null(EventTagUtils.GetRevenueValue(invalidValue));
+            Assert.Null(EventTagUtils.GetRevenueValue(invalidTagNonRevenue));
 
             // Valid data.
             Assert.AreEqual(EventTagUtils.GetRevenueValue(validTag), expectedValue);
             Assert.AreEqual(EventTagUtils.GetRevenueValue(validTag2), expectedValue2);
+            Assert.AreEqual(EventTagUtils.GetRevenueValue(validTagStringValue), expectedValueString);
         }
 
         [Test]
