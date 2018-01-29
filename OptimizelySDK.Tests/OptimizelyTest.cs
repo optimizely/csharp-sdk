@@ -739,35 +739,35 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestForcedVariationPreceedsWhitelistedVariation()
         {
-            var optimizely = new Optimizely(TestData.ValidDataFileV3, EventDispatcher, LoggerMock.Object, ErrorHandlerMock.Object);
-            var projectConfig = ProjectConfig.Create(TestData.ValidDataFileV3, LoggerMock.Object, ErrorHandlerMock.Object);
-            Variation expectedVariation1 = projectConfig.GetVariationFromKey("etag1", "vtag1");
-            Variation expectedVariation2 = projectConfig.GetVariationFromKey("etag1", "vtag2");
+            var optimizely = new Optimizely(TestData.Datafile, EventDispatcher, LoggerMock.Object, ErrorHandlerMock.Object);
+            var projectConfig = ProjectConfig.Create(TestData.Datafile, LoggerMock.Object, ErrorHandlerMock.Object);
+            Variation expectedVariation1 = projectConfig.GetVariationFromKey("etag3", "vtag5");
+            Variation expectedVariation2 = projectConfig.GetVariationFromKey("etag3", "vtag6");
 
             //Check whitelisted experiment
-            var variation = optimizely.GetVariation("etag1", "testUser1");
+            var variation = optimizely.GetVariation("etag3", "testUser1");
             Assert.IsTrue(TestData.CompareObjects(expectedVariation1, variation));
 
             //Set forced variation
-            Assert.IsTrue(optimizely.SetForcedVariation("etag1", "testUser1", "vtag2"));
-            variation = optimizely.GetVariation("etag1", "testUser1");
+            Assert.IsTrue(optimizely.SetForcedVariation("etag3", "testUser1", "vtag6"));
+            variation = optimizely.GetVariation("etag3", "testUser1");
 
             // verify forced variation preceeds whitelisted variation
             Assert.IsTrue(TestData.CompareObjects(expectedVariation2, variation));
 
             // remove forced variation and verify whitelisted should be returned.
-            Assert.IsTrue(optimizely.SetForcedVariation("etag1", "testUser1", null));
-            variation = optimizely.GetVariation("etag1", "testUser1");
+            Assert.IsTrue(optimizely.SetForcedVariation("etag3", "testUser1", null));
+            variation = optimizely.GetVariation("etag3", "testUser1");
 
             Assert.IsTrue(TestData.CompareObjects(expectedVariation1, variation));
 
             LoggerMock.Verify(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()), Times.Exactly(7));
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "User \"testUser1\" is not in the forced variation map."), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.INFO, "User \"testUser1\" is forced in variation \"vtag1\"."), Times.Exactly(2));
-            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Set variation \"277\" for experiment \"223\" and user \"testUser1\" in the forced variation map."), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Variation \"vtag2\" is mapped to experiment \"etag1\" and user \"testUser1\" in the forced variation map"), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Variation mapped to experiment \"etag1\" has been removed for user \"testUser1\"."), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "No experiment \"etag1\" mapped to user \"testUser1\" in the forced variation map."), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.INFO, "User \"testUser1\" is forced in variation \"vtag5\"."), Times.Exactly(2));
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Set variation \"281\" for experiment \"224\" and user \"testUser1\" in the forced variation map."), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Variation \"vtag6\" is mapped to experiment \"etag3\" and user \"testUser1\" in the forced variation map"), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Variation mapped to experiment \"etag3\" has been removed for user \"testUser1\"."), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "No experiment \"etag3\" mapped to user \"testUser1\" in the forced variation map."), Times.Once);
         }
 
         [Test]
@@ -787,8 +787,8 @@ namespace OptimizelySDK.Tests
 
             userProfileServiceMock.Setup(_ => _.Lookup(userId)).Returns(userProfile.ToMap());
 
-            var optimizely = new Optimizely(TestData.NoAudienceProjectConfigV3, EventDispatcher, LoggerMock.Object, ErrorHandlerMock.Object, userProfileServiceMock.Object);
-            var projectConfig = ProjectConfig.Create(TestData.NoAudienceProjectConfigV3, LoggerMock.Object, ErrorHandlerMock.Object);
+            var optimizely = new Optimizely(TestData.Datafile, EventDispatcher, LoggerMock.Object, ErrorHandlerMock.Object, userProfileServiceMock.Object);
+            var projectConfig = ProjectConfig.Create(TestData.Datafile, LoggerMock.Object, ErrorHandlerMock.Object);
             Variation expectedFbVariation = projectConfig.GetVariationFromKey(experimentKey, fbVariationKey);
             Variation expectedVariation = projectConfig.GetVariationFromKey(experimentKey, variationKey);
 

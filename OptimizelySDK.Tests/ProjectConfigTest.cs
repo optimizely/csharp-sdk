@@ -76,7 +76,11 @@ namespace OptimizelySDK.Tests
                 { "test_experiment_double_feature",Config.GetExperimentFromKey("test_experiment_double_feature") },
                 { "test_experiment_integer_feature",Config.GetExperimentFromKey("test_experiment_integer_feature") },
                 { "group_experiment_1",Config.GetExperimentFromKey("group_experiment_1") },
-                {"group_experiment_2",Config.GetExperimentFromKey("group_experiment_2") }
+                {"group_experiment_2",Config.GetExperimentFromKey("group_experiment_2") },
+                {"etag1",Config.GetExperimentFromKey("etag1") },
+                {"etag2",Config.GetExperimentFromKey("etag2") },
+                {"etag3",Config.GetExperimentFromKey("etag3") },
+                {"etag4",Config.GetExperimentFromKey("etag4") }
             };
 
             Assert.IsTrue(TestData.CompareObjects(experimentKeyMap, Config.ExperimentKeyMap));
@@ -92,7 +96,11 @@ namespace OptimizelySDK.Tests
                 {"122238",Config.GetExperimentFromId("122238") },
                 {"122241",Config.GetExperimentFromId("122241") },
                 { "7723330021",Config.GetExperimentFromId("7723330021") },
-                { "7718750065",Config.GetExperimentFromId("7718750065") }
+                { "7718750065",Config.GetExperimentFromId("7718750065") },
+                { "223",Config.GetExperimentFromId("223") },
+                { "118",Config.GetExperimentFromId("118") },
+                { "224",Config.GetExperimentFromId("224") },
+                { "119",Config.GetExperimentFromId("119") }
             };
 
             Assert.IsTrue(TestData.CompareObjects(experimentIdMap, Config.ExperimentIdMap));
@@ -105,7 +113,8 @@ namespace OptimizelySDK.Tests
             var attributeKeyMap = new Dictionary<string, object>
             {
                 { "device_type", Config.GetAttribute("device_type") },
-                { "location", Config.GetAttribute("location")}
+                { "location", Config.GetAttribute("location")},
+                { "browser_type", Config.GetAttribute("browser_type")}
             };
             Assert.IsTrue(TestData.CompareObjects(attributeKeyMap, Config.AttributeKeyMap));
 
@@ -113,7 +122,8 @@ namespace OptimizelySDK.Tests
             var audienceIdMap = new Dictionary<string, object>
             {
                 { "7718080042", Config.GetAudience("7718080042") },
-                { "11154", Config.GetAudience("11154") }
+                { "11154", Config.GetAudience("11154") },
+                { "100", Config.GetAudience("100") }
             };
             Assert.IsTrue(TestData.CompareObjects(audienceIdMap, Config.AudienceIdMap));
 
@@ -193,6 +203,30 @@ namespace OptimizelySDK.Tests
                 { "177779", new Dictionary<string, object>
                  {
                      {"177780", Config.GetVariationFromKey("177779", "177780") }
+                 }
+                },
+                { "etag1", new Dictionary<string, object>
+                 {
+                     {"vtag1", Config.GetVariationFromKey("etag1", "vtag1") },
+                     {"vtag2", Config.GetVariationFromKey("etag1", "vtag2") }
+                 }
+                },
+                { "etag2", new Dictionary<string, object>
+                 {
+                     {"vtag3", Config.GetVariationFromKey("etag2", "vtag3") },
+                     {"vtag4", Config.GetVariationFromKey("etag2", "vtag4") }
+                 }
+                },
+                { "etag3", new Dictionary<string, object>
+                 {
+                     {"vtag5", Config.GetVariationFromKey("etag3", "vtag5") },
+                     {"vtag6", Config.GetVariationFromKey("etag3", "vtag6") }
+                 }
+                },
+                { "etag4", new Dictionary<string, object>
+                 {
+                     {"vtag7", Config.GetVariationFromKey("etag4", "vtag7") },
+                     {"vtag8", Config.GetVariationFromKey("etag4", "vtag8") }
                  }
                 }
             };
@@ -275,6 +309,30 @@ namespace OptimizelySDK.Tests
                 { "177779", new Dictionary<string, object>
                  {
                      {"177780", Config.GetVariationFromId("177779", "177780") }
+                 }
+                },
+                { "etag1", new Dictionary<string, object>
+                 {
+                     {"276", Config.GetVariationFromId("etag1", "276") },
+                     {"277", Config.GetVariationFromId("etag1", "277") }
+                 }
+                },
+                { "etag2", new Dictionary<string, object>
+                 {
+                     {"278", Config.GetVariationFromId("etag2", "278") },
+                     {"279", Config.GetVariationFromId("etag2", "279") }
+                 }
+                },
+                { "etag3", new Dictionary<string, object>
+                 {
+                     {"280", Config.GetVariationFromId("etag3", "280") },
+                     {"281", Config.GetVariationFromId("etag3", "281") }
+                 }
+                },
+                { "etag4", new Dictionary<string, object>
+                 {
+                     {"282", Config.GetVariationFromId("etag4", "282") },
+                     {"283", Config.GetVariationFromId("etag4", "283") }
                  }
                 }
             };
