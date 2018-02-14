@@ -85,7 +85,8 @@
 						"id": "155561",
 						"value": "red"
 					}
-				]
+				],
+				"featureEnabled": true
 			}, {
 				"id": "122232",
 				"key": "Feorge",
@@ -97,7 +98,8 @@
 						"id": "155561",
 						"value": "eorge"
 					}
-				]
+				],
+				"featureEnabled": false
 			}, {
 				"id": "122233",
 				"key": "Gred",
@@ -121,7 +123,8 @@
 						"id": "155561",
 						"value": "eorge"
 					}
-				]
+				],
+				"featureEnabled": true
 			}]
 		}, {
 			"key": "test_experiment_with_feature_rollout",
@@ -143,14 +146,16 @@
 				"variables": [{
 					"id": "155558",
 					"value": "cta_1"
-				}]
+				}],
+				"featureEnabled": true
 			}, {
 				"id": "122237",
 				"key": "variation",
 				"variables": [{
 					"id": "155558",
 					"value": "cta_2"
-				}]
+				}],
+				"featureEnabled": true
 			}]
 		}, {
 			"key": "test_experiment_double_feature",
@@ -172,14 +177,16 @@
 				"variables": [{
 					"id": "155551",
 					"value": "42.42"
-				}]
+				}],
+				"featureEnabled": true
 			}, {
 				"id": "122240",
 				"key": "variation",
 				"variables": [{
 					"id": "155551",
 					"value": "13.37"
-				}]
+				}],
+				"featureEnabled": false
 			}]
 		}, {
 			"key": "test_experiment_integer_feature",
@@ -201,14 +208,16 @@
 				"variables": [{
 					"id": "155553",
 					"value": "42"
-				}]
+				}],
+				"featureEnabled": false
 			}, {
 				"id": "122243",
 				"key": "variation",
 				"variables": [{
 					"id": "155553",
 					"value": "13"
-				}]
+				}],
+				"featureEnabled": true
 			}]
 		}
 	],
@@ -253,7 +262,8 @@
 						"variables": [{
 							"id": "155563",
 							"value": "groupie_1_v1"
-						}]
+						}],
+						"featureEnabled": true
 					},
 					{
 						"id": "7722360022",
@@ -261,7 +271,8 @@
 						"variables": [{
 							"id": "155563",
 							"value": "groupie_1_v2"
-						}]
+						}],
+						"featureEnabled": true
 					}
 				],
 				"forcedVariations": {
@@ -289,7 +300,8 @@
 						"variables": [{
 							"id": "155563",
 							"value": "groupie_2_v1"
-						}]
+						}],
+						"featureEnabled": false
 					},
 					{
 						"id": "7725250007",
@@ -297,7 +309,8 @@
 						"variables": [{
 							"id": "155563",
 							"value": "groupie_2_v2"
-						}]
+						}],
+						"featureEnabled": false
 					}
 				],
 				"forcedVariations": {},

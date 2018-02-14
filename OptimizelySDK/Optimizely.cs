@@ -361,18 +361,19 @@ namespace OptimizelySDK
                 return false;
             }
 
-            if (decision.Source == FeatureDecision.DECISION_SOURCE_EXPERIMENT)
+            var featureEnabled = decision.Source == FeatureDecision.DECISION_SOURCE_ROLLOUT || decision.Variation.FeatureEnabled;
+            if (featureEnabled)
             {
-                
-                SendImpressionEvent(decision.Experiment, decision.Variation, userId, userAttributes);
-            }
-            else
-            {
-                Logger.Log(LogLevel.INFO, $@"The user ""{userId}"" is not being experimented on feature ""{featureKey}"".");
-            }
+                if (decision.Source == FeatureDecision.DECISION_SOURCE_EXPERIMENT)
+                    SendImpressionEvent(decision.Experiment, decision.Variation, userId, userAttributes);
+                else
+                    Logger.Log(LogLevel.INFO, $@"The user ""{userId}"" is not being experimented on feature ""{featureKey}"".");
 
-            Logger.Log(LogLevel.INFO, $@"Feature flag ""{featureKey}"" is enabled for user ""{userId}"".");
-            return true;
+                Logger.Log(LogLevel.INFO, $@"Feature flag ""{featureKey}"" is enabled for user ""{userId}"".");
+                return true;
+            }
+            
+            return false;
         }
 
         /// <summary>
