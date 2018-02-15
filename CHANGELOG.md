@@ -2,7 +2,10 @@
 February 14, 2018
 
 ### Bug Fixes
-* Change 'murmurhash' to 'murmurhash-signed' in OptimizelySDK.nuspec .
+* Change 'murmurhash' to 'murmurhash-signed' in OptimizelySDK.nuspec fixing:
+```
+System.IO.FileLoadException 'Could not load file or assembly 'MurmurHash, ... PublicKeyToken ...'
+```
 
 ## 1.3.0
 January 5, 2018
