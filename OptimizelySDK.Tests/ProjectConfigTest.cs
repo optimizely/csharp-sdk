@@ -318,9 +318,9 @@ namespace OptimizelySDK.Tests
 
             Assert.IsTrue(TestData.CompareObjects(expectedRolloutIdMap, Config.RolloutIdMap));
 
-            // Verify that the default value of featureEnabled is false.
-            var variation = new Variation();
-            Assert.False(variation.FeatureEnabled);
+            // Verify that featureEnabled property of variation is false if not defined.
+            var variation = new Variation { Id = "test_experiment", Key = "control" };
+            Assert.IsFalse(variation.FeatureEnabled);
         }
 
         [Test]
@@ -747,28 +747,6 @@ namespace OptimizelySDK.Tests
             // make sure the first user forced variations are still valid
             Assert.AreEqual(Config.GetForcedVariation("test_experiment", "test_user_1").Key, "control");
             Assert.AreEqual(Config.GetForcedVariation("group_experiment_1", "test_user_1").Key, "group_exp_1_var_1");
-        }
-
-        [Test]
-        public void TestVariationFeatureEnabledProperty()
-        {
-            var featureVariableUsageInstance = new List<FeatureVariableUsage>
-            {
-                new FeatureVariableUsage { Id="155560", Value="F" },
-                new FeatureVariableUsage { Id="155561", Value="red" },
-            };
-            var expectedExperimentVariation = new Variation { Id = "122231", Key = "Fred", FeatureVariableUsageInstances = featureVariableUsageInstance, FeatureEnabled = true };
-            var actualExperimentVariation = Config.GetVariationFromKey("test_experiment_multivariate", "Fred");
-
-            // Verify that featureEnabled property of variation is true for feature experiment.
-            Assert.IsTrue(TestData.CompareObjects(expectedExperimentVariation, actualExperimentVariation));
-
-            featureVariableUsageInstance = new List<FeatureVariableUsage> {new FeatureVariableUsage { Id = "155556", Value = "true" }};
-            var expectedRolloutVariation = new Variation { Id = "177771", Key = "177771", FeatureVariableUsageInstances = featureVariableUsageInstance, FeatureEnabled = false };
-            var actualRolloutVariation = Config.GetVariationFromKey("177770", "177771");
-
-            // Verify that featureEnabled of variation is false for rollout.
-            Assert.IsTrue(TestData.CompareObjects(expectedRolloutVariation, actualRolloutVariation));
         }
     }
 }

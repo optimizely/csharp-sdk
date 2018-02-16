@@ -355,25 +355,19 @@ namespace OptimizelySDK
                 return false;
 
             var decision = DecisionService.GetVariationForFeature(featureFlag, userId, userAttributes);
-            if (decision == null)
+            if (decision == null || !decision.Variation.FeatureEnabled)
             {
                 Logger.Log(LogLevel.INFO, $@"Feature flag ""{featureKey}"" is not enabled for user ""{userId}"".");
                 return false;
             }
 
-            var featureEnabled = decision.Source == FeatureDecision.DECISION_SOURCE_ROLLOUT || decision.Variation.FeatureEnabled;
-            if (featureEnabled)
-            {
-                if (decision.Source == FeatureDecision.DECISION_SOURCE_EXPERIMENT)
-                    SendImpressionEvent(decision.Experiment, decision.Variation, userId, userAttributes);
-                else
-                    Logger.Log(LogLevel.INFO, $@"The user ""{userId}"" is not being experimented on feature ""{featureKey}"".");
+            if (decision.Source == FeatureDecision.DECISION_SOURCE_EXPERIMENT)
+                SendImpressionEvent(decision.Experiment, decision.Variation, userId, userAttributes);
+            else
+                Logger.Log(LogLevel.INFO, $@"The user ""{userId}"" is not being experimented on feature ""{featureKey}"".");
 
-                Logger.Log(LogLevel.INFO, $@"Feature flag ""{featureKey}"" is enabled for user ""{userId}"".");
-                return true;
-            }
-            
-            return false;
+            Logger.Log(LogLevel.INFO, $@"Feature flag ""{featureKey}"" is enabled for user ""{userId}"".");
+            return true;
         }
 
         /// <summary>
