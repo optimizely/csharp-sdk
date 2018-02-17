@@ -1,3 +1,12 @@
+## 1.3.1
+February 14, 2018
+
+### Bug Fixes
+* Change 'murmurhash' to 'murmurhash-signed' in OptimizelySDK.nuspec fixing:
+```
+System.IO.FileLoadException 'Could not load file or assembly 'MurmurHash, ... PublicKeyToken ...'
+```
+
 ## 1.3.0
 January 5, 2018
 
@@ -14,11 +23,8 @@ November 6, 2017
 
 ### New Features
 * Package DLL's including third party component DLL's are strongnamed and digitally signed by Optimizely.
-
 * DecisionService GetVariationForFeatureRollout added.
-
 * Feature Flag and Rollout models added.
-
 * Implemented Bucketing ID feature. 
 
 ## 1.2.0
