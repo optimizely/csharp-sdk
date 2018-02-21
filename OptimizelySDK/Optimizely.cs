@@ -355,7 +355,7 @@ namespace OptimizelySDK
                 return false;
 
             var decision = DecisionService.GetVariationForFeature(featureFlag, userId, userAttributes);
-            if (decision == null || !decision.Variation.FeatureEnabled)
+            if (decision == null || !decision.Variation.IsFeatureEnabled)
             {
                 Logger.Log(LogLevel.INFO, $@"Feature flag ""{featureKey}"" is not enabled for user ""{userId}"".");
                 return false;
