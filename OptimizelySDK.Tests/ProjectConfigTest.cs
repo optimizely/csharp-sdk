@@ -339,16 +339,16 @@ namespace OptimizelySDK.Tests
 
             Assert.IsTrue(TestData.CompareObjects(expectedVariationIdMap, Config.VariationIdMap));
 
-			// Check Variation returns correct variable usage
+            // Check Variation returns correct variable usage
             var featureVariableUsageInstance = new List<FeatureVariableUsage>
             {
                 new FeatureVariableUsage{Id="155560", Value="F"},
                 new FeatureVariableUsage{Id="155561", Value="red"},
             };
 
-            var expectedVariationUsage = new Variation { Id = "122231", Key = "Fred", FeatureVariableUsageInstances = featureVariableUsageInstance};
+            var expectedVariationUsage = new Variation { Id = "122231", Key = "Fred", FeatureVariableUsageInstances = featureVariableUsageInstance, FeatureEnabled = true };
             var actualVariationUsage = Config.GetVariationFromKey("test_experiment_multivariate", "Fred");
- 
+
             Assert.IsTrue(TestData.CompareObjects(expectedVariationUsage, actualVariationUsage));
             
             // Check Feature Key map.
@@ -801,6 +801,14 @@ namespace OptimizelySDK.Tests
             // make sure the first user forced variations are still valid
             Assert.AreEqual(Config.GetForcedVariation("test_experiment", "test_user_1").Key, "control");
             Assert.AreEqual(Config.GetForcedVariation("group_experiment_1", "test_user_1").Key, "group_exp_1_var_1");
+        }
+
+        [Test]
+        public void TestVariationFeatureEnabledProperty()
+        {
+            // Verify that featureEnabled property of variation is false if not defined.
+            var variation = Config.GetVariationFromKey("test_experiment", "control");
+            Assert.IsFalse(variation.IsFeatureEnabled);
         }
     }
 }

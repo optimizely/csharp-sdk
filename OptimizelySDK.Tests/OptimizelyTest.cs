@@ -1562,6 +1562,49 @@ namespace OptimizelySDK.Tests
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "Feature flag \"boolean_single_variable_feature\" is enabled for user \"testUserId\"."), Times.Once);
         }
 
+        public void TestIsFeatureEnabledWithFeatureEnabledPropertyGivenFeatureExperiment()
+        {
+            var userId = "testUserId2";
+            var featureKey = "double_single_variable_feature";
+            var experiment = Config.GetExperimentFromKey("test_experiment_double_feature");
+            var featureEnabledTrue = Config.GetVariationFromKey("test_experiment_double_feature", "control");
+            var featureEnabledFalse = Config.GetVariationFromKey("test_experiment_double_feature", "variation");
+            var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
+            var decisionTrue = new FeatureDecision(experiment, featureEnabledTrue, FeatureDecision.DECISION_SOURCE_EXPERIMENT);
+            var decisionFalse = new FeatureDecision(experiment, featureEnabledFalse, FeatureDecision.DECISION_SOURCE_EXPERIMENT);
+
+            DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, null)).Returns(decisionTrue);
+            DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, userId, null)).Returns(decisionFalse);
+
+            var optly = Helper.CreatePrivateOptimizely();
+            optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
+
+            // Verify that IsFeatureEnabled returns true when feature experiment variation's 'featureEnabled' property is true.
+            bool result = (bool)optly.Invoke("IsFeatureEnabled", featureKey, TestUserId, null);
+            Assert.True(result);
+
+            // Verify that IsFeatureEnabled returns false when feature experiment variation's 'featureEnabled' property is false.
+            result = (bool)optly.Invoke("IsFeatureEnabled", featureKey, userId, null);
+            Assert.False(result);
+        }
+
+        public void TestIsFeatureEnabledWithFeatureEnabledPropertyGivenRolloutRule()
+        {
+            var featureKey = "boolean_single_variable_feature";
+            var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
+
+            // Verify that IsFeatureEnabled returns true when user is bucketed into the rollout rule's variation.
+            Assert.True(Optimizely.IsFeatureEnabled("boolean_single_variable_feature", TestUserId));
+
+            DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, null)).Returns<FeatureDecision>(null);
+            var optly = Helper.CreatePrivateOptimizely();
+            optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
+
+            // Verify that IsFeatureEnabled returns false when user does not get bucketed into the rollout rule's variation.
+            bool result = (bool)optly.Invoke("IsFeatureEnabled", featureKey, TestUserId, null);
+            Assert.False(result);
+        }
+
         #endregion // Test IsFeatureEnabled method
 
         #region Test NotificationCenter
@@ -1587,8 +1630,8 @@ namespace OptimizelySDK.Tests
 
         public void TestActivateListener(UserAttributes userAttributes)
         {
-            var experimentKey = "test_experiment";
-            var variationKey = "control";
+            var experimentKey = "group_experiment_1";
+            var variationKey = "group_exp_1_var_1";
             var featureKey = "boolean_feature";
             var experiment = Config.GetExperimentFromKey(experimentKey);
             var variation = Config.GetVariationFromKey(experimentKey, variationKey);
@@ -1611,7 +1654,6 @@ namespace OptimizelySDK.Tests
 
             var optly = Helper.CreatePrivateOptimizely();
             var optStronglyTyped = optly.GetObject() as Optimizely;
-
 
             // Adding notification listeners.
             var notificationType = NotificationCenter.NotificationType.Activate;

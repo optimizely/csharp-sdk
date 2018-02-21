@@ -49,5 +49,14 @@ namespace OptimizelySDK.Entity
 
             return null;
         }
+
+        public bool? FeatureEnabled { get; set; }
+        public bool IsFeatureEnabled
+        {
+            get
+            {
+                return FeatureEnabled ?? false;
+            }
+        }
     }
 }
