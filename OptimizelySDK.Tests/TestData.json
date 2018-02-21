@@ -16,13 +16,11 @@
 			"audienceIds": ["7718080042"],
 			"variations": [{
 					"id": "7722370027",
-					"key": "control",
-					"featureEnabled": true
+					"key": "control"
 				},
 				{
 					"id": "7721010009",
-					"key": "variation",
-					"featureEnabled": false
+					"key": "variation"
 				}
 			],
 			"forcedVariations": {
@@ -46,13 +44,11 @@
 			"audienceIds": [],
 			"variations": [{
 					"id": "7722370427",
-					"key": "control",
-					"featureEnabled": false
+					"key": "control"
 				},
 				{
 					"id": "7721010509",
-					"key": "variation",
-					"featureEnabled": false
+					"key": "variation"
 				}
 			],
 			"forcedVariations": {},

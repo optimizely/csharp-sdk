@@ -317,10 +317,6 @@ namespace OptimizelySDK.Tests
             };
 
             Assert.IsTrue(TestData.CompareObjects(expectedRolloutIdMap, Config.RolloutIdMap));
-
-            // Verify that featureEnabled property of variation is false if not defined.
-            var variation = new Variation { Id = "test_experiment", Key = "control" };
-            Assert.IsFalse(variation.FeatureEnabled);
         }
 
         [Test]
@@ -747,6 +743,14 @@ namespace OptimizelySDK.Tests
             // make sure the first user forced variations are still valid
             Assert.AreEqual(Config.GetForcedVariation("test_experiment", "test_user_1").Key, "control");
             Assert.AreEqual(Config.GetForcedVariation("group_experiment_1", "test_user_1").Key, "group_exp_1_var_1");
+        }
+
+        [Test]
+        public void TestVariationFeatureEnabledProperty()
+        {
+            // Verify that featureEnabled property of variation is false if not defined.
+            var variation = Config.GetVariationFromKey("test_experiment", "control");
+            Assert.IsFalse(variation.IsFeatureEnabled);
         }
     }
 }
