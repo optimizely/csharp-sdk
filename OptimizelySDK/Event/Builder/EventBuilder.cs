@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2017, Optimizely
+ * Copyright 2017-2018, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 using OptimizelySDK.Bucketing;
 using OptimizelySDK.Entity;
+using OptimizelySDK.Logger;
 using OptimizelySDK.Utils;
 using System;
 using System.Collections.Generic;
@@ -45,9 +46,12 @@ namespace OptimizelySDK.Event.Builder
 
         private Bucketer Bucketer;
 
-        public EventBuilder(Bucketer bucketer)
+        private ILogger Logger;
+
+        public EventBuilder(Bucketer bucketer, ILogger logger = null)
         {
-            Bucketer = bucketer; 
+            Bucketer = bucketer;
+            Logger = logger ?? new DefaultLogger();
             ResetParams();
         }
 
@@ -205,14 +209,14 @@ namespace OptimizelySDK.Event.Builder
 
                 if(eventTags != null)
                 {
-                    var revenue = EventTagUtils.GetRevenueValue(eventTags);
+                    var revenue = EventTagUtils.GetRevenueValue(eventTags, Logger);
 
                     if (revenue != null)
                     {
                         eventDict[EventTagUtils.REVENUE_EVENT_METRIC_NAME] = revenue;
                     }
 
-                    var eventVallue = EventTagUtils.GetNumericValue(eventTags, new Logger.DefaultLogger());
+                    var eventVallue = EventTagUtils.GetNumericValue(eventTags, Logger);
 
                     if(eventVallue != null)
                     {

@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2017, Optimizely
+ * Copyright 2017-2018, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use file except in compliance with the License.
@@ -91,7 +91,7 @@ namespace OptimizelySDK
             EventDispatcher = eventDispatcher ?? new DefaultEventDispatcher(Logger);
             ErrorHandler = errorHandler ?? new NoOpErrorHandler();
             Bucketer = new Bucketer(Logger);
-            EventBuilder = new EventBuilder(Bucketer);
+            EventBuilder = new EventBuilder(Bucketer, Logger);
             UserProfileService = userProfileService;
             NotificationCenter = new NotificationCenter(Logger);
 

@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2017, Optimizely
+ * Copyright 2017-2018, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,7 +60,7 @@ namespace OptimizelySDK.Tests
             ErrorHandlerMock = new Mock<IErrorHandler>();
             ErrorHandlerMock.Setup(e => e.HandleError(It.IsAny<Exception>()));
 
-            EventBuilderMock = new Mock<EventBuilder>(new Bucketer(LoggerMock.Object));
+            EventBuilderMock = new Mock<EventBuilder>(new Bucketer(LoggerMock.Object), LoggerMock.Object);
 
             EventBuilderMock.Setup(b => b.CreateImpressionEvent(It.IsAny<ProjectConfig>(), It.IsAny<Experiment>(),
                 It.IsAny<string>(), It.IsAny<string>(), It.IsAny<UserAttributes>()));
