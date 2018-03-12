@@ -1811,6 +1811,36 @@ namespace OptimizelySDK.Tests
             Array.ForEach(notEnabledFeatures, nef => CollectionAssert.DoesNotContain(actualFeaturesList, nef));
         }
 
+        [Test]
+        public void TestGetEnabledFeaturesReturnsSortedList()
+        {
+            string[] unsortedFeaturesList =
+            {
+                 "double_single_variable_feature",
+                 "boolean_feature",
+                 "string_single_variable_feature",
+                 "multi_variate_feature",
+                 "empty_feature",
+                 "boolean_single_variable_feature"
+             };
+            string[] sortedFeaturesList =
+            {
+                 "boolean_feature",
+                 "boolean_single_variable_feature",
+                 "double_single_variable_feature",
+                 "empty_feature",
+                 "multi_variate_feature",
+                 "string_single_variable_feature",
+             };
+
+            OptimizelyMock.Setup(om => om.IsFeatureEnabled(It.IsIn<string>(unsortedFeaturesList), TestUserId,
+                It.IsAny<UserAttributes>())).Returns(true);
+
+            // Verify that returned list in sorterd in ascending order.
+            var actualFeaturesList = OptimizelyMock.Object.GetEnabledFeatures(TestUserId, null);
+            CollectionAssert.AreEqual(sortedFeaturesList, actualFeaturesList);
+        }
+
         #endregion // Test GetEnabledFeatures
     }
 }
