@@ -10,7 +10,7 @@ This demo uses the C# SDK, a part of Optimizely's Full Stack solution. It will w
 
 This example App simulates an online retailer testing the effects of sorting products by price vs name.
 
-Using the instructions below, you can run the app locally and mimic bucketing website visitors by selecting a users from "Select Visitor" page. For example, the user ID “Mike” would simulate a unique visitor and a specific variation would be selected for that unique visitor. The variation that is given to a specific unique visitor, such as "Mike", will be deterministic. This means as long as the experiment conditions remain the same, Mike will always get the same variation.
+Using the instructions below, you can run the app locally and mimic bucketing website visitors by selecting a user from "Select Visitor" page. For example, the user ID “Mike” would simulate a unique visitor and a specific variation would be selected for that unique visitor. The variation that is given to a specific unique visitor, such as "Mike", will be deterministic. This means as long as the experiment conditions remain the same, Mike will always get the same variation.
 
 ### Deploying and Running the App
 

@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2017, Optimizely
+ * Copyright 2017-2018, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,21 +27,21 @@ namespace OptimizelySDK.DemoApp.Controllers
     {
         private static Product[] ProductRepo = new[]
         {
-            new Product { Id = 1, Name = "Long Sleeve Swing Shirt", Color = "Baby Blue", Category = "Shirts", Price = 54 },
-            new Product { Id = 2, Name = "Bo Henry", Color = "Khaki", Category = "Shorts", Price = 37 },
-            new Product { Id = 3, Name = "The \"Go\" Bag", Color = "Forest Green", Category = "Bags", Price = 118 },
-            new Product { Id = 4, Name = "Springtime", Color = "Rose", Category = "Dresses", Price = 84 },
-            new Product { Id = 5, Name = "The Night Out", Color = "Olive Green", Category = "Dresses", Price = 153 },
-            new Product { Id = 6, Name = "Dawson Trolley", Color = "Pine Green", Category = "Shirts", Price = 107 },
+            new Product { Id = 1, Name = "Long Sleeve Swing Shirt", Color = "Baby Blue", Category = "Shirts", Price = 54, ImagePath = "item_7.png" },
+            new Product { Id = 2, Name = "Bo Henry", Color = "Khaki", Category = "Shorts", Price = 37, ImagePath = "item_2.png" },
+            new Product { Id = 3, Name = "The \"Go\" Bag", Color = "Forest Green", Category = "Bags", Price = 118, ImagePath = "item_3.png" },
+            new Product { Id = 4, Name = "Springtime", Color = "Rose", Category = "Dresses", Price = 84, ImagePath = "item_4.png" },
+            new Product { Id = 5, Name = "The Night Out", Color = "Olive Green", Category = "Dresses", Price = 153, ImagePath = "item_5.png" },
+            new Product { Id = 6, Name = "Dawson Trolley", Color = "Pine Green", Category = "Shirts", Price = 107, ImagePath = "item_6.png" }
         };
 
         private static Visitor[] VisitorRepo = new[]
         {
-            new Visitor { Id = 10001, Name = "Mike", Age = 23 },
-            new Visitor { Id = 10002, Name = "Ali", Age = 29 },
-            new Visitor { Id = 10003, Name = "Sally", Age = 18 },
-            new Visitor { Id = 10004, Name = "Jennifer", Age = 44 },
-            new Visitor { Id = 10005, Name = "Randall", Age = 29 },
+            new Visitor { Id = 1, Name = "Mike", Age = 23 },
+            new Visitor { Id = 2, Name = "Ali", Age = 29 },
+            new Visitor { Id = 3, Name = "Sally", Age = 18 },
+            new Visitor { Id = 4, Name = "Jennifer", Age = 44 },
+            new Visitor { Id = 5, Name = "Randall", Age = 29 },
         };
 
         private static Config ConfigRepo = new Config();
@@ -135,6 +135,7 @@ namespace OptimizelySDK.DemoApp.Controllers
                 Products = GetProducts(variation).ToArray(),
                 CurrentVisitor = visitor,
                 Message = TempData.ContainsKey("Message") ? (string)TempData["Message"] : null,
+                VariationKey = variation
             });
         }
 
@@ -157,6 +158,7 @@ namespace OptimizelySDK.DemoApp.Controllers
 
             // buy the item (record the conversion)
             var visitor = VisitorRepo.Single(v => v.Id == visitorId);
+            var product = ProductRepo.Single(p => p.Id == productId);
 
             Entity.EventTags eventTags = new Entity.EventTags()
             {
@@ -167,7 +169,7 @@ namespace OptimizelySDK.DemoApp.Controllers
                 {"value", 100 }
             };
             Optimizely.Track(ConfigRepo.EventKey, Convert.ToString(visitorId), visitor.GetUserAttributes(), eventTags);
-            TempData["Message"] = string.Format("Successfully Purchased item {0} for visitor {1}", productId, visitorId);
+            TempData["Message"] = string.Format("Successfully Purchased item {0} for visitor {1}", product.Name, visitor.Name);
 
             return RedirectToAction("Shop");
         }
