@@ -1,5 +1,5 @@
 ﻿/* 
-* Copyright 2017, Optimizely
+* Copyright 2017-2018, Optimizely
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -289,35 +289,35 @@ namespace OptimizelySDK.Bucketing
             for (int i=0; i < rolloutRulesLength - 1; i++)
             {
                 var rolloutRule = rollout.Experiments[i];
-                var audience = ProjectConfig.AudienceIdMap[rolloutRule.AudienceIds[0]];
-
                 if (ExperimentUtils.IsUserInExperiment(ProjectConfig, rolloutRule, filteredAttributes))
                 {
-                    Logger.Log(LogLevel.DEBUG, $"Attempting to bucket user \"{userId}\" into rollout rule \"{rolloutRule.Key}\".");
                     variation = Bucketer.Bucket(ProjectConfig, rolloutRule, bucketingId, userId);
-
                     if (variation == null || string.IsNullOrEmpty(variation.Id))
-                    {
-                        Logger.Log(LogLevel.DEBUG, $"User \"{userId}\" is excluded due to traffic allocation. Checking \"Eveyrone Else\" rule now.");
                         break;
-                    }
 
                     return new FeatureDecision(rolloutRule, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT);
                 }
                 else
                 {
+                    var audience = ProjectConfig.GetAudience(rolloutRule.AudienceIds[0]);
                     Logger.Log(LogLevel.DEBUG, $"User \"{userId}\" does not meet the conditions to be in rollout rule for audience \"{audience.Name}\".");
                 }
             }
 
-            // Bucket the user into the last rule which is everyone else rule
+            // Get the last rule which is everyone else rule.
             var everyoneElseRolloutRule = rollout.Experiments[rolloutRulesLength - 1];
-            variation = Bucketer.Bucket(ProjectConfig, everyoneElseRolloutRule, bucketingId, userId);
+            if (ExperimentUtils.IsUserInExperiment(ProjectConfig, everyoneElseRolloutRule, filteredAttributes))
+            {
+                variation = Bucketer.Bucket(ProjectConfig, everyoneElseRolloutRule, bucketingId, userId);
+                if (variation != null && !string.IsNullOrEmpty(variation.Id))
+                    return new FeatureDecision(everyoneElseRolloutRule, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT);
+            }
+            else
+            {
+                var audience = ProjectConfig.GetAudience(everyoneElseRolloutRule.AudienceIds[0]);
+                Logger.Log(LogLevel.DEBUG, $"User \"{userId}\" does not meet the conditions to be in rollout rule for audience \"{audience.Name}\".");
+            }
 
-            if (variation != null && !string.IsNullOrEmpty(variation.Id))
-                return new FeatureDecision(everyoneElseRolloutRule, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT);
-
-            Logger.Log(LogLevel.DEBUG, $"User \"{userId}\" is excluded from \"Everyone Else\" rule for feature flag \"{featureFlag.Key}\".");
             return null;
         }
 
