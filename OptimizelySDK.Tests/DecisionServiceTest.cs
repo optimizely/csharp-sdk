@@ -1,6 +1,6 @@
 ﻿/**
  *
- *    Copyright 2017, Optimizely and contributors
+ *    Copyright 2017-2018, Optimizely and contributors
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -591,10 +591,7 @@ namespace OptimizelySDK.Tests
             var decisionService = new DecisionService(BucketerMock.Object, ErrorHandlerMock.Object, ProjectConfig, null, LoggerMock.Object);
 
             var actualDecision = decisionService.GetVariationForFeatureRollout(featureFlag, "user_1", userAttributes);
-
             Assert.IsTrue(TestData.CompareObjects(expectedDecision, actualDecision));
-
-            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, $"Attempting to bucket user \"user_1\" into rollout rule \"{experiment.Key}\"."));
         }
 
         // Should return the variation the user is bucketed into when the user is bucketed into the "Everyone Else" rule
@@ -619,11 +616,7 @@ namespace OptimizelySDK.Tests
             var decisionService = new DecisionService(BucketerMock.Object, ErrorHandlerMock.Object, ProjectConfig, null, LoggerMock.Object);
 
             var actualDecision = decisionService.GetVariationForFeatureRollout(featureFlag, "user_1", userAttributes);
-
             Assert.IsTrue(TestData.CompareObjects(expectedDecision, actualDecision));
-
-            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, $"Attempting to bucket user \"user_1\" into rollout rule \"{experiment.Key}\"."));
-            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "User \"user_1\" is excluded due to traffic allocation. Checking \"Eveyrone Else\" rule now."));
         }
 
         // Should log and return null when  the user is not bucketed into the targeting rule 
@@ -634,9 +627,6 @@ namespace OptimizelySDK.Tests
             var featureFlag = ProjectConfig.GetFeatureFlagFromKey("boolean_single_variable_feature");
             var rolloutId = featureFlag.RolloutId;
             var rollout = ProjectConfig.GetRolloutFromId(rolloutId);
-            var experiment = rollout.Experiments[0];
-            var everyoneElseRule = rollout.Experiments[rollout.Experiments.Count - 1];
-            
             var userAttributes = new UserAttributes {
                 { "browser_type", "chrome" }
             };
@@ -646,10 +636,6 @@ namespace OptimizelySDK.Tests
 
             var actualDecision = decisionService.GetVariationForFeatureRollout(featureFlag, "user_1", userAttributes);
             Assert.IsNull(actualDecision);
-
-            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, $"Attempting to bucket user \"user_1\" into rollout rule \"{experiment.Key}\"."));
-            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "User \"user_1\" is excluded due to traffic allocation. Checking \"Eveyrone Else\" rule now."));
-            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, $"User \"user_1\" is excluded from \"Everyone Else\" rule for feature flag \"{featureFlag.Key}\"."));
         }
         
         // Should return expected variation when the user is attempted to be bucketed into all targeting rules
@@ -733,6 +719,39 @@ namespace OptimizelySDK.Tests
 
             // Returned decision entity should be null because bucket value exceeds traffice allocation of everyone else rule.
             Assert.Null(actualDecision);
+        }
+
+        [Test]
+        public void TestGetVariationForFeatureRolloutCheckAudienceInEveryoneElseRule()
+        {
+            var featureFlag = ProjectConfig.GetFeatureFlagFromKey("boolean_single_variable_feature");
+            var rolloutId = featureFlag.RolloutId;
+            var rollout = ProjectConfig.GetRolloutFromId(rolloutId);
+            var everyoneElseRule = rollout.Experiments[2];
+            var variation = everyoneElseRule.Variations[0];
+            var expectedDecision = new FeatureDecision(everyoneElseRule, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT);
+
+            BucketerMock.Setup(bm => bm.Bucket(It.IsAny<ProjectConfig>(), everyoneElseRule, It.IsAny<string>(), WhitelistedUserId)).Returns(variation);
+            BucketerMock.Setup(bm => bm.Bucket(It.IsAny<ProjectConfig>(), everyoneElseRule, It.IsAny<string>(), GenericUserId)).Returns<Variation>(null);
+            var decisionService = new DecisionService(BucketerMock.Object, ErrorHandlerMock.Object, ProjectConfig, null, LoggerMock.Object);
+
+            // Returned variation id should be of everyone else rule as it passes audience Id checking.
+            var actualDecision = decisionService.GetVariationForFeatureRollout(featureFlag, WhitelistedUserId, null);
+            Assert.True(TestData.CompareObjects(expectedDecision, actualDecision));
+
+            // Returned variation id should be null.
+            actualDecision = decisionService.GetVariationForFeatureRollout(featureFlag, GenericUserId, null);
+            Assert.Null(actualDecision);
+
+            // Returned variation id should be null as it fails audience Id checking.
+            everyoneElseRule.AudienceIds = new string[] { ProjectConfig.Audiences[0].Id };
+            actualDecision = decisionService.GetVariationForFeatureRollout(featureFlag, GenericUserId, null);
+            Assert.Null(actualDecision);
+
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "User \"testUser1\" does not meet the conditions to be in rollout rule for audience \"Chrome users\"."), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "User \"testUser1\" does not meet the conditions to be in rollout rule for audience \"iPhone users in San Francisco\"."), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "User \"genericUserId\" does not meet the conditions to be in rollout rule for audience \"Chrome users\"."), Times.Exactly(2));
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "User \"genericUserId\" does not meet the conditions to be in rollout rule for audience \"iPhone users in San Francisco\"."), Times.Exactly(3));
         }
 
         #endregion // GetVariationForFeatureRollout Tests
