@@ -16,12 +16,6 @@ The SDK can be installed through [NuGet](https://www.nuget.org):
 PM> Install-Package Optimizely.SDK
 ```
 
-An ASP.Net MVC sample project demonstrating how to use the SDK is available as well:
-
-```
-PM> Install-Package Optimizely.SDK.Sample
-```
-
 Simply compile and run the Sample application to see it in use.
 Note that the way the Demo App stores data in memory is not recommended for production use
 and is merely illustrates how to use the SDK.
