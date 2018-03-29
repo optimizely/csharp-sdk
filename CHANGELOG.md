@@ -2,7 +2,7 @@
 
 March 29th, 2018
 
-This major release of the Optimizely SDK introduces APIs for Feature Management. It also introduces some breaking changes listed below.
+This major release of the Optimizely SDK introduces APIs for Feature Management.
 
 ### New Features
 * Introduces the `isFeatureEnabled` API to determine whether to show a feature to a user or not.
