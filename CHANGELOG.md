@@ -1,3 +1,28 @@
+## 2.0.0-beta1
+
+March 29th, 2018
+
+This major release of the Optimizely SDK introduces APIs for Feature Management. It also introduces some breaking changes listed below.
+
+### New Features
+* Introduces the `isFeatureEnabled` API to determine whether to show a feature to a user or not.
+```
+var enabled = optimizelyClient.isFeatureEnabled("my_feature_key", "user_1", userAttributes);
+```
+
+* You can also get all the enabled features for the user by calling the following method which returns a list of strings representing the feature keys:
+```
+var enabledFeatures = optimizelyClient.getEnabledFeatures("user_1", userAttributes);
+```
+
+* Introduces Feature Variables to configure or parameterize your feature. There are four variable types: `Integer`, `String`, `Double`, `Boolean`.
+```
+var stringVariable = optimizelyClient.getFeatureVariableString("my_feature_key", "string_variable_key", "user_1");
+var integerVariable = optimizelyClient.getFeatureVariableInteger("my_feature_key", "integer_variable_key", "user_1");
+var doubleVariable = optimizelyClient.getFeatureVariableDouble("my_feature_key", "double_variable_key", "user_1");
+var booleanVariable = optimizelyClient.getFeatureVariableBoolean("my_feature_key", "boolean_variable_key", "user_1");
+```
+
 ## 1.3.1
 February 14, 2018
 
@@ -25,7 +50,7 @@ November 6, 2017
 * Package DLL's including third party component DLL's are strongnamed and digitally signed by Optimizely.
 * DecisionService GetVariationForFeatureRollout added.
 * Feature Flag and Rollout models added.
-* Implemented Bucketing ID feature. 
+* Implemented Bucketing ID feature.
 
 ## 1.2.0
 October 4, 2017
@@ -41,7 +66,7 @@ var eventTags = new EventTags()
 OptimizelyClient.Track(eventKey, userId, attributes, eventTags);
 ```
 
-* Introduce Forced Variation - This allows you to force users into variations programmatically in real time for QA purposes without requiring datafile downloads from the network. 
+* Introduce Forced Variation - This allows you to force users into variations programmatically in real time for QA purposes without requiring datafile downloads from the network.
 ```
 var result = OptimizelyClient.setForcedVariation(experimentKey, userId, forcedVariationKey);
 ```
