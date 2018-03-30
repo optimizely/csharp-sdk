@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2017, Optimizely
+ * Copyright 2017-2018, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,14 +13,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+using System.IO;
+
 namespace OptimizelySDK.DemoApp.Models
 {
     public class Product
     {
+        private const string IMAGES_DIR = "~/Content/Images";
+
         public int Id { get; set; }
         public string Name { get; set; }
         public string Color { get; set; }
         public string Category { get; set; }
         public decimal Price { get; set; }
+
+        private string imagePath;
+        public string ImagePath
+        {
+            get
+            {
+                return imagePath;
+            }
+            set
+            {
+                imagePath = Path.Combine(IMAGES_DIR, value);
+            }
+        }
     }
 }

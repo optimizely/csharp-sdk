@@ -1,51 +1,64 @@
-﻿@{ 
-/* 
-* Copyright 2017, Optimizely
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+﻿@{
+	/*
+	* Copyright 2017-2018, Optimizely
+	*
+	* Licensed under the Apache License, Version 2.0 (the "License");
+	* you may not use this file except in compliance with the License.
+	* You may obtain a copy of the License at
+	*
+	* http://www.apache.org/licenses/LICENSE-2.0
+	*
+	* Unless required by applicable law or agreed to in writing, software
+	* distributed under the License is distributed on an "AS IS" BASIS,
+	* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	* See the License for the specific language governing permissions and
+	* limitations under the License.
+	*/
 }
+
 @model OptimizelySDK.DemoApp.Models.DemoViewModel
 @{
-    ViewBag.Title = "Shop";
+	ViewBag.Title = "Shop";
 }
-
-<h2>Shop</h2>
-@Html.Partial("_DemoMenu")
-
 
 @if (!string.IsNullOrEmpty(Model.Message))
 {
-<div class="alert alert-success">@Model.Message</div>
+	<div class="alert alert-success">@Model.Message</div>
 }
 
-<div>Current Simulated Visitor: @Model.CurrentVisitor.Name (@Model.CurrentVisitor.Id) <small><a href="SelectVisitor">(change)</a></small></div>
-
-<hr />
-
 <div class="container">
-    <div class="row">
-        @foreach (var product in Model.Products)
-        {
-            <div class="col-md-4 text-center" style="padding: 10px">
-                <h4>@product.Name</h4>
-                <div>in @product.Color</div>
-                <div>@product.Category, $@product.Price</div>
-                <div>ID: @product.Id</div>
-                <div>
-                    <a href="Buy?visitorId=@Model.CurrentVisitor.Id&productId=@product.Id" class="btn btn-white btn-default active">Buy Now</a>
-                </div>
-            </div>
-        }
-    </div>
+	@Html.Partial("_DemoMenu")
+
+	<div class="container">
+		<div class="card-header text-center">
+			Variation: @Model.VariationKey
+		</div>
+		<div class="row grid-group">
+			@foreach (var product in Model.Products)
+			{
+				<div class="item col-xs-3 col-lg-3" style="margin-bottom:45px;">
+					<div class="thumbnail">
+						<img class="img-fluid group list-group-image" style="width: 100%;height: 240px;" src="@Url.Content(product.ImagePath)" alt="@product.Name">
+						<div class="caption">
+							<h5 class="group inner list-group-item-heading">@product.Name</h5>
+							<p class="group inner list-group-item-text"></p>
+							<ul class="list-group list-group-flush">
+								<li class="list-group-item">Color: @product.Color</li>
+								<li class="list-group-item">Category: @product.Category</li>
+							</ul>
+							<p></p>
+							<div class="row">
+								<div class="col-xs-12 col-md-6">
+									<p class="lead">@string.Format("{0:c}", product.Price)</p>
+								</div>
+								<div class="col-xs-12 col-md-6">
+									<a href="Buy?visitorId=@Model.CurrentVisitor.Id&productId=@product.Id" class="btn btn-info">Buy Now</a>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			}
+		</div>
+	</div>
 </div>
