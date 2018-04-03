@@ -22,6 +22,7 @@ using OptimizelySDK.Logger;
 using OptimizelySDK.Utils;
 using OptimizelySDK.Notifications;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 
@@ -591,7 +592,7 @@ namespace OptimizelySDK
                     enabledFeaturesList.Add(featureKey);
             }
 
-            enabledFeaturesList.Sort();
+            enabledFeaturesList.Sort(StringComparer.OrdinalIgnoreCase);
 
             return enabledFeaturesList;
         }
