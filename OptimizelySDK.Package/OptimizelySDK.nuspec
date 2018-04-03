@@ -1,30 +1,43 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <package>
     <metadata>
         <id>Optimizely.SDK</id>
-        <version>1.2.1</version>
+        <version>2.0.0-beta1</version>
         <title>Optimizely C# SDK</title>
         <authors>Optimizely Development Team</authors>
         <owners>fullstack.optimizely</owners>
         <licenseUrl>http://www.apache.org/licenses/LICENSE-2.0</licenseUrl>
         <projectUrl>https://github.com/optimizely/csharp-sdk</projectUrl>
-        <iconUrl>https://github.com/optimizely/csharp-sdk/tree/master/OptimizelySDK.png</iconUrl>
+        <iconUrl>https://github.com/optimizely/csharp-sdk/blob/master/OptimizelySDK.png?raw=true</iconUrl>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <description>C# SDK for Optimizely X Fullstack</description>
         <releaseNotes>https://github.com/optimizely/csharp-sdk/blob/master/CHANGELOG.md</releaseNotes>
-        <copyright>Copyright 2017</copyright>
+        <copyright>Copyright 2017-2018</copyright>
         <tags>Optimizely</tags>
         <dependencies>
             <group targetFramework=".NETFramework4.5">
                 <dependency id="JsonNet.PrivateSettersContractResolvers.Source" version="0.1.0" />
+                <dependency id="murmurhash-signed" version="1.0.2" />
+                <dependency id="Newtonsoft.Json" version="9.0.1" />
+                <dependency id="NJsonSchema" version="8.30.6304.31883" />
+            </group>
+            <group targetFramework=".NETFramework3.5">
+                <dependency id="murmurhash-signed" version="1.0.2" />
+                <dependency id="Newtonsoft.Json" version="9.0.1" />
+            </group>
+            <group targetFramework=".NETFramework4.0">
+                <dependency id="murmurhash-signed" version="1.0.2" />
+                <dependency id="Newtonsoft.Json" version="9.0.1" />
             </group>
             <group targetFramework=".NETStandard1.6">
                 <dependency id="NETStandard.Library" version="1.6.1" />
+                <dependency id="murmurhash-signed" version="1.0.2" />
+                <dependency id="Newtonsoft.Json" version="9.0.1" />
+                <dependency id="NJsonSchema" version="8.33.6323.36213" />
             </group>
         </dependencies>
     </metadata>
     <files>
-        <file src="content\**" target="content" />
         <file src="lib\**" target="lib" />
     </files>
 </package>
