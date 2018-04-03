@@ -592,7 +592,7 @@ namespace OptimizelySDK
                     enabledFeaturesList.Add(featureKey);
             }
 
-            enabledFeaturesList.Sort(new CaseInsensitiveComparer());
+            enabledFeaturesList.Sort(StringComparer.OrdinalIgnoreCase);
 
             return enabledFeaturesList;
         }
