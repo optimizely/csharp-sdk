@@ -22,7 +22,7 @@ using OptimizelySDK.Logger;
 using OptimizelySDK.Utils;
 using OptimizelySDK.Notifications;
 using System;
-using System.Collections.CaseInsensitiveComparer;
+using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 
