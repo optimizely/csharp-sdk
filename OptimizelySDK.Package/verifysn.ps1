@@ -1,4 +1,4 @@
-﻿Write-Host "Verify Strong Naming"
+Write-Host "Verify Strong Naming"
 Write-Host "This script requires VS 2017"
 
 ################################################################
@@ -18,8 +18,8 @@ if ($PSVersionTable["Platform"] -eq "Unix") {
 # Locate *.nupkg
 ################################################################
 Write-Host "Locate *.nupkg"
-# Good enough for 1.3.1
-$nupkg="./Optimizely.SDK.1.3.1.nupkg"
+# Good enough for 2.0.0-beta1
+$nupkg="./Optimizely.SDK.2.0.0-beta1.nupkg"
 
 ################################################################
 # Unzipping *.nupkg

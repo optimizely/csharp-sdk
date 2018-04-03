@@ -121,6 +121,15 @@
       <HintPath>..\packages\WebGrease.1.5.2\lib\WebGrease.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="MurmurHash">
+      <HintPath>..\packages\murmurhash-signed.1.0.2\lib\net45\MurmurHash.dll</HintPath>
+    </Reference>
+    <Reference Include="NJsonSchema">
+      <HintPath>..\packages\NJsonSchema.8.30.6304.31883\lib\net45\NJsonSchema.dll</HintPath>
+    </Reference>
+    <Reference Include="OptimizelySDK">
+      <HintPath>..\packages\Optimizely.SDK.2.0.0-beta1\lib\net45\OptimizelySDK.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App_Start\BundleConfig.cs" />
@@ -139,6 +148,7 @@
     <Compile Include="Utils\InMemoryHandler.cs" />
     <Compile Include="Utils\Log4NetLogger.cs" />
     <Compile Include="Utils\MultiLogger.cs" />
+    <Compile Include="JsonNet.PrivateSettersContractResolvers\PrivateSettersContractResolvers.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\bootstrap-grid.css" />
@@ -232,12 +242,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\OptimizelySDK\OptimizelySDK.csproj">
-      <Project>{4DDE7FAA-110D-441C-AB3B-3F31B593E8BF}</Project>
-      <Name>OptimizelySDK</Name>
-    </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
