@@ -591,8 +591,7 @@ namespace OptimizelySDK
                     enabledFeaturesList.Add(featureKey);
             }
 
-            enabledFeaturesList.Sort();
-
+            enabledFeaturesList.Sort(StringComparer.OrdinalIgnoreCase);
             return enabledFeaturesList;
         }
 

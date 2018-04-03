@@ -434,7 +434,18 @@
 		"rolloutId": "",
 		"experimentIds": ["7723330021", "7718750065"],
 		"variables": []
-	}, {
+	},
+    {
+      "id": "1555892",
+      "key": "Double_single_variable_feature_ignorecase",
+      "rolloutId": "",
+      "experimentIds": [
+        "7723330021",
+        "7718750065"
+      ],
+      "variables": []
+    },
+  {
 		"id": "155550",
 		"key": "double_single_variable_feature",
 		"rolloutId": "",

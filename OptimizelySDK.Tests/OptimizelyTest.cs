@@ -1815,10 +1815,11 @@ namespace OptimizelySDK.Tests
         public void TestGetEnabledFeaturesReturnsSortedList()
         {
             string[] unsortedFeaturesList =
-            {
+            {                
+                 "Double_single_variable_feature_ignorecase",
                  "double_single_variable_feature",
                  "boolean_feature",
-                 "string_single_variable_feature",
+                 "string_single_variable_feature",                 
                  "multi_variate_feature",
                  "empty_feature",
                  "boolean_single_variable_feature"
@@ -1828,6 +1829,8 @@ namespace OptimizelySDK.Tests
                  "boolean_feature",
                  "boolean_single_variable_feature",
                  "double_single_variable_feature",
+                 //It must come first, if case-sensitive sorted otherwise should come at 4th place
+                 "Double_single_variable_feature_ignorecase",
                  "empty_feature",
                  "multi_variate_feature",
                  "string_single_variable_feature",
