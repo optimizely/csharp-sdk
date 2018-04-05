@@ -356,7 +356,6 @@ namespace OptimizelySDK.Tests
             {
                 { "boolean_feature", Config.GetFeatureFlagFromKey("boolean_feature") },
                 { "double_single_variable_feature", Config.GetFeatureFlagFromKey("double_single_variable_feature") },
-                { "Double_single_variable_feature_ignorecase", Config.GetFeatureFlagFromKey("Double_single_variable_feature_ignorecase") },
                 { "integer_single_variable_feature", Config.GetFeatureFlagFromKey("integer_single_variable_feature") },
                 { "boolean_single_variable_feature", Config.GetFeatureFlagFromKey("boolean_single_variable_feature") },
                 { "string_single_variable_feature", Config.GetFeatureFlagFromKey("string_single_variable_feature") },
