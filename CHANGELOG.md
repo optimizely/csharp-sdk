@@ -1,5 +1,5 @@
 ## 2.0.0-beta1
-March 29th, 2018
+April 3, 2018
 
 This major release of the Optimizely SDK introduces APIs for Feature Management.
 
