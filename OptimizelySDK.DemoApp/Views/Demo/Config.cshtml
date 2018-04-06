@@ -1,76 +1,72 @@
 ﻿@{ 
-/* 
-* Copyright 2017, Optimizely
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+	/* 
+	* Copyright 2017-2018, Optimizely
+	*
+	* Licensed under the Apache License, Version 2.0 (the "License");
+	* you may not use this file except in compliance with the License.
+	* You may obtain a copy of the License at
+	*
+	* http://www.apache.org/licenses/LICENSE-2.0
+	*
+	* Unless required by applicable law or agreed to in writing, software
+	* distributed under the License is distributed on an "AS IS" BASIS,
+	* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	* See the License for the specific language governing permissions and
+	* limitations under the License.
+	*/
 }
 @model OptimizelySDK.DemoApp.Models.Config
 
 @{
-    ViewBag.Title = "Config";
+	ViewBag.Title = "Config";
 }
 
-<h2>Optimizely SDK Configuration</h2>
-@Html.Partial("_DemoMenu")
+<div class="container body-content">
 
-<hr />
+	@Html.Partial("_DemoMenu")
 
-@using (Html.BeginForm())
-{
-    @Html.AntiForgeryToken()
-    
-    <div class="form-horizontal">
-        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
-        <div class="form-group">
-            @Html.LabelFor(model => model.ProjectId, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.ProjectId, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.ProjectId, "", new { @class = "text-danger" })
-            </div>
-        </div>
+	@using (Html.BeginForm())
+	{
+		@Html.AntiForgeryToken()
 
-        <div class="form-group">
-            @Html.LabelFor(model => model.ExperimentKey, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.ExperimentKey, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.ExperimentKey, "", new { @class = "text-danger" })
-            </div>
-        </div>
+		<div class="form-horizontal">
+			@Html.ValidationSummary(true, "", new { @class = "text-danger" })
+			<div class="form-group">
+				@Html.LabelFor(model => model.ProjectId, htmlAttributes: new { @class = "control-label col-md-2" })
+				<div class="col-md-10">
+					@Html.EditorFor(model => model.ProjectId, new { htmlAttributes = new { @class = "form-control" } })
+					@Html.ValidationMessageFor(model => model.ProjectId, "", new { @class = "text-danger" })
+				</div>
+			</div>
 
-        <div class="form-group">
-            @Html.LabelFor(model => model.EventKey, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.EventKey, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.EventKey, "", new { @class = "text-danger" })
-            </div>
-        </div>
+			<div class="form-group">
+				@Html.LabelFor(model => model.ExperimentKey, htmlAttributes: new { @class = "control-label col-md-2" })
+				<div class="col-md-10">
+					@Html.EditorFor(model => model.ExperimentKey, new { htmlAttributes = new { @class = "form-control" } })
+					@Html.ValidationMessageFor(model => model.ExperimentKey, "", new { @class = "text-danger" })
+				</div>
+			</div>
 
-        <div class="form-group">
-            @Html.LabelFor(model => model.ProjectConfigJson, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                <pre>@Model.ProjectConfigJson</pre>
-            </div>
-        </div>
+			<div class="form-group">
+				@Html.LabelFor(model => model.EventKey, htmlAttributes: new { @class = "control-label col-md-2" })
+				<div class="col-md-10">
+					@Html.EditorFor(model => model.EventKey, new { htmlAttributes = new { @class = "form-control" } })
+					@Html.ValidationMessageFor(model => model.EventKey, "", new { @class = "text-danger" })
+				</div>
+			</div>
 
-        <div class="form-group">
-            <div class="col-md-offset-2 col-md-10">
-                <input type="submit" value="Save" class="btn btn-default" />
-            </div>
-        </div>
-    </div>
-}
+			<div class="form-group">
+				@Html.LabelFor(model => model.ProjectConfigJson, htmlAttributes: new { @class = "control-label col-md-2" })
+				<div class="col-md-10 form-control" style="background-color: #e9ecef;">
+					<pre>@Model.ProjectConfigJson</pre>
+				</div>
+			</div>
 
-<div>
-    @Html.ActionLink("Back to List", "Index")
+			<div class="form-group">
+				<div class="col-md-offset-2 col-md-10">
+					<input type="submit" value="Save" class="btn btn-info" />
+				</div>
+			</div>
+		</div>
+	}
 </div>

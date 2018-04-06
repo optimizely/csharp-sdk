@@ -51,17 +51,8 @@ namespace OptimizelySDK
 
         public static String SDK_VERSION {
             get {
-                // Example output: "1.2.1" .  Should be kept in synch with NuGet package version.
-#if NET35
-                Assembly assembly = Assembly.GetExecutingAssembly();
-#else
-                Assembly assembly = typeof(Optimizely).GetTypeInfo().Assembly;
-#endif
-                // Microsoft    Major.Minor.Build.Revision
-                // Semantic     Major.Minor.Patch
-                Version version = assembly.GetName().Version;
-                String answer = String.Format("{0}.{1}.{2}", version.Major, version.Minor, version.Build);
-                return answer;
+                // Should be kept in synch with NuGet package version.
+                return "2.0.0-beta1";
             }
         }
 
@@ -455,7 +446,7 @@ namespace OptimizelySDK
         /// <param name="userId">The user ID</param>
         /// <param name="userAttributes">The user's attributes</param>
         /// <returns>bool | Feature variable value or null</returns>
-        public bool? GetFeatureVariableBoolean(string featureKey, string variableKey, string userId, UserAttributes userAttributes)
+        public bool? GetFeatureVariableBoolean(string featureKey, string variableKey, string userId, UserAttributes userAttributes = null)
         {
             var variableType = FeatureVariable.VariableType.BOOLEAN;
             var variableValue = GetFeatureVariableValueForType(featureKey, variableKey, userId, userAttributes, variableType);
@@ -479,7 +470,7 @@ namespace OptimizelySDK
         /// <param name="userId">The user ID</param>
         /// <param name="userAttributes">The user's attributes</param>
         /// <returns>double | Feature variable value or null</returns>
-        public double? GetFeatureVariableDouble(string featureKey, string variableKey, string userId, UserAttributes userAttributes)
+        public double? GetFeatureVariableDouble(string featureKey, string variableKey, string userId, UserAttributes userAttributes = null)
         {
             var variableType = FeatureVariable.VariableType.DOUBLE;
             var variableValue = GetFeatureVariableValueForType(featureKey, variableKey, userId, userAttributes, variableType);
@@ -503,7 +494,7 @@ namespace OptimizelySDK
         /// <param name="userId">The user ID</param>
         /// <param name="userAttributes">The user's attributes</param>
         /// <returns>int | Feature variable value or null</returns>
-        public int? GetFeatureVariableInteger(string featureKey, string variableKey, string userId, UserAttributes userAttributes)
+        public int? GetFeatureVariableInteger(string featureKey, string variableKey, string userId, UserAttributes userAttributes = null)
         {
             var variableType = FeatureVariable.VariableType.INTEGER;
             var variableValue = GetFeatureVariableValueForType(featureKey, variableKey, userId, userAttributes, variableType);
@@ -527,7 +518,7 @@ namespace OptimizelySDK
         /// <param name="userId">The user ID</param>
         /// <param name="userAttributes">The user's attributes</param>
         /// <returns>string | Feature variable value or null</returns>
-        public string GetFeatureVariableString(string featureKey, string variableKey, string userId, UserAttributes userAttributes)
+        public string GetFeatureVariableString(string featureKey, string variableKey, string userId, UserAttributes userAttributes = null)
         {
             return GetFeatureVariableValueForType(featureKey, variableKey, userId, userAttributes, 
                 FeatureVariable.VariableType.STRING);
@@ -574,7 +565,7 @@ namespace OptimizelySDK
         /// <param name="userId">The user Id</param>
         /// <param name="userAttributes">The user's attributes</param>
         /// <returns>List of the feature keys that are enabled for the user.</returns>
-        public List<string> GetEnabledFeatures(string userId, UserAttributes userAttributes)
+        public List<string> GetEnabledFeatures(string userId, UserAttributes userAttributes = null)
         {
             List<string> enabledFeaturesList = new List<string>();
 

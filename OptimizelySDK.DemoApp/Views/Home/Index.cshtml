@@ -1,39 +1,62 @@
-﻿@{ /* 
-       * Copyright 2017, Optimizely
-       *
-       * Licensed under the Apache License, Version 2.0 (the "License");
-       * you may not use this file except in compliance with the License.
-       * You may obtain a copy of the License at
-       *
-       * http://www.apache.org/licenses/LICENSE-2.0
-       *
-       * Unless required by applicable law or agreed to in writing, software
-       * distributed under the License is distributed on an "AS IS" BASIS,
-       * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-       * See the License for the specific language governing permissions and
-       * limitations under the License.
-       */
+﻿@{ /*
+		* Copyright 2017-2018, Optimizely
+		*
+		* Licensed under the Apache License, Version 2.0 (the "License");
+		* you may not use this file except in compliance with the License.
+		* You may obtain a copy of the License at
+		*
+		* http://www.apache.org/licenses/LICENSE-2.0
+		*
+		* Unless required by applicable law or agreed to in writing, software
+		* distributed under the License is distributed on an "AS IS" BASIS,
+		* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+		* See the License for the specific language governing permissions and
+		* limitations under the License.
+		*/
 }
 @{
-    ViewBag.Title = "Home Page";
+	ViewBag.Title = "Home Page";
 }
 
 <div class="jumbotron">
-    <h1>Optimizely .Net SDK Demo App</h1>
-    <p class="lead">Optimizely .Net SDK allows you to integrate your .Net applications with Optimizely</p>
+	<div class="container">
+		<h1>Optimizely</h1>
+		<p class="lead">Optimizely's C# SDK lets you integrate Optimizely in .NET applications.</p>
+	</div>
 </div>
-
-<div class="row">
-    <div class="col-md-4">
-        <h2>Demo App</h2>
-        <p>
-            Demo app modeled after the Pyton app.
-        </p>
-        <p><a class="btn btn-default" href="~/Demo/Config">Demo App &raquo;</a></p>
-    </div>
-    <div class="col-md-4">
-        <h2>Documentation</h2>
-        <p>More documentation</p>
-        <p><a class="btn btn-default" href="">Learn more &raquo;</a></p>
-    </div>
+<div class="container">
+	<div class="row">
+		<div class="col-md-4">
+			<h2>Demo App</h2>
+			<p>
+				Begin your Optimizely A/B test of a simulated shopping website experience with Optimizely C# SDK.
+			</p>
+			<br />
+			<br />
+			<p align="center">
+				<a href="~/Demo/Config" class="btn btn-info">Demo App &raquo;</a>
+			</p>
+			<br />
+			<br />
+		</div>
+		<div class="col-md-4">
+			<h2>Optimizely SDK Documentation</h2>
+			<p>
+				Optimizely is an Experimentation Platform that allows you to run experiments and roll out new
+				features on your website, mobile app, server-side application, or any other internet-connected
+				device. In addition to our Web solution, we offer SDKs for developers to run experiments in iOS,
+				Android, Python, Java, Ruby, Node, PHP, and JavaScript.
+			</p>
+			<p align="center"><a class="btn btn-info" href="https://developers.optimizely.com/overview/">Learn more &raquo;</a></p>
+		</div>
+		<div class="col-md-4">
+			<h2>Discover Optimizely</h2>
+			<p>
+				Digital Innovation is all around you. Ready to tap into it? Optimizely lets you experiment on
+				everything—from design choices to algorithms. That way the best ideas always win, and the best
+				customer experiences get even better.
+			</p>
+			<p align="center"><a class="btn btn-info" href="https://www.optimizely.com">Learn more &raquo;</a></p>
+		</div>
+	</div>
 </div>

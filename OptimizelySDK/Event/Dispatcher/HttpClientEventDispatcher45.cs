@@ -41,7 +41,7 @@ namespace OptimizelySDK.Event.Dispatcher
         /// <summary>
         /// Dispatch an Event asynchronously
         /// </summary>
-        private async Task DispatchEventAsync(LogEvent logEvent)
+        private async void DispatchEventAsync(LogEvent logEvent)
         {
             try
             {
@@ -68,11 +68,13 @@ namespace OptimizelySDK.Event.Dispatcher
         }
 
         /// <summary>
-        /// Dispatch an event
+        /// Dispatch an event Asynchronously by creating a new task and calls the 
+        /// Async version of DispatchEvent
+        /// This is a "Fire and Forget" option
         /// </summary>
         public void DispatchEvent(LogEvent logEvent)
         {
-            Task.Run(() => DispatchEventAsync(logEvent)).Wait();            
+            Task.Run(() => DispatchEventAsync(logEvent));
         }
     }
 }
