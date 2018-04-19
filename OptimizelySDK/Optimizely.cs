@@ -51,8 +51,17 @@ namespace OptimizelySDK
 
         public static String SDK_VERSION {
             get {
-                // Should be kept in synch with NuGet package version.
-                return "2.0.0-beta1";
+                // Example output: "2.0.0" .  Should be kept in synch with NuGet package version.
+#if NET35
+                Assembly assembly = Assembly.GetExecutingAssembly();
+#else
+                Assembly assembly = typeof(Optimizely).GetTypeInfo().Assembly;
+#endif
+                // Microsoft    Major.Minor.Build.Revision
+                // Semantic     Major.Minor.Patch
+                Version version = assembly.GetName().Version;
+                String answer = String.Format("{0}.{1}.{2}", version.Major, version.Minor, version.Build);
+                return answer;
             }
         }
 
