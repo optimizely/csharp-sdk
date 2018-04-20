@@ -62,12 +62,9 @@ namespace OptimizelySDK
             }
         }
 
-        public enum InputType
-        {
-            User_Id,
-            Experiment_Key,
-            Event_Key
-        }
+        public const string USER_ID = "User Id";
+        public const string EXPERIMENT_KEY = "Experiment Key";
+        public const string EVENT_KEY = "Event Key";
 
         /// <summary>
         /// Optimizely constructor for managing Full Stack .NET projects.
@@ -156,10 +153,10 @@ namespace OptimizelySDK
                 return null;
             }
 
-            var inputValues = new Dictionary<InputType, string>
+            var inputValues = new Dictionary<string, string>
             {
-                { InputType.User_Id, userId },
-                { InputType.Experiment_Key, experimentKey }
+                { USER_ID, userId },
+                { EXPERIMENT_KEY, experimentKey }
             };
 
             if (!ValidateStringInputs(inputValues))
@@ -217,10 +214,10 @@ namespace OptimizelySDK
                 return;
             }
 
-            var inputValues = new Dictionary<InputType, string>
+            var inputValues = new Dictionary<string, string>
             {
-                { InputType.User_Id, userId },
-                { InputType.Event_Key, eventKey }
+                { USER_ID, userId },
+                { EVENT_KEY, eventKey }
             };
 
             if (!ValidateStringInputs(inputValues))
@@ -306,10 +303,10 @@ namespace OptimizelySDK
                 return null;
             }
 
-            var inputValues = new Dictionary<InputType, string>
+            var inputValues = new Dictionary<string, string>
             {
-                { InputType.User_Id, userId },
-                { InputType.Experiment_Key, experimentKey }
+                { USER_ID, userId },
+                { EXPERIMENT_KEY, experimentKey }
             };
 
             if (!ValidateStringInputs(inputValues))
@@ -626,7 +623,7 @@ namespace OptimizelySDK
         /// </summary>
         /// <param name="inputs">Array Hash input types and values</param>
         /// <returns>True if all values are valid, false otherwise</returns>
-        private bool ValidateStringInputs(Dictionary<InputType, string> inputs)
+        private bool ValidateStringInputs(Dictionary<string, string> inputs)
         {
             bool isValid = true;
             foreach(var input in inputs)

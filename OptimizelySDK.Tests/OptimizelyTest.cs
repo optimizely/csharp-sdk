@@ -1820,13 +1820,13 @@ namespace OptimizelySDK.Tests
         {
             // Verify that ValidateStringInputs does not log error for valid values.
             var variation = Optimizely.Activate("test_experiment", "test_user");
-            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Provided Experiment_Key is in invalid format."), Times.Never);
-            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Provided User_Id is in invalid format."), Times.Never);
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, $"Provided {Optimizely.USER_ID} is in invalid format."), Times.Never);
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, $"Provided {Optimizely.EXPERIMENT_KEY} is in invalid format."), Times.Never);
 
             // Verify that ValidateStringInputs logs error for invalid values.
             variation = Optimizely.Activate("", null);
-            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Provided Experiment_Key is in invalid format."), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Provided User_Id is in invalid format."), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, $"Provided {Optimizely.USER_ID} is in invalid format."), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, $"Provided {Optimizely.EXPERIMENT_KEY} is in invalid format."), Times.Once);
         }
 
         [Test]
@@ -1834,13 +1834,13 @@ namespace OptimizelySDK.Tests
         {
             // Verify that ValidateStringInputs does not log error for valid values.
             var variation = Optimizely.GetVariation("test_experiment", "test_user");
-            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Provided Experiment_Key is in invalid format."), Times.Never);
-            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Provided User_Id is in invalid format."), Times.Never);
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, $"Provided {Optimizely.USER_ID} is in invalid format."), Times.Never);
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, $"Provided {Optimizely.EXPERIMENT_KEY} is in invalid format."), Times.Never);
 
             // Verify that ValidateStringInputs logs error for invalid values.
             variation = Optimizely.GetVariation("", null);
-            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Provided Experiment_Key is in invalid format."), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Provided User_Id is in invalid format."), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, $"Provided {Optimizely.USER_ID} is in invalid format."), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, $"Provided {Optimizely.EXPERIMENT_KEY} is in invalid format."), Times.Once);
         }
 
         [Test]
@@ -1848,13 +1848,13 @@ namespace OptimizelySDK.Tests
         {
             // Verify that ValidateStringInputs does not log error for valid values.
             Optimizely.Track("purchase", "test_user");
-            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Provided Event_key is in invalid format."), Times.Never);
-            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Provided User_Id is in invalid format."), Times.Never);
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, $"Provided {Optimizely.EVENT_KEY} is in invalid format."), Times.Never);
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, $"Provided {Optimizely.USER_ID} is in invalid format."), Times.Never);
 
             // Verify that ValidateStringInputs logs error for invalid values.
             Optimizely.Track("", null);
-            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Provided Event_Key is in invalid format."), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Provided User_Id is in invalid format."), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, $"Provided {Optimizely.EVENT_KEY} is in invalid format."), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, $"Provided {Optimizely.USER_ID} is in invalid format."), Times.Once);
         }
 
         #endregion // Test ValidateStringInputs
