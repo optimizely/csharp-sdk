@@ -1812,5 +1812,51 @@ namespace OptimizelySDK.Tests
         }
 
         #endregion // Test GetEnabledFeatures
+
+        #region Test ValidateStringInputs
+
+        [Test]
+        public void TestActivateValidateInputValues()
+        {
+            // Verify that ValidateStringInputs does not log error for valid values.
+            var variation = Optimizely.Activate("test_experiment", "test_user");
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Provided User Id is in invalid format."), Times.Never);
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Provided Experiment Key is in invalid format."), Times.Never);
+
+            // Verify that ValidateStringInputs logs error for invalid values.
+            variation = Optimizely.Activate("", null);
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Provided User Id is in invalid format."), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Provided Experiment Key is in invalid format."), Times.Once);
+        }
+
+        [Test]
+        public void TestGetVariationValidateInputValues()
+        {
+            // Verify that ValidateStringInputs does not log error for valid values.
+            var variation = Optimizely.GetVariation("test_experiment", "test_user");
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Provided User Id is in invalid format."), Times.Never);
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Provided Experiment Key is in invalid format."), Times.Never);
+
+            // Verify that ValidateStringInputs logs error for invalid values.
+            variation = Optimizely.GetVariation("", null);
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Provided User Id is in invalid format."), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Provided Experiment Key is in invalid format."), Times.Once);
+        }
+
+        [Test]
+        public void TestTrackValidateInputValues()
+        {
+            // Verify that ValidateStringInputs does not log error for valid values.
+            Optimizely.Track("purchase", "test_user");
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Provided User Id is in invalid format."), Times.Never);
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Provided Event Key is in invalid format."), Times.Never);
+
+            // Verify that ValidateStringInputs logs error for invalid values.
+            Optimizely.Track("", null);
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Provided User Id is in invalid format."), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Provided Event Key is in invalid format."), Times.Once);
+        }
+
+        #endregion // Test ValidateStringInputs
     }
 }

@@ -71,6 +71,10 @@ namespace OptimizelySDK
             }
         }
 
+        public const string USER_ID = "User Id";
+        public const string EXPERIMENT_KEY = "Experiment Key";
+        public const string EVENT_KEY = "Event Key";
+
         /// <summary>
         /// Optimizely constructor for managing Full Stack .NET projects.
         /// </summary>
@@ -158,6 +162,15 @@ namespace OptimizelySDK
                 return null;
             }
 
+            var inputValues = new Dictionary<string, string>
+            {
+                { USER_ID, userId },
+                { EXPERIMENT_KEY, experimentKey }
+            };
+
+            if (!ValidateStringInputs(inputValues))
+                return null;
+
             var experiment = Config.GetExperimentFromKey(experimentKey);
 
             if (experiment.Key == null)
@@ -209,6 +222,15 @@ namespace OptimizelySDK
                 Logger.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'track'.");
                 return;
             }
+
+            var inputValues = new Dictionary<string, string>
+            {
+                { USER_ID, userId },
+                { EVENT_KEY, eventKey }
+            };
+
+            if (!ValidateStringInputs(inputValues))
+                return;
 
             var eevent = Config.GetEvent(eventKey);
 
@@ -289,6 +311,15 @@ namespace OptimizelySDK
                 Logger.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'GetVariation'.");
                 return null;
             }
+
+            var inputValues = new Dictionary<string, string>
+            {
+                { USER_ID, userId },
+                { EXPERIMENT_KEY, experimentKey }
+            };
+
+            if (!ValidateStringInputs(inputValues))
+                return null;
 
             Experiment experiment = Config.GetExperimentFromKey(experimentKey);
             if (experiment.Key == null)
@@ -595,5 +626,25 @@ namespace OptimizelySDK
         }
 
         #endregion // FeatureFlag APIs
+
+        /// <summary>
+        /// Validate all string inputs are not null or empty.
+        /// </summary>
+        /// <param name="inputs">Array Hash input types and values</param>
+        /// <returns>True if all values are valid, false otherwise</returns>
+        private bool ValidateStringInputs(Dictionary<string, string> inputs)
+        {
+            bool isValid = true;
+            foreach(var input in inputs)
+            {
+                if (string.IsNullOrEmpty(input.Value))
+                {
+                    Logger.Log(LogLevel.ERROR, $"Provided {input.Key} is in invalid format.");
+                    isValid = false;
+                }
+            }
+
+            return isValid;
+        }
     }
 }
