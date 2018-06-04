@@ -515,8 +515,7 @@ namespace OptimizelySDK.Tests
 
             Optimizely.Track("purchase", TestUserId, attributes);
 
-            //LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Provided attributes are in an invalid format."), Times.Once);
-            ErrorHandlerMock.Verify(e => e.HandleError(It.IsAny<InvalidAttributeException>()), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, @"Attribute key ""abc"" is not in datafile."), Times.Once);
         }
 
         [Test]
@@ -1111,7 +1110,7 @@ namespace OptimizelySDK.Tests
                { "device_type", "iPhone" },
                { "company", "Optimizely" },
                { "location", "San Francisco" },
-               { DecisionService.RESERVED_ATTRIBUTE_KEY_BUCKETING_ID, testBucketingIdVariation }
+               { DecisionService.BUCKETING_ID_ATTRIBUTE, testBucketingIdVariation }
             };
 
             // confirm that a valid variation is bucketed without the bucketing ID

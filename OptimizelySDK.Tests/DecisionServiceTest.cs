@@ -388,13 +388,13 @@ namespace OptimizelySDK.Tests
                 {"device_type", "iPhone"},
                 {"company", "Optimizely"},
                 {"location", "San Francisco"},
-                {DecisionService.RESERVED_ATTRIBUTE_KEY_BUCKETING_ID, testBucketingIdVariation}
+                {DecisionService.BUCKETING_ID_ATTRIBUTE, testBucketingIdVariation}
             };
 
             var invalidUserAttributesWithBucketingId = new UserAttributes
             {
                 {"company", "Optimizely"},
-                {DecisionService.RESERVED_ATTRIBUTE_KEY_BUCKETING_ID, testBucketingIdControl}
+                {DecisionService.BUCKETING_ID_ATTRIBUTE, testBucketingIdControl}
             };
 
             var optlyObject = new Optimizely(TestData.Datafile, new ValidEventDispatcher(), LoggerMock.Object);

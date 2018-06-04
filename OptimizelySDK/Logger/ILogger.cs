@@ -20,6 +20,7 @@ namespace OptimizelySDK.Logger
         DEBUG,
         INFO,
         ERROR,
+        WARN,
     }
 
     public interface ILogger

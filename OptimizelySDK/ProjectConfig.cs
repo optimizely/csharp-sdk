@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2017, Optimizely
+ * Copyright 2017-2018, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,8 @@ namespace OptimizelySDK
 {
     public class ProjectConfig
     {
+        public const string RESERVED_ATTRIBUTE_PREFIX = "$opt_";
+
         /// <summary>
         /// Version of the datafile.
         /// </summary>
@@ -52,6 +54,11 @@ namespace OptimizelySDK
         /// Allow Anonymize IP by truncating the last block of visitors' IP address.
         /// </summary>
         public bool AnonymizeIP { get; set; }
+
+        /// <summary>
+        /// Bot filtering flag.
+        /// </summary>
+        public bool? BotFiltering { get; set; }
 
         //========================= Mappings ===========================
 
@@ -551,6 +558,33 @@ namespace OptimizelySDK
             Logger.Log(LogLevel.ERROR, message);
             ErrorHandler.HandleError(new Exceptions.InvalidRolloutException("Provided rollout is not in datafile."));
             return new Rollout();
+        }
+
+        /// <summary>
+        /// Get attribute ID for the provided attribute key
+        /// </summary>
+        /// <param name="attributeKey">Key of the Attribute</param>
+        /// <returns>Attribute ID corresponding to the provided attribute key. Attribute key if it is a reserved attribute</returns>
+        public string GetAttributeId(string attributeKey)
+        {
+            
+            var hasReservedPrefix = attributeKey.StartsWith(RESERVED_ATTRIBUTE_PREFIX);
+
+            if (_AttributeKeyMap.ContainsKey(attributeKey))
+            {
+                var attribute = _AttributeKeyMap[attributeKey];
+                if (hasReservedPrefix)
+                    Logger.Log(LogLevel.WARN, $@"Attribute {attributeKey} unexpectedly has reserved prefix {RESERVED_ATTRIBUTE_PREFIX}; using attribute ID instead of reserved attribute name.");
+
+                return attribute.Id;
+            }
+            else if (hasReservedPrefix)
+            {
+                return attributeKey;
+            }
+
+            Logger.Log(LogLevel.ERROR, $@"Attribute key ""{attributeKey}"" is not in datafile.");
+            return null;
         }
     }
 }
