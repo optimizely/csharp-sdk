@@ -2,6 +2,8 @@ language: csharp
 mono:
 - 5.2.0
 solution: "./OptimizelySDK.Travis.sln"
+addons:
+  srcclr: true
 install:
   - nuget restore ./OptimizelySDK.Travis.sln
   - nuget install ./OptimizelySDK.Tests/packages.config -OutputDirectory ./packages
