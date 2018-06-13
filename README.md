@@ -4,7 +4,7 @@
 [![NuGet](https://img.shields.io/nuget/v/Optimizely.SDK.svg?style=plastic)](https://www.nuget.org/packages/Optimizely.SDK/)
 [![Apache 2.0](https://img.shields.io/github/license/nebula-plugins/gradle-extra-configurations-plugin.svg)](http://www.apache.org/licenses/LICENSE-2.0)
 
-This repository houses the .Net based C# SDK for Optimizely Full Stack.
+This repository houses the official .Net based C# SDK for Optimizely Full Stack.
 
 ## Getting Started
 
