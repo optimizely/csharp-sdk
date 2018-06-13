@@ -32,7 +32,7 @@ namespace OptimizelySDK.Tests.EventTests
         private string TestUserId = string.Empty;
         private ProjectConfig Config;
         private EventBuilder EventBuilder;
-        
+
         [TestFixtureSetUp]
         public void Setup()
         {

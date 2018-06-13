@@ -53,14 +53,14 @@ namespace OptimizelySDK.Tests
         public void TestInit()
         {
             // Check Version
-            Assert.AreEqual(4, Config.Version);
+            Assert.AreEqual("4", Config.Version);
 
             // Check Account ID
             Assert.AreEqual("1592310167", Config.AccountId);
             // Check Project ID
             Assert.AreEqual("7720880029", Config.ProjectId);
             // Check Revision 
-            Assert.AreEqual(15, Config.Revision);
+            Assert.AreEqual("15", Config.Revision);
 
             // Check Group ID Map
             var expectedGroupId = CreateDictionary("7722400015", Config.GetGroup("7722400015"));

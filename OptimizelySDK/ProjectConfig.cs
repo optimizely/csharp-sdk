@@ -30,7 +30,7 @@ namespace OptimizelySDK
         /// <summary>
         /// Version of the datafile.
         /// </summary>
-        public int Version { get; set; }
+        public string Version { get; set; }
 
 
         /// <summary>
@@ -48,7 +48,7 @@ namespace OptimizelySDK
         /// <summary>
         /// Revision of the dataflie.
         /// </summary>
-        public int Revision { get; set; }
+        public string Revision { get; set; }
 
         /// <summary>
         /// Allow Anonymize IP by truncating the last block of visitors' IP address.

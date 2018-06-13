@@ -634,6 +634,6 @@
 		"key": "purchase"
 	}],
 	"revision": "15",
-	"anonymizeIP": "false",
-	"botFiltering": "true"
+	"anonymizeIP": false,
+	"botFiltering": true
 }
