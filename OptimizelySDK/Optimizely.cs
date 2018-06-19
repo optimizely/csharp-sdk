@@ -71,6 +71,10 @@ namespace OptimizelySDK
             }
         }
 
+        public const string USER_ID = "User Id";
+        public const string EXPERIMENT_KEY = "Experiment Key";
+        public const string EVENT_KEY = "Event Key";
+
         /// <summary>
         /// Optimizely constructor for managing Full Stack .NET projects.
         /// </summary>
@@ -158,6 +162,15 @@ namespace OptimizelySDK
                 return null;
             }
 
+            var inputValues = new Dictionary<string, string>
+            {
+                { USER_ID, userId },
+                { EXPERIMENT_KEY, experimentKey }
+            };
+
+            if (!ValidateStringInputs(inputValues))
+                return null;
+
             var experiment = Config.GetExperimentFromKey(experimentKey);
 
             if (experiment.Key == null)
@@ -209,6 +222,15 @@ namespace OptimizelySDK
                 Logger.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'track'.");
                 return;
             }
+
+            var inputValues = new Dictionary<string, string>
+            {
+                { USER_ID, userId },
+                { EVENT_KEY, eventKey }
+            };
+
+            if (!ValidateStringInputs(inputValues))
+                return;
 
             var eevent = Config.GetEvent(eventKey);
 
@@ -290,6 +312,15 @@ namespace OptimizelySDK
                 return null;
             }
 
+            var inputValues = new Dictionary<string, string>
+            {
+                { USER_ID, userId },
+                { EXPERIMENT_KEY, experimentKey }
+            };
+
+            if (!ValidateStringInputs(inputValues))
+                return null;
+
             Experiment experiment = Config.GetExperimentFromKey(experimentKey);
             if (experiment.Key == null)
                 return null;
@@ -335,14 +366,12 @@ namespace OptimizelySDK
         /// <returns>True if feature is enabled, false or null otherwise</returns>
         public virtual bool IsFeatureEnabled(string featureKey, string userId, UserAttributes userAttributes = null)
         {
-            if (string.IsNullOrEmpty(userId))
-            {
+            if (string.IsNullOrEmpty(userId)) {
                 Logger.Log(LogLevel.ERROR, "User ID must not be empty.");
                 return false;
             }
 
-            if (string.IsNullOrEmpty(featureKey))
-            {
+            if (string.IsNullOrEmpty(featureKey)) {
                 Logger.Log(LogLevel.ERROR, "Feature flag key must not be empty.");
                 return false;
             }
@@ -355,19 +384,21 @@ namespace OptimizelySDK
                 return false;
 
             var decision = DecisionService.GetVariationForFeature(featureFlag, userId, userAttributes);
-            if (decision == null || !decision.Variation.IsFeatureEnabled)
-            {
-                Logger.Log(LogLevel.INFO, $@"Feature flag ""{featureKey}"" is not enabled for user ""{userId}"".");
-                return false;
+            if (decision != null) {
+                if (decision.Source == FeatureDecision.DECISION_SOURCE_EXPERIMENT) {
+                    SendImpressionEvent(decision.Experiment, decision.Variation, userId, userAttributes);
+                } else {
+                    Logger.Log(LogLevel.INFO, $@"The user ""{userId}"" is not being experimented on feature ""{featureKey}"".");
+                }
+                if (decision.Variation.IsFeatureEnabled) {
+                    Logger.Log(LogLevel.INFO, $@"Feature flag ""{featureKey}"" is enabled for user ""{userId}"".");
+                    return true;
+                }
             }
 
-            if (decision.Source == FeatureDecision.DECISION_SOURCE_EXPERIMENT)
-                SendImpressionEvent(decision.Experiment, decision.Variation, userId, userAttributes);
-            else
-                Logger.Log(LogLevel.INFO, $@"The user ""{userId}"" is not being experimented on feature ""{featureKey}"".");
 
-            Logger.Log(LogLevel.INFO, $@"Feature flag ""{featureKey}"" is enabled for user ""{userId}"".");
-            return true;
+            Logger.Log(LogLevel.INFO, $@"Feature flag ""{featureKey}"" is not enabled for user ""{userId}"".");
+            return false;
         }
 
         /// <summary>
@@ -591,11 +622,29 @@ namespace OptimizelySDK
                     enabledFeaturesList.Add(featureKey);
             }
 
-            enabledFeaturesList.Sort();
-
             return enabledFeaturesList;
         }
 
         #endregion // FeatureFlag APIs
+
+        /// <summary>
+        /// Validate all string inputs are not null or empty.
+        /// </summary>
+        /// <param name="inputs">Array Hash input types and values</param>
+        /// <returns>True if all values are valid, false otherwise</returns>
+        private bool ValidateStringInputs(Dictionary<string, string> inputs)
+        {
+            bool isValid = true;
+            foreach(var input in inputs)
+            {
+                if (string.IsNullOrEmpty(input.Value))
+                {
+                    Logger.Log(LogLevel.ERROR, $"Provided {input.Key} is in invalid format.");
+                    isValid = false;
+                }
+            }
+
+            return isValid;
+        }
     }
 }
