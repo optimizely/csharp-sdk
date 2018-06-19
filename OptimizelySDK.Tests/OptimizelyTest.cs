@@ -38,6 +38,7 @@ namespace OptimizelySDK.Tests
         private ProjectConfig Config;
         private Mock<EventBuilder> EventBuilderMock;
         private Mock<IErrorHandler> ErrorHandlerMock;
+        private Mock<IEventDispatcher> EventDispatcherMock;
         private Optimizely Optimizely;
         private IEventDispatcher EventDispatcher;
         private const string TestUserId = "testUserId";
@@ -73,19 +74,19 @@ namespace OptimizelySDK.Tests
                 logger: LoggerMock.Object,
                 errorHandler: new NoOpErrorHandler());
 
-            EventDispatcher = new ValidEventDispatcher();
-            Optimizely = new Optimizely(TestData.Datafile, EventDispatcher, LoggerMock.Object, ErrorHandlerMock.Object);
+            EventDispatcherMock = new Mock<IEventDispatcher>();
+            Optimizely = new Optimizely(TestData.Datafile, EventDispatcherMock.Object, LoggerMock.Object, ErrorHandlerMock.Object);
 
             Helper = new OptimizelyHelper
             {
                 Datafile = TestData.Datafile,
-                EventDispatcher = EventDispatcher,
+                EventDispatcher = EventDispatcherMock.Object,
                 Logger = LoggerMock.Object,
                 ErrorHandler = ErrorHandlerMock.Object,
                 SkipJsonValidation = false,
             };
 
-            OptimizelyMock = new Mock<Optimizely>(TestData.Datafile, EventDispatcher, LoggerMock.Object, ErrorHandlerMock.Object, null, false)
+            OptimizelyMock = new Mock<Optimizely>(TestData.Datafile, EventDispatcherMock.Object, LoggerMock.Object, ErrorHandlerMock.Object, null, false)
             {
                 CallBase = true
             };
@@ -1537,6 +1538,34 @@ namespace OptimizelySDK.Tests
 
             LoggerMock.Verify(l => l.Log(LogLevel.INFO,
                 $@"Feature flag ""{featureKey}"" is enabled for user ""{TestUserId}""."));
+        }
+
+        // Should return false and send an impression event when feature is enabled for the user 
+        // and user is being experimented.
+        [Test]
+        public void TestIsFeatureEnabledGivenFeatureFlagIsNotEnabledAndUserIsBeingExperimented()
+        {
+            var featureKey = "double_single_variable_feature";
+            var experiment = Config.GetExperimentFromKey("test_experiment_double_feature");
+            var variation = Config.GetVariationFromKey("test_experiment_double_feature", "variation");
+            var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
+            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_EXPERIMENT);
+
+            DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, null)).Returns(decision);
+
+            var optly = Helper.CreatePrivateOptimizely();
+            optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
+
+            bool result = (bool)optly.Invoke("IsFeatureEnabled", featureKey, TestUserId, null);
+            Assert.False(result);
+
+            // SendImpressionEvent() gets called.
+            LoggerMock.Verify(l => l.Log(LogLevel.INFO,
+                $@"The user ""{TestUserId}"" is not being experimented on feature ""{featureKey}""."), Times.Never);
+
+            LoggerMock.Verify(l => l.Log(LogLevel.INFO,
+                $@"Feature flag ""{featureKey}"" is not enabled for user ""{TestUserId}""."));
+            EventDispatcherMock.Verify(dispatcher => dispatcher.DispatchEvent(It.IsAny<LogEvent>()));
         }
 
         // Verify that IsFeatureEnabled returns true if a variation does not get found in the feature
