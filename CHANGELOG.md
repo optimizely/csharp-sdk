@@ -1,3 +1,10 @@
+## 2.0.1
+June 20, 2018
+
+### Bug Fixes
+* Fix events are not sent from the SDK for a variation in a feature test if the
+feature is disabled.
+
 ## 2.0.0
 April 16, 2018
 
