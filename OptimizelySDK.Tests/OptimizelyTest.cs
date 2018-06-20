@@ -38,6 +38,7 @@ namespace OptimizelySDK.Tests
         private ProjectConfig Config;
         private Mock<EventBuilder> EventBuilderMock;
         private Mock<IErrorHandler> ErrorHandlerMock;
+        private Mock<IEventDispatcher> EventDispatcherMock;
         private Optimizely Optimizely;
         private IEventDispatcher EventDispatcher;
         private const string TestUserId = "testUserId";
@@ -73,19 +74,19 @@ namespace OptimizelySDK.Tests
                 logger: LoggerMock.Object,
                 errorHandler: new NoOpErrorHandler());
 
-            EventDispatcher = new ValidEventDispatcher();
-            Optimizely = new Optimizely(TestData.Datafile, EventDispatcher, LoggerMock.Object, ErrorHandlerMock.Object);
+            EventDispatcherMock = new Mock<IEventDispatcher>();
+            Optimizely = new Optimizely(TestData.Datafile, EventDispatcherMock.Object, LoggerMock.Object, ErrorHandlerMock.Object);
 
             Helper = new OptimizelyHelper
             {
                 Datafile = TestData.Datafile,
-                EventDispatcher = EventDispatcher,
+                EventDispatcher = EventDispatcherMock.Object,
                 Logger = LoggerMock.Object,
                 ErrorHandler = ErrorHandlerMock.Object,
                 SkipJsonValidation = false,
             };
 
-            OptimizelyMock = new Mock<Optimizely>(TestData.Datafile, EventDispatcher, LoggerMock.Object, ErrorHandlerMock.Object, null, false)
+            OptimizelyMock = new Mock<Optimizely>(TestData.Datafile, EventDispatcherMock.Object, LoggerMock.Object, ErrorHandlerMock.Object, null, false)
             {
                 CallBase = true
             };
@@ -1539,6 +1540,34 @@ namespace OptimizelySDK.Tests
                 $@"Feature flag ""{featureKey}"" is enabled for user ""{TestUserId}""."));
         }
 
+        // Should return false and send an impression event when feature is enabled for the user 
+        // and user is being experimented.
+        [Test]
+        public void TestIsFeatureEnabledGivenFeatureFlagIsNotEnabledAndUserIsBeingExperimented()
+        {
+            var featureKey = "double_single_variable_feature";
+            var experiment = Config.GetExperimentFromKey("test_experiment_double_feature");
+            var variation = Config.GetVariationFromKey("test_experiment_double_feature", "variation");
+            var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
+            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_EXPERIMENT);
+
+            DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, null)).Returns(decision);
+
+            var optly = Helper.CreatePrivateOptimizely();
+            optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
+
+            bool result = (bool)optly.Invoke("IsFeatureEnabled", featureKey, TestUserId, null);
+            Assert.False(result);
+
+            // SendImpressionEvent() gets called.
+            LoggerMock.Verify(l => l.Log(LogLevel.INFO,
+                $@"The user ""{TestUserId}"" is not being experimented on feature ""{featureKey}""."), Times.Never);
+
+            LoggerMock.Verify(l => l.Log(LogLevel.INFO,
+                $@"Feature flag ""{featureKey}"" is not enabled for user ""{TestUserId}""."));
+            EventDispatcherMock.Verify(dispatcher => dispatcher.DispatchEvent(It.IsAny<LogEvent>()));
+        }
+
         // Verify that IsFeatureEnabled returns true if a variation does not get found in the feature
         // flag experiment but found in the rollout rule.
         [Test]
@@ -1811,36 +1840,52 @@ namespace OptimizelySDK.Tests
             Array.ForEach(notEnabledFeatures, nef => CollectionAssert.DoesNotContain(actualFeaturesList, nef));
         }
 
+        #endregion // Test GetEnabledFeatures
+
+        #region Test ValidateStringInputs
+
         [Test]
-        public void TestGetEnabledFeaturesReturnsSortedList()
+        public void TestActivateValidateInputValues()
         {
-            string[] unsortedFeaturesList =
-            {
-                 "double_single_variable_feature",
-                 "boolean_feature",
-                 "string_single_variable_feature",
-                 "multi_variate_feature",
-                 "empty_feature",
-                 "boolean_single_variable_feature"
-             };
-            string[] sortedFeaturesList =
-            {
-                 "boolean_feature",
-                 "boolean_single_variable_feature",
-                 "double_single_variable_feature",
-                 "empty_feature",
-                 "multi_variate_feature",
-                 "string_single_variable_feature",
-             };
+            // Verify that ValidateStringInputs does not log error for valid values.
+            var variation = Optimizely.Activate("test_experiment", "test_user");
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Provided User Id is in invalid format."), Times.Never);
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Provided Experiment Key is in invalid format."), Times.Never);
 
-            OptimizelyMock.Setup(om => om.IsFeatureEnabled(It.IsIn<string>(unsortedFeaturesList), TestUserId,
-                It.IsAny<UserAttributes>())).Returns(true);
-
-            // Verify that returned list in sorterd in ascending order.
-            var actualFeaturesList = OptimizelyMock.Object.GetEnabledFeatures(TestUserId, null);
-            CollectionAssert.AreEqual(sortedFeaturesList, actualFeaturesList);
+            // Verify that ValidateStringInputs logs error for invalid values.
+            variation = Optimizely.Activate("", null);
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Provided User Id is in invalid format."), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Provided Experiment Key is in invalid format."), Times.Once);
         }
 
-        #endregion // Test GetEnabledFeatures
+        [Test]
+        public void TestGetVariationValidateInputValues()
+        {
+            // Verify that ValidateStringInputs does not log error for valid values.
+            var variation = Optimizely.GetVariation("test_experiment", "test_user");
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Provided User Id is in invalid format."), Times.Never);
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Provided Experiment Key is in invalid format."), Times.Never);
+
+            // Verify that ValidateStringInputs logs error for invalid values.
+            variation = Optimizely.GetVariation("", null);
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Provided User Id is in invalid format."), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Provided Experiment Key is in invalid format."), Times.Once);
+        }
+
+        [Test]
+        public void TestTrackValidateInputValues()
+        {
+            // Verify that ValidateStringInputs does not log error for valid values.
+            Optimizely.Track("purchase", "test_user");
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Provided User Id is in invalid format."), Times.Never);
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Provided Event Key is in invalid format."), Times.Never);
+
+            // Verify that ValidateStringInputs logs error for invalid values.
+            Optimizely.Track("", null);
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Provided User Id is in invalid format."), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Provided Event Key is in invalid format."), Times.Once);
+        }
+
+        #endregion // Test ValidateStringInputs
     }
 }
