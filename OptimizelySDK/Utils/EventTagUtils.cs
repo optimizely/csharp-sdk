@@ -68,55 +68,68 @@ namespace OptimizelySDK.Utils
 
         public static object GetNumericValue(Dictionary<string, object> eventTags, ILogger logger  = null)
         {
-            string debugMessage = string.Empty;
-            bool isCasted = false;
-
             float refVar = 0;
+            bool isCasted = false;
+            string logMessage = string.Empty;
+            LogLevel logLevel = LogLevel.INFO;
 
             if (eventTags == null)
-                debugMessage = "Event tags is undefined.";
-
+            {
+                logMessage = "Event tags is undefined.";
+                logLevel = LogLevel.DEBUG;
+            }
             else if (!eventTags.ContainsKey(VALUE_EVENT_METRIC_NAME))
-                debugMessage = "The numeric metric key is not in event tags.";
-
+            {
+                logMessage = "The numeric metric key is not in event tags.";
+                logLevel = LogLevel.DEBUG;
+            }
             else if (eventTags[VALUE_EVENT_METRIC_NAME] == null)
-                debugMessage = "The numeric metric key value is not defined in event tags.";
-
+            {
+                logMessage = "The numeric metric key value is not defined in event tags.";
+                logLevel = LogLevel.ERROR;
+            }
             else if (eventTags[VALUE_EVENT_METRIC_NAME] is bool)
-                debugMessage = "Provided numeric value is boolean which is an invalid format.";
-
+            {
+                logMessage = "Provided numeric value is boolean which is an invalid format.";
+                logLevel = LogLevel.ERROR;
+            }
             else if (!(eventTags[VALUE_EVENT_METRIC_NAME] is int) && !(eventTags[VALUE_EVENT_METRIC_NAME] is string) && !(eventTags[VALUE_EVENT_METRIC_NAME] is float)
-                && !(eventTags[VALUE_EVENT_METRIC_NAME] is decimal)
-                && !(eventTags[VALUE_EVENT_METRIC_NAME] is double)
-                && !(eventTags[VALUE_EVENT_METRIC_NAME] is float))
-                debugMessage = "Numeric metric value is not in integer, float, or string form.";
-
+                && !(eventTags[VALUE_EVENT_METRIC_NAME] is decimal) && !(eventTags[VALUE_EVENT_METRIC_NAME] is double) && !(eventTags[VALUE_EVENT_METRIC_NAME] is float))
+            {
+                logMessage = "Numeric metric value is not in integer, float, or string form.";
+                logLevel = LogLevel.ERROR;
+            }
+            else if (!float.TryParse(eventTags[VALUE_EVENT_METRIC_NAME].ToString(), out refVar))
+            {
+                logMessage = "Provided numeric value is boolean which is an invalid format.";
+                logLevel = LogLevel.ERROR;
+            }
             else
             {
                 if (!float.TryParse(eventTags[VALUE_EVENT_METRIC_NAME].ToString(), out refVar))
-                    debugMessage = string.Format("Provided numeric value {0} is in an invalid format.", eventTags[VALUE_EVENT_METRIC_NAME]);
+                {
+                    logMessage = string.Format("Provided numeric value {0} is in an invalid format.", eventTags[VALUE_EVENT_METRIC_NAME]);
+                    logLevel = LogLevel.ERROR;
+                }
                 else
                 {
                     if (float.IsInfinity(refVar))
-                        debugMessage = string.Format("Provided numeric value {0} is in an invalid format.", eventTags[VALUE_EVENT_METRIC_NAME]);
+                    {
+                        logMessage = string.Format("Provided numeric value {0} is in an invalid format.", eventTags[VALUE_EVENT_METRIC_NAME]);
+                        logLevel = LogLevel.ERROR;
+                    }
                     else
+                    {
                         isCasted = true;
+                        logMessage = string.Format("The numeric metric value {0} will be sent to results.", refVar);
+                    }
                 }
             }
 
             if (logger != null)
-            {
-                if (isCasted)
-                    logger.Log(LogLevel.INFO, string.Format("The numeric metric value {0} will be sent to results.", refVar));
-                else
-                    if (string.IsNullOrEmpty(debugMessage))
-                        logger.Log(LogLevel.ERROR, string.Format("The provided numeric metric value {0} is in an invalid format and will not be sent to results.", eventTags[VALUE_EVENT_METRIC_NAME]));
-                    else
-                        logger.Log(LogLevel.ERROR, debugMessage);
-            }
+                logger.Log(logLevel, logMessage);
 
             object o = refVar;
-
             if(isCasted && eventTags[VALUE_EVENT_METRIC_NAME] is float)
             {
                 // Special case, maximum value when passed and gone through tryparse, it loses precision.
@@ -124,7 +137,6 @@ namespace OptimizelySDK.Utils
             }
 
             return isCasted ? o : null;
-
         }
     }
 }
