@@ -128,7 +128,7 @@ namespace OptimizelySDK.Tests.UtilsTests
 
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Event tags is undefined."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "The numeric metric key is not in event tags."), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "The numeric metric key value is not defined in event tags."), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "The numeric metric key value is not defined in event tags."), Times.Once);
 
             // Valid data.
             Assert.AreEqual(42, EventTagUtils.GetNumericValue(validTagStr, Logger));
