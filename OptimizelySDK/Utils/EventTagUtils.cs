@@ -86,7 +86,7 @@ namespace OptimizelySDK.Utils
             else if (eventTags[VALUE_EVENT_METRIC_NAME] == null)
             {
                 logMessage = "The numeric metric key value is not defined in event tags.";
-                logLevel = LogLevel.ERROR;
+                logLevel = LogLevel.DEBUG;
             }
             else if (eventTags[VALUE_EVENT_METRIC_NAME] is bool)
             {
