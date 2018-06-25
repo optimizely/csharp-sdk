@@ -1,0 +1,458 @@
+﻿<!DOCTYPE html>
+<!--[if IE]><![endif]-->
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Class NotificationCenter
+   </title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="title" content="Class NotificationCenter
+   ">
+    <meta name="generator" content="docfx 2.36.1.0">
+    
+    <link rel="shortcut icon" href="../favicon.ico">
+    <link rel="stylesheet" href="../styles/docfx.vendor.css">
+    <link rel="stylesheet" href="../styles/docfx.css">
+    <link rel="stylesheet" href="../styles/main.css">
+    <meta property="docfx:navrel" content="../toc.html">
+    <meta property="docfx:tocrel" content="toc.html">
+    
+    
+    
+  </head>
+  <body data-spy="scroll" data-target="#affix" data-offset="120">
+    <div id="wrapper">
+      <header>
+        
+        <nav id="autocollapse" class="navbar navbar-inverse ng-scope" role="navigation">
+          <div class="container">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+              
+              <a class="navbar-brand" href="../index.html">
+                <img id="logo" class="svg" src="../logo.svg" alt="">
+              </a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar">
+              <form class="navbar-form navbar-right" role="search" id="search">
+                <div class="form-group">
+                  <input type="text" class="form-control" id="search-query" placeholder="Search" autocomplete="off">
+                </div>
+              </form>
+            </div>
+          </div>
+        </nav>
+        
+        <div class="subnav navbar navbar-default">
+          <div class="container hide-when-search" id="breadcrumb">
+            <ul class="breadcrumb">
+              <li></li>
+            </ul>
+          </div>
+        </div>
+      </header>
+      <div role="main" class="container body-content hide-when-search">
+        
+        <div class="sidenav hide-when-search">
+          <a class="btn toc-toggle collapse" data-toggle="collapse" href="#sidetoggle" aria-expanded="false" aria-controls="sidetoggle">Show / Hide Table of Contents</a>
+          <div class="sidetoggle collapse" id="sidetoggle">
+            <div id="sidetoc"></div>
+          </div>
+        </div>
+        <div class="article row grid-right">
+          <div class="col-md-10">
+            <article class="content wrap" id="_content" data-uid="OptimizelySDK.Notifications.NotificationCenter">
+  
+  
+  <h1 id="OptimizelySDK_Notifications_NotificationCenter" data-uid="OptimizelySDK.Notifications.NotificationCenter" class="text-break">Class NotificationCenter
+  </h1>
+  <div class="markdown level0 summary"><p>NotificationCenter class for sending notifications.</p>
+</div>
+  <div class="markdown level0 conceptual"></div>
+  <div class="inheritance">
+    <h5>Inheritance</h5>
+    <div class="level0"><span class="xref">System.Object</span></div>
+    <div class="level1"><span class="xref">NotificationCenter</span></div>
+  </div>
+  <div class="inheritedMembers">
+    <h5>Inherited Members</h5>
+    <div>
+      <span class="xref">System.Object.ToString()</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.Equals(System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.Equals(System.Object, System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.ReferenceEquals(System.Object, System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.GetHashCode()</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.GetType()</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.MemberwiseClone()</span>
+    </div>
+  </div>
+  <h6><strong>Namespace</strong>: <a class="xref" href="OptimizelySDK.Notifications.html">OptimizelySDK.Notifications</a></h6>
+  <h6><strong>Assembly</strong>: cs.temp.dll.dll</h6>
+  <h5 id="OptimizelySDK_Notifications_NotificationCenter_syntax">Syntax</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public class NotificationCenter</code></pre>
+  </div>
+  <h3 id="constructors">Constructors
+  </h3>
+  
+  
+  <a id="OptimizelySDK_Notifications_NotificationCenter__ctor_" data-uid="OptimizelySDK.Notifications.NotificationCenter.#ctor*"></a>
+  <h4 id="OptimizelySDK_Notifications_NotificationCenter__ctor_OptimizelySDK_Logger_ILogger_" data-uid="OptimizelySDK.Notifications.NotificationCenter.#ctor(OptimizelySDK.Logger.ILogger)">NotificationCenter(ILogger)</h4>
+  <div class="markdown level1 summary"><p>NotificationCenter constructor</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public NotificationCenter(ILogger logger = null)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="OptimizelySDK.Logger.ILogger.html">ILogger</a></td>
+        <td><span class="parametername">logger</span></td>
+        <td><p>The logger object</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="properties">Properties
+  </h3>
+  
+  
+  <a id="OptimizelySDK_Notifications_NotificationCenter_NotificationId_" data-uid="OptimizelySDK.Notifications.NotificationCenter.NotificationId*"></a>
+  <h4 id="OptimizelySDK_Notifications_NotificationCenter_NotificationId" data-uid="OptimizelySDK.Notifications.NotificationCenter.NotificationId">NotificationId</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public int NotificationId { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Int32</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  
+  
+  <a id="OptimizelySDK_Notifications_NotificationCenter_NotificationsCount_" data-uid="OptimizelySDK.Notifications.NotificationCenter.NotificationsCount*"></a>
+  <h4 id="OptimizelySDK_Notifications_NotificationCenter_NotificationsCount" data-uid="OptimizelySDK.Notifications.NotificationCenter.NotificationsCount">NotificationsCount</h4>
+  <div class="markdown level1 summary"><p>Property representing total notifications count.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public int NotificationsCount { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Int32</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="methods">Methods
+  </h3>
+  
+  
+  <a id="OptimizelySDK_Notifications_NotificationCenter_AddNotification_" data-uid="OptimizelySDK.Notifications.NotificationCenter.AddNotification*"></a>
+  <h4 id="OptimizelySDK_Notifications_NotificationCenter_AddNotification_OptimizelySDK_Notifications_NotificationCenter_NotificationType_OptimizelySDK_Notifications_NotificationCenter_ActivateCallback_" data-uid="OptimizelySDK.Notifications.NotificationCenter.AddNotification(OptimizelySDK.Notifications.NotificationCenter.NotificationType,OptimizelySDK.Notifications.NotificationCenter.ActivateCallback)">AddNotification(NotificationCenter.NotificationType, NotificationCenter.ActivateCallback)</h4>
+  <div class="markdown level1 summary"><p>Add a notification callback of decision type to the notification center.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public int AddNotification(NotificationCenter.NotificationType notificationType, NotificationCenter.ActivateCallback activateCallback)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="OptimizelySDK.Notifications.NotificationCenter.NotificationType.html">NotificationCenter.NotificationType</a></td>
+        <td><span class="parametername">notificationType</span></td>
+        <td><p>Notification type</p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="OptimizelySDK.Notifications.NotificationCenter.ActivateCallback.html">NotificationCenter.ActivateCallback</a></td>
+        <td><span class="parametername">activateCallback</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Int32</span></td>
+        <td><p>int | 0 for invalid notification type, -1 for adding existing notification
+or the notification id of newly added notification.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  
+  
+  <a id="OptimizelySDK_Notifications_NotificationCenter_AddNotification_" data-uid="OptimizelySDK.Notifications.NotificationCenter.AddNotification*"></a>
+  <h4 id="OptimizelySDK_Notifications_NotificationCenter_AddNotification_OptimizelySDK_Notifications_NotificationCenter_NotificationType_OptimizelySDK_Notifications_NotificationCenter_TrackCallback_" data-uid="OptimizelySDK.Notifications.NotificationCenter.AddNotification(OptimizelySDK.Notifications.NotificationCenter.NotificationType,OptimizelySDK.Notifications.NotificationCenter.TrackCallback)">AddNotification(NotificationCenter.NotificationType, NotificationCenter.TrackCallback)</h4>
+  <div class="markdown level1 summary"><p>Add a notification callback of track type to the notification center.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public int AddNotification(NotificationCenter.NotificationType notificationType, NotificationCenter.TrackCallback trackCallback)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="OptimizelySDK.Notifications.NotificationCenter.NotificationType.html">NotificationCenter.NotificationType</a></td>
+        <td><span class="parametername">notificationType</span></td>
+        <td><p>Notification type</p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="OptimizelySDK.Notifications.NotificationCenter.TrackCallback.html">NotificationCenter.TrackCallback</a></td>
+        <td><span class="parametername">trackCallback</span></td>
+        <td><p>Callback function to call when event gets triggered</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Int32</span></td>
+        <td><p>int | 0 for invalid notification type, -1 for adding existing notification
+or the notification id of newly added notification.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  
+  
+  <a id="OptimizelySDK_Notifications_NotificationCenter_ClearAllNotifications_" data-uid="OptimizelySDK.Notifications.NotificationCenter.ClearAllNotifications*"></a>
+  <h4 id="OptimizelySDK_Notifications_NotificationCenter_ClearAllNotifications" data-uid="OptimizelySDK.Notifications.NotificationCenter.ClearAllNotifications">ClearAllNotifications()</h4>
+  <div class="markdown level1 summary"><p>Removes all notifications.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void ClearAllNotifications()</code></pre>
+  </div>
+  
+  
+  <a id="OptimizelySDK_Notifications_NotificationCenter_ClearNotifications_" data-uid="OptimizelySDK.Notifications.NotificationCenter.ClearNotifications*"></a>
+  <h4 id="OptimizelySDK_Notifications_NotificationCenter_ClearNotifications_OptimizelySDK_Notifications_NotificationCenter_NotificationType_" data-uid="OptimizelySDK.Notifications.NotificationCenter.ClearNotifications(OptimizelySDK.Notifications.NotificationCenter.NotificationType)">ClearNotifications(NotificationCenter.NotificationType)</h4>
+  <div class="markdown level1 summary"><p>Remove all notifications for the specified notification type.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void ClearNotifications(NotificationCenter.NotificationType notificationType)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="OptimizelySDK.Notifications.NotificationCenter.NotificationType.html">NotificationCenter.NotificationType</a></td>
+        <td><span class="parametername">notificationType</span></td>
+        <td><p>The notification type</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  
+  
+  <a id="OptimizelySDK_Notifications_NotificationCenter_RemoveNotification_" data-uid="OptimizelySDK.Notifications.NotificationCenter.RemoveNotification*"></a>
+  <h4 id="OptimizelySDK_Notifications_NotificationCenter_RemoveNotification_System_Int32_" data-uid="OptimizelySDK.Notifications.NotificationCenter.RemoveNotification(System.Int32)">RemoveNotification(Int32)</h4>
+  <div class="markdown level1 summary"><p>Remove a previously added notification callback.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool RemoveNotification(int notificationId)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Int32</span></td>
+        <td><span class="parametername">notificationId</span></td>
+        <td><p>Id of notification</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Boolean</span></td>
+        <td><p>Returns true if found and removed, false otherwise.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  
+  
+  <a id="OptimizelySDK_Notifications_NotificationCenter_SendNotifications_" data-uid="OptimizelySDK.Notifications.NotificationCenter.SendNotifications*"></a>
+  <h4 id="OptimizelySDK_Notifications_NotificationCenter_SendNotifications_OptimizelySDK_Notifications_NotificationCenter_NotificationType_System_Object___" data-uid="OptimizelySDK.Notifications.NotificationCenter.SendNotifications(OptimizelySDK.Notifications.NotificationCenter.NotificationType,System.Object[])">SendNotifications(NotificationCenter.NotificationType, Object[])</h4>
+  <div class="markdown level1 summary"><p>Fire notifications of specified notification type when the event gets triggered.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void SendNotifications(NotificationCenter.NotificationType notificationType, params object[] args)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="OptimizelySDK.Notifications.NotificationCenter.NotificationType.html">NotificationCenter.NotificationType</a></td>
+        <td><span class="parametername">notificationType</span></td>
+        <td><p>The notification type</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.Object</span>[]</td>
+        <td><span class="parametername">args</span></td>
+        <td><p>Arguments to pass in notification callbacks</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+</article>
+          </div>
+          
+          <div class="hidden-sm col-md-2" role="complementary">
+            <div class="sideaffix">
+              <div class="contribution">
+                <ul class="nav">
+                </ul>
+              </div>
+              <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix" id="affix">
+              <!-- <p><a class="back-to-top" href="#top">Back to top</a><p> -->
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <footer>
+        <div class="grad-bottom"></div>
+        <div class="footer">
+          <div class="container">
+            <span class="pull-right">
+              <a href="#top">Back to top</a>
+            </span>
+            
+            <span>Generated by <strong>DocFX</strong></span>
+          </div>
+        </div>
+      </footer>
+    </div>
+    
+    <script type="text/javascript" src="../styles/docfx.vendor.js"></script>
+    <script type="text/javascript" src="../styles/docfx.js"></script>
+    <script type="text/javascript" src="../styles/main.js"></script>
+  </body>
+</html>

@@ -1,0 +1,381 @@
+{
+  "homepages": [],
+  "source_base_path": "D:/Projects/Optimizely-Remote-CSharp-SDK/documentation",
+  "xrefmap": "xrefmap.yml",
+  "files": [
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/OptimizelySDK.Bucketing.UserProfileService.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/OptimizelySDK.Bucketing.UserProfileService.html",
+          "hash": "Vi5jU+bQGnfB8xoDXRCT8g=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/OptimizelySDK.Bucketing.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/OptimizelySDK.Bucketing.html",
+          "hash": "+aMSkFN2uOw+pTKlsVTVug=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/OptimizelySDK.Entity.EventTags.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/OptimizelySDK.Entity.EventTags.html",
+          "hash": "VW5xgSheLu2s5IbYAOrBSQ=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/OptimizelySDK.Entity.FeatureVariable.VariableStatus.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/OptimizelySDK.Entity.FeatureVariable.VariableStatus.html",
+          "hash": "qzirWw4TAQ9FXFfOiDrZ1w=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/OptimizelySDK.Entity.FeatureVariable.VariableType.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/OptimizelySDK.Entity.FeatureVariable.VariableType.html",
+          "hash": "7YK9fku+UIui/RDuA6qfhA=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/OptimizelySDK.Entity.FeatureVariable.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/OptimizelySDK.Entity.FeatureVariable.html",
+          "hash": "ww3NncABs7VcB3La7I7WEw=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/OptimizelySDK.Entity.UserAttributes.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/OptimizelySDK.Entity.UserAttributes.html",
+          "hash": "DJBfYX1WGeAYYPvc5aUSQg=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/OptimizelySDK.Entity.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/OptimizelySDK.Entity.html",
+          "hash": "r0ftcWmHVaoiEV5H7dIfMQ=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/OptimizelySDK.ErrorHandler.IErrorHandler.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/OptimizelySDK.ErrorHandler.IErrorHandler.html",
+          "hash": "cFcaIt1wqH5ClTwupUDdjA=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/OptimizelySDK.ErrorHandler.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/OptimizelySDK.ErrorHandler.html",
+          "hash": "0netzWGuwwP63fQBg+7dvA=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/OptimizelySDK.Event.Dispatcher.IEventDispatcher.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/OptimizelySDK.Event.Dispatcher.IEventDispatcher.html",
+          "hash": "ri0H+tX/XB40V/tK/OMpWg=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/OptimizelySDK.Event.Dispatcher.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/OptimizelySDK.Event.Dispatcher.html",
+          "hash": "SKmb137KedPIkE20BQf6HQ=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/OptimizelySDK.Logger.ILogger.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/OptimizelySDK.Logger.ILogger.html",
+          "hash": "y0d5rX6Tauvga/xDRzTwgg=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/OptimizelySDK.Logger.LogLevel.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/OptimizelySDK.Logger.LogLevel.html",
+          "hash": "I7mKHXyMnvXap2xawumMBQ=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/OptimizelySDK.Logger.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/OptimizelySDK.Logger.html",
+          "hash": "TmbXFXgbESaczRZVbH3WGg=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/OptimizelySDK.Notifications.NotificationCenter.ActivateCallback.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/OptimizelySDK.Notifications.NotificationCenter.ActivateCallback.html",
+          "hash": "zXri/5Ba1u+4oTDtqoGiQw=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/OptimizelySDK.Notifications.NotificationCenter.NotificationType.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/OptimizelySDK.Notifications.NotificationCenter.NotificationType.html",
+          "hash": "1qJDdSBPo0Z5pv7Uf9J9Bg=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/OptimizelySDK.Notifications.NotificationCenter.TrackCallback.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/OptimizelySDK.Notifications.NotificationCenter.TrackCallback.html",
+          "hash": "25cmOjmFwY8hG4yGomKBbw=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/OptimizelySDK.Notifications.NotificationCenter.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/OptimizelySDK.Notifications.NotificationCenter.html",
+          "hash": "6YD/1GLW9eggFtnAuGaHug=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/OptimizelySDK.Notifications.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/OptimizelySDK.Notifications.html",
+          "hash": "XrNBsQwoUU6A2jRuDhz3Zw=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/OptimizelySDK.Optimizely.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/OptimizelySDK.Optimizely.html",
+          "hash": "dxEEU93GBeUFvIGo5ay+7g=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/OptimizelySDK.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/OptimizelySDK.html",
+          "hash": "NX20inHSLdC526+ax0QbzA=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "api/index.md",
+      "output": {
+        ".html": {
+          "relative_path": "api/index.html",
+          "hash": "sowVj1bvPzY0JtnUR+W61w=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "Toc",
+      "source_relative_path": "api/toc.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/toc.html",
+          "hash": "rlXTjxQLkFwWraBlaNA40Q=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "articles/intro.md",
+      "output": {
+        ".html": {
+          "relative_path": "articles/intro.html",
+          "hash": "FYISGir+Mtw24Zu6gsKrCQ=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "Toc",
+      "source_relative_path": "articles/toc.yml",
+      "output": {
+        ".html": {
+          "relative_path": "articles/toc.html",
+          "hash": "xVlQaX7Tk85omoiWv3O+Ag=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "index.md",
+      "output": {
+        ".html": {
+          "relative_path": "index.html",
+          "hash": "MNrrfbUpc5mymDwGr/Fsgg=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "Toc",
+      "source_relative_path": "toc.yml",
+      "output": {
+        ".html": {
+          "relative_path": "toc.html",
+          "hash": "ob7LqWp4kTNLz+9W4omdTw=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    }
+  ],
+  "incremental_info": [
+    {
+      "status": {
+        "can_incremental": false,
+        "details": "Cannot build incrementally because last build info is missing.",
+        "incrementalPhase": "build"
+      },
+      "processors": {
+        "TocDocumentProcessor": {
+          "can_incremental": false,
+          "details": "Processor TocDocumentProcessor cannot support incremental build because the processor doesn't implement ISupportIncrementalDocumentProcessor interface.",
+          "incrementalPhase": "build"
+        },
+        "ConceptualDocumentProcessor": {
+          "can_incremental": false,
+          "incrementalPhase": "build"
+        },
+        "ManagedReferenceDocumentProcessor": {
+          "can_incremental": false,
+          "incrementalPhase": "build"
+        }
+      }
+    },
+    {
+      "status": {
+        "can_incremental": false,
+        "details": "Cannot support incremental post processing, the reason is: last post processor info is null.",
+        "incrementalPhase": "postProcessing"
+      },
+      "processors": {}
+    }
+  ],
+  "version_info": {},
+  "groups": [
+    {
+      "xrefmap": "xrefmap.yml"
+    }
+  ]
+}

@@ -1,0 +1,606 @@
+﻿<!DOCTYPE html>
+<!--[if IE]><![endif]-->
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Class Optimizely
+   </title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="title" content="Class Optimizely
+   ">
+    <meta name="generator" content="docfx 2.36.1.0">
+    
+    <link rel="shortcut icon" href="../favicon.ico">
+    <link rel="stylesheet" href="../styles/docfx.vendor.css">
+    <link rel="stylesheet" href="../styles/docfx.css">
+    <link rel="stylesheet" href="../styles/main.css">
+    <meta property="docfx:navrel" content="../toc.html">
+    <meta property="docfx:tocrel" content="toc.html">
+    
+    
+    
+  </head>
+  <body data-spy="scroll" data-target="#affix" data-offset="120">
+    <div id="wrapper">
+      <header>
+        
+        <nav id="autocollapse" class="navbar navbar-inverse ng-scope" role="navigation">
+          <div class="container">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+              
+              <a class="navbar-brand" href="../index.html">
+                <img id="logo" class="svg" src="../logo.svg" alt="">
+              </a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar">
+              <form class="navbar-form navbar-right" role="search" id="search">
+                <div class="form-group">
+                  <input type="text" class="form-control" id="search-query" placeholder="Search" autocomplete="off">
+                </div>
+              </form>
+            </div>
+          </div>
+        </nav>
+        
+        <div class="subnav navbar navbar-default">
+          <div class="container hide-when-search" id="breadcrumb">
+            <ul class="breadcrumb">
+              <li></li>
+            </ul>
+          </div>
+        </div>
+      </header>
+      <div role="main" class="container body-content hide-when-search">
+        
+        <div class="sidenav hide-when-search">
+          <a class="btn toc-toggle collapse" data-toggle="collapse" href="#sidetoggle" aria-expanded="false" aria-controls="sidetoggle">Show / Hide Table of Contents</a>
+          <div class="sidetoggle collapse" id="sidetoggle">
+            <div id="sidetoc"></div>
+          </div>
+        </div>
+        <div class="article row grid-right">
+          <div class="col-md-10">
+            <article class="content wrap" id="_content" data-uid="OptimizelySDK.Optimizely">
+  
+  
+  <h1 id="OptimizelySDK_Optimizely" data-uid="OptimizelySDK.Optimizely" class="text-break">Class Optimizely
+  </h1>
+  <div class="markdown level0 summary"></div>
+  <div class="markdown level0 conceptual"></div>
+  <div class="inheritance">
+    <h5>Inheritance</h5>
+    <div class="level0"><span class="xref">System.Object</span></div>
+    <div class="level1"><span class="xref">Optimizely</span></div>
+  </div>
+  <div class="inheritedMembers">
+    <h5>Inherited Members</h5>
+    <div>
+      <span class="xref">System.Object.ToString()</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.Equals(System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.Equals(System.Object, System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.ReferenceEquals(System.Object, System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.GetHashCode()</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.GetType()</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.MemberwiseClone()</span>
+    </div>
+  </div>
+  <h6><strong>Namespace</strong>: <a class="xref" href="OptimizelySDK.html">OptimizelySDK</a></h6>
+  <h6><strong>Assembly</strong>: cs.temp.dll.dll</h6>
+  <h5 id="OptimizelySDK_Optimizely_syntax">Syntax</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public class Optimizely</code></pre>
+  </div>
+  <h3 id="constructors">Constructors
+  </h3>
+  
+  
+  <a id="OptimizelySDK_Optimizely__ctor_" data-uid="OptimizelySDK.Optimizely.#ctor*"></a>
+  <h4 id="OptimizelySDK_Optimizely__ctor_System_String_OptimizelySDK_Event_Dispatcher_IEventDispatcher_OptimizelySDK_Logger_ILogger_OptimizelySDK_ErrorHandler_IErrorHandler_OptimizelySDK_Bucketing_UserProfileService_System_Boolean_" data-uid="OptimizelySDK.Optimizely.#ctor(System.String,OptimizelySDK.Event.Dispatcher.IEventDispatcher,OptimizelySDK.Logger.ILogger,OptimizelySDK.ErrorHandler.IErrorHandler,OptimizelySDK.Bucketing.UserProfileService,System.Boolean)">Optimizely(String, IEventDispatcher, ILogger, IErrorHandler, UserProfileService, Boolean)</h4>
+  <div class="markdown level1 summary"><p>Optimizely constructor for managing Full Stack .NET projects.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Optimizely(string datafile, IEventDispatcher eventDispatcher = null, ILogger logger = null, IErrorHandler errorHandler = null, UserProfileService userProfileService = null, bool skipJsonValidation = false)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.String</span></td>
+        <td><span class="parametername">datafile</span></td>
+        <td><p>string JSON string representing the project</p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="OptimizelySDK.Event.Dispatcher.IEventDispatcher.html">IEventDispatcher</a></td>
+        <td><span class="parametername">eventDispatcher</span></td>
+        <td><p>EventDispatcherInterface</p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="OptimizelySDK.Logger.ILogger.html">ILogger</a></td>
+        <td><span class="parametername">logger</span></td>
+        <td><p>LoggerInterface</p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="OptimizelySDK.ErrorHandler.IErrorHandler.html">IErrorHandler</a></td>
+        <td><span class="parametername">errorHandler</span></td>
+        <td><p>ErrorHandlerInterface</p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="OptimizelySDK.Bucketing.UserProfileService.html">UserProfileService</a></td>
+        <td><span class="parametername">userProfileService</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.Boolean</span></td>
+        <td><span class="parametername">skipJsonValidation</span></td>
+        <td><p>boolean representing whether JSON schema validation needs to be performed</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="fields">Fields
+  </h3>
+  
+  
+  <h4 id="OptimizelySDK_Optimizely_Logger" data-uid="OptimizelySDK.Optimizely.Logger">Logger</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public ILogger Logger</code></pre>
+  </div>
+  <h5 class="fieldValue">Field Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="OptimizelySDK.Logger.ILogger.html">ILogger</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  
+  
+  <h4 id="OptimizelySDK_Optimizely_NotificationCenter" data-uid="OptimizelySDK.Optimizely.NotificationCenter">NotificationCenter</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public NotificationCenter NotificationCenter</code></pre>
+  </div>
+  <h5 class="fieldValue">Field Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="OptimizelySDK.Notifications.NotificationCenter.html">NotificationCenter</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="properties">Properties
+  </h3>
+  
+  
+  <a id="OptimizelySDK_Optimizely_IsValid_" data-uid="OptimizelySDK.Optimizely.IsValid*"></a>
+  <h4 id="OptimizelySDK_Optimizely_IsValid" data-uid="OptimizelySDK.Optimizely.IsValid">IsValid</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool IsValid { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Boolean</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  
+  
+  <a id="OptimizelySDK_Optimizely_SDK_TYPE_" data-uid="OptimizelySDK.Optimizely.SDK_TYPE*"></a>
+  <h4 id="OptimizelySDK_Optimizely_SDK_TYPE" data-uid="OptimizelySDK.Optimizely.SDK_TYPE">SDK_TYPE</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static string SDK_TYPE { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.String</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  
+  
+  <a id="OptimizelySDK_Optimizely_SDK_VERSION_" data-uid="OptimizelySDK.Optimizely.SDK_VERSION*"></a>
+  <h4 id="OptimizelySDK_Optimizely_SDK_VERSION" data-uid="OptimizelySDK.Optimizely.SDK_VERSION">SDK_VERSION</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static string SDK_VERSION { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.String</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="methods">Methods
+  </h3>
+  
+  
+  <a id="OptimizelySDK_Optimizely_Activate_" data-uid="OptimizelySDK.Optimizely.Activate*"></a>
+  <h4 id="OptimizelySDK_Optimizely_Activate_System_String_System_String_OptimizelySDK_Entity_UserAttributes_" data-uid="OptimizelySDK.Optimizely.Activate(System.String,System.String,OptimizelySDK.Entity.UserAttributes)">Activate(String, String, UserAttributes)</h4>
+  <div class="markdown level1 summary"><p>Buckets visitor and sends impression event to Optimizely.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string Activate(string experimentKey, string userId, UserAttributes userAttributes = null)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.String</span></td>
+        <td><span class="parametername">experimentKey</span></td>
+        <td><p>experimentKey string Key identifying the experiment</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.String</span></td>
+        <td><span class="parametername">userId</span></td>
+        <td><p>string ID for user</p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="OptimizelySDK.Entity.UserAttributes.html">UserAttributes</a></td>
+        <td><span class="parametername">userAttributes</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.String</span></td>
+        <td><p>null|string Representing variation</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  
+  
+  <a id="OptimizelySDK_Optimizely_GetForcedVariation_" data-uid="OptimizelySDK.Optimizely.GetForcedVariation*"></a>
+  <h4 id="OptimizelySDK_Optimizely_GetForcedVariation_System_String_System_String_" data-uid="OptimizelySDK.Optimizely.GetForcedVariation(System.String,System.String)">GetForcedVariation(String, String)</h4>
+  <div class="markdown level1 summary"><p>Gets the forced variation key for the given user and experiment.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Variation GetForcedVariation(string experimentKey, string userId)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.String</span></td>
+        <td><span class="parametername">experimentKey</span></td>
+        <td><p>The experiment key</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.String</span></td>
+        <td><span class="parametername">userId</span></td>
+        <td><p>The user ID</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Variation</span></td>
+        <td><p>null|string The variation key.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  
+  
+  <a id="OptimizelySDK_Optimizely_GetVariation_" data-uid="OptimizelySDK.Optimizely.GetVariation*"></a>
+  <h4 id="OptimizelySDK_Optimizely_GetVariation_System_String_System_String_OptimizelySDK_Entity_UserAttributes_" data-uid="OptimizelySDK.Optimizely.GetVariation(System.String,System.String,OptimizelySDK.Entity.UserAttributes)">GetVariation(String, String, UserAttributes)</h4>
+  <div class="markdown level1 summary"><p>Get variation where user will be bucketed</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string GetVariation(string experimentKey, string userId, UserAttributes userAttributes = null)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.String</span></td>
+        <td><span class="parametername">experimentKey</span></td>
+        <td><p>experimentKey string Key identifying the experiment</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.String</span></td>
+        <td><span class="parametername">userId</span></td>
+        <td><p>ID for the user</p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="OptimizelySDK.Entity.UserAttributes.html">UserAttributes</a></td>
+        <td><span class="parametername">userAttributes</span></td>
+        <td><p>Attributes for the users</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.String</span></td>
+        <td><p>null|string Representing variation</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  
+  
+  <a id="OptimizelySDK_Optimizely_SetForcedVariation_" data-uid="OptimizelySDK.Optimizely.SetForcedVariation*"></a>
+  <h4 id="OptimizelySDK_Optimizely_SetForcedVariation_System_String_System_String_System_String_" data-uid="OptimizelySDK.Optimizely.SetForcedVariation(System.String,System.String,System.String)">SetForcedVariation(String, String, String)</h4>
+  <div class="markdown level1 summary"><p>Force a user into a variation for a given experiment.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool SetForcedVariation(string experimentKey, string userId, string variationKey)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.String</span></td>
+        <td><span class="parametername">experimentKey</span></td>
+        <td><p>The experiment key</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.String</span></td>
+        <td><span class="parametername">userId</span></td>
+        <td><p>The user ID</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.String</span></td>
+        <td><span class="parametername">variationKey</span></td>
+        <td><p>The variation key specifies the variation which the user will be forced into.
+If null, then clear the existing experiment-to-variation mapping.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Boolean</span></td>
+        <td><p>A boolean value that indicates if the set completed successfully.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  
+  
+  <a id="OptimizelySDK_Optimizely_Track_" data-uid="OptimizelySDK.Optimizely.Track*"></a>
+  <h4 id="OptimizelySDK_Optimizely_Track_System_String_System_String_OptimizelySDK_Entity_UserAttributes_OptimizelySDK_Entity_EventTags_" data-uid="OptimizelySDK.Optimizely.Track(System.String,System.String,OptimizelySDK.Entity.UserAttributes,OptimizelySDK.Entity.EventTags)">Track(String, String, UserAttributes, EventTags)</h4>
+  <div class="markdown level1 summary"><p>Sends conversion event to Optimizely.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void Track(string eventKey, string userId, UserAttributes userAttributes = null, EventTags eventTags = null)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.String</span></td>
+        <td><span class="parametername">eventKey</span></td>
+        <td><p>Event key representing the event which needs to be recorded</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.String</span></td>
+        <td><span class="parametername">userId</span></td>
+        <td><p>ID for user</p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="OptimizelySDK.Entity.UserAttributes.html">UserAttributes</a></td>
+        <td><span class="parametername">userAttributes</span></td>
+        <td><p>Attributes of the user</p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="OptimizelySDK.Entity.EventTags.html">EventTags</a></td>
+        <td><span class="parametername">eventTags</span></td>
+        <td><p>eventTags array Hash representing metadata associated with the event.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+</article>
+          </div>
+          
+          <div class="hidden-sm col-md-2" role="complementary">
+            <div class="sideaffix">
+              <div class="contribution">
+                <ul class="nav">
+                </ul>
+              </div>
+              <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix" id="affix">
+              <!-- <p><a class="back-to-top" href="#top">Back to top</a><p> -->
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <footer>
+        <div class="grad-bottom"></div>
+        <div class="footer">
+          <div class="container">
+            <span class="pull-right">
+              <a href="#top">Back to top</a>
+            </span>
+            
+            <span>Generated by <strong>DocFX</strong></span>
+          </div>
+        </div>
+      </footer>
+    </div>
+    
+    <script type="text/javascript" src="../styles/docfx.vendor.js"></script>
+    <script type="text/javascript" src="../styles/docfx.js"></script>
+    <script type="text/javascript" src="../styles/main.js"></script>
+  </body>
+</html>
