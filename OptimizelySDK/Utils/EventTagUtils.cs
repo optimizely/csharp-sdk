@@ -44,7 +44,7 @@ namespace OptimizelySDK.Utils
             else if (eventTags[REVENUE_EVENT_METRIC_NAME] == null)
             {
                 logMessage = "The revenue key value is not defined in event tags.";
-                logLevel = LogLevel.ERROR;
+                logLevel = LogLevel.DEBUG;
             }
             else if (!int.TryParse(eventTags[REVENUE_EVENT_METRIC_NAME].ToString(), out result))
             {

@@ -76,7 +76,7 @@ namespace OptimizelySDK.Tests.UtilsTests
 
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Event tags is undefined."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "The revenue key is not defined in the event tags."), Times.Exactly(2));
-            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "The revenue key value is not defined in event tags."), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "The revenue key value is not defined in event tags."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Revenue value is not an integer or couldn't be parsed as an integer."), Times.Once);
 
             // Valid data.
