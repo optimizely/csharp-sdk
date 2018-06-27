@@ -23,6 +23,7 @@ using System.Collections.Generic;
 using System;
 using NUnit.Framework;
 using OptimizelySDK.Bucketing;
+using OptimizelySDK.Utils;
 
 namespace OptimizelySDK.Tests.EventTests
 {
@@ -86,8 +87,8 @@ namespace OptimizelySDK.Tests.EventTests
                                 {
                                     new Dictionary<string, object>
                                     {
-                                        {"entity_id", EventBuilder.BOT_FILTERING_ATTRIBUTE},
-                                        {"key", EventBuilder.BOT_FILTERING_ATTRIBUTE},
+                                        {"entity_id", ReservedAttribute.BOT_FILTERING_ATTRIBUTE},
+                                        {"key", ReservedAttribute.BOT_FILTERING_ATTRIBUTE},
                                         {"type", "custom" },
                                         {"value", true }
                                     }
@@ -172,8 +173,8 @@ namespace OptimizelySDK.Tests.EventTests
                                     },
                                     new Dictionary<string, object>
                                     {
-                                        {"entity_id", EventBuilder.BOT_FILTERING_ATTRIBUTE},
-                                        {"key", EventBuilder.BOT_FILTERING_ATTRIBUTE},
+                                        {"entity_id", ReservedAttribute.BOT_FILTERING_ATTRIBUTE},
+                                        {"key", ReservedAttribute.BOT_FILTERING_ATTRIBUTE},
                                         {"type", "custom" },
                                         {"value", true }
                                     }
@@ -258,8 +259,8 @@ namespace OptimizelySDK.Tests.EventTests
                                 {
                                     new Dictionary<string, object>
                                     {
-                                        {"entity_id", EventBuilder.BOT_FILTERING_ATTRIBUTE},
-                                        {"key", EventBuilder.BOT_FILTERING_ATTRIBUTE},
+                                        {"entity_id", ReservedAttribute.BOT_FILTERING_ATTRIBUTE},
+                                        {"key", ReservedAttribute.BOT_FILTERING_ATTRIBUTE},
                                         {"type", "custom" },
                                         {"value", true }
                                     }
@@ -348,8 +349,8 @@ namespace OptimizelySDK.Tests.EventTests
                                     },
                                     new Dictionary<string, object>
                                     {
-                                        {"entity_id", EventBuilder.BOT_FILTERING_ATTRIBUTE},
-                                        {"key", EventBuilder.BOT_FILTERING_ATTRIBUTE},
+                                        {"entity_id", ReservedAttribute.BOT_FILTERING_ATTRIBUTE},
+                                        {"key", ReservedAttribute.BOT_FILTERING_ATTRIBUTE},
                                         {"type", "custom" },
                                         {"value", true }
                                     }
@@ -442,8 +443,8 @@ namespace OptimizelySDK.Tests.EventTests
                                 {
                                     new Dictionary<string, object>
                                     {
-                                        {"entity_id", EventBuilder.BOT_FILTERING_ATTRIBUTE},
-                                        {"key", EventBuilder.BOT_FILTERING_ATTRIBUTE},
+                                        {"entity_id", ReservedAttribute.BOT_FILTERING_ATTRIBUTE},
+                                        {"key", ReservedAttribute.BOT_FILTERING_ATTRIBUTE},
                                         {"type", "custom" },
                                         {"value", true }
                                     }
@@ -546,8 +547,8 @@ namespace OptimizelySDK.Tests.EventTests
                                     },
                                     new Dictionary<string, object>
                                     {
-                                        {"entity_id", EventBuilder.BOT_FILTERING_ATTRIBUTE},
-                                        {"key", EventBuilder.BOT_FILTERING_ATTRIBUTE},
+                                        {"entity_id", ReservedAttribute.BOT_FILTERING_ATTRIBUTE},
+                                        {"key", ReservedAttribute.BOT_FILTERING_ATTRIBUTE},
                                         {"type", "custom" },
                                         {"value", true }
                                     }
@@ -650,8 +651,8 @@ namespace OptimizelySDK.Tests.EventTests
                                 {
                                     new Dictionary<string, object>
                                     {
-                                        {"entity_id", EventBuilder.BOT_FILTERING_ATTRIBUTE},
-                                        {"key", EventBuilder.BOT_FILTERING_ATTRIBUTE},
+                                        {"entity_id", ReservedAttribute.BOT_FILTERING_ATTRIBUTE},
+                                        {"key", ReservedAttribute.BOT_FILTERING_ATTRIBUTE},
                                         {"type", "custom" },
                                         {"value", true }
                                     }
@@ -747,8 +748,8 @@ namespace OptimizelySDK.Tests.EventTests
                                 {
                                     new Dictionary<string, object>
                                     {
-                                        {"entity_id", EventBuilder.BOT_FILTERING_ATTRIBUTE},
-                                        {"key", EventBuilder.BOT_FILTERING_ATTRIBUTE},
+                                        {"entity_id", ReservedAttribute.BOT_FILTERING_ATTRIBUTE},
+                                        {"key", ReservedAttribute.BOT_FILTERING_ATTRIBUTE},
                                         {"type", "custom" },
                                         {"value", true }
                                     }
@@ -843,15 +844,15 @@ namespace OptimizelySDK.Tests.EventTests
                                     },
                                     new Dictionary<string, object>
                                     {
-                                        {"entity_id", DecisionService.BUCKETING_ID_ATTRIBUTE },
-                                        {"key", DecisionService.BUCKETING_ID_ATTRIBUTE },
+                                        {"entity_id", ReservedAttribute.BUCKETING_ID_ATTRIBUTE },
+                                        {"key", ReservedAttribute.BUCKETING_ID_ATTRIBUTE },
                                         {"type", "custom" },
                                         {"value", "variation"}
                                     },
                                     new Dictionary<string, object>
                                     {
-                                        {"entity_id", EventBuilder.BOT_FILTERING_ATTRIBUTE},
-                                        {"key", EventBuilder.BOT_FILTERING_ATTRIBUTE},
+                                        {"entity_id", ReservedAttribute.BOT_FILTERING_ATTRIBUTE},
+                                        {"key", ReservedAttribute.BOT_FILTERING_ATTRIBUTE},
                                         {"type", "custom" },
                                         {"value", true }
                                     }
@@ -882,7 +883,7 @@ namespace OptimizelySDK.Tests.EventTests
             {
                 { "device_type", "iPhone"},
                 {"company", "Optimizely" },
-                {DecisionService.BUCKETING_ID_ATTRIBUTE, "variation" }
+                {ReservedAttribute.BUCKETING_ID_ATTRIBUTE, "variation" }
             };
 
             var experimentToVariationMap = new Dictionary<string, Variation>
@@ -948,15 +949,15 @@ namespace OptimizelySDK.Tests.EventTests
                                     },
                                     new Dictionary<string, object>
                                     {
-                                        {"entity_id", DecisionService.BUCKETING_ID_ATTRIBUTE },
-                                        {"key", DecisionService.BUCKETING_ID_ATTRIBUTE },
+                                        {"entity_id", ReservedAttribute.BUCKETING_ID_ATTRIBUTE },
+                                        {"key", ReservedAttribute.BUCKETING_ID_ATTRIBUTE },
                                         {"type", "custom" },
                                         {"value", "variation"}
                                     },
                                     new Dictionary<string, object>
                                     {
-                                        {"entity_id", EventBuilder.BOT_FILTERING_ATTRIBUTE},
-                                        {"key", EventBuilder.BOT_FILTERING_ATTRIBUTE},
+                                        {"entity_id", ReservedAttribute.BOT_FILTERING_ATTRIBUTE},
+                                        {"key", ReservedAttribute.BOT_FILTERING_ATTRIBUTE},
                                         {"type", "custom" },
                                         {"value", true }
                                     }
@@ -986,7 +987,7 @@ namespace OptimizelySDK.Tests.EventTests
             {
                 { "device_type", "iPhone" },
                 { "company", "Optimizely" },
-                {DecisionService.BUCKETING_ID_ATTRIBUTE, "variation" }
+                {ReservedAttribute.BUCKETING_ID_ATTRIBUTE, "variation" }
             };
             
             var logEvent = EventBuilder.CreateImpressionEvent(Config, Config.GetExperimentFromKey("test_experiment"), "7722370027", TestUserId, userAttributes);
@@ -1040,15 +1041,15 @@ namespace OptimizelySDK.Tests.EventTests
                                 {
                                     new Dictionary<string, object>
                                     {
-                                        {"entity_id", EventBuilder.USER_AGENT_ATTRIBUTE },
-                                        {"key", EventBuilder.USER_AGENT_ATTRIBUTE },
+                                        {"entity_id", ReservedAttribute.USER_AGENT_ATTRIBUTE },
+                                        {"key", ReservedAttribute.USER_AGENT_ATTRIBUTE },
                                         {"type", "custom" },
                                         {"value", "chrome"}
                                     },
                                     new Dictionary<string, object>
                                     {
-                                        {"entity_id", EventBuilder.BOT_FILTERING_ATTRIBUTE},
-                                        {"key", EventBuilder.BOT_FILTERING_ATTRIBUTE},
+                                        {"entity_id", ReservedAttribute.BOT_FILTERING_ATTRIBUTE},
+                                        {"key", ReservedAttribute.BOT_FILTERING_ATTRIBUTE},
                                         {"type", "custom" },
                                         {"value", true }
                                     }
@@ -1076,7 +1077,7 @@ namespace OptimizelySDK.Tests.EventTests
 
             var userAttributes = new UserAttributes
             {
-                {EventBuilder.USER_AGENT_ATTRIBUTE, "chrome" }
+                {ReservedAttribute.USER_AGENT_ATTRIBUTE, "chrome" }
             };
 
             var botFilteringEnabledConfig = Config;
@@ -1133,8 +1134,8 @@ namespace OptimizelySDK.Tests.EventTests
                                 {
                                     new Dictionary<string, object>
                                     {
-                                        {"entity_id", EventBuilder.USER_AGENT_ATTRIBUTE },
-                                        {"key", EventBuilder.USER_AGENT_ATTRIBUTE },
+                                        {"entity_id", ReservedAttribute.USER_AGENT_ATTRIBUTE },
+                                        {"key", ReservedAttribute.USER_AGENT_ATTRIBUTE },
                                         {"type", "custom" },
                                         {"value", "chrome"}
                                     }
@@ -1162,7 +1163,7 @@ namespace OptimizelySDK.Tests.EventTests
 
             var userAttributes = new UserAttributes
             {
-                {EventBuilder.USER_AGENT_ATTRIBUTE, "chrome" }
+                {ReservedAttribute.USER_AGENT_ATTRIBUTE, "chrome" }
             };
 
             var botFilteringDisabledConfig = Config;
@@ -1220,15 +1221,15 @@ namespace OptimizelySDK.Tests.EventTests
                                 {
                                     new Dictionary<string, object>
                                     {
-                                        {"entity_id", EventBuilder.USER_AGENT_ATTRIBUTE },
-                                        {"key", EventBuilder.USER_AGENT_ATTRIBUTE },
+                                        {"entity_id", ReservedAttribute.USER_AGENT_ATTRIBUTE },
+                                        {"key", ReservedAttribute.USER_AGENT_ATTRIBUTE },
                                         {"type", "custom" },
                                         {"value", "safari"}
                                     },
                                     new Dictionary<string, object>
                                     {
-                                        {"entity_id", EventBuilder.BOT_FILTERING_ATTRIBUTE},
-                                        {"key", EventBuilder.BOT_FILTERING_ATTRIBUTE},
+                                        {"entity_id", ReservedAttribute.BOT_FILTERING_ATTRIBUTE},
+                                        {"key", ReservedAttribute.BOT_FILTERING_ATTRIBUTE},
                                         {"type", "custom" },
                                         {"value", true }
                                     }
@@ -1256,7 +1257,7 @@ namespace OptimizelySDK.Tests.EventTests
 
             var userAttributes = new UserAttributes
             {
-                {EventBuilder.USER_AGENT_ATTRIBUTE, "safari" }
+                {ReservedAttribute.USER_AGENT_ATTRIBUTE, "safari" }
             };
             var experimentToVariationMap = new Dictionary<string, Variation>
             {
@@ -1317,8 +1318,8 @@ namespace OptimizelySDK.Tests.EventTests
                                 {
                                     new Dictionary<string, object>
                                     {
-                                        {"entity_id", EventBuilder.USER_AGENT_ATTRIBUTE },
-                                        {"key", EventBuilder.USER_AGENT_ATTRIBUTE },
+                                        {"entity_id", ReservedAttribute.USER_AGENT_ATTRIBUTE },
+                                        {"key", ReservedAttribute.USER_AGENT_ATTRIBUTE },
                                         {"type", "custom" },
                                         {"value", "safari"}
                                     }
@@ -1346,7 +1347,7 @@ namespace OptimizelySDK.Tests.EventTests
 
             var userAttributes = new UserAttributes
             {
-                {EventBuilder.USER_AGENT_ATTRIBUTE, "safari" }
+                {ReservedAttribute.USER_AGENT_ATTRIBUTE, "safari" }
             };
             var experimentToVariationMap = new Dictionary<string, Variation>
             {

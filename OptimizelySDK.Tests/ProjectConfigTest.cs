@@ -24,6 +24,7 @@ using NUnit.Framework;
 using OptimizelySDK.Entity;
 using Newtonsoft.Json;
 using OptimizelySDK.Event.Builder;
+using OptimizelySDK.Utils;
 
 namespace OptimizelySDK.Tests
 {
@@ -836,10 +837,10 @@ namespace OptimizelySDK.Tests
         public void TestGetAttributeIdWithReservedPrefix()
         {
             // Verify that attribute key is returned for reserved attribute key.
-            Assert.AreEqual(Config.GetAttributeId(EventBuilder.USER_AGENT_ATTRIBUTE), EventBuilder.USER_AGENT_ATTRIBUTE);
+            Assert.AreEqual(Config.GetAttributeId(ReservedAttribute.USER_AGENT_ATTRIBUTE), ReservedAttribute.USER_AGENT_ATTRIBUTE);
 
             // Verify that attribute Id is returned for attribute key with reserved prefix that does not exist in datafile.
-            Assert.AreEqual(Config.GetAttributeId(EventBuilder.USER_AGENT_ATTRIBUTE), EventBuilder.USER_AGENT_ATTRIBUTE);
+            Assert.AreEqual(Config.GetAttributeId("$opt_reserved_prefix_attribute"), "$opt_reserved_prefix_attribute");
 
             // Create config file copy with additional resered prefix attribute.
             string reservedPrefixAttrKey = "$opt_user_defined_attribute";

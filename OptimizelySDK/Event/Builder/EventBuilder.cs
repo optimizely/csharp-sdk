@@ -35,10 +35,6 @@ namespace OptimizelySDK.Event.Builder
 
         private const string ACTIVATE_EVENT_KEY = "campaign_activated";
 
-        public const string BOT_FILTERING_ATTRIBUTE = "$opt_bot_filtering";
-
-        public const string USER_AGENT_ATTRIBUTE = "$opt_user_agent";
-
         private static readonly Dictionary<string, string> HTTP_HEADERS = new Dictionary<string, string>
         {
             { "Content-Type", "application/json" },
@@ -122,8 +118,8 @@ namespace OptimizelySDK.Event.Builder
             {
                 userFeatures.Add(new Dictionary<string, object>
                 {
-                    { "entity_id", BOT_FILTERING_ATTRIBUTE },
-                    { "key", BOT_FILTERING_ATTRIBUTE },
+                    { "entity_id", ReservedAttribute.BOT_FILTERING_ATTRIBUTE },
+                    { "key", ReservedAttribute.BOT_FILTERING_ATTRIBUTE },
                     { "type", CUSTOM_ATTRIBUTE_FEATURE_TYPE },
                     { "value",  config.BotFiltering}
                 });

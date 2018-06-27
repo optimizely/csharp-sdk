@@ -28,6 +28,7 @@ using OptimizelySDK.Tests.UtilsTests;
 using OptimizelySDK.Bucketing;
 using OptimizelySDK.Notifications;
 using OptimizelySDK.Tests.NotificationTests;
+using OptimizelySDK.Utils;
 
 namespace OptimizelySDK.Tests
 {
@@ -1110,7 +1111,7 @@ namespace OptimizelySDK.Tests
                { "device_type", "iPhone" },
                { "company", "Optimizely" },
                { "location", "San Francisco" },
-               { DecisionService.BUCKETING_ID_ATTRIBUTE, testBucketingIdVariation }
+               { ReservedAttribute.BUCKETING_ID_ATTRIBUTE, testBucketingIdVariation }
             };
 
             // confirm that a valid variation is bucketed without the bucketing ID

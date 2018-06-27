@@ -148,6 +148,9 @@
     <Compile Include="..\OptimizelySDK\Utils\Validator.cs">
       <Link>Utils\Validator.cs</Link>
     </Compile>
+	<Compile Include="..\OptimizelySDK\Utils\ReservedAttribute.cs">
+      <Link>Utils\ReservedAttribute.cs</Link>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="..\OptimizelySDK\Bucketing\Bucketer.cs">
       <Link>Bucketing\Bucketer.cs</Link>
