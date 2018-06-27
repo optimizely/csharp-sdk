@@ -51,7 +51,7 @@ namespace OptimizelySDK
 
         public static String SDK_VERSION {
             get {
-                // Example output: "2.0.0" .  Should be kept in synch with NuGet package version.
+                // Example output: "2.0.1" .  Should be kept in synch with NuGet package version.
 #if NET35
                 Assembly assembly = Assembly.GetExecutingAssembly();
 #else
@@ -366,14 +366,12 @@ namespace OptimizelySDK
         /// <returns>True if feature is enabled, false or null otherwise</returns>
         public virtual bool IsFeatureEnabled(string featureKey, string userId, UserAttributes userAttributes = null)
         {
-            if (string.IsNullOrEmpty(userId))
-            {
+            if (string.IsNullOrEmpty(userId)) {
                 Logger.Log(LogLevel.ERROR, "User ID must not be empty.");
                 return false;
             }
 
-            if (string.IsNullOrEmpty(featureKey))
-            {
+            if (string.IsNullOrEmpty(featureKey)) {
                 Logger.Log(LogLevel.ERROR, "Feature flag key must not be empty.");
                 return false;
             }
@@ -386,19 +384,21 @@ namespace OptimizelySDK
                 return false;
 
             var decision = DecisionService.GetVariationForFeature(featureFlag, userId, userAttributes);
-            if (decision == null || !decision.Variation.IsFeatureEnabled)
-            {
-                Logger.Log(LogLevel.INFO, $@"Feature flag ""{featureKey}"" is not enabled for user ""{userId}"".");
-                return false;
+            if (decision != null) {
+                if (decision.Source == FeatureDecision.DECISION_SOURCE_EXPERIMENT) {
+                    SendImpressionEvent(decision.Experiment, decision.Variation, userId, userAttributes);
+                } else {
+                    Logger.Log(LogLevel.INFO, $@"The user ""{userId}"" is not being experimented on feature ""{featureKey}"".");
+                }
+                if (decision.Variation.IsFeatureEnabled) {
+                    Logger.Log(LogLevel.INFO, $@"Feature flag ""{featureKey}"" is enabled for user ""{userId}"".");
+                    return true;
+                }
             }
 
-            if (decision.Source == FeatureDecision.DECISION_SOURCE_EXPERIMENT)
-                SendImpressionEvent(decision.Experiment, decision.Variation, userId, userAttributes);
-            else
-                Logger.Log(LogLevel.INFO, $@"The user ""{userId}"" is not being experimented on feature ""{featureKey}"".");
 
-            Logger.Log(LogLevel.INFO, $@"Feature flag ""{featureKey}"" is enabled for user ""{userId}"".");
-            return true;
+            Logger.Log(LogLevel.INFO, $@"Feature flag ""{featureKey}"" is not enabled for user ""{userId}"".");
+            return false;
         }
 
         /// <summary>
