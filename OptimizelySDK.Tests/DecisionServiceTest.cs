@@ -22,6 +22,7 @@ using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Entity;
 using NUnit.Framework;
 using OptimizelySDK.Bucketing;
+using OptimizelySDK.Utils;
 
 namespace OptimizelySDK.Tests
 {
@@ -388,13 +389,13 @@ namespace OptimizelySDK.Tests
                 {"device_type", "iPhone"},
                 {"company", "Optimizely"},
                 {"location", "San Francisco"},
-                {DecisionService.RESERVED_ATTRIBUTE_KEY_BUCKETING_ID, testBucketingIdVariation}
+                {ControlAttributes.BUCKETING_ID_ATTRIBUTE, testBucketingIdVariation}
             };
 
             var invalidUserAttributesWithBucketingId = new UserAttributes
             {
                 {"company", "Optimizely"},
-                {DecisionService.RESERVED_ATTRIBUTE_KEY_BUCKETING_ID, testBucketingIdControl}
+                {ControlAttributes.BUCKETING_ID_ATTRIBUTE, testBucketingIdControl}
             };
 
             var optlyObject = new Optimizely(TestData.Datafile, new ValidEventDispatcher(), LoggerMock.Object);

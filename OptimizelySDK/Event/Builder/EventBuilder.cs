@@ -35,8 +35,6 @@ namespace OptimizelySDK.Event.Builder
 
         private const string ACTIVATE_EVENT_KEY = "campaign_activated";
 
-        public const string RESERVED_ATTRIBUTE_KEY_BUCKETING_ID_EVENT_PARAM_KEY = "optimizely_bucketing_id";
-
         private static readonly Dictionary<string, string> HTTP_HEADERS = new Dictionary<string, string>
         {
             { "Content-Type", "application/json" },
@@ -103,37 +101,31 @@ namespace OptimizelySDK.Event.Builder
 
             foreach (var userAttribute in userAttributes.Where(a => !string.IsNullOrEmpty(a.Key)))
             {
-                if (string.Equals(userAttribute.Key, DecisionService.RESERVED_ATTRIBUTE_KEY_BUCKETING_ID))
+                var attributeId = config.GetAttributeId(userAttribute.Key);
+                if (!string.IsNullOrEmpty(attributeId))
                 {
-                    var userFeature = new Dictionary<string, object>
+                    userFeatures.Add(new Dictionary<string, object>
                     {
-                        { "entity_id", DecisionService.RESERVED_ATTRIBUTE_KEY_BUCKETING_ID },
-                        { "key", RESERVED_ATTRIBUTE_KEY_BUCKETING_ID_EVENT_PARAM_KEY },
+                        { "entity_id", attributeId },
+                        { "key", userAttribute.Key },
                         { "type", CUSTOM_ATTRIBUTE_FEATURE_TYPE },
                         { "value", userAttribute.Value}
-                    };
-                    userFeatures.Add(userFeature);
-                }
-                else
-                {
-                    var attributeEntity = config.GetAttribute(userAttribute.Key);
-                    if (attributeEntity != null && attributeEntity.Key != null)
-                    {
-                        var userFeature = new Dictionary<string, object>
-                        {
-                            { "entity_id", attributeEntity.Id },
-                            { "key", attributeEntity.Key },
-                            { "type", CUSTOM_ATTRIBUTE_FEATURE_TYPE },
-                            { "value",  userAttribute.Value}
-                        };
-                        userFeatures.Add(userFeature);
-                    }
+                    });
                 }
             }
 
-
+            if (config.BotFiltering.HasValue)
+            {
+                userFeatures.Add(new Dictionary<string, object>
+                {
+                    { "entity_id", ControlAttributes.BOT_FILTERING_ATTRIBUTE },
+                    { "key", ControlAttributes.BOT_FILTERING_ATTRIBUTE },
+                    { "type", CUSTOM_ATTRIBUTE_FEATURE_TYPE },
+                    { "value",  config.BotFiltering}
+                });
+            }
+            
             visitor["attributes"] = userFeatures;
-
             return comonParams;
         }
 

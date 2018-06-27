@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2017-2018, Optimizely
+ * Copyright 2018, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,18 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-namespace OptimizelySDK.Logger
-{
-    public enum LogLevel
-    {
-        DEBUG,
-        INFO,
-        WARN,
-        ERROR,
-    }
 
-    public interface ILogger
+namespace OptimizelySDK.Utils
+{
+    public class ControlAttributes
     {
-        void Log(LogLevel level, string message);
+        public const string BOT_FILTERING_ATTRIBUTE = "$opt_bot_filtering";
+        public const string BUCKETING_ID_ATTRIBUTE  = "$opt_bucketing_id";
+        public const string USER_AGENT_ATTRIBUTE    = "$opt_user_agent";
     }
 }
