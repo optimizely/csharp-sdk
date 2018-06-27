@@ -399,9 +399,9 @@ namespace OptimizelySDK.Bucketing
             string bucketingId = userId;
 
             // If the bucketing ID key is defined in attributes, then use that in place of the userID for the murmur hash key
-            if (filteredAttributes != null && filteredAttributes.ContainsKey(ReservedAttribute.BUCKETING_ID_ATTRIBUTE))
+            if (filteredAttributes != null && filteredAttributes.ContainsKey(ControlAttributes.BUCKETING_ID_ATTRIBUTE))
             {
-                bucketingId = filteredAttributes[ReservedAttribute.BUCKETING_ID_ATTRIBUTE];
+                bucketingId = filteredAttributes[ControlAttributes.BUCKETING_ID_ATTRIBUTE];
                 Logger.Log(LogLevel.DEBUG, string.Format("Setting the bucketing ID to \"{0}\"", bucketingId));
             }
 

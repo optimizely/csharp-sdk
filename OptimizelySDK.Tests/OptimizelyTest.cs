@@ -1112,7 +1112,7 @@ namespace OptimizelySDK.Tests
                { "device_type", "iPhone" },
                { "company", "Optimizely" },
                { "location", "San Francisco" },
-               { ReservedAttribute.BUCKETING_ID_ATTRIBUTE, testBucketingIdVariation }
+               { ControlAttributes.BUCKETING_ID_ATTRIBUTE, testBucketingIdVariation }
             };
 
             // confirm that a valid variation is bucketed without the bucketing ID

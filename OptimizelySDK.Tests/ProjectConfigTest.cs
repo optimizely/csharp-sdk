@@ -837,7 +837,7 @@ namespace OptimizelySDK.Tests
         public void TestGetAttributeIdWithReservedPrefix()
         {
             // Verify that attribute key is returned for reserved attribute key.
-            Assert.AreEqual(Config.GetAttributeId(ReservedAttribute.USER_AGENT_ATTRIBUTE), ReservedAttribute.USER_AGENT_ATTRIBUTE);
+            Assert.AreEqual(Config.GetAttributeId(ControlAttributes.USER_AGENT_ATTRIBUTE), ControlAttributes.USER_AGENT_ATTRIBUTE);
 
             // Verify that attribute Id is returned for attribute key with reserved prefix that does not exist in datafile.
             Assert.AreEqual(Config.GetAttributeId("$opt_reserved_prefix_attribute"), "$opt_reserved_prefix_attribute");

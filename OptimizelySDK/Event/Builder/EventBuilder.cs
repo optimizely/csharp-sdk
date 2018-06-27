@@ -118,8 +118,8 @@ namespace OptimizelySDK.Event.Builder
             {
                 userFeatures.Add(new Dictionary<string, object>
                 {
-                    { "entity_id", ReservedAttribute.BOT_FILTERING_ATTRIBUTE },
-                    { "key", ReservedAttribute.BOT_FILTERING_ATTRIBUTE },
+                    { "entity_id", ControlAttributes.BOT_FILTERING_ATTRIBUTE },
+                    { "key", ControlAttributes.BOT_FILTERING_ATTRIBUTE },
                     { "type", CUSTOM_ATTRIBUTE_FEATURE_TYPE },
                     { "value",  config.BotFiltering}
                 });
