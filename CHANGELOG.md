@@ -1,3 +1,9 @@
+## 2.1.0
+June 28, 2018
+
+### New Features
+* Introduces support for bot filtering. ([#79](https://github.com/optimizely/csharp-sdk/pull/79))
+
 ## 2.0.1
 June 20, 2018
 
