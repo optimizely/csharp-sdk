@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2017, Optimizely
+ * Copyright 2017-2018, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,9 @@ using Newtonsoft.Json.Linq;
 using OptimizelySDK.Exceptions;
 using NUnit.Framework;
 using OptimizelySDK.Entity;
+using Newtonsoft.Json;
+using OptimizelySDK.Event.Builder;
+using OptimizelySDK.Utils;
 
 namespace OptimizelySDK.Tests
 {
@@ -51,14 +54,14 @@ namespace OptimizelySDK.Tests
         public void TestInit()
         {
             // Check Version
-            Assert.AreEqual(4, Config.Version);
+            Assert.AreEqual("4", Config.Version);
 
             // Check Account ID
             Assert.AreEqual("1592310167", Config.AccountId);
             // Check Project ID
             Assert.AreEqual("7720880029", Config.ProjectId);
             // Check Revision 
-            Assert.AreEqual(15, Config.Revision);
+            Assert.AreEqual("15", Config.Revision);
 
             // Check Group ID Map
             var expectedGroupId = CreateDictionary("7722400015", Config.GetGroup("7722400015"));
@@ -809,6 +812,56 @@ namespace OptimizelySDK.Tests
             // Verify that featureEnabled property of variation is false if not defined.
             var variation = Config.GetVariationFromKey("test_experiment", "control");
             Assert.IsFalse(variation.IsFeatureEnabled);
+        }
+
+        [Test]
+        public void TestBotFilteringValues()
+        {
+            // Verify that bot filtering value is true as defined in Config data.
+            Assert.True(Config.BotFiltering.GetValueOrDefault());
+
+            // Remove botFilering node and verify returned value in null.
+            JObject projConfig = JObject.Parse(TestData.Datafile);
+            if (projConfig.TryGetValue("botFiltering", out JToken token))
+            {
+                projConfig.Property("botFiltering").Remove();
+                var configWithoutBotFilter = ProjectConfig.Create(JsonConvert.SerializeObject(projConfig),
+                    LoggerMock.Object, ErrorHandlerMock.Object);
+
+                // Verify that bot filtering is null when not defined in datafile.
+                Assert.Null(configWithoutBotFilter.BotFiltering);
+            }
+        }
+
+        [Test]
+        public void TestGetAttributeIdWithReservedPrefix()
+        {
+            // Verify that attribute key is returned for reserved attribute key.
+            Assert.AreEqual(Config.GetAttributeId(ControlAttributes.USER_AGENT_ATTRIBUTE), ControlAttributes.USER_AGENT_ATTRIBUTE);
+
+            // Verify that attribute Id is returned for attribute key with reserved prefix that does not exist in datafile.
+            Assert.AreEqual(Config.GetAttributeId("$opt_reserved_prefix_attribute"), "$opt_reserved_prefix_attribute");
+
+            // Create config file copy with additional resered prefix attribute.
+            string reservedPrefixAttrKey = "$opt_user_defined_attribute";
+            JObject projConfig = JObject.Parse(TestData.Datafile);
+            var attributes = (JArray)projConfig["attributes"];
+
+            var reservedAttr = new Entity.Attribute { Id = "7723348204", Key = reservedPrefixAttrKey };
+            attributes.Add((JObject)JToken.FromObject(reservedAttr));
+
+            // Verify that attribute Id is returned and warning is logged for attribute key with reserved prefix that exists in datafile.
+            var reservedAttrConfig = ProjectConfig.Create(JsonConvert.SerializeObject(projConfig), LoggerMock.Object, ErrorHandlerMock.Object);
+            Assert.AreEqual(reservedAttrConfig.GetAttributeId(reservedPrefixAttrKey), reservedAttrConfig.GetAttribute(reservedPrefixAttrKey).Id);
+            LoggerMock.Verify(l => l.Log(LogLevel.WARN, $@"Attribute {reservedPrefixAttrKey} unexpectedly has reserved prefix {ProjectConfig.RESERVED_ATTRIBUTE_PREFIX}; using attribute ID instead of reserved attribute name."));
+        }
+
+        [Test]
+        public void TestGetAttributeIdWithInvalidAttributeKey()
+        {
+            // Verify that null is returned when provided attribute key is invalid.
+            Assert.Null(Config.GetAttributeId("invalid_attribute"));
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, @"Attribute key ""invalid_attribute"" is not in datafile."));
         }
     }
 }
