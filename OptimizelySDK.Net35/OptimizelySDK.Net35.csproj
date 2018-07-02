@@ -151,6 +151,9 @@
 	<Compile Include="..\OptimizelySDK\Utils\ControlAttributes.cs">
       <Link>Utils\ControlAttributes.cs</Link>
     </Compile>
+	<Compile Include="..\OptimizelySDK\Utils\ExtensionMethods.cs">
+      <Link>Utils\ExtensionMethods.cs</Link>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="..\OptimizelySDK\Bucketing\Bucketer.cs">
       <Link>Bucketing\Bucketer.cs</Link>
