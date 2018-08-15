@@ -76,7 +76,7 @@ namespace OptimizelySDK
         public const string EVENT_KEY = "Event Key";
 
         /// <summary>
-        /// Optimizely constructor for managing Full Stack .NET projects.
+        /// Optimizely constructor for managing Full Stack .NET projects. (Main method)
         /// </summary>
         /// <param name="datafile">string JSON string representing the project</param>
         /// <param name="eventDispatcher">EventDispatcherInterface</param>
