@@ -20,6 +20,9 @@ namespace OptimizelySDK
 {
 	public interface IOptimizely
 	{
+		/// <summary>
+		/// Returns true if the IOptimizely instance was initialized with a valid datafile
+		/// </summary>
 		bool IsValid { get; }
 
 		/// <summary>
@@ -67,27 +70,17 @@ namespace OptimizelySDK
 		/// <returns>null|string The variation key.</returns>
 		Variation GetForcedVariation(string experimentKey, string userId);
 
+		#region  FeatureFlag APIs
+
 		/// <summary>
 		/// Determine whether a feature is enabled.
 		/// Send an impression event if the user is bucketed into an experiment using the feature.
 		/// </summary>
-		/// <param name="featureKey">The experiment key</param>
+		/// <param name="featureKey">The feature key</param>
 		/// <param name="userId">The user ID</param>
 		/// <param name="userAttributes">The user's attributes.</param>
 		/// <returns>True if feature is enabled, false or null otherwise</returns>
 		bool IsFeatureEnabled(string featureKey, string userId, UserAttributes userAttributes = null);
-
-		/// <summary>
-		/// Gets the feature variable value for given type.
-		/// </summary>
-		/// <param name="featureKey">The feature flag key</param>
-		/// <param name="variableKey">The variable key</param>
-		/// <param name="userId">The user ID</param>
-		/// <param name="userAttributes">The user's attributes</param>
-		/// <param name="variableType">Variable type</param>
-		/// <returns>string | null Feature variable value</returns>
-		string GetFeatureVariableValueForType(string featureKey, string variableKey, string userId, 
-			UserAttributes userAttributes, FeatureVariable.VariableType variableType);
 
 		/// <summary>
 		/// Gets boolean feature variable value.
@@ -136,5 +129,7 @@ namespace OptimizelySDK
 		/// <param name="userAttributes">The user's attributes</param>
 		/// <returns>List of the feature keys that are enabled for the user.</returns>
 		List<string> GetEnabledFeatures(string userId, UserAttributes userAttributes = null);
+
+		#endregion
 	}
 }
