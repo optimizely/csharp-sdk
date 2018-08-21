@@ -166,30 +166,6 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
-        public void TestBucketValidExperimentNotInGroupUserInForcedVariation()
-        {
-            var bucketer = new Bucketer(LoggerMock.Object);
-
-            Assert.AreEqual(new Variation { Id = "7722370027", Key = "control" },
-                bucketer.Bucket(Config, Config.GetExperimentFromKey("test_experiment"), TestBucketingIdControl, "user1"));
-
-            LoggerMock.Verify(l => l.Log(LogLevel.INFO, "User [user1] is forced into variation [control]."));
-            LoggerMock.Verify(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()), Times.Exactly(1));
-        }
-
-        [Test]
-        public void TestBucketValidExperimentInGroupUserInForcedVariation()
-        {
-            var bucketer = new Bucketer(LoggerMock.Object);
-
-            Assert.AreEqual(new Variation { Id = "7722260071", Key = "group_exp_1_var_1" },
-                bucketer.Bucket(Config, Config.GetExperimentFromKey("group_experiment_1"), TestBucketingIdControl, "user1"));
-
-            LoggerMock.Verify(l => l.Log(LogLevel.INFO, "User [user1] is forced into variation [group_exp_1_var_1]."));
-            LoggerMock.Verify(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()), Times.Exactly(1));
-        }
-
-        [Test]
         public void TestBucketWithBucketingId()
         {
             var bucketer = new Bucketer(LoggerMock.Object);
