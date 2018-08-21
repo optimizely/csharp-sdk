@@ -116,6 +116,9 @@
     <Compile Include="..\OptimizelySDK\Exceptions\OptimizelyException.cs">
       <Link>Exceptions\OptimizelyException.cs</Link>
     </Compile>
+    <Compile Include="..\OptimizelySDK\IOptimizely.cs">
+      <Link>IOptimizely.cs</Link>
+    </Compile>
     <Compile Include="..\OptimizelySDK\Logger\DefaultLogger.cs">
       <Link>Logger\DefaultLogger.cs</Link>
     </Compile>

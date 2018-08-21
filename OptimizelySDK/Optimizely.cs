@@ -27,7 +27,7 @@ using System.Reflection;
 
 namespace OptimizelySDK
 {
-    public class Optimizely
+    public class Optimizely : IOptimizely
     {
         private Bucketer Bucketer;
 
@@ -152,7 +152,7 @@ namespace OptimizelySDK
         /// </summary>
         /// <param name="experimentKey">experimentKey string Key identifying the experiment</param>
         /// <param name="userId">string ID for user</param>
-        /// <param name="attributes">associative array of Attributes for the user</param>
+        /// <param name="userAttributes">associative array of Attributes for the user</param>
         /// <returns>null|Variation Representing variation</returns>
         public Variation Activate(string experimentKey, string userId, UserAttributes userAttributes = null)
         {
@@ -360,7 +360,7 @@ namespace OptimizelySDK
         /// Determine whether a feature is enabled.
         /// Send an impression event if the user is bucketed into an experiment using the feature.
         /// </summary>
-        /// <param name="experimentKey">The experiment key</param>
+        /// <param name="featureKey">The feature key</param>
         /// <param name="userId">The user ID</param>
         /// <param name="userAttributes">The user's attributes.</param>
         /// <returns>True if feature is enabled, false or null otherwise</returns>
