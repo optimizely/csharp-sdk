@@ -24,12 +24,21 @@ namespace OptimizelySDK.Tests
     public class TestData
     {
         private static string cachedDataFile = null;
-        
+        private static string multiEventExperimentCachedDataFile = null;
+
         public static string Datafile
         {
             get
             {
                 return cachedDataFile ?? (cachedDataFile = LoadJsonData());
+            }
+        }
+
+        public static string MultiEventExperimentDatafile
+        {
+            get 
+            {
+                return multiEventExperimentCachedDataFile ?? (multiEventExperimentCachedDataFile = LoadJsonData("MultiEventCachedData.json"));                
             }
         }
         
