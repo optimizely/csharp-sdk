@@ -1370,7 +1370,7 @@ namespace OptimizelySDK.Tests.EventTests
             var guid = Guid.NewGuid();
             var timeStamp = TestData.SecondsSince1970();
             
-            var eventInMultiExperimentConfig = ProjectConfig.Create(TestData.MultiEventExperimentDatafile, new NoOpLogger(), new ErrorHandler.NoOpErrorHandler());
+            var eventInMultiExperimentConfig = ProjectConfig.Create(TestData.SimpleABExperimentsDatafile, new NoOpLogger(), new ErrorHandler.NoOpErrorHandler());
 
             var experimentIdVariationMap = new Dictionary<string, Variation>
             {
@@ -1382,7 +1382,7 @@ namespace OptimizelySDK.Tests.EventTests
                 }
             };
 
-            var logEvent = EventBuilder.CreateConversionEvent(eventInMultiExperimentConfig, "test_event", experimentIdVariationMap, "test_user",
+            var logEvent = EventBuilder.CreateConversionEvent(eventInMultiExperimentConfig, "event_with_multiple_running_experiments", experimentIdVariationMap, "test_user",
                                                               new UserAttributes {
                                                                 {"test_attribute", "test_value"}
                                                               },
@@ -1457,7 +1457,7 @@ namespace OptimizelySDK.Tests.EventTests
                                                     {"timestamp", timeStamp},
                                                     {"revenue", 4200},
                                                     {"value", 1.234},
-                                                    {"key", "test_event"},
+                                                    {"key", "event_with_multiple_running_experiments"},
                                                     {"entity_id", "111095"},
                                                     {
                                                         "tags", new Dictionary<string, object>

@@ -94,7 +94,7 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="TestData.json" />
-    <EmbeddedResource Include="MultiEventCachedData.json" />
+    <EmbeddedResource Include="simple_ab_experiments.json" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\OptimizelySDK\OptimizelySDK.csproj">

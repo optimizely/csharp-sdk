@@ -24,7 +24,7 @@ namespace OptimizelySDK.Tests
     public class TestData
     {
         private static string cachedDataFile = null;
-        private static string multiEventExperimentCachedDataFile = null;
+        private static string simpleABExperimentsDatafile = null;
 
         public static string Datafile
         {
@@ -34,11 +34,11 @@ namespace OptimizelySDK.Tests
             }
         }
 
-        public static string MultiEventExperimentDatafile
+        public static string SimpleABExperimentsDatafile
         {
             get 
             {
-                return multiEventExperimentCachedDataFile ?? (multiEventExperimentCachedDataFile = LoadJsonData("MultiEventCachedData.json"));                
+                return simpleABExperimentsDatafile ?? (simpleABExperimentsDatafile = LoadJsonData("simple_ab_experiments.json"));                
             }
         }
         

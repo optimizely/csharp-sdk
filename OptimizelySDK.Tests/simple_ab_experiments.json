@@ -9,13 +9,6 @@
         "111130"
       ],
       "id": "111095"
-    },
-    {
-      "key": "event_with_single_running_experiment",
-      "experimentIds": [
-        "111127"
-      ],
-      "id": "111096"
     }
   ],
   "experiments": [
