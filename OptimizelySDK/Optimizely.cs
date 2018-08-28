@@ -111,9 +111,15 @@ namespace OptimizelySDK
                 IsValid = true;
                 DecisionService = new DecisionService(Bucketer, ErrorHandler, Config, userProfileService, Logger);
             }
+            catch (OptimizelySDK.Exceptions.ConfigParseException parseException)
+            {
+                Logger.Log(LogLevel.ERROR, parseException.Message);
+                ErrorHandler.HandleError(parseException);
+            }
             catch (Exception ex)
             {
                 Logger.Log(LogLevel.ERROR, "Provided 'datafile' is in an invalid format. " + ex.Message);
+                ErrorHandler.HandleError(ex);
             }
         }
 

@@ -25,6 +25,11 @@ namespace OptimizelySDK
 {
     public class ProjectConfig
     {
+        public enum OPTLYSDKVersion {
+            V2 = 2,
+            V3 = 3,
+            V4 = 4
+        }
         public const string RESERVED_ATTRIBUTE_PREFIX = "$opt_";
 
         /// <summary>
@@ -59,6 +64,14 @@ namespace OptimizelySDK
         /// Bot filtering flag.
         /// </summary>
         public bool? BotFiltering { get; set; }
+
+
+        private static List<OPTLYSDKVersion> SupportedVersions = new List<OPTLYSDKVersion> {
+            OPTLYSDKVersion.V2,
+            OPTLYSDKVersion.V3,
+            OPTLYSDKVersion.V4
+        };
+
 
         //========================= Mappings ===========================
 
@@ -272,13 +285,27 @@ namespace OptimizelySDK
         {
             ProjectConfig config = JsonConvert.DeserializeObject<ProjectConfig>(content);
 
+            ValidateSupport(config);
+
             config.Logger = logger;
             config.ErrorHandler = errorHandler;
+
+
 
             config.Initialize();
 
             return config;
         }
+
+        public static void ValidateSupport(ProjectConfig config)
+        {            
+            if(SupportedVersions.TrueForAll((obj) => !(obj.ToString() == config.Version)))
+            {
+                throw new Exceptions.ConfigParseException(string.Format(@"This version of the C# SDK does not support the given datafile version: {0}", config.Version));
+            }
+        }
+
+
 
 
         //========================= Getters ===========================
