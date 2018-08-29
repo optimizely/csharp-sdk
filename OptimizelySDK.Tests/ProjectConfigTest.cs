@@ -863,5 +863,36 @@ namespace OptimizelySDK.Tests
             Assert.Null(Config.GetAttributeId("invalid_attribute"));
             LoggerMock.Verify(l => l.Log(LogLevel.ERROR, @"Attribute key ""invalid_attribute"" is not in datafile."));
         }
+
+        [Test]
+        public void TestCreateThrowsWithNullDatafile()
+        {
+            var exception = Assert.Throws<ConfigParseException>(() => ProjectConfig.Create(null, null, null));
+            Assert.AreEqual("Unable to parse null datafile.", exception.Message);
+        }
+
+        [Test]
+        public void TestCreateThrowsWithEmptyDatafile()
+        {
+            var exception = Assert.Throws<ConfigParseException>(() => ProjectConfig.Create("", null, null));
+            Assert.AreEqual("Unable to parse empty datafile.", exception.Message);
+        }
+
+        [Test]
+        public void TestCreateThrowsWithUnsopportedDatafileVersion()
+        {
+            var unsupportedConfig = ProjectConfig.Create(TestData.Datafile, null, null);
+            unsupportedConfig.Version = "5";
+            var unsupportedConfigData = JsonConvert.SerializeObject(unsupportedConfig);
+
+            var exception = Assert.Throws<ConfigParseException>(() => ProjectConfig.Create(unsupportedConfigData, null, null));
+            Assert.AreEqual("This version of the C# SDK does not support the given datafile version: 5", exception.Message);
+        }
+
+        [Test]
+        public void TestCreateDoesNotThrowWithValidDatafile()
+        {
+            Assert.DoesNotThrow(() => ProjectConfig.Create(TestData.Datafile, null, null));
+        }
     }
 }

@@ -18,6 +18,7 @@ using OptimizelySDK.Entity;
 using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Event.Builder;
 using OptimizelySDK.Event.Dispatcher;
+using OptimizelySDK.Exceptions;
 using OptimizelySDK.Logger;
 using OptimizelySDK.Utils;
 using OptimizelySDK.Notifications;
@@ -111,10 +112,10 @@ namespace OptimizelySDK
                 IsValid = true;
                 DecisionService = new DecisionService(Bucketer, ErrorHandler, Config, userProfileService, Logger);
             }
-            catch (OptimizelySDK.Exceptions.ConfigParseException parseException)
+            catch (ConfigParseException configException)
             {
-                Logger.Log(LogLevel.ERROR, parseException.Message);
-                ErrorHandler.HandleError(parseException);
+                Logger.Log(LogLevel.ERROR, configException.Message);
+                ErrorHandler.HandleError(configException);
             }
             catch (Exception ex)
             {

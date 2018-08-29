@@ -185,7 +185,7 @@ namespace OptimizelySDK.Tests
         {
             string datafile = "{\"name\":\"optimizely\"}";
             Optimizely optimizely = new Optimizely(datafile, null, null, null, skipJsonValidation: true);
-            Assert.IsTrue(optimizely.IsValid);
+            Assert.IsFalse(optimizely.IsValid);
         }
 
         [Test]
