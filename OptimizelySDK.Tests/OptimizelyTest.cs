@@ -29,6 +29,7 @@ using OptimizelySDK.Bucketing;
 using OptimizelySDK.Notifications;
 using OptimizelySDK.Tests.NotificationTests;
 using OptimizelySDK.Utils;
+using Newtonsoft.Json;
 
 namespace OptimizelySDK.Tests
 {
@@ -186,6 +187,26 @@ namespace OptimizelySDK.Tests
             string datafile = "{\"name\":\"optimizely\"}";
             Optimizely optimizely = new Optimizely(datafile, null, null, null, skipJsonValidation: true);
             Assert.IsFalse(optimizely.IsValid);
+        }
+
+        [Test]
+        public void TestErrorHandlingWithInvalidConfigVersion()
+        {
+            var unsupportedConfig = JsonConvert.DeserializeObject<ProjectConfig>(TestData.Datafile);
+            unsupportedConfig.Version = "5";
+            var unsupportedConfigData = JsonConvert.SerializeObject(unsupportedConfig);
+
+            var optimizelyNullDatafile = new Optimizely(null, null, LoggerMock.Object, ErrorHandlerMock.Object, null, true);
+            var optimizelyEmptyDatafile = new Optimizely("", null, LoggerMock.Object, ErrorHandlerMock.Object, null, true);
+            var optimizelyUnsupportedVersion = new Optimizely(unsupportedConfigData, null, LoggerMock.Object, ErrorHandlerMock.Object, null, true);
+
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Unable to parse null datafile."), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Unable to parse empty datafile."), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, $"This version of the C# SDK does not support the given datafile version: {unsupportedConfig.Version}"), Times.Once);
+
+            ErrorHandlerMock.Verify(e => e.HandleError(It.Is<ConfigParseException>(ex => ex.Message == "Unable to parse null datafile.")), Times.Once);
+            ErrorHandlerMock.Verify(e => e.HandleError(It.Is<ConfigParseException>(ex => ex.Message == "Unable to parse null datafile.")), Times.Once);
+            ErrorHandlerMock.Verify(e => e.HandleError(It.Is<ConfigParseException>(ex => ex.Message == $"This version of the C# SDK does not support the given datafile version: {unsupportedConfig.Version}")), Times.Once);
         }
 
         [Test]

@@ -301,7 +301,7 @@ namespace OptimizelySDK
             if (configData == null)
                 throw new ConfigParseException("Unable to parse null datafile.");
 
-            if (configData.Length == 0)
+            if (string.IsNullOrEmpty(configData))
                 throw new ConfigParseException("Unable to parse empty datafile.");
 
             var config = JsonConvert.DeserializeObject<ProjectConfig>(configData);
