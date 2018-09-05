@@ -881,12 +881,8 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestCreateThrowsWithUnsupportedDatafileVersion()
         {
-            var unsupportedConfig = JsonConvert.DeserializeObject<ProjectConfig>(TestData.Datafile);
-            unsupportedConfig.Version = "5";
-            var unsupportedConfigData = JsonConvert.SerializeObject(unsupportedConfig);
-
-            var exception = Assert.Throws<ConfigParseException>(() => ProjectConfig.Create(unsupportedConfigData, null, null));
-            Assert.AreEqual($"This version of the C# SDK does not support the given datafile version: {unsupportedConfig.Version}", exception.Message);
+            var exception = Assert.Throws<ConfigParseException>(() => ProjectConfig.Create(TestData.UnsupportedVersionDatafile, null, null));
+            Assert.AreEqual($"This version of the C# SDK does not support the given datafile version: 5", exception.Message);
         }
 
         [Test]

@@ -306,14 +306,11 @@ namespace OptimizelySDK
 
             var config = JsonConvert.DeserializeObject<ProjectConfig>(configData);
 
-            if (SupportedVersions.TrueForAll((obj) => !(((int)obj).ToString() == config.Version)))
+            if (SupportedVersions.TrueForAll((supportedVersion) => !(((int)supportedVersion).ToString() == config.Version)))
                 throw new ConfigParseException(string.Format(@"This version of the C# SDK does not support the given datafile version: {0}", config.Version));
 
             return config;
         }
-
-
-
 
         //========================= Getters ===========================
 
