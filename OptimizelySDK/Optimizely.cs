@@ -18,6 +18,7 @@ using OptimizelySDK.Entity;
 using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Event.Builder;
 using OptimizelySDK.Event.Dispatcher;
+using OptimizelySDK.Exceptions;
 using OptimizelySDK.Logger;
 using OptimizelySDK.Utils;
 using OptimizelySDK.Notifications;
@@ -113,7 +114,14 @@ namespace OptimizelySDK
             }
             catch (Exception ex)
             {
-                Logger.Log(LogLevel.ERROR, "Provided 'datafile' is in an invalid format. " + ex.Message);
+                string error = String.Empty;
+                if (ex.GetType() == typeof(ConfigParseException))
+                    error = ex.Message;
+                else
+                    error = "Provided 'datafile' is in an invalid format. " + ex.Message;
+
+                Logger.Log(LogLevel.ERROR, error);
+                ErrorHandler.HandleError(ex);
             }
         }
 
