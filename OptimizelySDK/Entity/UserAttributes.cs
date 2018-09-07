@@ -18,12 +18,12 @@ using OptimizelySDK.Logger;
 
 namespace OptimizelySDK.Entity
 {
-    public class UserAttributes : Dictionary<string, string>
+    public class UserAttributes : Dictionary<string, object>
     {
         public UserAttributes FilterNullValues(ILogger logger)
         {
             UserAttributes answer = new UserAttributes();
-            foreach (KeyValuePair<string, string> pair in this) {
+            foreach (KeyValuePair<string, object> pair in this) {
                 if (pair.Value != null) {
                     answer[pair.Key] = pair.Value;
                 } else {

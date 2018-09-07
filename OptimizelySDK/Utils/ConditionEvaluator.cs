@@ -71,7 +71,7 @@ namespace OptimizelySDK.Utils
 
             string conditionName = conditions["name"].ToString();
             return userAttributes != null && userAttributes.ContainsKey(conditionName) 
-                && userAttributes[conditionName] == conditions["value"].ToString();
+                && userAttributes[conditionName].ToString() == conditions["value"].ToString();
         }
 
         public bool Evaluate(object[] conditions, UserAttributes userAttributes)
