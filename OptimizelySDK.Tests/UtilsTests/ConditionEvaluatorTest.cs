@@ -83,5 +83,20 @@ namespace OptimizelySDK.Tests.UtilsTests
             Assert.IsFalse(ConditionEvaluator.Evaluate(Conditions, userAttributes));
         }
 
+        [Test]
+        public void TestTypedUserAttributesEvaluateTrue()
+        {
+            var userAttributes = new UserAttributes
+            {
+                {"device_type", "iPhone" },
+                {"is_firefox", false },
+                {"num_users", 15 },
+                {"pi_value", 3.14 }
+            };
+
+            string typedConditionStr = @"[""and"", [""or"", [""or"", {""name"": ""device_type"", ""type"": ""custom_attribute"", ""value"": ""iPhone""}]], [""or"", [""or"", {""name"": ""is_firefox"", ""type"": ""custom_attribute"", ""value"": false}]], [""or"", [""or"", {""name"": ""num_users"", ""type"": ""custom_attribute"", ""value"": 15}]], [""or"", [""or"", {""name"": ""pi_value"", ""type"": ""custom_attribute"", ""value"": 3.14}]]]";
+            var typedConditions = Newtonsoft.Json.JsonConvert.DeserializeObject<object[]>(typedConditionStr);
+            Assert.IsTrue(ConditionEvaluator.Evaluate(typedConditions, userAttributes));
+        }
     }
 }
