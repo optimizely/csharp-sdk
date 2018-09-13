@@ -216,6 +216,119 @@ namespace OptimizelySDK.Tests.EventTests
         }
 
         [Test]
+        public void TestCreateImpressionEventWithTypedAttributes()
+        {
+            var guid = Guid.NewGuid();
+            var timeStamp = TestData.SecondsSince1970();
+
+            var payloadParams = new Dictionary<string, object>
+            {
+                { "visitors", new object[]
+                    {
+                        new Dictionary<string, object>()
+                        {
+                            { "snapshots", new object[]
+                                {
+                                    new Dictionary<string, object>
+                                    {
+                                        { "decisions", new object[]
+                                            {
+                                                new Dictionary<string, object>
+                                                {
+                                                    {"campaign_id", "7719770039" },
+                                                    {"experiment_id", "7716830082" },
+                                                    {"variation_id", "7722370027" }
+                                                }
+                                            }
+                                        },
+                                        { "events", new object[]
+                                            {
+                                                new Dictionary<string, object>
+                                                {
+                                                    {"entity_id", "7719770039" },
+                                                    {"timestamp", timeStamp },
+                                                    {"uuid", guid },
+                                                    {"key", "campaign_activated" }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            {"attributes", new object[]
+                                {
+                                    new Dictionary<string, object>
+                                    {
+                                        {"entity_id", "7723280020" },
+                                        {"key", "device_type" },
+                                        {"type", "custom" },
+                                        {"value", "iPhone"}
+                                    },
+                                    new Dictionary<string, object>
+                                    {
+                                        {"entity_id", "323434545" },
+                                        {"key", "boolean_key" },
+                                        {"type", "custom" },
+                                        {"value", true}
+                                    },
+                                    new Dictionary<string, object>
+                                    {
+                                        {"entity_id", "616727838" },
+                                        {"key", "integer_key" },
+                                        {"type", "custom" },
+                                        {"value", 15}
+                                    },
+                                    new Dictionary<string, object>
+                                    {
+                                        {"entity_id", "808797686" },
+                                        {"key", "double_key" },
+                                        {"type", "custom" },
+                                        {"value", 3.14}
+                                    },
+                                    new Dictionary<string, object>
+                                    {
+                                        {"entity_id", ControlAttributes.BOT_FILTERING_ATTRIBUTE},
+                                        {"key", ControlAttributes.BOT_FILTERING_ATTRIBUTE},
+                                        {"type", "custom" },
+                                        {"value", true }
+                                    }
+                                }
+                            },
+                            { "visitor_id", TestUserId }
+                        }
+                    }
+                },
+                {"project_id", "7720880029" },
+                {"account_id", "1592310167" },
+                {"client_name", "csharp-sdk" },
+                {"client_version", Optimizely.SDK_VERSION },
+                {"revision", "15" },
+                {"anonymize_ip", false}
+            };
+
+            var expectedLogEvent = new LogEvent("https://logx.optimizely.com/v1/events",
+                payloadParams,
+                "POST",
+                new Dictionary<string, string>
+                {
+                    { "Content-Type", "application/json" }
+                });
+
+            var userAttributes = new UserAttributes
+            {
+                {"device_type", "iPhone" },
+                {"boolean_key", true },
+                {"integer_key", 15 },
+                {"double_key", 3.14 }
+            };
+
+            var logEvent = EventBuilder.CreateImpressionEvent(Config, Config.GetExperimentFromKey("test_experiment"), "7722370027", TestUserId, userAttributes);
+            TestData.ChangeGUIDAndTimeStamp(logEvent.Params, timeStamp, guid);
+
+            Assert.IsTrue(TestData.CompareObjects(expectedLogEvent, logEvent));
+        }
+
+        [Test]
         public void TestCreateConversionEventNoAttributesNoValue()
         {
             var guid = Guid.NewGuid();

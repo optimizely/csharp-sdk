@@ -42,7 +42,6 @@ namespace OptimizelySDK.Tests
         private Mock<IErrorHandler> ErrorHandlerMock;
         private Mock<IEventDispatcher> EventDispatcherMock;
         private Optimizely Optimizely;
-        private IEventDispatcher EventDispatcher;
         private const string TestUserId = "testUserId";
         private OptimizelyHelper Helper;
         private Mock<Optimizely> OptimizelyMock;
@@ -466,15 +465,15 @@ namespace OptimizelySDK.Tests
             {
                 {"device_type", "iPhone" },
                 {"location", "San Francisco" },
-                {"is_firefox", false },
-                {"num_users", 15 },
-                {"pi_value", 3.14 }
+                {"boolean_key", true },
+                {"integer_key", 15 },
+                {"double_key", 3.14 }
             };
 
             EventBuilderMock.Setup(b => b.CreateImpressionEvent(It.IsAny<ProjectConfig>(), It.IsAny<Experiment>(),
               It.IsAny<string>(), It.IsAny<string>(), It.IsAny<UserAttributes>()))
               .Returns(new LogEvent("logx.optimizely.com/decision", OptimizelyHelper.SingleParameter, "POST", new Dictionary<string, string> { }));
-            
+
             var optly = Helper.CreatePrivateOptimizely();
             optly.SetFieldOrProperty("EventBuilder", EventBuilderMock.Object);
             
@@ -798,7 +797,7 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestForcedVariationPreceedsWhitelistedVariation()
         {
-            var optimizely = new Optimizely(TestData.Datafile, EventDispatcher, LoggerMock.Object, ErrorHandlerMock.Object);
+            var optimizely = new Optimizely(TestData.Datafile, EventDispatcherMock.Object, LoggerMock.Object, ErrorHandlerMock.Object);
             var projectConfig = ProjectConfig.Create(TestData.Datafile, LoggerMock.Object, ErrorHandlerMock.Object);
             Variation expectedVariation1 = projectConfig.GetVariationFromKey("etag3", "vtag5");
             Variation expectedVariation2 = projectConfig.GetVariationFromKey("etag3", "vtag6");
@@ -846,7 +845,7 @@ namespace OptimizelySDK.Tests
 
             userProfileServiceMock.Setup(_ => _.Lookup(userId)).Returns(userProfile.ToMap());
 
-            var optimizely = new Optimizely(TestData.Datafile, EventDispatcher, LoggerMock.Object, ErrorHandlerMock.Object, userProfileServiceMock.Object);
+            var optimizely = new Optimizely(TestData.Datafile, EventDispatcherMock.Object, LoggerMock.Object, ErrorHandlerMock.Object, userProfileServiceMock.Object);
             var projectConfig = ProjectConfig.Create(TestData.Datafile, LoggerMock.Object, ErrorHandlerMock.Object);
             Variation expectedFbVariation = projectConfig.GetVariationFromKey(experimentKey, fbVariationKey);
             Variation expectedVariation = projectConfig.GetVariationFromKey(experimentKey, variationKey);
