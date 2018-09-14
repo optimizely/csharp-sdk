@@ -392,6 +392,14 @@ namespace OptimizelySDK.Tests
                 {ControlAttributes.BUCKETING_ID_ATTRIBUTE, testBucketingIdVariation}
             };
 
+            var userAttributesWithInvalidBucketingId = new UserAttributes
+            {
+                {"device_type", "iPhone"},
+                {"company", "Optimizely"},
+                {"location", "San Francisco"},
+                {ControlAttributes.BUCKETING_ID_ATTRIBUTE, 1.59}
+            };
+
             var invalidUserAttributesWithBucketingId = new UserAttributes
             {
                 {"company", "Optimizely"},
@@ -407,6 +415,12 @@ namespace OptimizelySDK.Tests
             // confirm valid bucketing with bucketing ID set in attributes
             actualVariation = optlyObject.GetVariation(experimentKey, userId, userAttributesWithBucketingId);
             Assert.IsTrue(TestData.CompareObjects(VariationWithKeyVariation, actualVariation));
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, $"BucketingId is valid: \"{testBucketingIdVariation}\""));
+
+            // check audience with invalid bucketing Id
+            actualVariation = optlyObject.GetVariation(experimentKey, userId, userAttributesWithInvalidBucketingId);
+            Assert.IsTrue(TestData.CompareObjects(VariationWithKeyControl, actualVariation));
+            LoggerMock.Verify(l => l.Log(LogLevel.WARN, "BucketingID attribute is not a string. Defaulted to userId"));
 
             // check invalid audience with bucketing ID
             actualVariation = optlyObject.GetVariation(experimentKey, userId, invalidUserAttributesWithBucketingId);

@@ -42,7 +42,6 @@ namespace OptimizelySDK.Tests
         private Mock<IErrorHandler> ErrorHandlerMock;
         private Mock<IEventDispatcher> EventDispatcherMock;
         private Optimizely Optimizely;
-        private IEventDispatcher EventDispatcher;
         private const string TestUserId = "testUserId";
         private OptimizelyHelper Helper;
         private Mock<Optimizely> OptimizelyMock;
@@ -458,6 +457,39 @@ namespace OptimizelySDK.Tests
 
             Assert.IsNull(variationkey);
         }
+
+        [Test]
+        public void TestActivateWithTypedAttributes()
+        {
+            var userAttributes = new UserAttributes
+            {
+                {"device_type", "iPhone" },
+                {"location", "San Francisco" },
+                {"boolean_key", true },
+                {"integer_key", 15 },
+                {"double_key", 3.14 }
+            };
+
+            EventBuilderMock.Setup(b => b.CreateImpressionEvent(It.IsAny<ProjectConfig>(), It.IsAny<Experiment>(),
+              It.IsAny<string>(), It.IsAny<string>(), It.IsAny<UserAttributes>()))
+              .Returns(new LogEvent("logx.optimizely.com/decision", OptimizelyHelper.SingleParameter, "POST", new Dictionary<string, string> { }));
+
+            var optly = Helper.CreatePrivateOptimizely();
+            optly.SetFieldOrProperty("EventBuilder", EventBuilderMock.Object);
+            
+            var variation = (Variation)optly.Invoke("Activate", "test_experiment", "test_user", userAttributes);
+
+            EventBuilderMock.Verify(b => b.CreateImpressionEvent(It.IsAny<ProjectConfig>(), Config.GetExperimentFromKey("test_experiment"),
+                    "7722370027", "test_user", userAttributes), Times.Once);
+
+            LoggerMock.Verify(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()), Times.Exactly(6));
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Assigned bucket [3037] to user [test_user] with bucketing ID [test_user]."), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.INFO, "User [test_user] is in variation [control] of experiment [test_experiment]."), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.INFO, "Activating user test_user in experiment test_experiment."), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, @"Dispatching impression event to URL logx.optimizely.com/decision with params {""param1"":""val1""}."), Times.Once);
+
+            Assert.IsTrue(TestData.CompareObjects(VariationWithKeyControl, variation));
+        }
         #endregion
 
         #region Test GetVariation
@@ -765,7 +797,7 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestForcedVariationPreceedsWhitelistedVariation()
         {
-            var optimizely = new Optimizely(TestData.Datafile, EventDispatcher, LoggerMock.Object, ErrorHandlerMock.Object);
+            var optimizely = new Optimizely(TestData.Datafile, EventDispatcherMock.Object, LoggerMock.Object, ErrorHandlerMock.Object);
             var projectConfig = ProjectConfig.Create(TestData.Datafile, LoggerMock.Object, ErrorHandlerMock.Object);
             Variation expectedVariation1 = projectConfig.GetVariationFromKey("etag3", "vtag5");
             Variation expectedVariation2 = projectConfig.GetVariationFromKey("etag3", "vtag6");
@@ -813,7 +845,7 @@ namespace OptimizelySDK.Tests
 
             userProfileServiceMock.Setup(_ => _.Lookup(userId)).Returns(userProfile.ToMap());
 
-            var optimizely = new Optimizely(TestData.Datafile, EventDispatcher, LoggerMock.Object, ErrorHandlerMock.Object, userProfileServiceMock.Object);
+            var optimizely = new Optimizely(TestData.Datafile, EventDispatcherMock.Object, LoggerMock.Object, ErrorHandlerMock.Object, userProfileServiceMock.Object);
             var projectConfig = ProjectConfig.Create(TestData.Datafile, LoggerMock.Object, ErrorHandlerMock.Object);
             Variation expectedFbVariation = projectConfig.GetVariationFromKey(experimentKey, fbVariationKey);
             Variation expectedVariation = projectConfig.GetVariationFromKey(experimentKey, variationKey);

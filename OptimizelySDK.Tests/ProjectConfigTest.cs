@@ -117,7 +117,10 @@ namespace OptimizelySDK.Tests
             {
                 { "device_type", Config.GetAttribute("device_type") },
                 { "location", Config.GetAttribute("location")},
-                { "browser_type", Config.GetAttribute("browser_type")}
+                { "browser_type", Config.GetAttribute("browser_type")},
+                { "boolean_key", Config.GetAttribute("boolean_key")},
+                { "integer_key", Config.GetAttribute("integer_key")},
+                { "double_key", Config.GetAttribute("double_key")}
             };
             Assert.IsTrue(TestData.CompareObjects(attributeKeyMap, Config.AttributeKeyMap));
 

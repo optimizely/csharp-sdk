@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2017, Optimizely
+ * Copyright 2017-2018, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,12 @@ using OptimizelySDK.Logger;
 
 namespace OptimizelySDK.Entity
 {
-    public class UserAttributes : Dictionary<string, string>
+    public class UserAttributes : Dictionary<string, object>
     {
         public UserAttributes FilterNullValues(ILogger logger)
         {
             UserAttributes answer = new UserAttributes();
-            foreach (KeyValuePair<string, string> pair in this) {
+            foreach (KeyValuePair<string, object> pair in this) {
                 if (pair.Value != null) {
                     answer[pair.Key] = pair.Value;
                 } else {
