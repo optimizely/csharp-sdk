@@ -87,7 +87,7 @@ namespace OptimizelySDK.Utils
         public static bool IsFeatureFlagValid(ProjectConfig projectConfig, FeatureFlag featureFlag)
         {
             var experimentIds = featureFlag.ExperimentIds;
-            
+
             if (experimentIds == null || experimentIds.Count <= 1)
                 return true;
 
@@ -101,6 +101,16 @@ namespace OptimizelySDK.Utils
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// Determine if given user attribute is valid.
+        /// </summary>
+        /// <param name="attribute">Attribute key and value pair</param>
+        /// <returns>true if attribute key is not null and value is one of the supported type, false otherwise</returns>
+        public static bool IsUserAttributeValid(KeyValuePair<string, object> attribute)
+        {
+            return !string.IsNullOrEmpty(attribute.Key) && attribute.Value is string || attribute.Value is bool || attribute.Value is int || attribute.Value is double;
         }
     }
 }

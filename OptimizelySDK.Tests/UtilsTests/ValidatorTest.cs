@@ -126,6 +126,7 @@ namespace OptimizelySDK.Tests.UtilsTests
             }));
         }
 
+        [Test]
         public void TestAreEventTagsValidInvalidTags()
         {
             // Some of the tests cases are not applicable because C# is strongly typed.
@@ -136,5 +137,34 @@ namespace OptimizelySDK.Tests.UtilsTests
             }));
         }
 
+        [Test]
+        public void TestIsUserAttributeValidWithValidValues()
+        {
+            var userAttributes = new UserAttributes
+            {
+                { "device_type", "Android" },
+                { "is_firefox", true },
+                { "num_users", 15 },
+                { "pi_value", 3.14 }
+            };
+
+            foreach (var attribute in userAttributes)
+                Assert.True(Validator.IsUserAttributeValid(attribute));
+        }
+
+        [Test]
+        public void TestIsUserAttributeValidWithInvalidValues()
+        {
+            var userAttributes = new UserAttributes
+            {
+                { "", "Android" },
+                { "null", null },
+                { "objects", new object() },
+                { "arrays", new string[] { "a", "b", "c" } },
+            };
+
+            foreach (var attribute in userAttributes)
+                Assert.False(Validator.IsUserAttributeValid(attribute));
+        }
     }
 }
