@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 using OptimizelySDK.Entity;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Attribute = OptimizelySDK.Entity.Attribute;
@@ -22,7 +23,6 @@ namespace OptimizelySDK.Utils
 {
     public static class Validator
     {
-
         /// <summary>
         /// Validate the ProjectConfig JSON
         /// </summary>
@@ -103,6 +103,16 @@ namespace OptimizelySDK.Utils
             return true;
         }
 
+        private static Type[] AttributeTypes =
+        {
+            typeof(bool),
+            typeof(int),
+            typeof(long),
+            typeof(float),
+            typeof(double),
+            typeof(string),
+        };
+
         /// <summary>
         /// Determine if given user attribute is valid.
         /// </summary>
@@ -110,7 +120,7 @@ namespace OptimizelySDK.Utils
         /// <returns>true if attribute key is not null and value is one of the supported type, false otherwise</returns>
         public static bool IsUserAttributeValid(KeyValuePair<string, object> attribute)
         {
-            return !string.IsNullOrEmpty(attribute.Key) && attribute.Value is string || attribute.Value is bool || attribute.Value is int || attribute.Value is double;
+            return !string.IsNullOrEmpty(attribute.Key) && AttributeTypes.Contains(attribute.Value?.GetType());
         }
     }
 }
