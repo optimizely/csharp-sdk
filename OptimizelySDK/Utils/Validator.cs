@@ -103,16 +103,6 @@ namespace OptimizelySDK.Utils
             return true;
         }
 
-        private static Type[] AttributeTypes =
-        {
-            typeof(bool),
-            typeof(int),
-            typeof(long),
-            typeof(float),
-            typeof(double),
-            typeof(string),
-        };
-
         /// <summary>
         /// Determine if given user attribute is valid.
         /// </summary>
@@ -120,7 +110,9 @@ namespace OptimizelySDK.Utils
         /// <returns>true if attribute key is not null and value is one of the supported type, false otherwise</returns>
         public static bool IsUserAttributeValid(KeyValuePair<string, object> attribute)
         {
-            return !string.IsNullOrEmpty(attribute.Key) && AttributeTypes.Contains(attribute.Value?.GetType());
+            return (attribute.Key != null) && 
+                (attribute.Value is int || attribute.Value is string || attribute.Value is double 
+                 || attribute.Value is bool || attribute.Value is float || attribute.Value is long);
         }
     }
 }

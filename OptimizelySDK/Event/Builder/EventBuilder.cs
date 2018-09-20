@@ -78,34 +78,36 @@ namespace OptimizelySDK.Event.Builder
         /// <param name="userAttributes">associative array of Attributes for the user</param>
         private Dictionary<string, object> GetCommonParams(ProjectConfig config, string userId, UserAttributes userAttributes)
         {
+            var comonParams = new Dictionary<string, object>();
+
             var visitor = new Dictionary<string, object>
             {
-                { "snapshots", new object[0]},
-                { "visitor_id", userId },
-                { "attributes", new object[0] }
+                    { "snapshots", new object[0]},
+                    { "visitor_id", userId },
+                    { "attributes", new object[0] }
             };
 
-            var commonParams = new Dictionary<string, object>();
-            commonParams[Params.VISITORS] = new object[] { visitor };
-            commonParams[Params.PROJECT_ID] = config.ProjectId;
-            commonParams[Params.ACCOUNT_ID] = config.AccountId;
-            commonParams[Params.CLIENT_ENGINE] = Optimizely.SDK_TYPE;
-            commonParams[Params.CLIENT_VERSION] = Optimizely.SDK_VERSION;
-            commonParams[Params.REVISION] = config.Revision;
-            commonParams[Params.ANONYMIZE_IP] = config.AnonymizeIP;
+            comonParams[Params.VISITORS] = new object[] { visitor };
+            comonParams[Params.PROJECT_ID] = config.ProjectId;
+            comonParams[Params.ACCOUNT_ID] = config.AccountId;
+            comonParams[Params.CLIENT_ENGINE] = Optimizely.SDK_TYPE;
+            comonParams[Params.CLIENT_VERSION] = Optimizely.SDK_VERSION;
+            comonParams[Params.REVISION] = config.Revision;
+            comonParams[Params.ANONYMIZE_IP] = config.AnonymizeIP;
 
             var userFeatures = new List<Dictionary<string, object>>();
-            foreach (var userAttribute in userAttributes.Where(attribute => Validator.IsUserAttributeValid(attribute)))
-            {
-                var attributeId = config.GetAttributeId(userAttribute.Key);
-                if (!string.IsNullOrEmpty(attributeId))
-                {
+
+            //Omit attribute values that are not supported by the log endpoint.
+            foreach (var validUserAttribute in userAttributes.Where(attribute => Validator.IsUserAttributeValid(attribute)))
+            {                
+                var attributeId = config.GetAttributeId(validUserAttribute.Key);
+                if (!string.IsNullOrEmpty(attributeId)) {
                     userFeatures.Add(new Dictionary<string, object>
                     {
                         { "entity_id", attributeId },
-                        { "key", userAttribute.Key },
+                        { "key", validUserAttribute.Key },
                         { "type", CUSTOM_ATTRIBUTE_FEATURE_TYPE },
-                        { "value", userAttribute.Value}
+                        { "value", validUserAttribute.Value}
                     });
                 }
             }
@@ -114,15 +116,16 @@ namespace OptimizelySDK.Event.Builder
             {
                 userFeatures.Add(new Dictionary<string, object>
                 {
-                    { "entity_id", ControlAttributes.BOT_FILTERING_ATTRIBUTE },
-                    { "key", ControlAttributes.BOT_FILTERING_ATTRIBUTE },
-                    { "type", CUSTOM_ATTRIBUTE_FEATURE_TYPE },
-                    { "value",  config.BotFiltering}
-                });
+                        { "entity_id", ControlAttributes.BOT_FILTERING_ATTRIBUTE },
+                        { "key", ControlAttributes.BOT_FILTERING_ATTRIBUTE },
+                        { "type", CUSTOM_ATTRIBUTE_FEATURE_TYPE },
+                        { "value",  config.BotFiltering}
+                    });
             }
 
             visitor["attributes"] = userFeatures;
-            return commonParams;
+
+            return comonParams;
         }
 
         private Dictionary<string, object> GetImpressionParams(Experiment experiment, string variationId)

@@ -155,16 +155,28 @@ namespace OptimizelySDK.Tests.UtilsTests
         [Test]
         public void TestIsUserAttributeValidWithInvalidValues()
         {
-            var userAttributes = new UserAttributes
+            var userAttributesInvalid = new UserAttributes
             {
-                { "", "Android" },
-                { "null", null },
                 { "objects", new object() },
-                { "arrays", new string[] { "a", "b", "c" } },
+                { "arrays", new string[] { "a", "b", "c" } }
             };
 
-            foreach (var attribute in userAttributes)
+            foreach (var attribute in userAttributesInvalid)
                 Assert.False(Validator.IsUserAttributeValid(attribute));
+        }
+
+        [Test]
+        public void TestIsUserAttributeValidWithEmptyKeyOrValue()
+        {
+            var userAttributesValid = new UserAttributes
+            {
+                { "", "Android" },
+                { "integer", 0 },
+                { "string", string.Empty }
+            };
+
+            foreach (var attribute in userAttributesValid)
+                Assert.True(Validator.IsUserAttributeValid(attribute));    
         }
     }
 }
