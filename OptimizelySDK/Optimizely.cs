@@ -195,10 +195,6 @@ namespace OptimizelySDK
                 return null;
             }
 
-            if (userAttributes != null) {
-                userAttributes = userAttributes.FilterNullValues(Logger);
-            }
-
             SendImpressionEvent(experiment, variation, userId, userAttributes);
 
             return variation;
@@ -269,11 +265,6 @@ namespace OptimizelySDK
 
             if (validExperimentIdToVariationMap.Count > 0)
             {
-
-                if (userAttributes != null)
-                {
-                    userAttributes = userAttributes.FilterNullValues(Logger);
-                }
 
                 if (eventTags != null)
                 {

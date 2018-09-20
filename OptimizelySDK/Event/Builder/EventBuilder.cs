@@ -85,7 +85,7 @@ namespace OptimizelySDK.Event.Builder
                     { "snapshots", new object[0]},
                     { "visitor_id", userId },
                     { "attributes", new object[0] }
-                };
+            };
 
             comonParams[Params.VISITORS] = new object[] { visitor };
             comonParams[Params.PROJECT_ID] = config.ProjectId;
@@ -97,20 +97,23 @@ namespace OptimizelySDK.Event.Builder
 
             var userFeatures = new List<Dictionary<string, object>>();
 
-            foreach (var userAttribute in userAttributes.Where(a => !string.IsNullOrEmpty(a.Key))) {
-                var attributeId = config.GetAttributeId(userAttribute.Key);
+            //Omit attribute values that are not supported by the log endpoint.
+            foreach (var validUserAttribute in userAttributes.Where(attribute => Validator.IsUserAttributeValid(attribute)))
+            {                
+                var attributeId = config.GetAttributeId(validUserAttribute.Key);
                 if (!string.IsNullOrEmpty(attributeId)) {
                     userFeatures.Add(new Dictionary<string, object>
                     {
-                            { "entity_id", attributeId },
-                            { "key", userAttribute.Key },
-                            { "type", CUSTOM_ATTRIBUTE_FEATURE_TYPE },
-                            { "value", userAttribute.Value}
-                        });
+                        { "entity_id", attributeId },
+                        { "key", validUserAttribute.Key },
+                        { "type", CUSTOM_ATTRIBUTE_FEATURE_TYPE },
+                        { "value", validUserAttribute.Value}
+                    });
                 }
             }
 
-            if (config.BotFiltering.HasValue) {
+            if (config.BotFiltering.HasValue)
+            {
                 userFeatures.Add(new Dictionary<string, object>
                 {
                         { "entity_id", ControlAttributes.BOT_FILTERING_ATTRIBUTE },
@@ -121,6 +124,7 @@ namespace OptimizelySDK.Event.Builder
             }
 
             visitor["attributes"] = userFeatures;
+
             return comonParams;
         }
 

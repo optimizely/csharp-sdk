@@ -20,17 +20,6 @@ namespace OptimizelySDK.Entity
 {
     public class UserAttributes : Dictionary<string, object>
     {
-        public UserAttributes FilterNullValues(ILogger logger)
-        {
-            UserAttributes answer = new UserAttributes();
-            foreach (KeyValuePair<string, object> pair in this) {
-                if (pair.Value != null) {
-                    answer[pair.Key] = pair.Value;
-                } else {
-                    logger.Log(LogLevel.ERROR, string.Format("[UserAttributes] Null value for key {0} removed and will not be sent to results.", pair.Key));
-                }
-            }
-            return answer;
-        }
+        
     }
 }
