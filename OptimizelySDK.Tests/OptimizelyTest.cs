@@ -1325,9 +1325,9 @@ namespace OptimizelySDK.Tests
             Assert.IsNull(Optimizely.GetFeatureVariableValueForType(featureKey, variableKey, null, null, variableType));
             Assert.IsNull(Optimizely.GetFeatureVariableValueForType(featureKey, variableKey, "", null, variableType));
 
-            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Feature flag key must not be empty."), Times.Exactly(2));
-            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Variable key must not be empty."), Times.Exactly(2));
-            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "User ID must not be empty."), Times.Exactly(2));
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Provided Feature Key is in invalid format."), Times.Exactly(2));
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Provided Variable Key is in invalid format."), Times.Exactly(2));
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Provided User Id is in invalid format."), Times.Exactly(1));
         }
 
         // Should return null and log error message when feature key or variable key does not get found.
@@ -1487,8 +1487,8 @@ namespace OptimizelySDK.Tests
             Assert.IsFalse(Optimizely.IsFeatureEnabled(null, TestUserId, null));
             Assert.IsFalse(Optimizely.IsFeatureEnabled("", TestUserId, null));
 
-            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "User ID must not be empty."), Times.Exactly(2));
-            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Feature flag key must not be empty."), Times.Exactly(2));
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Provided Feature Key is in invalid format."), Times.Exactly(2));
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Provided User Id is in invalid format."), Times.Exactly(1));
         }
 
         // Should return false and log error message when feature flag key is not found in the datafile.
@@ -1941,5 +1941,48 @@ namespace OptimizelySDK.Tests
         }
 
         #endregion // Test ValidateStringInputs
+
+        #region TestValidateStringInputs
+
+        [Test]
+        public void TestValidateStringInputsWithValidValues()
+        {
+            var optly = Helper.CreatePrivateOptimizely();
+
+            bool result = (bool)optly.Invoke("ValidateStringInputs", new Dictionary<string, string> { { Optimizely.EXPERIMENT_KEY, "test_experiment" } });
+            Assert.True(result);
+
+            result = (bool)optly.Invoke("ValidateStringInputs", new Dictionary<string, string> { { Optimizely.EVENT_KEY, "buy_now_event" } });
+            Assert.True(result);
+        }
+
+        [Test]
+        public void TestValidateStringInputsWithInvalidValues()
+        {
+            var optly = Helper.CreatePrivateOptimizely();
+
+            bool result = (bool)optly.Invoke("ValidateStringInputs", new Dictionary<string, string> { { Optimizely.EXPERIMENT_KEY, "" } });
+            Assert.False(result);
+
+            result = (bool)optly.Invoke("ValidateStringInputs", new Dictionary<string, string> { { Optimizely.EVENT_KEY, null } });
+            Assert.False(result);
+        }
+
+        [Test]
+        public void TestValidateStringInputsWithUserId()
+        {
+            var optly = Helper.CreatePrivateOptimizely();
+
+            bool result = (bool)optly.Invoke("ValidateStringInputs", new Dictionary<string, string> { { Optimizely.USER_ID, "testUser" } });
+            Assert.True(result);
+
+            result = (bool)optly.Invoke("ValidateStringInputs", new Dictionary<string, string> { { Optimizely.USER_ID, "" } });
+            Assert.True(result);
+
+            result = (bool)optly.Invoke("ValidateStringInputs", new Dictionary<string, string> { { Optimizely.USER_ID, null } });
+            Assert.False(result);
+        }
+
+        #endregion //TestValidateStringInputs
     }
 }
