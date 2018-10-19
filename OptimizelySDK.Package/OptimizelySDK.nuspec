@@ -16,7 +16,6 @@
         <tags>Optimizely</tags>
         <dependencies>
             <group targetFramework=".NETFramework4.5">
-                <dependency id="JsonNet.PrivateSettersContractResolvers.Source" version="0.1.0" />
                 <dependency id="murmurhash-signed" version="1.0.2" />
                 <dependency id="Newtonsoft.Json" version="9.0.1" />
                 <dependency id="NJsonSchema" version="8.30.6304.31883" />
