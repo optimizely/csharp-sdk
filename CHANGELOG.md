@@ -1,5 +1,5 @@
 ## 2.2.0
-October 22, 2018
+October 26, 2018
 
 ### New Features
 * refactor(interface): Adds IOptimizely interface ([#93](https://github.com/optimizely/csharp-sdk/pull/93))
