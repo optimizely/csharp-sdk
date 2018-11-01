@@ -40,4 +40,4 @@ using System.Runtime.InteropServices;
 // [assembly: AssemblyVersion("1.0.*")]
 [assembly: AssemblyVersion("2.2.1.0")]
 [assembly: AssemblyFileVersion("2.2.1.0")]
-[assembly: AssemblyInformationalVersion("2.1.0")] // Used by Nuget.
+[assembly: AssemblyInformationalVersion("2.2.1")] // Used by Nuget.
