@@ -1,5 +1,5 @@
 ## 2.2.1
-November 2, 2018
+November 5, 2018
 ### Bug fixes
 * Fix package signing for installation via Nuget.
 
