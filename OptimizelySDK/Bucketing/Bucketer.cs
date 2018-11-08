@@ -112,20 +112,6 @@ namespace OptimizelySDK.Bucketing
             if (string.IsNullOrEmpty(experiment.Key))
                 return new Variation();
 
-            // Check if user is whitelisted for a variation.
-            var forcedVariations = experiment.ForcedVariations;
-            if (forcedVariations != null && forcedVariations.ContainsKey(userId))
-            {
-                string variationKey = forcedVariations[userId];
-                variation = config.GetVariationFromKey(experiment.Key, variationKey);
-                if (!string.IsNullOrEmpty(variationKey))
-                {
-                    message = string.Format("User [{0}] is forced into variation [{1}].", userId, variationKey);
-                    Logger.Log(LogLevel.INFO, message);
-                }
-                return variation;
-            }
-
             // Determine if experiment is in a mutually exclusive group.
             if (experiment.IsInMutexGroup)
             {

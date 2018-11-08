@@ -18,6 +18,7 @@ using OptimizelySDK.Entity;
 using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Event.Builder;
 using OptimizelySDK.Event.Dispatcher;
+using OptimizelySDK.Exceptions;
 using OptimizelySDK.Logger;
 using OptimizelySDK.Utils;
 using OptimizelySDK.Notifications;
@@ -27,7 +28,7 @@ using System.Reflection;
 
 namespace OptimizelySDK
 {
-    public class Optimizely
+    public class Optimizely : IOptimizely
     {
         private Bucketer Bucketer;
 
@@ -113,7 +114,14 @@ namespace OptimizelySDK
             }
             catch (Exception ex)
             {
-                Logger.Log(LogLevel.ERROR, "Provided 'datafile' is in an invalid format. " + ex.Message);
+                string error = String.Empty;
+                if (ex.GetType() == typeof(ConfigParseException))
+                    error = ex.Message;
+                else
+                    error = "Provided 'datafile' is in an invalid format. " + ex.Message;
+
+                Logger.Log(LogLevel.ERROR, error);
+                ErrorHandler.HandleError(ex);
             }
         }
 
@@ -152,7 +160,7 @@ namespace OptimizelySDK
         /// </summary>
         /// <param name="experimentKey">experimentKey string Key identifying the experiment</param>
         /// <param name="userId">string ID for user</param>
-        /// <param name="attributes">associative array of Attributes for the user</param>
+        /// <param name="userAttributes">associative array of Attributes for the user</param>
         /// <returns>null|Variation Representing variation</returns>
         public Variation Activate(string experimentKey, string userId, UserAttributes userAttributes = null)
         {
@@ -185,10 +193,6 @@ namespace OptimizelySDK
             {
                 Logger.Log(LogLevel.INFO, string.Format("Not activating user {0}.", userId));
                 return null;
-            }
-
-            if (userAttributes != null) {
-                userAttributes = userAttributes.FilterNullValues(Logger);
             }
 
             SendImpressionEvent(experiment, variation, userId, userAttributes);
@@ -261,11 +265,6 @@ namespace OptimizelySDK
 
             if (validExperimentIdToVariationMap.Count > 0)
             {
-
-                if (userAttributes != null)
-                {
-                    userAttributes = userAttributes.FilterNullValues(Logger);
-                }
 
                 if (eventTags != null)
                 {
@@ -360,7 +359,7 @@ namespace OptimizelySDK
         /// Determine whether a feature is enabled.
         /// Send an impression event if the user is bucketed into an experiment using the feature.
         /// </summary>
-        /// <param name="experimentKey">The experiment key</param>
+        /// <param name="featureKey">The feature key</param>
         /// <param name="userId">The user ID</param>
         /// <param name="userAttributes">The user's attributes.</param>
         /// <returns>True if feature is enabled, false or null otherwise</returns>

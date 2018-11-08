@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2017, Optimizely
+ * Copyright 2017-2018, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 using OptimizelySDK.Entity;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Attribute = OptimizelySDK.Entity.Attribute;
@@ -22,7 +23,6 @@ namespace OptimizelySDK.Utils
 {
     public static class Validator
     {
-
         /// <summary>
         /// Validate the ProjectConfig JSON
         /// </summary>
@@ -87,7 +87,7 @@ namespace OptimizelySDK.Utils
         public static bool IsFeatureFlagValid(ProjectConfig projectConfig, FeatureFlag featureFlag)
         {
             var experimentIds = featureFlag.ExperimentIds;
-            
+
             if (experimentIds == null || experimentIds.Count <= 1)
                 return true;
 
@@ -101,6 +101,18 @@ namespace OptimizelySDK.Utils
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// Determine if given user attribute is valid.
+        /// </summary>
+        /// <param name="attribute">Attribute key and value pair</param>
+        /// <returns>true if attribute key is not null and value is one of the supported type, false otherwise</returns>
+        public static bool IsUserAttributeValid(KeyValuePair<string, object> attribute)
+        {
+            return (attribute.Key != null) && 
+                (attribute.Value is int || attribute.Value is string || attribute.Value is double 
+                 || attribute.Value is bool || attribute.Value is float || attribute.Value is long);
         }
     }
 }

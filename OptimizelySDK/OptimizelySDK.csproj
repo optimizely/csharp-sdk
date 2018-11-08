@@ -92,6 +92,7 @@
     <Compile Include="Event\Dispatcher\IEventDispatcher.cs" />
     <Compile Include="Event\LogEvent.cs" />
     <Compile Include="Exceptions\OptimizelyException.cs" />
+    <Compile Include="IOptimizely.cs" />
     <Compile Include="Logger\DefaultLogger.cs" />
     <Compile Include="Logger\ILogger.cs" />
     <Compile Include="Logger\NoOpLogger.cs" />

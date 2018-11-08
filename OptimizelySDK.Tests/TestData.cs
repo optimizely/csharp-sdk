@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2017, Optimizely
+ * Copyright 2017-2018, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,9 @@ namespace OptimizelySDK.Tests
     public class TestData
     {
         private static string cachedDataFile = null;
-        
+        private static string simpleABExperimentsDatafile = null;
+        private static string unsupportedVersionDatafile = null;
+
         public static string Datafile
         {
             get
@@ -32,7 +34,23 @@ namespace OptimizelySDK.Tests
                 return cachedDataFile ?? (cachedDataFile = LoadJsonData());
             }
         }
-        
+
+        public static string SimpleABExperimentsDatafile
+        {
+            get 
+            {
+                return simpleABExperimentsDatafile ?? (simpleABExperimentsDatafile = LoadJsonData("simple_ab_experiments.json"));                
+            }
+        }
+
+        public static string UnsupportedVersionDatafile
+        {
+            get
+            {
+                return unsupportedVersionDatafile ?? (unsupportedVersionDatafile = LoadJsonData("unsupported_version_datafile.json"));
+            }
+        }
+
         private static string LoadJsonData(string fileName = "TestData.json")
         {
             var assembly = Assembly.GetExecutingAssembly();

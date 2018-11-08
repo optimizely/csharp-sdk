@@ -105,4 +105,13 @@ namespace OptimizelySDK.Exceptions
         {
         }
     }
+
+    public class ConfigParseException : OptimizelyException
+    {
+        public ConfigParseException(string message)
+            : base(message)
+        {
+            
+        }
+    }
 }

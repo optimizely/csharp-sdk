@@ -16,6 +16,7 @@
 using Newtonsoft.Json;
 using OptimizelySDK.Entity;
 using OptimizelySDK.ErrorHandler;
+using OptimizelySDK.Exceptions;
 using OptimizelySDK.Logger;
 using OptimizelySDK.Utils;
 using System.Collections.Generic;
@@ -25,6 +26,13 @@ namespace OptimizelySDK
 {
     public class ProjectConfig
     {
+        public enum OPTLYSDKVersion
+        {
+            V2 = 2,
+            V3 = 3,
+            V4 = 4
+        }
+
         public const string RESERVED_ATTRIBUTE_PREFIX = "$opt_";
 
         /// <summary>
@@ -59,6 +67,14 @@ namespace OptimizelySDK
         /// Bot filtering flag.
         /// </summary>
         public bool? BotFiltering { get; set; }
+
+
+        private static List<OPTLYSDKVersion> SupportedVersions = new List<OPTLYSDKVersion> {
+            OPTLYSDKVersion.V2,
+            OPTLYSDKVersion.V3,
+            OPTLYSDKVersion.V4
+        };
+
 
         //========================= Mappings ===========================
 
@@ -270,7 +286,7 @@ namespace OptimizelySDK
 
         public static ProjectConfig Create(string content, ILogger logger, IErrorHandler errorHandler)
         {
-            ProjectConfig config = JsonConvert.DeserializeObject<ProjectConfig>(content);
+            ProjectConfig config = GetConfig(content);
 
             config.Logger = logger;
             config.ErrorHandler = errorHandler;
@@ -280,6 +296,21 @@ namespace OptimizelySDK
             return config;
         }
 
+        private static ProjectConfig GetConfig(string configData)
+        {
+            if (configData == null)
+                throw new ConfigParseException("Unable to parse null datafile.");
+
+            if (string.IsNullOrEmpty(configData))
+                throw new ConfigParseException("Unable to parse empty datafile.");
+
+            var config = JsonConvert.DeserializeObject<ProjectConfig>(configData);
+
+            if (SupportedVersions.TrueForAll((supportedVersion) => !(((int)supportedVersion).ToString() == config.Version)))
+                throw new ConfigParseException(string.Format(@"This version of the C# SDK does not support the given datafile version: {0}", config.Version));
+
+            return config;
+        }
 
         //========================= Getters ===========================
 

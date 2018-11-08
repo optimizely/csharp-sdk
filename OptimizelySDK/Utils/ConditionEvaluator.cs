@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2017, Optimizely
+ * Copyright 2017-2018, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using OptimizelySDK.Entity;
+using System;
 using System.Linq;
 
 namespace OptimizelySDK.Utils
@@ -70,8 +71,7 @@ namespace OptimizelySDK.Utils
             }
 
             string conditionName = conditions["name"].ToString();
-            return userAttributes != null && userAttributes.ContainsKey(conditionName) 
-                && userAttributes[conditionName] == conditions["value"].ToString();
+            return userAttributes != null && userAttributes.ContainsKey(conditionName) && CompareValues(userAttributes[conditionName], conditions["value"]);
         }
 
         public bool Evaluate(object[] conditions, UserAttributes userAttributes)
@@ -89,6 +89,30 @@ namespace OptimizelySDK.Utils
         public static JToken DecodeConditions(string conditions)
         {
             return JToken.Parse(conditions);
+        }
+
+        private bool CompareValues(object attribute, JToken condition)
+        {
+            try
+            {
+                switch (condition.Type)
+                {
+                    case JTokenType.Integer:
+                        return (int)condition == Convert.ToInt32(attribute);
+                    case JTokenType.Float:
+                        return (double)condition == Convert.ToDouble(attribute);
+                    case JTokenType.String:
+                        return (string)condition == Convert.ToString(attribute);
+                    case JTokenType.Boolean:
+                        return (bool)condition == Convert.ToBoolean(attribute);
+                    default:
+                        return false;
+                }
+            }
+            catch (Exception)
+            {
+                return false;
+            }
         }
     }
 }

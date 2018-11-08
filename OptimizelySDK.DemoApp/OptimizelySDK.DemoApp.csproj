@@ -148,7 +148,6 @@
     <Compile Include="Utils\InMemoryHandler.cs" />
     <Compile Include="Utils\Log4NetLogger.cs" />
     <Compile Include="Utils\MultiLogger.cs" />
-    <Compile Include="JsonNet.PrivateSettersContractResolvers\PrivateSettersContractResolvers.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\bootstrap-grid.css" />

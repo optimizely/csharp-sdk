@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2017, Optimizely
+ * Copyright 2017-2018, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -126,6 +126,7 @@ namespace OptimizelySDK.Tests.UtilsTests
             }));
         }
 
+        [Test]
         public void TestAreEventTagsValidInvalidTags()
         {
             // Some of the tests cases are not applicable because C# is strongly typed.
@@ -136,5 +137,46 @@ namespace OptimizelySDK.Tests.UtilsTests
             }));
         }
 
+        [Test]
+        public void TestIsUserAttributeValidWithValidValues()
+        {
+            var userAttributes = new UserAttributes
+            {
+                { "device_type", "Android" },
+                { "is_firefox", true },
+                { "num_users", 15 },
+                { "pi_value", 3.14 }
+            };
+
+            foreach (var attribute in userAttributes)
+                Assert.True(Validator.IsUserAttributeValid(attribute));
+        }
+
+        [Test]
+        public void TestIsUserAttributeValidWithInvalidValues()
+        {
+            var invalidUserAttributes = new UserAttributes
+            {
+                { "objects", new object() },
+                { "arrays", new string[] { "a", "b", "c" } }
+            };
+
+            foreach (var attribute in invalidUserAttributes)
+                Assert.False(Validator.IsUserAttributeValid(attribute));
+        }
+
+        [Test]
+        public void TestIsUserAttributeValidWithEmptyKeyOrValue()
+        {
+            var validUserAttributes = new UserAttributes
+            {
+                { "", "Android" },
+                { "integer", 0 },
+                { "string", string.Empty }
+            };
+
+            foreach (var attribute in validUserAttributes)
+                Assert.True(Validator.IsUserAttributeValid(attribute));    
+        }
     }
 }
