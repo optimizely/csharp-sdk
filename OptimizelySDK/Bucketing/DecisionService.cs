@@ -35,8 +35,6 @@ namespace OptimizelySDK.Bucketing
     /// </summary>
     public class DecisionService
     {
-        public const string RESERVED_ATTRIBUTE_KEY_BUCKETING_ID = "$opt_bucketing_id";
-
         private Bucketer Bucketer;
         private IErrorHandler ErrorHandler;
         private ProjectConfig ProjectConfig;
@@ -395,16 +393,23 @@ namespace OptimizelySDK.Bucketing
         /// </summary>
         /// <param name = "userId" >User Identifier</param>
         /// <param name = "filteredAttributes" >The user's attributes.</param>
-        /// <returns>User ID if bucketing Id is not provided in user attributes, bucketing Id otherwise.</returns>
+        /// <returns>Bucketing Id if it is a string type in attributes, user Id otherwise.</returns>
         private string GetBucketingId(string userId, UserAttributes filteredAttributes)
         {
             string bucketingId = userId;
 
             // If the bucketing ID key is defined in attributes, then use that in place of the userID for the murmur hash key
-            if (filteredAttributes != null && filteredAttributes.ContainsKey(RESERVED_ATTRIBUTE_KEY_BUCKETING_ID))
+            if (filteredAttributes != null && filteredAttributes.ContainsKey(ControlAttributes.BUCKETING_ID_ATTRIBUTE))
             {
-                bucketingId = filteredAttributes[RESERVED_ATTRIBUTE_KEY_BUCKETING_ID];
-                Logger.Log(LogLevel.DEBUG, string.Format("Setting the bucketing ID to \"{0}\"", bucketingId));
+                if (filteredAttributes[ControlAttributes.BUCKETING_ID_ATTRIBUTE] is string)
+                {
+                    bucketingId = (string)filteredAttributes[ControlAttributes.BUCKETING_ID_ATTRIBUTE];
+                    Logger.Log(LogLevel.DEBUG, $"BucketingId is valid: \"{bucketingId}\"");
+                }
+                else
+                {
+                    Logger.Log(LogLevel.WARN, "BucketingID attribute is not a string. Defaulted to userId");
+                }
             }
 
             return bucketingId;

@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2017, Optimizely
+ * Copyright 2017-2018, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 using Newtonsoft.Json;
 using OptimizelySDK.Entity;
 using OptimizelySDK.ErrorHandler;
+using OptimizelySDK.Exceptions;
 using OptimizelySDK.Logger;
 using OptimizelySDK.Utils;
 using System.Collections.Generic;
@@ -25,10 +26,19 @@ namespace OptimizelySDK
 {
     public class ProjectConfig
     {
+        public enum OPTLYSDKVersion
+        {
+            V2 = 2,
+            V3 = 3,
+            V4 = 4
+        }
+
+        public const string RESERVED_ATTRIBUTE_PREFIX = "$opt_";
+
         /// <summary>
         /// Version of the datafile.
         /// </summary>
-        public int Version { get; set; }
+        public string Version { get; set; }
 
 
         /// <summary>
@@ -46,12 +56,25 @@ namespace OptimizelySDK
         /// <summary>
         /// Revision of the dataflie.
         /// </summary>
-        public int Revision { get; set; }
+        public string Revision { get; set; }
 
         /// <summary>
         /// Allow Anonymize IP by truncating the last block of visitors' IP address.
         /// </summary>
         public bool AnonymizeIP { get; set; }
+
+        /// <summary>
+        /// Bot filtering flag.
+        /// </summary>
+        public bool? BotFiltering { get; set; }
+
+
+        private static List<OPTLYSDKVersion> SupportedVersions = new List<OPTLYSDKVersion> {
+            OPTLYSDKVersion.V2,
+            OPTLYSDKVersion.V3,
+            OPTLYSDKVersion.V4
+        };
+
 
         //========================= Mappings ===========================
 
@@ -263,7 +286,7 @@ namespace OptimizelySDK
 
         public static ProjectConfig Create(string content, ILogger logger, IErrorHandler errorHandler)
         {
-            ProjectConfig config = JsonConvert.DeserializeObject<ProjectConfig>(content);
+            ProjectConfig config = GetConfig(content);
 
             config.Logger = logger;
             config.ErrorHandler = errorHandler;
@@ -273,6 +296,21 @@ namespace OptimizelySDK
             return config;
         }
 
+        private static ProjectConfig GetConfig(string configData)
+        {
+            if (configData == null)
+                throw new ConfigParseException("Unable to parse null datafile.");
+
+            if (string.IsNullOrEmpty(configData))
+                throw new ConfigParseException("Unable to parse empty datafile.");
+
+            var config = JsonConvert.DeserializeObject<ProjectConfig>(configData);
+
+            if (SupportedVersions.TrueForAll((supportedVersion) => !(((int)supportedVersion).ToString() == config.Version)))
+                throw new ConfigParseException(string.Format(@"This version of the C# SDK does not support the given datafile version: {0}", config.Version));
+
+            return config;
+        }
 
         //========================= Getters ===========================
 
@@ -551,6 +589,33 @@ namespace OptimizelySDK
             Logger.Log(LogLevel.ERROR, message);
             ErrorHandler.HandleError(new Exceptions.InvalidRolloutException("Provided rollout is not in datafile."));
             return new Rollout();
+        }
+
+        /// <summary>
+        /// Get attribute ID for the provided attribute key
+        /// </summary>
+        /// <param name="attributeKey">Key of the Attribute</param>
+        /// <returns>Attribute ID corresponding to the provided attribute key. Attribute key if it is a reserved attribute</returns>
+        public string GetAttributeId(string attributeKey)
+        {
+            
+            var hasReservedPrefix = attributeKey.StartsWith(RESERVED_ATTRIBUTE_PREFIX);
+
+            if (_AttributeKeyMap.ContainsKey(attributeKey))
+            {
+                var attribute = _AttributeKeyMap[attributeKey];
+                if (hasReservedPrefix)
+                    Logger.Log(LogLevel.WARN, $@"Attribute {attributeKey} unexpectedly has reserved prefix {RESERVED_ATTRIBUTE_PREFIX}; using attribute ID instead of reserved attribute name.");
+
+                return attribute.Id;
+            }
+            else if (hasReservedPrefix)
+            {
+                return attributeKey;
+            }
+
+            Logger.Log(LogLevel.ERROR, $@"Attribute key ""{attributeKey}"" is not in datafile.");
+            return null;
         }
     }
 }

@@ -115,6 +115,9 @@
     <Compile Include="..\OptimizelySDK\Exceptions\OptimizelyException.cs">
       <Link>Exceptions\OptimizelyException.cs</Link>
     </Compile>
+    <Compile Include="..\OptimizelySDK\IOptimizely.cs">
+      <Link>IOptimizely.cs</Link>
+    </Compile>
     <Compile Include="..\OptimizelySDK\Logger\DefaultLogger.cs">
       <Link>Logger\DefaultLogger.cs</Link>
     </Compile>
@@ -147,6 +150,9 @@
     </Compile>
     <Compile Include="..\OptimizelySDK\Utils\Validator.cs">
       <Link>Utils\Validator.cs</Link>
+    </Compile>
+	<Compile Include="..\OptimizelySDK\Utils\ControlAttributes.cs">
+      <Link>Utils\ControlAttributes.cs</Link>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="..\OptimizelySDK\Bucketing\Bucketer.cs">

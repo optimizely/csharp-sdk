@@ -28,6 +28,8 @@ using OptimizelySDK.Tests.UtilsTests;
 using OptimizelySDK.Bucketing;
 using OptimizelySDK.Notifications;
 using OptimizelySDK.Tests.NotificationTests;
+using OptimizelySDK.Utils;
+using Newtonsoft.Json;
 
 namespace OptimizelySDK.Tests
 {
@@ -38,8 +40,8 @@ namespace OptimizelySDK.Tests
         private ProjectConfig Config;
         private Mock<EventBuilder> EventBuilderMock;
         private Mock<IErrorHandler> ErrorHandlerMock;
+        private Mock<IEventDispatcher> EventDispatcherMock;
         private Optimizely Optimizely;
-        private IEventDispatcher EventDispatcher;
         private const string TestUserId = "testUserId";
         private OptimizelyHelper Helper;
         private Mock<Optimizely> OptimizelyMock;
@@ -73,19 +75,19 @@ namespace OptimizelySDK.Tests
                 logger: LoggerMock.Object,
                 errorHandler: new NoOpErrorHandler());
 
-            EventDispatcher = new ValidEventDispatcher();
-            Optimizely = new Optimizely(TestData.Datafile, EventDispatcher, LoggerMock.Object, ErrorHandlerMock.Object);
+            EventDispatcherMock = new Mock<IEventDispatcher>();
+            Optimizely = new Optimizely(TestData.Datafile, EventDispatcherMock.Object, LoggerMock.Object, ErrorHandlerMock.Object);
 
             Helper = new OptimizelyHelper
             {
                 Datafile = TestData.Datafile,
-                EventDispatcher = EventDispatcher,
+                EventDispatcher = EventDispatcherMock.Object,
                 Logger = LoggerMock.Object,
                 ErrorHandler = ErrorHandlerMock.Object,
                 SkipJsonValidation = false,
             };
 
-            OptimizelyMock = new Mock<Optimizely>(TestData.Datafile, EventDispatcher, LoggerMock.Object, ErrorHandlerMock.Object, null, false)
+            OptimizelyMock = new Mock<Optimizely>(TestData.Datafile, EventDispatcherMock.Object, LoggerMock.Object, ErrorHandlerMock.Object, null, false)
             {
                 CallBase = true
             };
@@ -183,7 +185,31 @@ namespace OptimizelySDK.Tests
         {
             string datafile = "{\"name\":\"optimizely\"}";
             Optimizely optimizely = new Optimizely(datafile, null, null, null, skipJsonValidation: true);
-            Assert.IsTrue(optimizely.IsValid);
+            Assert.IsFalse(optimizely.IsValid);
+        }
+
+        [Test]
+        public void TestErrorHandlingWithNullDatafile()
+        {
+            var optimizelyNullDatafile = new Optimizely(null, null, LoggerMock.Object, ErrorHandlerMock.Object, null, true);
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Unable to parse null datafile."), Times.Once);
+            ErrorHandlerMock.Verify(e => e.HandleError(It.Is<ConfigParseException>(ex => ex.Message == "Unable to parse null datafile.")), Times.Once);
+        }
+
+        [Test]
+        public void TestErrorHandlingWithEmptyDatafile()
+        {
+            var optimizelyEmptyDatafile = new Optimizely("", null, LoggerMock.Object, ErrorHandlerMock.Object, null, true);
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Unable to parse empty datafile."), Times.Once);
+            ErrorHandlerMock.Verify(e => e.HandleError(It.Is<ConfigParseException>(ex => ex.Message == "Unable to parse empty datafile.")), Times.Once);
+        }
+
+        [Test]
+        public void TestErrorHandlingWithUnsupportedConfigVersion()
+        {
+            var optimizelyUnsupportedVersion = new Optimizely(TestData.UnsupportedVersionDatafile, null, LoggerMock.Object, ErrorHandlerMock.Object, null, true);
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, $"This version of the C# SDK does not support the given datafile version: 5"), Times.Once);
+            ErrorHandlerMock.Verify(e => e.HandleError(It.Is<ConfigParseException>(ex => ex.Message == $"This version of the C# SDK does not support the given datafile version: 5")), Times.Once);
         }
 
         [Test]
@@ -375,9 +401,12 @@ namespace OptimizelySDK.Tests
             EventBuilderMock.Verify(b => b.CreateImpressionEvent(It.IsAny<ProjectConfig>(), Config.GetExperimentFromKey("test_experiment"),
                     "7722370027", "test_user", OptimizelyHelper.UserAttributes), Times.Once);
 
+
             LoggerMock.Verify(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()), Times.Exactly(6));
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "User \"test_user\" is not in the forced variation map."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Assigned bucket [3037] to user [test_user] with bucketing ID [test_user]."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "User [test_user] is in variation [control] of experiment [test_experiment]."), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.INFO, "This decision will not be saved since the UserProfileService is null."));
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "Activating user test_user in experiment test_experiment."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, @"Dispatching impression event to URL logx.optimizely.com/decision with params {""param1"":""val1""}."), Times.Once);
 
@@ -397,17 +426,14 @@ namespace OptimizelySDK.Tests
             var variation = (Variation)optly.Invoke("Activate", "test_experiment", "test_user", OptimizelyHelper.NullUserAttributes);
 
             EventBuilderMock.Verify(b => b.CreateImpressionEvent(It.IsAny<ProjectConfig>(), Config.GetExperimentFromKey("test_experiment"),
-                    "7722370027", "test_user", OptimizelyHelper.UserAttributes), Times.Once);
+                    "7722370027", "test_user", OptimizelyHelper.NullUserAttributes), Times.Once);
 
-            LoggerMock.Verify(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()), Times.Exactly(9));
+            LoggerMock.Verify(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()), Times.Exactly(6));
 
             //"User "test_user" is not in the forced variation map."
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "User \"test_user\" is not in the forced variation map."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Assigned bucket [3037] to user [test_user] with bucketing ID [test_user]."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "User [test_user] is in variation [control] of experiment [test_experiment]."), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "[UserAttributes] Null value for key null_value removed and will not be sent to results."), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "[UserAttributes] Null value for key wont_be_sent removed and will not be sent to results."), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "[UserAttributes] Null value for key bad_food removed and will not be sent to results."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "Activating user test_user in experiment test_experiment."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, @"Dispatching impression event to URL logx.optimizely.com/decision with params {""param1"":""val1""}."), Times.Once);
 
@@ -430,6 +456,39 @@ namespace OptimizelySDK.Tests
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "Not activating user test_user."), Times.Once);
 
             Assert.IsNull(variationkey);
+        }
+
+        [Test]
+        public void TestActivateWithTypedAttributes()
+        {
+            var userAttributes = new UserAttributes
+            {
+                {"device_type", "iPhone" },
+                {"location", "San Francisco" },
+                {"boolean_key", true },
+                {"integer_key", 15 },
+                {"double_key", 3.14 }
+            };
+
+            EventBuilderMock.Setup(b => b.CreateImpressionEvent(It.IsAny<ProjectConfig>(), It.IsAny<Experiment>(),
+              It.IsAny<string>(), It.IsAny<string>(), It.IsAny<UserAttributes>()))
+              .Returns(new LogEvent("logx.optimizely.com/decision", OptimizelyHelper.SingleParameter, "POST", new Dictionary<string, string> { }));
+
+            var optly = Helper.CreatePrivateOptimizely();
+            optly.SetFieldOrProperty("EventBuilder", EventBuilderMock.Object);
+            
+            var variation = (Variation)optly.Invoke("Activate", "test_experiment", "test_user", userAttributes);
+
+            EventBuilderMock.Verify(b => b.CreateImpressionEvent(It.IsAny<ProjectConfig>(), Config.GetExperimentFromKey("test_experiment"),
+                    "7722370027", "test_user", userAttributes), Times.Once);
+
+            LoggerMock.Verify(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()), Times.Exactly(6));
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Assigned bucket [3037] to user [test_user] with bucketing ID [test_user]."), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.INFO, "User [test_user] is in variation [control] of experiment [test_experiment]."), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.INFO, "Activating user test_user in experiment test_experiment."), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, @"Dispatching impression event to URL logx.optimizely.com/decision with params {""param1"":""val1""}."), Times.Once);
+
+            Assert.IsTrue(TestData.CompareObjects(VariationWithKeyControl, variation));
         }
         #endregion
 
@@ -515,8 +574,7 @@ namespace OptimizelySDK.Tests
 
             Optimizely.Track("purchase", TestUserId, attributes);
 
-            //LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Provided attributes are in an invalid format."), Times.Once);
-            ErrorHandlerMock.Verify(e => e.HandleError(It.IsAny<InvalidAttributeException>()), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, @"Attribute key ""abc"" is not in datafile."), Times.Once);
         }
 
         [Test]
@@ -625,7 +683,7 @@ namespace OptimizelySDK.Tests
                 { "wont_send_null", null}
             });
 
-            LoggerMock.Verify(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()), Times.Exactly(21));
+            LoggerMock.Verify(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()), Times.Exactly(18));
 
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "User \"test_user\" is not in the forced variation map."), Times.Exactly(3));
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Assigned bucket [3037] to user [test_user] with bucketing ID [test_user]."));
@@ -640,9 +698,6 @@ namespace OptimizelySDK.Tests
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "This decision will not be saved since the UserProfileService is null."));
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "Experiment \"paused_experiment\" is not running."));
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "Not tracking user \"test_user\" for experiment \"paused_experiment\""));
-            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "[UserAttributes] Null value for key null_value removed and will not be sent to results."));
-            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "[UserAttributes] Null value for key wont_be_sent removed and will not be sent to results."));
-            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "[UserAttributes] Null value for key bad_food removed and will not be sent to results."));
             LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "[EventTags] Null value for key wont_send_null removed and will not be sent to results."));
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "Tracking event purchase for user test_user."));
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Dispatching conversion event to URL logx.optimizely.com/track with params {\"param1\":\"val1\"}."));
@@ -739,7 +794,7 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestForcedVariationPreceedsWhitelistedVariation()
         {
-            var optimizely = new Optimizely(TestData.Datafile, EventDispatcher, LoggerMock.Object, ErrorHandlerMock.Object);
+            var optimizely = new Optimizely(TestData.Datafile, EventDispatcherMock.Object, LoggerMock.Object, ErrorHandlerMock.Object);
             var projectConfig = ProjectConfig.Create(TestData.Datafile, LoggerMock.Object, ErrorHandlerMock.Object);
             Variation expectedVariation1 = projectConfig.GetVariationFromKey("etag3", "vtag5");
             Variation expectedVariation2 = projectConfig.GetVariationFromKey("etag3", "vtag6");
@@ -787,7 +842,7 @@ namespace OptimizelySDK.Tests
 
             userProfileServiceMock.Setup(_ => _.Lookup(userId)).Returns(userProfile.ToMap());
 
-            var optimizely = new Optimizely(TestData.Datafile, EventDispatcher, LoggerMock.Object, ErrorHandlerMock.Object, userProfileServiceMock.Object);
+            var optimizely = new Optimizely(TestData.Datafile, EventDispatcherMock.Object, LoggerMock.Object, ErrorHandlerMock.Object, userProfileServiceMock.Object);
             var projectConfig = ProjectConfig.Create(TestData.Datafile, LoggerMock.Object, ErrorHandlerMock.Object);
             Variation expectedFbVariation = projectConfig.GetVariationFromKey(experimentKey, fbVariationKey);
             Variation expectedVariation = projectConfig.GetVariationFromKey(experimentKey, variationKey);
@@ -1111,7 +1166,7 @@ namespace OptimizelySDK.Tests
                { "device_type", "iPhone" },
                { "company", "Optimizely" },
                { "location", "San Francisco" },
-               { DecisionService.RESERVED_ATTRIBUTE_KEY_BUCKETING_ID, testBucketingIdVariation }
+               { ControlAttributes.BUCKETING_ID_ATTRIBUTE, testBucketingIdVariation }
             };
 
             // confirm that a valid variation is bucketed without the bucketing ID
@@ -1537,6 +1592,34 @@ namespace OptimizelySDK.Tests
 
             LoggerMock.Verify(l => l.Log(LogLevel.INFO,
                 $@"Feature flag ""{featureKey}"" is enabled for user ""{TestUserId}""."));
+        }
+
+        // Should return false and send an impression event when feature is enabled for the user 
+        // and user is being experimented.
+        [Test]
+        public void TestIsFeatureEnabledGivenFeatureFlagIsNotEnabledAndUserIsBeingExperimented()
+        {
+            var featureKey = "double_single_variable_feature";
+            var experiment = Config.GetExperimentFromKey("test_experiment_double_feature");
+            var variation = Config.GetVariationFromKey("test_experiment_double_feature", "variation");
+            var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
+            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_EXPERIMENT);
+
+            DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, null)).Returns(decision);
+
+            var optly = Helper.CreatePrivateOptimizely();
+            optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
+
+            bool result = (bool)optly.Invoke("IsFeatureEnabled", featureKey, TestUserId, null);
+            Assert.False(result);
+
+            // SendImpressionEvent() gets called.
+            LoggerMock.Verify(l => l.Log(LogLevel.INFO,
+                $@"The user ""{TestUserId}"" is not being experimented on feature ""{featureKey}""."), Times.Never);
+
+            LoggerMock.Verify(l => l.Log(LogLevel.INFO,
+                $@"Feature flag ""{featureKey}"" is not enabled for user ""{TestUserId}""."));
+            EventDispatcherMock.Verify(dispatcher => dispatcher.DispatchEvent(It.IsAny<LogEvent>()));
         }
 
         // Verify that IsFeatureEnabled returns true if a variation does not get found in the feature

@@ -1,3 +1,34 @@
+## 2.2.1
+November 5, 2018
+### Bug fixes
+* Fix package signing for installation via Nuget.
+
+## 2.2.0
+October 26, 2018
+
+### New Features
+* refactor(interface): Adds IOptimizely interface ([#93](https://github.com/optimizely/csharp-sdk/pull/93))
+* feat(api): Accepting all types for attributes values ([#102](https://github.com/optimizely/csharp-sdk/pull/102))
+
+### Bug fixes
+* fix(whitelistng): Removed logic from bucketing since it is checked in Decision Service. ([#98](https://github.com/optimizely/csharp-sdk/pull/98))
+* fix(track): Send decisions for all experiments using an event when using track. ([#100](https://github.com/optimizely/csharp-sdk/pull/100))
+* fix(datafile-parsing): Prevent newer versions datafile ([#101](https://github.com/optimizely/csharp-sdk/pull/101))
+* fix(api): Only track attributes with valid attribute types. ([#103](https://github.com/optimizely/csharp-sdk/pull/103))
+
+## 2.1.0
+June 28, 2018
+
+### New Features
+* Introduces support for bot filtering. ([#79](https://github.com/optimizely/csharp-sdk/pull/79))
+
+## 2.0.1
+June 20, 2018
+
+### Bug Fixes
+* Fix events are not sent from the SDK for a variation in a feature test if the
+feature is disabled.
+
 ## 2.0.0
 April 16, 2018
 

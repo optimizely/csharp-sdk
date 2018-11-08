@@ -128,7 +128,7 @@
       <HintPath>..\packages\NJsonSchema.8.30.6304.31883\lib\net45\NJsonSchema.dll</HintPath>
     </Reference>
     <Reference Include="OptimizelySDK">
-      <HintPath>..\packages\Optimizely.SDK.2.0.0-beta1\lib\net45\OptimizelySDK.dll</HintPath>
+      <HintPath>..\packages\Optimizely.SDK.2.1.0\lib\net45\OptimizelySDK.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -148,7 +148,6 @@
     <Compile Include="Utils\InMemoryHandler.cs" />
     <Compile Include="Utils\Log4NetLogger.cs" />
     <Compile Include="Utils\MultiLogger.cs" />
-    <Compile Include="JsonNet.PrivateSettersContractResolvers\PrivateSettersContractResolvers.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\bootstrap-grid.css" />
