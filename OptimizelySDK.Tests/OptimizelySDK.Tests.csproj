@@ -85,7 +85,7 @@
     <Compile Include="ProjectConfigTest.cs" />
     <Compile Include="UtilsTests\ConditionEvaluatorTest.cs" />
     <Compile Include="UtilsTests\EventTagUtilsTest.cs" />
-    <Compile Include="UtilsTests\ExtensionMethodsTest.cs" />
+    <Compile Include="UtilsTests\ExceptionExtensionsTest.cs" />
     <Compile Include="UtilsTests\PrivateObject.cs" />
     <Compile Include="UtilsTests\ValidatorTest.cs" />
     <Compile Include="ValidEventDispatcher.cs" />

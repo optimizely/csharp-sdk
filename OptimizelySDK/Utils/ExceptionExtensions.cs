@@ -14,21 +14,19 @@
  * limitations under the License.
  */
 
-using NUnit.Framework;
-using OptimizelySDK.Utils;
 using System;
 
-namespace OptimizelySDK.Tests.UtilsTests
+namespace OptimizelySDK.Utils
 {
-    public class ExtensionMethodsTest
+    public static class ExceptionExtensions
     {
-        [Test]
-        public void TestGetAllMessagesReturnsAllInnerExceptionMessages()
+        public static string GetAllMessages(this Exception exception, string separator = "\n")
         {
-            var exception = new Exception("Outer exception.", new Exception("Inner exception.", new Exception("Second level inner exception.")));
-            var expectedMessage = "Outer exception. Inner exception. Second level inner exception.";
-            
-            Assert.AreEqual(expectedMessage, exception.GetAllMessages());
+            if (exception.InnerException == null)
+                return exception.Message;
+
+            return (string.IsNullOrEmpty(exception.Message) ? "" : string.Format("{0}{1}", exception.Message, separator))
+                + GetAllMessages(exception.InnerException, separator);
         }
     }
 }
