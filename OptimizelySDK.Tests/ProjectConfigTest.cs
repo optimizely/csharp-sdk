@@ -778,7 +778,7 @@ namespace OptimizelySDK.Tests
             var experimentKey = "test_experiment";
 
             Assert.False(Config.SetForcedVariation(experimentKey, userId, "variation_not_in_datafile"));
-            Assert.True(Config.SetForcedVariation(experimentKey, userId, ""));
+            Assert.False(Config.SetForcedVariation(experimentKey, userId, ""));
             Assert.True(Config.SetForcedVariation(experimentKey, userId, null));
         }
         
