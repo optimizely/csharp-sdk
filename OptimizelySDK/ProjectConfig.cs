@@ -508,6 +508,13 @@ namespace OptimizelySDK
         /// <returns>A boolean value that indicates if the set completed successfully.</returns>
         public bool SetForcedVariation(string experimentKey, string userId, string variationKey)
         {
+            // Empty variation key is considered as invalid.
+            if (variationKey != null && variationKey.Length == 0)
+            {
+                Logger.Log(LogLevel.DEBUG, "Variation key is invalid.");
+                return false;
+            }
+
             var experimentId = GetExperimentFromKey(experimentKey).Id;
 
             // this case is logged in getExperimentFromKey
@@ -515,7 +522,7 @@ namespace OptimizelySDK
                 return false;
 
             // clear the forced variation if the variation key is null
-            if (string.IsNullOrEmpty(variationKey))
+            if (variationKey == null)
             {
                 if (_ForcedVariationMap.ContainsKey(userId) && _ForcedVariationMap[userId].ContainsKey(experimentId))
                     _ForcedVariationMap[userId].Remove(experimentId);
