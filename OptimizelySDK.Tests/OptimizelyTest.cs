@@ -943,6 +943,34 @@ namespace OptimizelySDK.Tests
             Assert.IsTrue(TestData.CompareObjects(VariationWithKeyVariation, actualForcedVariation));
         }
 
+        [Test]
+        public void TestSetForcedVariationWithNullAndEmptyUserId()
+        {
+            Assert.False(Optimizely.SetForcedVariation("test_experiment", null, "variation"));
+            Assert.True(Optimizely.SetForcedVariation("test_experiment", "", "variation"));
+        }
+
+        [Test]
+        public void TestSetForcedVariationWithInvalidExperimentKey()
+        {
+            var userId = "test_user";
+            var variation = "variation";
+
+            Assert.False(Optimizely.SetForcedVariation("test_experiment_not_in_datafile", userId, variation));
+            Assert.False(Optimizely.SetForcedVariation("", userId, variation));
+            Assert.False(Optimizely.SetForcedVariation(null, userId, variation));
+        }
+
+        [Test]
+        public void TestSetForcedVariationWithInvalidVariationKey()
+        {
+            var userId = "test_user";
+            var experimentKey = "test_experiment";
+
+            Assert.False(Optimizely.SetForcedVariation(experimentKey, userId, "variation_not_in_datafile"));
+            Assert.False(Optimizely.SetForcedVariation(experimentKey, userId, ""));
+        }
+
         // check that the get forced variation is correct.
         [Test]
         public void TestGetForcedVariation()
@@ -984,6 +1012,28 @@ namespace OptimizelySDK.Tests
             actualForcedVariation = Optimizely.GetForcedVariation("test_experiment", TestUserId);
 
             Assert.IsTrue(TestData.CompareObjects(expectedForcedVariation, actualForcedVariation));
+        }
+
+        [Test]
+        public void TestGetForcedVariationWithInvalidUserID()
+        {
+            var experimentKey = "test_experiment";
+            Optimizely.SetForcedVariation(experimentKey, "test_user", "test_variation");
+
+            Assert.Null(Optimizely.GetForcedVariation(experimentKey, null));
+            Assert.Null(Optimizely.GetForcedVariation(experimentKey, "invalid_user"));
+        }
+
+        [Test]
+        public void TestGetForcedVariationWithInvalidExperimentKey()
+        {
+            var userId = "test_user";
+            var experimentKey = "test_experiment";
+            Optimizely.SetForcedVariation(experimentKey, userId, "test_variation");
+            
+            Assert.Null(Optimizely.GetForcedVariation("test_experiment", userId));
+            Assert.Null(Optimizely.GetForcedVariation("", userId));
+            Assert.Null(Optimizely.GetForcedVariation(null, userId));
         }
 
         [Test]

@@ -458,12 +458,6 @@ namespace OptimizelySDK
         /// <returns>Variation entity which the given user and experiment should be forced into.</returns>
         public Variation GetForcedVariation(string experimentKey, string userId)
         {
-            if (string.IsNullOrEmpty(userId))
-            {
-                Logger.Log(LogLevel.DEBUG, "User ID is invalid.");
-                return null;
-            }
-
             if (_ForcedVariationMap.ContainsKey(userId) == false)
             {
                 Logger.Log(LogLevel.DEBUG, string.Format(@"User ""{0}"" is not in the forced variation map.", userId));
@@ -514,18 +508,6 @@ namespace OptimizelySDK
         /// <returns>A boolean value that indicates if the set completed successfully.</returns>
         public bool SetForcedVariation(string experimentKey, string userId, string variationKey)
         {
-            if (string.IsNullOrEmpty(userId))
-            {
-                Logger.Log(LogLevel.DEBUG, "User ID is invalid.");
-                return false;
-            }
-
-            if (string.IsNullOrEmpty(experimentKey))
-            {
-                Logger.Log(LogLevel.DEBUG, "Experiment key is invalid.");
-                return false;
-            }
-
             var experimentId = GetExperimentFromKey(experimentKey).Id;
 
             // this case is logged in getExperimentFromKey
