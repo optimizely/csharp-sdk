@@ -724,65 +724,6 @@ namespace OptimizelySDK.Tests
         }
         
         [Test]
-        public void TestGetForcedVariationWithInvalidUserID()
-        {
-            var experimentKey = "test_experiment";
-
-            Config.SetForcedVariation(experimentKey, "test_user", "test_variation");
-
-            Assert.Null(Config.GetForcedVariation(experimentKey, null));
-            Assert.Null(Config.GetForcedVariation(experimentKey, ""));
-            Assert.Null(Config.GetForcedVariation(experimentKey, "invalid_user"));
-        }
-
-        [Test]
-        public void TestGetForcedVariationWithInvalidExperimentKey()
-        {
-            var userId = "test_user";
-            var experimentKey = "test_experiment";
-
-            Config.SetForcedVariation(experimentKey, userId, "test_variation");
-
-
-
-            Assert.Null(Config.GetForcedVariation("test_experiment", userId));
-            Assert.Null(Config.GetForcedVariation("", userId));
-            Assert.Null(Config.GetForcedVariation(null, userId));
-        }
-
-        [Test]
-        public void TestSetForcedVariationWithInvalidUserID()
-        {
-            var experimentKey = "test_experiment";
-            var variation = "variation";
-
-            Assert.False(Config.SetForcedVariation(experimentKey, null, variation));
-            Assert.False(Config.SetForcedVariation(experimentKey, "", variation));
-        }
-
-        [Test]
-        public void TestSetForcedVariationWithInvalidExperimentKey()
-        {
-            var userId = "test_user";
-            var variation = "variation";
-
-            Assert.False(Config.SetForcedVariation("test_experiment_not_in_datafile", userId, variation));
-            Assert.False(Config.SetForcedVariation("", userId, variation));
-            Assert.False(Config.SetForcedVariation(null, userId, variation));
-        }
-
-        [Test]
-        public void TestSetForcedVariationWithInvalidVariationKey()
-        {
-            var userId = "test_user";
-            var experimentKey = "test_experiment";
-
-            Assert.False(Config.SetForcedVariation(experimentKey, userId, "variation_not_in_datafile"));
-            Assert.True(Config.SetForcedVariation(experimentKey, userId, ""));
-            Assert.True(Config.SetForcedVariation(experimentKey, userId, null));
-        }
-        
-        [Test]
         public void TestSetForcedVariationMultipleSets()
         {
             Assert.True(Config.SetForcedVariation("test_experiment", "test_user_1", "variation"));

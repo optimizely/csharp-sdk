@@ -75,6 +75,8 @@ namespace OptimizelySDK
         public const string USER_ID = "User Id";
         public const string EXPERIMENT_KEY = "Experiment Key";
         public const string EVENT_KEY = "Event Key";
+        public const string FEATURE_KEY = "Feature Key";
+        public const string VARIABLE_KEY = "Variable Key";
 
         /// <summary>
         /// Optimizely constructor for managing Full Stack .NET projects.
@@ -337,7 +339,13 @@ namespace OptimizelySDK
         /// <returns>A boolean value that indicates if the set completed successfully.</returns>
         public bool SetForcedVariation(string experimentKey, string userId, string variationKey)
         {
-            return Config.SetForcedVariation(experimentKey, userId, variationKey);
+            var inputValues = new Dictionary<string, string>
+            {
+                { USER_ID, userId },
+                { EXPERIMENT_KEY, experimentKey }
+            };
+
+            return ValidateStringInputs(inputValues) && Config.SetForcedVariation(experimentKey, userId, variationKey);
         }
 
         /// <summary>
@@ -348,9 +356,16 @@ namespace OptimizelySDK
         /// <returns>null|string The variation key.</returns>
         public Variation GetForcedVariation(string experimentKey, string userId)
         {
-            var forcedVariation = Config.GetForcedVariation(experimentKey, userId);
+            var inputValues = new Dictionary<string, string>
+            {
+                { USER_ID, userId },
+                { EXPERIMENT_KEY, experimentKey }
+            };
 
-            return forcedVariation;
+            if (!ValidateStringInputs(inputValues))
+                return null;
+
+            return Config.GetForcedVariation(experimentKey, userId);
         }
 
         #region  FeatureFlag APIs
@@ -365,15 +380,14 @@ namespace OptimizelySDK
         /// <returns>True if feature is enabled, false or null otherwise</returns>
         public virtual bool IsFeatureEnabled(string featureKey, string userId, UserAttributes userAttributes = null)
         {
-            if (string.IsNullOrEmpty(userId)) {
-                Logger.Log(LogLevel.ERROR, "User ID must not be empty.");
-                return false;
-            }
+            var inputValues = new Dictionary<string, string>
+            {
+                { USER_ID, userId },
+                { FEATURE_KEY, featureKey }
+            };
 
-            if (string.IsNullOrEmpty(featureKey)) {
-                Logger.Log(LogLevel.ERROR, "Feature flag key must not be empty.");
+            if (!ValidateStringInputs(inputValues))
                 return false;
-            }
 
             var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
             if (string.IsNullOrEmpty(featureFlag.Key))
@@ -395,7 +409,6 @@ namespace OptimizelySDK
                 }
             }
 
-
             Logger.Log(LogLevel.INFO, $@"Feature flag ""{featureKey}"" is not enabled for user ""{userId}"".");
             return false;
         }
@@ -412,23 +425,15 @@ namespace OptimizelySDK
         public virtual string GetFeatureVariableValueForType(string featureKey, string variableKey, string userId, 
             UserAttributes userAttributes, FeatureVariable.VariableType variableType)
         {
-            if (string.IsNullOrEmpty(featureKey))
+            var inputValues = new Dictionary<string, string>
             {
-                Logger.Log(LogLevel.ERROR, "Feature flag key must not be empty.");
-                return null;
-            }
+                { USER_ID, userId },
+                { FEATURE_KEY, featureKey },
+                { VARIABLE_KEY, variableKey }
+            };
 
-            if (string.IsNullOrEmpty(variableKey))
-            {
-                Logger.Log(LogLevel.ERROR, "Variable key must not be empty.");
+            if (!ValidateStringInputs(inputValues))
                 return null;
-            }
-
-            if (string.IsNullOrEmpty(userId))
-            {
-                Logger.Log(LogLevel.ERROR, "User ID must not be empty.");
-                return null;
-            }
 
             var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
             if (string.IsNullOrEmpty(featureFlag.Key))
@@ -614,6 +619,9 @@ namespace OptimizelySDK
                 return enabledFeaturesList;
             }
 
+            if (!ValidateStringInputs(new Dictionary<string, string> { { USER_ID, userId } }))
+                return enabledFeaturesList;
+
             foreach (var feature in Config.FeatureKeyMap.Values)
             {
                 var featureKey = feature.Key;
@@ -634,6 +642,19 @@ namespace OptimizelySDK
         private bool ValidateStringInputs(Dictionary<string, string> inputs)
         {
             bool isValid = true;
+
+            // Empty user Id is valid value.
+            if (inputs.ContainsKey(USER_ID))
+            {
+                if (inputs[USER_ID] == null)
+                {
+                    Logger.Log(LogLevel.ERROR, $"Provided {USER_ID} is in invalid format.");
+                    isValid = false;
+                }
+
+                inputs.Remove(USER_ID);
+            }
+
             foreach(var input in inputs)
             {
                 if (string.IsNullOrEmpty(input.Value))
