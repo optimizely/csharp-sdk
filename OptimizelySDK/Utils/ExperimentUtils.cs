@@ -26,8 +26,7 @@ namespace OptimizelySDK.Utils
         /// </summary>
         /// <param name="config">ProjectConfig Configuration for the project</param>
         /// <param name="experiment">Experiment Entity representing the experiment</param>
-        /// <param name="userAttributes">array Attributes of the user</param>
-        /// <returns>whether user meets audience conditions to be in experiment or not</returns>
+        /// <param name="userAttributes">array Attributes of the user</returns>
         public static bool IsUserInExperiment(ProjectConfig config, Experiment experiment, UserAttributes userAttributes)
         {
             var audienceIds = experiment.AudienceIds;
@@ -37,10 +36,9 @@ namespace OptimizelySDK.Utils
 
             if (userAttributes == null || !userAttributes.Any())
                 return false;
-
+            
             var conditionEvaluator = new ConditionEvaluator();
-
-            return audienceIds.Any(id => conditionEvaluator.Evaluate(config.GetAudience(id).ConditionList, userAttributes));
+            return audienceIds.Any(id => conditionEvaluator.Evaluate(config.GetAudience(id).ConditionList, userAttributes).GetValueOrDefault());
         }
     }
 }
