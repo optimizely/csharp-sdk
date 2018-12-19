@@ -9,3 +9,17 @@ install:
 script:
   - xbuild /p:Configuration=Release ./OptimizelySDK.Travis.sln
   - mono ./testrunner/NUnit.Runners.2.6.4/tools/nunit-console.exe ./OptimizelySDK.Tests/bin/Release/OptimizelySDK.Tests.dll 
+
+jobs:
+  include:
+    - stage: 'Integration tests'
+      env: SDK=csharp
+      language: python
+      before_install: skip
+      install:
+        - "pip install awscli"
+      before_script:
+        - "aws s3 cp s3://optimizely-travisci-artifacts/ci/trigger_fullstack-sdk-compat.sh ci/ && chmod u+x ci/trigger_fullstack-sdk-compat.sh"
+      script:
+        - "ci/trigger_fullstack-sdk-compat.sh"
+      after_success: skip
