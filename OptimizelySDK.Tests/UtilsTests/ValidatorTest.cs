@@ -18,6 +18,7 @@ using OptimizelySDK.Logger;
 using OptimizelySDK.Utils;
 using OptimizelySDK.Entity;
 using NUnit.Framework;
+using System;
 
 namespace OptimizelySDK.Tests.UtilsTests
 {
@@ -145,7 +146,9 @@ namespace OptimizelySDK.Tests.UtilsTests
                 { "device_type", "Android" },
                 { "is_firefox", true },
                 { "num_users", 15 },
-                { "pi_value", 3.14 }
+                { "pi_value", 3.14 },
+                { "2power53", Math.Pow(2, 53) },
+                { "-2power53", Math.Pow(2, 53) * -1 },
             };
 
             foreach (var attribute in userAttributes)
@@ -158,7 +161,12 @@ namespace OptimizelySDK.Tests.UtilsTests
             var invalidUserAttributes = new UserAttributes
             {
                 { "objects", new object() },
-                { "arrays", new string[] { "a", "b", "c" } }
+                { "arrays", new string[] { "a", "b", "c" } },
+                { "nan", double.NaN },
+                { "negative-infinity", double.NegativeInfinity },
+                { "positive-infinity", double.PositiveInfinity },
+                { "out-of-range", Math.Pow(2, 53) + 2 },
+                { "negative-out-of-range", (Math.Pow(2, 53) * -1) - 2 },
             };
 
             foreach (var attribute in invalidUserAttributes)
