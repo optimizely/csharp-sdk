@@ -23,6 +23,14 @@ namespace OptimizelySDK.Utils
 {
     public static class Validator
     {
+        public static readonly double OPT_NUMBER_LIMIT;
+
+        static Validator()
+        {
+            OPT_NUMBER_LIMIT = Math.Pow(2, 53);
+        }
+
+
         /// <summary>
         /// Validate the ProjectConfig JSON
         /// </summary>
@@ -136,7 +144,7 @@ namespace OptimizelySDK.Utils
             if (IsNumericType(value))
             {
                 var doubleValue = Convert.ToDouble(value);
-                if (double.IsInfinity(doubleValue) || double.IsNaN(doubleValue) || Math.Abs(doubleValue) > Math.Pow(2, 53))
+                if (double.IsInfinity(doubleValue) || double.IsNaN(doubleValue) || Math.Abs(doubleValue) > OPT_NUMBER_LIMIT)
                     return false;
 
                 return true;
