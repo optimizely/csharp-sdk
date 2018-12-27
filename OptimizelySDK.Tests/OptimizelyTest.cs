@@ -2092,14 +2092,14 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestIsFeatureEnabledWithTypedAudiences()
         {
-            var featureEnabled = OptimizelyTypedAudience.IsFeatureEnabled("feat", "user1", new UserAttributes
+            var featureEnabled = OptimizelyTypedAudience.IsFeatureEnabled("feat_no_vars", "user1", new UserAttributes
             {
                 { "favorite_ice_cream", "chocolate" }
             });
 
             Assert.True(featureEnabled);
 
-            featureEnabled = OptimizelyTypedAudience.IsFeatureEnabled("feat", "user1", new UserAttributes
+            featureEnabled = OptimizelyTypedAudience.IsFeatureEnabled("feat_no_vars", "user1", new UserAttributes
             {
                 { "lasers", 45.5 }
             });

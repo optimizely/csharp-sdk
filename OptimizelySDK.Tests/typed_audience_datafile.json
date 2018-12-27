@@ -3,7 +3,7 @@
 	"rollouts": [{
 			"experiments": [{
 				"status": "Running",
-				"key": "11488548027",
+				"key": "feat_no_vars_rule",
 				"layerId": "11551226731",
 				"trafficAllocation": [{
 					"entityId": "11557362669",
@@ -24,7 +24,7 @@
 		{
 			"experiments": [{
 				"status": "Paused",
-				"key": "11630490911",
+				"key": "feat_with_var_rule",
 				"layerId": "11638870867",
 				"trafficAllocation": [{
 					"entityId": "11475708558",
@@ -51,7 +51,7 @@
 			"rolloutId": "11551226731",
 			"variables": [],
 			"id": "11477755619",
-			"key": "feat"
+			"key": "feat_no_vars"
 		},
 		{
 			"experimentIds": [
