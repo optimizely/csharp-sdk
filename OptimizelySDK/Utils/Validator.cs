@@ -23,13 +23,8 @@ namespace OptimizelySDK.Utils
 {
     public static class Validator
     {
-        public static readonly double OPT_NUMBER_LIMIT;
-
-        static Validator()
-        {
-            OPT_NUMBER_LIMIT = Math.Pow(2, 53);
-        }
-
+        // Pow(2,53)
+        public const double OPT_NUMBER_LIMIT = 9007199254740992;
 
         /// <summary>
         /// Validate the ProjectConfig JSON
