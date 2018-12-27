@@ -38,7 +38,7 @@ namespace OptimizelySDK.Utils
         const string NOT_OPERATOR = "not";
 
         /// <summary>
-        /// String constant representing custome attribute condition type.
+        /// String constant representing custom attribute condition type.
         /// </summary>
         const string CUSTOM_ATTRIBUTE_CONDITION_TYPE = "custom_attribute";
 
@@ -153,7 +153,7 @@ namespace OptimizelySDK.Utils
                 attributeValue = userAttributes[conditions["name"].ToString()];
             }
 
-            var evaluator = Evaluator.GetEvaluator(matchType);
+            var evaluator = ConditionValueEvaluator.GetEvaluator(matchType);
             return evaluator != null ? evaluator(conditionValue, attributeValue) : null;
         }
 
