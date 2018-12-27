@@ -18,7 +18,7 @@ using System;
 
 namespace OptimizelySDK.Utils
 {
-    public static class Evaluator
+    public static class ConditionValueEvaluator
     {
         public static class AttributeMatchTypes
         {
