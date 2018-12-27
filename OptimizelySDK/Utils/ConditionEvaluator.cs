@@ -17,7 +17,6 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using OptimizelySDK.Entity;
 using System;
-using System.Linq;
 
 namespace OptimizelySDK.Utils
 {
@@ -38,23 +37,95 @@ namespace OptimizelySDK.Utils
         /// </summary>
         const string NOT_OPERATOR = "not";
 
-        private bool AndEvaluator(JArray conditions, UserAttributes userAttributes)
+        /// <summary>
+        /// String constant representing custom attribute condition type.
+        /// </summary>
+        const string CUSTOM_ATTRIBUTE_CONDITION_TYPE = "custom_attribute";
+
+        /// <summary>
+        /// Evaluates an array of conditions as if the evaluator had been applied
+        /// to each entry and the results AND-ed together.
+        /// </summary>
+        /// <param name="conditions">Array of conditions ex: [operand_1, operand_2]</param>
+        /// <param name="userAttributes">Hash representing user attributes</param>
+        /// <returns>true/false if the user attributes match/don't match the given conditions,
+        /// null if the user attributes and conditions can't be evaluated</returns>
+        private bool? AndEvaluator(JArray conditions, UserAttributes userAttributes)
         {
-            return conditions.All(condition => Evaluate(condition, userAttributes));
+            // According to the matrix:
+            // false and true is false
+            // false and null is false
+            // true and null is null.
+            // true and false is false
+            // true and true is true
+            // null and null is null
+            var foundNull = false;
+            foreach(var condition in conditions)
+            {
+                var result = Evaluate(condition, userAttributes);
+                if (result == null)
+                    foundNull = true;
+                else if (result == false)
+                    return false;
+            }
+
+            if (foundNull)
+                return null;
+
+            return true;
         }
 
-        private bool OrEvaluator(JArray conditions, UserAttributes userAttributes)
+        /// <summary>
+        /// Evaluates an array of conditions as if the evaluator had been applied
+        /// to each entry and the results OR-ed together.
+        /// </summary>
+        /// <param name="conditions">Array of conditions ex: [operand_1, operand_2]</param>
+        /// <param name="userAttributes">Hash representing user attributes</param>
+        /// <returns>true/false if the user attributes match/don't match the given conditions,
+        /// null if the user attributes and conditions can't be evaluated</returns>
+        private bool? OrEvaluator(JArray conditions, UserAttributes userAttributes)
         {
-            return conditions.Any(condition => Evaluate(condition, userAttributes));
+            // According to the matrix:
+            // true returns true
+            // false or null is null
+            // false or false is false
+            // null or null is null
+            var foundNull = false;
+            foreach (var condition in conditions)
+            {
+                var result = Evaluate(condition, userAttributes);
+                if (result == null)
+                    foundNull = true;
+                else if (result == true)
+                    return true;
+            }
+
+            if (foundNull)
+                return null;
+
+            return false;
         }
 
-        private bool NotEvaluator(JArray conditions, UserAttributes userAttributes)
+        /// <summary>
+        /// Evaluates an array of conditions as if the evaluator had been applied
+        /// to a single entry and NOT was applied to the result.
+        /// </summary>
+        /// <param name="conditions">Array of conditions ex: [operand_1, operand_2]</param>
+        /// <param name="userAttributes">Hash representing user attributes</param>
+        /// <returns>true/false if the user attributes match/don't match the given conditions,
+        /// null if the user attributes and conditions can't be evaluated</returns>
+        private bool? NotEvaluator(JArray conditions, UserAttributes userAttributes)
         {
-            return conditions.Count == 1 && !Evaluate(conditions[0], userAttributes);
+            if (conditions.Count == 1)
+            {
+                var result = Evaluate(conditions[0], userAttributes);
+                return result == null ? null : !result;
+            }
 
+            return false;
         }
 
-        public bool Evaluate(JToken conditions, UserAttributes userAttributes)
+        public bool? Evaluate(JToken conditions, UserAttributes userAttributes)
         {
             //Cloning is because it is reference type
             var conditionsArray = conditions.DeepClone() as JArray;
@@ -70,11 +141,23 @@ namespace OptimizelySDK.Utils
                 }
             }
 
-            string conditionName = conditions["name"].ToString();
-            return userAttributes != null && userAttributes.ContainsKey(conditionName) && CompareValues(userAttributes[conditionName], conditions["value"]);
+            if (conditions["type"] != null && conditions["type"].ToString() != CUSTOM_ATTRIBUTE_CONDITION_TYPE)
+                return null;
+
+            string matchType = conditions["match"]?.ToString();
+            var conditionValue = conditions["value"]?.ToObject<object>();
+            
+            object attributeValue = null;
+            if (userAttributes != null && userAttributes.ContainsKey(conditions["name"].ToString()))
+            {
+                attributeValue = userAttributes[conditions["name"].ToString()];
+            }
+
+            var evaluator = ConditionValueEvaluator.GetEvaluator(matchType);
+            return evaluator != null ? evaluator(conditionValue, attributeValue) : null;
         }
 
-        public bool Evaluate(object[] conditions, UserAttributes userAttributes)
+        public bool? Evaluate(object[] conditions, UserAttributes userAttributes)
         {
             return Evaluate(ConvertObjectArrayToJToken(conditions), userAttributes);
         }
@@ -89,30 +172,6 @@ namespace OptimizelySDK.Utils
         public static JToken DecodeConditions(string conditions)
         {
             return JToken.Parse(conditions);
-        }
-
-        private bool CompareValues(object attribute, JToken condition)
-        {
-            try
-            {
-                switch (condition.Type)
-                {
-                    case JTokenType.Integer:
-                        return (int)condition == Convert.ToInt32(attribute);
-                    case JTokenType.Float:
-                        return (double)condition == Convert.ToDouble(attribute);
-                    case JTokenType.String:
-                        return (string)condition == Convert.ToString(attribute);
-                    case JTokenType.Boolean:
-                        return (bool)condition == Convert.ToBoolean(attribute);
-                    default:
-                        return false;
-                }
-            }
-            catch (Exception)
-            {
-                return false;
-            }
         }
     }
 }

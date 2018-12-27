@@ -50,15 +50,14 @@
         <Compile Include="..\OptimizelySDK\Utils\ConfigParser.cs" />
         <Compile Include="..\OptimizelySDK\Utils\Schema.cs" />
 		<Compile Include="..\OptimizelySDK\Utils\ControlAttributes.cs" />
-
+		<Compile Include="..\OptimizelySDK\Utils\ExperimentUtils.cs" />
+		<Compile Include="..\OptimizelySDK\Utils\ConditionValueEvaluator.cs" />
         <Compile Include="..\OptimizelySDK\Bucketing\Bucketer.cs" />
         <Compile Include="..\OptimizelySDK\Bucketing\Decision.cs" />
         <Compile Include="..\OptimizelySDK\Bucketing\DecisionService.cs" />
         <Compile Include="..\OptimizelySDK\Bucketing\UserProfile.cs" />
         <Compile Include="..\OptimizelySDK\Bucketing\UserProfileService.cs" />
         <Compile Include="..\OptimizelySDK\Bucketing\UserProfileUtil.cs" />
-		<Compile Include="..\OptimizelySDK\Utils\ExperimentUtils.cs" />
-        
     </ItemGroup>
     <ItemGroup>
         <EmbeddedResource Include="..\OptimizelySDK\Utils\schema.json">
