@@ -146,10 +146,12 @@ namespace OptimizelySDK.Utils
 
             string matchType = conditions["match"]?.ToString();
             var conditionValue = conditions["value"]?.ToObject<object>();
-
+            
             object attributeValue = null;
             if (userAttributes != null && userAttributes.ContainsKey(conditions["name"].ToString()))
+            {
                 attributeValue = userAttributes[conditions["name"].ToString()];
+            }
 
             var evaluator = ConditionValueEvaluator.GetEvaluator(matchType);
             return evaluator != null ? evaluator(conditionValue, attributeValue) : null;
