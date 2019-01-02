@@ -73,7 +73,7 @@ namespace OptimizelySDK.Entity
         /// <summary>
         /// Audience Conditions
         /// </summary>
-        public string AudienceConditions { get; set; }
+        public object AudienceConditions { get; set; }
 
         private JToken audienceConditionsList = null;
 
@@ -84,7 +84,18 @@ namespace OptimizelySDK.Entity
         {
             get
             {
-                return (audienceConditionsList == null && string.IsNullOrEmpty(AudienceConditions)) ? null : (audienceConditionsList = ConditionTreeEvaluator.DecodeConditions(AudienceConditions ?? string.Empty));
+                if (AudienceConditions == null)
+                    return null;
+
+                if (audienceConditionsList == null)
+                {
+                    if (AudienceConditions is string)
+                        audienceConditionsList = ConditionTreeEvaluator.DecodeConditions((string)AudienceConditions);
+                    else
+                        audienceConditionsList = (JToken)AudienceConditions;
+                }
+
+                return audienceConditionsList;
             }
         }
 
