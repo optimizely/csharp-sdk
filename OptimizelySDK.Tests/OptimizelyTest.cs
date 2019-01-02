@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2017-2018, Optimizely
+ * Copyright 2017-2019, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -2144,5 +2144,124 @@ namespace OptimizelySDK.Tests
         }
 
         #endregion // Test Audience Match Types
+
+        #region Test Audience Combinations
+
+        [Test]
+        public void TestActivateIncludeUserInExperimentWithComplexAudienceConditions()
+        {
+            var userAttributes = new UserAttributes
+            {
+                { "house", "Welcome to Slytherin!" },
+                { "lasers", 45.5 }
+            };
+
+            // Should be included via substring match string audience with id '3988293898' and exact match number audience with id '3468206646'
+            var variation = OptimizelyWithTypedAudiences.Activate("audience_combinations_experiment", "user1", userAttributes);
+            Assert.AreEqual("A", variation.Key);
+
+            EventDispatcherMock.Verify(dispatcher => dispatcher.DispatchEvent(It.IsAny<LogEvent>()), Times.Once);
+        }
+
+        [Test]
+        public void TestActivateExcludeUserFromExperimentWithComplexAudienceConditions()
+        {
+            var userAttributes = new UserAttributes
+            {
+                { "house", "Hufflepuff" },
+                { "lasers", 45.5 }
+            };
+
+            // Should be excluded as substring audience with id '3988293898' does not match, so the overall conditions fail.
+            var variation = OptimizelyWithTypedAudiences.Activate("audience_combinations_experiment", "user1", userAttributes);
+            Assert.Null(variation);
+
+            EventDispatcherMock.Verify(dispatcher => dispatcher.DispatchEvent(It.IsAny<LogEvent>()), Times.Never);
+        }
+
+        [Test]
+        public void TestTrackWithComplexAudienceConditions()
+        {
+            var userAttributes = new UserAttributes
+            {
+                { "house", "Gryffindor" },
+                { "should_do_it", true }
+            };
+
+            // Should be included via exact match string audience with id '3468206642' and exact match boolean audience with id '3468206646'
+            OptimizelyWithTypedAudiences.Track("user_signed_up", "user1", userAttributes);
+
+            EventDispatcherMock.Verify(dispatcher => dispatcher.DispatchEvent(It.IsAny<LogEvent>()), Times.Once);
+        }
+
+        [Test]
+        public void TestTrackExcludeUserFromExperimentWithComplexAudienceConditions()
+        {
+            var userAttributes = new UserAttributes
+            {
+                { "house", "Gryffindor" },
+                { "should_do_it", false }
+            };
+
+            // Should be excluded as exact match boolean audience with id '3468206643' does not match so the overall conditions fail.
+            OptimizelyWithTypedAudiences.Track("user_signed_up", "user1", userAttributes);
+
+            EventDispatcherMock.Verify(dispatcher => dispatcher.DispatchEvent(It.IsAny<LogEvent>()), Times.Never);
+        }
+
+        [Test]
+        public void TestIsFeatureEnabledIncludeUserInRolloutWithComplexAudienceConditions()
+        {
+            var userAttributes = new UserAttributes
+            {
+                { "house", "Welcome to Slytherin!" },
+                { "lasers", 45.5 }
+            };
+
+            // Should be included via substring match string audience with id '3988293898' and exists audience with id '3988293899'
+            var result = OptimizelyWithTypedAudiences.IsFeatureEnabled("feat2", "user1", userAttributes);
+            Assert.True(result);
+        }
+
+        [Test]
+        public void TestIsFeatureEnabledExcludeUserFromRolloutWithComplexAudienceConditions()
+        {
+            var userAttributes = new UserAttributes
+            {
+                { "house", "Ravenclaw" },
+                { "lasers", 45.5 }
+            };
+
+            // Should be excluded - substring match string audience with id '3988293898' does not match,
+            // and no audience in the other branch of the 'and' matches either
+            var result = OptimizelyWithTypedAudiences.IsFeatureEnabled("audience_combinations_experiment", "user1", userAttributes);
+            Assert.False(result);
+        }
+
+        [Test]
+        public void TestGetFeatureVariableIntegerReturnsVariableValueWithComplexAudienceConditions()
+        {
+            var userAttributes = new UserAttributes
+            {
+                { "house", "Gryffindor" },
+                { "lasers", 700 }
+            };
+
+            // Should be included via substring match string audience with id '3988293898' and exists audience with id '3988293899'
+            var value = OptimizelyWithTypedAudiences.GetFeatureVariableInteger("feat2_with_var", "z", "user1", userAttributes);
+            Assert.AreEqual(150, value);
+        }
+
+        [Test]
+        public void TestGetFeatureVariableIntegerReturnsDefaultValueWithComplexAudienceConditions()
+        {
+            var userAttributes = new UserAttributes {};
+
+            // Should be included via substring match string audience with id '3988293898' and exists audience with id '3988293899'
+            var value = OptimizelyWithTypedAudiences.GetFeatureVariableInteger("feat2_with_var", "z", "user1", userAttributes);
+            Assert.AreEqual(10, value);
+        }
+
+        #endregion // Test Audience Combinations
     }
 }

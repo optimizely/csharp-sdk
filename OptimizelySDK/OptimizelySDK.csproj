@@ -100,7 +100,8 @@
     <Compile Include="Optimizely.cs" />
     <Compile Include="ProjectConfig.cs" />
     <Compile Include="Bucketing\UserProfile.cs" />
-    <Compile Include="Utils\ConditionEvaluator.cs" />
+    <Compile Include="Utils\ConditionTreeEvaluator.cs" />
+    <Compile Include="Utils\CustomAttributeConditionEvaluator.cs" />
     <Compile Include="Utils\EventTagUtils.cs" />
     <Compile Include="Bucketing\UserProfileUtil.cs" />
     <Compile Include="Utils\ExperimentUtils.cs" />

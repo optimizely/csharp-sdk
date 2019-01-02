@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2017, Optimizely
+ * Copyright 2017-2019, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 using System.Collections.Generic;
+using Newtonsoft.Json.Linq;
 using OptimizelySDK.Utils;
 
 namespace OptimizelySDK.Entity
@@ -68,6 +69,24 @@ namespace OptimizelySDK.Entity
         /// Traffic allocation of variations in the experiment
         /// </summary>
         public TrafficAllocation[] TrafficAllocation { get; set; }
+
+        /// <summary>
+        /// Audience Conditions
+        /// </summary>
+        public string AudienceConditions { get; set; }
+
+        private JToken audienceConditionsList = null;
+
+        /// <summary>
+        /// De-serialized audience conditions
+        /// </summary>
+        public JToken AudienceConditionsList
+        {
+            get
+            {
+                return (audienceConditionsList == null && string.IsNullOrEmpty(AudienceConditions)) ? null : (audienceConditionsList = ConditionTreeEvaluator.DecodeConditions(AudienceConditions ?? string.Empty));
+            }
+        }
 
         bool isGenerateKeyMapCalled = false;
 
@@ -146,6 +165,16 @@ namespace OptimizelySDK.Entity
         public bool IsUserInForcedVariation(string userId)
         {
             return ForcedVariations != null && ForcedVariations.ContainsKey(userId);
+        }
+
+        /// <summary>
+        /// Get audience conditions for the experiment.
+        /// </summary>
+        /// <returns>Audience conditions for the experiment - can be an array of audience IDs, or a nested array of conditions.
+        /// Examples: ["5", "6"], ["and", ["or", "1", "2"], "3"]</returns>
+        public JToken GetAudienceConditionsOrIds()
+        {
+            return AudienceConditionsList != null ? AudienceConditionsList : JArray.FromObject(AudienceIds);
         }
     }
 }
