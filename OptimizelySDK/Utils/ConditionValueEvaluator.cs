@@ -52,9 +52,6 @@ namespace OptimizelySDK.Utils
 
         public static bool? ExactEvaluator(object conditionValue, object attributeValue)
         {
-            if (conditionValue == null && attributeValue == null)
-                return true;
-
             if (conditionValue is bool && attributeValue is bool)
                 return (bool)conditionValue == (bool)attributeValue;
 

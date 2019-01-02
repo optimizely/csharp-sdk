@@ -192,6 +192,11 @@ namespace OptimizelySDK
         public Audience[] Audiences { get; set; }
 
         /// <summary>
+        /// Associative list of Typed Audiences.
+        /// </summary>
+        public Audience[] TypedAudiences { get; set; }
+
+        /// <summary>
         /// Associative list of FeatureFlags.
         /// </summary>
         public FeatureFlag[] FeatureFlags { get; set; }
@@ -221,6 +226,7 @@ namespace OptimizelySDK
             Events = Events ?? new Entity.Event[0];
             Attributes = Attributes ?? new Attribute[0];
             Audiences = Audiences ?? new Audience[0];
+            TypedAudiences = TypedAudiences ?? new Audience[0];
             FeatureFlags = FeatureFlags ?? new FeatureFlag[0];
             Rollouts = Rollouts ?? new Rollout[0];
 
@@ -232,6 +238,11 @@ namespace OptimizelySDK
             _AudienceIdMap = ConfigParser<Audience>.GenerateMap(entities: Audiences, getKey: a => a.Id.ToString(), clone: true);
             _FeatureKeyMap = ConfigParser<FeatureFlag>.GenerateMap(entities: FeatureFlags, getKey: f => f.Key, clone: true);
             _RolloutIdMap = ConfigParser<Rollout>.GenerateMap(entities: Rollouts, getKey: r => r.Id.ToString(), clone: true);
+
+            // Overwrite similar items in audience id map with typed audience id map.
+            var typedAudienceIdMap = ConfigParser<Audience>.GenerateMap(entities: TypedAudiences, getKey: a => a.Id.ToString(), clone: true);
+            foreach (var item in typedAudienceIdMap)
+                _AudienceIdMap[item.Key] = item.Value;
 
             foreach (Group group in Groups)
             {
