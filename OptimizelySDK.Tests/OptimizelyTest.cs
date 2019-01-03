@@ -2148,7 +2148,7 @@ namespace OptimizelySDK.Tests
         #region Test Audience Combinations
 
         [Test]
-        public void TestActivateIncludeUserInExperimentWithComplexAudienceConditions()
+        public void TestActivateIncludesUserInExperimentWithComplexAudienceConditions()
         {
             var userAttributes = new UserAttributes
             {
@@ -2164,7 +2164,7 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
-        public void TestActivateExcludeUserFromExperimentWithComplexAudienceConditions()
+        public void TestActivateExcludesUserFromExperimentWithComplexAudienceConditions()
         {
             var userAttributes = new UserAttributes
             {
@@ -2180,7 +2180,7 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
-        public void TestTrackWithComplexAudienceConditions()
+        public void TestTrackIncludesUserInExperimentWithComplexAudienceConditions()
         {
             var userAttributes = new UserAttributes
             {
@@ -2195,7 +2195,7 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
-        public void TestTrackExcludeUserFromExperimentWithComplexAudienceConditions()
+        public void TestTrackExcludesUserFromExperimentWithComplexAudienceConditions()
         {
             var userAttributes = new UserAttributes
             {
@@ -2210,12 +2210,12 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
-        public void TestIsFeatureEnabledIncludeUserInRolloutWithComplexAudienceConditions()
+        public void TestIsFeatureEnabledIncludesUserInRolloutWithComplexAudienceConditions()
         {
             var userAttributes = new UserAttributes
             {
                 { "house", "Welcome to Slytherin!" },
-                { "lasers", 45.5 }
+                { "favorite_ice_cream", "walls" }
             };
 
             // Should be included via substring match string audience with id '3988293898' and exists audience with id '3988293899'
@@ -2224,7 +2224,7 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
-        public void TestIsFeatureEnabledExcludeUserFromRolloutWithComplexAudienceConditions()
+        public void TestIsFeatureEnabledExcludesUserFromRolloutWithComplexAudienceConditions()
         {
             var userAttributes = new UserAttributes
             {
@@ -2257,7 +2257,7 @@ namespace OptimizelySDK.Tests
         {
             var userAttributes = new UserAttributes {};
 
-            // Should be included via substring match string audience with id '3988293898' and exists audience with id '3988293899'
+            // Should be excluded - no audiences match with no attributes.
             var value = OptimizelyWithTypedAudiences.GetFeatureVariableInteger("feat2_with_var", "z", "user1", userAttributes);
             Assert.AreEqual(10, value);
         }

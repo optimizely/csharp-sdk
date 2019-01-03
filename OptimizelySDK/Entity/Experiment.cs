@@ -75,7 +75,7 @@ namespace OptimizelySDK.Entity
         /// </summary>
         public object AudienceConditions { get; set; }
 
-        private JToken audienceConditionsList = null;
+        private JToken _audienceConditionsList = null;
 
         /// <summary>
         /// De-serialized audience conditions
@@ -87,15 +87,15 @@ namespace OptimizelySDK.Entity
                 if (AudienceConditions == null)
                     return null;
 
-                if (audienceConditionsList == null)
+                if (_audienceConditionsList == null)
                 {
                     if (AudienceConditions is string)
-                        audienceConditionsList = ConditionTreeEvaluator.DecodeConditions((string)AudienceConditions);
+                        _audienceConditionsList = ConditionTreeEvaluator.DecodeConditions((string)AudienceConditions);
                     else
-                        audienceConditionsList = (JToken)AudienceConditions;
+                        _audienceConditionsList = (JToken)AudienceConditions;
                 }
 
-                return audienceConditionsList;
+                return _audienceConditionsList;
             }
         }
 
@@ -185,7 +185,7 @@ namespace OptimizelySDK.Entity
         /// Examples: ["5", "6"], ["and", ["or", "1", "2"], "3"]</returns>
         public JToken GetAudienceConditionsOrIds()
         {
-            return AudienceConditionsList != null ? AudienceConditionsList : JArray.FromObject(AudienceIds);
+            return AudienceConditionsList ?? JArray.FromObject(AudienceIds);
         }
     }
 }

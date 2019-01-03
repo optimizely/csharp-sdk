@@ -35,7 +35,7 @@ namespace OptimizelySDK.Entity
         /// </summary>
         public object Conditions { get; set; }
 
-        private JToken DecodedConditions = null;
+        private JToken _decodedConditions = null;
 
         /// <summary>
         /// De-serialized audience conditions
@@ -47,15 +47,15 @@ namespace OptimizelySDK.Entity
                 if (Conditions == null)
                     return null;
 
-                if (DecodedConditions == null)
+                if (_decodedConditions == null)
                 {
                     if (Conditions is string)
-                        DecodedConditions = Utils.ConditionTreeEvaluator.DecodeConditions((string)Conditions);
+                        _decodedConditions = Utils.ConditionTreeEvaluator.DecodeConditions((string)Conditions);
                     else
-                        DecodedConditions = (JToken)Conditions;
+                        _decodedConditions = (JToken)Conditions;
                 }
 
-                return DecodedConditions;
+                return _decodedConditions;
             }
         }
     }

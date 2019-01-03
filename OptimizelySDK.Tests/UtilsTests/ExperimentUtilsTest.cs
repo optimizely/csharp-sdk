@@ -44,14 +44,17 @@ namespace OptimizelySDK.Tests.UtilsTests
         }
 
         [Test]
-        public void TestIsUserInExperimentReturnsFalseWithAudiencesAndNoAttributes()
+        public void TestIsUserInExperimentReturnsTrueWhenAudienceUsedInExperimentNoAttributesProvided()
         {
             var experiment = Config.GetExperimentFromKey("feat_with_var_test");
-            Assert.False(ExperimentUtils.IsUserInExperiment(Config, experiment, null));
+            experiment.AudienceIds = new string[] { "3468206648" };
+
+            Assert.True(ExperimentUtils.IsUserInExperiment(Config, experiment, null));
+            Assert.True(ExperimentUtils.IsUserInExperiment(Config, experiment, new UserAttributes { }));
         }
 
         [Test]
-        public void TestIsUserInExperimentReturnsFalseIfNoAudienceInORConditiosPass()
+        public void TestIsUserInExperimentReturnsFalseIfNoAudienceInORConditionPass()
         {
             var experiment = Config.GetExperimentFromKey("feat_with_var_test");
             var userAttributes = new UserAttributes
@@ -92,7 +95,7 @@ namespace OptimizelySDK.Tests.UtilsTests
         }
 
         [Test]
-        public void TestIsUserInExperimentReturnsFalseIfAnyAudienceInANDConditiosDoesNotPass()
+        public void TestIsUserInExperimentReturnsFalseIfAnyAudienceInANDConditionDoesNotPass()
         {
             var experiment = Config.GetExperimentFromKey("audience_combinations_experiment");
             var userAttributes = new UserAttributes

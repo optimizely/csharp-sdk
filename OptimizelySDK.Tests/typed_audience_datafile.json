@@ -215,11 +215,11 @@
 			"name": "exactString",
 			"conditions": "[\"and\", [\"or\", [\"or\", {\"name\": \"house\", \"type\": \"custom_attribute\", \"value\": \"Gryffindor\"}]]]"
 		},
-					{
-						"id": "3468206645",
-						"name": "notChrome",
-						"conditions": "[\"and\", [\"or\", [\"not\", [\"or\", {\"name\": \"browser_type\", \"type\": \"custom_attribute\", \"value\":\"Chrome\"}]]]]"
-					},
+		{
+			"id": "3468206645",
+			"name": "notChrome",
+			"conditions": "[\"and\", [\"or\", [\"not\", [\"or\", {\"name\": \"browser_type\", \"type\": \"custom_attribute\", \"value\":\"Chrome\"}]]]]"
+		},
 		{
 			"id": "3988293898",
 			"name": "$$dummySubstringString",
@@ -285,6 +285,11 @@
 			"id": "3468206643",
 			"name": "exactBoolean",
 			"conditions": ["and", ["or", ["or", {"name": "should_do_it", "type": "custom_attribute", "match": "exact", "value": true}]]]
+		},
+		{
+			"id": "3468206648",
+			"name": "notExist",
+			"conditions": ["not", {"name": "input_value", "type": "custom_attribute", "match": "exists"}]
 		}
 	],
 	"groups": [],

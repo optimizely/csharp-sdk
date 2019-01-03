@@ -111,13 +111,13 @@ namespace OptimizelySDK.Utils
         /// null if the user attributes and conditions can't be evaluated</returns>
         private bool? NotEvaluator(JArray conditions, Func<JToken, bool?> leafEvaluator)
         {
-            if (conditions.Count == 1)
+            if (conditions.Count > 0)
             {
                 var result = Evaluate(conditions[0], leafEvaluator);
                 return result == null ? null : !result;
             }
 
-            return false;
+            return null;
         }
 
         public bool? Evaluate(JToken conditions, Func<JToken, bool?> leafEvaluator)

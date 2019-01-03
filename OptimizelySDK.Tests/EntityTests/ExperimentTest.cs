@@ -49,6 +49,11 @@ namespace OptimizelySDK.Tests.EntityTests
         {
             var experiment = Config.GetExperimentFromKey("audience_combinations_experiment");
             Assert.True(TestData.CompareObjects(experiment.AudienceConditionsList, experiment.GetAudienceConditionsOrIds()));
+
+            // Verify that Audience conditions are returned in case of empty array.
+            experiment = new Entity.Experiment();
+            experiment.AudienceConditions = Newtonsoft.Json.Linq.JToken.FromObject(new object[] { });
+            Assert.True(TestData.CompareObjects(experiment.AudienceConditionsList, experiment.GetAudienceConditionsOrIds()));
         }
 
         #endregion // GetAudienceConditionsOrIds Tests

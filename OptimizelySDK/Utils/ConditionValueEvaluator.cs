@@ -52,16 +52,15 @@ namespace OptimizelySDK.Utils
 
         public static bool? ExactEvaluator(object conditionValue, object attributeValue)
         {
-            if (conditionValue is bool && attributeValue is bool)
-                return (bool)conditionValue == (bool)attributeValue;
+            if (!IsValueValidForExactConditions(conditionValue) || 
+                !IsValueValidForExactConditions(attributeValue) ||
+                !AreValuesSameType(conditionValue, attributeValue))
+                return null;
 
-            if (Validator.IsValidNumericValue(conditionValue) && Validator.IsValidNumericValue(attributeValue))
-                return Convert.ToDouble(conditionValue) == Convert.ToDouble(attributeValue);
+            if (Validator.IsNumericType(conditionValue) && Validator.IsNumericType(attributeValue))
+                return Convert.ToDouble(conditionValue).Equals(Convert.ToDouble(attributeValue));
 
-            if (conditionValue is string && attributeValue is string)
-                return (string)conditionValue == (string)attributeValue;
-
-            return null;
+            return conditionValue.Equals(attributeValue);
         }
 
         public static bool? ExistEvaluator(object conditionValue, object attributeValue)
@@ -94,6 +93,36 @@ namespace OptimizelySDK.Utils
             }
 
             return null;
+        }
+
+        /// <summary>
+        /// Validates the value for exact conditions.
+        /// </summary>
+        /// <param name="value">Value to validate</param>
+        /// <returns>true if the type of value is valid for exact conditions, false otherwise.</returns>
+        public static bool IsValueValidForExactConditions(object value)
+        {
+            return value is string || value is bool || Validator.IsValidNumericValue(value);
+        }
+
+        /// <summary>
+        /// Validates that the types of first and second value are same.
+        /// </summary>
+        /// <param name="firstValue"></param>
+        /// <param name="secondValue"></param>
+        /// <returns>true if the type of both values are same, false otherwise.</returns>
+        public static bool AreValuesSameType(object firstValue, object secondValue)
+        {
+            if (firstValue is string && secondValue is string)
+                return true;
+
+            if (firstValue is bool && secondValue is bool)
+                return true;
+
+            if (Validator.IsNumericType(firstValue) && Validator.IsNumericType(secondValue))
+                return true;
+
+            return false;
         }
     }
 }
