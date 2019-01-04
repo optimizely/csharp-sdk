@@ -89,8 +89,9 @@ namespace OptimizelySDK.Entity
 
                 if (_audienceConditionsList == null)
                 {
+                    // Convert single string condition Id to condition list.
                     if (AudienceConditions is string)
-                        _audienceConditionsList = ConditionTreeEvaluator.DecodeConditions((string)AudienceConditions);
+                        _audienceConditionsList = JToken.FromObject(new object[] { AudienceConditions });
                     else
                         _audienceConditionsList = (JToken)AudienceConditions;
                 }
