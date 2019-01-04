@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2017-2018, Optimizely
+ * Copyright 2017-2019, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use file except in compliance with the License.
@@ -147,7 +147,7 @@ namespace OptimizelySDK
                 return true;
             }
 
-            if (!ExperimentUtils.IsUserInExperiment(Config, experiment, userAttributes))
+            if (!ExperimentUtils.IsUserInExperiment(Config, experiment, userAttributes, Logger))
             {
                 Logger.Log(LogLevel.INFO, string.Format("User \"{0}\" does not meet conditions to be in experiment \"{1}\".", userId, experiment.Key));
                 return false;

@@ -1,5 +1,5 @@
 ﻿/* 
-* Copyright 2017-2018, Optimizely
+* Copyright 2017-2019, Optimizely
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -105,7 +105,7 @@ namespace OptimizelySDK.Bucketing
                 }
             }
 
-            if (ExperimentUtils.IsUserInExperiment(ProjectConfig, experiment, filteredAttributes))
+            if (ExperimentUtils.IsUserInExperiment(ProjectConfig, experiment, filteredAttributes, Logger))
             {
                 // Get Bucketing ID from user attributes.
                 string bucketingId = GetBucketingId(userId, filteredAttributes);
@@ -287,7 +287,7 @@ namespace OptimizelySDK.Bucketing
             for (int i=0; i < rolloutRulesLength - 1; i++)
             {
                 var rolloutRule = rollout.Experiments[i];
-                if (ExperimentUtils.IsUserInExperiment(ProjectConfig, rolloutRule, filteredAttributes))
+                if (ExperimentUtils.IsUserInExperiment(ProjectConfig, rolloutRule, filteredAttributes, Logger))
                 {
                     variation = Bucketer.Bucket(ProjectConfig, rolloutRule, bucketingId, userId);
                     if (variation == null || string.IsNullOrEmpty(variation.Id))
@@ -304,7 +304,7 @@ namespace OptimizelySDK.Bucketing
 
             // Get the last rule which is everyone else rule.
             var everyoneElseRolloutRule = rollout.Experiments[rolloutRulesLength - 1];
-            if (ExperimentUtils.IsUserInExperiment(ProjectConfig, everyoneElseRolloutRule, filteredAttributes))
+            if (ExperimentUtils.IsUserInExperiment(ProjectConfig, everyoneElseRolloutRule, filteredAttributes, Logger))
             {
                 variation = Bucketer.Bucket(ProjectConfig, everyoneElseRolloutRule, bucketingId, userId);
                 if (variation != null && !string.IsNullOrEmpty(variation.Id))

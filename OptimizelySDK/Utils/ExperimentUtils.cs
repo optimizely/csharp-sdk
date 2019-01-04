@@ -44,14 +44,18 @@ namespace OptimizelySDK.Utils
         /// <param name="config">ProjectConfig Configuration for the project</param>
         /// <param name="experiment">Experiment Entity representing the experiment</param>
         /// <param name="userAttributes">Attributes of the user. Defaults to empty attributes array if not provided</param>
+        /// <param name="logger">Logger instance</param>
         /// <returns>true if the user meets audience conditions to be in experiment, false otherwise.</returns>
-        public static bool IsUserInExperiment(ProjectConfig config, Experiment experiment, UserAttributes userAttributes)
+        public static bool IsUserInExperiment(ProjectConfig config, Experiment experiment, UserAttributes userAttributes, ILogger logger)
         {
             var audienceConditions = experiment.GetAudienceConditionsOrIds();
 
             // If there are no audiences, return true because that means ALL users are included in the experiment.
             if (audienceConditions == null || !audienceConditions.Any())
+            {
+                logger.Log(LogLevel.INFO, $@"No Audience attached to experiment ""{experiment.Key}"". Evaluated as True.");
                 return true;
+            }
 
             if (userAttributes == null)
                 userAttributes = new UserAttributes();

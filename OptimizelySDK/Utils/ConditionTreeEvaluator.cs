@@ -16,6 +16,7 @@
 
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using OptimizelySDK.Logger;
 using System;
 
 namespace OptimizelySDK.Utils
@@ -36,6 +37,16 @@ namespace OptimizelySDK.Utils
         /// const string Representing NOT operator.
         /// </summary>
         const string NOT_OPERATOR = "not";
+
+        ///// <summary>
+        ///// Logger instance.
+        ///// </summary>
+        //private ILogger Logger;
+
+        //public ConditionTreeEvaluator(ILogger logger)
+        //{
+        //    Logger = logger;
+        //}
 
         /// <summary>
         /// Evaluates an array of conditions as if the evaluator had been applied

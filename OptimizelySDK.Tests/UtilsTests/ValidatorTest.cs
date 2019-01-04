@@ -80,15 +80,15 @@ namespace OptimizelySDK.Tests.UtilsTests
         [Test]
         public void TestIsUserInExperimentNoAudienceUsedInExperiment()
         {
-            Assert.IsTrue(ExperimentUtils.IsUserInExperiment(Config, Config.GetExperimentFromKey("paused_experiment"), new UserAttributes()));
+            Assert.IsTrue(ExperimentUtils.IsUserInExperiment(Config, Config.GetExperimentFromKey("paused_experiment"), new UserAttributes(), Logger));
         }
 
         [Test]
         public void TestIsUserInExperimentAudienceUsedInExperimentNoAttributesProvided()
         {
-            Assert.IsFalse(ExperimentUtils.IsUserInExperiment(Config, Config.GetExperimentFromKey("test_experiment"), new UserAttributes()));
+            Assert.IsFalse(ExperimentUtils.IsUserInExperiment(Config, Config.GetExperimentFromKey("test_experiment"), new UserAttributes(), Logger));
 
-            Assert.IsFalse(ExperimentUtils.IsUserInExperiment(Config, Config.GetExperimentFromKey("test_experiment"), null));
+            Assert.IsFalse(ExperimentUtils.IsUserInExperiment(Config, Config.GetExperimentFromKey("test_experiment"), null, Logger));
         }
 
         [Test]
@@ -99,7 +99,7 @@ namespace OptimizelySDK.Tests.UtilsTests
                 {"device_type", "iPhone" },
                 {"location", "San Francisco" }
             };
-            Assert.IsTrue(ExperimentUtils.IsUserInExperiment(Config, Config.GetExperimentFromKey("test_experiment"), userAttributes));
+            Assert.IsTrue(ExperimentUtils.IsUserInExperiment(Config, Config.GetExperimentFromKey("test_experiment"), userAttributes, Logger));
         }
 
         [Test]
@@ -111,7 +111,7 @@ namespace OptimizelySDK.Tests.UtilsTests
                 {"location", "San Francisco" }
             };
 
-            Assert.IsFalse(ExperimentUtils.IsUserInExperiment(Config, Config.GetExperimentFromKey("test_experiment"), null));
+            Assert.IsFalse(ExperimentUtils.IsUserInExperiment(Config, Config.GetExperimentFromKey("test_experiment"), null, Logger));
         }
 
         [Test]

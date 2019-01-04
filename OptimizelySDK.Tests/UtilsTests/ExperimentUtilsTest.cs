@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
+using Moq;
 using NUnit.Framework;
 using OptimizelySDK.Entity;
+using OptimizelySDK.Logger;
 using OptimizelySDK.Utils;
 
 namespace OptimizelySDK.Tests.UtilsTests
@@ -24,11 +26,16 @@ namespace OptimizelySDK.Tests.UtilsTests
     public class ExperimentUtilsTest
     {
         private ProjectConfig Config;
+        private Mock<ILogger> LoggerMock;
+        private ILogger Logger;
 
         [SetUp]
         public void Setup()
         {
             Config = ProjectConfig.Create(TestData.TypedAudienceDatafile, null, null);
+            LoggerMock = new Mock<ILogger>();
+            LoggerMock.Setup(i => i.Log(It.IsAny<LogLevel>(), It.IsAny<string>()));
+            Logger = LoggerMock.Object;
         }
         
         #region IsUserInExperiment Tests
@@ -40,7 +47,7 @@ namespace OptimizelySDK.Tests.UtilsTests
             experiment.AudienceIds = new string[] { };
             experiment.AudienceConditions = null;
 
-            Assert.True(ExperimentUtils.IsUserInExperiment(Config, experiment, null));
+            Assert.True(ExperimentUtils.IsUserInExperiment(Config, experiment, null, Logger));
         }
 
         [Test]
@@ -49,8 +56,8 @@ namespace OptimizelySDK.Tests.UtilsTests
             var experiment = Config.GetExperimentFromKey("feat_with_var_test");
             experiment.AudienceIds = new string[] { "3468206648" };
 
-            Assert.True(ExperimentUtils.IsUserInExperiment(Config, experiment, null));
-            Assert.True(ExperimentUtils.IsUserInExperiment(Config, experiment, new UserAttributes { }));
+            Assert.True(ExperimentUtils.IsUserInExperiment(Config, experiment, null, Logger));
+            Assert.True(ExperimentUtils.IsUserInExperiment(Config, experiment, new UserAttributes { }, Logger));
         }
 
         [Test]
@@ -64,7 +71,7 @@ namespace OptimizelySDK.Tests.UtilsTests
                 { "should_do_it", false }
             };
 
-            Assert.False(ExperimentUtils.IsUserInExperiment(Config, experiment, userAttributes));
+            Assert.False(ExperimentUtils.IsUserInExperiment(Config, experiment, userAttributes, Logger));
         }
 
         [Test]
@@ -78,7 +85,7 @@ namespace OptimizelySDK.Tests.UtilsTests
                 { "should_do_it", false }
             };
 
-            Assert.True(ExperimentUtils.IsUserInExperiment(Config, experiment, userAttributes));
+            Assert.True(ExperimentUtils.IsUserInExperiment(Config, experiment, userAttributes, Logger));
         }
 
         [Test]
@@ -91,7 +98,7 @@ namespace OptimizelySDK.Tests.UtilsTests
                 { "favorite_ice_cream", "walls" }
             };
 
-            Assert.True(ExperimentUtils.IsUserInExperiment(Config, experiment, userAttributes));
+            Assert.True(ExperimentUtils.IsUserInExperiment(Config, experiment, userAttributes, Logger));
         }
 
         [Test]
@@ -104,7 +111,7 @@ namespace OptimizelySDK.Tests.UtilsTests
                 { "lasers", 50 }
             };
 
-            Assert.False(ExperimentUtils.IsUserInExperiment(Config, experiment, userAttributes));
+            Assert.False(ExperimentUtils.IsUserInExperiment(Config, experiment, userAttributes, Logger));
         }
 
         [Test]
@@ -117,7 +124,7 @@ namespace OptimizelySDK.Tests.UtilsTests
                 { "browser_type", "Safari" }
             };
 
-            Assert.True(ExperimentUtils.IsUserInExperiment(Config, experiment, userAttributes));
+            Assert.True(ExperimentUtils.IsUserInExperiment(Config, experiment, userAttributes, Logger));
         }
 
         [Test]
@@ -130,7 +137,7 @@ namespace OptimizelySDK.Tests.UtilsTests
                 { "browser_type", "Chrome" }
             };
 
-            Assert.False(ExperimentUtils.IsUserInExperiment(Config, experiment, userAttributes));
+            Assert.False(ExperimentUtils.IsUserInExperiment(Config, experiment, userAttributes, Logger));
         }
 
         #endregion // IsUserInExperiment Tests
