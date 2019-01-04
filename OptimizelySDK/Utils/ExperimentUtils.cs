@@ -58,13 +58,15 @@ namespace OptimizelySDK.Utils
 
             var conditionTreeEvaluator = new ConditionTreeEvaluator();
 
+            System.Func<JToken, bool?> evaluateConditionsWithUserAttributes = condition => CustomAttributeConditionEvaluator.Evaluate(condition, userAttributes);
+
             bool? EvaluateAudience(JToken audienceIdToken)
             {
                 string audienceId = audienceIdToken.ToString();
                 var audience = config.GetAudience(audienceId);
 
                 if (audience != null && !string.IsNullOrEmpty(audience.Id))
-                    return conditionTreeEvaluator.Evaluate(audience.ConditionList, condition => CustomAttributeConditionEvaluator.Evaluate(condition, userAttributes));
+                    return conditionTreeEvaluator.Evaluate(audience.ConditionList, evaluateConditionsWithUserAttributes);
 
                 return null;
             }
