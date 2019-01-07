@@ -53,16 +53,20 @@ namespace OptimizelySDK.Utils
             // If there are no audiences, return true because that means ALL users are included in the experiment.
             if (audienceConditions == null || !audienceConditions.Any())
             {
-                logger.Log(LogLevel.INFO, $@"No Audience attached to experiment ""{experiment.Key}"". Evaluated as True.");
+                logger.Log(LogLevel.INFO, $@"No Audience attached to the experiment ""{experiment.Key}"". Evaluated as True.");
                 return true;
             }
+
+            logger.Log(LogLevel.DEBUG, $@"Evaluating audiences for experiment ""{experiment.Key}"": ""{audienceConditions}""");
 
             if (userAttributes == null)
                 userAttributes = new UserAttributes();
 
+            logger.Log(LogLevel.DEBUG, $@"User attributes: {JToken.FromObject(userAttributes)}");
+
             var conditionTreeEvaluator = new ConditionTreeEvaluator();
 
-            System.Func<JToken, bool?> evaluateConditionsWithUserAttributes = condition => CustomAttributeConditionEvaluator.Evaluate(condition, userAttributes);
+            System.Func<JToken, bool?> evaluateConditionsWithUserAttributes = condition => CustomAttributeConditionEvaluator.Evaluate(condition, userAttributes, logger);
 
             bool? EvaluateAudience(JToken audienceIdToken)
             {
@@ -70,12 +74,19 @@ namespace OptimizelySDK.Utils
                 var audience = config.GetAudience(audienceId);
 
                 if (audience != null && !string.IsNullOrEmpty(audience.Id))
-                    return conditionTreeEvaluator.Evaluate(audience.ConditionList, evaluateConditionsWithUserAttributes);
+                {
+                    logger.Log(LogLevel.DEBUG, $@"Starting to evaluate audience ""{audienceId}"" with conditions: ""{audience.ConditionList}"".");
+                    var result = conditionTreeEvaluator.Evaluate(audience.ConditionList, evaluateConditionsWithUserAttributes);
+                    logger.Log(LogLevel.DEBUG, $@"Audience ""{audienceId}"" evaluated as ""{result?.ToString() ?? "UNKNOWN"}"".");
+                    return result;
+                }
 
                 return null;
             }
 
-            return conditionTreeEvaluator.Evaluate(audienceConditions, EvaluateAudience).GetValueOrDefault();
+            var evaluationResult = conditionTreeEvaluator.Evaluate(audienceConditions, EvaluateAudience).GetValueOrDefault();
+            logger.Log(LogLevel.INFO, $@"Audiences for experiment ""{experiment.Key}"" collectively evaluated as ""{evaluationResult}"".");
+            return evaluationResult;
         }
     }
 }

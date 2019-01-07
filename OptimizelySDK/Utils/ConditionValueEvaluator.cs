@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+using Newtonsoft.Json.Linq;
+using OptimizelySDK.Logger;
 using System;
 
 namespace OptimizelySDK.Utils
@@ -29,7 +31,7 @@ namespace OptimizelySDK.Utils
             public const string SUBSTRING = "substring";
         }
 
-        public static Func<object, object, bool?> GetEvaluator(string matchType)
+        public static Func<JToken, object, ILogger, bool?> GetEvaluator(string matchType)
         {
             switch (matchType)
             {
@@ -50,11 +52,21 @@ namespace OptimizelySDK.Utils
             return null;
         }
 
-        public static bool? ExactEvaluator(object conditionValue, object attributeValue)
+        public static bool? ExactEvaluator(JToken condition, object attributeValue, ILogger logger)
         {
-            if (!IsValueValidForExactConditions(conditionValue) || 
-                !IsValueValidForExactConditions(attributeValue) ||
-                !AreValuesSameType(conditionValue, attributeValue))
+            var conditionName = condition["name"].ToString();
+            var conditionValue = condition["value"]?.ToObject<object>();
+
+            if (!IsValueValidForExactConditions(conditionValue))
+                return null;
+
+            if (!IsValueValidForExactConditions(attributeValue))
+            {
+                logger.Log(LogLevel.WARN, $@"Audience condition ""{condition}"" evaluated as UNKNOWN because the value for user attribute ""{attributeValue}"" is inapplicable: {conditionName}");
+                return null;
+            }
+
+            if (!AreValuesSameType(conditionValue, attributeValue))
                 return null;
 
             if (Validator.IsNumericType(conditionValue) && Validator.IsNumericType(attributeValue))
@@ -63,36 +75,61 @@ namespace OptimizelySDK.Utils
             return conditionValue.Equals(attributeValue);
         }
 
-        public static bool? ExistEvaluator(object conditionValue, object attributeValue)
+        public static bool? ExistEvaluator(JToken condition, object attributeValue, ILogger logger)
         {
             return attributeValue != null;
         }
 
-        public static bool? GreaterThanEvaluator(object conditionValue, object attributeValue)
+        public static bool? GreaterThanEvaluator(JToken condition, object attributeValue, ILogger logger)
         {
-            if (Validator.IsValidNumericValue(conditionValue) && Validator.IsValidNumericValue(attributeValue))
-                return Convert.ToDouble(attributeValue) > Convert.ToDouble(conditionValue);
+            var conditionName = condition["name"].ToString();
+            var conditionValue = condition["value"]?.ToObject<object>();
 
-            return null;
-        }
+            if (!Validator.IsValidNumericValue(conditionValue))
+                return null;
 
-        public static bool? LessThanEvaluator(object conditionValue, object attributeValue)
-        {
-            if (Validator.IsValidNumericValue(conditionValue) && Validator.IsValidNumericValue(attributeValue))
-                return Convert.ToDouble(attributeValue) < Convert.ToDouble(conditionValue);
-
-            return null;
-        }
-
-        public static bool? SubstringEvaluator(object conditionValue, object attributeValue)
-        {
-            if (conditionValue is string && attributeValue is string)
+            if (!Validator.IsValidNumericValue(attributeValue))
             {
-                var value = (string)attributeValue;
-                return value != null && value.Contains((string)conditionValue);
+                logger.Log(LogLevel.WARN, $@"Audience condition ""{condition}"" evaluated as UNKNOWN because the value for user attribute ""{attributeValue}"" is inapplicable: {conditionName}");
+                return null;
+            }
+            
+            return Convert.ToDouble(attributeValue) > Convert.ToDouble(conditionValue);
+        }
+
+        public static bool? LessThanEvaluator(JToken condition, object attributeValue, ILogger logger)
+        {
+            var conditionName = condition["name"].ToString();
+            var conditionValue = condition["value"]?.ToObject<object>();
+
+            if (!Validator.IsValidNumericValue(conditionValue))
+                return null;
+
+            if (!Validator.IsValidNumericValue(attributeValue))
+            {
+                logger.Log(LogLevel.WARN, $@"Audience condition ""{condition}"" evaluated as UNKNOWN because the value for user attribute ""{attributeValue}"" is inapplicable: {conditionName}");
+                return null;
             }
 
-            return null;
+            return Convert.ToDouble(attributeValue) < Convert.ToDouble(conditionValue);
+        }
+
+        public static bool? SubstringEvaluator(JToken condition, object attributeValue, ILogger logger)
+        {
+            var conditionName = condition["name"].ToString();
+            var conditionValue = condition["value"]?.ToObject<object>();
+
+            if (!(conditionValue is string))
+                return null;
+
+            if (!(attributeValue is string))
+            {
+                logger.Log(LogLevel.WARN, $@"Audience condition ""{condition}"" evaluated as UNKNOWN because the value for user attribute ""{attributeValue}"" is inapplicable: {conditionName}");
+                return null;
+            }
+            
+            var value = (string)attributeValue;
+            return value != null && value.Contains((string)conditionValue);
         }
 
         /// <summary>

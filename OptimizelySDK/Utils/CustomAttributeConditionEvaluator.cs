@@ -16,6 +16,7 @@
 
 using Newtonsoft.Json.Linq;
 using OptimizelySDK.Entity;
+using OptimizelySDK.Logger;
 
 namespace OptimizelySDK.Utils
 {
@@ -26,21 +27,36 @@ namespace OptimizelySDK.Utils
         /// </summary>
         public const string CUSTOM_ATTRIBUTE_CONDITION_TYPE = "custom_attribute";
 
-        public static bool? Evaluate(JToken condition, UserAttributes userAttributes)
+        public static bool? Evaluate(JToken condition, UserAttributes userAttributes, ILogger logger)
         {
             string conditionType = condition["type"]?.ToString();
             if (conditionType == null || conditionType != CUSTOM_ATTRIBUTE_CONDITION_TYPE)
+            {
+                logger.Log(LogLevel.WARN, $@"Audience condition ""{condition}"" uses an unknown condition type.");
                 return null;
+            }
 
             string matchType = condition["match"]?.ToString();
-            var conditionValue = condition["value"]?.ToObject<object>();
+            var conditionName = condition["name"].ToString();
 
             object attributeValue = null;
-            if (userAttributes != null && userAttributes.ContainsKey(condition["name"].ToString()))
-                attributeValue = userAttributes[condition["name"].ToString()];
+            if (userAttributes != null && userAttributes.ContainsKey(conditionName))
+                attributeValue = userAttributes[conditionName];
+
+            if (attributeValue == null && matchType != "exists")
+            {
+                logger.Log(LogLevel.WARN, $@"Audience condition ""{condition}"" evaluated as UNKNOWN because no user value was passed for attribute ""{conditionName}"".");
+                return null;
+            }
 
             var evaluator = ConditionValueEvaluator.GetEvaluator(matchType);
-            return evaluator != null ? evaluator(conditionValue, attributeValue) : null;
+            if (evaluator == null)
+            {
+                logger.Log(LogLevel.WARN, $@"Audience condition ""{condition}"" uses an unknown match type.");
+                return null;
+            }
+
+            return evaluator != null ? evaluator(condition, attributeValue, logger) : null;
         }
     }
 }
