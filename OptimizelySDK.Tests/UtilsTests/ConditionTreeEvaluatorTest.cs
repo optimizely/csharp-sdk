@@ -17,6 +17,7 @@ using Moq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using NUnit.Framework;
+using OptimizelySDK.Logger;
 using OptimizelySDK.Utils;
 
 namespace OptimizelySDK.Tests.UtilsTests
@@ -39,6 +40,9 @@ namespace OptimizelySDK.Tests.UtilsTests
         private object[] OrConditions = null;
         private object[] NotCondition = null;
         private object[] NoOperatorConditions = null;
+
+        private Mock<ILogger> LoggerMock;
+        private ILogger Logger;
 
         [TestFixtureSetUp]
         public void Initialize()
@@ -64,6 +68,10 @@ namespace OptimizelySDK.Tests.UtilsTests
             OrConditions = JsonConvert.DeserializeObject<object[]>(OrConditionStr);
             NotCondition = JsonConvert.DeserializeObject<object[]>(NotConditionStr);
             NoOperatorConditions = JsonConvert.DeserializeObject<object[]>(NoOperatorConditionsStr);
+
+            LoggerMock = new Mock<ILogger>();
+            LoggerMock.Setup(i => i.Log(It.IsAny<LogLevel>(), It.IsAny<string>()));
+            Logger = LoggerMock.Object;
         }
 
         [TestFixtureTearDown]

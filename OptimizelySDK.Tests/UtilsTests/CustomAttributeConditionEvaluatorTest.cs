@@ -15,6 +15,7 @@
  */
 
 using Moq;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 using OptimizelySDK.Entity;
@@ -115,16 +116,20 @@ namespace OptimizelySDK.Tests.UtilsTests
         {
             var invalidTypeCondition = JToken.Parse(@"{""name"": ""input_value"", ""match"": ""exists""}");
             Assert.That(CustomAttributeConditionEvaluator.Evaluate(invalidTypeCondition, new UserAttributes { { "input_value", "test" } }, Logger), Is.Null);
+            LoggerMock.Verify(l => l.Log(LogLevel.WARN, $@"Audience condition ""{invalidTypeCondition.ToString(Formatting.None)}"" uses an unknown condition type."), Times.Once);
 
             invalidTypeCondition = JToken.Parse(@"{""name"": ""input_value"", ""type"": ""invalid"", ""match"": ""exists""}");
             Assert.That(CustomAttributeConditionEvaluator.Evaluate(invalidTypeCondition, new UserAttributes { { "input_value", "test" } }, Logger), Is.Null);
+            LoggerMock.Verify(l => l.Log(LogLevel.WARN, $@"Audience condition ""{invalidTypeCondition.ToString(Formatting.None)}"" uses an unknown condition type."), Times.Once);
         }
 
         [Test]
         public void TestEvaluateWithInvalidMatchProperty()
         {
             var invalidMatchCondition = JToken.Parse(@"{""name"": ""distance_gt"", ""type"": ""custom_attribute"", ""value"": 10, ""match"": ""invalid""}");
-            Assert.That(CustomAttributeConditionEvaluator.Evaluate(invalidMatchCondition, new UserAttributes { { "distance", 15 } }, Logger), Is.Null);
+            Assert.That(CustomAttributeConditionEvaluator.Evaluate(invalidMatchCondition, new UserAttributes { { "distance_gt", 15 } }, Logger), Is.Null);
+
+            LoggerMock.Verify(l => l.Log(LogLevel.WARN, $@"Audience condition ""{invalidMatchCondition.ToString(Formatting.None)}"" uses an unknown match type."), Times.Once);
         }
 
         [Test]
@@ -132,6 +137,24 @@ namespace OptimizelySDK.Tests.UtilsTests
         {
             var mismatchedTypeCondition = JToken.Parse(@"{""name"": ""is_firefox"", ""type"": ""custom_attribute"", ""value"": false, ""match"": ""substring""}");
             Assert.Null(CustomAttributeConditionEvaluator.Evaluate(mismatchedTypeCondition, new UserAttributes { { "is_firefox", false } }, Logger));
+        }
+
+        [Test]
+        public void TestEvaluateReturnsNullWhenAttributeIsNotProvided()
+        {
+            var condition = JToken.Parse(@"{""name"": ""is_firefox"", ""type"": ""custom_attribute"", ""value"": false, ""match"": ""substring""}");
+            Assert.Null(CustomAttributeConditionEvaluator.Evaluate(condition, new UserAttributes {}, Logger));
+
+            LoggerMock.Verify(l => l.Log(LogLevel.WARN, $@"Audience condition ""{condition.ToString(Formatting.None)}"" evaluated as UNKNOWN because no value was passed for user attribute ""is_firefox""."), Times.Once);
+        }
+
+        [Test]
+        public void TestEvaluateReturnsNullWhenAttributeTypeIsInvalid()
+        {
+            Assert.Null(CustomAttributeConditionEvaluator.Evaluate(SubstrCondition, new UserAttributes { { "location", false } }, Logger));
+            Assert.Null(CustomAttributeConditionEvaluator.Evaluate(LTCondition, new UserAttributes { { "distance_lt", "invalid" } }, Logger));
+            LoggerMock.Verify(l => l.Log(LogLevel.WARN, $@"Audience condition ""{SubstrCondition.ToString(Formatting.None)}"" evaluated as UNKNOWN because the value for user attribute ""False"" is inapplicable: ""location"""), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.WARN, $@"Audience condition ""{LTCondition.ToString(Formatting.None)}"" evaluated as UNKNOWN because the value for user attribute ""invalid"" is inapplicable: ""distance_lt"""), Times.Once);
         }
 
         #endregion // Evaluate Tests

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using OptimizelySDK.Entity;
 using OptimizelySDK.Logger;
@@ -32,7 +33,7 @@ namespace OptimizelySDK.Utils
             string conditionType = condition["type"]?.ToString();
             if (conditionType == null || conditionType != CUSTOM_ATTRIBUTE_CONDITION_TYPE)
             {
-                logger.Log(LogLevel.WARN, $@"Audience condition ""{condition}"" uses an unknown condition type.");
+                logger.Log(LogLevel.WARN, $@"Audience condition ""{condition.ToString(Formatting.None)}"" uses an unknown condition type.");
                 return null;
             }
 
@@ -45,14 +46,14 @@ namespace OptimizelySDK.Utils
 
             if (attributeValue == null && matchType != "exists")
             {
-                logger.Log(LogLevel.WARN, $@"Audience condition ""{condition}"" evaluated as UNKNOWN because no user value was passed for attribute ""{conditionName}"".");
+                logger.Log(LogLevel.WARN, $@"Audience condition ""{condition.ToString(Formatting.None)}"" evaluated as UNKNOWN because no value was passed for user attribute ""{conditionName}"".");
                 return null;
             }
 
             var evaluator = ConditionValueEvaluator.GetEvaluator(matchType);
             if (evaluator == null)
             {
-                logger.Log(LogLevel.WARN, $@"Audience condition ""{condition}"" uses an unknown match type.");
+                logger.Log(LogLevel.WARN, $@"Audience condition ""{condition.ToString(Formatting.None)}"" uses an unknown match type.");
                 return null;
             }
 

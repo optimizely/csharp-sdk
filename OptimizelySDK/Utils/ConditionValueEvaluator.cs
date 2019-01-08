@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using OptimizelySDK.Logger;
 using System;
@@ -62,7 +63,7 @@ namespace OptimizelySDK.Utils
 
             if (!IsValueValidForExactConditions(attributeValue))
             {
-                logger.Log(LogLevel.WARN, $@"Audience condition ""{condition}"" evaluated as UNKNOWN because the value for user attribute ""{attributeValue}"" is inapplicable: {conditionName}");
+                logger.Log(LogLevel.WARN, $@"Audience condition ""{condition.ToString(Formatting.None)}"" evaluated as UNKNOWN because the value for user attribute ""{attributeValue}"" is inapplicable: ""{conditionName}""");
                 return null;
             }
 
@@ -90,7 +91,7 @@ namespace OptimizelySDK.Utils
 
             if (!Validator.IsValidNumericValue(attributeValue))
             {
-                logger.Log(LogLevel.WARN, $@"Audience condition ""{condition}"" evaluated as UNKNOWN because the value for user attribute ""{attributeValue}"" is inapplicable: {conditionName}");
+                logger.Log(LogLevel.WARN, $@"Audience condition ""{condition.ToString(Formatting.None)}"" evaluated as UNKNOWN because the value for user attribute ""{attributeValue}"" is inapplicable: ""{conditionName}""");
                 return null;
             }
             
@@ -107,7 +108,7 @@ namespace OptimizelySDK.Utils
 
             if (!Validator.IsValidNumericValue(attributeValue))
             {
-                logger.Log(LogLevel.WARN, $@"Audience condition ""{condition}"" evaluated as UNKNOWN because the value for user attribute ""{attributeValue}"" is inapplicable: {conditionName}");
+                logger.Log(LogLevel.WARN, $@"Audience condition ""{condition.ToString(Formatting.None)}"" evaluated as UNKNOWN because the value for user attribute ""{attributeValue}"" is inapplicable: ""{conditionName}""");
                 return null;
             }
 
@@ -124,7 +125,7 @@ namespace OptimizelySDK.Utils
 
             if (!(attributeValue is string))
             {
-                logger.Log(LogLevel.WARN, $@"Audience condition ""{condition}"" evaluated as UNKNOWN because the value for user attribute ""{attributeValue}"" is inapplicable: {conditionName}");
+                logger.Log(LogLevel.WARN, $@"Audience condition ""{condition.ToString(Formatting.None)}"" evaluated as UNKNOWN because the value for user attribute ""{attributeValue}"" is inapplicable: ""{conditionName}""");
                 return null;
             }
             

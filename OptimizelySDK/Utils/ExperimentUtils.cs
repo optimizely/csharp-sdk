@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using OptimizelySDK.Entity;
 using OptimizelySDK.Logger;
@@ -57,15 +58,14 @@ namespace OptimizelySDK.Utils
                 return true;
             }
 
-            logger.Log(LogLevel.DEBUG, $@"Evaluating audiences for experiment ""{experiment.Key}"": ""{audienceConditions}""");
+            logger.Log(LogLevel.DEBUG, $@"Evaluating audiences for experiment ""{experiment.Key}"": ""{audienceConditions.ToString(Formatting.None)}""");
 
             if (userAttributes == null)
                 userAttributes = new UserAttributes();
 
-            logger.Log(LogLevel.DEBUG, $@"User attributes: {JToken.FromObject(userAttributes)}");
+            logger.Log(LogLevel.DEBUG, $@"User attributes: {JsonConvert.SerializeObject(userAttributes)}");
 
             var conditionTreeEvaluator = new ConditionTreeEvaluator();
-
             System.Func<JToken, bool?> evaluateConditionsWithUserAttributes = condition => CustomAttributeConditionEvaluator.Evaluate(condition, userAttributes, logger);
 
             bool? EvaluateAudience(JToken audienceIdToken)
@@ -75,9 +75,10 @@ namespace OptimizelySDK.Utils
 
                 if (audience != null && !string.IsNullOrEmpty(audience.Id))
                 {
-                    logger.Log(LogLevel.DEBUG, $@"Starting to evaluate audience ""{audienceId}"" with conditions: ""{audience.ConditionList}"".");
+                    logger.Log(LogLevel.DEBUG, $@"Starting to evaluate audience ""{audienceId}"" with conditions: ""{audience.ConditionList.ToString(Formatting.None)}"".");
                     var result = conditionTreeEvaluator.Evaluate(audience.ConditionList, evaluateConditionsWithUserAttributes);
-                    logger.Log(LogLevel.DEBUG, $@"Audience ""{audienceId}"" evaluated as ""{result?.ToString() ?? "UNKNOWN"}"".");
+                    var resultText = result?.ToString() ?? "UNKNOWN";
+                    logger.Log(LogLevel.DEBUG, $@"Audience ""{audienceId}"" evaluated as ""{resultText}"".");
                     return result;
                 }
 
