@@ -8,11 +8,11 @@ stages:
   - name: 'Trigger Integration Tests'
     if: env(SKIP) = true
   - name: 'Unit Tests'
-    if: env(SKIP) = true
+    if: env(SKIP) = false
   - name: 'Codesign'
     if: env(SKIP) = false
   - name: 'Codesign verification'
-    if: env(SKIP) = false
+    if: env(SKIP) = true
 
 jobs:
   include:
@@ -31,17 +31,28 @@ jobs:
       language: csharp
       mono: 5.2.0
       solution: "./OptimizelySDK.Travis.sln"
+      env:
+        - AWS_ACCESS_KEY_ID=$OFTA_AWS_ACCESS_KEY_ID
+        - AWS_SECRET_ACCESS_KEY=$OFTA_AWS_SECRET_ACCESS_KEY
+        - AWS_DEFAULT_REGION=$OFTA_AWS_DEFAULT_REGION
       install:
         - nuget restore ./OptimizelySDK.Travis.sln
         - nuget install ./OptimizelySDK.Tests/packages.config -OutputDirectory ./packages
         - nuget install NUnit.Runners -Version 2.6.4 -OutputDirectory ./testrunner
       script:
         - xbuild /p:Configuration=Release ./OptimizelySDK.Travis.sln
+        - aws s3 cp ./OptimizelySDK/bin/Release/OptimizelySDK.dll s3://optly-fs-travisci-artifacts/${TRAVIS_REPO_SLUG}/${TRAVIS_BUILD_NUMBER}/workspace/
         - mono ./testrunner/NUnit.Runners.2.6.4/tools/nunit-console.exe ./OptimizelySDK.Tests/bin/Release/OptimizelySDK.Tests.dll
 
     - stage: 'Codesign'
+      env:
+        - AWS_ACCESS_KEY_ID=$OFTA_AWS_ACCESS_KEY_ID
+        - AWS_SECRET_ACCESS_KEY=$OFTA_AWS_SECRET_ACCESS_KEY
+        - AWS_DEFAULT_REGION=$OFTA_AWS_DEFAULT_REGION
       script:
         - "echo codesign stage"
+        - aws s3 sync s3://optly-fs-travisci-artifacts/${TRAVIS_REPO_SLUG}/${TRAVIS_BUILD_NUMBER}/workspace/ /tmp/workspace/
+        - ls -al /tmp/workspace
  
     - stage: 'Codesign verification'
       dist: xenial
