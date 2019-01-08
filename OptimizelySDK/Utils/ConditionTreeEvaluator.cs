@@ -53,7 +53,7 @@ namespace OptimizelySDK.Utils
         /// to each entry and the results AND-ed together.
         /// </summary>
         /// <param name="conditions">Array of conditions ex: [operand_1, operand_2]</param>
-        /// <param name="userAttributes">Hash representing user attributes</param>
+        /// <param name="leafEvaluator">Function which will be called to evaluate leaf condition values</param>
         /// <returns>true/false if the user attributes match/don't match the given conditions,
         /// null if the user attributes and conditions can't be evaluated</returns>
         private bool? AndEvaluator(JArray conditions, Func<JToken, bool?> leafEvaluator)
@@ -86,7 +86,7 @@ namespace OptimizelySDK.Utils
         /// to each entry and the results OR-ed together.
         /// </summary>
         /// <param name="conditions">Array of conditions ex: [operand_1, operand_2]</param>
-        /// <param name="userAttributes">Hash representing user attributes</param>
+        /// <param name="leafEvaluator">Function which will be called to evaluate leaf condition values</param>
         /// <returns>true/false if the user attributes match/don't match the given conditions,
         /// null if the user attributes and conditions can't be evaluated</returns>
         private bool? OrEvaluator(JArray conditions, Func<JToken, bool?> leafEvaluator)
@@ -117,7 +117,7 @@ namespace OptimizelySDK.Utils
         /// to a single entry and NOT was applied to the result.
         /// </summary>
         /// <param name="conditions">Array of conditions ex: [operand_1, operand_2]</param>
-        /// <param name="userAttributes">Hash representing user attributes</param>
+        /// <param name="leafEvaluator">Function which will be called to evaluate leaf condition values</param>
         /// <returns>true/false if the user attributes match/don't match the given conditions,
         /// null if the user attributes and conditions can't be evaluated</returns>
         private bool? NotEvaluator(JArray conditions, Func<JToken, bool?> leafEvaluator)
@@ -131,6 +131,14 @@ namespace OptimizelySDK.Utils
             return null;
         }
 
+        /// <summary>
+        /// Top level method to evaluate conditions.
+        /// </summary>
+        /// <param name="conditions">Nested array of and/or conditions, or a single leaf condition value of any type.
+        /// Example: ['and', '0', ['or', '1', '2']]</param>
+        /// <param name="leafEvaluator">Function which will be called to evaluate leaf condition values</param>
+        /// <returns>Result of evaluating the conditions using the operator rules and the leaf evaluator. A return value of null
+        /// indicates that the conditions are invalid or unable to be evaluated</returns>
         public bool? Evaluate(JToken conditions, Func<JToken, bool?> leafEvaluator)
         {
             //Cloning is because it is reference type
