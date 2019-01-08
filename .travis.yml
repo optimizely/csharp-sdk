@@ -1,34 +1,55 @@
-language: csharp
-mono:
-  - 5.2.0
-# needed to make travis run the unit tests
-  - 5.18.0
-solution: "./OptimizelySDK.Travis.sln"
-install:
-  - nuget restore ./OptimizelySDK.Travis.sln
-  - nuget install ./OptimizelySDK.Tests/packages.config -OutputDirectory ./packages
-  - nuget install NUnit.Runners -Version 2.6.4 -OutputDirectory ./testrunner
-script:
-  - xbuild /p:Configuration=Release ./OptimizelySDK.Travis.sln
-  - mono ./testrunner/NUnit.Runners.2.6.4/tools/nunit-console.exe ./OptimizelySDK.Tests/bin/Release/OptimizelySDK.Tests.dll 
+language: minimal
+
+env:
+  - SKIP=false
 
 # Integration tests need to run first to reset the PR build status to pending
 stages:
-  - 'Integration tests'
-  - 'Test'
+  - name: 'Trigger Integration Tests'
+    if: env(SKIP) = true
+  - name: 'Unit Tests'
+    if: env(SKIP) = true
+  - name: 'Codesign'
+    if: env(SKIP) = false
+  - name: 'Codesign verification'
+    if: env(SKIP) = false
 
 jobs:
   include:
-    - stage: 'Integration tests'
+    - stage: 'Trigger Integration Tests'
       merge_mode: replace
       env: SDK=csharp
-      cache: false
       language: python
-      before_install: skip
       install:
         - "pip install awscli"
       before_script:
         - "aws s3 cp s3://optimizely-travisci-artifacts/ci/trigger_fullstack-sdk-compat.sh ci/ && chmod u+x ci/trigger_fullstack-sdk-compat.sh"
       script:
         - "ci/trigger_fullstack-sdk-compat.sh"
-      after_success: travis_terminate 0
+
+    - stage: 'Unit Tests'
+      language: csharp
+      mono: 5.2.0
+      solution: "./OptimizelySDK.Travis.sln"
+      install:
+        - nuget restore ./OptimizelySDK.Travis.sln
+        - nuget install ./OptimizelySDK.Tests/packages.config -OutputDirectory ./packages
+        - nuget install NUnit.Runners -Version 2.6.4 -OutputDirectory ./testrunner
+      script:
+        - xbuild /p:Configuration=Release ./OptimizelySDK.Travis.sln
+        - mono ./testrunner/NUnit.Runners.2.6.4/tools/nunit-console.exe ./OptimizelySDK.Tests/bin/Release/OptimizelySDK.Tests.dll
+
+    - stage: 'Codesign'
+      script:
+        - "echo codesign stage"
+ 
+    - stage: 'Codesign verification'
+      dist: xenial
+      language: csharp
+      mono: 5.2.0
+      script:
+        - wget -q https://dl.cacerts.digicert.com/DigiCertSHA2AssuredIDCodeSigningCA.crt && sudo certmgr -add -c -m Trust DigiCertSHA2AssuredIDCodeSigningCA.crt
+        - wget -q http://ts-aia.ws.symantec.com/tss-ca-g2.cer && sudo certmgr -add -c -m Trust tss-ca-g2.cer
+        - sudo nuget update -self
+        - sudo nuget install Optimizely.SDK -Version 2.2.1
+        - chktrust Optimizely.SDK.2.2.1/lib/net35/OptimizelySDK.Net35.dll
