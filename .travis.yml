@@ -41,16 +41,19 @@ jobs:
         - nuget install NUnit.Runners -Version 2.6.4 -OutputDirectory ./testrunner
       script:
         - xbuild /p:Configuration=Release ./OptimizelySDK.Travis.sln
+        - (cd /tmp && curl "https://s3.amazonaws.com/aws-cli/awscli-bundle.zip" -o "awscli-bundle.zip" && unzip awscli-bundle.zip && sudo ./awscli-bundle/install -b /usr/local/bin/aws)
         - aws s3 cp ./OptimizelySDK/bin/Release/OptimizelySDK.dll s3://optly-fs-travisci-artifacts/${TRAVIS_REPO_SLUG}/${TRAVIS_BUILD_NUMBER}/workspace/
         - mono ./testrunner/NUnit.Runners.2.6.4/tools/nunit-console.exe ./OptimizelySDK.Tests/bin/Release/OptimizelySDK.Tests.dll
 
     - stage: 'Codesign'
+      language: python
       env:
         - AWS_ACCESS_KEY_ID=$OFTA_AWS_ACCESS_KEY_ID
         - AWS_SECRET_ACCESS_KEY=$OFTA_AWS_SECRET_ACCESS_KEY
         - AWS_DEFAULT_REGION=$OFTA_AWS_DEFAULT_REGION
       script:
         - "echo codesign stage"
+        - pip install awscli
         - aws s3 sync s3://optly-fs-travisci-artifacts/${TRAVIS_REPO_SLUG}/${TRAVIS_BUILD_NUMBER}/workspace/ /tmp/workspace/
         - ls -al /tmp/workspace
  
