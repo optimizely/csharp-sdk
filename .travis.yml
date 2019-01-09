@@ -14,7 +14,7 @@ stages:
     if: env(SIGNCODE) = false
   - name: 'Signcode verification'
     if: env(SIGNCODE) = false
-  - name: 'dummy test'
+  - name: 'dummy stage'
     if: env(SIGNCODE) = true
 
 jobs:
@@ -92,3 +92,6 @@ jobs:
         #- sudo nuget update -self
         #- sudo nuget install Optimizely.SDK -Version 2.2.1
         #- chktrust Optimizely.SDK.2.2.1/lib/net35/OptimizelySDK.Net35.dll
+
+    - stage: 'dummy stage'
+      script: echo "dummy stage"
