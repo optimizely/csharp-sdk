@@ -72,6 +72,7 @@
   <ItemGroup>
     <Compile Include="DecisionServiceTest.cs" />
     <Compile Include="DefaultErrorHandlerTest.cs" />
+    <Compile Include="EntityTests\ExperimentTest.cs" />
     <Compile Include="EventTests\DefaultEventDispatcherTest.cs" />
     <Compile Include="EventTests\EventBuilderTest.cs" />
     <Compile Include="EventTests\LogEventTest.cs" />
@@ -83,8 +84,10 @@
     <Compile Include="TestData.cs" />
     <Compile Include="BucketerTest.cs" />
     <Compile Include="ProjectConfigTest.cs" />
-    <Compile Include="UtilsTests\ConditionEvaluatorTest.cs" />
+    <Compile Include="UtilsTests\ConditionTreeEvaluatorTest.cs" />
+    <Compile Include="UtilsTests\CustomAttributeConditionEvaluatorTest.cs" />
     <Compile Include="UtilsTests\EventTagUtilsTest.cs" />
+    <Compile Include="UtilsTests\ExperimentUtilsTest.cs" />
     <Compile Include="UtilsTests\PrivateObject.cs" />
     <Compile Include="UtilsTests\ValidatorTest.cs" />
     <Compile Include="ValidEventDispatcher.cs" />
