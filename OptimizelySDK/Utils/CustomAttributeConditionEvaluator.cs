@@ -38,26 +38,23 @@ namespace OptimizelySDK.Utils
             }
 
             string matchType = condition["match"]?.ToString();
-            var conditionName = condition["name"].ToString();
-
-            object attributeValue = null;
-            if (userAttributes != null && userAttributes.ContainsKey(conditionName))
-                attributeValue = userAttributes[conditionName];
-
-            if (attributeValue == null && matchType != "exists")
-            {
-                logger.Log(LogLevel.WARN, $@"Audience condition ""{condition.ToString(Formatting.None)}"" evaluated as UNKNOWN because no value was passed for user attribute ""{conditionName}"".");
-                return null;
-            }
-
-            var evaluator = ConditionValueEvaluator.GetEvaluator(matchType);
-            if (evaluator == null)
+            if (!ConditionValueEvaluator.IsValidMatchType(matchType))
             {
                 logger.Log(LogLevel.WARN, $@"Audience condition ""{condition.ToString(Formatting.None)}"" uses an unknown match type.");
                 return null;
             }
 
-            return evaluator != null ? evaluator(condition, attributeValue, logger) : null;
+            var conditionName = condition["name"].ToString();
+            userAttributes.TryGetValue(conditionName, out object attributeValue);
+            
+            if (attributeValue == null && matchType != ConditionValueEvaluator.AttributeMatchTypes.EXIST)
+            {
+                logger.Log(LogLevel.WARN, $@"Audience condition ""{condition.ToString(Formatting.None)}"" evaluated as UNKNOWN because no value was passed for user attribute ""{conditionName}"".");
+                return null;
+            }
+            
+            var evaluator = ConditionValueEvaluator.GetEvaluator(matchType);
+            return evaluator(condition, attributeValue, logger);
         }
     }
 }

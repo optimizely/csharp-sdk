@@ -140,7 +140,7 @@ namespace OptimizelySDK.Tests.UtilsTests
         }
 
         [Test]
-        public void TestEvaluateReturnsNullWhenAttributeIsNotProvided()
+        public void TestEvaluateReturnsNullAndLogsWarningWhenAttributeIsNotProvidedAndConditionIsNotExists()
         {
             var condition = JToken.Parse(@"{""name"": ""is_firefox"", ""type"": ""custom_attribute"", ""value"": false, ""match"": ""substring""}");
             Assert.Null(CustomAttributeConditionEvaluator.Evaluate(condition, new UserAttributes {}, Logger));
@@ -149,12 +149,21 @@ namespace OptimizelySDK.Tests.UtilsTests
         }
 
         [Test]
+        public void TestEvaluateReturnsFalseAndDoesNotLogForExistsConditionWhenAttributeIsNotProvided()
+        {
+            Assert.That(CustomAttributeConditionEvaluator.Evaluate(ExistsCondition, new UserAttributes { }, Logger), Is.False);
+            LoggerMock.Verify(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()), Times.Never);
+        }
+
+        [Test]
         public void TestEvaluateReturnsNullWhenAttributeTypeIsInvalid()
         {
             Assert.Null(CustomAttributeConditionEvaluator.Evaluate(SubstrCondition, new UserAttributes { { "location", false } }, Logger));
             Assert.Null(CustomAttributeConditionEvaluator.Evaluate(LTCondition, new UserAttributes { { "distance_lt", "invalid" } }, Logger));
+            Assert.Null(CustomAttributeConditionEvaluator.Evaluate(ExactBoolCondition, new UserAttributes { { "is_registered_user", 5 } }, Logger));
             LoggerMock.Verify(l => l.Log(LogLevel.WARN, $@"Audience condition ""{SubstrCondition.ToString(Formatting.None)}"" evaluated as UNKNOWN because the value for user attribute ""False"" is inapplicable: ""location"""), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.WARN, $@"Audience condition ""{LTCondition.ToString(Formatting.None)}"" evaluated as UNKNOWN because the value for user attribute ""invalid"" is inapplicable: ""distance_lt"""), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.WARN, $@"Audience condition ""{ExactBoolCondition.ToString(Formatting.None)}"" evaluated as UNKNOWN because the value for user attribute is ""5"" while expected is ""False""."), Times.Once);
         }
 
         #endregion // Evaluate Tests

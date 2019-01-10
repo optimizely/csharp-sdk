@@ -32,6 +32,22 @@ namespace OptimizelySDK.Utils
             public const string SUBSTRING = "substring";
         }
 
+        public static bool IsValidMatchType(string matchType)
+        {
+            switch (matchType)
+            {
+                case AttributeMatchTypes.EXACT:
+                case AttributeMatchTypes.EXIST:
+                case AttributeMatchTypes.GREATER_THAN:
+                case AttributeMatchTypes.LESS_THAN:
+                case AttributeMatchTypes.SUBSTRING:
+                case null:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
         public static Func<JToken, object, ILogger, bool?> GetEvaluator(string matchType)
         {
             switch (matchType)
@@ -68,7 +84,10 @@ namespace OptimizelySDK.Utils
             }
 
             if (!AreValuesSameType(conditionValue, attributeValue))
+            {
+                logger.Log(LogLevel.WARN, $@"Audience condition ""{condition.ToString(Formatting.None)}"" evaluated as UNKNOWN because the value for user attribute is ""{attributeValue}"" while expected is ""{conditionValue}"".");
                 return null;
+            }
 
             if (Validator.IsNumericType(conditionValue) && Validator.IsNumericType(attributeValue))
                 return Convert.ToDouble(conditionValue).Equals(Convert.ToDouble(attributeValue));
