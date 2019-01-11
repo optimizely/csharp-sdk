@@ -84,8 +84,9 @@ jobs:
       mono: 5.2.0
       script:
         - wget -q https://dl.cacerts.digicert.com/DigiCertSHA2AssuredIDCodeSigningCA.crt && sudo certmgr -add -c -m Trust DigiCertSHA2AssuredIDCodeSigningCA.crt
-        - wget -q http://ts-aia.ws.symantec.com/tss-ca-g2.cer && sudo certmgr -add -c -m Trust tss-ca-g2.cer
-        # install awscli via bundle method since python
+        # fingerprint doc: https://www.websecurity.symantec.com/content/dam/websitesecurity/digitalassets/desktop/pdfs/repository/Thawte-WTCA-Opinion-Letter-10-31-17.pdf
+        - wget -q http://ts-aia.ws.symantec.com/tss-ca-g2.cer && openssl x509 -in tss-ca-g2.cer -inform der -noout -fingerprint -sha256 | grep "SHA256 Fingerprint=06:25:FE:E1:A8:0D:7B:89:7A:97:12:24:9C:2F:55:FF:39:1D:66:61:DB:D8:B8:7F:9B:E6:F2:52:D8:8C:ED:95" && sudo certmgr -add -c -m Trust tss-ca-g2.cer
+        # install awscli via bundle method
         - (cd /tmp && curl "https://s3.amazonaws.com/aws-cli/awscli-bundle.zip" -o "awscli-bundle.zip" && unzip awscli-bundle.zip && sudo ./awscli-bundle/install -b /usr/local/bin/aws)
         - aws s3 sync s3://optly-fs-travisci-artifacts/${TRAVIS_REPO_SLUG}/${TRAVIS_BUILD_NUMBER}/workspace/ $HOME/workspace/
         - chktrust $HOME/workspace/OptimizelySDK-signed.dll
