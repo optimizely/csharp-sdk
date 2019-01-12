@@ -11,7 +11,7 @@ stages:
   - name: 'Unit Tests'
     if: env(SIGNCODE) = false
   - name: 'trigger codesign'
-    if: TRAVIS_EVENT_TYPE = pull_request AND env(SIGNCODE) = true
+    if: env(SIGNCODE) = true
 
 jobs:
   include:
@@ -53,4 +53,5 @@ jobs:
       before_script:
         - "aws s3 cp s3://optimizely-travisci-artifacts/ci/trigger_csharp-sdk-codesign.sh ci/ && chmod u+x ci/trigger_csharp-sdk-codesign.sh"
       script:
+        - echo "$TRAVIS_EVENT_TYPE"
         - "ci/trigger_csharp-sdk-codesign.sh"
