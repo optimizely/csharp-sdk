@@ -11,7 +11,7 @@ stages:
   - name: 'Unit Tests'
     if: env(SIGNCODE) = false
   - name: 'trigger codesign'
-    if: env(TRAVIS_EVENT_TYPE) = pull_request AND env(SIGNCODE) = true
+    if: TRAVIS_EVENT_TYPE = pull_request AND env(SIGNCODE) = true
 
 jobs:
   include:
