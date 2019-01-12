@@ -11,7 +11,7 @@ stages:
   - name: 'Unit Tests'
     if: env(SIGNCODE) = false
   - name: 'trigger codesign'
-    if: env(SIGNCODE) = true
+    if: env(SIGNCODE) = true AND type = pull_request
 
 jobs:
   include:
