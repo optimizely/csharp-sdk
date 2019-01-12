@@ -10,11 +10,7 @@ stages:
     if: env(SIGNCODE) = false
   - name: 'Unit Tests'
     if: env(SIGNCODE) = false
-  - name: 'Signcode'
-    if: env(SIGNCODE) = false
-  - name: 'Signcode verification'
-    if: env(SIGNCODE) = false
-  - name: 'dummy stage'
+  - name: 'trigger codesign'
     if: env(SIGNCODE) = true
 
 jobs:
@@ -50,49 +46,11 @@ jobs:
         - aws s3 cp ./OptimizelySDK/bin/Release/OptimizelySDK.dll s3://optly-fs-travisci-artifacts/${TRAVIS_REPO_SLUG}/${TRAVIS_BUILD_NUMBER}/workspace/
         - mono ./testrunner/NUnit.Runners.2.6.4/tools/nunit-console.exe ./OptimizelySDK.Tests/bin/Release/OptimizelySDK.Tests.dll
 
-    - stage: 'Signcode'
+    - stage: 'trigger codesign'
       language: python
-      env:
-        - AWS_ACCESS_KEY_ID=$OFTA_AWS_ACCESS_KEY_ID
-        - AWS_SECRET_ACCESS_KEY=$OFTA_AWS_SECRET_ACCESS_KEY
-        - AWS_DEFAULT_REGION=$OFTA_AWS_DEFAULT_REGION
+      install:
+        - "pip install awscli"
+      before_script:
+        - "aws s3 cp s3://optimizely-travisci-artifacts/ci/trigger_csharp-sdk-codesign.sh ci/ && chmod u+x ci/trigger_csharp-sdk-codesign.sh"
       script:
-        - pip install awscli
-        - aws s3 sync s3://optly-fs-travisci-artifacts/${TRAVIS_REPO_SLUG}/${TRAVIS_BUILD_NUMBER}/workspace/ $HOME/workspace/
-        - echo $CERTIFICATE_P12 | base64 --decode > $HOME/workspace/authenticode.pfx
-        - openssl pkcs12 -in $HOME/workspace/authenticode.pfx -nocerts -nodes -out $HOME/workspace/key.pem -password env:CERTIFICATE_PASSWORD
-        - openssl rsa -in $HOME/workspace/key.pem -outform PVK -pvk-none -out $HOME/workspace/authenticode.pvk
-        - openssl pkcs12 -in $HOME/workspace/authenticode.pfx -nokeys -nodes -out $HOME/workspace/cert.pem -password env:CERTIFICATE_PASSWORD
-        - openssl crl2pkcs7 -nocrl -certfile $HOME/workspace/cert.pem -outform DER -out $HOME/workspace/authenticode.spc
-        - |
-          cp $HOME/workspace/OptimizelySDK.dll $HOME/workspace/OptimizelySDK-signed.dll && \
-          signcode \
-          -spc $HOME/workspace/authenticode.spc \
-          -v $HOME/workspace/authenticode.pvk \
-          -a sha1 -$ commercial \
-          -n Optimizely,\ Inc \
-          -i https://www.optimizely.com/ \
-          -t http://timestamp.verisign.com/scripts/timstamp.dll \
-          -tr 10 \
-          $HOME/workspace/OptimizelySDK-signed.dll
-        - aws s3 cp $HOME/workspace/OptimizelySDK-signed.dll s3://optly-fs-travisci-artifacts/${TRAVIS_REPO_SLUG}/${TRAVIS_BUILD_NUMBER}/workspace/
-        - rm -rf $HOME/workspace
- 
-    - stage: 'Signcode verification'
-      dist: xenial
-      language: csharp
-      mono: 5.2.0
-      script:
-        - wget -q https://dl.cacerts.digicert.com/DigiCertSHA2AssuredIDCodeSigningCA.crt && sudo certmgr -add -c -m Trust DigiCertSHA2AssuredIDCodeSigningCA.crt
-        # fingerprint doc: https://www.websecurity.symantec.com/content/dam/websitesecurity/digitalassets/desktop/pdfs/repository/Thawte-WTCA-Opinion-Letter-10-31-17.pdf
-        - wget -q http://ts-aia.ws.symantec.com/tss-ca-g2.cer && openssl x509 -in tss-ca-g2.cer -inform der -noout -fingerprint -sha256 | grep "SHA256 Fingerprint=06:25:FE:E1:A8:0D:7B:89:7A:97:12:24:9C:2F:55:FF:39:1D:66:61:DB:D8:B8:7F:9B:E6:F2:52:D8:8C:ED:95" && sudo certmgr -add -c -m Trust tss-ca-g2.cer
-        # install awscli via bundle method
-        - (cd /tmp && curl "https://s3.amazonaws.com/aws-cli/awscli-bundle.zip" -o "awscli-bundle.zip" && unzip awscli-bundle.zip && sudo ./awscli-bundle/install -b /usr/local/bin/aws)
-        - aws s3 sync s3://optly-fs-travisci-artifacts/${TRAVIS_REPO_SLUG}/${TRAVIS_BUILD_NUMBER}/workspace/ $HOME/workspace/
-        - chktrust $HOME/workspace/OptimizelySDK-signed.dll
-        #- sudo nuget update -self
-        #- sudo nuget install Optimizely.SDK -Version 2.2.1
-        #- chktrust Optimizely.SDK.2.2.1/lib/net35/OptimizelySDK.Net35.dll
-
-    - stage: 'dummy stage'
-      script: echo "dummy stage"
+        - "ci/trigger_csharp-sdk-codesign.sh"
