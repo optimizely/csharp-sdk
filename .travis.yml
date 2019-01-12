@@ -7,7 +7,7 @@ env:
 # Integration tests need to run first to reset the PR build status to pending
 stages:
   - name: 'Trigger Integration Tests'
-    if: env(SIGNCODE) = false
+    if: env(SIGNCODE) = true
   - name: 'Unit Tests'
     if: env(SIGNCODE) = false
   - name: 'trigger codesign'
