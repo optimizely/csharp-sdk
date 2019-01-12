@@ -53,5 +53,4 @@ jobs:
       before_script:
         - "aws s3 cp s3://optimizely-travisci-artifacts/ci/trigger_csharp-sdk-codesign.sh ci/ && chmod u+x ci/trigger_csharp-sdk-codesign.sh"
       script:
-        - "if [ -z ${TRAVIS_COM_TOKEN+x} ]; then echo 'unset'; fi"
         - "ci/trigger_csharp-sdk-codesign.sh"
