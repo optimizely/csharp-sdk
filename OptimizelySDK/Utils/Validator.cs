@@ -147,37 +147,6 @@ namespace OptimizelySDK.Utils
 
             return false;
         }
-
-        /// <summary>
-        /// Validates if the type of provided value is numeric.
-        /// </summary>
-        /// <param name="value">true if the type of provided value is numeric, false otherwise</param>
-        /// <returns></returns>
-        public static bool IsNumericType(object value)
-        {
-            return value is byte || value is sbyte || value is char || value is short || value is ushort
-                || value is int || value is uint || value is long || value is ulong || value is float
-                || value is double || value is decimal;
-        }
-
-        /// <summary>
-        /// Validates if the provided value is a valid numeric value.
-        /// </summary>
-        /// <param name="value">Input value</param>
-        /// <returns>true if the provided absolute value is not infinite, NAN and greater than 2^53, false otherwise</returns>
-        public static bool IsValidNumericValue(object value)
-        {
-            if (IsNumericType(value))
-            {
-                var doubleValue = Convert.ToDouble(value);
-                if (double.IsInfinity(doubleValue) || double.IsNaN(doubleValue) || Math.Abs(doubleValue) > OPT_NUMBER_LIMIT)
-                    return false;
-
-                return true;
-            }
-
-            return false;
-        }
     }
 }
 
