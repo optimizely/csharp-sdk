@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2017, Optimizely
+ * Copyright 2017-2019, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 using System.Collections.Generic;
+using Newtonsoft.Json.Linq;
 using OptimizelySDK.Utils;
 
 namespace OptimizelySDK.Entity
@@ -68,6 +69,36 @@ namespace OptimizelySDK.Entity
         /// Traffic allocation of variations in the experiment
         /// </summary>
         public TrafficAllocation[] TrafficAllocation { get; set; }
+
+        /// <summary>
+        /// Audience Conditions
+        /// </summary>
+        public object AudienceConditions { get; set; }
+
+        private JToken _audienceConditionsList = null;
+
+        /// <summary>
+        /// De-serialized audience conditions
+        /// </summary>
+        public JToken AudienceConditionsList
+        {
+            get
+            {
+                if (AudienceConditions == null)
+                    return null;
+
+                if (_audienceConditionsList == null)
+                {
+                    // Convert single string condition Id to condition list.
+                    if (AudienceConditions is string)
+                        _audienceConditionsList = JToken.FromObject(new object[] { AudienceConditions });
+                    else
+                        _audienceConditionsList = (JToken)AudienceConditions;
+                }
+
+                return _audienceConditionsList;
+            }
+        }
 
         bool isGenerateKeyMapCalled = false;
 
@@ -146,6 +177,16 @@ namespace OptimizelySDK.Entity
         public bool IsUserInForcedVariation(string userId)
         {
             return ForcedVariations != null && ForcedVariations.ContainsKey(userId);
+        }
+
+        /// <summary>
+        /// Get audience conditions for the experiment.
+        /// </summary>
+        /// <returns>Audience conditions for the experiment - can be an array of audience IDs, or a nested array of conditions.
+        /// Examples: ["5", "6"], ["and", ["or", "1", "2"], "3"]</returns>
+        public JToken GetAudienceConditionsOrIds()
+        {
+            return AudienceConditionsList ?? JArray.FromObject(AudienceIds);
         }
     }
 }

@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2017-2018, Optimizely
+ * Copyright 2019, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using OptimizelySDK.Entity;
 using System;
 
 namespace OptimizelySDK.Utils
 {
-    public class ConditionEvaluator
+    public class ConditionTreeEvaluator
     {
         /// <summary>
         /// const string Representing AND operator.
@@ -38,19 +38,14 @@ namespace OptimizelySDK.Utils
         const string NOT_OPERATOR = "not";
 
         /// <summary>
-        /// String constant representing custom attribute condition type.
-        /// </summary>
-        const string CUSTOM_ATTRIBUTE_CONDITION_TYPE = "custom_attribute";
-
-        /// <summary>
         /// Evaluates an array of conditions as if the evaluator had been applied
         /// to each entry and the results AND-ed together.
         /// </summary>
         /// <param name="conditions">Array of conditions ex: [operand_1, operand_2]</param>
-        /// <param name="userAttributes">Hash representing user attributes</param>
+        /// <param name="leafEvaluator">Function which will be called to evaluate leaf condition values</param>
         /// <returns>true/false if the user attributes match/don't match the given conditions,
         /// null if the user attributes and conditions can't be evaluated</returns>
-        private bool? AndEvaluator(JArray conditions, UserAttributes userAttributes)
+        private bool? AndEvaluator(JArray conditions, Func<JToken, bool?> leafEvaluator)
         {
             // According to the matrix:
             // false and true is false
@@ -62,7 +57,7 @@ namespace OptimizelySDK.Utils
             var foundNull = false;
             foreach(var condition in conditions)
             {
-                var result = Evaluate(condition, userAttributes);
+                var result = Evaluate(condition, leafEvaluator);
                 if (result == null)
                     foundNull = true;
                 else if (result == false)
@@ -80,10 +75,10 @@ namespace OptimizelySDK.Utils
         /// to each entry and the results OR-ed together.
         /// </summary>
         /// <param name="conditions">Array of conditions ex: [operand_1, operand_2]</param>
-        /// <param name="userAttributes">Hash representing user attributes</param>
+        /// <param name="leafEvaluator">Function which will be called to evaluate leaf condition values</param>
         /// <returns>true/false if the user attributes match/don't match the given conditions,
         /// null if the user attributes and conditions can't be evaluated</returns>
-        private bool? OrEvaluator(JArray conditions, UserAttributes userAttributes)
+        private bool? OrEvaluator(JArray conditions, Func<JToken, bool?> leafEvaluator)
         {
             // According to the matrix:
             // true returns true
@@ -93,7 +88,7 @@ namespace OptimizelySDK.Utils
             var foundNull = false;
             foreach (var condition in conditions)
             {
-                var result = Evaluate(condition, userAttributes);
+                var result = Evaluate(condition, leafEvaluator);
                 if (result == null)
                     foundNull = true;
                 else if (result == true)
@@ -111,21 +106,29 @@ namespace OptimizelySDK.Utils
         /// to a single entry and NOT was applied to the result.
         /// </summary>
         /// <param name="conditions">Array of conditions ex: [operand_1, operand_2]</param>
-        /// <param name="userAttributes">Hash representing user attributes</param>
+        /// <param name="leafEvaluator">Function which will be called to evaluate leaf condition values</param>
         /// <returns>true/false if the user attributes match/don't match the given conditions,
         /// null if the user attributes and conditions can't be evaluated</returns>
-        private bool? NotEvaluator(JArray conditions, UserAttributes userAttributes)
+        private bool? NotEvaluator(JArray conditions, Func<JToken, bool?> leafEvaluator)
         {
-            if (conditions.Count == 1)
+            if (conditions.Count > 0)
             {
-                var result = Evaluate(conditions[0], userAttributes);
+                var result = Evaluate(conditions[0], leafEvaluator);
                 return result == null ? null : !result;
             }
 
-            return false;
+            return null;
         }
 
-        public bool? Evaluate(JToken conditions, UserAttributes userAttributes)
+        /// <summary>
+        /// Top level method to evaluate conditions.
+        /// </summary>
+        /// <param name="conditions">Nested array of and/or conditions, or a single leaf condition value of any type.
+        /// Example: ['and', '0', ['or', '1', '2']]</param>
+        /// <param name="leafEvaluator">Function which will be called to evaluate leaf condition values</param>
+        /// <returns>Result of evaluating the conditions using the operator rules and the leaf evaluator. A return value of null
+        /// indicates that the conditions are invalid or unable to be evaluated</returns>
+        public bool? Evaluate(JToken conditions, Func<JToken, bool?> leafEvaluator)
         {
             //Cloning is because it is reference type
             var conditionsArray = conditions.DeepClone() as JArray;
@@ -133,33 +136,22 @@ namespace OptimizelySDK.Utils
             {
                 switch (conditions[0].ToString())
                 {
-                    case AND_OPERATOR: conditionsArray.RemoveAt(0); return AndEvaluator(conditionsArray, userAttributes);
-                    case OR_OPERATOR:  conditionsArray.RemoveAt(0); return OrEvaluator(conditionsArray, userAttributes);
-                    case NOT_OPERATOR: conditionsArray.RemoveAt(0); return NotEvaluator(conditionsArray, userAttributes);
+                    case AND_OPERATOR: conditionsArray.RemoveAt(0); return AndEvaluator(conditionsArray, leafEvaluator);
+                    case OR_OPERATOR:  conditionsArray.RemoveAt(0); return OrEvaluator(conditionsArray,  leafEvaluator);
+                    case NOT_OPERATOR: conditionsArray.RemoveAt(0); return NotEvaluator(conditionsArray, leafEvaluator);
                     default:
-                        return false;
+                        // Operator to apply is not explicit - assume 'or'.
+                        return OrEvaluator(conditionsArray, leafEvaluator);
                 }
             }
 
-            if (conditions["type"] != null && conditions["type"].ToString() != CUSTOM_ATTRIBUTE_CONDITION_TYPE)
-                return null;
-
-            string matchType = conditions["match"]?.ToString();
-            var conditionValue = conditions["value"]?.ToObject<object>();
-            
-            object attributeValue = null;
-            if (userAttributes != null && userAttributes.ContainsKey(conditions["name"].ToString()))
-            {
-                attributeValue = userAttributes[conditions["name"].ToString()];
-            }
-
-            var evaluator = ConditionValueEvaluator.GetEvaluator(matchType);
-            return evaluator != null ? evaluator(conditionValue, attributeValue) : null;
+            var leafCondition = conditions;
+            return leafEvaluator(leafCondition);
         }
 
-        public bool? Evaluate(object[] conditions, UserAttributes userAttributes)
+        public bool? Evaluate(object[] conditions, Func<JToken, bool?> leafEvaluator)
         {
-            return Evaluate(ConvertObjectArrayToJToken(conditions), userAttributes);
+            return Evaluate(ConvertObjectArrayToJToken(conditions), leafEvaluator);
         }
 
         private JToken ConvertObjectArrayToJToken(object[] conditions)

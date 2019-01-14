@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2017-2018, Optimizely
+ * Copyright 2017-2019, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 using Newtonsoft.Json.Linq;
 
 namespace OptimizelySDK.Entity
@@ -34,7 +35,7 @@ namespace OptimizelySDK.Entity
         /// </summary>
         public object Conditions { get; set; }
 
-        private JToken DecodedConditions = null;
+        private JToken _decodedConditions = null;
 
         /// <summary>
         /// De-serialized audience conditions
@@ -46,15 +47,15 @@ namespace OptimizelySDK.Entity
                 if (Conditions == null)
                     return null;
 
-                if (DecodedConditions == null)
+                if (_decodedConditions == null)
                 {
                     if (Conditions is string)
-                        DecodedConditions = Utils.ConditionEvaluator.DecodeConditions((string)Conditions);
+                        _decodedConditions = Utils.ConditionTreeEvaluator.DecodeConditions((string)Conditions);
                     else
-                        DecodedConditions = (JToken)Conditions;
+                        _decodedConditions = (JToken)Conditions;
                 }
 
-                return DecodedConditions;
+                return _decodedConditions;
             }
         }
     }

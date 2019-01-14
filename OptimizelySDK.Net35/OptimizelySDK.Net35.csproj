@@ -136,8 +136,11 @@
     <Compile Include="..\OptimizelySDK\ProjectConfig.cs">
       <Link>ProjectConfig.cs</Link>
     </Compile>
-    <Compile Include="..\OptimizelySDK\Utils\ConditionEvaluator.cs">
-      <Link>Utils\ConditionEvaluator.cs</Link>
+    <Compile Include="..\OptimizelySDK\Utils\ConditionTreeEvaluator.cs">
+      <Link>Utils\ConditionTreeEvaluator.cs</Link>
+    </Compile>
+	<Compile Include="..\OptimizelySDK\Utils\CustomAttributeConditionEvaluator.cs">
+      <Link>Utils\CustomAttributeConditionEvaluator.cs</Link>
     </Compile>
     <Compile Include="..\OptimizelySDK\Utils\ConfigParser.cs">
       <Link>Utils\ConfigParser.cs</Link>

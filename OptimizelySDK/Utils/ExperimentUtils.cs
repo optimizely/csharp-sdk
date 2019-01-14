@@ -1,5 +1,5 @@
-﻿/* 
- * Copyright 2017-2018, Optimizely
+/* 
+ * Copyright 2017-2019, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+using Newtonsoft.Json.Linq;
 using OptimizelySDK.Entity;
 using OptimizelySDK.Logger;
 using System.Linq;
@@ -46,16 +47,31 @@ namespace OptimizelySDK.Utils
         /// <returns>true if the user meets audience conditions to be in experiment, false otherwise.</returns>
         public static bool IsUserInExperiment(ProjectConfig config, Experiment experiment, UserAttributes userAttributes)
         {
-            var audienceIds = experiment.AudienceIds;
+            var audienceConditions = experiment.GetAudienceConditionsOrIds();
 
-            if (!audienceIds.Any())
+            // If there are no audiences, return true because that means ALL users are included in the experiment.
+            if (audienceConditions == null || !audienceConditions.Any())
                 return true;
 
             if (userAttributes == null)
                 userAttributes = new UserAttributes();
-            
-            var conditionEvaluator = new ConditionEvaluator();
-            return audienceIds.Any(id => conditionEvaluator.Evaluate(config.GetAudience(id).ConditionList, userAttributes).GetValueOrDefault());
+
+            var conditionTreeEvaluator = new ConditionTreeEvaluator();
+
+            System.Func<JToken, bool?> evaluateConditionsWithUserAttributes = condition => CustomAttributeConditionEvaluator.Evaluate(condition, userAttributes);
+
+            bool? EvaluateAudience(JToken audienceIdToken)
+            {
+                string audienceId = audienceIdToken.ToString();
+                var audience = config.GetAudience(audienceId);
+
+                if (audience != null && !string.IsNullOrEmpty(audience.Id))
+                    return conditionTreeEvaluator.Evaluate(audience.ConditionList, evaluateConditionsWithUserAttributes);
+
+                return null;
+            }
+
+            return conditionTreeEvaluator.Evaluate(audienceConditions, EvaluateAudience).GetValueOrDefault();
         }
     }
 }

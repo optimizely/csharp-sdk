@@ -44,7 +44,8 @@
 		<Compile Include="..\OptimizelySDK\Notifications\NotificationCenter.cs" />
         <Compile Include="..\OptimizelySDK\Optimizely.cs" />
         <Compile Include="..\OptimizelySDK\ProjectConfig.cs" />
-        <Compile Include="..\OptimizelySDK\Utils\ConditionEvaluator.cs" />
+        <Compile Include="..\OptimizelySDK\Utils\ConditionTreeEvaluator.cs" />
+		<Compile Include="..\OptimizelySDK\Utils\CustomAttributeConditionEvaluator.cs" />
         <Compile Include="..\OptimizelySDK\Utils\EventTagUtils.cs" />
         <Compile Include="..\OptimizelySDK\Utils\Validator.cs" />
         <Compile Include="..\OptimizelySDK\Utils\ConfigParser.cs" />

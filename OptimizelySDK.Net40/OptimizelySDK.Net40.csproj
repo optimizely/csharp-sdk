@@ -65,7 +65,7 @@
     <Compile Include="..\OptimizelySDK\Entity\Experiment.cs">
       <Link>Entity\Experiment.cs</Link>
     </Compile>
-	<Compile Include="..\OptimizelySDK\Entity\FeatureDecision.cs">
+    <Compile Include="..\OptimizelySDK\Entity\FeatureDecision.cs">
       <Link>Entity\FeatureDecision.cs</Link>
     </Compile>
     <Compile Include="..\OptimizelySDK\Entity\ForcedVariation.cs">
@@ -128,7 +128,7 @@
     <Compile Include="..\OptimizelySDK\Logger\NoOpLogger.cs">
       <Link>Logger\NoOpLogger.cs</Link>
     </Compile>
-	<Compile Include="..\OptimizelySDK\Notifications\NotificationCenter.cs">
+    <Compile Include="..\OptimizelySDK\Notifications\NotificationCenter.cs">
       <Link>Notifications\NotificationCenter.cs</Link>
     </Compile>
     <Compile Include="..\OptimizelySDK\Optimizely.cs">
@@ -137,8 +137,11 @@
     <Compile Include="..\OptimizelySDK\ProjectConfig.cs">
       <Link>ProjectConfig.cs</Link>
     </Compile>
-    <Compile Include="..\OptimizelySDK\Utils\ConditionEvaluator.cs">
-      <Link>Utils\ConditionEvaluator.cs</Link>
+    <Compile Include="..\OptimizelySDK\Utils\ConditionTreeEvaluator.cs">
+      <Link>Utils\ConditionTreeEvaluator.cs</Link>
+    </Compile>
+	<Compile Include="..\OptimizelySDK\Utils\CustomAttributeConditionEvaluator.cs">
+      <Link>Utils\CustomAttributeConditionEvaluator.cs</Link>
     </Compile>
     <Compile Include="..\OptimizelySDK\Utils\ConfigParser.cs">
       <Link>Utils\ConfigParser.cs</Link>
@@ -152,7 +155,7 @@
     <Compile Include="..\OptimizelySDK\Utils\Validator.cs">
       <Link>Utils\Validator.cs</Link>
     </Compile>
-	<Compile Include="..\OptimizelySDK\Utils\ControlAttributes.cs">
+    <Compile Include="..\OptimizelySDK\Utils\ControlAttributes.cs">
       <Link>Utils\ControlAttributes.cs</Link>
     </Compile>
 	<Compile Include="..\OptimizelySDK\Utils\ConditionValueEvaluator.cs">
@@ -180,16 +183,16 @@
     <Compile Include="..\OptimizelySDK\Bucketing\UserprofileUtil.cs">
       <Link>Bucketing\UserProfileUtil</Link>
     </Compile>
-	<Compile Include="..\OptimizelySDK\Entity\FeatureVariableUsage.cs">
+    <Compile Include="..\OptimizelySDK\Entity\FeatureVariableUsage.cs">
       <Link>Entity\FeatureVariableUsage</Link>
     </Compile>
-	<Compile Include="..\OptimizelySDK\Entity\FeatureFlag.cs">
+    <Compile Include="..\OptimizelySDK\Entity\FeatureFlag.cs">
       <Link>Entity\FeatureFlag</Link>
     </Compile>
-	<Compile Include="..\OptimizelySDK\Entity\FeatureVariable.cs">
+    <Compile Include="..\OptimizelySDK\Entity\FeatureVariable.cs">
       <Link>Entity\FeatureVariable</Link>
     </Compile>
-	<Compile Include="..\OptimizelySDK\Entity\Rollout.cs">
+    <Compile Include="..\OptimizelySDK\Entity\Rollout.cs">
       <Link>Entity\Rollout</Link>
     </Compile>
   </ItemGroup>
