@@ -246,34 +246,13 @@ namespace OptimizelySDK
                 return;
             }
 
-            // Filter out experiments that are not running or when user(s) do not meet conditions.
-            var validExperimentIdToVariationMap = new Dictionary<string, Variation>();
-            var experimentIds = eevent.ExperimentIds;
-            foreach (string id in eevent.ExperimentIds)
-            {
-                var experiment = Config.GetExperimentFromId(id);
-                //Validate experiment
-                var variation = DecisionService.GetVariation(experiment, userId, userAttributes);
-
-                if (variation != null)
-                {
-                    validExperimentIdToVariationMap[experiment.Id] = variation;
-                }
-                else
-                {
-                    Logger.Log(LogLevel.INFO, string.Format("Not tracking user \"{0}\" for experiment \"{1}\"", userId, experiment.Key));
-                }
-            }
-
-            if (validExperimentIdToVariationMap.Count > 0)
-            {
 
                 if (eventTags != null)
                 {
                     eventTags = eventTags.FilterNullValues(Logger);
                 }
 
-                var conversionEvent = EventBuilder.CreateConversionEvent(Config, eventKey, validExperimentIdToVariationMap,
+                var conversionEvent = EventBuilder.CreateConversionEvent(Config, eventKey,
                     userId, userAttributes, eventTags);
                 Logger.Log(LogLevel.INFO, string.Format("Tracking event {0} for user {1}.", eventKey, userId));
                 Logger.Log(LogLevel.DEBUG, string.Format("Dispatching conversion event to URL {0} with params {1}.", 
@@ -290,11 +269,8 @@ namespace OptimizelySDK
 
                 NotificationCenter.SendNotifications(NotificationCenter.NotificationType.Track, eventKey, userId, 
                     userAttributes, eventTags, conversionEvent);
-            }
-            else
-            {
-                Logger.Log(LogLevel.INFO, string.Format("There are no valid experiments for event {0} to track.", eventKey));
-            }
+            
+
         }
 
 
