@@ -1,4 +1,5 @@
 language: csharp
+dist: xenial
 mono:
   - 5.2.0
 # needed to make travis run the unit tests
@@ -10,7 +11,10 @@ install:
   - nuget install NUnit.Runners -Version 2.6.4 -OutputDirectory ./testrunner
 script:
   - xbuild /p:Configuration=Release ./OptimizelySDK.Travis.sln
-  - mono ./testrunner/NUnit.Runners.2.6.4/tools/nunit-console.exe ./OptimizelySDK.Tests/bin/Release/OptimizelySDK.Tests.dll 
+  - mono ./testrunner/NUnit.Runners.2.6.4/tools/nunit-console.exe ./OptimizelySDK.Tests/bin/Release/OptimizelySDK.Tests.dll
+after_success:
+  - pip install --user awscli
+  - (AWS_ACCESS_KEY_ID=$OFTA_KEY AWS_SECRET_ACCESS_KEY=$OFTA_SECRET AWS_DEFAULT_REGION=$OFTA_REGION aws s3 cp ./OptimizelySDK/bin/Release/OptimizelySDK.dll s3://optly-fs-travisci-artifacts/${TRAVIS_REPO_SLUG}/${TRAVIS_BUILD_NUMBER}/${TRAVIS_JOB_NUMBER}/OptimizelySDK-unsigned.dll)
 
 # Integration tests need to run first to reset the PR build status to pending
 stages:
