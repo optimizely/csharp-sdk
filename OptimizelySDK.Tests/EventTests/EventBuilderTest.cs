@@ -101,6 +101,7 @@ namespace OptimizelySDK.Tests.EventTests
                 },
                 {"project_id", "7720880029" },
                 {"account_id", "1592310167" },
+                {"enrich_decisions", true} ,
                 {"client_name", "csharp-sdk" },
                 {"client_version", Optimizely.SDK_VERSION },
                 {"revision", "15" },
@@ -187,6 +188,7 @@ namespace OptimizelySDK.Tests.EventTests
                 },
                 {"project_id", "7720880029" },
                 {"account_id", "1592310167" },
+                {"enrich_decisions", true} ,
                 {"client_name", "csharp-sdk" },
                 {"client_version", Optimizely.SDK_VERSION },
                 {"revision", "15" },
@@ -300,6 +302,7 @@ namespace OptimizelySDK.Tests.EventTests
                 },
                 {"project_id", "7720880029" },
                 {"account_id", "1592310167" },
+                {"enrich_decisions", true} ,
                 {"client_name", "csharp-sdk" },
                 {"client_version", Optimizely.SDK_VERSION },
                 {"revision", "15" },
@@ -406,6 +409,7 @@ namespace OptimizelySDK.Tests.EventTests
                 },
                 {"project_id", "7720880029" },
                 {"account_id", "1592310167" },
+                {"enrich_decisions", true} ,
                 {"client_name", "csharp-sdk" },
                 {"client_version", Optimizely.SDK_VERSION },
                 {"revision", "15" },
@@ -457,16 +461,6 @@ namespace OptimizelySDK.Tests.EventTests
                                 {
                                     new Dictionary<string, object>
                                     {
-                                        { "decisions", new object[]
-                                            {
-                                                new Dictionary<string, object>
-                                                {
-                                                    {"campaign_id", "7719770039"},
-                                                    {"experiment_id", "7716830082"},
-                                                    {"variation_id", "7722370027"}
-                                                }
-                                            }
-                                        },
                                         {"events", new object[]
                                             {
                                                 new Dictionary<string, object>
@@ -497,6 +491,7 @@ namespace OptimizelySDK.Tests.EventTests
                     }
                 },
                 {"project_id", "7720880029"},
+                {"enrich_decisions", true} ,
                 {"account_id", "1592310167"},
                 {"client_name", "csharp-sdk"},
                 {"client_version", Optimizely.SDK_VERSION },
@@ -517,7 +512,7 @@ namespace OptimizelySDK.Tests.EventTests
                 {"7716830082", new Variation{Id="7722370027", Key="control"} }
             };
 
-            var logEvent = EventBuilder.CreateConversionEvent(Config, "purchase", experimentToVariationMap, TestUserId, null, null);
+            var logEvent = EventBuilder.CreateConversionEvent(Config, "purchase", TestUserId, null, null);
 
             TestData.ChangeGUIDAndTimeStamp(logEvent.Params, timeStamp, guid);
 
@@ -540,16 +535,6 @@ namespace OptimizelySDK.Tests.EventTests
                                 {
                                     new Dictionary<string, object>
                                     {
-                                        { "decisions", new object[]
-                                            {
-                                                new Dictionary<string, object>
-                                                {
-                                                    {"campaign_id", "7719770039"},
-                                                    {"experiment_id", "7716830082"},
-                                                    {"variation_id", "7722370027"}
-                                                }
-                                            }
-                                        },
                                         {"events", new object[]
                                             {
                                                 new Dictionary<string, object>
@@ -588,6 +573,7 @@ namespace OptimizelySDK.Tests.EventTests
                 },
                 {"project_id", "7720880029"},
                 {"account_id", "1592310167"},
+                {"enrich_decisions", true},
                 {"client_name", "csharp-sdk"},
                 {"client_version", Optimizely.SDK_VERSION },
                 {"revision", "15" },
@@ -612,7 +598,7 @@ namespace OptimizelySDK.Tests.EventTests
             {
                 {"7716830082", new Variation{Id="7722370027", Key="control"} }
             };
-            var logEvent = EventBuilder.CreateConversionEvent(Config, "purchase", experimentToVariationMap, TestUserId, userAttributes, null);
+            var logEvent = EventBuilder.CreateConversionEvent(Config, "purchase", TestUserId, userAttributes, null);
 
             TestData.ChangeGUIDAndTimeStamp(logEvent.Params, timeStamp, guid);
 
@@ -635,16 +621,6 @@ namespace OptimizelySDK.Tests.EventTests
                                 {
                                     new Dictionary<string, object>
                                     {
-                                        { "decisions", new object[]
-                                            {
-                                                new Dictionary<string, object>
-                                                {
-                                                    {"campaign_id", "7719770039" },
-                                                    {"experiment_id", "7716830082" },
-                                                    {"variation_id", "7722370027" }
-                                                }
-                                            }
-                                        },
                                         { "events", new object[]
                                             {
                                                 new Dictionary<string, object>
@@ -683,6 +659,7 @@ namespace OptimizelySDK.Tests.EventTests
                 },
                 {"project_id", "7720880029" },
                 {"account_id", "1592310167" },
+                {"enrich_decisions", true},
                 {"client_name", "csharp-sdk" },
                 {"client_version", Optimizely.SDK_VERSION },
                 {"revision", "15" },
@@ -704,7 +681,7 @@ namespace OptimizelySDK.Tests.EventTests
             };
 
 
-            var logEvent = EventBuilder.CreateConversionEvent(Config, "purchase", experimentToVariationMap, TestUserId, null,
+            var logEvent = EventBuilder.CreateConversionEvent(Config, "purchase", TestUserId, null,
                 new EventTags
             {
                     {"revenue", 42 }
@@ -731,16 +708,6 @@ namespace OptimizelySDK.Tests.EventTests
                                 {
                                     new Dictionary<string, object>
                                     {
-                                        { "decisions", new object[]
-                                            {
-                                                new Dictionary<string, object>
-                                                {
-                                                    {"campaign_id", "7719770039" },
-                                                    {"experiment_id", "7716830082" },
-                                                    {"variation_id", "7722370027" }
-                                                }
-                                            }
-                                        },
                                         { "events", new object[]
                                             {
                                                 new Dictionary<string, object>
@@ -786,6 +753,7 @@ namespace OptimizelySDK.Tests.EventTests
                     }
                 },
                 {"project_id", "7720880029" },
+                {"enrich_decisions", true},
                 {"account_id", "1592310167" },
                 {"client_name", "csharp-sdk" },
                 {"client_version", Optimizely.SDK_VERSION },
@@ -813,7 +781,7 @@ namespace OptimizelySDK.Tests.EventTests
                 {"7716830082", new Variation{Id="7722370027", Key="control"} }
             };
 
-            var logEvent = EventBuilder.CreateConversionEvent(Config, "purchase", experimentToVariationMap, TestUserId, userAttributes,
+            var logEvent = EventBuilder.CreateConversionEvent(Config, "purchase", TestUserId, userAttributes,
                 new EventTags
                 {
                     {"revenue", 42 },
@@ -841,16 +809,6 @@ namespace OptimizelySDK.Tests.EventTests
                                 {
                                     new Dictionary<string, object>
                                     {
-                                        { "decisions", new object[]
-                                            {
-                                                new Dictionary<string, object>
-                                                {
-                                                    {"campaign_id", "7719770039" },
-                                                    {"experiment_id", "7716830082" },
-                                                    {"variation_id", "7722370027" }
-                                                }
-                                            }
-                                        },
                                         { "events", new object[]
                                             {
                                                 new Dictionary<string, object>
@@ -889,6 +847,7 @@ namespace OptimizelySDK.Tests.EventTests
                     }
                 },
                 {"project_id", "7720880029" },
+                {"enrich_decisions", true},
                 {"account_id", "1592310167" },
                 {"client_name", "csharp-sdk" },
                 {"client_version", Optimizely.SDK_VERSION },
@@ -910,7 +869,7 @@ namespace OptimizelySDK.Tests.EventTests
                 {"7716830082", new Variation{Id="7722370027", Key="control"} }
             };
 
-            var logEvent = EventBuilder.CreateConversionEvent(Config, "purchase", experimentToVariationMap, TestUserId, null,
+            var logEvent = EventBuilder.CreateConversionEvent(Config, "purchase", TestUserId, null,
                 new EventTags
                 {
                     {"revenue", "42" },
@@ -938,16 +897,6 @@ namespace OptimizelySDK.Tests.EventTests
                                 {
                                     new Dictionary<string, object>
                                     {
-                                        { "decisions", new object[]
-                                            {
-                                                new Dictionary<string, object>
-                                                {
-                                                    {"campaign_id", "7719770039" },
-                                                    {"experiment_id", "7716830082" },
-                                                    {"variation_id", "7722370027" }
-                                                }
-                                            }
-                                        },
                                         { "events", new object[]
                                             {
                                                 new Dictionary<string, object>
@@ -987,6 +936,7 @@ namespace OptimizelySDK.Tests.EventTests
                     }
                 },
                 {"project_id", "7720880029" },
+                {"enrich_decisions", true},
                 {"account_id", "1592310167" },
                 {"client_name", "csharp-sdk" },
                 {"client_version", Optimizely.SDK_VERSION },
@@ -1008,7 +958,7 @@ namespace OptimizelySDK.Tests.EventTests
                 {"7716830082", new Variation{Id="7722370027", Key="control"} }
             };
 
-            var logEvent = EventBuilder.CreateConversionEvent(Config, "purchase", experimentToVariationMap, TestUserId, null,
+            var logEvent = EventBuilder.CreateConversionEvent(Config, "purchase", TestUserId, null,
                 new EventTags
             {
                     {"revenue", 42 },
@@ -1036,16 +986,6 @@ namespace OptimizelySDK.Tests.EventTests
                                 {
                                     new Dictionary<string, object>
                                     {
-                                        { "decisions", new object[]
-                                            {
-                                                new Dictionary<string, object>
-                                                {
-                                                    {"campaign_id", "7719770039" },
-                                                    {"experiment_id", "7716830082" },
-                                                    {"variation_id", "7722370027" }
-                                                }
-                                            }
-                                        },
                                         { "events", new object[]
                                             {
                                                 new Dictionary<string, object>
@@ -1091,6 +1031,7 @@ namespace OptimizelySDK.Tests.EventTests
                 },
                 {"project_id", "7720880029" },
                 {"account_id", "1592310167" },
+                {"enrich_decisions", true} ,
                 {"client_name", "csharp-sdk" },
                 {"client_version", Optimizely.SDK_VERSION },
                 {"revision", "15" },
@@ -1113,12 +1054,7 @@ namespace OptimizelySDK.Tests.EventTests
                 {ControlAttributes.BUCKETING_ID_ATTRIBUTE, "variation" }
             };
 
-            var experimentToVariationMap = new Dictionary<string, Variation>
-            {
-                {"7716830082", new Variation{Id = "7722370027", Key = "control"} }
-            };
-
-            var logEvent = EventBuilder.CreateConversionEvent(Config, "purchase", experimentToVariationMap, TestUserId, userAttributes, null);
+            var logEvent = EventBuilder.CreateConversionEvent(Config, "purchase", TestUserId, userAttributes, null);
 
             TestData.ChangeGUIDAndTimeStamp(logEvent.Params, timeStamp, guid);
 
@@ -1195,6 +1131,7 @@ namespace OptimizelySDK.Tests.EventTests
                     }
                 },
                 {"project_id", "7720880029" },
+                {"enrich_decisions", true},
                 {"account_id", "1592310167" },
                 {"client_name", "csharp-sdk" },
                 {"client_version", Optimizely.SDK_VERSION },
@@ -1288,6 +1225,7 @@ namespace OptimizelySDK.Tests.EventTests
                 },
                 {"project_id", "7720880029" },
                 {"account_id", "1592310167" },
+                {"enrich_decisions", true} ,
                 {"client_name", "csharp-sdk" },
                 {"client_version", Optimizely.SDK_VERSION },
                 {"revision", "15" },
@@ -1374,6 +1312,7 @@ namespace OptimizelySDK.Tests.EventTests
                 },
                 {"project_id", "7720880029" },
                 {"account_id", "1592310167" },
+                {"enrich_decisions", true} ,
                 {"client_name", "csharp-sdk" },
                 {"client_version", Optimizely.SDK_VERSION },
                 {"revision", "15" },
@@ -1419,16 +1358,6 @@ namespace OptimizelySDK.Tests.EventTests
                                 {
                                     new Dictionary<string, object>
                                     {
-                                        { "decisions", new object[]
-                                            {
-                                                new Dictionary<string, object>
-                                                {
-                                                    {"campaign_id", "7719770039"},
-                                                    {"experiment_id", "7716830082"},
-                                                    {"variation_id", "7722370027"}
-                                                }
-                                            }
-                                        },
                                         {"events", new object[]
                                             {
                                                 new Dictionary<string, object>
@@ -1467,6 +1396,7 @@ namespace OptimizelySDK.Tests.EventTests
                 },
                 {"project_id", "7720880029"},
                 {"account_id", "1592310167"},
+                {"enrich_decisions", true} ,
                 {"client_name", "csharp-sdk"},
                 {"client_version", Optimizely.SDK_VERSION },
                 {"revision", "15" },
@@ -1493,7 +1423,7 @@ namespace OptimizelySDK.Tests.EventTests
 
             var botFilteringEnabledConfig = Config;
             botFilteringEnabledConfig.BotFiltering = true;
-            var logEvent = EventBuilder.CreateConversionEvent(botFilteringEnabledConfig, "purchase", experimentToVariationMap, TestUserId, userAttributes, null);
+            var logEvent = EventBuilder.CreateConversionEvent(botFilteringEnabledConfig, "purchase", TestUserId, userAttributes, null);
 
             TestData.ChangeGUIDAndTimeStamp(logEvent.Params, timeStamp, guid);
 
@@ -1516,16 +1446,6 @@ namespace OptimizelySDK.Tests.EventTests
                                 {
                                     new Dictionary<string, object>
                                     {
-                                        { "decisions", new object[]
-                                            {
-                                                new Dictionary<string, object>
-                                                {
-                                                    {"campaign_id", "7719770039"},
-                                                    {"experiment_id", "7716830082"},
-                                                    {"variation_id", "7722370027"}
-                                                }
-                                            }
-                                        },
                                         {"events", new object[]
                                             {
                                                 new Dictionary<string, object>
@@ -1556,6 +1476,7 @@ namespace OptimizelySDK.Tests.EventTests
                     }
                 },
                 {"project_id", "7720880029"},
+                {"enrich_decisions", true},
                 {"account_id", "1592310167"},
                 {"client_name", "csharp-sdk"},
                 {"client_version", Optimizely.SDK_VERSION },
@@ -1583,7 +1504,7 @@ namespace OptimizelySDK.Tests.EventTests
 
             var botFilteringDisabledConfig = Config;
             botFilteringDisabledConfig.BotFiltering = null;
-            var logEvent = EventBuilder.CreateConversionEvent(botFilteringDisabledConfig, "purchase", experimentToVariationMap, TestUserId, userAttributes, null);
+            var logEvent = EventBuilder.CreateConversionEvent(botFilteringDisabledConfig, "purchase", TestUserId, userAttributes, null);
 
             TestData.ChangeGUIDAndTimeStamp(logEvent.Params, timeStamp, guid);
 
@@ -1608,7 +1529,7 @@ namespace OptimizelySDK.Tests.EventTests
                 }
             };
 
-            var logEvent = EventBuilder.CreateConversionEvent(eventInMultiExperimentConfig, "event_with_multiple_running_experiments", experimentIdVariationMap, "test_user",
+            var logEvent = EventBuilder.CreateConversionEvent(eventInMultiExperimentConfig, "event_with_multiple_running_experiments", "test_user",
                                                               new UserAttributes {
                                                                 {"test_attribute", "test_value"}
                                                               },
@@ -1622,7 +1543,7 @@ namespace OptimizelySDK.Tests.EventTests
                 {
                 {"client_version", Optimizely.SDK_VERSION},
                 {"project_id", "111001"},
-                //{"visitor_id", "test_user"},
+                {"enrich_decisions", true},
                 {"account_id", "12001"},
                 {"client_name", "csharp-sdk"},
                 {"anonymize_ip", false},
@@ -1653,26 +1574,6 @@ namespace OptimizelySDK.Tests.EventTests
                                     //snapshots[0]
                                     new Dictionary<string, object>
                                     {
-                                        //snapshots[0].decisions
-                                        {"decisions", new object[]
-                                            {
-                                                //decisions[0]
-                                                new Dictionary<string, object>
-                                                {
-                                                    {"variation_id", "111129"},
-                                                    {"experiment_id", "111127"},
-                                                    {"campaign_id", "111182"}
-
-                                                },
-                                                //decisions[1]
-                                                new Dictionary<string,object>
-                                                {
-                                                    {"experiment_id", "111130"},
-                                                    {"variation_id", "111131"},
-                                                    {"campaign_id", "111182"}
-                                                }
-                                            }
-                                        },
                                         //snapshots[0].events
                                         {
                                             "events", new object[]
@@ -1740,16 +1641,6 @@ namespace OptimizelySDK.Tests.EventTests
                                 {
                                     new Dictionary<string, object>
                                     {
-                                        { "decisions", new object[]
-                                            {
-                                                new Dictionary<string, object>
-                                                {
-                                                    {"campaign_id", "7719770039"},
-                                                    {"experiment_id", "7716830082"},
-                                                    {"variation_id", "7722370027"}
-                                                }
-                                            }
-                                        },
                                         {"events", new object[]
                                             {
                                                 new Dictionary<string, object>
@@ -1802,6 +1693,7 @@ namespace OptimizelySDK.Tests.EventTests
                 },
                 {"project_id", "7720880029"},
                 {"account_id", "1592310167"},
+                {"enrich_decisions", true},
                 {"client_name", "csharp-sdk"},
                 {"client_version", Optimizely.SDK_VERSION },
                 {"revision", "15" },
@@ -1837,7 +1729,7 @@ namespace OptimizelySDK.Tests.EventTests
                 {"7716830082", new Variation{Id="7722370027", Key="control"} }
             };
             
-            var logEvent = EventBuilder.CreateConversionEvent(Config, "purchase", experimentToVariationMap, TestUserId, userAttributes, null);
+            var logEvent = EventBuilder.CreateConversionEvent(Config, "purchase", TestUserId, userAttributes, null);
 
             TestData.ChangeGUIDAndTimeStamp(logEvent.Params, timeStamp, guid);
             Assert.IsTrue(TestData.CompareObjects(expectedEvent, logEvent));
