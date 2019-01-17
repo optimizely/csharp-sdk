@@ -240,37 +240,35 @@ namespace OptimizelySDK
 
             var eevent = Config.GetEvent(eventKey);
 
-            if (eevent.Key == null)
+            if (eevent.Key == null) 
             {
-                Logger.Log(LogLevel.ERROR, string.Format("Not tracking user {0} for event {1}.", userId, eventKey));
+                Logger.Log(LogLevel.INFO, string.Format("Not tracking user {0} for event {1}.", userId, eventKey));
                 return;
             }
 
 
-                if (eventTags != null)
-                {
-                    eventTags = eventTags.FilterNullValues(Logger);
-                }
+            if (eventTags != null)
+            {
+                eventTags = eventTags.FilterNullValues(Logger);
+            }
 
-                var conversionEvent = EventBuilder.CreateConversionEvent(Config, eventKey,
-                    userId, userAttributes, eventTags);
-                Logger.Log(LogLevel.INFO, string.Format("Tracking event {0} for user {1}.", eventKey, userId));
-                Logger.Log(LogLevel.DEBUG, string.Format("Dispatching conversion event to URL {0} with params {1}.", 
-                    conversionEvent.Url, conversionEvent.GetParamsAsJson()));
+            var conversionEvent = EventBuilder.CreateConversionEvent(Config, eventKey,
+                userId, userAttributes, eventTags);
+            Logger.Log(LogLevel.INFO, string.Format("Tracking event {0} for user {1}.", eventKey, userId));
+            Logger.Log(LogLevel.DEBUG, string.Format("Dispatching conversion event to URL {0} with params {1}.",
+                conversionEvent.Url, conversionEvent.GetParamsAsJson()));
 
-                try
-                {
-                    EventDispatcher.DispatchEvent(conversionEvent);
-                }
-                catch (Exception exception)
-                {
-                    Logger.Log(LogLevel.ERROR, string.Format("Unable to dispatch conversion event. Error {0}", exception.Message));
-                }
+            try 
+            {
+                EventDispatcher.DispatchEvent(conversionEvent);
+            } 
+            catch (Exception exception) 
+            {
+                Logger.Log(LogLevel.ERROR, string.Format("Unable to dispatch conversion event. Error {0}", exception.Message));
+            }
 
-                NotificationCenter.SendNotifications(NotificationCenter.NotificationType.Track, eventKey, userId, 
-                    userAttributes, eventTags, conversionEvent);
-            
-
+            NotificationCenter.SendNotifications(NotificationCenter.NotificationType.Track, eventKey, userId,
+                userAttributes, eventTags, conversionEvent);
         }
 
 

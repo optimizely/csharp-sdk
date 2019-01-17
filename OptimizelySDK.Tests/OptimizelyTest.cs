@@ -610,6 +610,15 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
+        public void TestTrackUnknownEventKey()
+        {
+            Optimizely.Track("unknown_event", "test_user");
+
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Event key \"unknown_event\" is not in datafile."), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.INFO, "Not tracking user test_user for event unknown_event."), Times.Once);
+        }
+
+        [Test]
         public void TestTrackNoAttributesWithEventValue()
         {
             EventBuilderMock.Setup(b => b.CreateConversionEvent(It.IsAny<ProjectConfig>(), It.IsAny<string>(),
