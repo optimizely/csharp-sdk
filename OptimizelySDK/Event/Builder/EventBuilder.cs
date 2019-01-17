@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2017-2018, Optimizely
+ * Copyright 2017-2019, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -254,22 +254,6 @@ namespace OptimizelySDK.Event.Builder
             var conversionParams = GetImpressionOrConversionParamsWithCommonParams(commonParams, conversionOnlyParams);
 
             return new LogEvent(CONVERSION_ENDPOINT, conversionParams, HTTP_VERB, HTTP_HEADERS);
-        }
-
-        /// <summary>
-        /// Create conversion event to be sent to the logging endpoint.
-        /// </summary>
-        /// <param name="config">ProjectConfig Configuration for the project.</param>
-        /// <param name="eventKey">Event Key representing the event</param>
-        /// <param name="userId">ID of user</param>
-        /// <param name="userAttributes">associative array of Attributes for the user</param>
-        /// <param name="eventTags">Dict representing metadata associated with the event.</param>
-        /// <returns>LogEvent object to be sent to dispatcher</returns>
-        [Obsolete("This overloaded method is obsolete. Use CreateConversionEvent without experimentIdVariationMap arg.")]
-        public virtual LogEvent CreateConversionEvent(ProjectConfig config, string eventKey, Dictionary<string, Variation> experimentIdVariationMap, string userId, UserAttributes userAttributes, EventTags eventTags)
-
-        {
-            return CreateConversionEvent(config, eventKey, userId, userAttributes, eventTags);
         }
     }
 }
