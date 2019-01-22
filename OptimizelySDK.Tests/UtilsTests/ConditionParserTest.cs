@@ -72,7 +72,20 @@ namespace OptimizelySDK.Tests.UtilsTests
         {
             var condition = ConditionParser.ParseAudienceConditions(NoOpAudienceConditions);
             Assert.NotNull(condition);
+
+            // OR operator is assumed by default when no operator has been provided.
             Assert.IsInstanceOf(typeof(OrCondition), condition);
+        }
+
+        [Test]
+        public void TestParseConditionsAssignsNullConditionIfNoConditionIsProvidedInNotOperator()
+        {
+            JToken emptyNotCondition = JToken.Parse(@"[""not""]");
+            var condition = ConditionParser.ParseConditions(emptyNotCondition);
+            Assert.NotNull(condition);
+            Assert.IsInstanceOf(typeof(NotCondition), condition);
+            var notCondition = (NotCondition)condition;
+            Assert.Null(notCondition.Condition);
         }
     }
 }

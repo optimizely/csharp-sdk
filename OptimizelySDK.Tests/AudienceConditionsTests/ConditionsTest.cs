@@ -180,6 +180,13 @@ namespace OptimizelySDK.Tests.AudienceConditionsTests
             Assert.That(notCondition.Evaluate(null, null), Is.False);
         }
 
+        [Test]
+        public void TestNotEvaluatorReturnsNullWhenConditionIsNull()
+        {
+            var notCondition = new NotCondition { Condition = null };
+            Assert.That(notCondition.Evaluate(null, null), Is.Null);
+        }
+
         #endregion // NOT Condition Tests
     }
 }

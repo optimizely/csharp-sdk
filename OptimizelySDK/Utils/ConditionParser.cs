@@ -116,7 +116,7 @@ namespace OptimizelySDK.Utils
                     condition = new OrCondition() { Conditions = conditions.ToArray() };
                     break;
                 case NOT_OPERATOR:
-                    condition = new NotCondition() { Condition = conditions.Count == 0 ? new EmptyCondition() : conditions[0] };
+                    condition = new NotCondition() { Condition = conditions.Count == 0 ? null : conditions[0] };
                     break;
                 default:
                     break;

@@ -37,8 +37,7 @@ namespace OptimizelySDK.AudienceConditions
 
         public bool? Evaluate(ProjectConfig config, UserAttributes userAttributes)
         {
-            string conditionType = Type;
-            if (conditionType == null || conditionType != CUSTOM_ATTRIBUTE_CONDITION_TYPE)
+            if (Type == null || Type != CUSTOM_ATTRIBUTE_CONDITION_TYPE)
                 return null;
 
             if (!IsValidMatchType())

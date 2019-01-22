@@ -24,7 +24,7 @@ namespace OptimizelySDK.AudienceConditions
 
         public bool? Evaluate(ProjectConfig config, UserAttributes attributes)
         {
-            var result = Condition.Evaluate(config, attributes);
+            var result = Condition?.Evaluate(config, attributes);
             return result == null ? null : !result;
         }
     }

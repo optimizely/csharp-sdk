@@ -40,7 +40,9 @@ namespace OptimizelySDK.Tests.AudienceConditionsTests
         public void TestEvaluateWithNoMatchType()
         {
             Assert.That(LegacyCondition.Evaluate(null, new UserAttributes { { "device_type", "iPhone" } }), Is.True);
-            Assert.That(LegacyCondition.Evaluate(null, new UserAttributes { { "device_type", "Android" } }), Is.False);
+
+            // Assumes exact evaluator if no match type is proved.
+            Assert.That(LegacyCondition.Evaluate(null, new UserAttributes { { "device_type", "IPhone" } }), Is.False);
         }
 
         [Test]
@@ -65,23 +67,20 @@ namespace OptimizelySDK.Tests.AudienceConditionsTests
         {
             BaseCondition condition = new BaseCondition { Name = "input_value", Value = "Android", Match = "exists", Type = "invalid_type" };
             Assert.That(condition.Evaluate(null, new UserAttributes { { "device_type", "iPhone" } }), Is.Null);
+        }
 
-            condition = new BaseCondition { Name = "input_value", Value = "Android", Match = "exists" };
+        [Test]
+        public void TestEvaluateWithMissingTypeProperty()
+        {
+            var condition = new BaseCondition { Name = "input_value", Value = "Android", Match = "exists" };
             Assert.That(condition.Evaluate(null, new UserAttributes { { "device_type", "iPhone" } }), Is.Null);
         }
 
         [Test]
         public void TestEvaluateWithInvalidMatchProperty()
         {
-            BaseCondition condition = new BaseCondition { Name = "input_value", Value = "Android", Match = "exists", Type = "invalid_match" };
+            BaseCondition condition = new BaseCondition { Name = "input_value", Value = "Android", Match = "invalid_match", Type = "custom_attribute" };
             Assert.That(condition.Evaluate(null, new UserAttributes { { "device_type", "iPhone" } }), Is.Null);
-        }
-
-        [Test]
-        public void TestEvaluateReturnsNullWithMismatchedConditionType()
-        {
-            BaseCondition condition = new BaseCondition { Name = "is_valid", Value = false, Match = "substring", Type = "custom_attribute" };
-            Assert.That(condition.Evaluate(null, new UserAttributes { { "is_valid", false } }), Is.Null);
         }
 
         #endregion // Evaluate Tests
