@@ -16,6 +16,7 @@
 using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
 using OptimizelySDK.Utils;
+using OptimizelySDK.AudienceConditions;
 
 namespace OptimizelySDK.Entity
 {
@@ -65,6 +66,31 @@ namespace OptimizelySDK.Entity
         /// </summary>
         public string[] AudienceIds { get; set; }
 
+        private ICondition _audienceIdsList = null;
+
+        /// <summary>
+        /// De-serialized audience conditions
+        /// </summary>
+        public ICondition AudienceIdsList
+        {
+            get
+            {
+                if (AudienceIds == null || AudienceIds.Length == 0)
+                    return null;
+                
+                if (_audienceIdsList == null)
+                {
+                    var conditions = new List<ICondition>();
+                    foreach (var audienceId in AudienceIds)
+                        conditions.Add(new AudienceIdCondition() { AudienceId = (string)audienceId });
+
+                    _audienceIdsList = new OrCondition() { Conditions = conditions.ToArray() };
+                }
+                
+                return _audienceIdsList;
+            }
+        }
+
         /// <summary>
         /// Traffic allocation of variations in the experiment
         /// </summary>
@@ -75,12 +101,12 @@ namespace OptimizelySDK.Entity
         /// </summary>
         public object AudienceConditions { get; set; }
 
-        private JToken _audienceConditionsList = null;
+        private ICondition _audienceConditionsList = null;
 
         /// <summary>
         /// De-serialized audience conditions
         /// </summary>
-        public JToken AudienceConditionsList
+        public ICondition AudienceConditionsList
         {
             get
             {
@@ -89,11 +115,10 @@ namespace OptimizelySDK.Entity
 
                 if (_audienceConditionsList == null)
                 {
-                    // Convert single string condition Id to condition list.
                     if (AudienceConditions is string)
-                        _audienceConditionsList = JToken.FromObject(new object[] { AudienceConditions });
+                        _audienceConditionsList = ConditionParser.ParseAudienceConditions(JToken.Parse((string)AudienceConditions));
                     else
-                        _audienceConditionsList = (JToken)AudienceConditions;
+                        _audienceConditionsList = ConditionParser.ParseAudienceConditions((JToken)AudienceConditions);
                 }
 
                 return _audienceConditionsList;
@@ -109,7 +134,6 @@ namespace OptimizelySDK.Entity
                 return _VariationKeyToVariationMap;
             }
         }
-        
 
 		private Dictionary<string, Variation> _VariationIdToVariationMap;
 		public Dictionary<string, Variation> VariationIdToVariationMap {
@@ -177,16 +201,6 @@ namespace OptimizelySDK.Entity
         public bool IsUserInForcedVariation(string userId)
         {
             return ForcedVariations != null && ForcedVariations.ContainsKey(userId);
-        }
-
-        /// <summary>
-        /// Get audience conditions for the experiment.
-        /// </summary>
-        /// <returns>Audience conditions for the experiment - can be an array of audience IDs, or a nested array of conditions.
-        /// Examples: ["5", "6"], ["and", ["or", "1", "2"], "3"]</returns>
-        public JToken GetAudienceConditionsOrIds()
-        {
-            return AudienceConditionsList ?? JArray.FromObject(AudienceIds);
         }
     }
 }
