@@ -174,7 +174,7 @@
     <Compile Include="..\OptimizelySDK\Utils\ExperimentUtils.cs">
       <Link>Bucketing\ExperimentUtils</Link>
     </Compile>
-    <Compile Include="..\OptimizelySDK\Bucketing\UserprofileUtil.cs">
+    <Compile Include="..\OptimizelySDK\Bucketing\UserProfileUtil.cs">
       <Link>Bucketing\UserProfileUtil</Link>
     </Compile>
 	<Compile Include="..\OptimizelySDK\Entity\FeatureVariableUsage.cs">
