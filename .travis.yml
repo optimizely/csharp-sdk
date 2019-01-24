@@ -1,7 +1,7 @@
 language: csharp
 dist: xenial
 mono:
-  - 5.2.0
+  - 5.4.0
 # needed to make travis run the unit tests
   - 5.18.0
 solution: "./OptimizelySDK.Travis.sln"
