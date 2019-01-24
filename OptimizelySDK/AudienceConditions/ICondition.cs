@@ -15,11 +15,12 @@
  */
 
 using OptimizelySDK.Entity;
+using OptimizelySDK.Logger;
 
 namespace OptimizelySDK.AudienceConditions
 {
     public interface ICondition
     {
-        bool? Evaluate(ProjectConfig config, UserAttributes attributes);
+        bool? Evaluate(ProjectConfig config, UserAttributes attributes, ILogger logger);
     }
 }

@@ -15,6 +15,7 @@
  */
 
 using OptimizelySDK.Entity;
+using OptimizelySDK.Logger;
 
 namespace OptimizelySDK.AudienceConditions
 {
@@ -22,7 +23,7 @@ namespace OptimizelySDK.AudienceConditions
     {
         public ICondition[] Conditions { get; set; }
 
-        public bool? Evaluate(ProjectConfig config, UserAttributes attributes)
+        public bool? Evaluate(ProjectConfig config, UserAttributes attributes, ILogger logger)
         {
             // According to the matrix:
             // true returns true
@@ -32,7 +33,7 @@ namespace OptimizelySDK.AudienceConditions
             var foundNull = false;
             foreach (var condition in Conditions)
             {
-                var result = condition.Evaluate(config, attributes);
+                var result = condition.Evaluate(config, attributes, logger);
                 if (result == null)
                     foundNull = true;
                 else if (result == true)
