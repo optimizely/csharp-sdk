@@ -2045,14 +2045,14 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
-        public void TestTrackExcludeUserFromExperimentWithTypedAudiences()
+        public void TestTrackDoesNotExcludeUserFromExperimentWhenAttributesMismatchWithTypedAudiences()
         {
             OptimizelyWithTypedAudiences.Track("item_bought", "user1", new UserAttributes
             {
                 { "house", "Hufflepuff" }
             });
 
-            EventDispatcherMock.Verify(dispatcher => dispatcher.DispatchEvent(It.IsAny<LogEvent>()), Times.Never);
+            EventDispatcherMock.Verify(dispatcher => dispatcher.DispatchEvent(It.IsAny<LogEvent>()), Times.Once);
         }
 
         [Test]
@@ -2161,7 +2161,7 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
-        public void TestTrackExcludesUserFromExperimentWithComplexAudienceConditions()
+        public void TestTrackDoesNotExcludesUserFromExperimentWhenAttributesMismatchWithAudienceConditions()
         {
             var userAttributes = new UserAttributes
             {
@@ -2172,7 +2172,7 @@ namespace OptimizelySDK.Tests
             // Should be excluded as exact match boolean audience with id '3468206643' does not match so the overall conditions fail.
             OptimizelyWithTypedAudiences.Track("user_signed_up", "user1", userAttributes);
 
-            EventDispatcherMock.Verify(dispatcher => dispatcher.DispatchEvent(It.IsAny<LogEvent>()), Times.Never);
+            EventDispatcherMock.Verify(dispatcher => dispatcher.DispatchEvent(It.IsAny<LogEvent>()), Times.Once);
         }
 
         [Test]
