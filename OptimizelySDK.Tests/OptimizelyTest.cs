@@ -69,7 +69,7 @@ namespace OptimizelySDK.Tests
                 It.IsAny<string>(), It.IsAny<string>(), It.IsAny<UserAttributes>()));
 
             EventBuilderMock.Setup(b => b.CreateConversionEvent(It.IsAny<ProjectConfig>(), It.IsAny<string>(),
-                It.IsAny<Dictionary<string, Variation>>(), It.IsAny<string>(), It.IsAny<UserAttributes>(), It.IsAny<EventTags>()));
+                It.IsAny<string>(), It.IsAny<UserAttributes>(), It.IsAny<EventTags>()));
 
             Config = ProjectConfig.Create(
                 content: TestData.Datafile,
@@ -583,7 +583,7 @@ namespace OptimizelySDK.Tests
         public void TestTrackNoAttributesNoEventValue()
         {
             EventBuilderMock.Setup(b => b.CreateConversionEvent(It.IsAny<ProjectConfig>(), It.IsAny<string>(),
-                It.IsAny<Dictionary<string,Variation>>(), It.IsAny<string>(), It.IsAny<UserAttributes>(), It.IsAny<EventTags>()))
+                It.IsAny<string>(), It.IsAny<UserAttributes>(), It.IsAny<EventTags>()))
               .Returns(new LogEvent("logx.optimizely.com/track", OptimizelyHelper.SingleParameter,
                                         "POST", new Dictionary<string, string> { }));
 
@@ -591,10 +591,6 @@ namespace OptimizelySDK.Tests
             optly.SetFieldOrProperty("EventBuilder", EventBuilderMock.Object);
             optly.Invoke("Track", "purchase", "test_user", null, null);
 
-            LoggerMock.Verify(l => l.Log(LogLevel.INFO, "User \"test_user\" does not meet conditions to be in experiment \"test_experiment\"."), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.INFO, "Not tracking user \"test_user\" for experiment \"test_experiment\""), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.INFO, "Experiment \"paused_experiment\" is not running."), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.INFO, "Not tracking user \"test_user\" for experiment \"paused_experiment\""), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "Tracking event purchase for user test_user."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Dispatching conversion event to URL logx.optimizely.com/track with params {\"param1\":\"val1\"}."), Times.Once);
         }
@@ -603,7 +599,7 @@ namespace OptimizelySDK.Tests
         public void TestTrackWithAttributesNoEventValue()
         {
             EventBuilderMock.Setup(b => b.CreateConversionEvent(It.IsAny<ProjectConfig>(), It.IsAny<string>(),
-                It.IsAny<Dictionary<string, Variation>>(), It.IsAny<string>(), It.IsAny<UserAttributes>(), It.IsAny<EventTags>()))
+                It.IsAny<string>(), It.IsAny<UserAttributes>(), It.IsAny<EventTags>()))
              .Returns(new LogEvent("logx.optimizely.com/track", OptimizelyHelper.SingleParameter,
                                        "POST", new Dictionary<string, string> { }));
 
@@ -611,17 +607,24 @@ namespace OptimizelySDK.Tests
             optly.SetFieldOrProperty("EventBuilder", EventBuilderMock.Object);
             optly.Invoke("Track", "purchase", "test_user", OptimizelyHelper.UserAttributes, null);
 
-            LoggerMock.Verify(l => l.Log(LogLevel.INFO, "Experiment \"paused_experiment\" is not running."), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.INFO, "Not tracking user \"test_user\" for experiment \"paused_experiment\""), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "Tracking event purchase for user test_user."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Dispatching conversion event to URL logx.optimizely.com/track with params {\"param1\":\"val1\"}."), Times.Once);
+        }
+
+        [Test]
+        public void TestTrackUnknownEventKey()
+        {
+            Optimizely.Track("unknown_event", "test_user");
+
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Event key \"unknown_event\" is not in datafile."), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.INFO, "Not tracking user test_user for event unknown_event."), Times.Once);
         }
 
         [Test]
         public void TestTrackNoAttributesWithEventValue()
         {
             EventBuilderMock.Setup(b => b.CreateConversionEvent(It.IsAny<ProjectConfig>(), It.IsAny<string>(),
-                It.IsAny<Dictionary<string, Variation>>(), It.IsAny<string>(), It.IsAny<UserAttributes>(), It.IsAny<EventTags>()))
+                It.IsAny<string>(), It.IsAny<UserAttributes>(), It.IsAny<EventTags>()))
              .Returns(new LogEvent("logx.optimizely.com/track", OptimizelyHelper.SingleParameter,
                                        "POST", new Dictionary<string, string> { }));
 
@@ -632,10 +635,6 @@ namespace OptimizelySDK.Tests
                 { "revenue", 42 }
             });
 
-            LoggerMock.Verify(l => l.Log(LogLevel.INFO, "User \"test_user\" does not meet conditions to be in experiment \"test_experiment\"."), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.INFO, "Not tracking user \"test_user\" for experiment \"test_experiment\""), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.INFO, "Experiment \"paused_experiment\" is not running."), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.INFO, "Not tracking user \"test_user\" for experiment \"paused_experiment\""), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "Tracking event purchase for user test_user."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Dispatching conversion event to URL logx.optimizely.com/track with params {\"param1\":\"val1\"}."), Times.Once);
         }
@@ -650,7 +649,7 @@ namespace OptimizelySDK.Tests
             };
 
             EventBuilderMock.Setup(b => b.CreateConversionEvent(It.IsAny<ProjectConfig>(), It.IsAny<string>(),
-                It.IsAny<Dictionary<string, Variation>>(), It.IsAny<string>(), It.IsAny<UserAttributes>(), It.IsAny<EventTags>()))
+                It.IsAny<string>(), It.IsAny<UserAttributes>(), It.IsAny<EventTags>()))
              .Returns(new LogEvent("logx.optimizely.com/track", OptimizelyHelper.SingleParameter,
                                        "POST", new Dictionary<string, string> { }));
 
@@ -661,10 +660,6 @@ namespace OptimizelySDK.Tests
                 { "revenue", 42 }
             });
 
-            LoggerMock.Verify(l => l.Log(LogLevel.INFO, "User \"test_user\" does not meet conditions to be in experiment \"test_experiment\"."), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.INFO, "Not tracking user \"test_user\" for experiment \"test_experiment\""), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.INFO, "Experiment \"paused_experiment\" is not running."), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.INFO, "Not tracking user \"test_user\" for experiment \"paused_experiment\""), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "Tracking event purchase for user test_user."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Dispatching conversion event to URL logx.optimizely.com/track with params {\"param1\":\"val1\"}."), Times.Once);
         }
@@ -673,7 +668,7 @@ namespace OptimizelySDK.Tests
         public void TestTrackWithNullAttributesWithNullEventValue()
         {
             EventBuilderMock.Setup(b => b.CreateConversionEvent(It.IsAny<ProjectConfig>(), It.IsAny<string>(),
-                It.IsAny<Dictionary<string, Variation>>(), It.IsAny<string>(), It.IsAny<UserAttributes>(), It.IsAny<EventTags>()))
+                It.IsAny<string>(), It.IsAny<UserAttributes>(), It.IsAny<EventTags>()))
              .Returns(new LogEvent("logx.optimizely.com/track", OptimizelyHelper.SingleParameter,
                                        "POST", new Dictionary<string, string> { }));
 
@@ -685,21 +680,8 @@ namespace OptimizelySDK.Tests
                 { "wont_send_null", null}
             });
 
-            LoggerMock.Verify(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()), Times.Exactly(18));
+            LoggerMock.Verify(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()), Times.Exactly(3));
 
-            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "User \"test_user\" is not in the forced variation map."), Times.Exactly(3));
-            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Assigned bucket [3037] to user [test_user] with bucketing ID [test_user]."));
-            LoggerMock.Verify(l => l.Log(LogLevel.INFO, "User [test_user] is in variation [control] of experiment [test_experiment]."));
-            LoggerMock.Verify(l => l.Log(LogLevel.INFO, "This decision will not be saved since the UserProfileService is null."));
-            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Assigned bucket [4517] to user [test_user] with bucketing ID [test_user]."));
-            LoggerMock.Verify(l => l.Log(LogLevel.INFO, "User [test_user] is not in experiment [group_experiment_1] of group [7722400015]."));
-            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Assigned bucket [4517] to user [test_user] with bucketing ID [test_user]."));
-            LoggerMock.Verify(l => l.Log(LogLevel.INFO, "User [test_user] is in experiment [group_experiment_2] of group [7722400015]."));
-            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Assigned bucket [9871] to user [test_user] with bucketing ID [test_user]."));
-            LoggerMock.Verify(l => l.Log(LogLevel.INFO, "User [test_user] is in variation [group_exp_2_var_2] of experiment [group_experiment_2]."));
-            LoggerMock.Verify(l => l.Log(LogLevel.INFO, "This decision will not be saved since the UserProfileService is null."));
-            LoggerMock.Verify(l => l.Log(LogLevel.INFO, "Experiment \"paused_experiment\" is not running."));
-            LoggerMock.Verify(l => l.Log(LogLevel.INFO, "Not tracking user \"test_user\" for experiment \"paused_experiment\""));
             LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "[EventTags] Null value for key wont_send_null removed and will not be sent to results."));
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "Tracking event purchase for user test_user."));
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Dispatching conversion event to URL logx.optimizely.com/track with params {\"param1\":\"val1\"}."));
@@ -734,7 +716,7 @@ namespace OptimizelySDK.Tests
         public void TestInvalidDispatchConversionEvent()
         {
             EventBuilderMock.Setup(b => b.CreateConversionEvent(It.IsAny<ProjectConfig>(), It.IsAny<string>(),
-                 It.IsAny<Dictionary<string, Variation>>(), It.IsAny<string>(), It.IsAny<UserAttributes>(), It.IsAny<EventTags>()))
+                 It.IsAny<string>(), It.IsAny<UserAttributes>(), It.IsAny<EventTags>()))
                .Returns(new LogEvent("logx.optimizely.com/track", OptimizelyHelper.SingleParameter,
                                          "POST", new Dictionary<string, string> { }));
 
@@ -744,10 +726,6 @@ namespace OptimizelySDK.Tests
 
             optly.Invoke("Track", "purchase", "test_user", null, null);
 
-            LoggerMock.Verify(l => l.Log(LogLevel.INFO, "User \"test_user\" does not meet conditions to be in experiment \"test_experiment\"."), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.INFO, "Not tracking user \"test_user\" for experiment \"test_experiment\""), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.INFO, "Experiment \"paused_experiment\" is not running."), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.INFO, "Not tracking user \"test_user\" for experiment \"paused_experiment\""), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "Tracking event purchase for user test_user."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Dispatching conversion event to URL logx.optimizely.com/track with params {\"param1\":\"val1\"}."), Times.Once);
         }
@@ -758,7 +736,7 @@ namespace OptimizelySDK.Tests
         public void TestTrackNoAttributesWithInvalidEventValue()
         {
             EventBuilderMock.Setup(b => b.CreateConversionEvent(It.IsAny<ProjectConfig>(), It.IsAny<string>(),
-                 It.IsAny<Dictionary<string, Variation>>(), It.IsAny<string>(), It.IsAny<UserAttributes>(), It.IsAny<EventTags>()))
+                 It.IsAny<string>(), It.IsAny<UserAttributes>(), It.IsAny<EventTags>()))
                .Returns(new LogEvent("logx.optimizely.com/track", OptimizelyHelper.SingleParameter,
                                          "POST", new Dictionary<string, string> { }));
 
@@ -779,7 +757,7 @@ namespace OptimizelySDK.Tests
              * In this case, int value can't be casted implicitly into Dictionary */
 
             EventBuilderMock.Setup(b => b.CreateConversionEvent(It.IsAny<ProjectConfig>(), It.IsAny<string>(),
-                 It.IsAny<Dictionary<string, Variation>>(), It.IsAny<string>(), It.IsAny<UserAttributes>(), It.IsAny<EventTags>()))
+                 It.IsAny<string>(), It.IsAny<UserAttributes>(), It.IsAny<EventTags>()))
                .Returns(new LogEvent("logx.optimizely.com/track", OptimizelyHelper.SingleParameter,
                                          "POST", new Dictionary<string, string> { }));
 
@@ -1168,7 +1146,7 @@ namespace OptimizelySDK.Tests
             };
 
             EventBuilderMock.Setup(b => b.CreateConversionEvent(It.IsAny<ProjectConfig>(), It.IsAny<string>(),
-                It.IsAny<Dictionary<string, Variation>>(), It.IsAny<string>(), It.IsAny<UserAttributes>(), It.IsAny<EventTags>()))
+                It.IsAny<string>(), It.IsAny<UserAttributes>(), It.IsAny<EventTags>()))
                 .Returns(new LogEvent("logx.optimizely.com/track", parameters, "POST", new Dictionary<string, string> { }));
 
             var optly = Helper.CreatePrivateOptimizely();
@@ -1180,20 +1158,8 @@ namespace OptimizelySDK.Tests
             // Track
             optly.Invoke("Track", "purchase", "test_user", null, null);
 
-            LoggerMock.Verify(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()), Times.Exactly(15));
+            LoggerMock.Verify(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()), Times.Exactly(3));
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, string.Format(@"Set variation ""{0}"" for experiment ""{1}"" and user ""{2}"" in the forced variation map.", variationId, experimentId, userId)), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Variation \"control\" is mapped to experiment \"test_experiment\" and user \"test_user\" in the forced variation map"), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "No experiment \"group_experiment_1\" mapped to user \"test_user\" in the forced variation map."), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Assigned bucket [4517] to user [test_user] with bucketing ID [test_user]."), Times.Exactly(2));
-            LoggerMock.Verify(l => l.Log(LogLevel.INFO, "User [test_user] is not in experiment [group_experiment_1] of group [7722400015]."), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "No experiment \"group_experiment_2\" mapped to user \"test_user\" in the forced variation map."), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Assigned bucket [4517] to user [test_user] with bucketing ID [test_user]."), Times.Exactly(2));
-            LoggerMock.Verify(l => l.Log(LogLevel.INFO, "User [test_user] is in experiment [group_experiment_2] of group [7722400015]."), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Assigned bucket [9871] to user [test_user] with bucketing ID [test_user]."), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.INFO, "User [test_user] is in variation [group_exp_2_var_2] of experiment [group_experiment_2]."), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.INFO, "This decision will not be saved since the UserProfileService is null."), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.INFO, "Experiment \"paused_experiment\" is not running."), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.INFO, "Not tracking user \"test_user\" for experiment \"paused_experiment\""), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "Tracking event purchase for user test_user."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Dispatching conversion event to URL logx.optimizely.com/track with params {\"param1\":\"val1\"}."), Times.Once);
         }
@@ -1863,7 +1829,7 @@ namespace OptimizelySDK.Tests
             NotificationCallbackMock.Setup(nc => nc.TestAnotherTrackCallback(It.IsAny<string>(), It.IsAny<string>(),
                 It.IsAny<UserAttributes>(), It.IsAny<EventTags>(), It.IsAny<LogEvent>()));
             EventBuilderMock.Setup(ebm => ebm.CreateConversionEvent(It.IsAny<ProjectConfig>(), It.IsAny<string>(),
-                It.IsAny<Dictionary<string, Variation>>(), It.IsAny<string>(), It.IsAny<UserAttributes>(), 
+                It.IsAny<string>(), It.IsAny<UserAttributes>(), 
                 It.IsAny<EventTags>())).Returns(logEvent);
             DecisionServiceMock.Setup(ds => ds.GetVariation(experiment, TestUserId, userAttributes)).Returns(variation);
             
