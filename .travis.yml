@@ -1,4 +1,5 @@
 language: csharp
+dotnet: 2.1.502
 mono:
   - 5.2.0
 # needed to make travis run the unit tests
@@ -11,7 +12,9 @@ install:
 script:
   - msbuild /p:Configuration=Release ./OptimizelySDK.Travis.sln
   - mono ./testrunner/NUnit.Runners.2.6.4/tools/nunit-console.exe ./OptimizelySDK.Tests/bin/Release/OptimizelySDK.Tests.dll 
-
+after_success:
+  - dotnet restore OptimizelySDK.NetStandard16/OptimizelySDK.NetStandard16.csproj
+  - dotnet build OptimizelySDK.NetStandard16/OptimizelySDK.NetStandard16.csproj
 # Integration tests need to run first to reset the PR build status to pending
 stages:
   - 'Integration tests'
