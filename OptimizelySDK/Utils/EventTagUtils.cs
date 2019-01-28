@@ -92,10 +92,10 @@ namespace OptimizelySDK.Utils
             {
                 logMessage = "Provided numeric value is boolean which is an invalid format.";
                 logLevel = LogLevel.ERROR;
-            }
-            else if (!(eventTags[VALUE_EVENT_METRIC_NAME] is int) && !(eventTags[VALUE_EVENT_METRIC_NAME] is string) && !(eventTags[VALUE_EVENT_METRIC_NAME] is float)
-                && !(eventTags[VALUE_EVENT_METRIC_NAME] is decimal) && !(eventTags[VALUE_EVENT_METRIC_NAME] is double) && !(eventTags[VALUE_EVENT_METRIC_NAME] is float))
-            {
+            } else if (!(eventTags[VALUE_EVENT_METRIC_NAME] is int) && !(eventTags[VALUE_EVENT_METRIC_NAME] is string) && !(eventTags[VALUE_EVENT_METRIC_NAME] is float)
+                && !(eventTags[VALUE_EVENT_METRIC_NAME] is decimal) && !(eventTags[VALUE_EVENT_METRIC_NAME] is double) && !(eventTags[VALUE_EVENT_METRIC_NAME] is long)
+                && !(eventTags[VALUE_EVENT_METRIC_NAME] is short) && !(eventTags[VALUE_EVENT_METRIC_NAME] is uint))
+              {
                 logMessage = "Numeric metric value is not in integer, float, or string form.";
                 logLevel = LogLevel.ERROR;
             }
