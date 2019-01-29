@@ -20,6 +20,9 @@ using System;
 
 namespace OptimizelySDK.AudienceConditions
 {
+    /// <summary>
+    /// Represents Base condition entity for audience evaluation.
+    /// </summary>
     public class BaseCondition : ICondition
     {
         /// <summary>

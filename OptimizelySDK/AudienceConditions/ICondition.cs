@@ -18,6 +18,9 @@ using OptimizelySDK.Entity;
 
 namespace OptimizelySDK.AudienceConditions
 {
+    /// <summary>
+    /// Interface implemented by all condition classes for audience evaluation.
+    /// </summary>
     public interface ICondition
     {
         bool? Evaluate(ProjectConfig config, UserAttributes attributes);

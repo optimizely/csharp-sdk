@@ -18,6 +18,9 @@ using OptimizelySDK.Entity;
 
 namespace OptimizelySDK.AudienceConditions
 {
+    /// <summary>
+    /// Represents Audiece Id condition for audience evaluation.
+    /// </summary>
     public class AudienceIdCondition : ICondition
     {
         public string AudienceId { get; set; }

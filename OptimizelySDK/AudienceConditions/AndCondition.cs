@@ -18,6 +18,9 @@ using OptimizelySDK.Entity;
 
 namespace OptimizelySDK.AudienceConditions
 {
+    /// <summary>
+    /// Represents an 'AND' condition operation for audience evaluation.
+    /// </summary>
     public class AndCondition : ICondition
     {
         public ICondition[] Conditions { get; set; }
