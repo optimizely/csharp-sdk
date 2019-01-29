@@ -70,9 +70,10 @@
     <Reference Include="System.Net.Http.WebRequest" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AudienceConditionsTests\ConditionEvaluationTest.cs" />
+    <Compile Include="AudienceConditionsTests\ConditionsTest.cs" />
     <Compile Include="DecisionServiceTest.cs" />
     <Compile Include="DefaultErrorHandlerTest.cs" />
-    <Compile Include="EntityTests\ExperimentTest.cs" />
     <Compile Include="EventTests\DefaultEventDispatcherTest.cs" />
     <Compile Include="EventTests\EventBuilderTest.cs" />
     <Compile Include="EventTests\LogEventTest.cs" />
@@ -84,8 +85,7 @@
     <Compile Include="TestData.cs" />
     <Compile Include="BucketerTest.cs" />
     <Compile Include="ProjectConfigTest.cs" />
-    <Compile Include="UtilsTests\ConditionTreeEvaluatorTest.cs" />
-    <Compile Include="UtilsTests\CustomAttributeConditionEvaluatorTest.cs" />
+    <Compile Include="UtilsTests\ConditionParserTest.cs" />
     <Compile Include="UtilsTests\EventTagUtilsTest.cs" />
     <Compile Include="UtilsTests\ExperimentUtilsTest.cs" />
     <Compile Include="UtilsTests\PrivateObject.cs" />
@@ -112,6 +112,9 @@
   </ItemGroup>
   <ItemGroup>
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="EntityTests\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.

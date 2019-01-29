@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-using Newtonsoft.Json.Linq;
+using OptimizelySDK.AudienceConditions;
 using OptimizelySDK.Entity;
 using OptimizelySDK.Logger;
+using System.Collections.Generic;
 using System.Linq;
 
 
@@ -47,31 +48,16 @@ namespace OptimizelySDK.Utils
         /// <returns>true if the user meets audience conditions to be in experiment, false otherwise.</returns>
         public static bool IsUserInExperiment(ProjectConfig config, Experiment experiment, UserAttributes userAttributes)
         {
-            var audienceConditions = experiment.GetAudienceConditionsOrIds();
-
-            // If there are no audiences, return true because that means ALL users are included in the experiment.
-            if (audienceConditions == null || !audienceConditions.Any())
-                return true;
-
             if (userAttributes == null)
                 userAttributes = new UserAttributes();
 
-            var conditionTreeEvaluator = new ConditionTreeEvaluator();
+            var expConditions = experiment.AudienceConditionsList ?? experiment.AudienceIdsList;
 
-            System.Func<JToken, bool?> evaluateConditionsWithUserAttributes = condition => CustomAttributeConditionEvaluator.Evaluate(condition, userAttributes);
+            // If there are no audiences, return true because that means ALL users are included in the experiment.
+            if (expConditions == null)
+                return true;
 
-            bool? EvaluateAudience(JToken audienceIdToken)
-            {
-                string audienceId = audienceIdToken.ToString();
-                var audience = config.GetAudience(audienceId);
-
-                if (audience != null && !string.IsNullOrEmpty(audience.Id))
-                    return conditionTreeEvaluator.Evaluate(audience.ConditionList, evaluateConditionsWithUserAttributes);
-
-                return null;
-            }
-
-            return conditionTreeEvaluator.Evaluate(audienceConditions, EvaluateAudience).GetValueOrDefault();
+            return expConditions.Evaluate(config, userAttributes).GetValueOrDefault();
         }
     }
 }

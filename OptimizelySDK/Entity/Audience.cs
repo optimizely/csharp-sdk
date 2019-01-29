@@ -15,6 +15,8 @@
  */
 
 using Newtonsoft.Json.Linq;
+using OptimizelySDK.AudienceConditions;
+using OptimizelySDK.Utils;
 
 namespace OptimizelySDK.Entity
 {
@@ -35,12 +37,12 @@ namespace OptimizelySDK.Entity
         /// </summary>
         public object Conditions { get; set; }
 
-        private JToken _decodedConditions = null;
+        private ICondition _decodedConditions = null;
 
         /// <summary>
         /// De-serialized audience conditions
         /// </summary>
-        public JToken ConditionList
+        public ICondition ConditionList
         {
             get
             {
@@ -50,9 +52,14 @@ namespace OptimizelySDK.Entity
                 if (_decodedConditions == null)
                 {
                     if (Conditions is string)
-                        _decodedConditions = Utils.ConditionTreeEvaluator.DecodeConditions((string)Conditions);
+                    {
+                        var conditions = JToken.Parse((string)Conditions);
+                        _decodedConditions = ConditionParser.ParseConditions(conditions);
+                    }
                     else
-                        _decodedConditions = (JToken)Conditions;
+                    {
+                        _decodedConditions = ConditionParser.ParseConditions((JToken)Conditions);
+                    }
                 }
 
                 return _decodedConditions;
