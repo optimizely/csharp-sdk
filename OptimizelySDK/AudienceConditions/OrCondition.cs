@@ -19,6 +19,9 @@ using OptimizelySDK.Logger;
 
 namespace OptimizelySDK.AudienceConditions
 {
+    /// <summary>
+    /// Represents an 'OR' condition operation for audience evaluation.
+    /// </summary>
     public class OrCondition : ICondition
     {
         public ICondition[] Conditions { get; set; }

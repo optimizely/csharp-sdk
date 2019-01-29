@@ -19,6 +19,9 @@ using OptimizelySDK.Logger;
 
 namespace OptimizelySDK.AudienceConditions
 {
+    /// <summary>
+    /// Represents a condition that evaluates to true for every audience evaluation.
+    /// </summary>
     public class EmptyCondition : ICondition
     {
         public bool? Evaluate(ProjectConfig config, UserAttributes attributes, ILogger logger)

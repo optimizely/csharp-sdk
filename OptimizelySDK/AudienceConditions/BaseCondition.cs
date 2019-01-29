@@ -24,6 +24,9 @@ using System.Collections.Generic;
 
 namespace OptimizelySDK.AudienceConditions
 {
+    /// <summary>
+    /// Represents Base condition entity for audience evaluation.
+    /// </summary>
     public class BaseCondition : ICondition
     {
         /// <summary>

@@ -19,6 +19,9 @@ using OptimizelySDK.Logger;
 
 namespace OptimizelySDK.AudienceConditions
 {
+    /// <summary>
+    /// Represents a 'NOT' condition operation for audience evaluation.
+    /// </summary>
     public class NotCondition : ICondition
     {
         public ICondition Condition { get; set; }

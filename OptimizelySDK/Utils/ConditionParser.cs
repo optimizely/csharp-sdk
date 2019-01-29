@@ -20,6 +20,9 @@ using System.Collections.Generic;
 
 namespace OptimizelySDK.Utils
 {
+    /// <summary>
+    /// Utility class for parsing audience conditions.
+    /// </summary>
     public static class ConditionParser
     {
         /// <summary>
