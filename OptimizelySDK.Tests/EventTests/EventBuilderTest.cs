@@ -1092,7 +1092,7 @@ namespace OptimizelySDK.Tests.EventTests
                 {"7716830082", new Variation{Id="7722370027", Key="control"} }
             };
 
-            var logEvent = EventBuilder.CreateConversionEvent(Config, "purchase", TestUserId, experimentToVariationMap, null,
+            var logEvent = EventBuilder.CreateConversionEvent(Config, "purchase", experimentToVariationMap, TestUserId, null,
                 new EventTags
             {
                     {"revenue", 0 },
@@ -1180,7 +1180,7 @@ namespace OptimizelySDK.Tests.EventTests
                 {"7716830082", new Variation{Id="7722370027", Key="control"} }
             };
 
-            var logEvent = EventBuilder.CreateConversionEvent(Config, "purchase", TestUserId, experimentToVariationMap, null,
+            var logEvent = EventBuilder.CreateConversionEvent(Config, "purchase", experimentToVariationMap, TestUserId, null,
                 new EventTags
             {
                     {"revenue", 10 },
@@ -1267,7 +1267,7 @@ namespace OptimizelySDK.Tests.EventTests
                 {"7716830082", new Variation{Id="7722370027", Key="control"} }
             };
 
-            var logEvent = EventBuilder.CreateConversionEvent(Config, "purchase", TestUserId, experimentToVariationMap, null,
+            var logEvent = EventBuilder.CreateConversionEvent(Config, "purchase", experimentToVariationMap, TestUserId, null,
                 new EventTags
             {
                     {"revenue", 1 },
