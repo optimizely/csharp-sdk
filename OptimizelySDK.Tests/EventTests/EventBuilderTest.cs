@@ -1031,6 +1031,16 @@ namespace OptimizelySDK.Tests.EventTests
                                 {
                                     new Dictionary<string, object>
                                     {
+                                        { "decisions", new object[]
+                                            {
+                                                new Dictionary<string, object>
+                                                {
+                                                    {"campaign_id", "7719770039" },
+                                                    {"experiment_id", "7716830082" },
+                                                    {"variation_id", "7722370027" }
+                                                }
+                                            }
+                                        },
                                         { "events", new object[]
                                             {
                                                 new Dictionary<string, object>
@@ -1119,6 +1129,16 @@ namespace OptimizelySDK.Tests.EventTests
                                 {
                                     new Dictionary<string, object>
                                     {
+                                        { "decisions", new object[]
+                                            {
+                                                new Dictionary<string, object>
+                                                {
+                                                    {"campaign_id", "7719770039" },
+                                                    {"experiment_id", "7716830082" },
+                                                    {"variation_id", "7722370027" }
+                                                }
+                                            }
+                                        },
                                         { "events", new object[]
                                             {
                                                 new Dictionary<string, object>
@@ -1206,6 +1226,16 @@ namespace OptimizelySDK.Tests.EventTests
                                 {
                                     new Dictionary<string, object>
                                     {
+                                        { "decisions", new object[]
+                                            {
+                                                new Dictionary<string, object>
+                                                {
+                                                    {"campaign_id", "7719770039" },
+                                                    {"experiment_id", "7716830082" },
+                                                    {"variation_id", "7722370027" }
+                                                }
+                                            }
+                                        },
                                         { "events", new object[]
                                             {
                                                 new Dictionary<string, object>
