@@ -1017,6 +1017,297 @@ namespace OptimizelySDK.Tests.EventTests
         }
 
         [Test]
+        public void TestConversionEventWithFalsyNumericAndRevenueValues()
+        {
+            var guid = Guid.NewGuid();
+            var timeStamp = TestData.SecondsSince1970();
+            var payloadParams = new Dictionary<string, object>
+            {
+                { "visitors", new object[]
+                    {
+                        new Dictionary<string, object>()
+                        {
+                            { "snapshots", new object[]
+                                {
+                                    new Dictionary<string, object>
+                                    {
+                                        { "decisions", new object[]
+                                            {
+                                                new Dictionary<string, object>
+                                                {
+                                                    {"campaign_id", "7719770039" },
+                                                    {"experiment_id", "7716830082" },
+                                                    {"variation_id", "7722370027" }
+                                                }
+                                            }
+                                        },
+                                        { "events", new object[]
+                                            {
+                                                new Dictionary<string, object>
+                                                {
+                                                    {"entity_id", "7718020063" },
+                                                    {"timestamp", timeStamp },
+                                                    {"uuid", guid },
+                                                    {"key", "purchase" },
+                                                    {"revenue", 0 },
+                                                    {"value", 0.0 },
+                                                    {"tags",
+                                                        new Dictionary<string, object>
+                                                        {
+                                                            {"revenue", 0 },
+                                                            {"value", 0.0 }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            { "attributes", new object[]
+                                {
+                                    new Dictionary<string, object>
+                                    {
+                                        {"entity_id", ControlAttributes.BOT_FILTERING_ATTRIBUTE},
+                                        {"key", ControlAttributes.BOT_FILTERING_ATTRIBUTE},
+                                        {"type", "custom" },
+                                        {"value", true }
+                                    }
+                                }
+                            },
+                            { "visitor_id", TestUserId }
+                        }
+                    }
+                },
+                {"project_id", "7720880029" },
+                {"account_id", "1592310167" },
+                {"client_name", "csharp-sdk" },
+                {"client_version", Optimizely.SDK_VERSION },
+                {"revision", "15" },
+                {"anonymize_ip", false}
+            };
+
+            var expectedEvent = new LogEvent(
+                "https://logx.optimizely.com/v1/events",
+                payloadParams,
+                "POST",
+                new Dictionary<string, string>
+                {
+                    { "Content-Type", "application/json"}
+                });
+
+            var experimentToVariationMap = new Dictionary<string, Variation>
+            {
+                {"7716830082", new Variation{Id="7722370027", Key="control"} }
+            };
+
+            var logEvent = EventBuilder.CreateConversionEvent(Config, "purchase", experimentToVariationMap, TestUserId, null,
+                new EventTags
+            {
+                    {"revenue", 0 },
+                    {"value", 0.0 }
+            });
+
+            TestData.ChangeGUIDAndTimeStamp(logEvent.Params, timeStamp, guid);
+
+            Assert.IsTrue(TestData.CompareObjects(expectedEvent, logEvent));
+        }
+
+        [Test]
+        public void TestConversionEventWithNumericValue1()
+        {
+            var guid = Guid.NewGuid();
+            var timeStamp = TestData.SecondsSince1970();
+            var payloadParams = new Dictionary<string, object>
+            {
+                { "visitors", new object[]
+                    {
+                        new Dictionary<string, object>()
+                        {
+                            { "snapshots", new object[]
+                                {
+                                    new Dictionary<string, object>
+                                    {
+                                        { "decisions", new object[]
+                                            {
+                                                new Dictionary<string, object>
+                                                {
+                                                    {"campaign_id", "7719770039" },
+                                                    {"experiment_id", "7716830082" },
+                                                    {"variation_id", "7722370027" }
+                                                }
+                                            }
+                                        },
+                                        { "events", new object[]
+                                            {
+                                                new Dictionary<string, object>
+                                                {
+                                                    {"entity_id", "7718020063" },
+                                                    {"timestamp", timeStamp },
+                                                    {"uuid", guid },
+                                                    {"key", "purchase" },
+                                                    {"revenue", 10 },
+                                                    {"value", 1.0 },
+                                                    {"tags",
+                                                        new Dictionary<string, object>
+                                                        {
+                                                            {"revenue", 10 },
+                                                            {"value", 1.0 }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            { "attributes", new object[]
+                                {
+                                    new Dictionary<string, object>
+                                    {
+                                        {"entity_id", ControlAttributes.BOT_FILTERING_ATTRIBUTE},
+                                        {"key", ControlAttributes.BOT_FILTERING_ATTRIBUTE},
+                                        {"type", "custom" },
+                                        {"value", true }
+                                    }
+                                }
+                            },
+                            { "visitor_id", TestUserId }
+                        }
+                    }
+                },
+                {"project_id", "7720880029" },
+                {"account_id", "1592310167" },
+                {"client_name", "csharp-sdk" },
+                {"client_version", Optimizely.SDK_VERSION },
+                {"revision", "15" },
+                {"anonymize_ip", false}
+            };
+
+            var expectedEvent = new LogEvent(
+                "https://logx.optimizely.com/v1/events",
+                payloadParams,
+                "POST",
+                new Dictionary<string, string>
+                {
+                    { "Content-Type", "application/json"}
+                });
+
+            var experimentToVariationMap = new Dictionary<string, Variation>
+            {
+                {"7716830082", new Variation{Id="7722370027", Key="control"} }
+            };
+
+            var logEvent = EventBuilder.CreateConversionEvent(Config, "purchase", experimentToVariationMap, TestUserId, null,
+                new EventTags
+            {
+                    {"revenue", 10 },
+                    {"value", 1.0 }
+            });
+
+            TestData.ChangeGUIDAndTimeStamp(logEvent.Params, timeStamp, guid);
+
+            Assert.IsTrue(TestData.CompareObjects(expectedEvent, logEvent));
+        }
+        [Test]
+        public void TestConversionEventWithRevenueValue1()
+        {
+            var guid = Guid.NewGuid();
+            var timeStamp = TestData.SecondsSince1970();
+            var payloadParams = new Dictionary<string, object>
+            {
+                { "visitors", new object[]
+                    {
+                        new Dictionary<string, object>()
+                        {
+                            { "snapshots", new object[]
+                                {
+                                    new Dictionary<string, object>
+                                    {
+                                        { "decisions", new object[]
+                                            {
+                                                new Dictionary<string, object>
+                                                {
+                                                    {"campaign_id", "7719770039" },
+                                                    {"experiment_id", "7716830082" },
+                                                    {"variation_id", "7722370027" }
+                                                }
+                                            }
+                                        },
+                                        { "events", new object[]
+                                            {
+                                                new Dictionary<string, object>
+                                                {
+                                                    {"entity_id", "7718020063" },
+                                                    {"timestamp", timeStamp },
+                                                    {"uuid", guid },
+                                                    {"key", "purchase" },
+                                                    {"revenue", 1 },
+                                                    {"value", 10.0 },
+                                                    {"tags",
+                                                        new Dictionary<string, object>
+                                                        {
+                                                            {"revenue", 1 },
+                                                            {"value", 10.0 }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            { "attributes", new object[]
+                                {
+                                    new Dictionary<string, object>
+                                    {
+                                        {"entity_id", ControlAttributes.BOT_FILTERING_ATTRIBUTE},
+                                        {"key", ControlAttributes.BOT_FILTERING_ATTRIBUTE},
+                                        {"type", "custom" },
+                                        {"value", true }
+                                    }
+                                }
+                            },
+                            { "visitor_id", TestUserId }
+                        }
+                    }
+                },
+                {"project_id", "7720880029" },
+                {"account_id", "1592310167" },
+                {"client_name", "csharp-sdk" },
+                {"client_version", Optimizely.SDK_VERSION },
+                {"revision", "15" },
+                {"anonymize_ip", false}
+            };
+
+            var expectedEvent = new LogEvent(
+                "https://logx.optimizely.com/v1/events",
+                payloadParams,
+                "POST",
+                new Dictionary<string, string>
+                {
+                    { "Content-Type", "application/json"}
+                });
+
+            var experimentToVariationMap = new Dictionary<string, Variation>
+            {
+                {"7716830082", new Variation{Id="7722370027", Key="control"} }
+            };
+
+            var logEvent = EventBuilder.CreateConversionEvent(Config, "purchase", experimentToVariationMap, TestUserId, null,
+                new EventTags
+            {
+                    {"revenue", 1 },
+                    {"value", 10.0 }
+            });
+
+            TestData.ChangeGUIDAndTimeStamp(logEvent.Params, timeStamp, guid);
+
+            Assert.IsTrue(TestData.CompareObjects(expectedEvent, logEvent));
+        }
+
+
+        [Test]
         public void TestCreateConversionEventWithBucketingIDAttribute()
         {
             var guid = Guid.NewGuid();
