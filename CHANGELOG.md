@@ -1,3 +1,8 @@
+## 2.2.2
+January 31, 20189
+### Bug fixes
+* fix(eventtagsutils) : don't exclude falsy values ([#132](https://github.com/optimizely/csharp-sdk/pull/132))
+
 ## 2.2.1
 November 1, 2018
 ### Bug fixes
