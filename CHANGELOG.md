@@ -1,7 +1,7 @@
 ## 2.2.2
 January 31, 2019
 ### Bug fixes
-* fix(eventtagsutils) : don't exclude falsy values ([#132](https://github.com/optimizely/csharp-sdk/pull/132))
+* fix(eventtagsutils) : fixes bug where values of 0 and 1 are excluded from the event value in the conversion event payload. ([#132](https://github.com/optimizely/csharp-sdk/pull/132))
 
 ## 2.2.1
 November 1, 2018
