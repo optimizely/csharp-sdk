@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2017-2018, Optimizely
+ * Copyright 2017-2019, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -833,6 +833,16 @@ namespace OptimizelySDK.Tests
         public void TestCreateDoesNotThrowWithValidDatafile()
         {
             Assert.DoesNotThrow(() => ProjectConfig.Create(TestData.Datafile, null, null));
+        }
+
+        [Test]
+        public void TestExperimentAudiencesRetrivedFromTypedAudiencesFirstThenFromAudiences()
+        {
+            var typedConfig = ProjectConfig.Create(TestData.TypedAudienceDatafile, null, null);
+            var experiment = typedConfig.GetExperimentFromKey("feat_with_var_test");
+
+            var expectedAudienceIds = new string[] { "3468206642", "3988293898", "3988293899", "3468206646", "3468206647", "3468206644", "3468206643" };
+            Assert.That(expectedAudienceIds, Is.EquivalentTo(experiment.AudienceIds));
         }
     }
 }

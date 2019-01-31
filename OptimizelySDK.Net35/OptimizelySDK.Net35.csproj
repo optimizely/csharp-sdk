@@ -46,6 +46,27 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+	<Compile Include="..\OptimizelySDK\AudienceConditions\AndCondition.cs">
+      <Link>AudienceConditions\AndCondition.cs</Link>
+    </Compile>
+	<Compile Include="..\OptimizelySDK\AudienceConditions\AudienceIdCondition.cs">
+      <Link>AudienceConditions\AudienceIdCondition.cs</Link>
+    </Compile>
+	<Compile Include="..\OptimizelySDK\AudienceConditions\BaseCondition.cs">
+      <Link>AudienceConditions\BaseCondition.cs</Link>
+    </Compile>
+	<Compile Include="..\OptimizelySDK\AudienceConditions\EmptyCondition.cs">
+      <Link>AudienceConditions\EmptyCondition.cs</Link>
+    </Compile>
+	<Compile Include="..\OptimizelySDK\AudienceConditions\ICondition.cs">
+      <Link>AudienceConditions\ICondition.cs</Link>
+    </Compile>
+	<Compile Include="..\OptimizelySDK\AudienceConditions\NotCondition.cs">
+      <Link>AudienceConditions\NotCondition.cs</Link>
+    </Compile>
+	<Compile Include="..\OptimizelySDK\AudienceConditions\OrCondition.cs">
+      <Link>AudienceConditions\OrCondition.cs</Link>
+    </Compile>
     <Compile Include="..\OptimizelySDK\Entity\Attribute.cs">
       <Link>Entity\Attribute.cs</Link>
     </Compile>
@@ -64,7 +85,7 @@
     <Compile Include="..\OptimizelySDK\Entity\Experiment.cs">
       <Link>Entity\Experiment.cs</Link>
     </Compile>
-	<Compile Include="..\OptimizelySDK\Entity\FeatureDecision.cs">
+    <Compile Include="..\OptimizelySDK\Entity\FeatureDecision.cs">
       <Link>Entity\FeatureDecision.cs</Link>
     </Compile>
     <Compile Include="..\OptimizelySDK\Entity\ForcedVariation.cs">
@@ -127,7 +148,7 @@
     <Compile Include="..\OptimizelySDK\Logger\NoOpLogger.cs">
       <Link>Logger\NoOpLogger.cs</Link>
     </Compile>
-	<Compile Include="..\OptimizelySDK\Notifications\NotificationCenter.cs">
+    <Compile Include="..\OptimizelySDK\Notifications\NotificationCenter.cs">
       <Link>Notifications\NotificationCenter.cs</Link>
     </Compile>
     <Compile Include="..\OptimizelySDK\Optimizely.cs">
@@ -135,9 +156,6 @@
     </Compile>
     <Compile Include="..\OptimizelySDK\ProjectConfig.cs">
       <Link>ProjectConfig.cs</Link>
-    </Compile>
-    <Compile Include="..\OptimizelySDK\Utils\ConditionEvaluator.cs">
-      <Link>Utils\ConditionEvaluator.cs</Link>
     </Compile>
     <Compile Include="..\OptimizelySDK\Utils\ConfigParser.cs">
       <Link>Utils\ConfigParser.cs</Link>
@@ -151,8 +169,14 @@
     <Compile Include="..\OptimizelySDK\Utils\Validator.cs">
       <Link>Utils\Validator.cs</Link>
     </Compile>
-	<Compile Include="..\OptimizelySDK\Utils\ControlAttributes.cs">
+    <Compile Include="..\OptimizelySDK\Utils\ControlAttributes.cs">
       <Link>Utils\ControlAttributes.cs</Link>
+    </Compile>
+	<Compile Include="..\OptimizelySDK\Utils\ConditionParser.cs">
+      <Link>Utils\ConditionParser.cs</Link>
+    </Compile>
+	<Compile Include="..\OptimizelySDK\Utils\AttributeMatchTypes.cs">
+      <Link>Utils\AttributeMatchTypes.cs</Link>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="..\OptimizelySDK\Bucketing\Bucketer.cs">
@@ -173,19 +197,19 @@
     <Compile Include="..\OptimizelySDK\Utils\ExperimentUtils.cs">
       <Link>Bucketing\ExperimentUtils</Link>
     </Compile>
-    <Compile Include="..\OptimizelySDK\Bucketing\UserprofileUtil.cs">
+    <Compile Include="..\OptimizelySDK\Bucketing\UserProfileUtil.cs">
       <Link>Bucketing\UserProfileUtil</Link>
     </Compile>
-	<Compile Include="..\OptimizelySDK\Entity\FeatureVariableUsage.cs">
+    <Compile Include="..\OptimizelySDK\Entity\FeatureVariableUsage.cs">
       <Link>Entity\FeatureVariableUsage</Link>
     </Compile>
-	<Compile Include="..\OptimizelySDK\Entity\FeatureFlag.cs">
+    <Compile Include="..\OptimizelySDK\Entity\FeatureFlag.cs">
       <Link>Entity\FeatureFlag</Link>
     </Compile>
-	<Compile Include="..\OptimizelySDK\Entity\FeatureVariable.cs">
+    <Compile Include="..\OptimizelySDK\Entity\FeatureVariable.cs">
       <Link>Entity\FeatureVariable</Link>
     </Compile>
-	<Compile Include="..\OptimizelySDK\Entity\Rollout.cs">
+    <Compile Include="..\OptimizelySDK\Entity\Rollout.cs">
       <Link>Entity\Rollout</Link>
     </Compile>
   </ItemGroup>

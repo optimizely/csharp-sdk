@@ -51,6 +51,7 @@ namespace OptimizelySDK.Tests
         private Variation VariationWithKeyControl;
         private Variation VariationWithKeyVariation;
         private Variation GroupVariation;
+        private Optimizely OptimizelyWithTypedAudiences;
 
         #region Test Life Cycle
         [SetUp]
@@ -77,6 +78,7 @@ namespace OptimizelySDK.Tests
 
             EventDispatcherMock = new Mock<IEventDispatcher>();
             Optimizely = new Optimizely(TestData.Datafile, EventDispatcherMock.Object, LoggerMock.Object, ErrorHandlerMock.Object);
+            OptimizelyWithTypedAudiences = new Optimizely(TestData.TypedAudienceDatafile, EventDispatcherMock.Object, LoggerMock.Object, ErrorHandlerMock.Object);
 
             Helper = new OptimizelyHelper
             {
@@ -1915,6 +1917,45 @@ namespace OptimizelySDK.Tests
         #region Test ValidateStringInputs
 
         [Test]
+        public void TestValidateStringInputsWithValidValues()
+        {
+            var optly = Helper.CreatePrivateOptimizely();
+
+            bool result = (bool)optly.Invoke("ValidateStringInputs", new Dictionary<string, string> { { Optimizely.EXPERIMENT_KEY, "test_experiment" } });
+            Assert.True(result);
+
+            result = (bool)optly.Invoke("ValidateStringInputs", new Dictionary<string, string> { { Optimizely.EVENT_KEY, "buy_now_event" } });
+            Assert.True(result);
+        }
+
+        [Test]
+        public void TestValidateStringInputsWithInvalidValues()
+        {
+            var optly = Helper.CreatePrivateOptimizely();
+
+            bool result = (bool)optly.Invoke("ValidateStringInputs", new Dictionary<string, string> { { Optimizely.EXPERIMENT_KEY, "" } });
+            Assert.False(result);
+
+            result = (bool)optly.Invoke("ValidateStringInputs", new Dictionary<string, string> { { Optimizely.EVENT_KEY, null } });
+            Assert.False(result);
+        }
+
+        [Test]
+        public void TestValidateStringInputsWithUserId()
+        {
+            var optly = Helper.CreatePrivateOptimizely();
+
+            bool result = (bool)optly.Invoke("ValidateStringInputs", new Dictionary<string, string> { { Optimizely.USER_ID, "testUser" } });
+            Assert.True(result);
+
+            result = (bool)optly.Invoke("ValidateStringInputs", new Dictionary<string, string> { { Optimizely.USER_ID, "" } });
+            Assert.True(result);
+
+            result = (bool)optly.Invoke("ValidateStringInputs", new Dictionary<string, string> { { Optimizely.USER_ID, null } });
+            Assert.False(result);
+        }
+
+        [Test]
         public void TestActivateValidateInputValues()
         {
             // Verify that ValidateStringInputs does not log error for valid values.
@@ -1958,47 +1999,235 @@ namespace OptimizelySDK.Tests
 
         #endregion // Test ValidateStringInputs
 
-        #region TestValidateStringInputs
+        #region Test Audience Match Types
 
         [Test]
-        public void TestValidateStringInputsWithValidValues()
+        public void TestActivateWithTypedAudiences()
         {
-            var optly = Helper.CreatePrivateOptimizely();
+            var variation = OptimizelyWithTypedAudiences.Activate("typed_audience_experiment", "user1", new UserAttributes
+            {
+                { "house", "Gryffindor" }
+            });
 
-            bool result = (bool)optly.Invoke("ValidateStringInputs", new Dictionary<string, string> { { Optimizely.EXPERIMENT_KEY, "test_experiment" } });
-            Assert.True(result);
+            Assert.AreEqual("A", variation.Key);
+            EventDispatcherMock.Verify(dispatcher => dispatcher.DispatchEvent(It.IsAny<LogEvent>()), Times.Once);
 
-            result = (bool)optly.Invoke("ValidateStringInputs", new Dictionary<string, string> { { Optimizely.EVENT_KEY, "buy_now_event" } });
+            variation = OptimizelyWithTypedAudiences.Activate("typed_audience_experiment", "user1", new UserAttributes
+            {
+                { "lasers", 45.5 }
+            });
+
+            Assert.AreEqual("A", variation.Key);
+            EventDispatcherMock.Verify(dispatcher => dispatcher.DispatchEvent(It.IsAny<LogEvent>()), Times.Exactly(2));
+        }
+
+        [Test]
+        public void TestActivateExcludeUserFromExperimentWithTypedAudiences()
+        {
+            var variation = OptimizelyWithTypedAudiences.Activate("typed_audience_experiment", "user1", new UserAttributes
+            {
+                { "house", "Hufflepuff" }
+            });
+
+            Assert.Null(variation);
+            EventDispatcherMock.Verify(dispatcher => dispatcher.DispatchEvent(It.IsAny<LogEvent>()), Times.Never);
+        }
+
+        [Test]
+        public void TestTrackWithTypedAudiences()
+        {
+            OptimizelyWithTypedAudiences.Track("item_bought", "user1", new UserAttributes
+            {
+                { "house", "Welcome to Slytherin!" }
+            });
+
+            EventDispatcherMock.Verify(dispatcher => dispatcher.DispatchEvent(It.IsAny<LogEvent>()), Times.Once);
+        }
+
+        [Test]
+        public void TestTrackDoesNotExcludeUserFromExperimentWhenAttributesMismatchWithTypedAudiences()
+        {
+            OptimizelyWithTypedAudiences.Track("item_bought", "user1", new UserAttributes
+            {
+                { "house", "Hufflepuff" }
+            });
+
+            EventDispatcherMock.Verify(dispatcher => dispatcher.DispatchEvent(It.IsAny<LogEvent>()), Times.Once);
+        }
+
+        [Test]
+        public void TestIsFeatureEnabledWithTypedAudiences()
+        {
+            var featureEnabled = OptimizelyWithTypedAudiences.IsFeatureEnabled("feat_no_vars", "user1", new UserAttributes
+            {
+                { "favorite_ice_cream", "chocolate" }
+            });
+
+            Assert.True(featureEnabled);
+
+            featureEnabled = OptimizelyWithTypedAudiences.IsFeatureEnabled("feat_no_vars", "user1", new UserAttributes
+            {
+                { "lasers", 45.5 }
+            });
+
+            Assert.True(featureEnabled);
+        }
+
+        [Test]
+        public void TestIsFeatureEnabledExcludeUserFromExperimentWithTypedAudiences()
+        {
+            var featureEnabled = OptimizelyWithTypedAudiences.IsFeatureEnabled("feat", "user1", new UserAttributes { });
+            Assert.False(featureEnabled);
+        }
+
+        [Test]
+        public void TestGetFeatureVariableStringReturnVariableValueWithTypedAudiences()
+        {
+            var variableValue = OptimizelyWithTypedAudiences.GetFeatureVariableString("feat_with_var", "x", "user1", new UserAttributes
+            {
+                { "lasers", 71 }
+            });
+
+            Assert.AreEqual(variableValue, "xyz");
+
+            variableValue = OptimizelyWithTypedAudiences.GetFeatureVariableString("feat_with_var", "x", "user1", new UserAttributes
+            {
+                { "should_do_it", true }
+            });
+
+            Assert.AreEqual(variableValue, "xyz");
+        }
+
+        [Test]
+        public void TestGetFeatureVariableStringReturnDefaultVariableValueWithTypedAudiences()
+        {
+            var variableValue = OptimizelyWithTypedAudiences.GetFeatureVariableString("feat_with_var", "x", "user1", new UserAttributes
+            {
+                { "lasers", 50 }
+            });
+
+            Assert.AreEqual(variableValue, "x");
+        }
+
+        #endregion // Test Audience Match Types
+
+        #region Test Audience Combinations
+
+        [Test]
+        public void TestActivateIncludesUserInExperimentWithComplexAudienceConditions()
+        {
+            var userAttributes = new UserAttributes
+            {
+                { "house", "Welcome to Slytherin!" },
+                { "lasers", 45.5 }
+            };
+
+            // Should be included via substring match string audience with id '3988293898' and exact match number audience with id '3468206646'
+            var variation = OptimizelyWithTypedAudiences.Activate("audience_combinations_experiment", "user1", userAttributes);
+            Assert.AreEqual("A", variation.Key);
+
+            EventDispatcherMock.Verify(dispatcher => dispatcher.DispatchEvent(It.IsAny<LogEvent>()), Times.Once);
+        }
+
+        [Test]
+        public void TestActivateExcludesUserFromExperimentWithComplexAudienceConditions()
+        {
+            var userAttributes = new UserAttributes
+            {
+                { "house", "Hufflepuff" },
+                { "lasers", 45.5 }
+            };
+
+            // Should be excluded as substring audience with id '3988293898' does not match, so the overall conditions fail.
+            var variation = OptimizelyWithTypedAudiences.Activate("audience_combinations_experiment", "user1", userAttributes);
+            Assert.Null(variation);
+
+            EventDispatcherMock.Verify(dispatcher => dispatcher.DispatchEvent(It.IsAny<LogEvent>()), Times.Never);
+        }
+
+        [Test]
+        public void TestTrackIncludesUserInExperimentWithComplexAudienceConditions()
+        {
+            var userAttributes = new UserAttributes
+            {
+                { "house", "Gryffindor" },
+                { "should_do_it", true }
+            };
+
+            // Should be included via exact match string audience with id '3468206642' and exact match boolean audience with id '3468206646'
+            OptimizelyWithTypedAudiences.Track("user_signed_up", "user1", userAttributes);
+
+            EventDispatcherMock.Verify(dispatcher => dispatcher.DispatchEvent(It.IsAny<LogEvent>()), Times.Once);
+        }
+
+        [Test]
+        public void TestTrackDoesNotExcludesUserFromExperimentWhenAttributesMismatchWithAudienceConditions()
+        {
+            var userAttributes = new UserAttributes
+            {
+                { "house", "Gryffindor" },
+                { "should_do_it", false }
+            };
+
+            // Should be excluded as exact match boolean audience with id '3468206643' does not match so the overall conditions fail.
+            OptimizelyWithTypedAudiences.Track("user_signed_up", "user1", userAttributes);
+
+            EventDispatcherMock.Verify(dispatcher => dispatcher.DispatchEvent(It.IsAny<LogEvent>()), Times.Once);
+        }
+
+        [Test]
+        public void TestIsFeatureEnabledIncludesUserInRolloutWithComplexAudienceConditions()
+        {
+            var userAttributes = new UserAttributes
+            {
+                { "house", "Welcome to Slytherin!" },
+                { "favorite_ice_cream", "walls" }
+            };
+
+            // Should be included via substring match string audience with id '3988293898' and exists audience with id '3988293899'
+            var result = OptimizelyWithTypedAudiences.IsFeatureEnabled("feat2", "user1", userAttributes);
             Assert.True(result);
         }
 
         [Test]
-        public void TestValidateStringInputsWithInvalidValues()
+        public void TestIsFeatureEnabledExcludesUserFromRolloutWithComplexAudienceConditions()
         {
-            var optly = Helper.CreatePrivateOptimizely();
+            var userAttributes = new UserAttributes
+            {
+                { "house", "Ravenclaw" },
+                { "lasers", 45.5 }
+            };
 
-            bool result = (bool)optly.Invoke("ValidateStringInputs", new Dictionary<string, string> { { Optimizely.EXPERIMENT_KEY, "" } });
-            Assert.False(result);
-
-            result = (bool)optly.Invoke("ValidateStringInputs", new Dictionary<string, string> { { Optimizely.EVENT_KEY, null } });
+            // Should be excluded - substring match string audience with id '3988293898' does not match,
+            // and no audience in the other branch of the 'and' matches either
+            var result = OptimizelyWithTypedAudiences.IsFeatureEnabled("audience_combinations_experiment", "user1", userAttributes);
             Assert.False(result);
         }
 
         [Test]
-        public void TestValidateStringInputsWithUserId()
+        public void TestGetFeatureVariableIntegerReturnsVariableValueWithComplexAudienceConditions()
         {
-            var optly = Helper.CreatePrivateOptimizely();
+            var userAttributes = new UserAttributes
+            {
+                { "house", "Gryffindor" },
+                { "lasers", 700 }
+            };
 
-            bool result = (bool)optly.Invoke("ValidateStringInputs", new Dictionary<string, string> { { Optimizely.USER_ID, "testUser" } });
-            Assert.True(result);
-
-            result = (bool)optly.Invoke("ValidateStringInputs", new Dictionary<string, string> { { Optimizely.USER_ID, "" } });
-            Assert.True(result);
-
-            result = (bool)optly.Invoke("ValidateStringInputs", new Dictionary<string, string> { { Optimizely.USER_ID, null } });
-            Assert.False(result);
+            // Should be included via substring match string audience with id '3988293898' and exists audience with id '3988293899'
+            var value = OptimizelyWithTypedAudiences.GetFeatureVariableInteger("feat2_with_var", "z", "user1", userAttributes);
+            Assert.AreEqual(150, value);
         }
 
-        #endregion //TestValidateStringInputs
+        [Test]
+        public void TestGetFeatureVariableIntegerReturnsDefaultValueWithComplexAudienceConditions()
+        {
+            var userAttributes = new UserAttributes {};
+
+            // Should be excluded - no audiences match with no attributes.
+            var value = OptimizelyWithTypedAudiences.GetFeatureVariableInteger("feat2_with_var", "z", "user1", userAttributes);
+            Assert.AreEqual(10, value);
+        }
+
+        #endregion // Test Audience Combinations
     }
 }

@@ -62,10 +62,17 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AudienceConditions\AndCondition.cs" />
+    <Compile Include="AudienceConditions\AudienceIdCondition.cs" />
+    <Compile Include="AudienceConditions\EmptyCondition.cs" />
+    <Compile Include="AudienceConditions\ICondition.cs" />
+    <Compile Include="AudienceConditions\NotCondition.cs" />
+    <Compile Include="AudienceConditions\OrCondition.cs" />
     <Compile Include="Bucketing\Bucketer.cs" />
     <Compile Include="Bucketing\Decision.cs" />
     <Compile Include="Entity\Attribute.cs" />
     <Compile Include="Entity\Audience.cs" />
+    <Compile Include="AudienceConditions\BaseCondition.cs" />
     <Compile Include="Entity\Entity.cs" />
     <Compile Include="Entity\Event.cs" />
     <Compile Include="Entity\EventAttributes.cs" />
@@ -100,7 +107,8 @@
     <Compile Include="Optimizely.cs" />
     <Compile Include="ProjectConfig.cs" />
     <Compile Include="Bucketing\UserProfile.cs" />
-    <Compile Include="Utils\ConditionEvaluator.cs" />
+    <Compile Include="Utils\AttributeMatchTypes.cs" />
+    <Compile Include="Utils\ConditionParser.cs" />
     <Compile Include="Utils\EventTagUtils.cs" />
     <Compile Include="Bucketing\UserProfileUtil.cs" />
     <Compile Include="Utils\ExperimentUtils.cs" />
