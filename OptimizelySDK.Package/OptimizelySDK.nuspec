@@ -12,7 +12,7 @@
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <description>C# SDK for Optimizely X Fullstack</description>
         <releaseNotes>https://github.com/optimizely/csharp-sdk/blob/master/CHANGELOG.md</releaseNotes>
-        <copyright>Copyright 2017-2018</copyright>
+        <copyright>Copyright 2017-2019</copyright>
         <tags>Optimizely</tags>
         <dependencies>
             <group targetFramework=".NETFramework4.5">
