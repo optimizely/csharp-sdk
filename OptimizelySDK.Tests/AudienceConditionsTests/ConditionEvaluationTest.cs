@@ -39,7 +39,7 @@ namespace OptimizelySDK.Tests.AudienceConditionsTests
         private ILogger Logger;
         private Mock<ILogger> LoggerMock;
 
-        [TestFixtureSetUp]
+        [SetUp]
         public void Initialize()
         {
             LoggerMock = new Mock<ILogger>();
@@ -48,15 +48,6 @@ namespace OptimizelySDK.Tests.AudienceConditionsTests
         }
 
         #region Evaluate Tests
-
-        [Test]
-        public void TestEvaluateWithNoMatchType()
-        {
-            Assert.That(LegacyCondition.Evaluate(null, new UserAttributes { { "device_type", "iPhone" } }, Logger), Is.True);
-
-            // Assumes exact evaluator if no match type is proved.
-            Assert.That(LegacyCondition.Evaluate(null, new UserAttributes { { "device_type", "IPhone" } }, Logger), Is.False);
-        }
 
         [Test]
         public void TestEvaluateWithDifferentTypedAttributes()
@@ -73,6 +64,15 @@ namespace OptimizelySDK.Tests.AudienceConditionsTests
             Assert.That(ExactBoolCondition.Evaluate(null, userAttributes, Logger), Is.True);
             Assert.That(GTCondition.Evaluate(null, userAttributes, Logger), Is.True);
             Assert.That(ExactDecimalCondition.Evaluate(null, userAttributes, Logger), Is.True);
+        }
+
+        [Test]
+        public void TestEvaluateWithNoMatchType()
+        {
+            Assert.That(LegacyCondition.Evaluate(null, new UserAttributes { { "device_type", "iPhone" } }, Logger), Is.True);
+
+            // Assumes exact evaluator if no match type is proved.
+            Assert.That(LegacyCondition.Evaluate(null, new UserAttributes { { "device_type", "IPhone" } }, Logger), Is.False);
         }
 
         [Test]
@@ -103,12 +103,31 @@ namespace OptimizelySDK.Tests.AudienceConditionsTests
         }
 
         [Test]
-        public void TestEvaluateReturnsNullAndLogsWarningWhenAttributeIsNotProvidedAndConditionTypeIsNotExists()
+        public void TestEvaluateLogsWarningAndReturnNullWhenAttributeIsNotProvidedAndConditionTypeIsNotExists()
         {
-            BaseCondition condition = new BaseCondition { Name = "is_firefox", Value = false, Match = "substring", Type = "custom_attribute" };
-            Assert.That(condition.Evaluate(null, new UserAttributes { }, Logger), Is.Null);
+            Assert.That(ExactBoolCondition.Evaluate(null, new UserAttributes { }, Logger), Is.Null);
+            Assert.That(SubstrCondition.Evaluate(null, new UserAttributes { }, Logger), Is.Null);
+            Assert.That(LTCondition.Evaluate(null, new UserAttributes { }, Logger), Is.Null);
+            Assert.That(GTCondition.Evaluate(null, new UserAttributes { }, Logger), Is.Null);
 
-            LoggerMock.Verify(l => l.Log(LogLevel.WARN, $@"Audience condition ""{condition}"" evaluated to UNKNOWN because no value was passed for user attribute ""is_firefox"""), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.WARN, @"Audience condition {""type"":""custom_attribute"",""match"":""exact"",""name"":""is_registered_user"",""value"":false} evaluated to UNKNOWN because no value was passed for user attribute ""is_registered_user"""), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.WARN, @"Audience condition {""type"":""custom_attribute"",""match"":""substring"",""name"":""location"",""value"":""USA""} evaluated to UNKNOWN because no value was passed for user attribute ""location"""), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.WARN, @"Audience condition {""type"":""custom_attribute"",""match"":""lt"",""name"":""distance_lt"",""value"":10} evaluated to UNKNOWN because no value was passed for user attribute ""distance_lt"""), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.WARN, @"Audience condition {""type"":""custom_attribute"",""match"":""gt"",""name"":""distance_gt"",""value"":10} evaluated to UNKNOWN because no value was passed for user attribute ""distance_gt"""), Times.Once);
+        }
+
+        [Test]
+        public void TestEvaluateLogsAndReturnNullWhenAttributeValueIsNullAndConditionTypeIsNotExists()
+        {
+            Assert.That(ExactBoolCondition.Evaluate(null, new UserAttributes { { "is_registered_user", null } }, Logger), Is.Null);
+            Assert.That(SubstrCondition.Evaluate(null, new UserAttributes { { "location", null } }, Logger), Is.Null);
+            Assert.That(LTCondition.Evaluate(null, new UserAttributes { { "distance_lt", null } }, Logger), Is.Null);
+            Assert.That(GTCondition.Evaluate(null, new UserAttributes { { "distance_gt", null } }, Logger), Is.Null);
+
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, @"Audience condition {""type"":""custom_attribute"",""match"":""exact"",""name"":""is_registered_user"",""value"":false} evaluated to UNKNOWN because a null value was passed for user attribute ""is_registered_user"""), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, @"Audience condition {""type"":""custom_attribute"",""match"":""substring"",""name"":""location"",""value"":""USA""} evaluated to UNKNOWN because a null value was passed for user attribute ""location"""), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, @"Audience condition {""type"":""custom_attribute"",""match"":""lt"",""name"":""distance_lt"",""value"":10} evaluated to UNKNOWN because a null value was passed for user attribute ""distance_lt"""), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, @"Audience condition {""type"":""custom_attribute"",""match"":""gt"",""name"":""distance_gt"",""value"":10} evaluated to UNKNOWN because a null value was passed for user attribute ""distance_gt"""), Times.Once);
         }
 
         [Test]
@@ -119,14 +138,37 @@ namespace OptimizelySDK.Tests.AudienceConditionsTests
         }
 
         [Test]
-        public void TestEvaluateReturnsNullWhenAttributeTypeIsInvalid()
+        public void TestEvaluateLogsWarningAndReturnNullWhenAttributeTypeIsInvalid()
         {
+            Assert.That(ExactBoolCondition.Evaluate(null, new UserAttributes { { "is_registered_user", 5 } }, Logger), Is.Null);
             Assert.That(SubstrCondition.Evaluate(null, new UserAttributes { { "location", false } }, Logger), Is.Null);
             Assert.That(LTCondition.Evaluate(null, new UserAttributes { { "distance_lt", "invalid" } }, Logger), Is.Null);
-            Assert.That(ExactBoolCondition.Evaluate(null, new UserAttributes { { "is_registered_user", 5 } }, Logger), Is.Null);
-            LoggerMock.Verify(l => l.Log(LogLevel.WARN, $@"Audience condition ""{SubstrCondition}"" evaluated to UNKNOWN because a value of type ""Boolean"" was passed for user attribute ""location"""), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.WARN, $@"Audience condition ""{LTCondition}"" evaluated to UNKNOWN because a value of type ""String"" was passed for user attribute ""distance_lt"""), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.WARN, $@"Audience condition ""{ExactBoolCondition}"" evaluated to UNKNOWN because a value of type ""Int32"" was passed for user attribute ""is_registered_user"""), Times.Once);
+            Assert.That(GTCondition.Evaluate(null, new UserAttributes { { "distance_gt", true } }, Logger), Is.Null);
+
+            LoggerMock.Verify(l => l.Log(LogLevel.WARN, @"Audience condition {""type"":""custom_attribute"",""match"":""exact"",""name"":""is_registered_user"",""value"":false} evaluated to UNKNOWN because a value of type ""Int32"" was passed for user attribute ""is_registered_user"""), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.WARN, @"Audience condition {""type"":""custom_attribute"",""match"":""substring"",""name"":""location"",""value"":""USA""} evaluated to UNKNOWN because a value of type ""Boolean"" was passed for user attribute ""location"""), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.WARN, @"Audience condition {""type"":""custom_attribute"",""match"":""lt"",""name"":""distance_lt"",""value"":10} evaluated to UNKNOWN because a value of type ""String"" was passed for user attribute ""distance_lt"""), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.WARN, @"Audience condition {""type"":""custom_attribute"",""match"":""gt"",""name"":""distance_gt"",""value"":10} evaluated to UNKNOWN because a value of type ""Boolean"" was passed for user attribute ""distance_gt"""), Times.Once);
+        }
+
+        [Test]
+        public void TestEvaluateLogsWarningAndReturnNullWhenConditionTypeIsInvalid()
+        {
+            var invalidCondition = new BaseCondition { Name = "is_registered_user", Value = new string[] { }, Match = "exact", Type = "custom_attribute" };
+            Assert.That(invalidCondition.Evaluate(null, new UserAttributes { { "is_registered_user", true } }, Logger), Is.Null);
+            LoggerMock.Verify(l => l.Log(LogLevel.WARN, @"Audience condition {""type"":""custom_attribute"",""match"":""exact"",""name"":""is_registered_user"",""value"":[]} evaluated to UNKNOWN because the condition value is not supported"), Times.Once);
+
+            invalidCondition = new BaseCondition { Name = "location", Value = 25, Match = "substring", Type = "custom_attribute" };
+            Assert.That(invalidCondition.Evaluate(null, new UserAttributes { { "location", "USA" } }, Logger), Is.Null);
+            LoggerMock.Verify(l => l.Log(LogLevel.WARN, @"Audience condition {""type"":""custom_attribute"",""match"":""substring"",""name"":""location"",""value"":25} evaluated to UNKNOWN because the condition value is not supported"), Times.Once);
+
+            invalidCondition = new BaseCondition { Name = "distance_lt", Value = "invalid", Match = "lt", Type = "custom_attribute" };
+            Assert.That(invalidCondition.Evaluate(null, new UserAttributes { { "distance_lt", 5 } }, Logger), Is.Null);
+            LoggerMock.Verify(l => l.Log(LogLevel.WARN, @"Audience condition {""type"":""custom_attribute"",""match"":""lt"",""name"":""distance_lt"",""value"":""invalid""} evaluated to UNKNOWN because the condition value is not supported"), Times.Once);
+
+            invalidCondition = new BaseCondition { Name = "distance_gt", Value = "invalid", Match = "gt", Type = "custom_attribute" };
+            Assert.That(invalidCondition.Evaluate(null, new UserAttributes { { "distance_gt", "invalid" } }, Logger), Is.Null);
+            LoggerMock.Verify(l => l.Log(LogLevel.WARN, @"Audience condition {""type"":""custom_attribute"",""match"":""gt"",""name"":""distance_gt"",""value"":""invalid""} evaluated to UNKNOWN because the condition value is not supported"), Times.Once);
         }
 
         #endregion // Evaluate Tests

@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using OptimizelySDK.AudienceConditions;
 using OptimizelySDK.Entity;
 using OptimizelySDK.Logger;
@@ -55,11 +57,12 @@ namespace OptimizelySDK.Utils
             if (experiment.AudienceConditionsList != null)
             {
                 expConditions = experiment.AudienceConditionsList;
-                logger.Log(LogLevel.DEBUG, $@"Evaluating audiences for experiment ""{experiment.Key}"": ""{experiment.AudienceConditions}""");
+                logger.Log(LogLevel.DEBUG, $@"Evaluating audiences for experiment ""{experiment.Key}"": {experiment.AudienceConditionsString}");
             }
             else
             {
                 expConditions = experiment.AudienceIdsList;
+                logger.Log(LogLevel.DEBUG, $@"Evaluating audiences for experiment ""{experiment.Key}"": {experiment.AudienceIdsString}");
             }
 
             // If there are no audiences, return true because that means ALL users are included in the experiment.
@@ -68,7 +71,7 @@ namespace OptimizelySDK.Utils
 
             var result = expConditions.Evaluate(config, userAttributes, logger).GetValueOrDefault();
             var resultText = result.ToString().ToUpper();
-            logger.Log(LogLevel.INFO, $@"Audiences for experiment ""{experiment.Key}"" collectively evaluated to ""{resultText}""");
+            logger.Log(LogLevel.INFO, $@"Audiences for experiment ""{experiment.Key}"" collectively evaluated to {resultText}");
             return result;
         }
     }

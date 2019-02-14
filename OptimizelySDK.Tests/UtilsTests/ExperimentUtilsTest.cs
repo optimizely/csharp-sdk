@@ -55,14 +55,14 @@ namespace OptimizelySDK.Tests.UtilsTests
         {
             var experiment = Config.GetExperimentFromKey("feat_with_var_test");
             experiment.AudienceIds = new string[] { "3468206648" };
-            var audienceConditions = Config.GetAudience("3468206648").Conditions;
-
+            
             Assert.True(ExperimentUtils.IsUserInExperiment(Config, experiment, null, Logger));
             Assert.True(ExperimentUtils.IsUserInExperiment(Config, experiment, new UserAttributes { }, Logger));
-            
-            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, $@"Starting to evaluate audience ""3468206648"" with conditions: ""{audienceConditions}"""), Times.Exactly(2));
-            LoggerMock.Verify(l => l.Log(LogLevel.INFO, $@"Audience ""3468206648"" evaluated to ""TRUE"""), Times.Exactly(2));
-            LoggerMock.Verify(l => l.Log(LogLevel.INFO, @"Audiences for experiment ""feat_with_var_test"" collectively evaluated to ""TRUE"""), Times.Exactly(2));
+
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, @"Evaluating audiences for experiment ""feat_with_var_test"": [""3468206648""]"), Times.Exactly(2));
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, @"Starting to evaluate audience ""3468206648"" with conditions: [""not"",{""name"":""input_value"",""type"":""custom_attribute"",""match"":""exists""}]"), Times.Exactly(2));
+            LoggerMock.Verify(l => l.Log(LogLevel.INFO, $@"Audience ""3468206648"" evaluated to TRUE"), Times.Exactly(2));
+            LoggerMock.Verify(l => l.Log(LogLevel.INFO, @"Audiences for experiment ""feat_with_var_test"" collectively evaluated to TRUE"), Times.Exactly(2));
         }
 
         [Test]
@@ -109,12 +109,6 @@ namespace OptimizelySDK.Tests.UtilsTests
         [Test]
         public void TestIsUserInExperimentReturnsFalseIfAnyAudienceInANDConditionDoesNotPass()
         {
-            var audience3468206642Conditions = Config.GetAudience("3468206642").Conditions;
-            var audience3988293899Conditions = Config.GetAudience("3988293899").Conditions;
-            var audience3468206646Conditions = Config.GetAudience("3468206646").Conditions;
-            var audience3468206647Conditions = Config.GetAudience("3468206647").Conditions;
-            var audience3468206644Conditions = Config.GetAudience("3468206644").Conditions;
-            var audience3468206643Conditions = Config.GetAudience("3468206643").Conditions;
             var experiment = Config.GetExperimentFromKey("audience_combinations_experiment");
             var userAttributes = new UserAttributes
             {
@@ -124,21 +118,21 @@ namespace OptimizelySDK.Tests.UtilsTests
 
             Assert.False(ExperimentUtils.IsUserInExperiment(Config, experiment, userAttributes, Logger));
 
-            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, $@"Evaluating audiences for experiment ""audience_combinations_experiment"": ""{experiment.AudienceConditions}"""), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, $@"Starting to evaluate audience ""3468206642"" with conditions: ""{audience3468206642Conditions}"""), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.INFO, @"Audience ""3468206642"" evaluated to ""TRUE"""), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, $@"Starting to evaluate audience ""3988293899"" with conditions: ""{audience3988293899Conditions}"""), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.INFO, @"Audience ""3988293899"" evaluated to ""FALSE"""), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, $@"Starting to evaluate audience ""3468206646"" with conditions: ""{audience3468206646Conditions}"""), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.INFO, @"Audience ""3468206646"" evaluated to ""FALSE"""), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, $@"Starting to evaluate audience ""3468206647"" with conditions: ""{audience3468206647Conditions}"""), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.INFO, @"Audience ""3468206647"" evaluated to ""FALSE"""), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, $@"Starting to evaluate audience ""3468206644"" with conditions: ""{audience3468206644Conditions}"""), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.INFO, @"Audience ""3468206644"" evaluated to ""FALSE"""), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, $@"Starting to evaluate audience ""3468206643"" with conditions: ""{audience3468206643Conditions}"""), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.WARN, @"Audience condition ""{""Type"":""custom_attribute"",""Match"":""exact"",""Name"":""should_do_it"",""Value"":true}"" evaluated to UNKNOWN because no value was passed for user attribute ""should_do_it"""), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.INFO, @"Audience ""3468206643"" evaluated to ""UNKNOWN"""), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.INFO, @"Audiences for experiment ""audience_combinations_experiment"" collectively evaluated to ""FALSE"""), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, @"Evaluating audiences for experiment ""audience_combinations_experiment"": [""and"",[""or"",""3468206642"",""3988293898""],[""or"",""3988293899"",""3468206646"",""3468206647"",""3468206644"",""3468206643""]]"), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, @"Starting to evaluate audience ""3468206642"" with conditions: [""and"", [""or"", [""or"", {""name"": ""house"", ""type"": ""custom_attribute"", ""value"": ""Gryffindor""}]]]"), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.INFO, @"Audience ""3468206642"" evaluated to TRUE"), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, @"Starting to evaluate audience ""3988293899"" with conditions: [""and"",[""or"",[""or"",{""name"":""favorite_ice_cream"",""type"":""custom_attribute"",""match"":""exists""}]]]"), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.INFO, @"Audience ""3988293899"" evaluated to FALSE"), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, @"Starting to evaluate audience ""3468206646"" with conditions: [""and"",[""or"",[""or"",{""name"":""lasers"",""type"":""custom_attribute"",""match"":""exact"",""value"":45.5}]]]"), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.INFO, @"Audience ""3468206646"" evaluated to FALSE"), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, @"Starting to evaluate audience ""3468206647"" with conditions: [""and"",[""or"",[""or"",{""name"":""lasers"",""type"":""custom_attribute"",""match"":""gt"",""value"":70}]]]"), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.INFO, @"Audience ""3468206647"" evaluated to FALSE"), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, @"Starting to evaluate audience ""3468206644"" with conditions: [""and"",[""or"",[""or"",{""name"":""lasers"",""type"":""custom_attribute"",""match"":""lt"",""value"":1.0}]]]"), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.INFO, @"Audience ""3468206644"" evaluated to FALSE"), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, @"Starting to evaluate audience ""3468206643"" with conditions: [""and"",[""or"",[""or"",{""name"":""should_do_it"",""type"":""custom_attribute"",""match"":""exact"",""value"":true}]]]"), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.WARN, @"Audience condition {""type"":""custom_attribute"",""match"":""exact"",""name"":""should_do_it"",""value"":true} evaluated to UNKNOWN because no value was passed for user attribute ""should_do_it"""), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.INFO, @"Audience ""3468206643"" evaluated to UNKNOWN"), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.INFO, @"Audiences for experiment ""audience_combinations_experiment"" collectively evaluated to FALSE"), Times.Once);
         }
 
         [Test]

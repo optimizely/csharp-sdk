@@ -15,12 +15,10 @@
  */
 
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using OptimizelySDK.Entity;
 using OptimizelySDK.Logger;
 using OptimizelySDK.Utils;
 using System;
-using System.Collections.Generic;
 
 namespace OptimizelySDK.AudienceConditions
 {
@@ -34,12 +32,16 @@ namespace OptimizelySDK.AudienceConditions
         /// </summary>
         public const string CUSTOM_ATTRIBUTE_CONDITION_TYPE = "custom_attribute";
 
+        [JsonProperty("type")]
         public string Type { get; set; }
 
+        [JsonProperty("match")]
         public string Match { get; set; }
 
+        [JsonProperty("name")]
         public string Name { get; set; }
 
+        [JsonProperty("value")]
         public object Value { get; set; }
 
         public bool? Evaluate(ProjectConfig config, UserAttributes userAttributes, ILogger logger)
@@ -56,10 +58,10 @@ namespace OptimizelySDK.AudienceConditions
                 return null;
             }
 
-            userAttributes.TryGetValue(Name, out object attributeValue);
-            if (attributeValue == null && Match != AttributeMatchTypes.EXIST)
+            object attributeValue = null;
+            if (userAttributes.TryGetValue(Name, out attributeValue) == false && Match != AttributeMatchTypes.EXIST)
             {
-                logger.Log(LogLevel.WARN, $@"Audience condition ""{this}"" evaluated to UNKNOWN because no value was passed for user attribute ""{Name}""");
+                logger.Log(LogLevel.WARN, $@"Audience condition {this} evaluated to UNKNOWN because no value was passed for user attribute ""{Name}""");
                 return null;
             }
 
@@ -107,17 +109,20 @@ namespace OptimizelySDK.AudienceConditions
         public bool? ExactEvaluator(object attributeValue, ILogger logger)
         {
             if (!IsValueValidForExactConditions(Value))
+            {
+                logger.Log(LogLevel.WARN, $@"Audience condition {this} evaluated to UNKNOWN because the condition value is not supported");
                 return null;
+            }
 
             if (attributeValue == null)
             {
-                logger.Log(LogLevel.WARN, $@"Audience condition ""{this}"" evaluated to UNKNOWN because a null value was passed for user attribute ""{Name}""");
+                logger.Log(LogLevel.DEBUG, $@"Audience condition {this} evaluated to UNKNOWN because a null value was passed for user attribute ""{Name}""");
                 return null;
             }
 
             if (!IsValueValidForExactConditions(attributeValue) || !AreValuesSameType(Value, attributeValue))
             {
-                logger.Log(LogLevel.WARN, $@"Audience condition ""{this}"" evaluated to UNKNOWN because a value of type ""{attributeValue.GetType().Name}"" was passed for user attribute ""{Name}""");
+                logger.Log(LogLevel.WARN, $@"Audience condition {this} evaluated to UNKNOWN because a value of type ""{attributeValue.GetType().Name}"" was passed for user attribute ""{Name}""");
                 return null;
             }
 
@@ -135,17 +140,20 @@ namespace OptimizelySDK.AudienceConditions
         public bool? GreaterThanEvaluator(object attributeValue, ILogger logger)
         {
             if (!Validator.IsValidNumericValue(Value))
+            {
+                logger.Log(LogLevel.WARN, $@"Audience condition {this} evaluated to UNKNOWN because the condition value is not supported");
                 return null;
+            }
 
             if (attributeValue == null)
             {
-                logger.Log(LogLevel.WARN, $@"Audience condition ""{this}"" evaluated to UNKNOWN because a null value was passed for user attribute ""{Name}""");
+                logger.Log(LogLevel.DEBUG, $@"Audience condition {this} evaluated to UNKNOWN because a null value was passed for user attribute ""{Name}""");
                 return null;
             }
 
             if (!Validator.IsValidNumericValue(attributeValue))
             {
-                logger.Log(LogLevel.WARN, $@"Audience condition ""{this}"" evaluated to UNKNOWN because a value of type ""{attributeValue.GetType().Name}"" was passed for user attribute ""{Name}""");
+                logger.Log(LogLevel.WARN, $@"Audience condition {this} evaluated to UNKNOWN because a value of type ""{attributeValue.GetType().Name}"" was passed for user attribute ""{Name}""");
                 return null;
             }
 
@@ -155,17 +163,20 @@ namespace OptimizelySDK.AudienceConditions
         public bool? LessThanEvaluator(object attributeValue, ILogger logger)
         {
             if (!Validator.IsValidNumericValue(Value))
+            {
+                logger.Log(LogLevel.WARN, $@"Audience condition {this} evaluated to UNKNOWN because the condition value is not supported");
                 return null;
+            }
 
             if (attributeValue == null)
             {
-                logger.Log(LogLevel.WARN, $@"Audience condition ""{this}"" evaluated to UNKNOWN because a null value was passed for user attribute ""{Name}""");
+                logger.Log(LogLevel.DEBUG, $@"Audience condition {this} evaluated to UNKNOWN because a null value was passed for user attribute ""{Name}""");
                 return null;
             }
 
             if (!Validator.IsValidNumericValue(attributeValue))
             {
-                logger.Log(LogLevel.WARN, $@"Audience condition ""{this}"" evaluated to UNKNOWN because a value of type ""{attributeValue.GetType().Name}"" was passed for user attribute ""{Name}""");
+                logger.Log(LogLevel.WARN, $@"Audience condition {this} evaluated to UNKNOWN because a value of type ""{attributeValue.GetType().Name}"" was passed for user attribute ""{Name}""");
                 return null;
             }
 
@@ -175,17 +186,20 @@ namespace OptimizelySDK.AudienceConditions
         public bool? SubstringEvaluator(object attributeValue, ILogger logger)
         {
             if (!(Value is string))
+            {
+                logger.Log(LogLevel.WARN, $@"Audience condition {this} evaluated to UNKNOWN because the condition value is not supported");
                 return null;
+            }
 
             if (attributeValue == null)
             {
-                logger.Log(LogLevel.WARN, $@"Audience condition ""{this}"" evaluated to UNKNOWN because a null value was passed for user attribute ""{Name}""");
+                logger.Log(LogLevel.DEBUG, $@"Audience condition {this} evaluated to UNKNOWN because a null value was passed for user attribute ""{Name}""");
                 return null;
             }
 
             if (!(attributeValue is string))
             {
-                logger.Log(LogLevel.WARN, $@"Audience condition ""{this}"" evaluated to UNKNOWN because a value of type ""{attributeValue.GetType().Name}"" was passed for user attribute ""{Name}""");
+                logger.Log(LogLevel.WARN, $@"Audience condition {this} evaluated to UNKNOWN because a value of type ""{attributeValue.GetType().Name}"" was passed for user attribute ""{Name}""");
                 return null;
             }
 
