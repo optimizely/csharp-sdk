@@ -130,7 +130,7 @@ namespace OptimizelySDK.Tests.UtilsTests
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, @"Starting to evaluate audience ""3468206644"" with conditions: [""and"",[""or"",[""or"",{""name"":""lasers"",""type"":""custom_attribute"",""match"":""lt"",""value"":1.0}]]]"), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, @"Audience ""3468206644"" evaluated to FALSE"), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, @"Starting to evaluate audience ""3468206643"" with conditions: [""and"",[""or"",[""or"",{""name"":""should_do_it"",""type"":""custom_attribute"",""match"":""exact"",""value"":true}]]]"), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.WARN, @"Audience condition {""type"":""custom_attribute"",""match"":""exact"",""name"":""should_do_it"",""value"":true} evaluated to UNKNOWN because no value was passed for user attribute ""should_do_it"""), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, @"Audience condition {""type"":""custom_attribute"",""match"":""exact"",""name"":""should_do_it"",""value"":true} evaluated to UNKNOWN because no value was passed for user attribute ""should_do_it"""), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, @"Audience ""3468206643"" evaluated to UNKNOWN"), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, @"Audiences for experiment ""audience_combinations_experiment"" collectively evaluated to FALSE"), Times.Once);
         }

@@ -61,7 +61,7 @@ namespace OptimizelySDK.AudienceConditions
             object attributeValue = null;
             if (userAttributes.TryGetValue(Name, out attributeValue) == false && Match != AttributeMatchTypes.EXIST)
             {
-                logger.Log(LogLevel.WARN, $@"Audience condition {this} evaluated to UNKNOWN because no value was passed for user attribute ""{Name}""");
+                logger.Log(LogLevel.DEBUG, $@"Audience condition {this} evaluated to UNKNOWN because no value was passed for user attribute ""{Name}""");
                 return null;
             }
 
