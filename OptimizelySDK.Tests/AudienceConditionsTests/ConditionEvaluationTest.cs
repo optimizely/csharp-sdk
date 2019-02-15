@@ -19,6 +19,7 @@ using NUnit.Framework;
 using OptimizelySDK.AudienceConditions;
 using OptimizelySDK.Entity;
 using OptimizelySDK.Logger;
+using System;
 
 namespace OptimizelySDK.Tests.AudienceConditionsTests
 {
@@ -71,7 +72,7 @@ namespace OptimizelySDK.Tests.AudienceConditionsTests
         {
             Assert.That(LegacyCondition.Evaluate(null, new UserAttributes { { "device_type", "iPhone" } }, Logger), Is.True);
 
-            // Assumes exact evaluator if no match type is proved.
+            // Assumes exact evaluator if no match type is provided.
             Assert.That(LegacyCondition.Evaluate(null, new UserAttributes { { "device_type", "IPhone" } }, Logger), Is.False);
         }
 
@@ -191,13 +192,23 @@ namespace OptimizelySDK.Tests.AudienceConditionsTests
             Assert.That(ExactBoolCondition.Evaluate(null, new UserAttributes { { "is_registered_user", "abcd" } }, Logger), Is.Null);
             Assert.That(ExactDecimalCondition.Evaluate(null, new UserAttributes { { "pi_value", false } }, Logger), Is.Null);
             Assert.That(ExactIntCondition.Evaluate(null, new UserAttributes { { "lasers_count", "infinity" } }, Logger), Is.Null);
+
+            LoggerMock.Verify(l => l.Log(LogLevel.WARN, @"Audience condition {""type"":""custom_attribute"",""match"":""exact"",""name"":""browser_type"",""value"":""firefox""} evaluated to UNKNOWN because a value of type ""Boolean"" was passed for user attribute ""browser_type"""), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.WARN, @"Audience condition {""type"":""custom_attribute"",""match"":""exact"",""name"":""is_registered_user"",""value"":false} evaluated to UNKNOWN because a value of type ""String"" was passed for user attribute ""is_registered_user"""), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.WARN, @"Audience condition {""type"":""custom_attribute"",""match"":""exact"",""name"":""pi_value"",""value"":3.14} evaluated to UNKNOWN because a value of type ""Boolean"" was passed for user attribute ""pi_value"""), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.WARN, @"Audience condition {""type"":""custom_attribute"",""match"":""exact"",""name"":""lasers_count"",""value"":9000} evaluated to UNKNOWN because a value of type ""String"" was passed for user attribute ""lasers_count"""), Times.Once);
         }
 
         [Test]
-        public void TestExactMatcherReturnsNullWithNumericInfinity()
+        public void TestExactMatcherReturnsNullForOutOfBoundNumericValues()
         {
             Assert.That(ExactIntCondition.Evaluate(null, new UserAttributes { { "lasers_count", double.NegativeInfinity } }, Logger), Is.Null);
+            Assert.That(ExactDecimalCondition.Evaluate(null, new UserAttributes { { "pi_value", Math.Pow(2, 53) + 2 } }, Logger), Is.Null);
             Assert.That(InfinityIntCondition.Evaluate(null, new UserAttributes { { "max_num_value", 15 } }, Logger), Is.Null);
+
+            LoggerMock.Verify(l => l.Log(LogLevel.WARN, @"Audience condition {""type"":""custom_attribute"",""match"":""exact"",""name"":""lasers_count"",""value"":9000} evaluated to UNKNOWN because the number value for user attribute ""lasers_count"" is not in the range [-2^53, +2^53]"), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.WARN, @"Audience condition {""type"":""custom_attribute"",""match"":""exact"",""name"":""pi_value"",""value"":3.14} evaluated to UNKNOWN because the number value for user attribute ""pi_value"" is not in the range [-2^53, +2^53]"), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.WARN, @"Audience condition {""type"":""custom_attribute"",""match"":""exact"",""name"":""max_num_value"",""value"":9223372036854775807} evaluated to UNKNOWN because the condition value is not supported"), Times.Once);
         }
 
         [Test]
@@ -247,7 +258,8 @@ namespace OptimizelySDK.Tests.AudienceConditionsTests
         [Test]
         public void TestSubstringMatcherReturnsNullWhenAttributeValueIsNotAString()
         {
-            Assert.That(SubstrCondition.Evaluate(null, new UserAttributes { { "attr_value", 10.5 } }, Logger), Is.Null);
+            Assert.That(SubstrCondition.Evaluate(null, new UserAttributes { { "location", 10.5 } }, Logger), Is.Null);
+            LoggerMock.Verify(l => l.Log(LogLevel.WARN, @"Audience condition {""type"":""custom_attribute"",""match"":""substring"",""name"":""location"",""value"":""USA""} evaluated to UNKNOWN because a value of type ""Double"" was passed for user attribute ""location"""), Times.Once);
         }
 
         [Test]
@@ -272,12 +284,15 @@ namespace OptimizelySDK.Tests.AudienceConditionsTests
         public void TestGTMatcherReturnsNullWhenAttributeValueIsNotANumericValue()
         {
             Assert.That(GTCondition.Evaluate(null, new UserAttributes { { "distance_gt", "invalid_type" } }, Logger), Is.Null);
+            LoggerMock.Verify(l => l.Log(LogLevel.WARN, @"Audience condition {""type"":""custom_attribute"",""match"":""gt"",""name"":""distance_gt"",""value"":10} evaluated to UNKNOWN because a value of type ""String"" was passed for user attribute ""distance_gt"""), Times.Once);
         }
 
         [Test]
-        public void TestGTMatcherReturnsNullWhenAttributeValueIsInfinity()
+        public void TestGTMatcherReturnsNullWhenAttributeValueIsOutOfBounds()
         {
             Assert.That(GTCondition.Evaluate(null, new UserAttributes { { "distance_gt", double.PositiveInfinity } }, Logger), Is.Null);
+            Assert.That(GTCondition.Evaluate(null, new UserAttributes { { "distance_gt", Math.Pow(2, 53) + 2 } }, Logger), Is.Null);
+            LoggerMock.Verify(l => l.Log(LogLevel.WARN, @"Audience condition {""type"":""custom_attribute"",""match"":""gt"",""name"":""distance_gt"",""value"":10} evaluated to UNKNOWN because the number value for user attribute ""distance_gt"" is not in the range [-2^53, +2^53]"), Times.Exactly(2));
         }
 
         [Test]
@@ -300,13 +315,16 @@ namespace OptimizelySDK.Tests.AudienceConditionsTests
         [Test]
         public void TestLTMatcherReturnsNullWhenAttributeValueIsNotANumericValue()
         {
-            Assert.That(LTCondition.Evaluate(null, new UserAttributes { { "distance_gt", "invalid_type" } }, Logger), Is.Null);
+            Assert.That(LTCondition.Evaluate(null, new UserAttributes { { "distance_lt", "invalid_type" } }, Logger), Is.Null);
+            LoggerMock.Verify(l => l.Log(LogLevel.WARN, @"Audience condition {""type"":""custom_attribute"",""match"":""lt"",""name"":""distance_lt"",""value"":10} evaluated to UNKNOWN because a value of type ""String"" was passed for user attribute ""distance_lt"""), Times.Once);
         }
 
         [Test]
-        public void TestLTMatcherReturnsNullWhenAttributeValueIsInfinity()
+        public void TestLTMatcherReturnsNullWhenAttributeValueIsOutOfBounds()
         {
-            Assert.That(LTCondition.Evaluate(null, new UserAttributes { { "distance_gt", double.NegativeInfinity } }, Logger), Is.Null);
+            Assert.That(LTCondition.Evaluate(null, new UserAttributes { { "distance_lt", double.NegativeInfinity } }, Logger), Is.Null);
+            Assert.That(LTCondition.Evaluate(null, new UserAttributes { { "distance_lt", -Math.Pow(2, 53) - 2 } }, Logger), Is.Null);
+            LoggerMock.Verify(l => l.Log(LogLevel.WARN, @"Audience condition {""type"":""custom_attribute"",""match"":""lt"",""name"":""distance_lt"",""value"":10} evaluated to UNKNOWN because the number value for user attribute ""distance_lt"" is not in the range [-2^53, +2^53]"), Times.Exactly(2));
         }
 
         [Test]

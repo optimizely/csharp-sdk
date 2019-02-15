@@ -14,14 +14,9 @@
  * limitations under the License.
  */
 
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using OptimizelySDK.AudienceConditions;
 using OptimizelySDK.Entity;
 using OptimizelySDK.Logger;
-using System.Collections.Generic;
-using System.Linq;
-
 
 namespace OptimizelySDK.Utils
 {

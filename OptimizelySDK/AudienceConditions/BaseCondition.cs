@@ -108,7 +108,7 @@ namespace OptimizelySDK.AudienceConditions
 
         public bool? ExactEvaluator(object attributeValue, ILogger logger)
         {
-            if (!IsValueValidForExactConditions(Value))
+            if (!IsValueValidForExactConditions(Value) || (Validator.IsNumericType(Value) && !Validator.IsValidNumericValue(Value)))
             {
                 logger.Log(LogLevel.WARN, $@"Audience condition {this} evaluated to UNKNOWN because the condition value is not supported");
                 return null;
@@ -123,6 +123,12 @@ namespace OptimizelySDK.AudienceConditions
             if (!IsValueValidForExactConditions(attributeValue) || !AreValuesSameType(Value, attributeValue))
             {
                 logger.Log(LogLevel.WARN, $@"Audience condition {this} evaluated to UNKNOWN because a value of type ""{attributeValue.GetType().Name}"" was passed for user attribute ""{Name}""");
+                return null;
+            }
+
+            if (Validator.IsNumericType(attributeValue) && !Validator.IsValidNumericValue(attributeValue))
+            {
+                logger.Log(LogLevel.WARN, $@"Audience condition {this} evaluated to UNKNOWN because the number value for user attribute ""{Name}"" is not in the range [-2^53, +2^53]");
                 return null;
             }
 
@@ -151,9 +157,15 @@ namespace OptimizelySDK.AudienceConditions
                 return null;
             }
 
-            if (!Validator.IsValidNumericValue(attributeValue))
+            if (!Validator.IsNumericType(attributeValue))
             {
                 logger.Log(LogLevel.WARN, $@"Audience condition {this} evaluated to UNKNOWN because a value of type ""{attributeValue.GetType().Name}"" was passed for user attribute ""{Name}""");
+                return null;
+            }
+
+            if (!Validator.IsValidNumericValue(attributeValue))
+            {
+                logger.Log(LogLevel.WARN, $@"Audience condition {this} evaluated to UNKNOWN because the number value for user attribute ""{Name}"" is not in the range [-2^53, +2^53]");
                 return null;
             }
 
@@ -174,9 +186,15 @@ namespace OptimizelySDK.AudienceConditions
                 return null;
             }
 
-            if (!Validator.IsValidNumericValue(attributeValue))
+            if (!Validator.IsNumericType(attributeValue))
             {
                 logger.Log(LogLevel.WARN, $@"Audience condition {this} evaluated to UNKNOWN because a value of type ""{attributeValue.GetType().Name}"" was passed for user attribute ""{Name}""");
+                return null;
+            }
+
+            if (!Validator.IsValidNumericValue(attributeValue))
+            {
+                logger.Log(LogLevel.WARN, $@"Audience condition {this} evaluated to UNKNOWN because the number value for user attribute ""{Name}"" is not in the range [-2^53, +2^53]");
                 return null;
             }
 
@@ -214,7 +232,7 @@ namespace OptimizelySDK.AudienceConditions
         /// <returns>true if the type of value is valid for exact conditions, false otherwise.</returns>
         public bool IsValueValidForExactConditions(object value)
         {
-            return value is string || value is bool || Validator.IsValidNumericValue(value);
+            return value is string || value is bool || Validator.IsNumericType(value);
         }
 
         /// <summary>
