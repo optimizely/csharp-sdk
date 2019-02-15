@@ -172,10 +172,13 @@
     <Compile Include="..\OptimizelySDK\Utils\ControlAttributes.cs">
       <Link>Utils\ControlAttributes.cs</Link>
     </Compile>
-	<Compile Include="..\OptimizelySDK\Utils\ConditionParser.cs">
+	  <Compile Include="..\OptimizelySDK\Utils\ExceptionExtensions.cs">
+      <Link>Utils\ExceptionExtensions.cs</Link>
+    </Compile>
+	  <Compile Include="..\OptimizelySDK\Utils\ConditionParser.cs">
       <Link>Utils\ConditionParser.cs</Link>
     </Compile>
-	<Compile Include="..\OptimizelySDK\Utils\AttributeMatchTypes.cs">
+	  <Compile Include="..\OptimizelySDK\Utils\AttributeMatchTypes.cs">
       <Link>Utils\AttributeMatchTypes.cs</Link>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
