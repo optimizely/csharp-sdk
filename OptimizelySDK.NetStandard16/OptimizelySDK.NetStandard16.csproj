@@ -9,7 +9,14 @@
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     </PropertyGroup>
     <ItemGroup>
-        <Compile Include="..\OptimizelySDK\Entity\Attribute.cs" />
+		<Compile Include="..\OptimizelySDK\AudienceConditions\AndCondition.cs" />
+		<Compile Include="..\OptimizelySDK\AudienceConditions\AudienceIdCondition.cs" />
+		<Compile Include="..\OptimizelySDK\AudienceConditions\BaseCondition.cs" />
+		<Compile Include="..\OptimizelySDK\AudienceConditions\EmptyCondition.cs" />
+		<Compile Include="..\OptimizelySDK\AudienceConditions\ICondition.cs" />
+		<Compile Include="..\OptimizelySDK\AudienceConditions\NotCondition.cs" />
+		<Compile Include="..\OptimizelySDK\AudienceConditions\OrCondition.cs" />
+		<Compile Include="..\OptimizelySDK\Entity\Attribute.cs" />
         <Compile Include="..\OptimizelySDK\Entity\Audience.cs" />
         <Compile Include="..\OptimizelySDK\Entity\Entity.cs" />
         <Compile Include="..\OptimizelySDK\Entity\Event.cs" />
@@ -44,22 +51,21 @@
 		<Compile Include="..\OptimizelySDK\Notifications\NotificationCenter.cs" />
         <Compile Include="..\OptimizelySDK\Optimizely.cs" />
         <Compile Include="..\OptimizelySDK\ProjectConfig.cs" />
-        <Compile Include="..\OptimizelySDK\Utils\ConditionEvaluator.cs" />
         <Compile Include="..\OptimizelySDK\Utils\EventTagUtils.cs" />
         <Compile Include="..\OptimizelySDK\Utils\Validator.cs" />
         <Compile Include="..\OptimizelySDK\Utils\ConfigParser.cs" />
         <Compile Include="..\OptimizelySDK\Utils\Schema.cs" />
-		<Compile Include="..\OptimizelySDK\Utils\ControlAttributes.cs" />
-		<Compile Include="..\OptimizelySDK\Utils\ExceptionExtensions.cs" />
-
+    		<Compile Include="..\OptimizelySDK\Utils\ControlAttributes.cs" />
+		    <Compile Include="..\OptimizelySDK\Utils\ExceptionExtensions.cs" />
+    		<Compile Include="..\OptimizelySDK\Utils\ExperimentUtils.cs" />
+		    <Compile Include="..\OptimizelySDK\Utils\ConditionParser.cs" />
+    		<Compile Include="..\OptimizelySDK\Utils\AttributeMatchTypes.cs" />
         <Compile Include="..\OptimizelySDK\Bucketing\Bucketer.cs" />
         <Compile Include="..\OptimizelySDK\Bucketing\Decision.cs" />
         <Compile Include="..\OptimizelySDK\Bucketing\DecisionService.cs" />
         <Compile Include="..\OptimizelySDK\Bucketing\UserProfile.cs" />
         <Compile Include="..\OptimizelySDK\Bucketing\UserProfileService.cs" />
         <Compile Include="..\OptimizelySDK\Bucketing\UserProfileUtil.cs" />
-		<Compile Include="..\OptimizelySDK\Utils\ExperimentUtils.cs" />
-        
     </ItemGroup>
     <ItemGroup>
         <EmbeddedResource Include="..\OptimizelySDK\Utils\schema.json">

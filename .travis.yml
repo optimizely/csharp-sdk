@@ -1,11 +1,56 @@
 language: csharp
+dist: xenial
 mono:
-- 5.2.0
+  - 5.2.0
+# needed to make travis run the unit tests
+  - 5.18.0
 solution: "./OptimizelySDK.Travis.sln"
 install:
   - nuget restore ./OptimizelySDK.Travis.sln
   - nuget install ./OptimizelySDK.Tests/packages.config -OutputDirectory ./packages
   - nuget install NUnit.Runners -Version 2.6.4 -OutputDirectory ./testrunner
 script:
-  - xbuild /p:Configuration=Release ./OptimizelySDK.Travis.sln
-  - mono ./testrunner/NUnit.Runners.2.6.4/tools/nunit-console.exe ./OptimizelySDK.Tests/bin/Release/OptimizelySDK.Tests.dll 
+  - xbuild /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=$TRAVIS_BUILD_DIR/keypair.snk /p:Configuration=Release ./OptimizelySDK.Travis.sln
+  - mono ./testrunner/NUnit.Runners.2.6.4/tools/nunit-console.exe ./OptimizelySDK.Tests/bin/Release/OptimizelySDK.Tests.dll
+  # strongname signing from xbuild step needs additional re-signing with sn
+  - find . -path './OptimizelySDK*bin/Release/OptimizelySDK*.dll' -not -regex '.*Tests.*' -print0 | while IFS= read -r -d '' file; do sn -R $file ./keypair.snk; done
+after_success:
+  - pip install --user awscli
+  # upload dll build artifacts to s3 with -unsigned suffix
+  - ([ ${TRAVIS_BRANCH} = "master" ] && [ ${TRAVIS_EVENT_TYPE} = "push" ]) && find . -path './OptimizelySDK*bin/Release/OptimizelySDK*.dll' -not -regex '.*Tests.*' -print0 | while IFS= read -r -d '' file; do (AWS_ACCESS_KEY_ID=$OFTA_KEY AWS_SECRET_ACCESS_KEY=$OFTA_SECRET AWS_DEFAULT_REGION=$OFTA_REGION aws s3 cp $file s3://optly-fs-travisci-artifacts/${TRAVIS_REPO_SLUG}/${TRAVIS_BUILD_NUMBER}/${TRAVIS_JOB_NUMBER}/$(basename $file)-unsigned); done
+
+# Integration tests need to run first to reset the PR build status to pending
+stages:
+  - 'Integration tests'
+  - 'Test'
+
+jobs:
+  include:
+    - stage: 'Integration tests'
+      env: SDK=csharp
+      cache: false
+      language: python
+      before_install: skip
+      install:
+        - "pip install awscli"
+      before_script:
+        - "aws s3 cp s3://optimizely-travisci-artifacts/ci/trigger_fullstack-sdk-compat.sh ci/ && chmod u+x ci/trigger_fullstack-sdk-compat.sh"
+      script:
+        - "ci/trigger_fullstack-sdk-compat.sh"
+      after_success: travis_terminate 0
+    - stage: 'NetStandard16'
+      language: csharp
+      # dotnet only works on trusty https://github.com/travis-ci/travis-ci/issues/5189
+      dist: trusty
+      mono: none
+      dotnet: 2.1.502
+      install:
+        - dotnet restore OptimizelySDK.NetStandard16/OptimizelySDK.NetStandard16.csproj
+      script:
+        # strongname signing is taken care of in build step
+        - dotnet build OptimizelySDK.NetStandard16/OptimizelySDK.NetStandard16.csproj /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=$TRAVIS_BUILD_DIR/keypair.snk
+        # TODO: no dotnet test yet for NetStandard16
+      after_success:
+        - pip install --user awscli
+        # upload dll build artifacts to s3 with -unsigned suffix
+        - ([ ${TRAVIS_BRANCH} = "master" ] && [ ${TRAVIS_EVENT_TYPE} = "push" ]) && (AWS_ACCESS_KEY_ID=$OFTA_KEY AWS_SECRET_ACCESS_KEY=$OFTA_SECRET AWS_DEFAULT_REGION=$OFTA_REGION aws s3 cp ./OptimizelySDK.NetStandard16/bin/Debug/netstandard1.6/OptimizelySDK.NetStandard16.dll s3://optly-fs-travisci-artifacts/${TRAVIS_REPO_SLUG}/${TRAVIS_BUILD_NUMBER}/${TRAVIS_JOB_NUMBER}/OptimizelySDK.NetStandard16.dll-unsigned)

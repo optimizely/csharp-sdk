@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2017, Optimizely
+ * Copyright 2017-2019, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 using System.Collections.Generic;
+using Newtonsoft.Json.Linq;
 using OptimizelySDK.Utils;
+using OptimizelySDK.AudienceConditions;
 
 namespace OptimizelySDK.Entity
 {
@@ -64,10 +66,64 @@ namespace OptimizelySDK.Entity
         /// </summary>
         public string[] AudienceIds { get; set; }
 
+        private ICondition _audienceIdsList = null;
+
+        /// <summary>
+        /// De-serialized audience conditions
+        /// </summary>
+        public ICondition AudienceIdsList
+        {
+            get
+            {
+                if (AudienceIds == null || AudienceIds.Length == 0)
+                    return null;
+                
+                if (_audienceIdsList == null)
+                {
+                    var conditions = new List<ICondition>();
+                    foreach (var audienceId in AudienceIds)
+                        conditions.Add(new AudienceIdCondition() { AudienceId = (string)audienceId });
+
+                    _audienceIdsList = new OrCondition() { Conditions = conditions.ToArray() };
+                }
+                
+                return _audienceIdsList;
+            }
+        }
+
         /// <summary>
         /// Traffic allocation of variations in the experiment
         /// </summary>
         public TrafficAllocation[] TrafficAllocation { get; set; }
+
+        /// <summary>
+        /// Audience Conditions
+        /// </summary>
+        public object AudienceConditions { get; set; }
+
+        private ICondition _audienceConditionsList = null;
+
+        /// <summary>
+        /// De-serialized audience conditions
+        /// </summary>
+        public ICondition AudienceConditionsList
+        {
+            get
+            {
+                if (AudienceConditions == null)
+                    return null;
+
+                if (_audienceConditionsList == null)
+                {
+                    if (AudienceConditions is string)
+                        _audienceConditionsList = ConditionParser.ParseAudienceConditions(JToken.Parse((string)AudienceConditions));
+                    else
+                        _audienceConditionsList = ConditionParser.ParseAudienceConditions((JToken)AudienceConditions);
+                }
+
+                return _audienceConditionsList;
+            }
+        }
 
         bool isGenerateKeyMapCalled = false;
 
@@ -78,7 +134,6 @@ namespace OptimizelySDK.Entity
                 return _VariationKeyToVariationMap;
             }
         }
-        
 
 		private Dictionary<string, Variation> _VariationIdToVariationMap;
 		public Dictionary<string, Variation> VariationIdToVariationMap {

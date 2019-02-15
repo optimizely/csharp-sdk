@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2017-2018, Optimizely
+ * Copyright 2017-2019, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -724,65 +724,6 @@ namespace OptimizelySDK.Tests
         }
         
         [Test]
-        public void TestGetForcedVariationWithInvalidUserID()
-        {
-            var experimentKey = "test_experiment";
-
-            Config.SetForcedVariation(experimentKey, "test_user", "test_variation");
-
-            Assert.Null(Config.GetForcedVariation(experimentKey, null));
-            Assert.Null(Config.GetForcedVariation(experimentKey, ""));
-            Assert.Null(Config.GetForcedVariation(experimentKey, "invalid_user"));
-        }
-
-        [Test]
-        public void TestGetForcedVariationWithInvalidExperimentKey()
-        {
-            var userId = "test_user";
-            var experimentKey = "test_experiment";
-
-            Config.SetForcedVariation(experimentKey, userId, "test_variation");
-
-
-
-            Assert.Null(Config.GetForcedVariation("test_experiment", userId));
-            Assert.Null(Config.GetForcedVariation("", userId));
-            Assert.Null(Config.GetForcedVariation(null, userId));
-        }
-
-        [Test]
-        public void TestSetForcedVariationWithInvalidUserID()
-        {
-            var experimentKey = "test_experiment";
-            var variation = "variation";
-
-            Assert.False(Config.SetForcedVariation(experimentKey, null, variation));
-            Assert.False(Config.SetForcedVariation(experimentKey, "", variation));
-        }
-
-        [Test]
-        public void TestSetForcedVariationWithInvalidExperimentKey()
-        {
-            var userId = "test_user";
-            var variation = "variation";
-
-            Assert.False(Config.SetForcedVariation("test_experiment_not_in_datafile", userId, variation));
-            Assert.False(Config.SetForcedVariation("", userId, variation));
-            Assert.False(Config.SetForcedVariation(null, userId, variation));
-        }
-
-        [Test]
-        public void TestSetForcedVariationWithInvalidVariationKey()
-        {
-            var userId = "test_user";
-            var experimentKey = "test_experiment";
-
-            Assert.False(Config.SetForcedVariation(experimentKey, userId, "variation_not_in_datafile"));
-            Assert.True(Config.SetForcedVariation(experimentKey, userId, ""));
-            Assert.True(Config.SetForcedVariation(experimentKey, userId, null));
-        }
-        
-        [Test]
         public void TestSetForcedVariationMultipleSets()
         {
             Assert.True(Config.SetForcedVariation("test_experiment", "test_user_1", "variation"));
@@ -892,6 +833,16 @@ namespace OptimizelySDK.Tests
         public void TestCreateDoesNotThrowWithValidDatafile()
         {
             Assert.DoesNotThrow(() => ProjectConfig.Create(TestData.Datafile, null, null));
+        }
+
+        [Test]
+        public void TestExperimentAudiencesRetrivedFromTypedAudiencesFirstThenFromAudiences()
+        {
+            var typedConfig = ProjectConfig.Create(TestData.TypedAudienceDatafile, null, null);
+            var experiment = typedConfig.GetExperimentFromKey("feat_with_var_test");
+
+            var expectedAudienceIds = new string[] { "3468206642", "3988293898", "3988293899", "3468206646", "3468206647", "3468206644", "3468206643" };
+            Assert.That(expectedAudienceIds, Is.EquivalentTo(experiment.AudienceIds));
         }
     }
 }
