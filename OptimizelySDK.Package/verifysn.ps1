@@ -18,8 +18,8 @@ if ($PSVersionTable["Platform"] -eq "Unix") {
 # Locate *.nupkg
 ################################################################
 Write-Host "Locate *.nupkg"
-# Good enough for 2.2.2
-$nupkg="./Optimizely.SDK.2.2.2.nupkg"
+# Good enough for 3.0.0
+$nupkg="./Optimizely.SDK.3.0.0.nupkg"
 
 ################################################################
 # Unzipping *.nupkg
