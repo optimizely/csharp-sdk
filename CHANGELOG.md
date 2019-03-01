@@ -1,5 +1,5 @@
 ## 3.0.0
-March 4th, 2019
+March 1st, 2019
 
 The 3.0 release improves event tracking and supports additional audience targeting functionality.
 ### New Features:
