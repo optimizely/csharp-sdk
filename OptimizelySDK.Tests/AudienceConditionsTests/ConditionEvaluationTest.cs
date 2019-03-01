@@ -97,8 +97,8 @@ namespace OptimizelySDK.Tests.AudienceConditionsTests
         [Test]
         public void TestEvaluateWithInvalidMatchProperty()
         {
-            BaseCondition condition = new BaseCondition { Name = "input_value", Value = "Android", Match = "invalid_match", Type = "custom_attribute" };
-            Assert.That(condition.Evaluate(null, new UserAttributes { { "device_type", "iPhone" } }, Logger), Is.Null);
+            BaseCondition condition = new BaseCondition { Name = "device_type", Value = "Android", Match = "invalid_match", Type = "custom_attribute" };
+            Assert.That(condition.Evaluate(null, new UserAttributes { { "device_type", "Android" } }, Logger), Is.Null);
 
             LoggerMock.Verify(l => l.Log(LogLevel.WARN, $@"Audience condition ""{condition}"" uses an unknown match type. You may need to upgrade to a newer release of the Optimizely SDK"), Times.Once);
         }
@@ -157,19 +157,19 @@ namespace OptimizelySDK.Tests.AudienceConditionsTests
         {
             var invalidCondition = new BaseCondition { Name = "is_registered_user", Value = new string[] { }, Match = "exact", Type = "custom_attribute" };
             Assert.That(invalidCondition.Evaluate(null, new UserAttributes { { "is_registered_user", true } }, Logger), Is.Null);
-            LoggerMock.Verify(l => l.Log(LogLevel.WARN, @"Audience condition {""type"":""custom_attribute"",""match"":""exact"",""name"":""is_registered_user"",""value"":[]} evaluated to UNKNOWN because the condition value is not supported"), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.WARN, @"Audience condition {""type"":""custom_attribute"",""match"":""exact"",""name"":""is_registered_user"",""value"":[]} has an unsupported condition value. You may need to upgrade to a newer release of the Optimizely SDK"), Times.Once);
 
             invalidCondition = new BaseCondition { Name = "location", Value = 25, Match = "substring", Type = "custom_attribute" };
             Assert.That(invalidCondition.Evaluate(null, new UserAttributes { { "location", "USA" } }, Logger), Is.Null);
-            LoggerMock.Verify(l => l.Log(LogLevel.WARN, @"Audience condition {""type"":""custom_attribute"",""match"":""substring"",""name"":""location"",""value"":25} evaluated to UNKNOWN because the condition value is not supported"), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.WARN, @"Audience condition {""type"":""custom_attribute"",""match"":""substring"",""name"":""location"",""value"":25} has an unsupported condition value. You may need to upgrade to a newer release of the Optimizely SDK"), Times.Once);
 
             invalidCondition = new BaseCondition { Name = "distance_lt", Value = "invalid", Match = "lt", Type = "custom_attribute" };
             Assert.That(invalidCondition.Evaluate(null, new UserAttributes { { "distance_lt", 5 } }, Logger), Is.Null);
-            LoggerMock.Verify(l => l.Log(LogLevel.WARN, @"Audience condition {""type"":""custom_attribute"",""match"":""lt"",""name"":""distance_lt"",""value"":""invalid""} evaluated to UNKNOWN because the condition value is not supported"), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.WARN, @"Audience condition {""type"":""custom_attribute"",""match"":""lt"",""name"":""distance_lt"",""value"":""invalid""} has an unsupported condition value. You may need to upgrade to a newer release of the Optimizely SDK"), Times.Once);
 
             invalidCondition = new BaseCondition { Name = "distance_gt", Value = "invalid", Match = "gt", Type = "custom_attribute" };
             Assert.That(invalidCondition.Evaluate(null, new UserAttributes { { "distance_gt", "invalid" } }, Logger), Is.Null);
-            LoggerMock.Verify(l => l.Log(LogLevel.WARN, @"Audience condition {""type"":""custom_attribute"",""match"":""gt"",""name"":""distance_gt"",""value"":""invalid""} evaluated to UNKNOWN because the condition value is not supported"), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.WARN, @"Audience condition {""type"":""custom_attribute"",""match"":""gt"",""name"":""distance_gt"",""value"":""invalid""} has an unsupported condition value. You may need to upgrade to a newer release of the Optimizely SDK"), Times.Once);
         }
 
         #endregion // Evaluate Tests
@@ -208,7 +208,7 @@ namespace OptimizelySDK.Tests.AudienceConditionsTests
 
             LoggerMock.Verify(l => l.Log(LogLevel.WARN, @"Audience condition {""type"":""custom_attribute"",""match"":""exact"",""name"":""lasers_count"",""value"":9000} evaluated to UNKNOWN because the number value for user attribute ""lasers_count"" is not in the range [-2^53, +2^53]"), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.WARN, @"Audience condition {""type"":""custom_attribute"",""match"":""exact"",""name"":""pi_value"",""value"":3.14} evaluated to UNKNOWN because the number value for user attribute ""pi_value"" is not in the range [-2^53, +2^53]"), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.WARN, @"Audience condition {""type"":""custom_attribute"",""match"":""exact"",""name"":""max_num_value"",""value"":9223372036854775807} evaluated to UNKNOWN because the condition value is not supported"), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.WARN, @"Audience condition {""type"":""custom_attribute"",""match"":""exact"",""name"":""max_num_value"",""value"":9223372036854775807} has an unsupported condition value. You may need to upgrade to a newer release of the Optimizely SDK"), Times.Once);
         }
 
         [Test]
