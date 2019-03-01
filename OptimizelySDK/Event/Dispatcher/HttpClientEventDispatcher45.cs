@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2017, Optimizely
+ * Copyright 2017, 2019, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 #if !NET35 && !NET40
 using OptimizelySDK.Logger;
+using OptimizelySDK.Utils;
 using System;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -63,7 +64,7 @@ namespace OptimizelySDK.Event.Dispatcher
             }
             catch (Exception ex)
             {
-                Logger.Log(LogLevel.ERROR, string.Format("Error Dispatching Event: {0}", ex.Message));
+                Logger.Log(LogLevel.ERROR, string.Format("Error Dispatching Event: {0}", ex.GetAllMessages()));
             }
         }
 
