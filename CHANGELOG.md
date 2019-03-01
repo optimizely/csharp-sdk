@@ -1,5 +1,5 @@
 ## 3.0.0
-February 28, 2019
+March 4th, 2019
 
 The 3.0 release improves event tracking and supports additional audience targeting functionality.
 ### New Features:
@@ -24,11 +24,11 @@ The 3.0 release improves event tracking and supports additional audience targeti
 ### Breaking Changes:
 * `UserAttributes` objects, which are passed to API methods and returned to notification listeners, can now contain non-string values. More concretely, `UserAttributes` now extends `Dictionary<string, object>` instead of `Dictionary<string, string>`.
 ### Bug Fixes:
-* Experiments and features can no longer activate when a negatively targeted attribute has a missing, null, or malformed value.
+* Experiments and features can no longer activate when a negatively targeted attribute has a missing, null, or malformed value. ([#132](https://github.com/optimizely/csharp-sdk/pull/132))
   * Audience conditions (except for the new `exists` matcher) no longer resolve to `false` when they fail to find an legitimate value for the targeted user attribute. The result remains `null` (unknown). Therefore, an audience that negates such a condition (using the `"not"` operator) can no longer resolve to `true` unless there is an unrelated branch in the condition tree that itself resolves to `true`.
-* `SetForcedVariation` now treats an empty variation key as invalid and does not reset the variation.
+* `SetForcedVariation` now treats an empty variation key as invalid and does not reset the variation. ([#113](https://github.com/optimizely/csharp-sdk/pull/113))
 * All methods now treat an empty user ID as valid.
-* HttpClientEventDispatcher45 now logs full exception ([#112](https://github.com/optimizely/csharp-sdk/pull/112))
+* `HttpClientEventDispatcher45` now logs full exception ([#112](https://github.com/optimizely/csharp-sdk/pull/112))
 * You can now specify `0` or `1` as the `revenue` or `value` for a conversion event when using the `Track` method. Previously, `0` and `1` were withheld, would not appear in your data export, and in the case of `1` would not contribute to the user's total revenue or value.
 
 ## 2.2.2
