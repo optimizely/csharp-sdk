@@ -17,6 +17,7 @@ using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
 using OptimizelySDK.Utils;
 using OptimizelySDK.AudienceConditions;
+using Newtonsoft.Json;
 
 namespace OptimizelySDK.Entity
 {
@@ -91,6 +92,25 @@ namespace OptimizelySDK.Entity
             }
         }
 
+        private string _audienceIdsString = null;
+
+        /// <summary>
+        /// Stringified audience conditions
+        /// </summary>
+        public string AudienceIdsString
+        {
+            get
+            {
+                if (AudienceIds == null)
+                    return null;
+
+                if (_audienceIdsString == null)
+                    _audienceIdsString = JsonConvert.SerializeObject(AudienceIds, Formatting.None);
+
+                return _audienceIdsString;
+            }
+        }
+
         /// <summary>
         /// Traffic allocation of variations in the experiment
         /// </summary>
@@ -122,6 +142,30 @@ namespace OptimizelySDK.Entity
                 }
 
                 return _audienceConditionsList;
+            }
+        }
+
+        private string _audienceConditionsString = null;
+
+        /// <summary>
+        /// Stringified audience conditions
+        /// </summary>
+        public string AudienceConditionsString
+        {
+            get
+            {
+                if (AudienceConditions == null)
+                    return null;
+
+                if (_audienceConditionsString == null)
+                {
+                    if (AudienceConditions is JToken token)
+                        _audienceConditionsString = token.ToString(Formatting.None);
+                    else
+                        _audienceConditionsString = AudienceConditions.ToString();
+                }
+
+                return _audienceConditionsString;
             }
         }
 

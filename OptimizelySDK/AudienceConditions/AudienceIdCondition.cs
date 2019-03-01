@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using OptimizelySDK.Entity;
+using OptimizelySDK.Logger;
 
 namespace OptimizelySDK.AudienceConditions
 {
@@ -25,13 +28,18 @@ namespace OptimizelySDK.AudienceConditions
     {
         public string AudienceId { get; set; }
         
-        public bool? Evaluate(ProjectConfig config, UserAttributes attributes)
+        public bool? Evaluate(ProjectConfig config, UserAttributes attributes, ILogger logger)
         {
-            var audience = config != null ? config.GetAudience(AudienceId) : null;
+            var audience = config?.GetAudience(AudienceId);
             if (audience == null || string.IsNullOrEmpty(audience.Id))
                 return null;
 
-            return audience.ConditionList.Evaluate(config, attributes);
+            logger.Log(LogLevel.DEBUG, $@"Starting to evaluate audience ""{AudienceId}"" with conditions: {audience.ConditionsString}");
+            var result = audience.ConditionList.Evaluate(config, attributes, logger);
+            var resultText = result?.ToString().ToUpper() ?? "UNKNOWN";
+            logger.Log(LogLevel.INFO, $@"Audience ""{AudienceId}"" evaluated to {resultText}");
+
+            return result;
         }
     }
 }

@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
+using Newtonsoft.Json;
 using OptimizelySDK.Entity;
+using OptimizelySDK.Logger;
 using OptimizelySDK.Utils;
 using System;
 
@@ -30,47 +32,44 @@ namespace OptimizelySDK.AudienceConditions
         /// </summary>
         public const string CUSTOM_ATTRIBUTE_CONDITION_TYPE = "custom_attribute";
 
+        [JsonProperty("type")]
         public string Type { get; set; }
 
+        [JsonProperty("match")]
         public string Match { get; set; }
 
+        [JsonProperty("name")]
         public string Name { get; set; }
 
+        [JsonProperty("value")]
         public object Value { get; set; }
 
-        public bool? Evaluate(ProjectConfig config, UserAttributes userAttributes)
+        public bool? Evaluate(ProjectConfig config, UserAttributes userAttributes, ILogger logger)
         {
             if (Type == null || Type != CUSTOM_ATTRIBUTE_CONDITION_TYPE)
+            {
+                logger.Log(LogLevel.WARN, $@"Audience condition ""{this}"" has an unknown condition type. You may need to upgrade to a newer release of the Optimizely SDK");
                 return null;
-
-            if (!IsValidMatchType())
+            }
+            
+            object attributeValue = null;
+            if (userAttributes.TryGetValue(Name, out attributeValue) == false && Match != AttributeMatchTypes.EXIST)
+            {
+                logger.Log(LogLevel.DEBUG, $@"Audience condition {this} evaluated to UNKNOWN because no value was passed for user attribute ""{Name}""");
                 return null;
-
-            userAttributes.TryGetValue(Name, out object attributeValue);
-            if (attributeValue == null && Match != AttributeMatchTypes.EXIST)
-                return null;
+            }
 
             var evaluator = GetEvaluator();
-            return evaluator != null ? evaluator(attributeValue) : null;
-        }
-
-        public bool IsValidMatchType()
-        {
-            switch (Match)
+            if (evaluator == null)
             {
-                case AttributeMatchTypes.EXACT:
-                case AttributeMatchTypes.EXIST:
-                case AttributeMatchTypes.GREATER_THAN:
-                case AttributeMatchTypes.LESS_THAN:
-                case AttributeMatchTypes.SUBSTRING:
-                case null:
-                    return true;
-                default:
-                    return false;
+                logger.Log(LogLevel.WARN, $@"Audience condition ""{this}"" uses an unknown match type. You may need to upgrade to a newer release of the Optimizely SDK");
+                return null;
             }
-        }
 
-        public Func<object, bool?> GetEvaluator()
+            return evaluator(attributeValue, logger);
+        }
+        
+        public Func<object, ILogger, bool?> GetEvaluator()
         {
             switch (Match)
             {
@@ -91,12 +90,31 @@ namespace OptimizelySDK.AudienceConditions
             return null;
         }
 
-        public bool? ExactEvaluator(object attributeValue)
+        public bool? ExactEvaluator(object attributeValue, ILogger logger)
         {
-            if (!IsValueValidForExactConditions(Value) ||
-                !IsValueValidForExactConditions(attributeValue) ||
-                !AreValuesSameType(Value, attributeValue))
+            if (!IsValueTypeValidForExactConditions(Value) || (Validator.IsNumericType(Value) && !Validator.IsValidNumericValue(Value)))
+            {
+                logger.Log(LogLevel.WARN, $@"Audience condition {this} has an unsupported condition value. You may need to upgrade to a newer release of the Optimizely SDK");
                 return null;
+            }
+
+            if (attributeValue == null)
+            {
+                logger.Log(LogLevel.DEBUG, $@"Audience condition {this} evaluated to UNKNOWN because a null value was passed for user attribute ""{Name}""");
+                return null;
+            }
+
+            if (!IsValueTypeValidForExactConditions(attributeValue) || !AreValuesSameType(Value, attributeValue))
+            {
+                logger.Log(LogLevel.WARN, $@"Audience condition {this} evaluated to UNKNOWN because a value of type ""{attributeValue.GetType().Name}"" was passed for user attribute ""{Name}""");
+                return null;
+            }
+
+            if (Validator.IsNumericType(attributeValue) && !Validator.IsValidNumericValue(attributeValue))
+            {
+                logger.Log(LogLevel.WARN, $@"Audience condition {this} evaluated to UNKNOWN because the number value for user attribute ""{Name}"" is not in the range [-2^53, +2^53]");
+                return null;
+            }
 
             if (Validator.IsNumericType(Value) && Validator.IsNumericType(attributeValue))
                 return Convert.ToDouble(Value).Equals(Convert.ToDouble(attributeValue));
@@ -104,36 +122,91 @@ namespace OptimizelySDK.AudienceConditions
             return Value.Equals(attributeValue);
         }
 
-        public bool? ExistEvaluator(object attributeValue)
+        public bool? ExistEvaluator(object attributeValue, ILogger logger)
         {
             return attributeValue != null;
         }
 
-        public bool? GreaterThanEvaluator(object attributeValue)
+        public bool? GreaterThanEvaluator(object attributeValue, ILogger logger)
         {
-            if (Validator.IsValidNumericValue(Value) && Validator.IsValidNumericValue(attributeValue))
-                return Convert.ToDouble(attributeValue) > Convert.ToDouble(Value);
-
-            return null;
-        }
-
-        public bool? LessThanEvaluator(object attributeValue)
-        {
-            if (Validator.IsValidNumericValue(Value) && Validator.IsValidNumericValue(attributeValue))
-                return Convert.ToDouble(attributeValue) < Convert.ToDouble(Value);
-
-            return null;
-        }
-
-        public bool? SubstringEvaluator(object attributeValue)
-        {
-            if (Value is string && attributeValue is string)
+            if (!Validator.IsValidNumericValue(Value))
             {
-                var attrValue = (string)attributeValue;
-                return attrValue != null && attrValue.Contains((string)Value);
+                logger.Log(LogLevel.WARN, $@"Audience condition {this} has an unsupported condition value. You may need to upgrade to a newer release of the Optimizely SDK");
+                return null;
             }
 
-            return null;
+            if (attributeValue == null)
+            {
+                logger.Log(LogLevel.DEBUG, $@"Audience condition {this} evaluated to UNKNOWN because a null value was passed for user attribute ""{Name}""");
+                return null;
+            }
+
+            if (!Validator.IsNumericType(attributeValue))
+            {
+                logger.Log(LogLevel.WARN, $@"Audience condition {this} evaluated to UNKNOWN because a value of type ""{attributeValue.GetType().Name}"" was passed for user attribute ""{Name}""");
+                return null;
+            }
+
+            if (!Validator.IsValidNumericValue(attributeValue))
+            {
+                logger.Log(LogLevel.WARN, $@"Audience condition {this} evaluated to UNKNOWN because the number value for user attribute ""{Name}"" is not in the range [-2^53, +2^53]");
+                return null;
+            }
+
+            return Convert.ToDouble(attributeValue) > Convert.ToDouble(Value);
+        }
+
+        public bool? LessThanEvaluator(object attributeValue, ILogger logger)
+        {
+            if (!Validator.IsValidNumericValue(Value))
+            {
+                logger.Log(LogLevel.WARN, $@"Audience condition {this} has an unsupported condition value. You may need to upgrade to a newer release of the Optimizely SDK");
+                return null;
+            }
+
+            if (attributeValue == null)
+            {
+                logger.Log(LogLevel.DEBUG, $@"Audience condition {this} evaluated to UNKNOWN because a null value was passed for user attribute ""{Name}""");
+                return null;
+            }
+
+            if (!Validator.IsNumericType(attributeValue))
+            {
+                logger.Log(LogLevel.WARN, $@"Audience condition {this} evaluated to UNKNOWN because a value of type ""{attributeValue.GetType().Name}"" was passed for user attribute ""{Name}""");
+                return null;
+            }
+
+            if (!Validator.IsValidNumericValue(attributeValue))
+            {
+                logger.Log(LogLevel.WARN, $@"Audience condition {this} evaluated to UNKNOWN because the number value for user attribute ""{Name}"" is not in the range [-2^53, +2^53]");
+                return null;
+            }
+
+            return Convert.ToDouble(attributeValue) < Convert.ToDouble(Value);
+        }
+
+        public bool? SubstringEvaluator(object attributeValue, ILogger logger)
+        {
+            if (!(Value is string))
+            {
+                logger.Log(LogLevel.WARN, $@"Audience condition {this} has an unsupported condition value. You may need to upgrade to a newer release of the Optimizely SDK");
+                return null;
+            }
+
+            if (attributeValue == null)
+            {
+                logger.Log(LogLevel.DEBUG, $@"Audience condition {this} evaluated to UNKNOWN because a null value was passed for user attribute ""{Name}""");
+                return null;
+            }
+
+            if (!(attributeValue is string))
+            {
+                logger.Log(LogLevel.WARN, $@"Audience condition {this} evaluated to UNKNOWN because a value of type ""{attributeValue.GetType().Name}"" was passed for user attribute ""{Name}""");
+                return null;
+            }
+
+            var attrValue = (string)attributeValue;
+            return attrValue != null && attrValue.Contains((string)Value);
         }
 
         /// <summary>
@@ -141,9 +214,9 @@ namespace OptimizelySDK.AudienceConditions
         /// </summary>
         /// <param name="value">Value to validate</param>
         /// <returns>true if the type of value is valid for exact conditions, false otherwise.</returns>
-        public bool IsValueValidForExactConditions(object value)
+        public bool IsValueTypeValidForExactConditions(object value)
         {
-            return value is string || value is bool || Validator.IsValidNumericValue(value);
+            return value is string || value is bool || Validator.IsNumericType(value);
         }
 
         /// <summary>
@@ -164,6 +237,11 @@ namespace OptimizelySDK.AudienceConditions
                 return true;
 
             return false;
+        }
+
+        public override string ToString()
+        {
+            return JsonConvert.SerializeObject(this, Formatting.None);
         }
     }
 }

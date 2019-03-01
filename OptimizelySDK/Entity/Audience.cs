@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using OptimizelySDK.AudienceConditions;
 using OptimizelySDK.Utils;
@@ -63,6 +64,30 @@ namespace OptimizelySDK.Entity
                 }
 
                 return _decodedConditions;
+            }
+        }
+
+        private string _conditionsString = null;
+
+        /// <summary>
+        /// Stringified audience conditions
+        /// </summary>
+        public string ConditionsString
+        {
+            get
+            {
+                if (Conditions == null)
+                    return null;
+
+                if (_conditionsString == null)
+                {
+                    if (Conditions is JToken token)
+                        _conditionsString = token.ToString(Formatting.None);
+                    else
+                        _conditionsString = Conditions.ToString();
+                }
+
+                return _conditionsString;
             }
         }
     }

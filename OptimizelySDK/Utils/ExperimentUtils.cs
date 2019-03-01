@@ -17,9 +17,6 @@
 using OptimizelySDK.AudienceConditions;
 using OptimizelySDK.Entity;
 using OptimizelySDK.Logger;
-using System.Collections.Generic;
-using System.Linq;
-
 
 namespace OptimizelySDK.Utils
 {
@@ -46,18 +43,31 @@ namespace OptimizelySDK.Utils
         /// <param name="experiment">Experiment Entity representing the experiment</param>
         /// <param name="userAttributes">Attributes of the user. Defaults to empty attributes array if not provided</param>
         /// <returns>true if the user meets audience conditions to be in experiment, false otherwise.</returns>
-        public static bool IsUserInExperiment(ProjectConfig config, Experiment experiment, UserAttributes userAttributes)
+        public static bool IsUserInExperiment(ProjectConfig config, Experiment experiment, UserAttributes userAttributes, ILogger logger)
         {
             if (userAttributes == null)
                 userAttributes = new UserAttributes();
 
-            var expConditions = experiment.AudienceConditionsList ?? experiment.AudienceIdsList;
+            ICondition expConditions = null;
+            if (experiment.AudienceConditionsList != null)
+            {
+                expConditions = experiment.AudienceConditionsList;
+                logger.Log(LogLevel.DEBUG, $@"Evaluating audiences for experiment ""{experiment.Key}"": {experiment.AudienceConditionsString}");
+            }
+            else
+            {
+                expConditions = experiment.AudienceIdsList;
+                logger.Log(LogLevel.DEBUG, $@"Evaluating audiences for experiment ""{experiment.Key}"": {experiment.AudienceIdsString}");
+            }
 
             // If there are no audiences, return true because that means ALL users are included in the experiment.
             if (expConditions == null)
                 return true;
 
-            return expConditions.Evaluate(config, userAttributes).GetValueOrDefault();
+            var result = expConditions.Evaluate(config, userAttributes, logger).GetValueOrDefault();
+            var resultText = result.ToString().ToUpper();
+            logger.Log(LogLevel.INFO, $@"Audiences for experiment ""{experiment.Key}"" collectively evaluated to {resultText}");
+            return result;
         }
     }
 }

@@ -147,7 +147,7 @@ namespace OptimizelySDK
                 return true;
             }
 
-            if (!ExperimentUtils.IsUserInExperiment(Config, experiment, userAttributes))
+            if (!ExperimentUtils.IsUserInExperiment(Config, experiment, userAttributes, Logger))
             {
                 Logger.Log(LogLevel.INFO, string.Format("User \"{0}\" does not meet conditions to be in experiment \"{1}\".", userId, experiment.Key));
                 return false;

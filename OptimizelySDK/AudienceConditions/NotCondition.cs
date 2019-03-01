@@ -15,6 +15,7 @@
  */
 
 using OptimizelySDK.Entity;
+using OptimizelySDK.Logger;
 
 namespace OptimizelySDK.AudienceConditions
 {
@@ -25,9 +26,9 @@ namespace OptimizelySDK.AudienceConditions
     {
         public ICondition Condition { get; set; }
 
-        public bool? Evaluate(ProjectConfig config, UserAttributes attributes)
+        public bool? Evaluate(ProjectConfig config, UserAttributes attributes, ILogger logger)
         {
-            var result = Condition?.Evaluate(config, attributes);
+            var result = Condition?.Evaluate(config, attributes, logger);
             return result == null ? null : !result;
         }
     }
