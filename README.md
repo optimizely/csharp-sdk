@@ -1,4 +1,4 @@
-# Optimizely C# SDK
+# Optimizely C# SDK 
 ![Semantic](https://img.shields.io/badge/sem-ver-lightgrey.svg?style=plastic)
 [![Build Status](https://travis-ci.org/optimizely/csharp-sdk.svg?branch=master)](https://travis-ci.org/optimizely/csharp-sdk)
 [![NuGet](https://img.shields.io/nuget/v/Optimizely.SDK.svg?style=plastic)](https://www.nuget.org/packages/Optimizely.SDK/)
