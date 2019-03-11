@@ -4,6 +4,7 @@
         <TargetFramework>netstandard1.6</TargetFramework>
         <ReleaseVersion>1.2.1</ReleaseVersion>
         <AssemblyOriginatorKeyFile>..\keypair.snk</AssemblyOriginatorKeyFile>
+        <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
@@ -53,6 +54,7 @@
         <Compile Include="..\OptimizelySDK\ProjectConfig.cs" />
         <Compile Include="..\OptimizelySDK\Utils\EventTagUtils.cs" />
         <Compile Include="..\OptimizelySDK\Utils\Validator.cs" />
+        <Compile Include="..\OptimizelySDK\Properties\AssemblyInfo.cs" />
         <Compile Include="..\OptimizelySDK\Utils\ConfigParser.cs" />
         <Compile Include="..\OptimizelySDK\Utils\Schema.cs" />
     		<Compile Include="..\OptimizelySDK\Utils\ControlAttributes.cs" />
