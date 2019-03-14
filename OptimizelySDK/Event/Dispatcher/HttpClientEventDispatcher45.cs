@@ -56,7 +56,7 @@ namespace OptimizelySDK.Event.Dispatcher
                 };
 
                 foreach (var h in logEvent.Headers)
-                    if (h.Key.ToLower() != "content-type")
+                    if (!string.Equals(h.Key, "content-type", StringComparison.OrdinalIgnoreCase))
                         request.Content.Headers.Add(h.Key, h.Value);
 
                 var result = await Client.SendAsync(request);
