@@ -47,20 +47,21 @@ namespace OptimizelySDK.Event.Dispatcher
             try
             {
                 string json = logEvent.GetParamsAsJson();
-                var request = new HttpRequestMessage
+
+                using (var request = new HttpRequestMessage(HttpMethod.Post, new Uri(logEvent.Url)))
                 {
-                    RequestUri = new Uri(logEvent.Url),
-                    Method = HttpMethod.Post,
                     // The Content-Type header applies to the Content, not the Request itself
-                    Content = new StringContent(json, System.Text.Encoding.UTF8, "application/json"),
-                };
+                    request.Content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
 
-                foreach (var h in logEvent.Headers)
-                    if (h.Key.ToLower() != "content-type")
-                        request.Content.Headers.Add(h.Key, h.Value);
+                    foreach (var h in logEvent.Headers)
+                        if (h.Key.ToLower() != "content-type")
+                            request.Content.Headers.Add(h.Key, h.Value);
 
-                var result = await Client.SendAsync(request);
-                result.EnsureSuccessStatusCode();
+                    using (var result = await Client.SendAsync(request))
+                    {
+                        result.EnsureSuccessStatusCode();
+                    }
+                }
             }
             catch (Exception ex)
             {
