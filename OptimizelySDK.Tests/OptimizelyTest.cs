@@ -1836,6 +1836,132 @@ namespace OptimizelySDK.Tests
             NotificationCallbackMock.Verify(nc => nc.TestAnotherTrackCallback(eventKey, TestUserId, userAttributes, eventTags, logEvent), Times.Exactly(1));
         }
 
+        #region Decision Listener
+
+        [Test]
+        public void TestDecisionListenerWhenActivateReturnsVariation()
+        {
+            var experimentKey = "group_experiment_1";
+            var variationKey = "group_exp_1_var_1";
+            var experiment = Config.GetExperimentFromKey(experimentKey);
+            var variation = Config.GetVariationFromKey(experimentKey, variationKey);
+            var userAttributes = new UserAttributes
+            {
+               { "device_type", "iPhone" },
+               { "company", "Optimizely" },
+               { "location", "San Francisco" }
+            };
+
+            // Mocking objects.
+            NotificationCallbackMock.Setup(nc => nc.TestDecisionCallback(It.IsAny<string>(), It.IsAny<string>(),
+                It.IsAny<UserAttributes>(), It.IsAny<Dictionary<string, object>>()));
+            DecisionServiceMock.Setup(ds => ds.GetVariation(experiment, TestUserId, userAttributes)).Returns(variation);
+
+            var optly = Helper.CreatePrivateOptimizely();
+            var optStronglyTyped = optly.GetObject() as Optimizely;
+            
+            optStronglyTyped.NotificationCenter.AddNotification(NotificationCenter.NotificationType.Decision, NotificationCallbackMock.Object.TestDecisionCallback);
+            optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
+            
+            optly.Invoke("Activate", experimentKey, TestUserId, userAttributes);
+            var decisionInfo = new Dictionary<string, object>
+            {
+                { "experimentKey", experimentKey },
+                { "variationKey", variationKey },
+            };
+
+            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionInfoTypes.EXPERIMENT, TestUserId, userAttributes, decisionInfo), Times.Once);
+        }
+
+        [Test]
+        public void TestDecisionListenerWhenActivateReturnsNull()
+        {
+            var experimentKey = "group_experiment_1";
+            var experiment = Config.GetExperimentFromKey(experimentKey);
+            
+            NotificationCallbackMock.Setup(nc => nc.TestDecisionCallback(It.IsAny<string>(), It.IsAny<string>(),
+                It.IsAny<UserAttributes>(), It.IsAny<Dictionary<string, object>>()));
+            DecisionServiceMock.Setup(ds => ds.GetVariation(experiment, TestUserId, null)).Returns<Variation>(null);
+
+            var optly = Helper.CreatePrivateOptimizely();
+            var optStronglyTyped = optly.GetObject() as Optimizely;
+
+            optStronglyTyped.NotificationCenter.AddNotification(NotificationCenter.NotificationType.Decision, NotificationCallbackMock.Object.TestDecisionCallback);
+            optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
+
+            optly.Invoke("Activate", experimentKey, TestUserId, null);
+            var decisionInfo = new Dictionary<string, object>
+            {
+                { "experimentKey", experimentKey },
+                { "variationKey", null },
+            };
+
+            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionInfoTypes.EXPERIMENT, TestUserId, new UserAttributes(), decisionInfo), Times.Once);
+        }
+
+        [Test]
+        public void TestDecisionListenerWhenGetVariationReturnsVariation()
+        {
+            var experimentKey = "group_experiment_1";
+            var variationKey = "group_exp_1_var_1";
+            var experiment = Config.GetExperimentFromKey(experimentKey);
+            var variation = Config.GetVariationFromKey(experimentKey, variationKey);
+            var userAttributes = new UserAttributes
+            {
+               { "device_type", "iPhone" },
+               { "company", "Optimizely" },
+               { "location", "San Francisco" }
+            };
+
+            // Mocking objects.
+            NotificationCallbackMock.Setup(nc => nc.TestDecisionCallback(It.IsAny<string>(), It.IsAny<string>(),
+                It.IsAny<UserAttributes>(), It.IsAny<Dictionary<string, object>>()));
+            DecisionServiceMock.Setup(ds => ds.GetVariation(experiment, TestUserId, userAttributes)).Returns(variation);
+
+            var optly = Helper.CreatePrivateOptimizely();
+            var optStronglyTyped = optly.GetObject() as Optimizely;
+
+            optStronglyTyped.NotificationCenter.AddNotification(NotificationCenter.NotificationType.Decision, NotificationCallbackMock.Object.TestDecisionCallback);
+            optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
+
+            optly.Invoke("GetVariation", experimentKey, TestUserId, userAttributes);
+            var decisionInfo = new Dictionary<string, object>
+            {
+                { "experimentKey", experimentKey },
+                { "variationKey", variationKey },
+            };
+
+            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionInfoTypes.EXPERIMENT, TestUserId, userAttributes, decisionInfo), Times.Once);
+        }
+
+        [Test]
+        public void TestDecisionListenerWhenGetVariationReturnsNull()
+        {
+            var experimentKey = "group_experiment_1";
+            var experiment = Config.GetExperimentFromKey(experimentKey);
+
+            NotificationCallbackMock.Setup(nc => nc.TestDecisionCallback(It.IsAny<string>(), It.IsAny<string>(),
+                It.IsAny<UserAttributes>(), It.IsAny<Dictionary<string, object>>()));
+            DecisionServiceMock.Setup(ds => ds.GetVariation(experiment, TestUserId, null)).Returns<Variation>(null);
+
+            var optly = Helper.CreatePrivateOptimizely();
+            var optStronglyTyped = optly.GetObject() as Optimizely;
+
+            optStronglyTyped.NotificationCenter.AddNotification(NotificationCenter.NotificationType.Decision, NotificationCallbackMock.Object.TestDecisionCallback);
+            optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
+
+            optly.Invoke("GetVariation", experimentKey, TestUserId, null);
+            var decisionInfo = new Dictionary<string, object>
+            {
+                { "experimentKey", experimentKey },
+                { "variationKey", null },
+            };
+
+            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionInfoTypes.EXPERIMENT, TestUserId, new UserAttributes(), decisionInfo), Times.Once);
+        }
+
+        #endregion // Decision Listener
+
         #endregion // Test NotificationCenter
 
         #region Test GetEnabledFeatures
