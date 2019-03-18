@@ -370,21 +370,45 @@ namespace OptimizelySDK
             if (!Validator.IsFeatureFlagValid(Config, featureFlag))
                 return false;
 
+            string experimentKey = null;
+            string variationKey = null;
+            bool featureEnabled = false;
             var decision = DecisionService.GetVariationForFeature(featureFlag, userId, userAttributes);
-            if (decision != null) {
-                if (decision.Source == FeatureDecision.DECISION_SOURCE_EXPERIMENT) {
-                    SendImpressionEvent(decision.Experiment, decision.Variation, userId, userAttributes);
-                } else {
-                    Logger.Log(LogLevel.INFO, $@"The user ""{userId}"" is not being experimented on feature ""{featureKey}"".");
+
+            if (IsValidDecision(decision))
+            {
+                var variation = decision.Variation;
+                featureEnabled = variation.FeatureEnabled.GetValueOrDefault();
+
+                if (decision.Source == FeatureDecision.DECISION_SOURCE_EXPERIMENT)
+                {
+                    experimentKey = decision.Experiment.Key;
+                    variationKey = variation.Key;
+                    SendImpressionEvent(decision.Experiment, variation, userId, userAttributes);
                 }
-                if (decision.Variation.IsFeatureEnabled) {
-                    Logger.Log(LogLevel.INFO, $@"Feature flag ""{featureKey}"" is enabled for user ""{userId}"".");
-                    return true;
+                else
+                {
+                    Logger.Log(LogLevel.INFO, $@"The user ""{userId}"" is not being experimented on feature ""{featureKey}"".");
                 }
             }
 
-            Logger.Log(LogLevel.INFO, $@"Feature flag ""{featureKey}"" is not enabled for user ""{userId}"".");
-            return false;
+            if (featureEnabled == true)
+                Logger.Log(LogLevel.INFO, $@"Feature flag ""{featureKey}"" is enabled for user ""{userId}"".");
+            else
+                Logger.Log(LogLevel.INFO, $@"Feature flag ""{featureKey}"" is not enabled for user ""{userId}"".");
+
+            var decisionInfo = new Dictionary<string, object>
+            {
+                { "featureKey", featureKey },
+                { "featureEnabled", featureEnabled },
+                { "source", decision.Source },
+                { "sourceExperimentKey", experimentKey },
+                { "sourceVariationKey", variationKey },
+            };
+
+            NotificationCenter.SendNotifications(NotificationCenter.NotificationType.Decision, DecisionInfoTypes.FEATURE, userId,
+               userAttributes ?? new UserAttributes(), decisionInfo);
+            return featureEnabled;
         }
 
         /// <summary>
@@ -430,7 +454,7 @@ namespace OptimizelySDK
             var variableValue = featureVariable.DefaultValue;
             var decision = DecisionService.GetVariationForFeature(featureFlag, userId, userAttributes);
 
-            if (decision != null)
+            if (IsValidDecision(decision))
             {
                 var variation = decision.Variation;
                 var featureVariableUsageInstance = variation.GetFeatureVariableUsageFromId(featureVariable.Id);
@@ -639,6 +663,11 @@ namespace OptimizelySDK
             }
 
             return isValid;
+        }
+
+        private bool IsValidDecision(FeatureDecision decision)
+        {
+            return decision != null && decision.Experiment != null && decision.Variation != null;
         }
     }
 }

@@ -1531,8 +1531,9 @@ namespace OptimizelySDK.Tests
         {
             var featureKey = "double_single_variable_feature";
             var featureFlag = Config.GetFeatureFlagFromKey("double_single_variable_feature");
-            
-            DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, null)).Returns<FeatureDecision>(null);
+            var decision = new FeatureDecision(null, null, FeatureDecision.DECISION_SOURCE_ROLLOUT);
+
+            DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, null)).Returns(decision);
 
             var optly = Helper.CreatePrivateOptimizely();
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
@@ -1835,6 +1836,278 @@ namespace OptimizelySDK.Tests
             NotificationCallbackMock.Verify(nc => nc.TestTrackCallback(eventKey, TestUserId, userAttributes, eventTags, logEvent), Times.Exactly(1));
             NotificationCallbackMock.Verify(nc => nc.TestAnotherTrackCallback(eventKey, TestUserId, userAttributes, eventTags, logEvent), Times.Exactly(1));
         }
+
+        #region Decision Listener
+
+        [Test]
+        public void TestDecisionListenerWhenIsFeatureEnabledReturnsTrueForFeatureExperiment()
+        {
+            var featureKey = "double_single_variable_feature";
+            var experiment = Config.GetExperimentFromKey("test_experiment_double_feature");
+            var variation = Config.GetVariationFromKey("test_experiment_double_feature", "control");
+            var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
+            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_EXPERIMENT);
+            
+            DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, null)).Returns(decision);
+            NotificationCallbackMock.Setup(nc => nc.TestDecisionCallback(It.IsAny<string>(), It.IsAny<string>(),
+                It.IsAny<UserAttributes>(), It.IsAny<Dictionary<string, object>>()));
+            DecisionServiceMock.Setup(ds => ds.GetVariation(experiment, TestUserId, null)).Returns(variation);
+
+            var optly = Helper.CreatePrivateOptimizely();
+            var optStronglyTyped = optly.GetObject() as Optimizely;
+
+            optStronglyTyped.NotificationCenter.AddNotification(NotificationCenter.NotificationType.Decision, NotificationCallbackMock.Object.TestDecisionCallback);
+            optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
+
+            bool result = (bool)optly.Invoke("IsFeatureEnabled", featureKey, TestUserId, null);
+            Assert.True(result);
+
+            var decisionInfo = new Dictionary<string, object>
+            {
+                { "featureKey", featureKey },
+                { "featureEnabled", true },
+                { "source", FeatureDecision.DECISION_SOURCE_EXPERIMENT },
+                { "sourceExperimentKey", "test_experiment_double_feature" },
+                { "sourceVariationKey", "control" },
+            };
+
+            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionInfoTypes.FEATURE, TestUserId, new UserAttributes(), decisionInfo), Times.Once);
+        }
+
+        [Test]
+        public void TestDecisionListenerWhenIsFeatureEnabledReturnsFalseForFeatureExperiment()
+        {
+            var featureKey = "double_single_variable_feature";
+            var experiment = Config.GetExperimentFromKey("test_experiment_double_feature");
+            var variation = Config.GetVariationFromKey("test_experiment_double_feature", "variation");
+            var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
+            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_EXPERIMENT);
+            
+            DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, null)).Returns(decision);
+            NotificationCallbackMock.Setup(nc => nc.TestDecisionCallback(It.IsAny<string>(), It.IsAny<string>(),
+                It.IsAny<UserAttributes>(), It.IsAny<Dictionary<string, object>>()));
+            DecisionServiceMock.Setup(ds => ds.GetVariation(experiment, TestUserId, null)).Returns(variation);
+
+            var optly = Helper.CreatePrivateOptimizely();
+            var optStronglyTyped = optly.GetObject() as Optimizely;
+
+            optStronglyTyped.NotificationCenter.AddNotification(NotificationCenter.NotificationType.Decision, NotificationCallbackMock.Object.TestDecisionCallback);
+            optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
+
+            bool result = (bool)optly.Invoke("IsFeatureEnabled", featureKey, TestUserId, null);
+            Assert.False(result);
+
+            var decisionInfo = new Dictionary<string, object>
+            {
+                { "featureKey", featureKey },
+                { "featureEnabled", false },
+                { "source", FeatureDecision.DECISION_SOURCE_EXPERIMENT },
+                { "sourceExperimentKey", "test_experiment_double_feature" },
+                { "sourceVariationKey", "variation" },
+            };
+
+            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionInfoTypes.FEATURE, TestUserId, new UserAttributes(), decisionInfo), Times.Once);
+        }
+
+        [Test]
+        public void TestDecisionListenerWhenIsFeatureEnabledReturnsTrueForRollout()
+        {
+            var featureKey = "boolean_single_variable_feature";
+            var userAttributes = new UserAttributes
+            {
+                { "device_type", "iPhone" },
+                { "company", "Optimizely" }
+            };
+            var experiment = Config.GetRolloutFromId("166660").Experiments[0];
+            var variation = Config.GetVariationFromKey("177770", "177771");
+            var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
+            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT);
+
+            DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, userAttributes)).Returns(decision);
+            NotificationCallbackMock.Setup(nc => nc.TestDecisionCallback(It.IsAny<string>(), It.IsAny<string>(),
+                It.IsAny<UserAttributes>(), It.IsAny<Dictionary<string, object>>()));
+            
+            var optly = Helper.CreatePrivateOptimizely();
+            var optStronglyTyped = optly.GetObject() as Optimizely;
+
+            optStronglyTyped.NotificationCenter.AddNotification(NotificationCenter.NotificationType.Decision, NotificationCallbackMock.Object.TestDecisionCallback);
+            optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
+
+            bool result = (bool)optly.Invoke("IsFeatureEnabled", featureKey, TestUserId, userAttributes);
+            Assert.True(result);
+
+            var decisionInfo = new Dictionary<string, object>
+            {
+                { "featureKey", featureKey },
+                { "featureEnabled", true },
+                { "source", FeatureDecision.DECISION_SOURCE_ROLLOUT },
+                { "sourceExperimentKey", null },
+                { "sourceVariationKey", null },
+            };
+
+            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionInfoTypes.FEATURE, TestUserId, userAttributes, decisionInfo), Times.Once);
+        }
+
+        [Test]
+        public void TestDecisionListenerWhenIsFeatureEnabledReturnsFalseForRollout()
+        {
+            var featureKey = "boolean_single_variable_feature";
+            var userAttributes = new UserAttributes
+            {
+                { "device_type", "iPhone" },
+                { "company", "Optimizely" }
+            };
+            var experiment = Config.GetRolloutFromId("166660").Experiments[3];
+            var variation = Config.GetVariationFromKey("188880", "188881");
+            var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
+            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT);
+
+            DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, userAttributes)).Returns(decision);
+            NotificationCallbackMock.Setup(nc => nc.TestDecisionCallback(It.IsAny<string>(), It.IsAny<string>(),
+                It.IsAny<UserAttributes>(), It.IsAny<Dictionary<string, object>>()));
+
+            var optly = Helper.CreatePrivateOptimizely();
+            var optStronglyTyped = optly.GetObject() as Optimizely;
+
+            optStronglyTyped.NotificationCenter.AddNotification(NotificationCenter.NotificationType.Decision, NotificationCallbackMock.Object.TestDecisionCallback);
+            optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
+
+            bool result = (bool)optly.Invoke("IsFeatureEnabled", featureKey, TestUserId, userAttributes);
+            Assert.False(result);
+
+            var decisionInfo = new Dictionary<string, object>
+            {
+                { "featureKey", featureKey },
+                { "featureEnabled", false },
+                { "source", FeatureDecision.DECISION_SOURCE_ROLLOUT },
+                { "sourceExperimentKey", null },
+                { "sourceVariationKey", null },
+            };
+
+            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionInfoTypes.FEATURE, TestUserId, userAttributes, decisionInfo), Times.Once);
+        }
+
+        [Test]
+        public void TestDecisionListenerWhenIsFeatureEnabledReturnsFalseAndUserIsNotBucketedInFeatureExperimentOrRollout()
+        {
+            var featureKey = "boolean_single_variable_feature";
+            var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
+            var decision = new FeatureDecision(null, null, FeatureDecision.DECISION_SOURCE_ROLLOUT);
+
+            DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, null)).Returns(decision);
+            NotificationCallbackMock.Setup(nc => nc.TestDecisionCallback(It.IsAny<string>(), It.IsAny<string>(),
+                It.IsAny<UserAttributes>(), It.IsAny<Dictionary<string, object>>()));
+
+            var optly = Helper.CreatePrivateOptimizely();
+            var optStronglyTyped = optly.GetObject() as Optimizely;
+
+            optStronglyTyped.NotificationCenter.AddNotification(NotificationCenter.NotificationType.Decision, NotificationCallbackMock.Object.TestDecisionCallback);
+            optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
+
+            bool result = (bool)optly.Invoke("IsFeatureEnabled", featureKey, TestUserId, null);
+            Assert.False(result);
+
+            var decisionInfo = new Dictionary<string, object>
+            {
+                { "featureKey", featureKey },
+                { "featureEnabled", false },
+                { "source", FeatureDecision.DECISION_SOURCE_ROLLOUT },
+                { "sourceExperimentKey", null },
+                { "sourceVariationKey", null },
+            };
+
+            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionInfoTypes.FEATURE, TestUserId, new UserAttributes(), decisionInfo), Times.Once);
+        }
+
+        [Test]
+        public void TestDecisionListenerWithGetEnabledFeaturesSendsNotificationForBothEnabledAndDisabledFeatures()
+        {
+            string[] enabledFeatures =
+            {
+                "double_single_variable_feature",
+                "boolean_single_variable_feature",
+                "string_single_variable_feature"
+            };
+
+            var userAttributes = new UserAttributes
+            {
+                { "device_type", "iPhone" },
+                { "location", "San Francisco" }
+            };
+
+            NotificationCallbackMock.Setup(nc => nc.TestDecisionCallback(It.IsAny<string>(), It.IsAny<string>(),
+                It.IsAny<UserAttributes>(), It.IsAny<Dictionary<string, object>>()));
+            OptimizelyMock.Object.NotificationCenter.AddNotification(NotificationCenter.NotificationType.Decision, NotificationCallbackMock.Object.TestDecisionCallback);
+
+            var actualFeaturesList = OptimizelyMock.Object.GetEnabledFeatures(TestUserId, userAttributes);
+            CollectionAssert.AreEquivalent(enabledFeatures, actualFeaturesList);
+
+            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionInfoTypes.FEATURE, TestUserId, userAttributes, new Dictionary<string, object> {
+                { "featureKey", "boolean_feature" },
+                { "featureEnabled", false },
+                { "source", FeatureDecision.DECISION_SOURCE_EXPERIMENT },
+                { "sourceExperimentKey", "group_experiment_2" },
+                { "sourceVariationKey", "group_exp_2_var_1" },
+            }), Times.Once);
+            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionInfoTypes.FEATURE, TestUserId, userAttributes, new Dictionary<string, object> {
+                { "featureKey", "double_single_variable_feature" },
+                { "featureEnabled", true },
+                { "source", FeatureDecision.DECISION_SOURCE_EXPERIMENT },
+                { "sourceExperimentKey", "test_experiment_double_feature" },
+                { "sourceVariationKey", "control" },
+            }), Times.Once);
+            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionInfoTypes.FEATURE, TestUserId, userAttributes, new Dictionary<string, object> {
+                { "featureKey", "integer_single_variable_feature" },
+                { "featureEnabled", false },
+                { "source", FeatureDecision.DECISION_SOURCE_EXPERIMENT },
+                { "sourceExperimentKey", "test_experiment_integer_feature" },
+                { "sourceVariationKey", "control" },
+            }), Times.Once);
+            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionInfoTypes.FEATURE, TestUserId, userAttributes, new Dictionary<string, object> {
+                { "featureKey", "boolean_single_variable_feature" },
+                { "featureEnabled", true },
+                { "source", FeatureDecision.DECISION_SOURCE_ROLLOUT },
+                { "sourceExperimentKey", null },
+                { "sourceVariationKey", null },
+            }), Times.Once);
+            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionInfoTypes.FEATURE, TestUserId, userAttributes, new Dictionary<string, object> {
+                { "featureKey", "string_single_variable_feature" },
+                { "featureEnabled", true },
+                { "source", FeatureDecision.DECISION_SOURCE_EXPERIMENT },
+                { "sourceExperimentKey", "test_experiment_with_feature_rollout" },
+                { "sourceVariationKey", "variation" },
+            }), Times.Once);
+            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionInfoTypes.FEATURE, TestUserId, userAttributes, new Dictionary<string, object> {
+                { "featureKey", "multi_variate_feature" },
+                { "featureEnabled", false },
+                { "source", FeatureDecision.DECISION_SOURCE_ROLLOUT },
+                { "sourceExperimentKey", null },
+                { "sourceVariationKey", null },
+            }), Times.Once);
+            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionInfoTypes.FEATURE, TestUserId, userAttributes, new Dictionary<string, object> {
+                { "featureKey", "mutex_group_feature" },
+                { "featureEnabled", false },
+                { "source", FeatureDecision.DECISION_SOURCE_EXPERIMENT },
+                { "sourceExperimentKey", "group_experiment_2" },
+                { "sourceVariationKey", "group_exp_2_var_1" },
+            }), Times.Once);
+            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionInfoTypes.FEATURE, TestUserId, userAttributes, new Dictionary<string, object> {
+                { "featureKey", "empty_feature" },
+                { "featureEnabled", false },
+                { "source", FeatureDecision.DECISION_SOURCE_ROLLOUT },
+                { "sourceExperimentKey", null },
+                { "sourceVariationKey", null },
+            }), Times.Once);
+            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionInfoTypes.FEATURE, TestUserId, userAttributes, new Dictionary<string, object> {
+                { "featureKey", "no_rollout_experiment_feature" },
+                { "featureEnabled", false },
+                { "source", FeatureDecision.DECISION_SOURCE_ROLLOUT },
+                { "sourceExperimentKey", null },
+                { "sourceVariationKey", null },
+            }), Times.Once);
+        }
+
+        #endregion // Decision Listener
 
         #endregion // Test NotificationCenter
 

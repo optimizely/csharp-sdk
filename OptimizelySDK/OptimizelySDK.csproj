@@ -109,6 +109,7 @@
     <Compile Include="Bucketing\UserProfile.cs" />
     <Compile Include="Utils\AttributeMatchTypes.cs" />
     <Compile Include="Utils\ConditionParser.cs" />
+    <Compile Include="Utils\DecisionInfoTypes.cs" />
     <Compile Include="Utils\EventTagUtils.cs" />
     <Compile Include="Bucketing\UserProfileUtil.cs" />
     <Compile Include="Utils\ExperimentUtils.cs" />

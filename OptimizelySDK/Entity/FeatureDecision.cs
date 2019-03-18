@@ -21,13 +21,13 @@ namespace OptimizelySDK.Entity
 {
     public class FeatureDecision
     {
-        public const string DECISION_SOURCE_EXPERIMENT = "experiment";
-        public const string DECISION_SOURCE_ROLLOUT = "rollout";
+        public const string DECISION_SOURCE_EXPERIMENT = "EXPERIMENT";
+        public const string DECISION_SOURCE_ROLLOUT = "ROLLOUT";
 
         public Experiment Experiment { get; }
         public Variation Variation { get; }
         public string Source { get; }
-
+        
         public FeatureDecision(Experiment experiment, Variation variation, string source)
         {
             Experiment = experiment;
