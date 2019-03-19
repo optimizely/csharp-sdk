@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2017, Optimizely
+ * Copyright 2017, 2019 Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -235,6 +235,10 @@ namespace OptimizelySDK.Tests.NotificationTests
 
         public virtual void TestAnotherTrackCallback(string eventKey, string userId, UserAttributes userAttributes,
             EventTags eventTags, LogEvent logEvent) {
+        }
+
+        public virtual void TestDecisionCallback(string type, string userId, UserAttributes userAttributes,
+            Dictionary<string, object> decisionInfo) {
         }
     }
     #endregion // Test Notification callbacks class.

@@ -381,11 +381,13 @@ namespace OptimizelySDK.Bucketing
             decision = GetVariationForFeatureRollout(featureFlag, userId, filteredAttributes);
 
             if (decision != null)
+            {
                 Logger.Log(LogLevel.INFO, $"The user \"{userId}\" is bucketed into a rollout for feature flag \"{featureFlag.Key}\".");
-            else
-                Logger.Log(LogLevel.INFO, $"The user \"{userId}\" is not bucketed into a rollout for feature flag \"{featureFlag.Key}\".");
-
-            return decision;
+                return decision;
+            }
+            
+            Logger.Log(LogLevel.INFO, $"The user \"{userId}\" is not bucketed into a rollout for feature flag \"{featureFlag.Key}\".");
+            return new FeatureDecision(null, null, FeatureDecision.DECISION_SOURCE_ROLLOUT);
         }
 
         /// <summary>

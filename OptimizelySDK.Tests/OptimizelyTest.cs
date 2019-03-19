@@ -1836,6 +1836,374 @@ namespace OptimizelySDK.Tests
             NotificationCallbackMock.Verify(nc => nc.TestAnotherTrackCallback(eventKey, TestUserId, userAttributes, eventTags, logEvent), Times.Exactly(1));
         }
 
+        #region Decision Listener
+
+        [Test]
+        public void TestGetFeatureVariableDoubleSendsNotificationWhenUserBuckedIntoFeatureExperimentAndVariationIsToggleOn()
+        {
+            var featureKey = "double_single_variable_feature";
+            var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
+            var variableKey = "double_variable";
+            var expectedValue = 42.42;
+            var experiment = Config.GetExperimentFromKey("test_experiment_double_feature");
+            var variation = Config.GetVariationFromKey("test_experiment_double_feature", "control");
+            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_EXPERIMENT);
+
+            DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, null)).Returns(decision);
+            NotificationCallbackMock.Setup(nc => nc.TestDecisionCallback(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<UserAttributes>(),
+                It.IsAny<Dictionary<string, object>>()));
+
+            var optly = Helper.CreatePrivateOptimizely();
+            var optStronglyTyped = optly.GetObject() as Optimizely;
+
+            optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
+            optStronglyTyped.NotificationCenter.AddNotification(NotificationCenter.NotificationType.Decision, NotificationCallbackMock.Object.TestDecisionCallback);
+
+            var variableValue = (double)optly.Invoke("GetFeatureVariableDouble", featureKey, variableKey, TestUserId, null);
+            Assert.AreEqual(expectedValue, variableValue);
+            var decisionInfo = new Dictionary<string, object>
+            {
+                { "featureKey", featureKey },
+                { "featureEnabled", true },
+                { "variableKey", variableKey },
+                { "variableValue", expectedValue },
+                { "variableType", FeatureVariable.VariableType.DOUBLE },
+                { "source", FeatureDecision.DECISION_SOURCE_EXPERIMENT },
+                { "sourceExperimentKey", "test_experiment_double_feature" },
+                { "sourceVariationKey", "control" },
+            };
+
+            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionInfoTypes.FEATURE_VARIABLE, TestUserId, new UserAttributes(), decisionInfo), Times.Once);
+        }
+
+        [Test]
+        public void TestGetFeatureVariableIntegerSendsNotificationWhenUserBuckedIntoFeatureExperimentAndVariationIsToggleOn()
+        {
+            var featureKey = "integer_single_variable_feature";
+            var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
+            var variableKey = "integer_variable";
+            var expectedValue = 13;
+            var experiment = Config.GetExperimentFromKey("test_experiment_integer_feature");
+            var variation = Config.GetVariationFromKey("test_experiment_integer_feature", "variation");
+            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_EXPERIMENT);
+            var userAttributes = new UserAttributes
+            {
+               { "device_type", "iPhone" },
+               { "company", "Optimizely" },
+               { "location", "San Francisco" }
+            };
+
+            DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, userAttributes)).Returns(decision);
+            NotificationCallbackMock.Setup(nc => nc.TestDecisionCallback(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<UserAttributes>(),
+                It.IsAny<Dictionary<string, object>>()));
+
+            var optly = Helper.CreatePrivateOptimizely();
+            var optStronglyTyped = optly.GetObject() as Optimizely;
+
+            optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
+            optStronglyTyped.NotificationCenter.AddNotification(NotificationCenter.NotificationType.Decision, NotificationCallbackMock.Object.TestDecisionCallback);
+
+            var variableValue = (int)optly.Invoke("GetFeatureVariableInteger", featureKey, variableKey, TestUserId, userAttributes);
+            Assert.AreEqual(expectedValue, variableValue);
+            var decisionInfo = new Dictionary<string, object>
+            {
+                { "featureKey", featureKey },
+                { "featureEnabled", true },
+                { "variableKey", variableKey },
+                { "variableValue", expectedValue },
+                { "variableType", FeatureVariable.VariableType.INTEGER },
+                { "source", FeatureDecision.DECISION_SOURCE_EXPERIMENT },
+                { "sourceExperimentKey", "test_experiment_integer_feature" },
+                { "sourceVariationKey", "variation" },
+            };
+
+            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionInfoTypes.FEATURE_VARIABLE, TestUserId, userAttributes, decisionInfo), Times.Once);
+        }
+
+        [Test]
+        public void TestGetFeatureVariableDoubleSendsNotificationWhenUserBuckedIntoFeatureExperimentAndVariationIsToggleOff()
+        {
+            var featureKey = "double_single_variable_feature";
+            var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
+            var variableKey = "double_variable";
+            var expectedValue = 14.99;
+            var experiment = Config.GetExperimentFromKey("test_experiment_double_feature");
+            var variation = Config.GetVariationFromKey("test_experiment_double_feature", "variation");
+            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_EXPERIMENT);
+
+            DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, null)).Returns(decision);
+            NotificationCallbackMock.Setup(nc => nc.TestDecisionCallback(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<UserAttributes>(),
+                It.IsAny<Dictionary<string, object>>()));
+
+            var optly = Helper.CreatePrivateOptimizely();
+            var optStronglyTyped = optly.GetObject() as Optimizely;
+
+            optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
+            optStronglyTyped.NotificationCenter.AddNotification(NotificationCenter.NotificationType.Decision, NotificationCallbackMock.Object.TestDecisionCallback);
+
+            var variableValue = (double)optly.Invoke("GetFeatureVariableDouble", featureKey, variableKey, TestUserId, null);
+            Assert.AreEqual(expectedValue, variableValue);
+            var decisionInfo = new Dictionary<string, object>
+            {
+                { "featureKey", featureKey },
+                { "featureEnabled", false },
+                { "variableKey", variableKey },
+                { "variableValue", expectedValue },
+                { "variableType", FeatureVariable.VariableType.DOUBLE },
+                { "source", FeatureDecision.DECISION_SOURCE_EXPERIMENT },
+                { "sourceExperimentKey", "test_experiment_double_feature" },
+                { "sourceVariationKey", "variation" },
+            };
+
+            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionInfoTypes.FEATURE_VARIABLE, TestUserId, new UserAttributes(), decisionInfo), Times.Once);
+        }
+
+        [Test]
+        public void TestGetFeatureVariableIntegerSendsNotificationWhenUserBuckedIntoFeatureExperimentAndVariationIsToggleOff()
+        {
+            var featureKey = "integer_single_variable_feature";
+            var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
+            var variableKey = "integer_variable";
+            var expectedValue = 7;
+            var experiment = Config.GetExperimentFromKey("test_experiment_integer_feature");
+            var variation = Config.GetVariationFromKey("test_experiment_integer_feature", "control");
+            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_EXPERIMENT);
+            var userAttributes = new UserAttributes
+            {
+               { "device_type", "iPhone" },
+               { "company", "Optimizely" },
+               { "location", "San Francisco" }
+            };
+
+            DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, userAttributes)).Returns(decision);
+            NotificationCallbackMock.Setup(nc => nc.TestDecisionCallback(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<UserAttributes>(),
+                It.IsAny<Dictionary<string, object>>()));
+
+            var optly = Helper.CreatePrivateOptimizely();
+            var optStronglyTyped = optly.GetObject() as Optimizely;
+
+            optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
+            optStronglyTyped.NotificationCenter.AddNotification(NotificationCenter.NotificationType.Decision, NotificationCallbackMock.Object.TestDecisionCallback);
+
+            var variableValue = (int)optly.Invoke("GetFeatureVariableInteger", featureKey, variableKey, TestUserId, userAttributes);
+            Assert.AreEqual(expectedValue, variableValue);
+            var decisionInfo = new Dictionary<string, object>
+            {
+                { "featureKey", featureKey },
+                { "featureEnabled", false },
+                { "variableKey", variableKey },
+                { "variableValue", expectedValue },
+                { "variableType", FeatureVariable.VariableType.INTEGER },
+                { "source", FeatureDecision.DECISION_SOURCE_EXPERIMENT },
+                { "sourceExperimentKey", "test_experiment_integer_feature" },
+                { "sourceVariationKey", "control" },
+            };
+
+            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionInfoTypes.FEATURE_VARIABLE, TestUserId, userAttributes, decisionInfo), Times.Once);
+        }
+
+        [Test]
+        public void TestGetFeatureVariableBooleanSendsNotificationWhenUserBuckedIntoRolloutAndVariationIsToggleOn()
+        {
+            var featureKey = "boolean_single_variable_feature";
+            var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
+            var variableKey = "boolean_variable";
+            var expectedValue = true;
+            var experiment = Config.GetRolloutFromId("166660").Experiments[0];
+            var variation = Config.GetVariationFromKey(experiment.Key, "177771");
+            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT);
+
+            DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, null)).Returns(decision);
+            NotificationCallbackMock.Setup(nc => nc.TestDecisionCallback(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<UserAttributes>(),
+                It.IsAny<Dictionary<string, object>>()));
+
+            var optly = Helper.CreatePrivateOptimizely();
+            var optStronglyTyped = optly.GetObject() as Optimizely;
+
+            optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
+            optStronglyTyped.NotificationCenter.AddNotification(NotificationCenter.NotificationType.Decision, NotificationCallbackMock.Object.TestDecisionCallback);
+
+            var variableValue = (bool)optly.Invoke("GetFeatureVariableBoolean", featureKey, variableKey, TestUserId, null);
+            Assert.AreEqual(expectedValue, variableValue);
+            var decisionInfo = new Dictionary<string, object>
+            {
+                { "featureKey", featureKey },
+                { "featureEnabled", true },
+                { "variableKey", variableKey },
+                { "variableValue", expectedValue },
+                { "variableType", FeatureVariable.VariableType.BOOLEAN },
+                { "source", FeatureDecision.DECISION_SOURCE_ROLLOUT },
+                { "sourceExperimentKey", null },
+                { "sourceVariationKey", null },
+            };
+
+            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionInfoTypes.FEATURE_VARIABLE, TestUserId, new UserAttributes(), decisionInfo), Times.Once);
+        }
+
+        [Test]
+        public void TestGetFeatureVariableStringSendsNotificationWhenUserBuckedIntoRolloutAndVariationIsToggleOn()
+        {
+            var featureKey = "string_single_variable_feature";
+            var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
+            var variableKey = "string_variable";
+            var expectedValue = "cta_4";
+            var experiment = Config.GetRolloutFromId("166661").Experiments[0];
+            var variation = Config.GetVariationFromKey(experiment.Key, "177775");
+            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT);
+            var userAttributes = new UserAttributes
+            {
+               { "device_type", "iPhone" },
+               { "company", "Optimizely" },
+               { "location", "San Francisco" }
+            };
+
+            DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, userAttributes)).Returns(decision);
+            NotificationCallbackMock.Setup(nc => nc.TestDecisionCallback(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<UserAttributes>(),
+                It.IsAny<Dictionary<string, object>>()));
+
+            var optly = Helper.CreatePrivateOptimizely();
+            var optStronglyTyped = optly.GetObject() as Optimizely;
+
+            optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
+            optStronglyTyped.NotificationCenter.AddNotification(NotificationCenter.NotificationType.Decision, NotificationCallbackMock.Object.TestDecisionCallback);
+
+            var variableValue = (string)optly.Invoke("GetFeatureVariableString", featureKey, variableKey, TestUserId, userAttributes);
+            Assert.AreEqual(expectedValue, variableValue);
+            var decisionInfo = new Dictionary<string, object>
+            {
+                { "featureKey", featureKey },
+                { "featureEnabled", true },
+                { "variableKey", variableKey },
+                { "variableValue", expectedValue },
+                { "variableType", FeatureVariable.VariableType.STRING },
+                { "source", FeatureDecision.DECISION_SOURCE_ROLLOUT },
+                { "sourceExperimentKey", null },
+                { "sourceVariationKey", null },
+            };
+
+            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionInfoTypes.FEATURE_VARIABLE, TestUserId, userAttributes, decisionInfo), Times.Once);
+        }
+
+        [Test]
+        public void TestGetFeatureVariableBooleanSendsNotificationWhenUserBuckedIntoRolloutAndVariationIsToggleOff()
+        {
+            var featureKey = "boolean_single_variable_feature";
+            var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
+            var variableKey = "boolean_variable";
+            var expectedValue = true;
+            var experiment = Config.GetRolloutFromId("166660").Experiments[3];
+            var variation = Config.GetVariationFromKey(experiment.Key, "177782");
+            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT);
+
+            DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, null)).Returns(decision);
+            NotificationCallbackMock.Setup(nc => nc.TestDecisionCallback(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<UserAttributes>(),
+                It.IsAny<Dictionary<string, object>>()));
+
+            var optly = Helper.CreatePrivateOptimizely();
+            var optStronglyTyped = optly.GetObject() as Optimizely;
+
+            optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
+            optStronglyTyped.NotificationCenter.AddNotification(NotificationCenter.NotificationType.Decision, NotificationCallbackMock.Object.TestDecisionCallback);
+
+            var variableValue = (bool)optly.Invoke("GetFeatureVariableBoolean", featureKey, variableKey, TestUserId, null);
+            Assert.AreEqual(expectedValue, variableValue);
+            var decisionInfo = new Dictionary<string, object>
+            {
+                { "featureKey", featureKey },
+                { "featureEnabled", false },
+                { "variableKey", variableKey },
+                { "variableValue", expectedValue },
+                { "variableType", FeatureVariable.VariableType.BOOLEAN },
+                { "source", FeatureDecision.DECISION_SOURCE_ROLLOUT },
+                { "sourceExperimentKey", null },
+                { "sourceVariationKey", null },
+            };
+
+            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionInfoTypes.FEATURE_VARIABLE, TestUserId, new UserAttributes(), decisionInfo), Times.Once);
+        }
+
+        [Test]
+        public void TestGetFeatureVariableStringSendsNotificationWhenUserBuckedIntoRolloutAndVariationIsToggleOff()
+        {
+            var featureKey = "string_single_variable_feature";
+            var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
+            var variableKey = "string_variable";
+            var expectedValue = "wingardium leviosa";
+            var experiment = Config.GetRolloutFromId("166661").Experiments[2];
+            var variation = Config.GetVariationFromKey(experiment.Key, "177784");
+            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT);
+            var userAttributes = new UserAttributes
+            {
+               { "device_type", "iPhone" },
+               { "company", "Optimizely" },
+               { "location", "San Francisco" }
+            };
+
+            DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, userAttributes)).Returns(decision);
+            NotificationCallbackMock.Setup(nc => nc.TestDecisionCallback(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<UserAttributes>(),
+                It.IsAny<Dictionary<string, object>>()));
+
+            var optly = Helper.CreatePrivateOptimizely();
+            var optStronglyTyped = optly.GetObject() as Optimizely;
+
+            optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
+            optStronglyTyped.NotificationCenter.AddNotification(NotificationCenter.NotificationType.Decision, NotificationCallbackMock.Object.TestDecisionCallback);
+
+            var variableValue = (string)optly.Invoke("GetFeatureVariableString", featureKey, variableKey, TestUserId, userAttributes);
+            Assert.AreEqual(expectedValue, variableValue);
+            var decisionInfo = new Dictionary<string, object>
+            {
+                { "featureKey", featureKey },
+                { "featureEnabled", false },
+                { "variableKey", variableKey },
+                { "variableValue", expectedValue },
+                { "variableType", FeatureVariable.VariableType.STRING },
+                { "source", FeatureDecision.DECISION_SOURCE_ROLLOUT },
+                { "sourceExperimentKey", null },
+                { "sourceVariationKey", null },
+            };
+
+            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionInfoTypes.FEATURE_VARIABLE, TestUserId, userAttributes, decisionInfo), Times.Once);
+        }
+
+        [Test]
+        public void TestGetFeatureVariableDoubleSendsNotificationWhenUserNotBuckedIntoBothFeatureExperimentAndRollout()
+        {
+            var featureKey = "double_single_variable_feature";
+            var featureFlag = Config.GetFeatureFlagFromKey("double_single_variable_feature");
+            var variableKey = "double_variable";
+            var expectedValue = 14.99;
+            var decision = new FeatureDecision(null, null, FeatureDecision.DECISION_SOURCE_ROLLOUT);
+
+            DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, null)).Returns(decision);
+            NotificationCallbackMock.Setup(nc => nc.TestDecisionCallback(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<UserAttributes>(),
+                It.IsAny<Dictionary<string, object>>()));
+
+            var optly = Helper.CreatePrivateOptimizely();
+            var optStronglyTyped = optly.GetObject() as Optimizely;
+
+            optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
+            optStronglyTyped.NotificationCenter.AddNotification(NotificationCenter.NotificationType.Decision, NotificationCallbackMock.Object.TestDecisionCallback);
+
+            var variableValue = (double)optly.Invoke("GetFeatureVariableDouble", featureKey, variableKey, TestUserId, null);
+            Assert.AreEqual(expectedValue, variableValue);
+            var decisionInfo = new Dictionary<string, object>
+            {
+                { "featureKey", featureKey },
+                { "featureEnabled", false },
+                { "variableKey", variableKey },
+                { "variableValue", expectedValue },
+                { "variableType", FeatureVariable.VariableType.DOUBLE },
+                { "source", FeatureDecision.DECISION_SOURCE_ROLLOUT },
+                { "sourceExperimentKey", null },
+                { "sourceVariationKey", null },
+            };
+
+            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionInfoTypes.FEATURE_VARIABLE, TestUserId, new UserAttributes(), decisionInfo), Times.Once);
+        }
+
+        #endregion // Decision Listener
+
         #endregion // Test NotificationCenter
 
         #region Test GetEnabledFeatures

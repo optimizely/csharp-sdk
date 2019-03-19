@@ -371,7 +371,7 @@ namespace OptimizelySDK
                 return false;
 
             var decision = DecisionService.GetVariationForFeature(featureFlag, userId, userAttributes);
-            if (decision != null) {
+            if (IsValidDecision(decision)) {
                 if (decision.Source == FeatureDecision.DECISION_SOURCE_EXPERIMENT) {
                     SendImpressionEvent(decision.Experiment, decision.Variation, userId, userAttributes);
                 } else {
@@ -427,15 +427,17 @@ namespace OptimizelySDK
                 return null;
             }
 
+            var featureEnabled = false;
             var variableValue = featureVariable.DefaultValue;
             var decision = DecisionService.GetVariationForFeature(featureFlag, userId, userAttributes);
 
-            if (decision != null)
+            if (IsValidDecision(decision))
             {
                 var variation = decision.Variation;
+                featureEnabled = variation.FeatureEnabled.GetValueOrDefault();
                 var featureVariableUsageInstance = variation.GetFeatureVariableUsageFromId(featureVariable.Id);
 
-                if (featureVariableUsageInstance != null)
+                if (featureEnabled && featureVariableUsageInstance != null)
                 {
                     variableValue = featureVariableUsageInstance.Value;
                     Logger.Log(LogLevel.INFO,
@@ -453,6 +455,28 @@ namespace OptimizelySDK
                     $@"User ""{userId}"" is not in any variation for feature flag ""{featureFlag.Key}"", returning default value ""{variableValue}"".");
             }
 
+            string experimentKey = null;
+            string variationKey = null;
+            if (decision?.Source == FeatureDecision.DECISION_SOURCE_EXPERIMENT)
+            {
+                experimentKey = decision.Experiment.Key;
+                variationKey = decision.Variation.Key;
+            }
+
+            var decisionInfo = new Dictionary<string, object>
+            {
+                { "featureKey", featureKey },
+                { "featureEnabled", featureEnabled },
+                { "variableKey", variableKey },
+                { "variableValue", GetTypeCastedVariableValue(variableValue, variableType) },
+                { "variableType", variableType },
+                { "source", decision?.Source },
+                { "sourceExperimentKey", experimentKey },
+                { "sourceVariationKey", variationKey },
+            };
+
+            NotificationCenter.SendNotifications(NotificationCenter.NotificationType.Decision, DecisionInfoTypes.FEATURE_VARIABLE, userId,
+               userAttributes ?? new UserAttributes(), decisionInfo);
             return variableValue;
         }
 
@@ -471,7 +495,7 @@ namespace OptimizelySDK
             
             if (variableValue != null)
             {
-                if (Boolean.TryParse(variableValue, out bool booleanValue))
+                if (bool.TryParse(variableValue, out bool booleanValue))
                     return booleanValue;
                 else
                     Logger.Log(LogLevel.ERROR, $@"Unable to cast variable value ""{variableValue}"" to type ""{variableType}"".");
@@ -495,7 +519,7 @@ namespace OptimizelySDK
 
             if (variableValue != null)
             {
-                if (Double.TryParse(variableValue, out double doubleValue))
+                if (double.TryParse(variableValue, out double doubleValue))
                     return doubleValue;
                 else
                     Logger.Log(LogLevel.ERROR, $@"Unable to cast variable value ""{variableValue}"" to type ""{variableType}"".");
@@ -519,7 +543,7 @@ namespace OptimizelySDK
 
             if (variableValue != null)
             {
-                if (Int32.TryParse(variableValue, out int intValue))
+                if (int.TryParse(variableValue, out int intValue))
                     return intValue;
                 else
                     Logger.Log(LogLevel.ERROR, $@"Unable to cast variable value ""{variableValue}"" to type ""{variableType}"".");
@@ -639,6 +663,37 @@ namespace OptimizelySDK
             }
 
             return isValid;
+        }
+
+        private bool IsValidDecision(FeatureDecision decision)
+        {
+            return decision != null && decision.Experiment != null && decision.Variation != null;
+        }
+
+        private object GetTypeCastedVariableValue(string value, FeatureVariable.VariableType type)
+        {
+            switch (type)
+            {
+                case FeatureVariable.VariableType.BOOLEAN:
+                    if (bool.TryParse(value, out bool booleanValue))
+                        return booleanValue;
+                    else
+                        return null;
+                case FeatureVariable.VariableType.DOUBLE:
+                    if (double.TryParse(value, out double doubleValue))
+                        return doubleValue;
+                    else
+                        return null;
+                case FeatureVariable.VariableType.INTEGER:
+                    if (int.TryParse(value, out int intValue))
+                        return intValue;
+                    else
+                        return null;
+                case FeatureVariable.VariableType.STRING:
+                    return value;
+            }
+
+            return null;
         }
     }
 }
