@@ -1205,22 +1205,21 @@ namespace OptimizelySDK.Tests
             var variableKeyNull = "varNull";
             var featureVariableType = FeatureVariable.VariableType.BOOLEAN;
 
-            OptimizelyMock.Setup(om => om.GetFeatureVariableValueForType(It.IsAny<string>(), variableKeyTrue, It.IsAny<string>(),
-                It.IsAny<UserAttributes>(), featureVariableType)).Returns("True");
+            OptimizelyMock.Setup(om => om.GetFeatureVariableValueForType<bool?>(It.IsAny<string>(), variableKeyTrue, It.IsAny<string>(),
+                It.IsAny<UserAttributes>(), featureVariableType)).Returns(true);
             Assert.AreEqual(true, OptimizelyMock.Object.GetFeatureVariableBoolean(featureKey, variableKeyTrue, TestUserId, null));
 
-            OptimizelyMock.Setup(om => om.GetFeatureVariableValueForType(It.IsAny<string>(), variableKeyFalse, It.IsAny<string>(),
-                It.IsAny<UserAttributes>(), featureVariableType)).Returns("false");
+            OptimizelyMock.Setup(om => om.GetFeatureVariableValueForType<bool?>(It.IsAny<string>(), variableKeyFalse, It.IsAny<string>(),
+                It.IsAny<UserAttributes>(), featureVariableType)).Returns(false);
             Assert.AreEqual(false, OptimizelyMock.Object.GetFeatureVariableBoolean(featureKey, variableKeyFalse, TestUserId, null));
 
-            OptimizelyMock.Setup(om => om.GetFeatureVariableValueForType(It.IsAny<string>(), variableKeyNonBoolean, It.IsAny<string>(),
+            OptimizelyMock.Setup(om => om.GetFeatureVariableValueForType<string>(It.IsAny<string>(), variableKeyNonBoolean, It.IsAny<string>(),
                 It.IsAny<UserAttributes>(), featureVariableType)).Returns("non_boolean_value");
-
             Assert.Null(OptimizelyMock.Object.GetFeatureVariableBoolean(featureKey, variableKeyNonBoolean, TestUserId, null));
             LoggerMock.Verify(l => l.Log(LogLevel.ERROR, $@"Unable to cast variable value ""non_boolean_value"" to type ""{featureVariableType}""."));
 
-            OptimizelyMock.Setup(om => om.GetFeatureVariableValueForType(It.IsAny<string>(), variableKeyNull, It.IsAny<string>(),
-                It.IsAny<UserAttributes>(), featureVariableType)).Returns<string>(null);
+            OptimizelyMock.Setup(om => om.GetFeatureVariableValueForType<bool?>(It.IsAny<string>(), variableKeyNull, It.IsAny<string>(),
+                It.IsAny<UserAttributes>(), featureVariableType)).Returns<bool?>(null);
             Assert.Null(OptimizelyMock.Object.GetFeatureVariableBoolean(featureKey, variableKeyNull, TestUserId, null));
         }
 
@@ -1234,22 +1233,22 @@ namespace OptimizelySDK.Tests
             var variableKeyNull = "varNull";
             var featureVariableType = FeatureVariable.VariableType.DOUBLE;
 
-            OptimizelyMock.Setup(om => om.GetFeatureVariableValueForType(It.IsAny<string>(), variableKeyDouble, It.IsAny<string>(),
-                It.IsAny<UserAttributes>(), featureVariableType)).Returns("100.54");
+            OptimizelyMock.Setup(om => om.GetFeatureVariableValueForType<double?>(It.IsAny<string>(), variableKeyDouble, It.IsAny<string>(),
+                It.IsAny<UserAttributes>(), featureVariableType)).Returns(100.54);
             Assert.AreEqual(100.54, OptimizelyMock.Object.GetFeatureVariableDouble(featureKey, variableKeyDouble, TestUserId, null));
 
-            OptimizelyMock.Setup(om => om.GetFeatureVariableValueForType(It.IsAny<string>(), variableKeyInt, It.IsAny<string>(),
-                It.IsAny<UserAttributes>(), featureVariableType)).Returns("100");
+            OptimizelyMock.Setup(om => om.GetFeatureVariableValueForType<double?>(It.IsAny<string>(), variableKeyInt, It.IsAny<string>(),
+                It.IsAny<UserAttributes>(), featureVariableType)).Returns(100);
             Assert.AreEqual(100, OptimizelyMock.Object.GetFeatureVariableDouble(featureKey, variableKeyInt, TestUserId, null));
 
-            OptimizelyMock.Setup(om => om.GetFeatureVariableValueForType(It.IsAny<string>(), variableKeyNonDouble, It.IsAny<string>(),
+            OptimizelyMock.Setup(om => om.GetFeatureVariableValueForType<string>(It.IsAny<string>(), variableKeyNonDouble, It.IsAny<string>(),
                 It.IsAny<UserAttributes>(), featureVariableType)).Returns("non_double_value");
 
             Assert.Null(OptimizelyMock.Object.GetFeatureVariableDouble(featureKey, variableKeyNonDouble, TestUserId, null));
             LoggerMock.Verify(l => l.Log(LogLevel.ERROR, $@"Unable to cast variable value ""non_double_value"" to type ""{featureVariableType}""."));
 
-            OptimizelyMock.Setup(om => om.GetFeatureVariableValueForType(It.IsAny<string>(), variableKeyNull, It.IsAny<string>(),
-                It.IsAny<UserAttributes>(), featureVariableType)).Returns<string>(null);
+            OptimizelyMock.Setup(om => om.GetFeatureVariableValueForType<double?>(It.IsAny<string>(), variableKeyNull, It.IsAny<string>(),
+                It.IsAny<UserAttributes>(), featureVariableType)).Returns<double?>(null);
             Assert.Null(OptimizelyMock.Object.GetFeatureVariableDouble(featureKey, variableKeyNull, TestUserId, null));
         }
 
@@ -1263,23 +1262,23 @@ namespace OptimizelySDK.Tests
             var variableKeyNull = "varNull";
             var featureVariableType = FeatureVariable.VariableType.INTEGER;
 
-            OptimizelyMock.Setup(om => om.GetFeatureVariableValueForType(It.IsAny<string>(), variableKeyInt, It.IsAny<string>(),
-                It.IsAny<UserAttributes>(), featureVariableType)).Returns("100");
+            OptimizelyMock.Setup(om => om.GetFeatureVariableValueForType<int?>(It.IsAny<string>(), variableKeyInt, It.IsAny<string>(),
+                It.IsAny<UserAttributes>(), featureVariableType)).Returns(100);
             Assert.AreEqual(100, OptimizelyMock.Object.GetFeatureVariableInteger(featureKey, variableKeyInt, TestUserId, null));
 
-            OptimizelyMock.Setup(om => om.GetFeatureVariableValueForType(It.IsAny<string>(), variableKeyDouble, It.IsAny<string>(),
-                It.IsAny<UserAttributes>(), featureVariableType)).Returns("100.45");
+            OptimizelyMock.Setup(om => om.GetFeatureVariableValueForType<int?>(It.IsAny<string>(), variableKeyDouble, It.IsAny<string>(),
+                It.IsAny<UserAttributes>(), featureVariableType)).Returns((int)100.45);
 
             Assert.Null(OptimizelyMock.Object.GetFeatureVariableInteger(featureKey, variableKeyDouble, TestUserId, null));
             LoggerMock.Verify(l => l.Log(LogLevel.ERROR, $@"Unable to cast variable value ""100.45"" to type ""{featureVariableType}""."));
 
-            OptimizelyMock.Setup(om => om.GetFeatureVariableValueForType(It.IsAny<string>(), variableNonInt, It.IsAny<string>(),
+            OptimizelyMock.Setup(om => om.GetFeatureVariableValueForType<string>(It.IsAny<string>(), variableNonInt, It.IsAny<string>(),
                 It.IsAny<UserAttributes>(), featureVariableType)).Returns("non_integer_value");
 
             Assert.Null(OptimizelyMock.Object.GetFeatureVariableInteger(featureKey, variableNonInt, TestUserId, null));
             LoggerMock.Verify(l => l.Log(LogLevel.ERROR, $@"Unable to cast variable value ""non_integer_value"" to type ""{featureVariableType}""."));
 
-            OptimizelyMock.Setup(om => om.GetFeatureVariableValueForType(It.IsAny<string>(), variableKeyNull, It.IsAny<string>(),
+            OptimizelyMock.Setup(om => om.GetFeatureVariableValueForType<int?>(It.IsAny<string>(), variableKeyNull, It.IsAny<string>(),
                 It.IsAny<UserAttributes>(), featureVariableType)).Returns<string>(null);
             Assert.Null(OptimizelyMock.Object.GetFeatureVariableInteger(featureKey, variableKeyNull, TestUserId, null));
         }
@@ -1293,15 +1292,15 @@ namespace OptimizelySDK.Tests
             var variableKeyNull = "varNull";
             var featureVariableType = FeatureVariable.VariableType.STRING;
 
-            OptimizelyMock.Setup(om => om.GetFeatureVariableValueForType(It.IsAny<string>(), variableKeyString, It.IsAny<string>(),
+            OptimizelyMock.Setup(om => om.GetFeatureVariableValueForType<string>(It.IsAny<string>(), variableKeyString, It.IsAny<string>(),
                 It.IsAny<UserAttributes>(), featureVariableType)).Returns("Test String");
             Assert.AreEqual("Test String", OptimizelyMock.Object.GetFeatureVariableString(featureKey, variableKeyString, TestUserId, null));
 
-            OptimizelyMock.Setup(om => om.GetFeatureVariableValueForType(It.IsAny<string>(), variableKeyIntString, It.IsAny<string>(),
+            OptimizelyMock.Setup(om => om.GetFeatureVariableValueForType<string>(It.IsAny<string>(), variableKeyIntString, It.IsAny<string>(),
                 It.IsAny<UserAttributes>(), featureVariableType)).Returns("123");
             Assert.AreEqual("123", OptimizelyMock.Object.GetFeatureVariableString(featureKey, variableKeyIntString, TestUserId, null));
 
-            OptimizelyMock.Setup(om => om.GetFeatureVariableValueForType(It.IsAny<string>(), variableKeyNull, It.IsAny<string>(),
+            OptimizelyMock.Setup(om => om.GetFeatureVariableValueForType<string>(It.IsAny<string>(), variableKeyNull, It.IsAny<string>(),
                 It.IsAny<UserAttributes>(), featureVariableType)).Returns<string>(null);
             Assert.Null(OptimizelyMock.Object.GetFeatureVariableString(featureKey, variableKeyNull, TestUserId, null));
         }
@@ -1319,16 +1318,16 @@ namespace OptimizelySDK.Tests
             var variableType = FeatureVariable.VariableType.BOOLEAN;
 
             // Passing null and empty feature key.
-            Assert.IsNull(Optimizely.GetFeatureVariableValueForType(null, variableKey, TestUserId, null, variableType));
-            Assert.IsNull(Optimizely.GetFeatureVariableValueForType("", variableKey, TestUserId, null, variableType));
+            Assert.IsNull(Optimizely.GetFeatureVariableValueForType<bool?>(null, variableKey, TestUserId, null, variableType));
+            Assert.IsNull(Optimizely.GetFeatureVariableValueForType<bool?>("", variableKey, TestUserId, null, variableType));
 
             // Passing null and empty variable key.
-            Assert.IsNull(Optimizely.GetFeatureVariableValueForType(featureKey, null, TestUserId, null, variableType));
-            Assert.IsNull(Optimizely.GetFeatureVariableValueForType(featureKey, "", TestUserId, null, variableType));
+            Assert.IsNull(Optimizely.GetFeatureVariableValueForType<bool?>(featureKey, null, TestUserId, null, variableType));
+            Assert.IsNull(Optimizely.GetFeatureVariableValueForType<bool?>(featureKey, "", TestUserId, null, variableType));
 
             // Passing null and empty user Id.
-            Assert.IsNull(Optimizely.GetFeatureVariableValueForType(featureKey, variableKey, null, null, variableType));
-            Assert.IsNull(Optimizely.GetFeatureVariableValueForType(featureKey, variableKey, "", null, variableType));
+            Assert.IsNull(Optimizely.GetFeatureVariableValueForType<bool?>(featureKey, variableKey, null, null, variableType));
+            Assert.IsNull(Optimizely.GetFeatureVariableValueForType<bool?>(featureKey, variableKey, "", null, variableType));
 
             LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Provided Feature Key is in invalid format."), Times.Exactly(2));
             LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Provided Variable Key is in invalid format."), Times.Exactly(2));
@@ -1343,8 +1342,8 @@ namespace OptimizelySDK.Tests
             var variableKey = "this_variable_should_never_be_found_in_the_datafile_unless_the_datafile_creator_got_insane";
             var variableType = FeatureVariable.VariableType.BOOLEAN;
 
-            Assert.IsNull(Optimizely.GetFeatureVariableValueForType(featureKey, variableKey, TestUserId, null, variableType));
-            Assert.IsNull(Optimizely.GetFeatureVariableValueForType("double_single_variable_feature", variableKey, TestUserId, null, variableType));
+            Assert.IsNull(Optimizely.GetFeatureVariableValueForType<bool?>(featureKey, variableKey, TestUserId, null, variableType));
+            Assert.IsNull(Optimizely.GetFeatureVariableValueForType<bool?>("double_single_variable_feature", variableKey, TestUserId, null, variableType));
 
             LoggerMock.Verify(l => l.Log(LogLevel.ERROR, $@"Feature key ""{featureKey}"" is not in datafile."));
             LoggerMock.Verify(l => l.Log(LogLevel.ERROR, 
@@ -1360,10 +1359,10 @@ namespace OptimizelySDK.Tests
             var variableTypeDouble = FeatureVariable.VariableType.DOUBLE;
             var variableTypeString = FeatureVariable.VariableType.STRING;
 
-            Assert.IsNull(Optimizely.GetFeatureVariableValueForType("double_single_variable_feature", "double_variable", TestUserId, null, variableTypeBool));
-            Assert.IsNull(Optimizely.GetFeatureVariableValueForType("boolean_single_variable_feature", "boolean_variable", TestUserId, null, variableTypeDouble));
-            Assert.IsNull(Optimizely.GetFeatureVariableValueForType("integer_single_variable_feature", "integer_variable", TestUserId, null, variableTypeString));
-            Assert.IsNull(Optimizely.GetFeatureVariableValueForType("string_single_variable_feature", "string_variable", TestUserId, null, variableTypeInt));
+            Assert.IsNull(Optimizely.GetFeatureVariableValueForType<double?>("double_single_variable_feature", "double_variable", TestUserId, null, variableTypeBool));
+            Assert.IsNull(Optimizely.GetFeatureVariableValueForType<bool?>("boolean_single_variable_feature", "boolean_variable", TestUserId, null, variableTypeDouble));
+            Assert.IsNull(Optimizely.GetFeatureVariableValueForType<int?>("integer_single_variable_feature", "integer_variable", TestUserId, null, variableTypeString));
+            Assert.IsNull(Optimizely.GetFeatureVariableValueForType<string>("string_single_variable_feature", "string_variable", TestUserId, null, variableTypeInt));
 
             LoggerMock.Verify(l => l.Log(LogLevel.ERROR,
                 $@"Variable is of type ""DOUBLE"", but you requested it as type ""{variableTypeBool}""."));

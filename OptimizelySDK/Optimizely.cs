@@ -396,7 +396,7 @@ namespace OptimizelySDK
         /// <param name="userAttributes">The user's attributes</param>
         /// <param name="variableType">Variable type</param>
         /// <returns>string | null Feature variable value</returns>
-        public virtual string GetFeatureVariableValueForType(string featureKey, string variableKey, string userId, 
+        public virtual T GetFeatureVariableValueForType<T>(string featureKey, string variableKey, string userId, 
             UserAttributes userAttributes, FeatureVariable.VariableType variableType)
         {
             var inputValues = new Dictionary<string, string>
@@ -407,24 +407,24 @@ namespace OptimizelySDK
             };
 
             if (!ValidateStringInputs(inputValues))
-                return null;
+                return default(T);
 
             var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
             if (string.IsNullOrEmpty(featureFlag.Key))
-                return null;
+                return default(T);
 
             var featureVariable = featureFlag.GetFeatureVariableFromKey(variableKey);
             if (featureVariable == null)
             {
                 Logger.Log(LogLevel.ERROR,
                     $@"No feature variable was found for key ""{variableKey}"" in feature flag ""{featureKey}"".");
-                return null;
+                return default(T);
             }
             else if (featureVariable.Type != variableType)
             {
                 Logger.Log(LogLevel.ERROR,
                     $@"Variable is of type ""{featureVariable.Type}"", but you requested it as type ""{variableType}"".");
-                return null;
+                return default(T);
             }
 
             var featureEnabled = false;
@@ -463,12 +463,13 @@ namespace OptimizelySDK
                 variationKey = decision.Variation.Key;
             }
 
+            var typeCastedValue = GetTypeCastedVariableValue(variableValue, variableType);
             var decisionInfo = new Dictionary<string, object>
             {
                 { "featureKey", featureKey },
                 { "featureEnabled", featureEnabled },
                 { "variableKey", variableKey },
-                { "variableValue", GetTypeCastedVariableValue(variableValue, variableType) },
+                { "variableValue", typeCastedValue },
                 { "variableType", variableType },
                 { "source", decision?.Source },
                 { "sourceExperimentKey", experimentKey },
@@ -477,7 +478,7 @@ namespace OptimizelySDK
 
             NotificationCenter.SendNotifications(NotificationCenter.NotificationType.Decision, DecisionInfoTypes.FEATURE_VARIABLE, userId,
                userAttributes ?? new UserAttributes(), decisionInfo);
-            return variableValue;
+            return (T)typeCastedValue;
         }
 
         /// <summary>
@@ -491,17 +492,21 @@ namespace OptimizelySDK
         public bool? GetFeatureVariableBoolean(string featureKey, string variableKey, string userId, UserAttributes userAttributes = null)
         {
             var variableType = FeatureVariable.VariableType.BOOLEAN;
-            var variableValue = GetFeatureVariableValueForType(featureKey, variableKey, userId, userAttributes, variableType);
+            var variableValue = GetFeatureVariableValueForType<bool?>(featureKey, variableKey, userId, userAttributes, variableType);
+            if (variableValue == null)
+                Logger.Log(LogLevel.ERROR, $@"Unable to cast variable value ""{variableValue}"" to type ""{variableType}"".");
+
+            return variableValue;
+
+            //if (variableValue != null)
+            //{
+            //    if (bool.TryParse(variableValue, out bool booleanValue))
+            //        return booleanValue;
+            //    else
+            //        Logger.Log(LogLevel.ERROR, $@"Unable to cast variable value ""{variableValue}"" to type ""{variableType}"".");
+            //}
             
-            if (variableValue != null)
-            {
-                if (bool.TryParse(variableValue, out bool booleanValue))
-                    return booleanValue;
-                else
-                    Logger.Log(LogLevel.ERROR, $@"Unable to cast variable value ""{variableValue}"" to type ""{variableType}"".");
-            }
-            
-            return null;
+            //return null;
         }
 
         /// <summary>
@@ -515,17 +520,21 @@ namespace OptimizelySDK
         public double? GetFeatureVariableDouble(string featureKey, string variableKey, string userId, UserAttributes userAttributes = null)
         {
             var variableType = FeatureVariable.VariableType.DOUBLE;
-            var variableValue = GetFeatureVariableValueForType(featureKey, variableKey, userId, userAttributes, variableType);
+            var variableValue = GetFeatureVariableValueForType<double?>(featureKey, variableKey, userId, userAttributes, variableType);
+            if (variableValue == null)
+                Logger.Log(LogLevel.ERROR, $@"Unable to cast variable value ""{variableValue}"" to type ""{variableType}"".");
 
-            if (variableValue != null)
-            {
-                if (double.TryParse(variableValue, out double doubleValue))
-                    return doubleValue;
-                else
-                    Logger.Log(LogLevel.ERROR, $@"Unable to cast variable value ""{variableValue}"" to type ""{variableType}"".");
-            }
+            return variableValue;
 
-            return null;
+            //if (variableValue != null)
+            //{
+            //    if (double.TryParse(variableValue, out double doubleValue))
+            //        return doubleValue;
+            //    else
+            //        Logger.Log(LogLevel.ERROR, $@"Unable to cast variable value ""{variableValue}"" to type ""{variableType}"".");
+            //}
+
+            //return null;
         }
 
         /// <summary>
@@ -539,17 +548,21 @@ namespace OptimizelySDK
         public int? GetFeatureVariableInteger(string featureKey, string variableKey, string userId, UserAttributes userAttributes = null)
         {
             var variableType = FeatureVariable.VariableType.INTEGER;
-            var variableValue = GetFeatureVariableValueForType(featureKey, variableKey, userId, userAttributes, variableType);
+            var variableValue = GetFeatureVariableValueForType<int?>(featureKey, variableKey, userId, userAttributes, variableType);
+            if (variableValue == null)
+                Logger.Log(LogLevel.ERROR, $@"Unable to cast variable value ""{variableValue}"" to type ""{variableType}"".");
 
-            if (variableValue != null)
-            {
-                if (int.TryParse(variableValue, out int intValue))
-                    return intValue;
-                else
-                    Logger.Log(LogLevel.ERROR, $@"Unable to cast variable value ""{variableValue}"" to type ""{variableType}"".");
-            }
+            return variableValue;
 
-            return null;
+            //if (variableValue != null)
+            //{
+            //    if (int.TryParse(variableValue, out int intValue))
+            //        return intValue;
+            //    else
+            //        Logger.Log(LogLevel.ERROR, $@"Unable to cast variable value ""{variableValue}"" to type ""{variableType}"".");
+            //}
+
+            //return null;
         }
 
         /// <summary>
@@ -562,7 +575,7 @@ namespace OptimizelySDK
         /// <returns>string | Feature variable value or null</returns>
         public string GetFeatureVariableString(string featureKey, string variableKey, string userId, UserAttributes userAttributes = null)
         {
-            return GetFeatureVariableValueForType(featureKey, variableKey, userId, userAttributes, 
+            return GetFeatureVariableValueForType<string>(featureKey, variableKey, userId, userAttributes, 
                 FeatureVariable.VariableType.STRING);
         }
 
