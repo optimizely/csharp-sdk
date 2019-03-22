@@ -31,6 +31,14 @@ namespace OptimizelySDK.Tests.UtilsTests
                 Type.DefaultBinder, createdInstance, args);
         }
 
+        public object InvokeGeneric<T>(string name, params object[] args)
+        {
+            MethodInfo method = instanceType.GetMethod(name);
+            MethodInfo genericMethod = method.MakeGenericMethod(typeof(T));
+            return genericMethod.Invoke(createdInstance, BindingFlags.Instance | BindingFlags.Public | BindingFlags.InvokeMethod | BindingFlags.NonPublic,
+                Type.DefaultBinder, args, null);
+        }
+
         public object GetObject()
         {
             return createdInstance;
