@@ -1839,7 +1839,7 @@ namespace OptimizelySDK.Tests
         #region Decision Listener
 
         [Test]
-        public void TestDecisionListenerWhenActivateReturnsVariation()
+        public void TestActivateSendsDecisionNotificationWithActualVariationKey()
         {
             var experimentKey = "group_experiment_1";
             var variationKey = "group_exp_1_var_1";
@@ -1874,7 +1874,7 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
-        public void TestDecisionListenerWhenActivateReturnsNull()
+        public void TestActivateSendsDecisionNotificationWithNullVariationKey()
         {
             var experimentKey = "group_experiment_1";
             var experiment = Config.GetExperimentFromKey(experimentKey);
@@ -1900,7 +1900,7 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
-        public void TestDecisionListenerWhenGetVariationReturnsVariation()
+        public void TestGetVariationSendsDecisionNotificationWithActualVariationKey()
         {
             var experimentKey = "group_experiment_1";
             var variationKey = "group_exp_1_var_1";
@@ -1935,7 +1935,7 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
-        public void TestDecisionListenerWhenGetVariationReturnsNull()
+        public void TestGetVariationSendsDecisionNotificationWithNullVariationKey()
         {
             var experimentKey = "group_experiment_1";
             var experiment = Config.GetExperimentFromKey(experimentKey);
