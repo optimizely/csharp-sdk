@@ -1840,7 +1840,7 @@ namespace OptimizelySDK.Tests
         #region Decision Listener
 
         [Test]
-        public void TestDecisionListenerWhenIsFeatureEnabledReturnsTrueForFeatureExperiment()
+        public void TestIsFeatureEnabledSendsDecisionNotificationWithFeatureEnabledTrueForFeatureExperiment()
         {
             var featureKey = "double_single_variable_feature";
             var experiment = Config.GetExperimentFromKey("test_experiment_double_feature");
@@ -1875,7 +1875,7 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
-        public void TestDecisionListenerWhenIsFeatureEnabledReturnsFalseForFeatureExperiment()
+        public void TestIsFeatureEnabledSendsDecisionNotificationWithFeatureEnabledFalseForFeatureExperiment()
         {
             var featureKey = "double_single_variable_feature";
             var experiment = Config.GetExperimentFromKey("test_experiment_double_feature");
@@ -1910,7 +1910,7 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
-        public void TestDecisionListenerWhenIsFeatureEnabledReturnsTrueForRollout()
+        public void TestIsFeatureEnabledSendsDecisionNotificationWithFeatureEnabledTrueForFeatureRollout()
         {
             var featureKey = "boolean_single_variable_feature";
             var userAttributes = new UserAttributes
@@ -1949,7 +1949,7 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
-        public void TestDecisionListenerWhenIsFeatureEnabledReturnsFalseForRollout()
+        public void TestIsFeatureEnabledSendsDecisionNotificationWithFeatureEnabledFalseForFeatureRollout()
         {
             var featureKey = "boolean_single_variable_feature";
             var userAttributes = new UserAttributes
@@ -1988,7 +1988,7 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
-        public void TestDecisionListenerWhenIsFeatureEnabledReturnsFalseAndUserIsNotBucketedInFeatureExperimentOrRollout()
+        public void TestIsFeatureEnabledSendsDecisionNotificationWithFeatureEnabledFalseWhenUserIsNotBucketed()
         {
             var featureKey = "boolean_single_variable_feature";
             var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
@@ -2020,7 +2020,7 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
-        public void TestDecisionListenerWithGetEnabledFeaturesSendsNotificationForBothEnabledAndDisabledFeatures()
+        public void TestGetEnabledFeaturesSendDecisionNotificationForBothEnabledAndDisabledFeatures()
         {
             string[] enabledFeatures =
             {
