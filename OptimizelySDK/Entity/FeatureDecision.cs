@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-using System;
-using System.Collections.Generic;
-
 namespace OptimizelySDK.Entity
 {
     public class FeatureDecision
