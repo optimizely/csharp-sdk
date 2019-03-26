@@ -426,7 +426,7 @@ namespace OptimizelySDK
                     $@"Variable is of type ""{featureVariable.Type}"", but you requested it as type ""{variableType}"".");
                 return null;
             }
-
+            
             var variableValue = featureVariable.DefaultValue;
             var decision = DecisionService.GetVariationForFeature(featureFlag, userId, userAttributes);
 
@@ -435,7 +435,7 @@ namespace OptimizelySDK
                 var variation = decision.Variation;
                 var featureVariableUsageInstance = variation.GetFeatureVariableUsageFromId(featureVariable.Id);
 
-                if (featureVariableUsageInstance != null)
+                if (featureVariableUsageInstance != null && variation.FeatureEnabled == true)
                 {
                     variableValue = featureVariableUsageInstance.Value;
                     Logger.Log(LogLevel.INFO,
