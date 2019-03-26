@@ -1915,7 +1915,7 @@ namespace OptimizelySDK.Tests
             var featureKey = "double_single_variable_feature";
             var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
             var variableKey = "double_variable";
-            var expectedValue = 14.99;
+            var expectedValue = 13.37;
             var experiment = Config.GetExperimentFromKey("test_experiment_double_feature");
             var variation = Config.GetVariationFromKey("test_experiment_double_feature", "variation");
             var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_EXPERIMENT);
@@ -1953,7 +1953,7 @@ namespace OptimizelySDK.Tests
             var featureKey = "integer_single_variable_feature";
             var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
             var variableKey = "integer_variable";
-            var expectedValue = 7;
+            var expectedValue = 42;
             var experiment = Config.GetExperimentFromKey("test_experiment_integer_feature");
             var variation = Config.GetVariationFromKey("test_experiment_integer_feature", "control");
             var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_EXPERIMENT);
@@ -2079,7 +2079,7 @@ namespace OptimizelySDK.Tests
             var featureKey = "boolean_single_variable_feature";
             var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
             var variableKey = "boolean_variable";
-            var expectedValue = true;
+            var expectedValue = false;
             var experiment = Config.GetRolloutFromId("166660").Experiments[3];
             var variation = Config.GetVariationFromKey(experiment.Key, "177782");
             var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT);
@@ -2117,7 +2117,7 @@ namespace OptimizelySDK.Tests
             var featureKey = "string_single_variable_feature";
             var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
             var variableKey = "string_variable";
-            var expectedValue = "wingardium leviosa";
+            var expectedValue = "cta_5";
             var experiment = Config.GetRolloutFromId("166661").Experiments[2];
             var variation = Config.GetVariationFromKey(experiment.Key, "177784");
             var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT);

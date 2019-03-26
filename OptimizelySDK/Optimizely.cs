@@ -437,7 +437,7 @@ namespace OptimizelySDK
                 featureEnabled = variation.FeatureEnabled.GetValueOrDefault();
                 var featureVariableUsageInstance = variation.GetFeatureVariableUsageFromId(featureVariable.Id);
 
-                if (featureEnabled && featureVariableUsageInstance != null)
+                if (featureVariableUsageInstance != null)
                 {
                     variableValue = featureVariableUsageInstance.Value;
                     Logger.Log(LogLevel.INFO,
