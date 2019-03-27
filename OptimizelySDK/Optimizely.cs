@@ -435,22 +435,27 @@ namespace OptimizelySDK
                 var variation = decision.Variation;
                 var featureVariableUsageInstance = variation.GetFeatureVariableUsageFromId(featureVariable.Id);
 
-                if (featureVariableUsageInstance != null && variation.FeatureEnabled == true)
+                if (featureVariableUsageInstance != null)
                 {
-                    variableValue = featureVariableUsageInstance.Value;
-                    Logger.Log(LogLevel.INFO,
-                        $@"Returning variable value ""{variableValue}"" for variation ""{variation.Key}"" of feature flag ""{featureFlag.Key}"".");
+                    if (variation.FeatureEnabled == true)
+                    {
+                        variableValue = featureVariableUsageInstance.Value;
+                        Logger.Log(LogLevel.INFO, $@"Returning variable value ""{variableValue}"" for variation ""{variation.Key}"" of feature flag ""{featureKey}"".");
+                    }
+                    else
+                    {
+                        Logger.Log(LogLevel.INFO, $@"Feature ""{featureKey}"" is not enabled for user {userId}. Returning default value for variable ""{variableKey}"".");
+                    }
                 }
                 else
                 {
-                    Logger.Log(LogLevel.INFO,
-                        $@"Variable ""{variableKey}"" is not used in variation ""{variation.Key}"", returning default value ""{variableValue}"".");
+                    Logger.Log(LogLevel.INFO, $@"Variable ""{variableKey}"" is not used in variation ""{variation.Key}"", returning default value ""{variableValue}"".");
                 }
             }
             else
             {
                 Logger.Log(LogLevel.INFO,
-                    $@"User ""{userId}"" is not in any variation for feature flag ""{featureFlag.Key}"", returning default value ""{variableValue}"".");
+                    $@"User ""{userId}"" is not in any variation for feature flag ""{featureKey}"", returning default value ""{variableValue}"".");
             }
 
             return variableValue;

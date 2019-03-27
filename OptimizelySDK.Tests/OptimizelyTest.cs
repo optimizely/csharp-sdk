@@ -1326,6 +1326,8 @@ namespace OptimizelySDK.Tests
             
             var variableValue = (double)optly.Invoke("GetFeatureVariableDouble", featureKey, variableKey, TestUserId, null);
             Assert.AreEqual(expectedValue, variableValue);
+
+            LoggerMock.Verify(l => l.Log(LogLevel.INFO, $@"Returning variable value ""{variableValue}"" for variation ""{variation.Key}"" of feature flag ""{featureKey}""."));
         }
 
         [Test]
@@ -1352,6 +1354,8 @@ namespace OptimizelySDK.Tests
             
             var variableValue = (int)optly.Invoke("GetFeatureVariableInteger", featureKey, variableKey, TestUserId, userAttributes);
             Assert.AreEqual(expectedValue, variableValue);
+
+            LoggerMock.Verify(l => l.Log(LogLevel.INFO, $@"Returning variable value ""{variableValue}"" for variation ""{variation.Key}"" of feature flag ""{featureKey}""."));
         }
 
         [Test]
@@ -1372,6 +1376,8 @@ namespace OptimizelySDK.Tests
             
             var variableValue = (double)optly.Invoke("GetFeatureVariableDouble", featureKey, variableKey, TestUserId, null);
             Assert.AreEqual(expectedValue, variableValue);
+
+            LoggerMock.Verify(l => l.Log(LogLevel.INFO, $@"Feature ""{featureKey}"" is not enabled for user {TestUserId}. Returning default value for variable ""{variableKey}""."));
         }
 
         [Test]
@@ -1398,6 +1404,8 @@ namespace OptimizelySDK.Tests
 
             var variableValue = (int)optly.Invoke("GetFeatureVariableInteger", featureKey, variableKey, TestUserId, userAttributes);
             Assert.AreEqual(expectedValue, variableValue);
+
+            LoggerMock.Verify(l => l.Log(LogLevel.INFO, $@"Feature ""{featureKey}"" is not enabled for user {TestUserId}. Returning default value for variable ""{variableKey}""."));
         }
 
         [Test]
@@ -1418,6 +1426,8 @@ namespace OptimizelySDK.Tests
             
             var variableValue = (bool)optly.Invoke("GetFeatureVariableBoolean", featureKey, variableKey, TestUserId, null);
             Assert.AreEqual(expectedValue, variableValue);
+
+            LoggerMock.Verify(l => l.Log(LogLevel.INFO, $@"Returning variable value ""true"" for variation ""{variation.Key}"" of feature flag ""{featureKey}""."));
         }
 
         [Test]
@@ -1444,6 +1454,8 @@ namespace OptimizelySDK.Tests
             
             var variableValue = (string)optly.Invoke("GetFeatureVariableString", featureKey, variableKey, TestUserId, userAttributes);
             Assert.AreEqual(expectedValue, variableValue);
+
+            LoggerMock.Verify(l => l.Log(LogLevel.INFO, $@"Returning variable value ""{variableValue}"" for variation ""{variation.Key}"" of feature flag ""{featureKey}""."));
         }
 
         [Test]
@@ -1464,6 +1476,8 @@ namespace OptimizelySDK.Tests
             
             var variableValue = (bool)optly.Invoke("GetFeatureVariableBoolean", featureKey, variableKey, TestUserId, null);
             Assert.AreEqual(expectedValue, variableValue);
+
+            LoggerMock.Verify(l => l.Log(LogLevel.INFO, $@"Feature ""{featureKey}"" is not enabled for user {TestUserId}. Returning default value for variable ""{variableKey}""."));
         }
 
         [Test]
@@ -1490,6 +1504,8 @@ namespace OptimizelySDK.Tests
 
             var variableValue = (string)optly.Invoke("GetFeatureVariableString", featureKey, variableKey, TestUserId, userAttributes);
             Assert.AreEqual(expectedValue, variableValue);
+
+            LoggerMock.Verify(l => l.Log(LogLevel.INFO, $@"Feature ""{featureKey}"" is not enabled for user {TestUserId}. Returning default value for variable ""{variableKey}""."));
         }
 
         [Test]
@@ -1507,6 +1523,8 @@ namespace OptimizelySDK.Tests
 
             var variableValue = (double)optly.Invoke("GetFeatureVariableDouble", featureKey, variableKey, TestUserId, null);
             Assert.AreEqual(expectedValue, variableValue);
+
+            LoggerMock.Verify(l => l.Log(LogLevel.INFO, $@"User ""{TestUserId}"" is not in any variation for feature flag ""{featureKey}"", returning default value ""{variableValue}""."));
         }
 
         #endregion Feature Toggle Tests
