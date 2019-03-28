@@ -54,7 +54,7 @@
         <Compile Include="..\OptimizelySDK\ProjectConfig.cs" />
         <Compile Include="..\OptimizelySDK\Utils\EventTagUtils.cs" />
         <Compile Include="..\OptimizelySDK\Utils\Validator.cs" />
-        <Compile Include="..\OptimizelySDK\Properties\AssemblyInfo.cs" />
+        <Compile Include="Properties\AssemblyInfo.cs" />
         <Compile Include="..\OptimizelySDK\Utils\ConfigParser.cs" />
         <Compile Include="..\OptimizelySDK\Utils\Schema.cs" />
     		<Compile Include="..\OptimizelySDK\Utils\ControlAttributes.cs" />
