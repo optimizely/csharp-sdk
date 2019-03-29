@@ -1194,10 +1194,10 @@ namespace OptimizelySDK.Tests
 
         #endregion
 
-        #region Test GetFeatureVariable<Type> Typecasting
+        #region Test GetFeatureVariable<Type> methods
 
         [Test]
-        public void TestGetFeatureVariableBooleanReturnCorrectValue()
+        public void TestGetFeatureVariableBooleanReturnsCorrectValue()
         {
             var featureKey = "featureKey";
             var variableKeyTrue = "varTrue";
@@ -1224,7 +1224,7 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
-        public void TestGetFeatureVariableDoubleReturnTypecastedValue()
+        public void TestGetFeatureVariableDoubleReturnsCorrectValue()
         {
             var featureKey = "featureKey";
             var variableKeyDouble = "varDouble";
@@ -1251,7 +1251,7 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
-        public void TestGetFeatureVariableIntegerReturnTypecastedValue()
+        public void TestGetFeatureVariableIntegerReturnsCorrectValue()
         {
             var featureKey = "featureKey";
             var variableKeyInt = "varInt";
@@ -1274,7 +1274,7 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
-        public void TestGetFeatureVariableStringReturnTypecastedValue()
+        public void TestGetFeatureVariableStringReturnsCorrectValue()
         {
             var featureKey = "featureKey";
             var variableKeyString = "varString1";
@@ -1295,7 +1295,7 @@ namespace OptimizelySDK.Tests
             Assert.Null(OptimizelyMock.Object.GetFeatureVariableString(featureKey, variableKeyNull, TestUserId, null));
         }
 
-        #endregion // Test GetFeatureVariable<Type> TypeCasting
+        #endregion // Test GetFeatureVariable<Type> methods
 
         #region Test GetFeatureVariableValueForType method
 
@@ -1379,7 +1379,7 @@ namespace OptimizelySDK.Tests
             var optly = Helper.CreatePrivateOptimizely();
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
 
-            var variableValue = (double?)optly.InvokeGeneric<double?>("GetFeatureVariableValueForType", featureKey, variableKey, TestUserId, null, variableType);
+            var variableValue = (double?)optly.InvokeGeneric("GetFeatureVariableValueForType", new Type[] { typeof(double?) }, featureKey, variableKey, TestUserId, null, variableType);
             Assert.AreEqual(expectedValue, variableValue);
 
             LoggerMock.Verify(l => l.Log(LogLevel.INFO,
@@ -1406,7 +1406,7 @@ namespace OptimizelySDK.Tests
             var optly = Helper.CreatePrivateOptimizely();
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
 
-            var variableValue = (double?)optly.InvokeGeneric<double?>("GetFeatureVariableValueForType", featureKey, variableKey, TestUserId, null, variableType);
+            var variableValue = (double?)optly.InvokeGeneric("GetFeatureVariableValueForType", new Type[] { typeof(double?) }, featureKey, variableKey, TestUserId, null, variableType);
             Assert.AreEqual(expectedValue, variableValue);
 
             LoggerMock.Verify(l => l.Log(LogLevel.INFO,
@@ -1432,13 +1432,13 @@ namespace OptimizelySDK.Tests
             var optly = Helper.CreatePrivateOptimizely();
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
             
-            var variableValue = (double?)optly.InvokeGeneric<double?>("GetFeatureVariableValueForType", featureKey, variableKey, TestUserId, null, variableType);
+            var variableValue = (double?)optly.InvokeGeneric("GetFeatureVariableValueForType", new Type[] { typeof(double?) }, featureKey, variableKey, TestUserId, null, variableType);
             Assert.AreEqual(expectedValue, variableValue);
 
             LoggerMock.Verify(l => l.Log(LogLevel.INFO,
                 $@"Returning variable value ""{variableValue}"" for variation ""{variation.Key}"" of feature flag ""{featureKey}""."));
         }
-
+        
         // Verify that GetFeatureVariableValueForType returns correct variable value for rollout rule.
         [Test]
         public void TestGetFeatureVariableValueForTypeWithRolloutRule()
