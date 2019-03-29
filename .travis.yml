@@ -1,9 +1,10 @@
 language: minimal
+addons:
+  srcclr: true
 
 # Integration tests need to run first to reset the PR build status to pending
 stages:
   - name: 'Integration tests'
-  - name: 'SourceClear'
   - name: 'Unit Tests'
   - name: 'NetStandard16'
 
@@ -20,12 +21,6 @@ jobs:
       script:
         - "$HOME/travisci-tools/fsc-trigger/trigger_fullstack-sdk-compat.sh"
       after_success: travis_terminate 0
-
-    - stage: 'SourceClear'
-      language: minimal
-      os: linux
-      addons:
-        srcclr: true
 
     - stage: 'Unit Tests'
       language: csharp
