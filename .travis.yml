@@ -48,8 +48,7 @@ jobs:
       install:
         - dotnet restore OptimizelySDK.NetStandard16/OptimizelySDK.NetStandard16.csproj
       addons:
-        srcclr:
-          debug: true
+        srcclr: true
       script:
         # strongname signing is taken care of in build step
         - dotnet build OptimizelySDK.NetStandard16/OptimizelySDK.NetStandard16.csproj /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=$TRAVIS_BUILD_DIR/keypair.snk
