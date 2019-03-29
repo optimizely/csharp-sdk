@@ -29,9 +29,6 @@ jobs:
         - nuget restore ./OptimizelySDK.Travis.sln
         - nuget install ./OptimizelySDK.Tests/packages.config -OutputDirectory ./packages
         - nuget install NUnit.Runners -Version 2.6.4 -OutputDirectory ./testrunner
-      addons:
-        srcclr:
-          debug: true
       script:
         - xbuild /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=$TRAVIS_BUILD_DIR/keypair.snk /p:Configuration=Release ./OptimizelySDK.Travis.sln
         - mono ./testrunner/NUnit.Runners.2.6.4/tools/nunit-console.exe ./OptimizelySDK.Tests/bin/Release/OptimizelySDK.Tests.dll
@@ -50,6 +47,9 @@ jobs:
       dotnet: 2.1.502
       install:
         - dotnet restore OptimizelySDK.NetStandard16/OptimizelySDK.NetStandard16.csproj
+      addons:
+        srcclr:
+          debug: true
       script:
         # strongname signing is taken care of in build step
         - dotnet build OptimizelySDK.NetStandard16/OptimizelySDK.NetStandard16.csproj /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=$TRAVIS_BUILD_DIR/keypair.snk
