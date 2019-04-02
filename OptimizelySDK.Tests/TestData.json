@@ -724,6 +724,32 @@
 					]
 				},
 				{
+					"id": "177781",
+					"key": "177781",
+					"status": "Running",
+					"layerId": "166660",
+					"audienceIds": [],
+					"variations": [
+						{
+							"id": "177782",
+							"key": "177782",
+							"variables": [
+								{
+									"id": "155556",
+									"value": "false"
+								}
+							],
+							"featureEnabled": false
+						}
+					],
+					"trafficAllocation": [
+						{
+							"entityId": "177778",
+							"endOfRange": 9000
+						}
+					]
+				},
+				{
 					"id": "188880",
 					"key": "188880",
 					"status": "Running",
@@ -764,7 +790,12 @@
 						{
 							"id": "177775",
 							"key": "177775",
-							"variables": [],
+							"variables": [
+								{
+									"id": "155558",
+									"value": "cta_4"
+								}
+							],
 							"featureEnabled": true
 						}
 					],
@@ -787,6 +818,32 @@
 							"key": "177780",
 							"variables": [],
 							"featureEnabled": true
+						}
+					],
+					"trafficAllocation": [
+						{
+							"entityId": "177780",
+							"endOfRange": 1500
+						}
+					]
+				},
+				{
+					"id": "177783",
+					"key": "177783",
+					"status": "Running",
+					"layerId": "166661",
+					"audienceIds": [],
+					"variations": [
+						{
+							"id": "177784",
+							"key": "177784",
+							"variables": [
+								{
+									"id": "155558",
+									"value": "cta_5"
+								}
+							],
+							"featureEnabled": false
 						}
 					],
 					"trafficAllocation": [
