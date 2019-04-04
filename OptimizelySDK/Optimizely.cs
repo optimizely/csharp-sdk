@@ -307,8 +307,9 @@ namespace OptimizelySDK
                 { "variationKey", variation?.Key },
             };
 
+            userAttributes = userAttributes ?? new UserAttributes();
             NotificationCenter.SendNotifications(NotificationCenter.NotificationType.Decision, DecisionInfoTypes.EXPERIMENT, userId,
-                userAttributes ?? new UserAttributes(), decisionInfo);
+                userAttributes, decisionInfo);
             return variation;
         }
 
