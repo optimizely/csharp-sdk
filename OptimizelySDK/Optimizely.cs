@@ -375,7 +375,7 @@ namespace OptimizelySDK
             bool featureEnabled = false;
             var decision = DecisionService.GetVariationForFeature(featureFlag, userId, userAttributes);
 
-            if (IsValidDecision(decision))
+            if (decision.Variation != null)
             {
                 var variation = decision.Variation;
                 featureEnabled = variation.FeatureEnabled.GetValueOrDefault();
@@ -454,7 +454,7 @@ namespace OptimizelySDK
             var variableValue = featureVariable.DefaultValue;
             var decision = DecisionService.GetVariationForFeature(featureFlag, userId, userAttributes);
 
-            if (IsValidDecision(decision))
+            if (decision.Variation != null)
             {
                 var variation = decision.Variation;
                 var featureVariableUsageInstance = variation.GetFeatureVariableUsageFromId(featureVariable.Id);
@@ -668,11 +668,6 @@ namespace OptimizelySDK
             }
 
             return isValid;
-        }
-
-        private bool IsValidDecision(FeatureDecision decision)
-        {
-            return decision != null && decision.Experiment != null && decision.Variation != null;
         }
     }
 }

@@ -1515,8 +1515,9 @@ namespace OptimizelySDK.Tests
             var featureFlag = Config.GetFeatureFlagFromKey("double_single_variable_feature");
             var variableKey = "double_variable";
             var expectedValue = 14.99;
+            var decision = new FeatureDecision(null, null, FeatureDecision.DECISION_SOURCE_ROLLOUT);
             
-            DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, null)).Returns<FeatureDecision>(null);
+            DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, null)).Returns(decision);
             
             var optly = Helper.CreatePrivateOptimizely();
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
@@ -1604,11 +1605,14 @@ namespace OptimizelySDK.Tests
         {
             var featureKey = "double_single_variable_feature";
             var featureFlag = Config.GetFeatureFlagFromKey("double_single_variable_feature");
+            var experiment = Config.GetExperimentFromKey("test_experiment_double_feature");
+            var variation = Config.GetVariationFromKey("test_experiment_double_feature", "variation");
             var variableKey = "double_variable";
             var variableType = FeatureVariable.VariableType.DOUBLE;
             var expectedValue = "14.99";
+            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_EXPERIMENT);
 
-            DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, null)).Returns<FeatureDecision>(null);
+            DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, null)).Returns(decision);
 
             var optly = Helper.CreatePrivateOptimizely();
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
@@ -1617,7 +1621,7 @@ namespace OptimizelySDK.Tests
             Assert.AreEqual(expectedValue, variableValue);
 
             LoggerMock.Verify(l => l.Log(LogLevel.INFO,
-                $@"User ""{TestUserId}"" is not in any variation for feature flag ""{featureKey}"", returning default value ""{variableValue}""."));
+                $@"Feature ""{featureKey}"" is not enabled for user {TestUserId}. Returning default value for variable ""{variableKey}""."));
         }
 
         // Should return default value and log message when feature is enabled for the user 
