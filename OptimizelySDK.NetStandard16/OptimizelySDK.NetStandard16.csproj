@@ -57,11 +57,12 @@
         <Compile Include=".\Properties\AssemblyInfo.cs" />
         <Compile Include="..\OptimizelySDK\Utils\ConfigParser.cs" />
         <Compile Include="..\OptimizelySDK\Utils\Schema.cs" />
-    		<Compile Include="..\OptimizelySDK\Utils\ControlAttributes.cs" />
-		    <Compile Include="..\OptimizelySDK\Utils\ExceptionExtensions.cs" />
-    		<Compile Include="..\OptimizelySDK\Utils\ExperimentUtils.cs" />
-		    <Compile Include="..\OptimizelySDK\Utils\ConditionParser.cs" />
-    		<Compile Include="..\OptimizelySDK\Utils\AttributeMatchTypes.cs" />
+		<Compile Include="..\OptimizelySDK\Utils\ControlAttributes.cs" />
+		<Compile Include="..\OptimizelySDK\Utils\ExceptionExtensions.cs" />
+		<Compile Include="..\OptimizelySDK\Utils\ExperimentUtils.cs" />
+		<Compile Include="..\OptimizelySDK\Utils\ConditionParser.cs" />
+		<Compile Include="..\OptimizelySDK\Utils\AttributeMatchTypes.cs" />
+		<Compile Include="..\OptimizelySDK\Utils\DecisionInfoTypes.cs" />
         <Compile Include="..\OptimizelySDK\Bucketing\Bucketer.cs" />
         <Compile Include="..\OptimizelySDK\Bucketing\Decision.cs" />
         <Compile Include="..\OptimizelySDK\Bucketing\DecisionService.cs" />

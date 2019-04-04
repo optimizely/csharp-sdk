@@ -189,7 +189,7 @@ namespace OptimizelySDK
                 return null;
             }
 
-            var variation = DecisionService.GetVariation(experiment, userId, userAttributes);
+            var variation = GetVariation(experimentKey, userId, userAttributes);
 
             if (variation == null || variation.Key == null)
             {
@@ -294,13 +294,23 @@ namespace OptimizelySDK
             };
 
             if (!ValidateStringInputs(inputValues))
-                return null;
+                return null; 
 
             Experiment experiment = Config.GetExperimentFromKey(experimentKey);
             if (experiment.Key == null)
                 return null;
 
-            return DecisionService.GetVariation(experiment, userId, userAttributes);
+            var variation = DecisionService.GetVariation(experiment, userId, userAttributes);
+            var decisionInfo = new Dictionary<string, object>
+            {
+                { "experimentKey", experimentKey },
+                { "variationKey", variation?.Key },
+            };
+
+            userAttributes = userAttributes ?? new UserAttributes();
+            NotificationCenter.SendNotifications(NotificationCenter.NotificationType.Decision, DecisionInfoTypes.EXPERIMENT, userId,
+                userAttributes, decisionInfo);
+            return variation;
         }
 
         /// <summary>

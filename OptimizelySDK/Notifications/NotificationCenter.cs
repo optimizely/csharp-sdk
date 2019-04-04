@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2017, Optimizely
+ * Copyright 2017, 2019, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,8 +33,9 @@ namespace OptimizelySDK.Notifications
         /// </summary>
         public enum NotificationType
         {
-            Activate, // Activate called.
-            Track
+            Activate,   // Activate called.
+            Track,      // Track called.
+            Decision    // A decision is made in the system. i.e. user activation, feature access or feature-variable value retrieval.
         };
 
         /// <summary>
@@ -58,6 +59,15 @@ namespace OptimizelySDK.Notifications
         /// <param name="logEvent">The conversion event</param>
         public delegate void TrackCallback(string eventKey, string userId, UserAttributes userAttributes, EventTags eventTags,
             LogEvent logEvent);
+
+        /// <summary>
+        /// Delegate for decision notifications.
+        /// </summary>
+        /// <param name="type">Decision-Info type</param>
+        /// <param name="userId">The user identifier</param>
+        /// <param name="userAttributes">Associative array of attributes for the user</param>
+        /// <param name="decisionInfo">Dictionary containing decision information</param>
+        public delegate void DecisionCallback(string type, string userId, UserAttributes userAttributes, Dictionary<string, object> decisionInfo);
 
         private ILogger Logger;
 
@@ -129,6 +139,20 @@ namespace OptimizelySDK.Notifications
             return AddNotification(notificationType, (object)trackCallback);
         }
 
+        /// <summary>
+        /// Add a notification callback of decision type to the notification center.
+        /// </summary>
+        /// <param name="notificationType">Notification type</param>
+        /// <param name="decisionCallback">Callback function to call when event gets triggered</param>
+        /// <returns>int | 0 for invalid notification type, -1 for adding existing notification
+        /// or the notification id of newly added notification.</returns>
+        public int AddNotification(NotificationType notificationType, DecisionCallback decisionCallback)
+        {
+            if (!IsNotificationTypeValid(notificationType, NotificationType.Decision))
+                return 0;
+
+            return AddNotification(notificationType, (object)decisionCallback);
+        }
 
         /// <summary>
         /// Validate notification type.
