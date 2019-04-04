@@ -19,5 +19,6 @@ namespace OptimizelySDK.Utils
     public static class DecisionInfoTypes
     {
         public const string FEATURE = "feature";
+        public const string EXPERIMENT = "experiment";
     }
 }
