@@ -371,7 +371,7 @@ namespace OptimizelySDK
                 return false;
 
             var decision = DecisionService.GetVariationForFeature(featureFlag, userId, userAttributes);
-            if (IsValidDecision(decision)) {
+            if (decision.Variation != null) {
                 if (decision.Source == FeatureDecision.DECISION_SOURCE_EXPERIMENT) {
                     SendImpressionEvent(decision.Experiment, decision.Variation, userId, userAttributes);
                 } else {
@@ -431,7 +431,7 @@ namespace OptimizelySDK
             var variableValue = featureVariable.DefaultValue;
             var decision = DecisionService.GetVariationForFeature(featureFlag, userId, userAttributes);
 
-            if (IsValidDecision(decision))
+            if (decision.Variation != null)
             {
                 var variation = decision.Variation;
                 featureEnabled = variation.FeatureEnabled.GetValueOrDefault();
@@ -636,12 +636,7 @@ namespace OptimizelySDK
 
             return isValid;
         }
-
-        private bool IsValidDecision(FeatureDecision decision)
-        {
-            return decision != null && decision.Experiment != null && decision.Variation != null;
-        }
-
+        
         private object GetTypeCastedVariableValue(string value, FeatureVariable.VariableType type)
         {
             object result = null;
