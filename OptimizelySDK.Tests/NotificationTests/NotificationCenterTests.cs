@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2017, 2019 Optimizely
+ * Copyright 2017, 2019, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -237,7 +237,7 @@ namespace OptimizelySDK.Tests.NotificationTests
             EventTags eventTags, LogEvent logEvent) {
         }
 
-        public virtual void TestDecisionCallback(string type, string userId, UserAttributes userAttributes,
+        public virtual void TestDecisionCallback(string type, string userId, UserAttributes userAttributes, 
             Dictionary<string, object> decisionInfo) {
         }
     }

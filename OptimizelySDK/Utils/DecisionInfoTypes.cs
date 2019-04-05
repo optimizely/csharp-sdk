@@ -1,8 +1,8 @@
 ﻿/* 
- * Copyright 2017-2019, Optimizely
+ * Copyright 2019, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use file except in compliance with the License.
+ * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
@@ -18,6 +18,7 @@ namespace OptimizelySDK.Utils
 {
     public static class DecisionInfoTypes
     {
+        public const string EXPERIMENT = "experiment";
         public const string FEATURE_VARIABLE = "feature_variable";
     }
 }

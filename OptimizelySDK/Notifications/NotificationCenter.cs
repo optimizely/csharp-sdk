@@ -61,7 +61,7 @@ namespace OptimizelySDK.Notifications
             LogEvent logEvent);
 
         /// <summary>
-        /// Delegate for decision notifcations.
+        /// Delegate for decision notifications.
         /// </summary>
         /// <param name="type">Decision-Info type</param>
         /// <param name="userId">The user identifier</param>
