@@ -748,6 +748,32 @@
 							"endOfRange": 9000
 						}
 					]
+				},
+				{
+					"id": "188880",
+					"key": "188880",
+					"status": "Running",
+					"layerId": "166660",
+					"audienceIds": [],
+					"variations": [
+						{
+							"id": "188881",
+							"key": "188881",
+							"variables": [
+								{
+									"id": "155556",
+									"value": "false"
+								}
+							],
+							"featureEnabled": false
+						}
+					],
+					"trafficAllocation": [
+						{
+							"entityId": "188881",
+							"endOfRange": 9200
+						}
+					]
 				}
 			]
 		},

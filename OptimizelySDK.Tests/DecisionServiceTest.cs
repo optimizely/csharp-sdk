@@ -819,12 +819,13 @@ namespace OptimizelySDK.Tests
         public void TestGetVariationForFeatureWhenTheUserIsNeitherBucketedIntoFeatureExperimentNorToFeatureRollout()
         {
             var featureFlag = ProjectConfig.GetFeatureFlagFromKey("string_single_variable_feature");
+            var expectedDecision = new FeatureDecision(null, null, FeatureDecision.DECISION_SOURCE_ROLLOUT);
 
             DecisionServiceMock.Setup(ds => ds.GetVariationForFeatureExperiment(It.IsAny<FeatureFlag>(), It.IsAny<string>(), It.IsAny<UserAttributes>())).Returns<Variation>(null);
             DecisionServiceMock.Setup(ds => ds.GetVariationForFeatureRollout(It.IsAny<FeatureFlag>(), It.IsAny<string>(), It.IsAny<UserAttributes>())).Returns<Variation>(null);
 
             var actualDecision = DecisionServiceMock.Object.GetVariationForFeature(featureFlag, "user1", new UserAttributes());
-            Assert.IsNull(actualDecision);
+            Assert.IsTrue(TestData.CompareObjects(expectedDecision, actualDecision));
 
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "The user \"user1\" is not bucketed into a rollout for feature flag \"string_single_variable_feature\"."));
         }

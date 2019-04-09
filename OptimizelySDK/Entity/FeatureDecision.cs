@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2017, Optimizely
+ * Copyright 2017, 2019, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,17 @@
  * limitations under the License.
  */
 
-using System;
-using System.Collections.Generic;
-
 namespace OptimizelySDK.Entity
 {
     public class FeatureDecision
     {
-        public const string DECISION_SOURCE_EXPERIMENT = "experiment";
-        public const string DECISION_SOURCE_ROLLOUT = "rollout";
+        public const string DECISION_SOURCE_EXPERIMENT = "EXPERIMENT";
+        public const string DECISION_SOURCE_ROLLOUT = "ROLLOUT";
 
         public Experiment Experiment { get; }
         public Variation Variation { get; }
         public string Source { get; }
-
+        
         public FeatureDecision(Experiment experiment, Variation variation, string source)
         {
             Experiment = experiment;
