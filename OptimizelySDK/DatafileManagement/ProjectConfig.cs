@@ -1,10 +1,7 @@
 ﻿using System;
 namespace OptimizelySDK.DatafileManagement
 {
-    public class ProjectConfig
+    public interface ProjectConfig
     {
-        public ProjectConfig()
-        {
-        }
     }
 }

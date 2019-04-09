@@ -121,12 +121,20 @@
     <Compile Include="Utils\Schema.cs" />
     <Compile Include="Bucketing\UserProfileService.cs" />
     <Compile Include="Bucketing\DecisionService.cs" />
+    <Compile Include="DatafileManagement\ProjectConfig.cs" />
+    <Compile Include="DatafileManagement\DatafileProjectConfig.cs" />
+    <Compile Include="DatafileManagement\ProjectConfigManager.cs" />
+    <Compile Include="DatafileManagement\PollingProjectConfigManager.cs" />
+    <Compile Include="DatafileManagement\HttpProjectConfigManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Utils\schema.json" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="DatafileManagement\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

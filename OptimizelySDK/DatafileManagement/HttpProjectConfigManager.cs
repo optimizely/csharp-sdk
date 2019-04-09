@@ -1,10 +1,11 @@
 ﻿using System;
 namespace OptimizelySDK.DatafileManagement
 {
-    public class HttpProjectConfigManager
+    public class HttpProjectConfigManager : PollingProjectConfigManager
     {
-        public HttpProjectConfigManager()
+        protected override ProjectConfig FetchConfig()
         {
+            throw new NotImplementedException();
         }
     }
 }
