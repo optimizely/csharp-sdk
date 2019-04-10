@@ -98,7 +98,7 @@ namespace OptimizelySDK.DatafileManagement
             return true;
         }
 
-        protected abstract ProjectConfig FetchConfig();
+        public abstract ProjectConfig FetchConfig();
 
         public virtual void Run(object sender, ElapsedEventArgs e)
         {

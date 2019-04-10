@@ -22,9 +22,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         {
             return new Mock<HttpProjectConfigManager>(url, period, autoUpdate, logger, errorHandler) { CallBase = true };
         }
-
-        //public void Update
-
+        
         [Test]
         public void TestHttpConfigManagerReturnsCorrectProjectConfig()
         {
@@ -37,30 +35,31 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
             Assert.NotNull(config);
         }
 
-        //[Test]
-        //public void TestHttpConfigManagerDoesNotPollContinouslyWhenAutoUpdateIsFalse()
-        //{
-        //    HttpConfigManagerMock = GetHttpConfigManagerMock(Url, TimeSpan.FromMilliseconds(5000), false, null, null);
-        //    HttpConfigManagerMock.Setup(mgr => mgr.SetConfig(It.IsAny<DatafileManagement.ProjectConfig>()));
+        [Test]
+        public void TestHttpConfigManagerDoesNotPollContinouslyWhenAutoUpdateIsFalse()
+        {
+            HttpConfigManagerMock = GetHttpConfigManagerMock(Url, TimeSpan.FromMilliseconds(2000), false, null, null);
+            HttpConfigManagerMock.Setup(mgr => mgr.FetchConfig());
 
-        //    //HttpConfigManagerMock.Object.GetConfig();
-        //    Thread.Sleep(15000);
+            HttpConfigManagerMock.Object.GetConfig();
+            Thread.Sleep(10000);
 
-        //    HttpConfigManagerMock.Verify(mgr => mgr.SetConfig(It.IsAny<DatafileManagement.ProjectConfig>()), Times.Exactly(1));
-        //}
+            // The timeout is 2 seconds but FetchConfig called once from GetConfig() as AutoUpdate is false.
+            HttpConfigManagerMock.Verify(mgr => mgr.FetchConfig(), Times.Exactly(1));
+        }
 
-        //[Test]
-        //public void TestHttpConfigManagerPollsContinouslyWhenAutoUpdateIsTrue()
-        //{
-        //    HttpConfigManagerMock = GetHttpConfigManagerMock(Url, TimeSpan.FromMilliseconds(2000), true, null, null);
-        //    HttpConfigManagerMock.Setup(mgr => mgr.Run(It.IsAny<object>(), It.IsAny<ElapsedEventArgs>()));
+        [Test]
+        public void TestHttpConfigManagerPollsContinouslyWhenAutoUpdateIsTrue()
+        {
+            HttpConfigManagerMock = GetHttpConfigManagerMock(Url, TimeSpan.FromMilliseconds(2000), true, null, null);
+            HttpConfigManagerMock.Setup(mgr => mgr.FetchConfig());
 
-        //    var config = HttpConfigManagerMock.Object.GetConfig();
-        //    Assert.NotNull(config);
+            HttpConfigManagerMock.Object.GetConfig();
+            
+            Thread.Sleep(10000);
 
-        //    Thread.Sleep(15000);
-
-        //    HttpConfigManagerMock.Verify(mgr => mgr.Run(It.IsAny<object>(), It.IsAny<ElapsedEventArgs>()), Times.AtLeast(3));
-        //}
+            // The timeout is 2 seconds so FetchConfig called continously from GetConfig() as AutoUpdate is true.
+            HttpConfigManagerMock.Verify(mgr => mgr.FetchConfig(), Times.AtLeast(3));
+        }
     }
 }

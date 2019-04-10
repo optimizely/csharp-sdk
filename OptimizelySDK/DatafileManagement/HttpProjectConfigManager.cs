@@ -100,7 +100,7 @@ namespace OptimizelySDK.DatafileManagement
             }
         }
 
-        protected override ProjectConfig FetchConfig()
+        public override ProjectConfig FetchConfig()
         {
             //Client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             var request = new HttpRequestMessage
@@ -108,12 +108,7 @@ namespace OptimizelySDK.DatafileManagement
                 RequestUri = new Uri(Url),
                 Method = HttpMethod.Get,
             };
-
-            //request.Content = new StringContent("", Encoding.UTF8, "application/json");
-
-            //request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-            //request.Headers.Add("Content-Type", "application/json");
-
+            
             // Send If-Modified-Since header if Last-Modified-Since header contains any value.
             if (!string.IsNullOrEmpty(lastModifiedSince))
                 request.Headers.Add("If-Modified-Since", lastModifiedSince);
