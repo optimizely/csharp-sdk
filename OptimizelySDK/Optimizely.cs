@@ -430,7 +430,7 @@ namespace OptimizelySDK
         /// <param name="userAttributes">The user's attributes</param>
         /// <param name="variableType">Variable type</param>
         /// <returns>string | null Feature variable value</returns>
-        public virtual string GetFeatureVariableValueForType(string featureKey, string variableKey, string userId, 
+        public virtual T GetFeatureVariableValueForType<T>(string featureKey, string variableKey, string userId, 
             UserAttributes userAttributes, FeatureVariable.VariableType variableType)
         {
             var inputValues = new Dictionary<string, string>
@@ -441,32 +441,34 @@ namespace OptimizelySDK
             };
 
             if (!ValidateStringInputs(inputValues))
-                return null;
+                return default(T);
 
             var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
             if (string.IsNullOrEmpty(featureFlag.Key))
-                return null;
+                return default(T);
 
             var featureVariable = featureFlag.GetFeatureVariableFromKey(variableKey);
             if (featureVariable == null)
             {
                 Logger.Log(LogLevel.ERROR,
                     $@"No feature variable was found for key ""{variableKey}"" in feature flag ""{featureKey}"".");
-                return null;
+                return default(T);
             }
             else if (featureVariable.Type != variableType)
             {
                 Logger.Log(LogLevel.ERROR,
                     $@"Variable is of type ""{featureVariable.Type}"", but you requested it as type ""{variableType}"".");
-                return null;
+                return default(T);
             }
-            
+
+            var featureEnabled = false;
             var variableValue = featureVariable.DefaultValue;
             var decision = DecisionService.GetVariationForFeature(featureFlag, userId, userAttributes);
 
             if (decision.Variation != null)
             {
                 var variation = decision.Variation;
+                featureEnabled = variation.FeatureEnabled.GetValueOrDefault();
                 var featureVariableUsageInstance = variation.GetFeatureVariableUsageFromId(featureVariable.Id);
 
                 if (featureVariableUsageInstance != null)
@@ -492,7 +494,30 @@ namespace OptimizelySDK
                     $@"User ""{userId}"" is not in any variation for feature flag ""{featureKey}"", returning default value ""{variableValue}"".");
             }
 
-            return variableValue;
+            string experimentKey = null;
+            string variationKey = null;
+            if (decision?.Source == FeatureDecision.DECISION_SOURCE_EXPERIMENT)
+            {
+                experimentKey = decision.Experiment.Key;
+                variationKey = decision.Variation.Key;
+            }
+
+            var typeCastedValue = GetTypeCastedVariableValue(variableValue, variableType);
+            var decisionInfo = new Dictionary<string, object>
+            {
+                { "featureKey", featureKey },
+                { "featureEnabled", featureEnabled },
+                { "variableKey", variableKey },
+                { "variableValue", typeCastedValue },
+                { "variableType", variableType },
+                { "source", decision?.Source },
+                { "sourceExperimentKey", experimentKey },
+                { "sourceVariationKey", variationKey },
+            };
+
+            NotificationCenter.SendNotifications(NotificationCenter.NotificationType.Decision, DecisionInfoTypes.FEATURE_VARIABLE, userId,
+               userAttributes ?? new UserAttributes(), decisionInfo);
+            return (T)typeCastedValue;
         }
 
         /// <summary>
@@ -505,18 +530,7 @@ namespace OptimizelySDK
         /// <returns>bool | Feature variable value or null</returns>
         public bool? GetFeatureVariableBoolean(string featureKey, string variableKey, string userId, UserAttributes userAttributes = null)
         {
-            var variableType = FeatureVariable.VariableType.BOOLEAN;
-            var variableValue = GetFeatureVariableValueForType(featureKey, variableKey, userId, userAttributes, variableType);
-            
-            if (variableValue != null)
-            {
-                if (Boolean.TryParse(variableValue, out bool booleanValue))
-                    return booleanValue;
-                else
-                    Logger.Log(LogLevel.ERROR, $@"Unable to cast variable value ""{variableValue}"" to type ""{variableType}"".");
-            }
-            
-            return null;
+            return GetFeatureVariableValueForType<bool?>(featureKey, variableKey, userId, userAttributes, FeatureVariable.VariableType.BOOLEAN);
         }
 
         /// <summary>
@@ -529,18 +543,7 @@ namespace OptimizelySDK
         /// <returns>double | Feature variable value or null</returns>
         public double? GetFeatureVariableDouble(string featureKey, string variableKey, string userId, UserAttributes userAttributes = null)
         {
-            var variableType = FeatureVariable.VariableType.DOUBLE;
-            var variableValue = GetFeatureVariableValueForType(featureKey, variableKey, userId, userAttributes, variableType);
-
-            if (variableValue != null)
-            {
-                if (Double.TryParse(variableValue, out double doubleValue))
-                    return doubleValue;
-                else
-                    Logger.Log(LogLevel.ERROR, $@"Unable to cast variable value ""{variableValue}"" to type ""{variableType}"".");
-            }
-
-            return null;
+            return GetFeatureVariableValueForType<double?>(featureKey, variableKey, userId, userAttributes, FeatureVariable.VariableType.DOUBLE);
         }
 
         /// <summary>
@@ -553,18 +556,7 @@ namespace OptimizelySDK
         /// <returns>int | Feature variable value or null</returns>
         public int? GetFeatureVariableInteger(string featureKey, string variableKey, string userId, UserAttributes userAttributes = null)
         {
-            var variableType = FeatureVariable.VariableType.INTEGER;
-            var variableValue = GetFeatureVariableValueForType(featureKey, variableKey, userId, userAttributes, variableType);
-
-            if (variableValue != null)
-            {
-                if (Int32.TryParse(variableValue, out int intValue))
-                    return intValue;
-                else
-                    Logger.Log(LogLevel.ERROR, $@"Unable to cast variable value ""{variableValue}"" to type ""{variableType}"".");
-            }
-
-            return null;
+            return GetFeatureVariableValueForType<int?>(featureKey, variableKey, userId, userAttributes, FeatureVariable.VariableType.INTEGER);
         }
 
         /// <summary>
@@ -577,8 +569,7 @@ namespace OptimizelySDK
         /// <returns>string | Feature variable value or null</returns>
         public string GetFeatureVariableString(string featureKey, string variableKey, string userId, UserAttributes userAttributes = null)
         {
-            return GetFeatureVariableValueForType(featureKey, variableKey, userId, userAttributes, 
-                FeatureVariable.VariableType.STRING);
+            return GetFeatureVariableValueForType<string>(featureKey, variableKey, userId, userAttributes, FeatureVariable.VariableType.STRING);
         }
 
         /// <summary>
@@ -678,6 +669,34 @@ namespace OptimizelySDK
             }
 
             return isValid;
+        }
+        
+        private object GetTypeCastedVariableValue(string value, FeatureVariable.VariableType type)
+        {
+            object result = null;
+            switch (type)
+            {
+                case FeatureVariable.VariableType.BOOLEAN:
+                    bool.TryParse(value, out bool booleanValue);
+                    result = booleanValue;
+                    break;
+                case FeatureVariable.VariableType.DOUBLE:
+                    double.TryParse(value, out double doubleValue);
+                    result = doubleValue;
+                    break;
+                case FeatureVariable.VariableType.INTEGER:
+                    int.TryParse(value, out int intValue);
+                    result = intValue;
+                    break;
+                case FeatureVariable.VariableType.STRING:
+                    result = value;
+                    break;
+            }
+
+            if (result == null)
+                Logger.Log(LogLevel.ERROR, $@"Unable to cast variable value ""{value}"" to type ""{type}"".");
+
+            return result;
         }
     }
 }
