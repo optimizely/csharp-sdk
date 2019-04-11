@@ -54,6 +54,11 @@ namespace OptimizelySDK.Tests
         private Variation GroupVariation;
         private Optimizely OptimizelyWithTypedAudiences;
 
+        const string FEATUREVARIABLE_BOOLEANTYPE = "boolean";
+        const string FEATUREVARIABLE_INTEGERTYPE = "integer";
+        const string FEATUREVARIABLE_DOUBLETYPE = "double";
+        const string FEATUREVARIABLE_STRINGTYPE = "string";
+
         #region Test Life Cycle
         [SetUp]
         public void Initialize()
@@ -2474,7 +2479,7 @@ namespace OptimizelySDK.Tests
                 { "featureEnabled", true },
                 { "variableKey", variableKey },
                 { "variableValue", expectedValue },
-                { "variableType", FeatureVariable.VariableType.DOUBLE },
+                { "variableType", FEATUREVARIABLE_DOUBLETYPE },
                 { "source", FeatureDecision.DECISION_SOURCE_EXPERIMENT },
                 { "sourceExperimentKey", "test_experiment_double_feature" },
                 { "sourceVariationKey", "control" },
@@ -2518,7 +2523,7 @@ namespace OptimizelySDK.Tests
                 { "featureEnabled", true },
                 { "variableKey", variableKey },
                 { "variableValue", expectedValue },
-                { "variableType", FeatureVariable.VariableType.INTEGER },
+                { "variableType", FEATUREVARIABLE_INTEGERTYPE },
                 { "source", FeatureDecision.DECISION_SOURCE_EXPERIMENT },
                 { "sourceExperimentKey", "test_experiment_integer_feature" },
                 { "sourceVariationKey", "variation" },
@@ -2556,7 +2561,7 @@ namespace OptimizelySDK.Tests
                 { "featureEnabled", false },
                 { "variableKey", variableKey },
                 { "variableValue", expectedValue },
-                { "variableType", FeatureVariable.VariableType.DOUBLE },
+                { "variableType", FEATUREVARIABLE_DOUBLETYPE },
                 { "source", FeatureDecision.DECISION_SOURCE_EXPERIMENT },
                 { "sourceExperimentKey", "test_experiment_double_feature" },
                 { "sourceVariationKey", "variation" },
@@ -2600,7 +2605,7 @@ namespace OptimizelySDK.Tests
                 { "featureEnabled", false },
                 { "variableKey", variableKey },
                 { "variableValue", expectedValue },
-                { "variableType", FeatureVariable.VariableType.INTEGER },
+                { "variableType", FEATUREVARIABLE_INTEGERTYPE },
                 { "source", FeatureDecision.DECISION_SOURCE_EXPERIMENT },
                 { "sourceExperimentKey", "test_experiment_integer_feature" },
                 { "sourceVariationKey", "control" },
@@ -2638,7 +2643,7 @@ namespace OptimizelySDK.Tests
                 { "featureEnabled", true },
                 { "variableKey", variableKey },
                 { "variableValue", expectedValue },
-                { "variableType", FeatureVariable.VariableType.BOOLEAN },
+                { "variableType", FEATUREVARIABLE_BOOLEANTYPE },
                 { "source", FeatureDecision.DECISION_SOURCE_ROLLOUT },
                 { "sourceExperimentKey", null },
                 { "sourceVariationKey", null },
@@ -2682,7 +2687,7 @@ namespace OptimizelySDK.Tests
                 { "featureEnabled", true },
                 { "variableKey", variableKey },
                 { "variableValue", expectedValue },
-                { "variableType", FeatureVariable.VariableType.STRING },
+                { "variableType", FEATUREVARIABLE_STRINGTYPE },
                 { "source", FeatureDecision.DECISION_SOURCE_ROLLOUT },
                 { "sourceExperimentKey", null },
                 { "sourceVariationKey", null },
@@ -2720,7 +2725,7 @@ namespace OptimizelySDK.Tests
                 { "featureEnabled", false },
                 { "variableKey", variableKey },
                 { "variableValue", expectedValue },
-                { "variableType", FeatureVariable.VariableType.BOOLEAN },
+                { "variableType", FEATUREVARIABLE_BOOLEANTYPE },
                 { "source", FeatureDecision.DECISION_SOURCE_ROLLOUT },
                 { "sourceExperimentKey", null },
                 { "sourceVariationKey", null },
@@ -2764,7 +2769,7 @@ namespace OptimizelySDK.Tests
                 { "featureEnabled", false },
                 { "variableKey", variableKey },
                 { "variableValue", expectedValue },
-                { "variableType", FeatureVariable.VariableType.STRING },
+                { "variableType", FEATUREVARIABLE_STRINGTYPE },
                 { "source", FeatureDecision.DECISION_SOURCE_ROLLOUT },
                 { "sourceExperimentKey", null },
                 { "sourceVariationKey", null },
@@ -2800,7 +2805,7 @@ namespace OptimizelySDK.Tests
                 { "featureEnabled", false },
                 { "variableKey", variableKey },
                 { "variableValue", expectedValue },
-                { "variableType", FeatureVariable.VariableType.DOUBLE },
+                { "variableType", FEATUREVARIABLE_DOUBLETYPE },
                 { "source", FeatureDecision.DECISION_SOURCE_ROLLOUT },
                 { "sourceExperimentKey", null },
                 { "sourceVariationKey", null },
