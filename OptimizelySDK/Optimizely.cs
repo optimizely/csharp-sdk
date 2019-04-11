@@ -509,7 +509,7 @@ namespace OptimizelySDK
                 { "featureEnabled", featureEnabled },
                 { "variableKey", variableKey },
                 { "variableValue", typeCastedValue },
-                { "variableType", variableType },
+                { "variableType", variableType.ToString().ToLower() },
                 { "source", decision?.Source },
                 { "sourceExperimentKey", experimentKey },
                 { "sourceVariationKey", variationKey },
