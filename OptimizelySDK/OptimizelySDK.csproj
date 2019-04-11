@@ -70,6 +70,9 @@
     <Compile Include="AudienceConditions\OrCondition.cs" />
     <Compile Include="Bucketing\Bucketer.cs" />
     <Compile Include="Bucketing\Decision.cs" />
+    <Compile Include="DatafileManagement\StaticDatafileManager.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Entity\Attribute.cs" />
     <Compile Include="Entity\Audience.cs" />
     <Compile Include="AudienceConditions\BaseCondition.cs" />

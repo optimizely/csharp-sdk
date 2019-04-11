@@ -19,35 +19,36 @@ using System.Timers;
 using System.Threading.Tasks;
 using OptimizelySDK.Logger;
 using OptimizelySDK.ErrorHandler;
-using System.Diagnostics;
 
 namespace OptimizelySDK.DatafileManagement
 {
-    public abstract class PollingProjectConfigManager : Timer, ProjectConfigManager
+    public class PollingProjectConfigManager : Timer, ProjectConfigManager
     {
-        protected Task _onReady;
         private bool isStarted = false;
         private bool autoUpdate = false;
         private ProjectConfig currentProjectConfig = null;
+        private PollingProjectConfigManager ConfigManager;
+
         protected ILogger Logger { get; set; }
         protected IErrorHandler ErrorHandler { get; set; }
 
         //public delegate void ReadyCallback();
-        //public ReadyCallback UpdateHandler;
-        public delegate void EventHandler();
-        public event EventHandler UpdateHandler;
-        
-        public PollingProjectConfigManager(TimeSpan period, bool autoUpdate, ILogger logger = null, IErrorHandler errorHandler = null)
+        //public ReadyCallback ReadyHandler;
+        //public delegate void EventHandler();
+        //public event EventHandler UpdateHandler;
+
+        protected Task datafileUpdaterTask;
+
+        public PollingProjectConfigManager(TimeSpan period, bool autoUpdate, ILogger logger = null, IErrorHandler errorHandler = null, PollingProjectConfigManager configManager = null)
         {
-            //this.AutoReset = autoUpdate;
-            // When app finishes task then start polling,
-            // not at fixed interval
             this.autoUpdate = autoUpdate;
             Interval = period.TotalMilliseconds;
-            AutoReset = false;
             Elapsed += Run;
 
-            // Setting Enabled to autoUpdate value for firing event.
+            ConfigManager = configManager;
+
+            // Setting AutoReset and Enabled to autoUpdate value for firing event.
+            AutoReset = autoUpdate;
             Enabled = autoUpdate;
         }
 
@@ -61,11 +62,13 @@ namespace OptimizelySDK.DatafileManagement
         {
             if (isStarted) 
             {
-                try {
-                    _onReady.Wait();
-                } catch (Exception ex) {
-                    Console.WriteLine(ex);
-                    //logger.warn("Interrupted waiting for valid ProjectConfig");
+                try
+                {
+                    datafileUpdaterTask.Wait();
+                }
+                catch (Exception ex)
+                {
+                    Logger.Log(LogLevel.WARN, ex.Message);
                 }
 
                 return currentProjectConfig;
@@ -86,24 +89,23 @@ namespace OptimizelySDK.DatafileManagement
             if (projectConfig == null)
                 return false;
 
-            //String previousVersion = currentProjectConfig.get() == null ? "null" : currentProjectConfig.get().getRevision();
-
-            //if (projectConfig.getRevision().equals(previousVersion)) {
-            //    return false;
-            //}
-
-            //logger.info("New datafile set with revision: {}. Old version: {}", projectConfig.getRevision(), previousVersion);
-
+            var previousVersion = currentProjectConfig == null ? "null" : currentProjectConfig.Revision;
+            if (projectConfig.Revision == previousVersion)
+                return false;
+            
             currentProjectConfig = projectConfig;
             return true;
         }
 
-        public abstract ProjectConfig FetchConfig();
+        public virtual ProjectConfig FetchConfig()
+        {
+            return ConfigManager.FetchConfig();
+        }
 
         public virtual void Run(object sender, ElapsedEventArgs e)
         {
             // 4.0 < frameworks
-            Task t = new Task(() => {
+            datafileUpdaterTask = new Task(() => {
                 // if not modified, no need to send
                 var config = FetchConfig();
                 if (config != null)
@@ -111,19 +113,11 @@ namespace OptimizelySDK.DatafileManagement
                     SetConfig(config);
                 }
             });
-
-            t.ContinueWith((arg) => {
-                if (autoUpdate)
-                    Start();
-            });
-
-            if (isStarted == false)
-            {
+            
+            if (!isStarted)
                 isStarted = true;
-                _onReady = t;
-            }
 
-            t.Start();
+            datafileUpdaterTask.Start();
         }
     }
 }

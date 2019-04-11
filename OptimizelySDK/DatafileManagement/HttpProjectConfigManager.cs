@@ -2,13 +2,9 @@
 using OptimizelySDK.Logger;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace OptimizelySDK.DatafileManagement
 {
@@ -68,9 +64,6 @@ namespace OptimizelySDK.DatafileManagement
 
             public HttpProjectConfigManager Build()
             {
-                //if (Url != null)
-                //    return new HttpProjectConfigManager(Url, Period, AutoUpdate);
-
                 if (SdkKey == null)
                     throw new Exception("sdkKey cannot be null");
 
@@ -92,17 +85,8 @@ namespace OptimizelySDK.DatafileManagement
             ErrorHandler = errorHandler;
         }
 
-        public Task OnReady
-        {
-            get
-            {
-                return _onReady;
-            }
-        }
-
         public override ProjectConfig FetchConfig()
         {
-            //Client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             var request = new HttpRequestMessage
             {
                 RequestUri = new Uri(Url),
