@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+using OptimizelySDK.DatafileManagement;
 using OptimizelySDK.Entity;
 using System;
 using System.Collections.Generic;

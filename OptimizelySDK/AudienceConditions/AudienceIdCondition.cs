@@ -16,6 +16,7 @@
 
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using OptimizelySDK.DatafileManagement;
 using OptimizelySDK.Entity;
 using OptimizelySDK.Logger;
 

@@ -16,6 +16,7 @@
 
 using System;
 using System.Collections.Generic;
+using OptimizelySDK.DatafileManagement;
 using OptimizelySDK.Entity;
 using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Logger;

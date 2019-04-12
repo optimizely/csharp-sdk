@@ -15,6 +15,7 @@
  */
 
 using OptimizelySDK.AudienceConditions;
+using OptimizelySDK.DatafileManagement;
 using OptimizelySDK.Entity;
 using OptimizelySDK.Logger;
 
