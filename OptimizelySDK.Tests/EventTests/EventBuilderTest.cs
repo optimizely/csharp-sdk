@@ -24,6 +24,7 @@ using System;
 using NUnit.Framework;
 using OptimizelySDK.Bucketing;
 using OptimizelySDK.Utils;
+using OptimizelySDK.DatafileManagement;
 
 namespace OptimizelySDK.Tests.EventTests
 {
@@ -40,7 +41,7 @@ namespace OptimizelySDK.Tests.EventTests
         {
             TestUserId = "testUserId";
             var logger = new NoOpLogger();
-            Config = ProjectConfig.Create(TestData.Datafile, logger, new ErrorHandler.NoOpErrorHandler());
+            Config = DatafileProjectConfig.Create(TestData.Datafile, logger, new ErrorHandler.NoOpErrorHandler());
             EventBuilder = new EventBuilder(new Bucketer(logger));
         }
 
@@ -1781,7 +1782,7 @@ namespace OptimizelySDK.Tests.EventTests
             var guid = Guid.NewGuid();
             var timeStamp = TestData.SecondsSince1970();
             
-            var eventInMultiExperimentConfig = ProjectConfig.Create(TestData.SimpleABExperimentsDatafile, new NoOpLogger(), new ErrorHandler.NoOpErrorHandler());
+            var eventInMultiExperimentConfig = DatafileProjectConfig.Create(TestData.SimpleABExperimentsDatafile, new NoOpLogger(), new ErrorHandler.NoOpErrorHandler());
 
             var experimentIdVariationMap = new Dictionary<string, Variation>
             {

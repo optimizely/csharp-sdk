@@ -31,6 +31,7 @@ using OptimizelySDK.Tests.NotificationTests;
 using OptimizelySDK.Utils;
 using Newtonsoft.Json;
 using System.Reflection;
+using OptimizelySDK.DatafileManagement;
 
 namespace OptimizelySDK.Tests
 {
@@ -77,7 +78,7 @@ namespace OptimizelySDK.Tests
             EventBuilderMock.Setup(b => b.CreateConversionEvent(It.IsAny<ProjectConfig>(), It.IsAny<string>(),
                 It.IsAny<string>(), It.IsAny<UserAttributes>(), It.IsAny<EventTags>()));
 
-            Config = ProjectConfig.Create(
+            Config = DatafileProjectConfig.Create(
                 content: TestData.Datafile,
                 logger: LoggerMock.Object,
                 errorHandler: new NoOpErrorHandler());
@@ -770,7 +771,7 @@ namespace OptimizelySDK.Tests
         public void TestForcedVariationPreceedsWhitelistedVariation()
         {
             var optimizely = new Optimizely(TestData.Datafile, EventDispatcherMock.Object, LoggerMock.Object, ErrorHandlerMock.Object);
-            var projectConfig = ProjectConfig.Create(TestData.Datafile, LoggerMock.Object, ErrorHandlerMock.Object);
+            var projectConfig = DatafileProjectConfig.Create(TestData.Datafile, LoggerMock.Object, ErrorHandlerMock.Object);
             Variation expectedVariation1 = projectConfig.GetVariationFromKey("etag3", "vtag5");
             Variation expectedVariation2 = projectConfig.GetVariationFromKey("etag3", "vtag6");
 
@@ -818,7 +819,7 @@ namespace OptimizelySDK.Tests
             userProfileServiceMock.Setup(_ => _.Lookup(userId)).Returns(userProfile.ToMap());
 
             var optimizely = new Optimizely(TestData.Datafile, EventDispatcherMock.Object, LoggerMock.Object, ErrorHandlerMock.Object, userProfileServiceMock.Object);
-            var projectConfig = ProjectConfig.Create(TestData.Datafile, LoggerMock.Object, ErrorHandlerMock.Object);
+            var projectConfig = DatafileProjectConfig.Create(TestData.Datafile, LoggerMock.Object, ErrorHandlerMock.Object);
             Variation expectedFbVariation = projectConfig.GetVariationFromKey(experimentKey, fbVariationKey);
             Variation expectedVariation = projectConfig.GetVariationFromKey(experimentKey, variationKey);
 
@@ -1731,7 +1732,7 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestIsFeatureEnabledGivenFeatureFlagContainsInvalidExperiment()
         {
-            var tempConfig = ProjectConfig.Create(TestData.Datafile, LoggerMock.Object, new NoOpErrorHandler());
+            var tempConfig = DatafileProjectConfig.Create(TestData.Datafile, LoggerMock.Object, new NoOpErrorHandler());
             var featureFlag = tempConfig.GetFeatureFlagFromKey("multi_variate_feature");
 
             var optly = Helper.CreatePrivateOptimizely();

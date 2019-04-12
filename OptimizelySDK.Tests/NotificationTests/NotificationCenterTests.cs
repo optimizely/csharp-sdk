@@ -16,6 +16,7 @@
 
 using Moq;
 using NUnit.Framework;
+using OptimizelySDK.DatafileManagement;
 using OptimizelySDK.Entity;
 using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Event;
@@ -156,7 +157,7 @@ namespace OptimizelySDK.Tests.NotificationTests
         [Test]
         public void TestSendNotifications()
         {
-            var config = ProjectConfig.Create(TestData.Datafile, LoggerMock.Object, new NoOpErrorHandler());
+            var config = DatafileProjectConfig.Create(TestData.Datafile, LoggerMock.Object, new NoOpErrorHandler());
             var logEventMocker = new Mock<LogEvent>("http://mockedurl", new Dictionary<string, object>(), "POST", new Dictionary<string, string>());
             // Mocking notification callbacks.
             var notificationCallbackMock = new Mock<TestNotificationCallbacks>();

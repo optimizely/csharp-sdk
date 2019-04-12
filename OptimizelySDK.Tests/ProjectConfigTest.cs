@@ -25,6 +25,7 @@ using OptimizelySDK.Entity;
 using Newtonsoft.Json;
 using OptimizelySDK.Event.Builder;
 using OptimizelySDK.Utils;
+using OptimizelySDK.DatafileManagement;
 
 namespace OptimizelySDK.Tests
 {
@@ -42,7 +43,7 @@ namespace OptimizelySDK.Tests
             ErrorHandlerMock = new Mock<IErrorHandler>();
             ErrorHandlerMock.Setup(e => e.HandleError(It.IsAny<Exception>()));
 
-            Config = ProjectConfig.Create(TestData.Datafile, LoggerMock.Object, ErrorHandlerMock.Object);
+            Config = DatafileProjectConfig.Create(TestData.Datafile, LoggerMock.Object, ErrorHandlerMock.Object);
         }
 
         public static Dictionary<string, object> CreateDictionary(string name, object entityObject)
@@ -638,7 +639,7 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TempProjectConfigTest()
         {
-            ProjectConfig config = ProjectConfig.Create(TestData.Datafile, new Mock<ILogger>().Object, new DefaultErrorHandler());
+            ProjectConfig config = DatafileProjectConfig.Create(TestData.Datafile, new Mock<ILogger>().Object, new DefaultErrorHandler());
             Assert.IsNotNull(config);
             Assert.AreEqual("1592310167", config.AccountId);
         }
@@ -799,7 +800,7 @@ namespace OptimizelySDK.Tests
             if (projConfig.TryGetValue("botFiltering", out JToken token))
             {
                 projConfig.Property("botFiltering").Remove();
-                var configWithoutBotFilter = ProjectConfig.Create(JsonConvert.SerializeObject(projConfig),
+                var configWithoutBotFilter = DatafileProjectConfig.Create(JsonConvert.SerializeObject(projConfig),
                     LoggerMock.Object, ErrorHandlerMock.Object);
 
                 // Verify that bot filtering is null when not defined in datafile.
@@ -825,9 +826,9 @@ namespace OptimizelySDK.Tests
             attributes.Add((JObject)JToken.FromObject(reservedAttr));
 
             // Verify that attribute Id is returned and warning is logged for attribute key with reserved prefix that exists in datafile.
-            var reservedAttrConfig = ProjectConfig.Create(JsonConvert.SerializeObject(projConfig), LoggerMock.Object, ErrorHandlerMock.Object);
+            var reservedAttrConfig = DatafileProjectConfig.Create(JsonConvert.SerializeObject(projConfig), LoggerMock.Object, ErrorHandlerMock.Object);
             Assert.AreEqual(reservedAttrConfig.GetAttributeId(reservedPrefixAttrKey), reservedAttrConfig.GetAttribute(reservedPrefixAttrKey).Id);
-            LoggerMock.Verify(l => l.Log(LogLevel.WARN, $@"Attribute {reservedPrefixAttrKey} unexpectedly has reserved prefix {ProjectConfig.RESERVED_ATTRIBUTE_PREFIX}; using attribute ID instead of reserved attribute name."));
+            LoggerMock.Verify(l => l.Log(LogLevel.WARN, $@"Attribute {reservedPrefixAttrKey} unexpectedly has reserved prefix {DatafileProjectConfig.RESERVED_ATTRIBUTE_PREFIX}; using attribute ID instead of reserved attribute name."));
         }
 
         [Test]
@@ -841,34 +842,34 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestCreateThrowsWithNullDatafile()
         {
-            var exception = Assert.Throws<ConfigParseException>(() => ProjectConfig.Create(null, null, null));
+            var exception = Assert.Throws<ConfigParseException>(() => DatafileProjectConfig.Create(null, null, null));
             Assert.AreEqual("Unable to parse null datafile.", exception.Message);
         }
 
         [Test]
         public void TestCreateThrowsWithEmptyDatafile()
         {
-            var exception = Assert.Throws<ConfigParseException>(() => ProjectConfig.Create("", null, null));
+            var exception = Assert.Throws<ConfigParseException>(() => DatafileProjectConfig.Create("", null, null));
             Assert.AreEqual("Unable to parse empty datafile.", exception.Message);
         }
 
         [Test]
         public void TestCreateThrowsWithUnsupportedDatafileVersion()
         {
-            var exception = Assert.Throws<ConfigParseException>(() => ProjectConfig.Create(TestData.UnsupportedVersionDatafile, null, null));
+            var exception = Assert.Throws<ConfigParseException>(() => DatafileProjectConfig.Create(TestData.UnsupportedVersionDatafile, null, null));
             Assert.AreEqual($"This version of the C# SDK does not support the given datafile version: 5", exception.Message);
         }
 
         [Test]
         public void TestCreateDoesNotThrowWithValidDatafile()
         {
-            Assert.DoesNotThrow(() => ProjectConfig.Create(TestData.Datafile, null, null));
+            Assert.DoesNotThrow(() => DatafileProjectConfig.Create(TestData.Datafile, null, null));
         }
 
         [Test]
         public void TestExperimentAudiencesRetrivedFromTypedAudiencesFirstThenFromAudiences()
         {
-            var typedConfig = ProjectConfig.Create(TestData.TypedAudienceDatafile, null, null);
+            var typedConfig = DatafileProjectConfig.Create(TestData.TypedAudienceDatafile, null, null);
             var experiment = typedConfig.GetExperimentFromKey("feat_with_var_test");
 
             var expectedAudienceIds = new string[] { "3468206642", "3988293898", "3988293899", "3468206646", "3468206647", "3468206644", "3468206643" };

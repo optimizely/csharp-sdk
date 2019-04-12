@@ -23,6 +23,7 @@ using OptimizelySDK.Entity;
 using NUnit.Framework;
 using OptimizelySDK.Bucketing;
 using OptimizelySDK.Utils;
+using OptimizelySDK.DatafileManagement;
 
 namespace OptimizelySDK.Tests
 {
@@ -53,7 +54,7 @@ namespace OptimizelySDK.Tests
             UserProfileServiceMock  = new Mock<UserProfileService>();
             BucketerMock            = new Mock<Bucketer>(LoggerMock.Object);
             
-            ProjectConfig           = ProjectConfig.Create(TestData.Datafile, LoggerMock.Object, ErrorHandlerMock.Object);
+            ProjectConfig           = DatafileProjectConfig.Create(TestData.Datafile, LoggerMock.Object, ErrorHandlerMock.Object);
             WhitelistedExperiment   = ProjectConfig.ExperimentIdMap["224"];
             WhitelistedVariation    = WhitelistedExperiment.VariationKeyToVariationMap["vtag5"];
             

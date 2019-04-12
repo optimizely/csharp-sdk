@@ -16,6 +16,7 @@
 
 using Moq;
 using NUnit.Framework;
+using OptimizelySDK.DatafileManagement;
 using OptimizelySDK.Entity;
 using OptimizelySDK.Logger;
 using OptimizelySDK.Utils;
@@ -32,7 +33,7 @@ namespace OptimizelySDK.Tests.UtilsTests
         [SetUp]
         public void Setup()
         {
-            Config = ProjectConfig.Create(TestData.TypedAudienceDatafile, null, null);
+            Config = DatafileProjectConfig.Create(TestData.TypedAudienceDatafile, null, null);
             LoggerMock = new Mock<ILogger>();
             LoggerMock.Setup(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()));
             Logger = LoggerMock.Object;
