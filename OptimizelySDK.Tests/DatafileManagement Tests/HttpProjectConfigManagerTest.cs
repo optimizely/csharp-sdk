@@ -1,76 +1,82 @@
-﻿
+﻿/* 
+ * Copyright 2019, Optimizely
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 using Moq;
 using NUnit.Framework;
 using OptimizelySDK.DatafileManagement;
-using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Logger;
-using System;
-using System.Threading;
-using System.Timers;
 
 namespace OptimizelySDK.Tests.DatafileManagement_Tests
 {
     [TestFixture]
     public class HttpProjectConfigManagerTest
     {
-        // Project Id.
-        private string SdkKey = "10192104166";
-        //private string Url = "https://cdn.optimizely.com/json/10192104166.json";
-        private Mock<HttpProjectConfigManager> HttpConfigManagerMock;
-        private Mock<ILogger> LoggerMock = new Mock<ILogger>();
-
-        //public Mock<HttpProjectConfigManager> GetHttpConfigManagerMock(string sdkKey, TimeSpan period, bool autoUpdate, ILogger logger, IErrorHandler errorHandler)
-        //{
-        //    string url = $"https://cdn.optimizely.com/json/{sdkKey}.json";
-        //    HttpProjectConfigManager httpManager = new HttpProjectConfigManager.Builder()
-        //        .WithSdkKey(sdkKey)
-        //        .WithAutoUpdate(true)
-        //        .WithLogger(LoggerMock.Object)
-        //        .Build();
-
-        //    return new Mock<PollingProjectConfigManager>(sdkKey, period, autoUpdate, logger, errorHandler, httpManager) { CallBase = true };
-        //}
+        private Mock<ILogger> LoggerMock;
         
+        [SetUp]
+        public void Setup()
+        {
+            LoggerMock = new Mock<ILogger>();
+            LoggerMock.Setup(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()));
+        }
+
         [Test]
-        public void TestHttpConfigManagerReturnsCorrectProjectConfig()
+        public void TestHttpConfigManagerRetreiveProjectConfigByURL()
         {
             HttpProjectConfigManager httpManager = new HttpProjectConfigManager.Builder()
-                .WithSdkKey(SdkKey)
-                .WithAutoUpdate(true)
+                .WithUrl("https://cdn.optimizely.com/datafiles/QBw9gFM8oTn7ogY9ANCC1z.json")
                 .WithLogger(LoggerMock.Object)
                 .Build();
 
-
-            var configManager = new PollingProjectConfigManager(TimeSpan.FromSeconds(5), true, null, null, httpManager);
-            var config = configManager.GetConfig();
-            Assert.NotNull(config);
+            Assert.NotNull(httpManager.GetConfig());
         }
 
-        //[Test]
-        //public void TestHttpConfigManagerDoesNotPollContinouslyWhenAutoUpdateIsFalse()
-        //{
-        //    HttpConfigManagerMock = GetHttpConfigManagerMock(SdkKey, TimeSpan.FromMilliseconds(2000), false, null, null);
-        //    HttpConfigManagerMock.Setup(mgr => mgr.FetchConfig());
+        [Test]
+        public void TestHttpConfigManagerRetreiveProjectConfigBySDKKey()
+        {
+            HttpProjectConfigManager httpManager = new HttpProjectConfigManager.Builder()
+                .WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z")
+                .WithLogger(LoggerMock.Object)
+                .Build();
 
-        //    HttpConfigManagerMock.Object.GetConfig();
-        //    Thread.Sleep(10000);
+            Assert.NotNull(httpManager.GetConfig());
+        }
 
-        //    // The timeout is 2 seconds but FetchConfig called once from GetConfig() as AutoUpdate is false.
-        //    HttpConfigManagerMock.Verify(mgr => mgr.FetchConfig(), Times.Exactly(1));
-        //}
+        [Test]
+        public void TestHttpConfigManagerRetreiveProjectConfigByFormat()
+        {
+            HttpProjectConfigManager httpManager = new HttpProjectConfigManager.Builder()
+                .WithSdkKey("10192104166")
+                .WithFormat("https://cdn.optimizely.com/json/{0}.json")
+                .WithLogger(LoggerMock.Object)
+                .Build();
 
-        //[Test]
-        //public void TestHttpConfigManagerPollsContinouslyWhenAutoUpdateIsTrue()
-        //{
-        //    HttpConfigManagerMock = GetHttpConfigManagerMock(SdkKey, TimeSpan.FromMilliseconds(2000), true, null, null);
-        //    HttpConfigManagerMock.Setup(mgr => mgr.FetchConfig());
+            Assert.NotNull(httpManager.GetConfig());
+        }
 
-        //    HttpConfigManagerMock.Object.GetConfig();
-            
-        //    Thread.Sleep(10000);
+        [Test]
+        public void TestHttpConfigManagerRetreiveNullWithInvalidURL()
+        {
+            HttpProjectConfigManager httpManager = new HttpProjectConfigManager.Builder()
+                .WithUrl("https://cdn.optimizely.com/daaaatafilessss/QBw9gFM8oTn7ogY9ANCC1z.json")
+                .WithFormat("https://cdn.optimizely.com/json/{0}.json")
+                .WithLogger(LoggerMock.Object)
+                .Build();
 
-        //    // The timeout is 2 seconds so FetchConfig called continously from GetConfig() as AutoUpdate is true.
-        //    HttpConfigManagerMock.Verify(mgr => mgr.FetchConfig(), Times.AtLeast(3));
-        //}
+            Assert.Null(httpManager.GetConfig());
+        }
     }
 }

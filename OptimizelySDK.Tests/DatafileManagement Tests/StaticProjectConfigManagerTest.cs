@@ -14,21 +14,22 @@
  * limitations under the License.
  */
 
-namespace OptimizelySDK.DatafileManagement
-{
-    public class StaticProjectConfigManager : ProjectConfigManager
-    {
-        private ProjectConfig ProjectConfig;
-        
-        public bool SetConfig(ProjectConfig projectConfig)
-        {
-            ProjectConfig = projectConfig;
-            return true;
-        }
+using NUnit.Framework;
+using OptimizelySDK.DatafileManagement;
 
-        public ProjectConfig GetConfig()
+namespace OptimizelySDK.Tests.DatafileManagement_Tests
+{
+    [TestFixture]
+    public class StaticProjectConfigManagerTest
+    {
+        private StaticProjectConfigManager ConfigManager = new StaticProjectConfigManager();
+
+        [Test]
+        public void TestStaticProjectConfigManagerReturnsCorrectProjectConfig()
         {
-            return ProjectConfig;
+            var expectedConfig = DatafileProjectConfig.Create(TestData.TypedAudienceDatafile, null, null);
+            ConfigManager.SetConfig(expectedConfig);
+            Assert.True(TestData.CompareObjects(expectedConfig, ConfigManager.GetConfig()));
         }
     }
 }

@@ -18,70 +18,56 @@ using System;
 using System.Timers;
 using System.Threading.Tasks;
 using OptimizelySDK.Logger;
-using OptimizelySDK.ErrorHandler;
 
 namespace OptimizelySDK.DatafileManagement
 {
-    public class PollingProjectConfigManager : Timer, ProjectConfigManager
+    public class PollingProjectConfigManager : ProjectConfigManager
     {
-        private bool isStarted = false;
-        private bool autoUpdate = false;
-        private ProjectConfig currentProjectConfig = null;
-        private PollingProjectConfigManager ConfigManager;
+        private ProjectConfig CurrentProjectConfig;
+        private ProjectConfigManager ConfigManager;
+        private Timer SchedulerService;
+        private double PollingIntervalMS;
 
-        protected ILogger Logger { get; set; }
-        protected IErrorHandler ErrorHandler { get; set; }
+        private ILogger Logger { get; set; }
+        public bool IsStarted { get; set; } = false;
+        private TaskCompletionSource<bool> OnReadyFuture = new TaskCompletionSource<bool>();
 
-        //public delegate void ReadyCallback();
-        //public ReadyCallback ReadyHandler;
-        //public delegate void EventHandler();
-        //public event EventHandler UpdateHandler;
-
-        protected Task datafileUpdaterTask;
-
-        public PollingProjectConfigManager(TimeSpan period, bool autoUpdate, ILogger logger = null, IErrorHandler errorHandler = null, PollingProjectConfigManager configManager = null)
+        public PollingProjectConfigManager(TimeSpan period, ProjectConfigManager configManager = null, ILogger logger = null)
         {
-            this.autoUpdate = autoUpdate;
-            Interval = period.TotalMilliseconds;
-            Elapsed += Run;
-
             ConfigManager = configManager;
+            PollingIntervalMS = period.TotalMilliseconds;
+            Logger = logger;
 
-            // Setting AutoReset and Enabled to autoUpdate value for firing event.
-            AutoReset = autoUpdate;
-            Enabled = autoUpdate;
+            SchedulerService = new Timer(PollingIntervalMS);
+            SchedulerService.AutoReset = true;
+            SchedulerService.Elapsed += Run;
+
+            Start();
         }
 
-        public new void Stop() 
+        public void Start()
         {
-            isStarted = false;
-            base.Stop();
+            if (IsStarted)
+            {
+                Logger.Log(LogLevel.WARN, "Manager already started.");
+                return;
+            }
+
+            Logger.Log(LogLevel.WARN, $"Starting Config scheduler with interval: {PollingIntervalMS} milliseconds.");
+            SchedulerService.Start();
+            IsStarted = true;
+        }
+
+        public void Stop() 
+        {
+            SchedulerService.Stop();
+            IsStarted = false;
+            Logger.Log(LogLevel.WARN, $"Stopping Config scheduler.");
         }
 
         public ProjectConfig GetConfig()
         {
-            if (isStarted) 
-            {
-                try
-                {
-                    datafileUpdaterTask.Wait();
-                }
-                catch (Exception ex)
-                {
-                    Logger.Log(LogLevel.WARN, ex.Message);
-                }
-
-                return currentProjectConfig;
-            }
-
-            // Block execution
-            ProjectConfig projectConfig = FetchConfig();
-
-            // Update datafile if modified.
-            if (projectConfig != null)
-                SetConfig(projectConfig);
-
-            return projectConfig;
+            return CurrentProjectConfig;
         }
 
         public bool SetConfig(ProjectConfig projectConfig)
@@ -89,35 +75,30 @@ namespace OptimizelySDK.DatafileManagement
             if (projectConfig == null)
                 return false;
 
-            var previousVersion = currentProjectConfig == null ? "null" : currentProjectConfig.Revision;
+            var previousVersion = CurrentProjectConfig == null ? "null" : CurrentProjectConfig.Revision;
             if (projectConfig.Revision == previousVersion)
                 return false;
             
-            currentProjectConfig = projectConfig;
+            CurrentProjectConfig = projectConfig;
+            OnReadyFuture.SetResult(true);
             return true;
         }
 
-        public virtual ProjectConfig FetchConfig()
+        /// <summary>
+        /// OnReady future's task that gets completed when ConfigManager
+        /// retrieved ProjectConfig for the fist time.
+        /// </summary>
+        /// <returns>OnReady future's Task</returns>
+        public Task<bool> OnReady()
         {
-            return ConfigManager.FetchConfig();
+            return OnReadyFuture.Task;
         }
-
+        
         public virtual void Run(object sender, ElapsedEventArgs e)
         {
-            // 4.0 < frameworks
-            datafileUpdaterTask = new Task(() => {
-                // if not modified, no need to send
-                var config = FetchConfig();
-                if (config != null)
-                {
-                    SetConfig(config);
-                }
-            });
-            
-            if (!isStarted)
-                isStarted = true;
-
-            datafileUpdaterTask.Start();
+            var config = ConfigManager.GetConfig();
+            if (config != null)
+                SetConfig(config);
         }
     }
 }

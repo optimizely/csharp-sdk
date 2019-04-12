@@ -73,6 +73,8 @@
     <Compile Include="AudienceConditionsTests\ConditionEvaluationTest.cs" />
     <Compile Include="AudienceConditionsTests\ConditionsTest.cs" />
     <Compile Include="DatafileManagement Tests\HttpProjectConfigManagerTest.cs" />
+    <Compile Include="DatafileManagement Tests\PollingProjectConfigManagerTest.cs" />
+    <Compile Include="DatafileManagement Tests\StaticProjectConfigManagerTest.cs" />
     <Compile Include="DecisionServiceTest.cs" />
     <Compile Include="DefaultErrorHandlerTest.cs" />
     <Compile Include="EventTests\DefaultEventDispatcherTest.cs" />
