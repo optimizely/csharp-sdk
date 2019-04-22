@@ -148,7 +148,13 @@ namespace OptimizelySDK
         /// </summary>
         private Dictionary<string, Rollout> _RolloutIdMap;
         public Dictionary<string, Rollout> RolloutIdMap { get { return _RolloutIdMap; } }
-        
+
+        /// <summary>
+        /// Associative array of experiment IDs that exist in any feature
+        /// for checking that experiment is a feature experiment.
+        /// </summary>
+        private Dictionary<string, List<string>> ExperimentFeatureMap = new Dictionary<string, List<string>>();
+
 
         //========================= Callbacks ===========================
 
@@ -291,6 +297,18 @@ namespace OptimizelySDK
                             _VariationIdMap[rolloutRule.Key][variation.Id] = variation;
                         }
                     }
+                }
+            }
+
+            // Adding experiments in experiment-feature map.
+            foreach (var feature in FeatureFlags)
+            {
+                foreach (var experimentId in feature.ExperimentIds ?? new List<string>())
+                {
+                    if (ExperimentFeatureMap.ContainsKey(experimentId))
+                        ExperimentFeatureMap[experimentId].Add(feature.Id);
+                    else
+                        ExperimentFeatureMap[experimentId] = new List<string> { experimentId };
                 }
             }
         }
@@ -616,6 +634,16 @@ namespace OptimizelySDK
 
             Logger.Log(LogLevel.ERROR, $@"Attribute key ""{attributeKey}"" is not in datafile.");
             return null;
+        }
+
+        /// <summary>
+        /// Check if the provided experiment Id belongs to any feature, false otherwise.
+        /// </summary>
+        /// <param name="experimentId">Experiment Id</param>
+        /// <returns>true if experiment belongs to any feature, false otherwise</returns>
+        public bool IsFeatureExperiment(string experimentId)
+        {
+            return ExperimentFeatureMap.ContainsKey(experimentId);
         }
     }
 }

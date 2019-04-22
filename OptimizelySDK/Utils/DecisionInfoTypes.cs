@@ -16,10 +16,11 @@
 
 namespace OptimizelySDK.Utils
 {
-    public static class DecisionInfoTypes
+    public static class DecisionNotificationTypes
     {
+        public const string AB_TEST = "ab-test";
         public const string FEATURE = "feature";
-        public const string EXPERIMENT = "experiment";
-        public const string FEATURE_VARIABLE = "feature_variable";
+        public const string FEATURE_TEST = "feature-test";
+        public const string FEATURE_VARIABLE = "feature-variable";
     }
 }

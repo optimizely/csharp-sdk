@@ -353,7 +353,7 @@ namespace OptimizelySDK.Bucketing
                 if (variation != null && !string.IsNullOrEmpty(variation.Id))
                 {
                     Logger.Log(LogLevel.INFO, $"The user \"{userId}\" is bucketed into experiment \"{experiment.Key}\" of feature \"{featureFlag.Key}\".");
-                    return new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_EXPERIMENT);
+                    return new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_FEATURE_TEST);
                 }
             }
 

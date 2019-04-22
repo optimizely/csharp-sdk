@@ -1310,7 +1310,7 @@ namespace OptimizelySDK.Tests
             var expectedValue = 42.42;
             var experiment = Config.GetExperimentFromKey("test_experiment_double_feature");
             var variation = Config.GetVariationFromKey("test_experiment_double_feature", "control");
-            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_EXPERIMENT);
+            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_FEATURE_TEST);
 
             DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, null)).Returns(decision);
             
@@ -1332,7 +1332,7 @@ namespace OptimizelySDK.Tests
             var expectedValue = 13;
             var experiment = Config.GetExperimentFromKey("test_experiment_integer_feature");
             var variation = Config.GetVariationFromKey("test_experiment_integer_feature", "variation");
-            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_EXPERIMENT);
+            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_FEATURE_TEST);
             var userAttributes = new UserAttributes
             {
                { "device_type", "iPhone" },
@@ -1360,7 +1360,7 @@ namespace OptimizelySDK.Tests
             var expectedValue = 14.99;
             var experiment = Config.GetExperimentFromKey("test_experiment_double_feature");
             var variation = Config.GetVariationFromKey("test_experiment_double_feature", "variation");
-            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_EXPERIMENT);
+            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_FEATURE_TEST);
 
             DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, null)).Returns(decision);
             
@@ -1382,7 +1382,7 @@ namespace OptimizelySDK.Tests
             var expectedValue = 7;
             var experiment = Config.GetExperimentFromKey("test_experiment_integer_feature");
             var variation = Config.GetVariationFromKey("test_experiment_integer_feature", "control");
-            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_EXPERIMENT);
+            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_FEATURE_TEST);
             var userAttributes = new UserAttributes
             {
                { "device_type", "iPhone" },
@@ -1604,7 +1604,7 @@ namespace OptimizelySDK.Tests
             var variableType = FeatureVariable.VariableType.DOUBLE;
             var expectedValue = 14.99;
 
-            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_EXPERIMENT);
+            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_FEATURE_TEST);
 
             DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, null)).Returns(decision);
 
@@ -1627,7 +1627,7 @@ namespace OptimizelySDK.Tests
             var featureFlag = Config.GetFeatureFlagFromKey("double_single_variable_feature");
             var experiment = Config.GetExperimentFromKey("test_experiment_integer_feature");
             var differentVariation = Config.GetVariationFromKey("test_experiment_integer_feature", "control");
-            var expectedDecision = new FeatureDecision(experiment, differentVariation, FeatureDecision.DECISION_SOURCE_EXPERIMENT);
+            var expectedDecision = new FeatureDecision(experiment, differentVariation, FeatureDecision.DECISION_SOURCE_FEATURE_TEST);
             var variableKey = "double_variable";
             var variableType = FeatureVariable.VariableType.DOUBLE;
             var expectedValue = 14.99;
@@ -1657,7 +1657,7 @@ namespace OptimizelySDK.Tests
             var expectedValue = 42.42;
             var experiment = Config.GetExperimentFromKey("test_experiment_double_feature");
             var variation = Config.GetVariationFromKey("test_experiment_double_feature", "control");
-            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_EXPERIMENT);
+            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_FEATURE_TEST);
 
             DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, null)).Returns(decision);
 
@@ -1754,7 +1754,7 @@ namespace OptimizelySDK.Tests
             var featureFlag = Config.GetFeatureFlagFromKey("double_single_variable_feature");
             var experiment = Config.GetExperimentFromKey("test_experiment_double_feature");
             var variation = Config.GetVariationFromKey("test_experiment_double_feature", "variation");
-            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_EXPERIMENT);
+            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_FEATURE_TEST);
 
             DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, null)).Returns(decision);
 
@@ -1805,7 +1805,7 @@ namespace OptimizelySDK.Tests
             var experiment = Config.GetExperimentFromKey("test_experiment_double_feature");
             var variation = Config.GetVariationFromKey("test_experiment_double_feature", "control");
             var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
-            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_EXPERIMENT);
+            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_FEATURE_TEST);
 
             DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, null)).Returns(decision);
 
@@ -1832,7 +1832,7 @@ namespace OptimizelySDK.Tests
             var experiment = Config.GetExperimentFromKey("test_experiment_double_feature");
             var variation = Config.GetVariationFromKey("test_experiment_double_feature", "variation");
             var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
-            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_EXPERIMENT);
+            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_FEATURE_TEST);
 
             DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, null)).Returns(decision);
 
@@ -1882,8 +1882,8 @@ namespace OptimizelySDK.Tests
             var featureEnabledTrue = Config.GetVariationFromKey("test_experiment_double_feature", "control");
             var featureEnabledFalse = Config.GetVariationFromKey("test_experiment_double_feature", "variation");
             var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
-            var decisionTrue = new FeatureDecision(experiment, featureEnabledTrue, FeatureDecision.DECISION_SOURCE_EXPERIMENT);
-            var decisionFalse = new FeatureDecision(experiment, featureEnabledFalse, FeatureDecision.DECISION_SOURCE_EXPERIMENT);
+            var decisionTrue = new FeatureDecision(experiment, featureEnabledTrue, FeatureDecision.DECISION_SOURCE_FEATURE_TEST);
+            var decisionFalse = new FeatureDecision(experiment, featureEnabledFalse, FeatureDecision.DECISION_SOURCE_FEATURE_TEST);
 
             DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, null)).Returns(decisionTrue);
             DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, userId, null)).Returns(decisionFalse);
@@ -1948,7 +1948,7 @@ namespace OptimizelySDK.Tests
             var experiment = Config.GetExperimentFromKey(experimentKey);
             var variation = Config.GetVariationFromKey(experimentKey, variationKey);
             var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
-            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_EXPERIMENT);
+            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_FEATURE_TEST);
             var logEvent = new LogEvent("https://logx.optimizely.com/v1/events", OptimizelyHelper.SingleParameter,
                 "POST", new Dictionary<string, string> { });
 
@@ -2065,6 +2065,41 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestActivateSendsDecisionNotificationWithActualVariationKey()
         {
+            var experimentKey = "test_experiment";
+            var variationKey = "variation";
+            var experiment = Config.GetExperimentFromKey(experimentKey);
+            var variation = Config.GetVariationFromKey(experimentKey, variationKey);
+            var userAttributes = new UserAttributes
+            {
+               { "device_type", "iPhone" },
+               { "company", "Optimizely" },
+               { "location", "San Francisco" }
+            };
+
+            // Mocking objects.
+            NotificationCallbackMock.Setup(nc => nc.TestDecisionCallback(It.IsAny<string>(), It.IsAny<string>(),
+                It.IsAny<UserAttributes>(), It.IsAny<Dictionary<string, object>>()));
+            DecisionServiceMock.Setup(ds => ds.GetVariation(experiment, TestUserId, userAttributes)).Returns(variation);
+
+            var optly = Helper.CreatePrivateOptimizely();
+            var optStronglyTyped = optly.GetObject() as Optimizely;
+
+            optStronglyTyped.NotificationCenter.AddNotification(NotificationCenter.NotificationType.Decision, NotificationCallbackMock.Object.TestDecisionCallback);
+            optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
+
+            optly.Invoke("Activate", experimentKey, TestUserId, userAttributes);
+            var decisionInfo = new Dictionary<string, object>
+            {
+                { "experimentKey", experimentKey },
+                { "variationKey", variationKey },
+            };
+
+            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionNotificationTypes.AB_TEST, TestUserId, userAttributes, decisionInfo), Times.Once);
+        }
+
+        [Test]
+        public void TestActivateSendsDecisionNotificationWithVariationKeyAndTypeFeatureTestForFeatureExperiment()
+        {
             var experimentKey = "group_experiment_1";
             var variationKey = "group_exp_1_var_1";
             var experiment = Config.GetExperimentFromKey(experimentKey);
@@ -2094,13 +2129,13 @@ namespace OptimizelySDK.Tests
                 { "variationKey", variationKey },
             };
 
-            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionInfoTypes.EXPERIMENT, TestUserId, userAttributes, decisionInfo), Times.Once);
+            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionNotificationTypes.FEATURE_TEST, TestUserId, userAttributes, decisionInfo), Times.Once);
         }
 
         [Test]
         public void TestActivateSendsDecisionNotificationWithNullVariationKey()
         {
-            var experimentKey = "group_experiment_1";
+            var experimentKey = "test_experiment";
             var experiment = Config.GetExperimentFromKey(experimentKey);
             
             NotificationCallbackMock.Setup(nc => nc.TestDecisionCallback(It.IsAny<string>(), It.IsAny<string>(),
@@ -2120,11 +2155,46 @@ namespace OptimizelySDK.Tests
                 { "variationKey", null },
             };
 
-            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionInfoTypes.EXPERIMENT, TestUserId, new UserAttributes(), decisionInfo), Times.Once);
+            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionNotificationTypes.AB_TEST, TestUserId, new UserAttributes(), decisionInfo), Times.Once);
         }
 
         [Test]
         public void TestGetVariationSendsDecisionNotificationWithActualVariationKey()
+        {
+            var experimentKey = "test_experiment";
+            var variationKey = "variation";
+            var experiment = Config.GetExperimentFromKey(experimentKey);
+            var variation = Config.GetVariationFromKey(experimentKey, variationKey);
+            var userAttributes = new UserAttributes
+            {
+               { "device_type", "iPhone" },
+               { "company", "Optimizely" },
+               { "location", "San Francisco" }
+            };
+
+            // Mocking objects.
+            NotificationCallbackMock.Setup(nc => nc.TestDecisionCallback(It.IsAny<string>(), It.IsAny<string>(),
+                It.IsAny<UserAttributes>(), It.IsAny<Dictionary<string, object>>()));
+            DecisionServiceMock.Setup(ds => ds.GetVariation(experiment, TestUserId, userAttributes)).Returns(variation);
+
+            var optly = Helper.CreatePrivateOptimizely();
+            var optStronglyTyped = optly.GetObject() as Optimizely;
+
+            optStronglyTyped.NotificationCenter.AddNotification(NotificationCenter.NotificationType.Decision, NotificationCallbackMock.Object.TestDecisionCallback);
+            optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
+
+            optly.Invoke("GetVariation", experimentKey, TestUserId, userAttributes);
+            var decisionInfo = new Dictionary<string, object>
+            {
+                { "experimentKey", experimentKey },
+                { "variationKey", variationKey },
+            };
+
+            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionNotificationTypes.AB_TEST, TestUserId, userAttributes, decisionInfo), Times.Once);
+        }
+
+        [Test]
+        public void TestGetVariationSendsDecisionNotificationWithVariationKeyAndTypeFeatureTestForFeatureExperiment()
         {
             var experimentKey = "group_experiment_1";
             var variationKey = "group_exp_1_var_1";
@@ -2155,13 +2225,13 @@ namespace OptimizelySDK.Tests
                 { "variationKey", variationKey },
             };
 
-            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionInfoTypes.EXPERIMENT, TestUserId, userAttributes, decisionInfo), Times.Once);
+            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionNotificationTypes.FEATURE_TEST, TestUserId, userAttributes, decisionInfo), Times.Once);
         }
 
         [Test]
         public void TestGetVariationSendsDecisionNotificationWithNullVariationKey()
         {
-            var experimentKey = "group_experiment_1";
+            var experimentKey = "test_experiment";
             var experiment = Config.GetExperimentFromKey(experimentKey);
 
             NotificationCallbackMock.Setup(nc => nc.TestDecisionCallback(It.IsAny<string>(), It.IsAny<string>(),
@@ -2181,7 +2251,7 @@ namespace OptimizelySDK.Tests
                 { "variationKey", null },
             };
 
-            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionInfoTypes.EXPERIMENT, TestUserId, new UserAttributes(), decisionInfo), Times.Once);
+            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionNotificationTypes.AB_TEST, TestUserId, new UserAttributes(), decisionInfo), Times.Once);
         }
         public void TestIsFeatureEnabledSendsDecisionNotificationWithFeatureEnabledTrueForFeatureExperiment()
         {
@@ -2189,7 +2259,7 @@ namespace OptimizelySDK.Tests
             var experiment = Config.GetExperimentFromKey("test_experiment_double_feature");
             var variation = Config.GetVariationFromKey("test_experiment_double_feature", "control");
             var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
-            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_EXPERIMENT);
+            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_FEATURE_TEST);
 
             DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, null)).Returns(decision);
             NotificationCallbackMock.Setup(nc => nc.TestDecisionCallback(It.IsAny<string>(), It.IsAny<string>(),
@@ -2209,12 +2279,12 @@ namespace OptimizelySDK.Tests
            {
                 { "featureKey", featureKey },
                 { "featureEnabled", true },
-                { "source", FeatureDecision.DECISION_SOURCE_EXPERIMENT },
+                { "source", FeatureDecision.DECISION_SOURCE_FEATURE_TEST },
                 { "sourceExperimentKey", "test_experiment_double_feature" },
                 { "sourceVariationKey", "control" },
             };
 
-            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionInfoTypes.FEATURE, TestUserId, new UserAttributes(), decisionInfo), Times.Once);
+            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionNotificationTypes.FEATURE, TestUserId, new UserAttributes(), decisionInfo), Times.Once);
         }
 
         [Test]
@@ -2224,8 +2294,8 @@ namespace OptimizelySDK.Tests
             var experiment = Config.GetExperimentFromKey("test_experiment_double_feature");
             var variation = Config.GetVariationFromKey("test_experiment_double_feature", "variation");
             var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
-            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_EXPERIMENT);
-
+            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_FEATURE_TEST);
+            
             DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, null)).Returns(decision);
             NotificationCallbackMock.Setup(nc => nc.TestDecisionCallback(It.IsAny<string>(), It.IsAny<string>(),
                 It.IsAny<UserAttributes>(), It.IsAny<Dictionary<string, object>>()));
@@ -2239,17 +2309,21 @@ namespace OptimizelySDK.Tests
 
             bool result = (bool)optly.Invoke("IsFeatureEnabled", featureKey, TestUserId, null);
             Assert.False(result);
-
+            
             var decisionInfo = new Dictionary<string, object>
-           {
+            {
                 { "featureKey", featureKey },
                 { "featureEnabled", false },
-                { "source", FeatureDecision.DECISION_SOURCE_EXPERIMENT },
-                { "sourceExperimentKey", "test_experiment_double_feature" },
-                { "sourceVariationKey", "variation" },
+                { "source", FeatureDecision.DECISION_SOURCE_FEATURE_TEST },
+                { "sourceInfo", new Dictionary<string, string>
+                    {
+                        { "experimentKey", "test_experiment_double_feature" },
+                        { "variationKey", "variation" },
+                    }
+                },
             };
 
-            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionInfoTypes.FEATURE, TestUserId, new UserAttributes(), decisionInfo), Times.Once);
+            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionNotificationTypes.FEATURE, TestUserId, new UserAttributes(), It.Is<Dictionary<string, object>>(info => TestData.CompareObjects(info, decisionInfo))), Times.Once);
         }
 
         [Test]
@@ -2280,15 +2354,14 @@ namespace OptimizelySDK.Tests
             Assert.True(result);
 
             var decisionInfo = new Dictionary<string, object>
-           {
+            {
                 { "featureKey", featureKey },
                 { "featureEnabled", true },
                 { "source", FeatureDecision.DECISION_SOURCE_ROLLOUT },
-                { "sourceExperimentKey", null },
-                { "sourceVariationKey", null },
+                { "sourceInfo", new Dictionary<string, string>() },
             };
 
-            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionInfoTypes.FEATURE, TestUserId, userAttributes, decisionInfo), Times.Once);
+            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionNotificationTypes.FEATURE, TestUserId, userAttributes, It.Is<Dictionary<string, object>>(info => TestData.CompareObjects(info, decisionInfo))), Times.Once);
         }
 
         [Test]
@@ -2319,15 +2392,14 @@ namespace OptimizelySDK.Tests
             Assert.False(result);
 
             var decisionInfo = new Dictionary<string, object>
-           {
+            {
                 { "featureKey", featureKey },
                 { "featureEnabled", false },
                 { "source", FeatureDecision.DECISION_SOURCE_ROLLOUT },
-                { "sourceExperimentKey", null },
-                { "sourceVariationKey", null },
+                { "sourceInfo", new Dictionary<string, string>() },
             };
 
-            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionInfoTypes.FEATURE, TestUserId, userAttributes, decisionInfo), Times.Once);
+            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionNotificationTypes.FEATURE, TestUserId, userAttributes, It.Is<Dictionary<string, object>>(info => TestData.CompareObjects(info, decisionInfo))), Times.Once);
         }
 
         [Test]
@@ -2351,15 +2423,14 @@ namespace OptimizelySDK.Tests
             Assert.False(result);
 
             var decisionInfo = new Dictionary<string, object>
-           {
+            {
                 { "featureKey", featureKey },
                 { "featureEnabled", false },
                 { "source", FeatureDecision.DECISION_SOURCE_ROLLOUT },
-                { "sourceExperimentKey", null },
-                { "sourceVariationKey", null },
+                { "sourceInfo", new Dictionary<string, string>() },
             };
 
-            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionInfoTypes.FEATURE, TestUserId, new UserAttributes(), decisionInfo), Times.Once);
+            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionNotificationTypes.FEATURE, TestUserId, new UserAttributes(), It.Is<Dictionary<string, object>>(info => TestData.CompareObjects(info, decisionInfo))), Times.Once);
         }
 
         [Test]
@@ -2385,69 +2456,85 @@ namespace OptimizelySDK.Tests
             var actualFeaturesList = OptimizelyMock.Object.GetEnabledFeatures(TestUserId, userAttributes);
             CollectionAssert.AreEquivalent(enabledFeatures, actualFeaturesList);
 
-            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionInfoTypes.FEATURE, TestUserId, userAttributes, new Dictionary<string, object> {
+            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionNotificationTypes.FEATURE, TestUserId, userAttributes, It.Is<Dictionary<string, object>>(info => TestData.CompareObjects(info, new Dictionary<string, object> {
                 { "featureKey", "boolean_feature" },
                 { "featureEnabled", false },
-                { "source", FeatureDecision.DECISION_SOURCE_EXPERIMENT },
-                { "sourceExperimentKey", "group_experiment_2" },
-                { "sourceVariationKey", "group_exp_2_var_1" },
-            }), Times.Once);
-            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionInfoTypes.FEATURE, TestUserId, userAttributes, new Dictionary<string, object> {
+                { "source", FeatureDecision.DECISION_SOURCE_FEATURE_TEST },
+                { "sourceInfo", new Dictionary<string, string>
+                    {
+                        { "experimentKey", "group_experiment_2" },
+                        { "variationKey", "group_exp_2_var_1" },
+                    }
+                },
+            }))), Times.Once);
+            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionNotificationTypes.FEATURE, TestUserId, userAttributes, It.Is<Dictionary<string, object>>(info => TestData.CompareObjects(info, new Dictionary<string, object> {
                 { "featureKey", "double_single_variable_feature" },
                 { "featureEnabled", true },
-                { "source", FeatureDecision.DECISION_SOURCE_EXPERIMENT },
-                { "sourceExperimentKey", "test_experiment_double_feature" },
-                { "sourceVariationKey", "control" },
-            }), Times.Once);
-            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionInfoTypes.FEATURE, TestUserId, userAttributes, new Dictionary<string, object> {
+                { "source", FeatureDecision.DECISION_SOURCE_FEATURE_TEST },
+                { "sourceInfo", new Dictionary<string, string>
+                    {
+                        { "experimentKey", "test_experiment_double_feature" },
+                        { "variationKey", "control" },
+                    }
+                },
+            }))), Times.Once);
+            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionNotificationTypes.FEATURE, TestUserId, userAttributes, It.Is<Dictionary<string, object>>(info => TestData.CompareObjects(info, new Dictionary<string, object> {
                 { "featureKey", "integer_single_variable_feature" },
                 { "featureEnabled", false },
-                { "source", FeatureDecision.DECISION_SOURCE_EXPERIMENT },
-                { "sourceExperimentKey", "test_experiment_integer_feature" },
-                { "sourceVariationKey", "control" },
-            }), Times.Once);
-            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionInfoTypes.FEATURE, TestUserId, userAttributes, new Dictionary<string, object> {
+                { "source", FeatureDecision.DECISION_SOURCE_FEATURE_TEST },
+                { "sourceInfo", new Dictionary<string, string>
+                    {
+                        { "experimentKey", "test_experiment_integer_feature" },
+                        { "variationKey", "control" },
+                    }
+                },
+            }))), Times.Once);
+            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionNotificationTypes.FEATURE, TestUserId, userAttributes, It.Is<Dictionary<string, object>>(info => TestData.CompareObjects(info, new Dictionary<string, object> {
                 { "featureKey", "boolean_single_variable_feature" },
                 { "featureEnabled", true },
                 { "source", FeatureDecision.DECISION_SOURCE_ROLLOUT },
-                { "sourceExperimentKey", null },
-                { "sourceVariationKey", null },
-            }), Times.Once);
-            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionInfoTypes.FEATURE, TestUserId, userAttributes, new Dictionary<string, object> {
+                { "sourceInfo", new Dictionary<string, string>() },
+            }))), Times.Once);
+            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionNotificationTypes.FEATURE, TestUserId, userAttributes, It.Is<Dictionary<string, object>>(info => TestData.CompareObjects(info, new Dictionary<string, object> {
                 { "featureKey", "string_single_variable_feature" },
                 { "featureEnabled", true },
-                { "source", FeatureDecision.DECISION_SOURCE_EXPERIMENT },
-                { "sourceExperimentKey", "test_experiment_with_feature_rollout" },
-                { "sourceVariationKey", "variation" },
-            }), Times.Once);
-            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionInfoTypes.FEATURE, TestUserId, userAttributes, new Dictionary<string, object> {
+                { "source", FeatureDecision.DECISION_SOURCE_FEATURE_TEST },
+                { "sourceInfo", new Dictionary<string, string>
+                    {
+                        { "experimentKey", "test_experiment_with_feature_rollout" },
+                        { "variationKey", "variation" },
+                    }
+                },
+            }))), Times.Once);
+            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionNotificationTypes.FEATURE, TestUserId, userAttributes, It.Is<Dictionary<string, object>>(info => TestData.CompareObjects(info, new Dictionary<string, object> {
                 { "featureKey", "multi_variate_feature" },
                 { "featureEnabled", false },
                 { "source", FeatureDecision.DECISION_SOURCE_ROLLOUT },
-                { "sourceExperimentKey", null },
-                { "sourceVariationKey", null },
-            }), Times.Once);
-            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionInfoTypes.FEATURE, TestUserId, userAttributes, new Dictionary<string, object> {
+                { "sourceInfo", new Dictionary<string, string>() },
+            }))), Times.Once);
+            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionNotificationTypes.FEATURE, TestUserId, userAttributes, It.Is<Dictionary<string, object>>(info => TestData.CompareObjects(info, new Dictionary<string, object> {
                 { "featureKey", "mutex_group_feature" },
                 { "featureEnabled", false },
-                { "source", FeatureDecision.DECISION_SOURCE_EXPERIMENT },
-                { "sourceExperimentKey", "group_experiment_2" },
-                { "sourceVariationKey", "group_exp_2_var_1" },
-            }), Times.Once);
-            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionInfoTypes.FEATURE, TestUserId, userAttributes, new Dictionary<string, object> {
+                { "source", FeatureDecision.DECISION_SOURCE_FEATURE_TEST },
+                { "sourceInfo", new Dictionary<string, string>
+                    {
+                        { "experimentKey", "group_experiment_2" },
+                        { "variationKey", "group_exp_2_var_1" },
+                    }
+                },
+            }))), Times.Once);
+            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionNotificationTypes.FEATURE, TestUserId, userAttributes, It.Is<Dictionary<string, object>>(info => TestData.CompareObjects(info, new Dictionary<string, object> {
                 { "featureKey", "empty_feature" },
                 { "featureEnabled", false },
                 { "source", FeatureDecision.DECISION_SOURCE_ROLLOUT },
-                { "sourceExperimentKey", null },
-                { "sourceVariationKey", null },
-            }), Times.Once);
-            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionInfoTypes.FEATURE, TestUserId, userAttributes, new Dictionary<string, object> {
+                { "sourceInfo", new Dictionary<string, string>() },
+            }))), Times.Once);
+            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionNotificationTypes.FEATURE, TestUserId, userAttributes, It.Is<Dictionary<string, object>>(info => TestData.CompareObjects(info, new Dictionary<string, object> {
                 { "featureKey", "no_rollout_experiment_feature" },
                 { "featureEnabled", false },
                 { "source", FeatureDecision.DECISION_SOURCE_ROLLOUT },
-                { "sourceExperimentKey", null },
-                { "sourceVariationKey", null },
-            }), Times.Once);
+                { "sourceInfo", new Dictionary<string, string>() },
+            }))), Times.Once);
         }
 
         [Test]
@@ -2459,7 +2546,7 @@ namespace OptimizelySDK.Tests
             var expectedValue = 42.42;
             var experiment = Config.GetExperimentFromKey("test_experiment_double_feature");
             var variation = Config.GetVariationFromKey("test_experiment_double_feature", "control");
-            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_EXPERIMENT);
+            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_FEATURE_TEST);
 
             DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, null)).Returns(decision);
             NotificationCallbackMock.Setup(nc => nc.TestDecisionCallback(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<UserAttributes>(),
@@ -2480,12 +2567,16 @@ namespace OptimizelySDK.Tests
                 { "variableKey", variableKey },
                 { "variableValue", expectedValue },
                 { "variableType", FEATUREVARIABLE_DOUBLETYPE },
-                { "source", FeatureDecision.DECISION_SOURCE_EXPERIMENT },
-                { "sourceExperimentKey", "test_experiment_double_feature" },
-                { "sourceVariationKey", "control" },
+                { "source", FeatureDecision.DECISION_SOURCE_FEATURE_TEST },
+                { "sourceInfo", new Dictionary<string, string>
+                    {
+                        { "experimentKey", "test_experiment_double_feature" },
+                        { "variationKey", "control" },
+                    }
+                },
             };
 
-            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionInfoTypes.FEATURE_VARIABLE, TestUserId, new UserAttributes(), decisionInfo), Times.Once);
+            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionNotificationTypes.FEATURE_VARIABLE, TestUserId, new UserAttributes(), It.Is<Dictionary<string, object>>(info => TestData.CompareObjects(info, decisionInfo))), Times.Once);
         }
 
         [Test]
@@ -2497,7 +2588,7 @@ namespace OptimizelySDK.Tests
             var expectedValue = 13;
             var experiment = Config.GetExperimentFromKey("test_experiment_integer_feature");
             var variation = Config.GetVariationFromKey("test_experiment_integer_feature", "variation");
-            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_EXPERIMENT);
+            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_FEATURE_TEST);
             var userAttributes = new UserAttributes
             {
                { "device_type", "iPhone" },
@@ -2524,12 +2615,16 @@ namespace OptimizelySDK.Tests
                 { "variableKey", variableKey },
                 { "variableValue", expectedValue },
                 { "variableType", FEATUREVARIABLE_INTEGERTYPE },
-                { "source", FeatureDecision.DECISION_SOURCE_EXPERIMENT },
-                { "sourceExperimentKey", "test_experiment_integer_feature" },
-                { "sourceVariationKey", "variation" },
+                { "source", FeatureDecision.DECISION_SOURCE_FEATURE_TEST },
+                { "sourceInfo", new Dictionary<string, string>
+                    {
+                        { "experimentKey", "test_experiment_integer_feature" },
+                        { "variationKey", "variation" },
+                    }
+                },
             };
 
-            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionInfoTypes.FEATURE_VARIABLE, TestUserId, userAttributes, decisionInfo), Times.Once);
+            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionNotificationTypes.FEATURE_VARIABLE, TestUserId, userAttributes, It.Is<Dictionary<string, object>>(info => TestData.CompareObjects(info, decisionInfo))), Times.Once);
         }
 
         [Test]
@@ -2541,7 +2636,7 @@ namespace OptimizelySDK.Tests
             var expectedValue = 14.99;
             var experiment = Config.GetExperimentFromKey("test_experiment_double_feature");
             var variation = Config.GetVariationFromKey("test_experiment_double_feature", "variation");
-            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_EXPERIMENT);
+            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_FEATURE_TEST);
 
             DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, null)).Returns(decision);
             NotificationCallbackMock.Setup(nc => nc.TestDecisionCallback(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<UserAttributes>(),
@@ -2562,12 +2657,16 @@ namespace OptimizelySDK.Tests
                 { "variableKey", variableKey },
                 { "variableValue", expectedValue },
                 { "variableType", FEATUREVARIABLE_DOUBLETYPE },
-                { "source", FeatureDecision.DECISION_SOURCE_EXPERIMENT },
-                { "sourceExperimentKey", "test_experiment_double_feature" },
-                { "sourceVariationKey", "variation" },
+                { "source", FeatureDecision.DECISION_SOURCE_FEATURE_TEST },
+                { "sourceInfo", new Dictionary<string, string>
+                    {
+                        { "experimentKey", "test_experiment_double_feature" },
+                        { "variationKey", "variation" },
+                    }
+                },
             };
 
-            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionInfoTypes.FEATURE_VARIABLE, TestUserId, new UserAttributes(), decisionInfo), Times.Once);
+            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionNotificationTypes.FEATURE_VARIABLE, TestUserId, new UserAttributes(), It.Is<Dictionary<string, object>>(info => TestData.CompareObjects(info, decisionInfo))), Times.Once);
         }
 
         [Test]
@@ -2579,7 +2678,7 @@ namespace OptimizelySDK.Tests
             var expectedValue = 7;
             var experiment = Config.GetExperimentFromKey("test_experiment_integer_feature");
             var variation = Config.GetVariationFromKey("test_experiment_integer_feature", "control");
-            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_EXPERIMENT);
+            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_FEATURE_TEST);
             var userAttributes = new UserAttributes
             {
                { "device_type", "iPhone" },
@@ -2606,12 +2705,16 @@ namespace OptimizelySDK.Tests
                 { "variableKey", variableKey },
                 { "variableValue", expectedValue },
                 { "variableType", FEATUREVARIABLE_INTEGERTYPE },
-                { "source", FeatureDecision.DECISION_SOURCE_EXPERIMENT },
-                { "sourceExperimentKey", "test_experiment_integer_feature" },
-                { "sourceVariationKey", "control" },
+                { "source", FeatureDecision.DECISION_SOURCE_FEATURE_TEST },
+                { "sourceInfo", new Dictionary<string, string>
+                    {
+                        { "experimentKey", "test_experiment_integer_feature" },
+                        { "variationKey", "control" },
+                    }
+                },
             };
 
-            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionInfoTypes.FEATURE_VARIABLE, TestUserId, userAttributes, decisionInfo), Times.Once);
+            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionNotificationTypes.FEATURE_VARIABLE, TestUserId, userAttributes, It.Is<Dictionary<string, object>>(info => TestData.CompareObjects(info, decisionInfo))), Times.Once);
         }
 
         [Test]
@@ -2645,11 +2748,10 @@ namespace OptimizelySDK.Tests
                 { "variableValue", expectedValue },
                 { "variableType", FEATUREVARIABLE_BOOLEANTYPE },
                 { "source", FeatureDecision.DECISION_SOURCE_ROLLOUT },
-                { "sourceExperimentKey", null },
-                { "sourceVariationKey", null },
+                { "sourceInfo", new Dictionary<string, string>() },
             };
 
-            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionInfoTypes.FEATURE_VARIABLE, TestUserId, new UserAttributes(), decisionInfo), Times.Once);
+            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionNotificationTypes.FEATURE_VARIABLE, TestUserId, new UserAttributes(), It.Is<Dictionary<string, object>>(info => TestData.CompareObjects(info, decisionInfo))), Times.Once);
         }
 
         [Test]
@@ -2689,11 +2791,10 @@ namespace OptimizelySDK.Tests
                 { "variableValue", expectedValue },
                 { "variableType", FEATUREVARIABLE_STRINGTYPE },
                 { "source", FeatureDecision.DECISION_SOURCE_ROLLOUT },
-                { "sourceExperimentKey", null },
-                { "sourceVariationKey", null },
+                { "sourceInfo", new Dictionary<string, string>() },
             };
 
-            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionInfoTypes.FEATURE_VARIABLE, TestUserId, userAttributes, decisionInfo), Times.Once);
+            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionNotificationTypes.FEATURE_VARIABLE, TestUserId, userAttributes, It.Is<Dictionary<string, object>>(info => TestData.CompareObjects(info, decisionInfo))), Times.Once);
         }
 
         [Test]
@@ -2727,11 +2828,10 @@ namespace OptimizelySDK.Tests
                 { "variableValue", expectedValue },
                 { "variableType", FEATUREVARIABLE_BOOLEANTYPE },
                 { "source", FeatureDecision.DECISION_SOURCE_ROLLOUT },
-                { "sourceExperimentKey", null },
-                { "sourceVariationKey", null },
+                { "sourceInfo", new Dictionary<string, string>()},
             };
 
-            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionInfoTypes.FEATURE_VARIABLE, TestUserId, new UserAttributes(), decisionInfo), Times.Once);
+            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionNotificationTypes.FEATURE_VARIABLE, TestUserId, new UserAttributes(), It.Is<Dictionary<string, object>>(info => TestData.CompareObjects(info, decisionInfo))), Times.Once);
         }
 
         [Test]
@@ -2771,11 +2871,10 @@ namespace OptimizelySDK.Tests
                 { "variableValue", expectedValue },
                 { "variableType", FEATUREVARIABLE_STRINGTYPE },
                 { "source", FeatureDecision.DECISION_SOURCE_ROLLOUT },
-                { "sourceExperimentKey", null },
-                { "sourceVariationKey", null },
+                { "sourceInfo", new Dictionary<string, string>() },
             };
 
-            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionInfoTypes.FEATURE_VARIABLE, TestUserId, userAttributes, decisionInfo), Times.Once);
+            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionNotificationTypes.FEATURE_VARIABLE, TestUserId, userAttributes, It.Is<Dictionary<string, object>>(info => TestData.CompareObjects(info, decisionInfo))), Times.Once);
         }
 
         [Test]
@@ -2807,11 +2906,10 @@ namespace OptimizelySDK.Tests
                 { "variableValue", expectedValue },
                 { "variableType", FEATUREVARIABLE_DOUBLETYPE },
                 { "source", FeatureDecision.DECISION_SOURCE_ROLLOUT },
-                { "sourceExperimentKey", null },
-                { "sourceVariationKey", null },
+                { "sourceInfo", new Dictionary<string, string>() },
             };
 
-            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionInfoTypes.FEATURE_VARIABLE, TestUserId, new UserAttributes(), decisionInfo), Times.Once);
+            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionNotificationTypes.FEATURE_VARIABLE, TestUserId, new UserAttributes(), It.Is<Dictionary<string, object>>(info => TestData.CompareObjects(info, decisionInfo))), Times.Once);
         }
 
         #endregion // Decision Listener
