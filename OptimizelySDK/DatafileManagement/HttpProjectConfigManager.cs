@@ -22,22 +22,24 @@ using System.Net.Http;
 
 namespace OptimizelySDK.DatafileManagement
 {
-    public class HttpProjectConfigManager : ProjectConfigManager
+    public class HttpProjectConfigManager : PollingProjectConfigManager
     {
         private string Url;
         public HttpClient Client;
-        ProjectConfig ProjectConfig;
-        protected ILogger Logger { get; set; }
         private string LastModifiedSince = string.Empty;
         
-        private HttpProjectConfigManager(string url, ILogger logger)
+        private HttpProjectConfigManager(TimeSpan period, string url, ILogger logger) : base(period, logger)
         {
             Client = new HttpClient();
             Url = url;
-            Logger = logger;
         }
 
-        public ProjectConfig GetConfig()
+        static ProjectConfig ParseProjectConfig(string datafile)
+        {
+            return DatafileProjectConfig.Create(datafile, null, null);
+        }
+
+        protected override ProjectConfig Poll()
         {
             var request = new HttpRequestMessage
             {
@@ -55,7 +57,9 @@ namespace OptimizelySDK.DatafileManagement
             // Return from here if datafile is not modified.
             var response = httpResponse.Result;
             if (!response.IsSuccessStatusCode)
-                return ProjectConfig;
+            {
+                Logger.Log(LogLevel.ERROR, "Unexpected response from event endpoint, status: " + response.StatusCode);
+            }
 
             // Update Last-Modified header if provided.
             if (response.Headers.TryGetValues("Last-Modified", out IEnumerable<string> values))
@@ -65,29 +69,23 @@ namespace OptimizelySDK.DatafileManagement
             content.Wait();
             
             string datafile = content.Result.ToString();
-            var projectConfig = DatafileProjectConfig.Create(datafile, null, null);
-
-            SetConfig(projectConfig);
-            return projectConfig;
+            return ParseProjectConfig(datafile);
         }
-
-        public bool SetConfig(ProjectConfig projectConfig)
-        {
-            if (projectConfig != null)
-            {
-                ProjectConfig = projectConfig;
-                return true;
-            }
-
-            return false;
-        }
-
+        
         public class Builder
         {
+            private string Datafile;
             private string SdkKey;
             private string Url;
             private string Format = "https://cdn.optimizely.com/datafiles/{0}.json";
             private ILogger Logger;
+            private TimeSpan Period;
+
+            public Builder WithDatafile(string datafile)
+            {
+                Datafile = datafile;
+                return this;
+            }
 
             public Builder WithSdkKey(string sdkKey)
             {
@@ -98,6 +96,12 @@ namespace OptimizelySDK.DatafileManagement
             public Builder WithUrl(string url)
             {
                 Url = url;
+                return this;
+            }
+
+            public Builder WithPollingInterval(TimeSpan period)
+            {
+                Period = period;
                 return this;
             }
 
@@ -112,20 +116,55 @@ namespace OptimizelySDK.DatafileManagement
                 Logger = logger;
                 return this;
             }
-            
+
+            /// <summary>
+            /// HttpProjectConfigManager.Builder that builds and starts a HttpProjectConfigManager.
+            /// This is the default builder which will block until a config is available.
+            /// </summary>
+            /// <returns>HttpProjectConfigManager instance</returns>
             public HttpProjectConfigManager Build()
+            {
+                return Build(false);
+            }
+
+            /// <summary>
+            /// HttpProjectConfigManager.Builder that builds and starts a HttpProjectConfigManager.
+            /// </summary>
+            /// <param name="defer">When true, we will not wait for the configuration to be available
+            /// before returning the HttpProjectConfigManager instance.</param>
+            /// <returns>HttpProjectConfigManager instance</returns>
+            public HttpProjectConfigManager Build(bool defer)
             {
                 if (Logger == null)
                     Logger = new DefaultLogger();
 
                 if (!string.IsNullOrEmpty(Url))
-                    return new HttpProjectConfigManager(Url, Logger);
+                    return new HttpProjectConfigManager(Period, Url, Logger);
 
                 if (string.IsNullOrEmpty(SdkKey))
                     throw new Exception("SdkKey cannot be null");
 
                 Url = string.Format(Format, SdkKey);
-                return new HttpProjectConfigManager(Url, Logger);
+                var configManager = new HttpProjectConfigManager(Period, Url, Logger);
+
+                if (Datafile != null)
+                {
+                    try
+                    {
+                        var config = HttpProjectConfigManager.ParseProjectConfig(Datafile);
+                        configManager.SetConfig(config);
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Log(LogLevel.WARN, "Error parsing fallback datafile." + ex.Message);
+                    }
+                }
+
+                // Optionally block until config is available.
+                if (!defer)
+                    configManager.GetConfig();
+
+                return configManager;
             }
         }
     }

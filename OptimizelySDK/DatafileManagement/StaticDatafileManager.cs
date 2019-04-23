@@ -19,16 +19,16 @@ namespace OptimizelySDK.DatafileManagement
     public class StaticProjectConfigManager : ProjectConfigManager
     {
         private ProjectConfig ProjectConfig;
-        
-        public bool SetConfig(ProjectConfig projectConfig)
-        {
-            ProjectConfig = projectConfig;
-            return true;
-        }
 
         public ProjectConfig GetConfig()
         {
             return ProjectConfig;
+        }
+
+        public bool SetConfig(ProjectConfig projectConfig)
+        {
+            ProjectConfig = projectConfig;
+            return true;
         }
     }
 }

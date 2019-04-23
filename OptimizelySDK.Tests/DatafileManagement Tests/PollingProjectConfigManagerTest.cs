@@ -34,26 +34,26 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
             LoggerMock.Setup(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()));
         }
 
-        [Test]
-        public void TestHttpConfigManagerReturnsCorrectProjectConfig()
-        {
-            System.Diagnostics.Debug.WriteLine($"Main Thread: {System.Threading.Thread.CurrentThread.ManagedThreadId}");
+        //[Test]
+        //public void TestHttpConfigManagerReturnsCorrectProjectConfig()
+        //{
+        //    System.Diagnostics.Debug.WriteLine($"Main Thread: {System.Threading.Thread.CurrentThread.ManagedThreadId}");
 
-            HttpProjectConfigManager httpManager = new HttpProjectConfigManager.Builder()
-                .WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z")
-                .WithLogger(LoggerMock.Object)
-                .Build();
+        //    HttpProjectConfigManager httpManager = new HttpProjectConfigManager.Builder()
+        //        .WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z")
+        //        .WithLogger(LoggerMock.Object)
+        //        .Build();
             
-            var configManager = new PollingProjectConfigManager(TimeSpan.FromSeconds(1), httpManager, LoggerMock.Object);
-            var onReady = configManager.OnReady();
+        //    var configManager = new PollingProjectConfigManager(TimeSpan.FromSeconds(1), httpManager, LoggerMock.Object);
+        //    var onReady = configManager.OnReady();
 
-            // GetConfig returns null as OnReady feature is not resolved yet.
-            if (!onReady.IsCompleted)
-                Assert.Null(configManager.GetConfig());
+        //    // GetConfig returns null as OnReady feature is not resolved yet.
+        //    if (!onReady.IsCompleted)
+        //        Assert.Null(configManager.GetConfig());
 
-            // Waiting for onReady to gets completed.
-            var resolved = onReady.Result;
-            Assert.NotNull(configManager.GetConfig());
-        }
+        //    // Waiting for onReady to gets completed.
+        //    var resolved = onReady.Result;
+        //    Assert.NotNull(configManager.GetConfig());
+        //}
     }
 }

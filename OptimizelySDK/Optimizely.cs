@@ -39,6 +39,11 @@ namespace OptimizelySDK
         
         private ProjectConfig Config;
 
+        private ProjectConfigManager ConfigManager;
+
+        // For backward compatibility
+        private StaticProjectConfigManager FallbackConfigManager = new StaticProjectConfigManager();
+
         private ILogger Logger;
 
         private IErrorHandler ErrorHandler;
@@ -92,7 +97,9 @@ namespace OptimizelySDK
                           ILogger logger = null,
                           IErrorHandler errorHandler = null,
                           UserProfileService userProfileService = null,
-                          bool skipJsonValidation = false)
+                          bool skipJsonValidation = false,
+                          ProjectConfig projectConfig = null,
+                          ProjectConfigManager projectConfigManager = null)
         {
             IsValid = false; // invalid until proven valid
             Logger = logger ?? new NoOpLogger();
@@ -102,17 +109,30 @@ namespace OptimizelySDK
             EventBuilder = new EventBuilder(Bucketer, Logger);
             UserProfileService = userProfileService;
             NotificationCenter = new NotificationCenter(Logger);
+            Config = projectConfig;
+            ConfigManager = projectConfigManager;
 
             try
             {
-                if (!ValidateInputs(datafile, skipJsonValidation))
+                if (Config == null && !string.IsNullOrEmpty(datafile))
                 {
-                    Logger.Log(LogLevel.ERROR, "Provided 'datafile' has invalid schema.");
-                    return;
+                    if (ValidateInputs(datafile, skipJsonValidation))
+                    {
+                        Config = DatafileProjectConfig.Create(datafile, Logger, ErrorHandler);
+                        IsValid = true;
+                    }
+                    else
+                    {
+                        Logger.Log(LogLevel.ERROR, "Provided 'datafile' has invalid schema.");
+                    }
                 }
 
-                Config = DatafileProjectConfig.Create(datafile, Logger, ErrorHandler);
-                IsValid = true;
+                if (Config != null)
+                    FallbackConfigManager.SetConfig(Config);
+
+                if (ConfigManager == null)
+                    ConfigManager = FallbackConfigManager;
+
                 DecisionService = new DecisionService(Bucketer, ErrorHandler, Config, userProfileService, Logger);
             }
             catch (Exception ex)

@@ -18,25 +18,24 @@ using System;
 using System.Timers;
 using System.Threading.Tasks;
 using OptimizelySDK.Logger;
+using OptimizelySDK.Utils;
 
 namespace OptimizelySDK.DatafileManagement
 {
-    public class PollingProjectConfigManager : ProjectConfigManager
+    public abstract class PollingProjectConfigManager : ProjectConfigManager
     {
         private ProjectConfig CurrentProjectConfig;
-        private ProjectConfigManager ConfigManager;
         private Timer SchedulerService;
         private double PollingIntervalMS;
+        private TaskCompletionSource<ProjectConfigManager> CompletableConfigManager = new TaskCompletionSource<ProjectConfigManager>();
 
-        private ILogger Logger { get; set; }
-        public bool IsStarted { get; set; } = false;
-        private TaskCompletionSource<bool> OnReadyFuture = new TaskCompletionSource<bool>();
-
-        public PollingProjectConfigManager(TimeSpan period, ProjectConfigManager configManager = null, ILogger logger = null)
+        protected ILogger Logger { get; set; }
+        public bool IsStarted { get; set; }
+        
+        public PollingProjectConfigManager(TimeSpan period, ILogger logger = null)
         {
-            ConfigManager = configManager;
-            PollingIntervalMS = period.TotalMilliseconds;
             Logger = logger;
+            PollingIntervalMS = period.TotalMilliseconds;
 
             SchedulerService = new Timer(PollingIntervalMS);
             SchedulerService.AutoReset = true;
@@ -44,6 +43,8 @@ namespace OptimizelySDK.DatafileManagement
 
             Start();
         }
+
+        protected abstract ProjectConfig Poll();
 
         public void Start()
         {
@@ -67,7 +68,23 @@ namespace OptimizelySDK.DatafileManagement
 
         public ProjectConfig GetConfig()
         {
-            return CurrentProjectConfig;
+            if (IsStarted)
+            {
+                try
+                {
+                    var result = CompletableConfigManager.Task.Result;
+                }
+                catch (AggregateException ex)
+                {
+                    Logger.Log(LogLevel.WARN, "Interrupted waiting for valid ProjectConfig. Error: " + ex.GetAllMessages());
+                    throw;
+                }
+
+                return CurrentProjectConfig;
+            }
+
+            var projectConfig = Poll();
+            return projectConfig ?? CurrentProjectConfig;
         }
 
         public bool SetConfig(ProjectConfig projectConfig)
@@ -80,25 +97,14 @@ namespace OptimizelySDK.DatafileManagement
                 return false;
             
             CurrentProjectConfig = projectConfig;
-            OnReadyFuture.SetResult(true);
+            CompletableConfigManager.SetResult(this);
             return true;
-        }
-
-        /// <summary>
-        /// OnReady future's task that gets completed when ConfigManager
-        /// retrieved ProjectConfig for the fist time.
-        /// </summary>
-        /// <returns>OnReady future's Task</returns>
-        public Task<bool> OnReady()
-        {
-            return OnReadyFuture.Task;
         }
         
         public virtual void Run(object sender, ElapsedEventArgs e)
         {
-            var config = ConfigManager.GetConfig();
-            if (config != null)
-                SetConfig(config);
+            var config = Poll();
+            SetConfig(config);
         }
     }
 }
