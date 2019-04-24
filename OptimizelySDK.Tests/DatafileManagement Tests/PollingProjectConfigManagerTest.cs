@@ -19,41 +19,73 @@ using NUnit.Framework;
 using OptimizelySDK.DatafileManagement;
 using OptimizelySDK.Logger;
 using System;
+using System.Diagnostics;
+using System.Threading;
 
 namespace OptimizelySDK.Tests.DatafileManagement_Tests
 {
+    public class TestProjectConfigManager : PollingProjectConfigManager
+    {
+        public TestProjectConfigManager(TimeSpan period, ILogger logger) : base(period, logger)
+        {
+
+        }
+
+        protected override ProjectConfig Poll()
+        {
+            Thread.Sleep(2000);
+            return DatafileProjectConfig.Create(TestData.TypedAudienceDatafile, null, null);
+        }
+    }
+
     [TestFixture]
     public class PollingProjectConfigManagerTest
     {
         private Mock<ILogger> LoggerMock;
+        private TestProjectConfigManager TestProjectConfigManager;
 
         [SetUp]
         public void Setup()
         {
             LoggerMock = new Mock<ILogger>();
             LoggerMock.Setup(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()));
+            TestProjectConfigManager = new TestProjectConfigManager(TimeSpan.FromSeconds(3), LoggerMock.Object);
         }
 
-        //[Test]
-        //public void TestHttpConfigManagerReturnsCorrectProjectConfig()
-        //{
-        //    System.Diagnostics.Debug.WriteLine($"Main Thread: {System.Threading.Thread.CurrentThread.ManagedThreadId}");
+        [Test]
+        public void TestPollingConfigManagerBlocksForProjectConfigWhenStarted()
+        {
+            var stopwatch = new Stopwatch();
+            var configManager = new TestProjectConfigManager(TimeSpan.FromSeconds(2), LoggerMock.Object);
 
-        //    HttpProjectConfigManager httpManager = new HttpProjectConfigManager.Builder()
-        //        .WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z")
-        //        .WithLogger(LoggerMock.Object)
-        //        .Build();
-            
-        //    var configManager = new PollingProjectConfigManager(TimeSpan.FromSeconds(1), httpManager, LoggerMock.Object);
-        //    var onReady = configManager.OnReady();
+            stopwatch.Start();
+            var config = configManager.GetConfig();
+            stopwatch.Stop();
 
-        //    // GetConfig returns null as OnReady feature is not resolved yet.
-        //    if (!onReady.IsCompleted)
-        //        Assert.Null(configManager.GetConfig());
+            Assert.True(stopwatch.Elapsed.Seconds >= 2);
+            Assert.NotNull(config);
+        }
 
-        //    // Waiting for onReady to gets completed.
-        //    var resolved = onReady.Result;
-        //    Assert.NotNull(configManager.GetConfig());
-        //}
+        [Test]
+        public void TestPollingConfigManagerGetConfigWithDefault()
+        {
+            var config = DatafileProjectConfig.Create(TestData.TypedAudienceDatafile, null, null);
+            var configManager = new TestProjectConfigManager(TimeSpan.FromSeconds(2), LoggerMock.Object);
+            configManager.SetConfig(config);
+
+            Assert.True(TestData.CompareObjects(configManager.GetConfig(), config));
+        }
+
+        [Test]
+        public void TestPollingConfigManagerGetConfigNotStarted()
+        {
+            var config = DatafileProjectConfig.Create(TestData.TypedAudienceDatafile, null, null);
+            var configManager = new TestProjectConfigManager(TimeSpan.FromSeconds(2), LoggerMock.Object);
+            configManager.SetConfig(config);
+            configManager.Stop();
+
+            Assert.False(configManager.IsStarted);
+            Assert.True(TestData.CompareObjects(configManager.GetConfig(), config));
+        }
     }
 }

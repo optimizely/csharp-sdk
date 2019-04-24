@@ -59,6 +59,7 @@ namespace OptimizelySDK.DatafileManagement
             if (!response.IsSuccessStatusCode)
             {
                 Logger.Log(LogLevel.ERROR, "Unexpected response from event endpoint, status: " + response.StatusCode);
+                return null;
             }
 
             // Update Last-Modified header if provided.
