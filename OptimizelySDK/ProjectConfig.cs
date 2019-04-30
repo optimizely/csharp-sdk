@@ -308,7 +308,7 @@ namespace OptimizelySDK
                     if (ExperimentFeatureMap.ContainsKey(experimentId))
                         ExperimentFeatureMap[experimentId].Add(feature.Id);
                     else
-                        ExperimentFeatureMap[experimentId] = new List<string> { experimentId };
+                        ExperimentFeatureMap[experimentId] = new List<string> { feature.Id };
                 }
             }
         }
