@@ -20,6 +20,7 @@ using System.Linq;
 using System.Web.Mvc;
 using OptimizelySDK.DemoApp.Utils;
 using Newtonsoft.Json;
+using OptimizelySDK.Notifications;
 
 namespace OptimizelySDK.DemoApp.Controllers
 {
@@ -91,7 +92,7 @@ namespace OptimizelySDK.DemoApp.Controllers
                 logger: Logger,
                 errorHandler: InMemoryHandler,
                 skipJsonValidation: false);
-
+                
             return RedirectToAction("Config");
         }
 
