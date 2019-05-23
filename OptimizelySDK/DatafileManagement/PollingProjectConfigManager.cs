@@ -15,31 +15,36 @@
  */
 
 using System;
-using System.Timers;
-using System.Threading.Tasks;
+using System.Threading;
 using OptimizelySDK.Logger;
 using OptimizelySDK.Utils;
+using System.Threading.Tasks;
 
 namespace OptimizelySDK.DatafileManagement
 {
     public abstract class PollingProjectConfigManager : ProjectConfigManager
     {
+        private TimeSpan PollingInterval;
+        public bool IsStarted { get; private set; }
+        private bool scheduleWhenFinished = false;
+
         private ProjectConfig CurrentProjectConfig;
         private Timer SchedulerService;
-        private double PollingIntervalMS;
-        private TaskCompletionSource<ProjectConfigManager> CompletableConfigManager = new TaskCompletionSource<ProjectConfigManager>();
 
         protected ILogger Logger { get; set; }
-        public bool IsStarted { get; set; }
-        
-        public PollingProjectConfigManager(TimeSpan period, ILogger logger = null)
+        protected TimeSpan BlockingTimeout;
+        protected TaskCompletionSource<bool> CompletableConfigManager = new TaskCompletionSource<bool>();
+        // Variables to control blocking/syncing.
+        public static object mutex = new Object();
+
+        public PollingProjectConfigManager(TimeSpan period, TimeSpan blockingTimeout, ILogger logger = null)
         {
             Logger = logger;
-            PollingIntervalMS = period.TotalMilliseconds;
+            BlockingTimeout = blockingTimeout;
+            PollingInterval = period;
 
-            SchedulerService = new Timer(PollingIntervalMS);
-            SchedulerService.AutoReset = true;
-            SchedulerService.Elapsed += Run;
+            // Never start, start only when Start is called.
+            SchedulerService = new Timer((object state) => { Run(); }, this, -1, -1);
 
             Start();
         }
@@ -54,14 +59,16 @@ namespace OptimizelySDK.DatafileManagement
                 return;
             }
 
-            Logger.Log(LogLevel.WARN, $"Starting Config scheduler with interval: {PollingIntervalMS} milliseconds.");
-            SchedulerService.Start();
+            Logger.Log(LogLevel.WARN, $"Starting Config scheduler with interval: {PollingInterval} milliseconds.");
+            SchedulerService.Change(TimeSpan.Zero, PollingInterval);
             IsStarted = true;
         }
 
         public void Stop() 
         {
-            SchedulerService.Stop();
+            // don't call now and onwards.
+            SchedulerService.Change(-1, -1);
+
             IsStarted = false;
             Logger.Log(LogLevel.WARN, $"Stopping Config scheduler.");
         }
@@ -72,7 +79,13 @@ namespace OptimizelySDK.DatafileManagement
             {
                 try
                 {
-                    var result = CompletableConfigManager.Task.Result;
+                    bool isCompleted = CompletableConfigManager.Task.Wait(BlockingTimeout);
+                    if (!isCompleted)
+                    {
+                        // Don't wait next time.
+                        BlockingTimeout = TimeSpan.FromMilliseconds(0);
+                        Logger.Log(LogLevel.WARN, "Timeout exceeded waiting for ProjectConfig to be set, returning null.");
+                    }
                 }
                 catch (AggregateException ex)
                 {
@@ -89,22 +102,45 @@ namespace OptimizelySDK.DatafileManagement
 
         public bool SetConfig(ProjectConfig projectConfig)
         {
+            // trigger now, due because of delayed latency response
+            if(scheduleWhenFinished && IsStarted) {
+                // Can't directly call Run, it will be part of previous thread then.
+                // Call immediately, because it's due now.
+                scheduleWhenFinished = false;
+                SchedulerService.Change(TimeSpan.FromSeconds(0), PollingInterval);
+            }
+
             if (projectConfig == null)
                 return false;
-
+                
             var previousVersion = CurrentProjectConfig == null ? "null" : CurrentProjectConfig.Revision;
             if (projectConfig.Revision == previousVersion)
                 return false;
             
             CurrentProjectConfig = projectConfig;
-            CompletableConfigManager.SetResult(this);
+
+            // SetResult raise exception if called again, that's why Try is used.
+            CompletableConfigManager.TrySetResult(true);
+
             return true;
         }
         
-        public virtual void Run(object sender, ElapsedEventArgs e)
+        public virtual void Run()
         {
-            var config = Poll();
-            SetConfig(config);
+            if (Monitor.TryEnter(mutex)){
+                try {
+                    var config = Poll();
+                    SetConfig(config);
+                } catch (Exception exception) {
+                    Logger.Log(LogLevel.ERROR, "Unable to get config file ");
+                } finally {
+                    Monitor.Exit(mutex);
+                    SetConfig(null);
+                }
+            }
+            else {
+                scheduleWhenFinished = true;
+            }
         }
     }
 }

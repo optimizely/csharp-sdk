@@ -19,6 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace OptimizelySDK.DatafileManagement
 {
@@ -27,13 +28,21 @@ namespace OptimizelySDK.DatafileManagement
         private string Url;
         public HttpClient Client;
         private string LastModifiedSince = string.Empty;
-        
-        private HttpProjectConfigManager(TimeSpan period, string url, ILogger logger) : base(period, logger)
+
+        private HttpProjectConfigManager(TimeSpan period, string url, ILogger logger, TimeSpan blockingTimeout) : base(period, blockingTimeout, logger)
         {
             Client = new HttpClient();
             Url = url;
+            this.BlockingTimeout = blockingTimeout;
         }
-
+        public Task OnReady()
+        {
+            Task t = new Task(() => {
+                CompletableConfigManager.Task.Wait(this.BlockingTimeout);
+            });
+            t.Start();
+            return t;
+        }
         static ProjectConfig ParseProjectConfig(string datafile)
         {
             return DatafileProjectConfig.Create(datafile, null, null);
@@ -66,10 +75,13 @@ namespace OptimizelySDK.DatafileManagement
             if (response.Headers.TryGetValues("Last-Modified", out IEnumerable<string> values))
                 LastModifiedSince = values.First();
 
+            if (response.StatusCode == System.Net.HttpStatusCode.NotModified)
+                return null;
+
             var content = response.Content.ReadAsStringAsync();
             content.Wait();
-            
-            string datafile = content.Result.ToString();
+
+            string datafile = content.Result;
             return ParseProjectConfig(datafile);
         }
         
@@ -81,7 +93,14 @@ namespace OptimizelySDK.DatafileManagement
             private string Format = "https://cdn.optimizely.com/datafiles/{0}.json";
             private ILogger Logger;
             private TimeSpan Period;
+            private TimeSpan BlockingTimeoutSpan;
 
+            public Builder WithBlockingTimeoutPeriod(TimeSpan blockingTimeoutSpan)
+            {
+                BlockingTimeoutSpan = blockingTimeoutSpan;
+
+                return this;
+            }
             public Builder WithDatafile(string datafile)
             {
                 Datafile = datafile;
@@ -140,13 +159,13 @@ namespace OptimizelySDK.DatafileManagement
                     Logger = new DefaultLogger();
 
                 if (!string.IsNullOrEmpty(Url))
-                    return new HttpProjectConfigManager(Period, Url, Logger);
+                    return new HttpProjectConfigManager(Period, Url, Logger, BlockingTimeoutSpan);
 
                 if (string.IsNullOrEmpty(SdkKey))
                     throw new Exception("SdkKey cannot be null");
 
                 Url = string.Format(Format, SdkKey);
-                var configManager = new HttpProjectConfigManager(Period, Url, Logger);
+                var configManager = new HttpProjectConfigManager(Period, Url, Logger, BlockingTimeoutSpan);
 
                 if (Datafile != null)
                 {

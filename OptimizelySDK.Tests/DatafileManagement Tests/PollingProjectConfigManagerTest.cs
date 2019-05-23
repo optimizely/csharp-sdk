@@ -26,7 +26,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
 {
     public class TestProjectConfigManager : PollingProjectConfigManager
     {
-        public TestProjectConfigManager(TimeSpan period, ILogger logger) : base(period, logger)
+        public TestProjectConfigManager(TimeSpan period, ILogger logger) : base(period, TimeSpan.Zero, logger)
         {
 
         }
