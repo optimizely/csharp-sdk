@@ -26,7 +26,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
 {
     public class TestProjectConfigManager : PollingProjectConfigManager
     {
-        public TestProjectConfigManager(TimeSpan period, ILogger logger) : base(period, TimeSpan.Zero, logger)
+        public TestProjectConfigManager(TimeSpan period, TimeSpan blockingTimeout, ILogger logger) : base(period, blockingTimeout, logger)
         {
 
         }
@@ -42,21 +42,36 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
     public class PollingProjectConfigManagerTest
     {
         private Mock<ILogger> LoggerMock;
-        private TestProjectConfigManager TestProjectConfigManager;
+        private ProjectConfig ProjectConfig;
 
         [SetUp]
         public void Setup()
         {
             LoggerMock = new Mock<ILogger>();
             LoggerMock.Setup(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()));
-            TestProjectConfigManager = new TestProjectConfigManager(TimeSpan.FromSeconds(3), LoggerMock.Object);
+            ProjectConfig = DatafileProjectConfig.Create(TestData.Datafile, LoggerMock.Object, null);
         }
 
         [Test]
-        public void TestPollingConfigManagerBlocksForProjectConfigWhenStarted()
+        public void TestPollingConfigManagerDoesNotBlockWhenProjectConfigIsAlreadyProvided()
         {
             var stopwatch = new Stopwatch();
-            var configManager = new TestProjectConfigManager(TimeSpan.FromSeconds(2), LoggerMock.Object);
+            var configManager = new TestProjectConfigManager(TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(3), LoggerMock.Object);
+            configManager.SetConfig(ProjectConfig);
+
+            stopwatch.Start();
+            var config = configManager.GetConfig();
+            stopwatch.Stop();
+
+            Assert.True(stopwatch.Elapsed.Seconds == 0);
+            Assert.NotNull(config);
+        }
+
+        [Test]
+        public void TestPollingConfigManagerBlocksWhenProjectConfigIsNotProvided()
+        {
+            var stopwatch = new Stopwatch();
+            var configManager = new TestProjectConfigManager(TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(3), LoggerMock.Object);
 
             stopwatch.Start();
             var config = configManager.GetConfig();
@@ -70,7 +85,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         public void TestPollingConfigManagerGetConfigWithDefault()
         {
             var config = DatafileProjectConfig.Create(TestData.TypedAudienceDatafile, null, null);
-            var configManager = new TestProjectConfigManager(TimeSpan.FromSeconds(2), LoggerMock.Object);
+            var configManager = new TestProjectConfigManager(TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(3), LoggerMock.Object);
             configManager.SetConfig(config);
 
             Assert.True(TestData.CompareObjects(configManager.GetConfig(), config));
@@ -80,7 +95,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         public void TestPollingConfigManagerGetConfigNotStarted()
         {
             var config = DatafileProjectConfig.Create(TestData.TypedAudienceDatafile, null, null);
-            var configManager = new TestProjectConfigManager(TimeSpan.FromSeconds(2), LoggerMock.Object);
+            var configManager = new TestProjectConfigManager(TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(3), LoggerMock.Object);
             configManager.SetConfig(config);
             configManager.Stop();
 

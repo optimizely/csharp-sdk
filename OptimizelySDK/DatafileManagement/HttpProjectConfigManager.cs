@@ -33,15 +33,16 @@ namespace OptimizelySDK.DatafileManagement
         {
             Client = new HttpClient();
             Url = url;
-            this.BlockingTimeout = blockingTimeout;
         }
+
         public Task OnReady()
         {
-            Task t = new Task(() => {
-                CompletableConfigManager.Task.Wait(this.BlockingTimeout);
-            });
-            t.Start();
-            return t;
+            return CompletableConfigManager.Task;
+            //Task t = new Task(() => {
+            //    CompletableConfigManager.Task.Wait(this.BlockingTimeout);
+            //});
+            //t.Start();
+            //return t;
         }
         static ProjectConfig ParseProjectConfig(string datafile)
         {

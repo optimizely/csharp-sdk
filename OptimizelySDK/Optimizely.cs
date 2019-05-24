@@ -42,7 +42,7 @@ namespace OptimizelySDK
         private ProjectConfigManager ConfigManager;
 
         // For backward compatibility
-        private StaticProjectConfigManager FallbackConfigManager = new StaticProjectConfigManager();
+        private AtomicProjectConfigManager FallbackConfigManager = new AtomicProjectConfigManager();
 
         private ILogger Logger;
 

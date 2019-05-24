@@ -14,22 +14,21 @@
  * limitations under the License.
  */
 
-using NUnit.Framework;
-using OptimizelySDK.DatafileManagement;
-
-namespace OptimizelySDK.Tests.DatafileManagement_Tests
+namespace OptimizelySDK.DatafileManagement
 {
-    [TestFixture]
-    public class StaticProjectConfigManagerTest
+    public class AtomicProjectConfigManager : ProjectConfigManager
     {
-        private StaticProjectConfigManager ConfigManager = new StaticProjectConfigManager();
+        private ProjectConfig ProjectConfig;
 
-        [Test]
-        public void TestStaticProjectConfigManagerReturnsCorrectProjectConfig()
+        public ProjectConfig GetConfig()
         {
-            var expectedConfig = DatafileProjectConfig.Create(TestData.TypedAudienceDatafile, null, null);
-            ConfigManager.SetConfig(expectedConfig);
-            Assert.True(TestData.CompareObjects(expectedConfig, ConfigManager.GetConfig()));
+            return ProjectConfig;
+        }
+
+        public bool SetConfig(ProjectConfig projectConfig)
+        {
+            ProjectConfig = projectConfig;
+            return true;
         }
     }
 }

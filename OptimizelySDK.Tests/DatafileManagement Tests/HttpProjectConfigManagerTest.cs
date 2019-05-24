@@ -19,6 +19,7 @@ using NUnit.Framework;
 using OptimizelySDK.DatafileManagement;
 using OptimizelySDK.Logger;
 using System;
+using System.Diagnostics;
 
 namespace OptimizelySDK.Tests.DatafileManagement_Tests
 {
@@ -40,9 +41,11 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
             HttpProjectConfigManager httpManager = new HttpProjectConfigManager.Builder()
                 .WithUrl("https://cdn.optimizely.com/datafiles/QBw9gFM8oTn7ogY9ANCC1z.json")
                 .WithLogger(LoggerMock.Object)
-                .WithPollingInterval(TimeSpan.FromMilliseconds(100))
+                .WithPollingInterval(TimeSpan.FromMilliseconds(1000))
+                .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(500))
                 .Build();
 
+            httpManager.OnReady().Wait();
             Assert.NotNull(httpManager.GetConfig());
         }
 
@@ -52,9 +55,11 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
             HttpProjectConfigManager httpManager = new HttpProjectConfigManager.Builder()
                 .WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z")
                 .WithLogger(LoggerMock.Object)
-                .WithPollingInterval(TimeSpan.FromMilliseconds(100))
+                .WithPollingInterval(TimeSpan.FromMilliseconds(1000))
+                .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(500))
                 .Build();
 
+            httpManager.OnReady().Wait();
             Assert.NotNull(httpManager.GetConfig());
         }
 
@@ -65,23 +70,32 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
                 .WithSdkKey("10192104166")
                 .WithFormat("https://cdn.optimizely.com/json/{0}.json")
                 .WithLogger(LoggerMock.Object)
-                .WithPollingInterval(TimeSpan.FromMilliseconds(100))
+                .WithPollingInterval(TimeSpan.FromMilliseconds(1000))
+                .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(500))
                 .Build();
 
+            httpManager.OnReady().Wait();
             Assert.NotNull(httpManager.GetConfig());
         }
 
-        //[Test]
-        //public void TestHttpConfigManagerRetreiveNullWithInvalidURL()
-        //{
-        //    HttpProjectConfigManager httpManager = new HttpProjectConfigManager.Builder()
-        //        .WithUrl("https://cdn.optimizely.com/daaaatafilessss/QBw9gFM8oTn7ogY9ANCC1z.json")
-        //        .WithFormat("https://cdn.optimizely.com/json/{0}.json")
-        //        .WithLogger(LoggerMock.Object)
-        //        .WithPollingInterval(TimeSpan.FromMilliseconds(2000))
-        //        .Build();
+        [Test]
+        public void TestOnReadyPromiseResolvedImmediatelyWhenDatafileIsProvided()
+        {
+            var stopwatch = new Stopwatch();
+            HttpProjectConfigManager httpManager = new HttpProjectConfigManager.Builder()
+                .WithSdkKey("10192104166")
+                .WithDatafile(TestData.Datafile)
+                .WithLogger(LoggerMock.Object)
+                .WithPollingInterval(TimeSpan.FromMilliseconds(1000))
+                .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(500))
+                .Build();
 
-        //    Assert.Null(httpManager.GetConfig());
-        //}
+            stopwatch.Start();
+            httpManager.OnReady().Wait();
+            stopwatch.Stop();
+
+            Assert.True(stopwatch.Elapsed.Seconds == 0);
+            Assert.NotNull(httpManager.GetConfig());
+        }
     }
 }

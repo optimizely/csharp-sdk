@@ -132,10 +132,9 @@ namespace OptimizelySDK.DatafileManagement
                     var config = Poll();
                     SetConfig(config);
                 } catch (Exception exception) {
-                    Logger.Log(LogLevel.ERROR, "Unable to get config file ");
+                    Logger.Log(LogLevel.ERROR, "Unable to get project config. Error: " + exception.Message);
                 } finally {
                     Monitor.Exit(mutex);
-                    SetConfig(null);
                 }
             }
             else {
