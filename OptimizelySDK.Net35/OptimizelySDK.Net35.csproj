@@ -224,15 +224,9 @@
 	<Compile Include="..\OptimizelySDK\DatafileManagement\ProjectConfigManager.cs">
       <Link>DatafileManagement\ProjectConfigManager</Link>
     </Compile>
-	<Compile Include="..\OptimizelySDK\DatafileManagement\PollingProjectConfigManager.cs">
-      <Link>DatafileManagement\PollingProjectConfigManager</Link>
-    </Compile>
-	<Compile Include="..\OptimizelySDK\DatafileManagement\HttpProjectConfigManager.cs">
-      <Link>DatafileManagement\HttpProjectConfigManager</Link>
-    </Compile>
-	<Compile Include="..\OptimizelySDK\DatafileManagement\StaticDatafileManager.cs">
-      <Link>DatafileManagement\StaticDatafileManager</Link>
-    </Compile>
+	<Compile Include="..\OptimizelySDK\DatafileManagement\AtomicProjectConfigManager.cs">
+	  <Link>DatafileManagement\AtomicProjectConfigManager.cs</Link>
+	</Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\OptimizelySDK\Utils\schema.json">

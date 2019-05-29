@@ -155,9 +155,6 @@
     <Compile Include="..\OptimizelySDK\Optimizely.cs">
       <Link>Optimizely.cs</Link>
     </Compile>
-    <Compile Include="..\OptimizelySDK\ProjectConfig.cs">
-      <Link>ProjectConfig.cs</Link>
-    </Compile>
     <Compile Include="..\OptimizelySDK\Utils\ConfigParser.cs">
       <Link>Utils\ConfigParser.cs</Link>
     </Compile>
@@ -234,9 +231,9 @@
 	<Compile Include="..\OptimizelySDK\DatafileManagement\HttpProjectConfigManager.cs">
       <Link>DatafileManagement\HttpProjectConfigManager</Link>
     </Compile>
-	<Compile Include="..\OptimizelySDK\DatafileManagement\StaticDatafileManager.cs">
-      <Link>DatafileManagement\StaticDatafileManager</Link>
-    </Compile>
+	<Compile Include="..\OptimizelySDK\DatafileManagement\AtomicProjectConfigManager.cs">
+	  <Link>DatafileManagement\AtomicProjectConfigManager.cs</Link>
+	</Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\OptimizelySDK\Utils\schema.json">

@@ -18,7 +18,6 @@ using OptimizelySDK.Logger;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace OptimizelySDK.DatafileManagement
@@ -26,12 +25,10 @@ namespace OptimizelySDK.DatafileManagement
     public class HttpProjectConfigManager : PollingProjectConfigManager
     {
         private string Url;
-        public HttpClient Client;
         private string LastModifiedSince = string.Empty;
 
         private HttpProjectConfigManager(TimeSpan period, string url, ILogger logger, TimeSpan blockingTimeout) : base(period, blockingTimeout, logger)
         {
-            Client = new HttpClient();
             Url = url;
         }
 
@@ -51,18 +48,23 @@ namespace OptimizelySDK.DatafileManagement
 
 
 #if !NET40 && !NET35
+        private static System.Net.Http.HttpClient Client;
+        static HttpProjectConfigManager() {
+            Client = new System.Net.Http.HttpClient();
+        }
         private string GetRemoteDatafileResponse()
         {
-            var request = new HttpRequestMessage {
+
+            var request = new System.Net.Http.HttpRequestMessage {
                 RequestUri = new Uri(Url),
-                Method = HttpMethod.Get,
+                Method = System.Net.Http.HttpMethod.Get,
             };
 
             // Send If-Modified-Since header if Last-Modified-Since header contains any value.
             if (!string.IsNullOrEmpty(LastModifiedSince))
                 request.Headers.Add("If-Modified-Since", LastModifiedSince);
 
-            var httpResponse = Client.SendAsync(request);
+            var httpResponse =  Client.SendAsync(request);
             httpResponse.Wait();
 
             // Return from here if datafile is not modified.
@@ -112,7 +114,7 @@ namespace OptimizelySDK.DatafileManagement
             }
         }
 #else
-        private HttpResponseMessage GetRemoteDatafileResponse(string url)
+        private string GetRemoteDatafileResponse()
         {
             return null;
         }
