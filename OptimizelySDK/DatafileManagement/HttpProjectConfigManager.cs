@@ -49,14 +49,15 @@ namespace OptimizelySDK.DatafileManagement
             return DatafileProjectConfig.Create(datafile, null, null);
         }
 
-        protected override ProjectConfig Poll()
+
+#if !NET40 && !NET35
+        private string GetRemoteDatafileResponse()
         {
-            var request = new HttpRequestMessage
-            {
+            var request = new HttpRequestMessage {
                 RequestUri = new Uri(Url),
                 Method = HttpMethod.Get,
             };
-            
+
             // Send If-Modified-Since header if Last-Modified-Since header contains any value.
             if (!string.IsNullOrEmpty(LastModifiedSince))
                 request.Headers.Add("If-Modified-Since", LastModifiedSince);
@@ -65,24 +66,66 @@ namespace OptimizelySDK.DatafileManagement
             httpResponse.Wait();
 
             // Return from here if datafile is not modified.
-            var response = httpResponse.Result;
-            if (!response.IsSuccessStatusCode)
-            {
-                Logger.Log(LogLevel.ERROR, "Unexpected response from event endpoint, status: " + response.StatusCode);
+            var result = httpResponse.Result;
+            if (!result.IsSuccessStatusCode) {
+                Logger.Log(LogLevel.ERROR, "Unexpected response from event endpoint, status: " + result.StatusCode);
                 return null;
             }
 
             // Update Last-Modified header if provided.
-            if (response.Headers.TryGetValues("Last-Modified", out IEnumerable<string> values))
+            if (result.Headers.TryGetValues("Last-Modified", out IEnumerable<string> values))
                 LastModifiedSince = values.First();
 
-            if (response.StatusCode == System.Net.HttpStatusCode.NotModified)
+            if (result.StatusCode == System.Net.HttpStatusCode.NotModified)
                 return null;
 
-            var content = response.Content.ReadAsStringAsync();
+            var content = result.Content.ReadAsStringAsync();
             content.Wait();
 
-            string datafile = content.Result;
+            return content.Result;  
+        }
+#elif NET40
+        //TODO: Need to revise this method.
+        private string GetRemoteDatafileResponse()
+        {
+            var request = (System.Net.HttpWebRequest)System.Net.WebRequest.Create(Url);
+
+            // Send If-Modified-Since header if Last-Modified-Since header contains any value.
+            if (!string.IsNullOrEmpty(LastModifiedSince))
+                request.Headers.Add("If-Modified-Since", LastModifiedSince);
+            var result = (System.Net.HttpWebResponse)request.GetResponse();
+
+            // TODO: Need to revise this code.
+            if (result.StatusCode != System.Net.HttpStatusCode.OK) {
+                Logger.Log(LogLevel.ERROR, "Unexpected response from event endpoint, status: " + result.StatusCode);
+            }
+            var lastModified = result.Headers.GetValues("Last-Modified");
+            if(!string.IsNullOrEmpty(lastModified.First()))
+            {
+                LastModifiedSince = lastModified.First();
+            }
+
+            var encoding = System.Text.Encoding.ASCII;
+            using (var reader = new System.IO.StreamReader(result.GetResponseStream(), encoding)) {
+                string responseText = reader.ReadToEnd();
+                return responseText;
+            }
+        }
+#else
+        private HttpResponseMessage GetRemoteDatafileResponse(string url)
+        {
+            return null;
+        }
+#endif
+
+
+        protected override ProjectConfig Poll()
+        {
+            var datafile = GetRemoteDatafileResponse();
+
+            if (datafile == null)
+                return null;
+
             return ParseProjectConfig(datafile);
         }
         
@@ -136,7 +179,7 @@ namespace OptimizelySDK.DatafileManagement
             {
                 Logger = logger;
                 return this;
-            }
+            }            
 
             /// <summary>
             /// HttpProjectConfigManager.Builder that builds and starts a HttpProjectConfigManager.
@@ -172,7 +215,7 @@ namespace OptimizelySDK.DatafileManagement
                 {
                     try
                     {
-                        var config = HttpProjectConfigManager.ParseProjectConfig(Datafile);
+                        var config = ParseProjectConfig(Datafile);
                         configManager.SetConfig(config);
                     }
                     catch (Exception ex)

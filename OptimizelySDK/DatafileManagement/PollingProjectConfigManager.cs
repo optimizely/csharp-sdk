@@ -35,9 +35,11 @@ namespace OptimizelySDK.DatafileManagement
         protected TimeSpan BlockingTimeout;
         protected TaskCompletionSource<bool> CompletableConfigManager = new TaskCompletionSource<bool>();
         // Variables to control blocking/syncing.
-        public static object mutex = new Object();
+        public object mutex = new Object();
 
-        public PollingProjectConfigManager(TimeSpan period, TimeSpan blockingTimeout, ILogger logger = null)
+        protected event Action<ProjectConfig> DatafileUpdate_Notification;
+
+        public PollingProjectConfigManager(TimeSpan period, TimeSpan blockingTimeout, ILogger logger = null, bool StartByDefault = true)
         {
             Logger = logger;
             BlockingTimeout = blockingTimeout;
@@ -45,8 +47,10 @@ namespace OptimizelySDK.DatafileManagement
 
             // Never start, start only when Start is called.
             SchedulerService = new Timer((object state) => { Run(); }, this, -1, -1);
+            if(StartByDefault) {
+                Start();
+            }
 
-            Start();
         }
 
         protected abstract ProjectConfig Poll();
@@ -121,6 +125,8 @@ namespace OptimizelySDK.DatafileManagement
 
             // SetResult raise exception if called again, that's why Try is used.
             CompletableConfigManager.TrySetResult(true);
+
+            DatafileUpdate_Notification?.Invoke(projectConfig);
 
             return true;
         }
