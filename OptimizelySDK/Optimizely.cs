@@ -329,7 +329,8 @@ namespace OptimizelySDK
             };
 
             userAttributes = userAttributes ?? new UserAttributes();
-            NotificationCenter.SendNotifications(NotificationCenter.NotificationType.Decision, DecisionInfoTypes.EXPERIMENT, userId,
+            var decisionNotificationType = Config.IsFeatureExperiment(experiment.Id) ? DecisionNotificationTypes.FEATURE_TEST : DecisionNotificationTypes.AB_TEST;
+            NotificationCenter.SendNotifications(NotificationCenter.NotificationType.Decision, decisionNotificationType, userId,
                 userAttributes, decisionInfo);
             return variation;
         }
@@ -401,9 +402,8 @@ namespace OptimizelySDK
             if (!Validator.IsFeatureFlagValid(Config, featureFlag))
                 return false;
 
-            string experimentKey = null;
-            string variationKey = null;
             bool featureEnabled = false;
+            var sourceInfo = new Dictionary<string, string>();
             var decision = DecisionService.GetVariationForFeature(featureFlag, userId, userAttributes);
 
             if (decision.Variation != null)
@@ -411,10 +411,10 @@ namespace OptimizelySDK
                 var variation = decision.Variation;
                 featureEnabled = variation.FeatureEnabled.GetValueOrDefault();
 
-                if (decision.Source == FeatureDecision.DECISION_SOURCE_EXPERIMENT)
+                if (decision.Source == FeatureDecision.DECISION_SOURCE_FEATURE_TEST)
                 {
-                    experimentKey = decision.Experiment.Key;
-                    variationKey = variation.Key;
+                    sourceInfo["experimentKey"] = decision.Experiment.Key;
+                    sourceInfo["variationKey"] = variation.Key;
                     SendImpressionEvent(decision.Experiment, variation, userId, userAttributes);
                 }
                 else
@@ -433,11 +433,10 @@ namespace OptimizelySDK
                 { "featureKey", featureKey },
                 { "featureEnabled", featureEnabled },
                 { "source", decision.Source },
-                { "sourceExperimentKey", experimentKey },
-                { "sourceVariationKey", variationKey },
+                { "sourceInfo", sourceInfo },
             };
 
-            NotificationCenter.SendNotifications(NotificationCenter.NotificationType.Decision, DecisionInfoTypes.FEATURE, userId,
+            NotificationCenter.SendNotifications(NotificationCenter.NotificationType.Decision, DecisionNotificationTypes.FEATURE, userId,
                userAttributes ?? new UserAttributes(), decisionInfo);
             return featureEnabled;
         }
@@ -515,12 +514,11 @@ namespace OptimizelySDK
                     $@"User ""{userId}"" is not in any variation for feature flag ""{featureKey}"", returning default value ""{variableValue}"".");
             }
 
-            string experimentKey = null;
-            string variationKey = null;
-            if (decision?.Source == FeatureDecision.DECISION_SOURCE_EXPERIMENT)
+            var sourceInfo = new Dictionary<string, string>();
+            if (decision?.Source == FeatureDecision.DECISION_SOURCE_FEATURE_TEST)
             {
-                experimentKey = decision.Experiment.Key;
-                variationKey = decision.Variation.Key;
+                sourceInfo["experimentKey"] = decision.Experiment.Key;
+                sourceInfo["variationKey"] = decision.Variation.Key;
             }
 
             var typeCastedValue = GetTypeCastedVariableValue(variableValue, variableType);
@@ -532,11 +530,10 @@ namespace OptimizelySDK
                 { "variableValue", typeCastedValue },
                 { "variableType", variableType.ToString().ToLower() },
                 { "source", decision?.Source },
-                { "sourceExperimentKey", experimentKey },
-                { "sourceVariationKey", variationKey },
+                { "sourceInfo", sourceInfo },
             };
 
-            NotificationCenter.SendNotifications(NotificationCenter.NotificationType.Decision, DecisionInfoTypes.FEATURE_VARIABLE, userId,
+            NotificationCenter.SendNotifications(NotificationCenter.NotificationType.Decision, DecisionNotificationTypes.FEATURE_VARIABLE, userId,
                userAttributes ?? new UserAttributes(), decisionInfo);
             return (T)typeCastedValue;
         }

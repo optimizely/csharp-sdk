@@ -875,5 +875,23 @@ namespace OptimizelySDK.Tests
             var expectedAudienceIds = new string[] { "3468206642", "3988293898", "3988293899", "3468206646", "3468206647", "3468206644", "3468206643" };
             Assert.That(expectedAudienceIds, Is.EquivalentTo(experiment.AudienceIds));
         }
+
+        [Test]
+        public void TestIsFeatureExperimentReturnsFalseForExperimentThatDoesNotBelongToAnyFeature()
+        {
+            var typedConfig = ProjectConfig.Create(TestData.TypedAudienceDatafile, null, null);
+            var experiment = typedConfig.GetExperimentFromKey("typed_audience_experiment");
+
+            Assert.False(typedConfig.IsFeatureExperiment(experiment.Id));
+        }
+
+        [Test]
+        public void TestIsFeatureExperimentReturnsTrueForExperimentThatBelongsToAFeature()
+        {
+            var typedConfig = ProjectConfig.Create(TestData.TypedAudienceDatafile, null, null);
+            var experiment = typedConfig.GetExperimentFromKey("feat2_with_var_test");
+
+            Assert.True(typedConfig.IsFeatureExperiment(experiment.Id));
+        }
     }
 }

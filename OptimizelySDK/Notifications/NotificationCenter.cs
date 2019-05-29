@@ -46,6 +46,7 @@ namespace OptimizelySDK.Notifications
         /// <param name="userAttributes">Associative array of attributes for the user</param>
         /// <param name="variation">The variation entity</param>
         /// <param name="logEvent">The impression event</param>
+        [Obsolete("ActivateCallback is deprecated. Use DecisionCallback instead.")]
         public delegate void ActivateCallback(Experiment experiment, string userId, UserAttributes userAttributes,
             Variation variation, LogEvent logEvent);
 
@@ -113,9 +114,10 @@ namespace OptimizelySDK.Notifications
         /// Add a notification callback of decision type to the notification center.
         /// </summary>
         /// <param name="notificationType">Notification type</param>
-        /// <param name="decisionCallBack">Callback function to call when event gets triggered</param>
+        /// <param name="activateCallback">Callback function to call when event gets triggered</param>
         /// <returns>int | 0 for invalid notification type, -1 for adding existing notification
         /// or the notification id of newly added notification.</returns>
+        [Obsolete("ActivateCallback is deprecated. Use DecisionCallback instead.")]
         public int AddNotification(NotificationType notificationType, ActivateCallback activateCallback)
         {
             if (!IsNotificationTypeValid(notificationType, NotificationType.Activate))

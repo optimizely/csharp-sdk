@@ -2,7 +2,7 @@
 <package>
     <metadata>
         <id>Optimizely.SDK</id>
-        <version>2.2.2</version>
+        <version>3.1.0</version>
         <title>Optimizely C# SDK</title>
         <authors>Optimizely Development Team</authors>
         <owners>fullstack.optimizely</owners>

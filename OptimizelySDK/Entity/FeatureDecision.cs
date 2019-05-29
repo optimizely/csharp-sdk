@@ -18,8 +18,8 @@ namespace OptimizelySDK.Entity
 {
     public class FeatureDecision
     {
-        public const string DECISION_SOURCE_EXPERIMENT = "EXPERIMENT";
-        public const string DECISION_SOURCE_ROLLOUT = "ROLLOUT";
+        public const string DECISION_SOURCE_FEATURE_TEST = "feature-test";
+        public const string DECISION_SOURCE_ROLLOUT = "rollout";
 
         public Experiment Experiment { get; }
         public Variation Variation { get; }

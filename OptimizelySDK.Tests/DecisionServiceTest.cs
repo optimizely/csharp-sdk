@@ -1,6 +1,6 @@
 ﻿/**
  *
- *    Copyright 2017-2018, Optimizely and contributors
+ *    Copyright 2017-2019, Optimizely and contributors
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -512,7 +512,7 @@ namespace OptimizelySDK.Tests
         {
             var experiment = ProjectConfig.GetExperimentFromKey("test_experiment_multivariate");
             var variation = ProjectConfig.GetVariationFromId("test_experiment_multivariate", "122231");
-            var expectedDecision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_EXPERIMENT);
+            var expectedDecision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_FEATURE_TEST);
             var userAttributes = new UserAttributes();
 
             DecisionServiceMock.Setup(ds => ds.GetVariation(ProjectConfig.GetExperimentFromKey("test_experiment_multivariate"), 
@@ -533,7 +533,7 @@ namespace OptimizelySDK.Tests
             var mutexExperiment = ProjectConfig.GetExperimentFromKey("group_experiment_1");
             var variation = mutexExperiment.Variations[0];
             var userAttributes = new UserAttributes();
-            var expectedDecision = new FeatureDecision(mutexExperiment, variation, FeatureDecision.DECISION_SOURCE_EXPERIMENT);
+            var expectedDecision = new FeatureDecision(mutexExperiment, variation, FeatureDecision.DECISION_SOURCE_FEATURE_TEST);
 
             DecisionServiceMock.Setup(ds => ds.GetVariation(ProjectConfig.GetExperimentFromKey("group_experiment_1"), "user1", 
                 userAttributes)).Returns(variation);
@@ -782,7 +782,7 @@ namespace OptimizelySDK.Tests
             var expectedExperimentId = featureFlag.ExperimentIds[0];
             var expectedExperiment = ProjectConfig.GetExperimentFromId(expectedExperimentId);
             var variation = expectedExperiment.Variations[0];
-            var expectedDecision = new FeatureDecision(expectedExperiment, variation, FeatureDecision.DECISION_SOURCE_EXPERIMENT);
+            var expectedDecision = new FeatureDecision(expectedExperiment, variation, FeatureDecision.DECISION_SOURCE_FEATURE_TEST);
 
             DecisionServiceMock.Setup(ds => ds.GetVariationForFeatureExperiment(It.IsAny<FeatureFlag>(), It.IsAny<string>(), 
                 It.IsAny<UserAttributes>())).Returns(expectedDecision);
@@ -839,7 +839,7 @@ namespace OptimizelySDK.Tests
             var featureFlag = ProjectConfig.GetFeatureFlagFromKey("string_single_variable_feature");
             var experiment = ProjectConfig.GetExperimentFromKey("test_experiment_with_feature_rollout");
             var variation = ProjectConfig.GetVariationFromId("test_experiment_with_feature_rollout", "122236");
-            var expectedDecision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_EXPERIMENT);
+            var expectedDecision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_FEATURE_TEST);
             var userAttributes = new UserAttributes {
                 { "browser_type", "chrome" }
             };
