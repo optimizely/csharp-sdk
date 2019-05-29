@@ -95,6 +95,7 @@
     <Compile Include="UtilsTests\PrivateObject.cs" />
     <Compile Include="UtilsTests\ValidatorTest.cs" />
     <Compile Include="ValidEventDispatcher.cs" />
+    <Compile Include="DatafileManagement Tests\TestPollingProjectConfigManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="App.config" />

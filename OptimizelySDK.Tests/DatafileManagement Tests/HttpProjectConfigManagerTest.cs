@@ -45,7 +45,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
                 .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(500))
                 .Build();
 
-            httpManager.OnReady().Wait();
+            httpManager.OnReady().Wait(System.Threading.Timeout.Infinite);
             Assert.NotNull(httpManager.GetConfig());
         }
 
@@ -59,7 +59,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
                 .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(500))
                 .Build();
 
-            httpManager.OnReady().Wait();
+            httpManager.OnReady().Wait(System.Threading.Timeout.Infinite);
             Assert.NotNull(httpManager.GetConfig());
         }
 
@@ -74,7 +74,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
                 .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(500))
                 .Build();
 
-            httpManager.OnReady().Wait();
+            httpManager.OnReady().Wait(System.Threading.Timeout.Infinite);
             Assert.NotNull(httpManager.GetConfig());
         }
 
