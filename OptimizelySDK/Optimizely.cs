@@ -92,9 +92,7 @@ namespace OptimizelySDK
                           ILogger logger = null,
                           IErrorHandler errorHandler = null,
                           UserProfileService userProfileService = null,
-                          bool skipJsonValidation = false,
-                          ProjectConfig projectConfig = null,
-                          ProjectConfigManager projectConfigManager = null)
+                          bool skipJsonValidation = false)
         {
             IsValid = false; // invalid until proven valid
             Logger = logger ?? new NoOpLogger();
@@ -104,25 +102,20 @@ namespace OptimizelySDK
             EventBuilder = new EventBuilder(Bucketer, Logger);
             UserProfileService = userProfileService;
             NotificationCenter = new NotificationCenter(Logger);
-            Config = projectConfig;
 
-            try
-            {
-                if (Config == null && !string.IsNullOrEmpty(datafile))
+            try {
+
+                if (!ValidateInputs(datafile, skipJsonValidation)) 
                 {
-                    if (ValidateInputs(datafile, skipJsonValidation))
-                    {
-                        Config = DatafileProjectConfig.Create(datafile, Logger, ErrorHandler);
-                        IsValid = true;
-                    }
-                    else
-                    {
-                        Logger.Log(LogLevel.ERROR, "Provided 'datafile' has invalid schema.");
-                    }
+                    Logger.Log(LogLevel.ERROR, "Provided 'datafile' has invalid schema.");
+                    return;
                 }
 
+                Config = DatafileProjectConfig.Create(datafile, Logger, ErrorHandler);
+                IsValid = true;
+
                 DecisionService = new DecisionService(Bucketer, ErrorHandler, Config, userProfileService, Logger);
-            }
+            } 
             catch (Exception ex)
             {
                 string error = String.Empty;

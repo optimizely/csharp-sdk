@@ -16,7 +16,6 @@
 
 using OptimizelySDK.Entity;
 using OptimizelySDK.Logger;
-using OptimizelySDK.DatafileManagement;
 
 namespace OptimizelySDK.AudienceConditions
 {
