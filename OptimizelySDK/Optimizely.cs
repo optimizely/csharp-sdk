@@ -103,7 +103,6 @@ namespace OptimizelySDK
                     IsValid = true;
                     ProjectConfigManager = new AtomicProjectConfigManager();
                     ProjectConfigManager.SetConfig(config);
-
                 } else {
                     Logger.Log(LogLevel.ERROR, "Provided 'datafile' has invalid schema.");
                 }
@@ -143,7 +142,7 @@ namespace OptimizelySDK
             EventBuilder = new EventBuilder(Bucketer, Logger);
             UserProfileService = userProfileService;
             NotificationCenter = new NotificationCenter(Logger);
-            DecisionService = new DecisionService(Bucketer, ErrorHandler, ProjectConfigManager, userProfileService, Logger);
+            DecisionService = new DecisionService(Bucketer, ErrorHandler, userProfileService, Logger);
         }
 
         /// <summary>
@@ -152,7 +151,7 @@ namespace OptimizelySDK
         /// <param name="experiment">Experiment Object representing experiment</param>
         /// <param name="userId">string ID for user</param>
         /// <param name="userAttributes">associative array of Attributes for the user</param>
-        private bool ValidatePreconditions(Experiment experiment, string userId, UserAttributes userAttributes = null)
+        private bool ValidatePreconditions(Experiment experiment, string userId, ProjectConfig config, UserAttributes userAttributes = null)
         {
             if (!experiment.IsExperimentRunning)
             {
@@ -165,7 +164,7 @@ namespace OptimizelySDK
                 return true;
             }
 
-            if (!ExperimentUtils.IsUserInExperiment(Config, experiment, userAttributes, Logger))
+            if (!ExperimentUtils.IsUserInExperiment(config, experiment, userAttributes, Logger))
             {
                 Logger.Log(LogLevel.INFO, string.Format("User \"{0}\" does not meet conditions to be in experiment \"{1}\".", userId, experiment.Key));
                 return false;
@@ -184,7 +183,8 @@ namespace OptimizelySDK
         /// <returns>null|Variation Representing variation</returns>
         public Variation Activate(string experimentKey, string userId, UserAttributes userAttributes = null)
         {
-            if (!IsValid)
+            var config = ProjectConfigManager?.GetConfig();
+            if (!IsValid || config == null)
             {
                 Logger.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'activate'.");
                 return null;
@@ -199,7 +199,7 @@ namespace OptimizelySDK
             if (!ValidateStringInputs(inputValues))
                 return null;
 
-            var experiment = Config.GetExperimentFromKey(experimentKey);
+            var experiment = config.GetExperimentFromKey(experimentKey);
 
             if (experiment.Key == null)
             {
@@ -215,7 +215,7 @@ namespace OptimizelySDK
                 return null;
             }
 
-            SendImpressionEvent(experiment, variation, userId, userAttributes);
+            SendImpressionEvent(experiment, variation, userId, userAttributes, config);
 
             return variation;
         }
@@ -241,7 +241,8 @@ namespace OptimizelySDK
         /// <param name="eventTags">eventTags array Hash representing metadata associated with the event.</param>
         public void Track(string eventKey, string userId, UserAttributes userAttributes = null, EventTags eventTags = null)
         {
-            if (!IsValid)
+            var config = ProjectConfigManager?.GetConfig();
+            if (!IsValid || config == null) 
             {
                 Logger.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'track'.");
                 return;
@@ -256,7 +257,7 @@ namespace OptimizelySDK
             if (!ValidateStringInputs(inputValues))
                 return;
 
-            var eevent = Config.GetEvent(eventKey);
+            var eevent = config.GetEvent(eventKey);
 
             if (eevent.Key == null) 
             {
@@ -270,7 +271,7 @@ namespace OptimizelySDK
                 eventTags = eventTags.FilterNullValues(Logger);
             }
 
-            var conversionEvent = EventBuilder.CreateConversionEvent(Config, eventKey,
+            var conversionEvent = EventBuilder.CreateConversionEvent(config, eventKey,
                 userId, userAttributes, eventTags);
             Logger.Log(LogLevel.INFO, string.Format("Tracking event {0} for user {1}.", eventKey, userId));
             Logger.Log(LogLevel.DEBUG, string.Format("Dispatching conversion event to URL {0} with params {1}.",
@@ -299,7 +300,8 @@ namespace OptimizelySDK
         /// <returns>null|Variation Representing variation</returns>
         public Variation GetVariation(string experimentKey, string userId, UserAttributes userAttributes = null)
         {
-            if (!IsValid)
+            var config = ProjectConfigManager?.GetConfig();
+            if (!IsValid || config == null) 
             {
                 Logger.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'GetVariation'.");
                 return null;
@@ -314,11 +316,11 @@ namespace OptimizelySDK
             if (!ValidateStringInputs(inputValues))
                 return null; 
 
-            Experiment experiment = Config.GetExperimentFromKey(experimentKey);
+            Experiment experiment = config.GetExperimentFromKey(experimentKey);
             if (experiment.Key == null)
                 return null;
 
-            var variation = DecisionService.GetVariation(experiment, userId, userAttributes);
+            var variation = DecisionService.GetVariation(experiment, userId, config, userAttributes);
             var decisionInfo = new Dictionary<string, object>
             {
                 { "experimentKey", experimentKey },
@@ -326,7 +328,7 @@ namespace OptimizelySDK
             };
 
             userAttributes = userAttributes ?? new UserAttributes();
-            var decisionNotificationType = Config.IsFeatureExperiment(experiment.Id) ? DecisionNotificationTypes.FEATURE_TEST : DecisionNotificationTypes.AB_TEST;
+            var decisionNotificationType = config.IsFeatureExperiment(experiment.Id) ? DecisionNotificationTypes.FEATURE_TEST : DecisionNotificationTypes.AB_TEST;
             NotificationCenter.SendNotifications(NotificationCenter.NotificationType.Decision, decisionNotificationType, userId,
                 userAttributes, decisionInfo);
             return variation;
@@ -342,13 +344,19 @@ namespace OptimizelySDK
         /// <returns>A boolean value that indicates if the set completed successfully.</returns>
         public bool SetForcedVariation(string experimentKey, string userId, string variationKey)
         {
+            var config = ProjectConfigManager?.GetConfig();
+            if (!IsValid || config == null)
+            {
+                return false;
+            }
+
             var inputValues = new Dictionary<string, string>
             {
                 { USER_ID, userId },
                 { EXPERIMENT_KEY, experimentKey }
             };
 
-            return ValidateStringInputs(inputValues) && Config.SetForcedVariation(experimentKey, userId, variationKey);
+            return ValidateStringInputs(inputValues) && config.SetForcedVariation(experimentKey, userId, variationKey);
         }
 
         /// <summary>
@@ -359,6 +367,11 @@ namespace OptimizelySDK
         /// <returns>null|string The variation key.</returns>
         public Variation GetForcedVariation(string experimentKey, string userId)
         {
+            var config = ProjectConfigManager?.GetConfig();
+            if (!IsValid || config == null) {
+                return null;
+            }
+
             var inputValues = new Dictionary<string, string>
             {
                 { USER_ID, userId },
@@ -368,7 +381,7 @@ namespace OptimizelySDK
             if (!ValidateStringInputs(inputValues))
                 return null;
 
-            return Config.GetForcedVariation(experimentKey, userId);
+            return config.GetForcedVariation(experimentKey, userId);
         }
 
         #region  FeatureFlag APIs
@@ -383,6 +396,14 @@ namespace OptimizelySDK
         /// <returns>True if feature is enabled, false or null otherwise</returns>
         public virtual bool IsFeatureEnabled(string featureKey, string userId, UserAttributes userAttributes = null)
         {
+            var config = ProjectConfigManager?.GetConfig();
+            if (!IsValid || config == null) {
+
+                Logger.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'GetVariation'.");
+
+                return false;
+            }
+
             var inputValues = new Dictionary<string, string>
             {
                 { USER_ID, userId },
@@ -392,16 +413,16 @@ namespace OptimizelySDK
             if (!ValidateStringInputs(inputValues))
                 return false;
 
-            var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
+            var featureFlag = config.GetFeatureFlagFromKey(featureKey);
             if (string.IsNullOrEmpty(featureFlag.Key))
                 return false;
 
-            if (!Validator.IsFeatureFlagValid(Config, featureFlag))
+            if (!Validator.IsFeatureFlagValid(config, featureFlag))
                 return false;
 
             bool featureEnabled = false;
             var sourceInfo = new Dictionary<string, string>();
-            var decision = DecisionService.GetVariationForFeature(featureFlag, userId, userAttributes);
+            var decision = DecisionService.GetVariationForFeature(featureFlag, userId, config, userAttributes);
 
             if (decision.Variation != null)
             {
@@ -412,7 +433,7 @@ namespace OptimizelySDK
                 {
                     sourceInfo["experimentKey"] = decision.Experiment.Key;
                     sourceInfo["variationKey"] = variation.Key;
-                    SendImpressionEvent(decision.Experiment, variation, userId, userAttributes);
+                    SendImpressionEvent(decision.Experiment, variation, userId, userAttributes, config);
                 }
                 else
                 {
@@ -448,8 +469,9 @@ namespace OptimizelySDK
         /// <param name="variableType">Variable type</param>
         /// <returns>string | null Feature variable value</returns>
         public virtual T GetFeatureVariableValueForType<T>(string featureKey, string variableKey, string userId, 
-            UserAttributes userAttributes, FeatureVariable.VariableType variableType)
+            UserAttributes userAttributes, FeatureVariable.VariableType variableType, ProjectConfig config)
         {
+
             var inputValues = new Dictionary<string, string>
             {
                 { USER_ID, userId },
@@ -460,7 +482,7 @@ namespace OptimizelySDK
             if (!ValidateStringInputs(inputValues))
                 return default(T);
 
-            var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
+            var featureFlag = config.GetFeatureFlagFromKey(featureKey);
             if (string.IsNullOrEmpty(featureFlag.Key))
                 return default(T);
 
@@ -480,7 +502,7 @@ namespace OptimizelySDK
 
             var featureEnabled = false;
             var variableValue = featureVariable.DefaultValue;
-            var decision = DecisionService.GetVariationForFeature(featureFlag, userId, userAttributes);
+            var decision = DecisionService.GetVariationForFeature(featureFlag, userId, config, userAttributes);
 
             if (decision.Variation != null)
             {
@@ -545,7 +567,14 @@ namespace OptimizelySDK
         /// <returns>bool | Feature variable value or null</returns>
         public bool? GetFeatureVariableBoolean(string featureKey, string variableKey, string userId, UserAttributes userAttributes = null)
         {
-            return GetFeatureVariableValueForType<bool?>(featureKey, variableKey, userId, userAttributes, FeatureVariable.VariableType.BOOLEAN);
+            var config = ProjectConfigManager?.GetConfig();
+
+            if (!IsValid || config == null) {
+                Logger.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'activate'.");
+                return null;
+            }
+
+            return GetFeatureVariableValueForType<bool?>(featureKey, variableKey, userId, userAttributes, FeatureVariable.VariableType.BOOLEAN, config);
         }
 
         /// <summary>
@@ -558,7 +587,13 @@ namespace OptimizelySDK
         /// <returns>double | Feature variable value or null</returns>
         public double? GetFeatureVariableDouble(string featureKey, string variableKey, string userId, UserAttributes userAttributes = null)
         {
-            return GetFeatureVariableValueForType<double?>(featureKey, variableKey, userId, userAttributes, FeatureVariable.VariableType.DOUBLE);
+            var config = ProjectConfigManager?.GetConfig();
+            if (!IsValid || config == null) {
+                Logger.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'activate'.");
+                return null;
+            }
+
+            return GetFeatureVariableValueForType<double?>(featureKey, variableKey, userId, userAttributes, FeatureVariable.VariableType.DOUBLE, config);
         }
 
         /// <summary>
@@ -571,7 +606,13 @@ namespace OptimizelySDK
         /// <returns>int | Feature variable value or null</returns>
         public int? GetFeatureVariableInteger(string featureKey, string variableKey, string userId, UserAttributes userAttributes = null)
         {
-            return GetFeatureVariableValueForType<int?>(featureKey, variableKey, userId, userAttributes, FeatureVariable.VariableType.INTEGER);
+            var config = ProjectConfigManager?.GetConfig();
+            if (!IsValid || config == null) {
+                Logger.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'activate'.");
+                return null;
+            }
+
+            return GetFeatureVariableValueForType<int?>(featureKey, variableKey, userId, userAttributes, FeatureVariable.VariableType.INTEGER, config);
         }
 
         /// <summary>
@@ -584,7 +625,13 @@ namespace OptimizelySDK
         /// <returns>string | Feature variable value or null</returns>
         public string GetFeatureVariableString(string featureKey, string variableKey, string userId, UserAttributes userAttributes = null)
         {
-            return GetFeatureVariableValueForType<string>(featureKey, variableKey, userId, userAttributes, FeatureVariable.VariableType.STRING);
+            var config = ProjectConfigManager?.GetConfig();
+            if (!IsValid || config == null) {
+                Logger.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'activate'.");
+                return null;
+            }
+
+            return GetFeatureVariableValueForType<string>(featureKey, variableKey, userId, userAttributes, FeatureVariable.VariableType.STRING, config);
         }
 
         /// <summary>
@@ -595,11 +642,11 @@ namespace OptimizelySDK
         /// <param name="userId">The user ID</param>
         /// <param name="userAttributes">The user's attributes</param>
         private void SendImpressionEvent(Experiment experiment, Variation variation, string userId, 
-        UserAttributes userAttributes)
+        UserAttributes userAttributes, ProjectConfig config)
         {
             if (experiment.IsExperimentRunning)
             {
-                var impressionEvent = EventBuilder.CreateImpressionEvent(Config, experiment, variation.Id, userId, userAttributes);
+                var impressionEvent = EventBuilder.CreateImpressionEvent(config, experiment, variation.Id, userId, userAttributes);
                 Logger.Log(LogLevel.INFO, string.Format("Activating user {0} in experiment {1}.", userId, experiment.Key));
                 Logger.Log(LogLevel.DEBUG, string.Format("Dispatching impression event to URL {0} with params {1}.",
                     impressionEvent.Url, impressionEvent.GetParamsAsJson()));
@@ -632,16 +679,17 @@ namespace OptimizelySDK
         {
             List<string> enabledFeaturesList = new List<string>();
 
-            if (!IsValid)
+            var config = ProjectConfigManager?.GetConfig();
+            if (!IsValid || config == null)
             {
-                Logger.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'GetEnabledFeatures'.");
-                return enabledFeaturesList;
+                Logger.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'activate'.");
+                return null;
             }
 
             if (!ValidateStringInputs(new Dictionary<string, string> { { USER_ID, userId } }))
                 return enabledFeaturesList;
 
-            foreach (var feature in Config.FeatureKeyMap.Values)
+            foreach (var feature in config.FeatureKeyMap.Values)
             {
                 var featureKey = feature.Key;
                 if (IsFeatureEnabled(featureKey, userId, userAttributes))

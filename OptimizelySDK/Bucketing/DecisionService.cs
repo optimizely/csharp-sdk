@@ -37,7 +37,6 @@ namespace OptimizelySDK.Bucketing
     {
         private Bucketer Bucketer;
         private IErrorHandler ErrorHandler;
-        private ProjectConfigManager ProjectConfigManager;
         private UserProfileService UserProfileService;
         private ILogger Logger;
         
@@ -49,11 +48,10 @@ namespace OptimizelySDK.Bucketing
         /// <param name = "projectConfigManager" > Optimizely Project Config representing the datafile.</param>
         /// <param name = "userProfileService" ></ param >
         /// < param name= "logger" > UserProfileService implementation for storing user info.</param>
-        public DecisionService(Bucketer bucketer, IErrorHandler errorHandler, ProjectConfigManager projectConfigManager, UserProfileService userProfileService, ILogger logger)
+        public DecisionService(Bucketer bucketer, IErrorHandler errorHandler, UserProfileService userProfileService, ILogger logger)
         {
             Bucketer = bucketer;
             ErrorHandler = errorHandler;
-            ProjectConfigManager = projectConfigManager;
             UserProfileService = userProfileService;
             Logger = logger;
         }
@@ -65,9 +63,8 @@ namespace OptimizelySDK.Bucketing
         /// <param name = "userId" > The userId of the user.
         /// <param name = "filteredAttributes" > The user's attributes. This should be filtered to just attributes in the Datafile.</param>
         /// <returns>The Variation the user is allocated into.</returns>
-        public virtual Variation GetVariation(Experiment experiment, string userId, UserAttributes filteredAttributes)
+        public virtual Variation GetVariation(Experiment experiment, string userId, ProjectConfig config, UserAttributes filteredAttributes)
         {
-            var config = ProjectConfigManager.GetConfig();
             if (!ExperimentUtils.IsExperimentActive(experiment, Logger)) return null;
 
             // check if a forced variation is set
@@ -87,7 +84,7 @@ namespace OptimizelySDK.Bucketing
                     if (userProfileMap != null && UserProfileUtil.IsValidUserProfileMap(userProfileMap))
                     {
                         userProfile = UserProfileUtil.ConvertMapToUserProfile(userProfileMap);
-                        variation = GetStoredVariation(experiment, userProfile);
+                        variation = GetStoredVariation(experiment, userProfile, config);
                         if (variation != null) return variation;
                     }
                     else if (userProfileMap == null)
@@ -166,7 +163,7 @@ namespace OptimizelySDK.Bucketing
         /// <param name = "experiment" > which the user was bucketed</param>
         /// <param name = "userProfile" > User profile of the user</param>
         /// <returns>The user was previously bucketed into.</returns>
-        public Variation GetStoredVariation(Experiment experiment, UserProfile userProfile)
+        public Variation GetStoredVariation(Experiment experiment, UserProfile userProfile, ProjectConfig config)
         {
             // ---------- Check User Profile for Sticky Bucketing ----------
             // If a user profile instance is present then check it for a saved variation
@@ -185,7 +182,6 @@ namespace OptimizelySDK.Bucketing
             try
             {
                 string variationId = decision.VariationId;
-                var config = ProjectConfigManager.GetConfig();
 
                 Variation savedVariation = config.ExperimentIdMap[experimentId].VariationIdToVariationMap.ContainsKey(variationId) 
                     ? config.ExperimentIdMap[experimentId].VariationIdToVariationMap[variationId] 
@@ -350,7 +346,7 @@ namespace OptimizelySDK.Bucketing
                 if (string.IsNullOrEmpty(experiment.Key))
                     continue;
 
-                var variation = GetVariation(experiment, userId, filteredAttributes);
+                var variation = GetVariation(experiment, userId, config, filteredAttributes);
 
                 if (variation != null && !string.IsNullOrEmpty(variation.Id))
                 {
@@ -371,7 +367,7 @@ namespace OptimizelySDK.Bucketing
         /// <param name = "filteredAttributes" >The user's attributes. This should be filtered to just attributes in the Datafile.</param>
         /// <returns>null if the user is not bucketed into any variation or the FeatureDecision entity if the user is 
         /// successfully bucketed.</returns>
-        public virtual FeatureDecision GetVariationForFeature(FeatureFlag featureFlag, string userId, UserAttributes filteredAttributes, ProjectConfig config)
+        public virtual FeatureDecision GetVariationForFeature(FeatureFlag featureFlag, string userId, ProjectConfig config, UserAttributes filteredAttributes)
         {
             // Check if the feature flag has an experiment and the user is bucketed into that experiment.
             var decision = GetVariationForFeatureExperiment(featureFlag, userId, filteredAttributes, config);
