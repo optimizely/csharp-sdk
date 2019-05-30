@@ -22,9 +22,9 @@ using OptimizelySDK.Utils;
 using System.Collections.Generic;
 using Attribute = OptimizelySDK.Entity.Attribute;
 
-namespace OptimizelySDK
+namespace OptimizelySDK.DatafileManagement
 {
-    public class ProjectConfig
+    public class DatafileProjectConfig : ProjectConfig
     {
         public enum OPTLYSDKVersion
         {
@@ -214,12 +214,6 @@ namespace OptimizelySDK
 
         //========================= Initialization ===========================
 
-        /// <summary>
-        /// Constructor (private)
-        /// </summary>
-        private ProjectConfig()
-        {
-        }
 
         /// <summary>
         /// Initialize the arrays and mappings
@@ -315,7 +309,7 @@ namespace OptimizelySDK
 
         public static ProjectConfig Create(string content, ILogger logger, IErrorHandler errorHandler)
         {
-            ProjectConfig config = GetConfig(content);
+            DatafileProjectConfig config = GetConfig(content);
 
             config.Logger = logger;
             config.ErrorHandler = errorHandler;
@@ -325,7 +319,7 @@ namespace OptimizelySDK
             return config;
         }
 
-        private static ProjectConfig GetConfig(string configData)
+        private static DatafileProjectConfig GetConfig(string configData)
         {
             if (configData == null)
                 throw new ConfigParseException("Unable to parse null datafile.");
@@ -333,7 +327,7 @@ namespace OptimizelySDK
             if (string.IsNullOrEmpty(configData))
                 throw new ConfigParseException("Unable to parse empty datafile.");
 
-            var config = JsonConvert.DeserializeObject<ProjectConfig>(configData);
+            var config = JsonConvert.DeserializeObject<DatafileProjectConfig>(configData);
 
             if (SupportedVersions.TrueForAll((supportedVersion) => !(((int)supportedVersion).ToString() == config.Version)))
                 throw new ConfigParseException(string.Format(@"This version of the C# SDK does not support the given datafile version: {0}", config.Version));

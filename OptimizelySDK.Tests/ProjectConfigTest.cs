@@ -879,7 +879,7 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestIsFeatureExperimentReturnsFalseForExperimentThatDoesNotBelongToAnyFeature()
         {
-            var typedConfig = ProjectConfig.Create(TestData.TypedAudienceDatafile, null, null);
+            var typedConfig = DatafileProjectConfig.Create(TestData.TypedAudienceDatafile, null, null);
             var experiment = typedConfig.GetExperimentFromKey("typed_audience_experiment");
 
             Assert.False(typedConfig.IsFeatureExperiment(experiment.Id));
@@ -888,7 +888,7 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestIsFeatureExperimentReturnsTrueForExperimentThatBelongsToAFeature()
         {
-            var typedConfig = ProjectConfig.Create(TestData.TypedAudienceDatafile, null, null);
+            var typedConfig = DatafileProjectConfig.Create(TestData.TypedAudienceDatafile, null, null);
             var experiment = typedConfig.GetExperimentFromKey("feat2_with_var_test");
 
             Assert.True(typedConfig.IsFeatureExperiment(experiment.Id));

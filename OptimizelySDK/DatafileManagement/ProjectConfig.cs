@@ -17,7 +17,7 @@
 using OptimizelySDK.Entity;
 using System.Collections.Generic;
 
-namespace OptimizelySDK.DatafileManagement
+namespace OptimizelySDK
 {
     public interface ProjectConfig
     {
@@ -256,5 +256,14 @@ namespace OptimizelySDK.DatafileManagement
         /// <param name="attributeKey">Key of the Attribute</param>
         /// <returns>Attribute ID corresponding to the provided attribute key. Attribute key if it is a reserved attribute</returns>
         string GetAttributeId(string attributeKey);
+
+        /// <summary>
+        /// Check if the provided experiment Id belongs to any feature, false otherwise.
+        /// </summary>
+        /// <param name="experimentId">Experiment Id</param>
+        /// <returns>true if experiment belongs to any feature, false otherwise</returns>
+        bool IsFeatureExperiment(string experimentId);
+
+        // TODO: Need to check, Create should be part of this interface.
     }
 }

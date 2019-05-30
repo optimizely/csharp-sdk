@@ -39,11 +39,6 @@ namespace OptimizelySDK
         
         private ProjectConfig Config;
 
-        private ProjectConfigManager ConfigManager;
-
-        // For backward compatibility
-        private AtomicProjectConfigManager FallbackConfigManager = new AtomicProjectConfigManager();
-
         private ILogger Logger;
 
         private IErrorHandler ErrorHandler;
@@ -110,7 +105,6 @@ namespace OptimizelySDK
             UserProfileService = userProfileService;
             NotificationCenter = new NotificationCenter(Logger);
             Config = projectConfig;
-            ConfigManager = projectConfigManager;
 
             try
             {
@@ -126,12 +120,6 @@ namespace OptimizelySDK
                         Logger.Log(LogLevel.ERROR, "Provided 'datafile' has invalid schema.");
                     }
                 }
-
-                if (Config != null)
-                    FallbackConfigManager.SetConfig(Config);
-
-                if (ConfigManager == null)
-                    ConfigManager = FallbackConfigManager;
 
                 DecisionService = new DecisionService(Bucketer, ErrorHandler, Config, userProfileService, Logger);
             }

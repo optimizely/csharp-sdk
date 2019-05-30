@@ -59,13 +59,13 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         public void TestPollingConfigManagerBlocksWhenProjectConfigIsNotProvided()
         {
             var stopwatch = new Stopwatch();
-            var configManager = new TestPollingProjectConfigManager(TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(2), LoggerMock.Object, new int[] { });
+            var configManager = new TestPollingProjectConfigManager(TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(2), LoggerMock.Object, new int[] {500 });
 
             stopwatch.Start();
             var config = configManager.GetConfig();
             stopwatch.Stop();
 
-            Assert.True(stopwatch.Elapsed.Seconds >= 2);
+            Assert.True(stopwatch.Elapsed.TotalMilliseconds >= 500);
         }
 
         // TODO: GetConfig without start should always block execution.
