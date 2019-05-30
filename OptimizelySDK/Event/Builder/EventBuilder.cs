@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 using OptimizelySDK.Bucketing;
-using OptimizelySDK.DatafileManagement;
 using OptimizelySDK.Entity;
 using OptimizelySDK.Logger;
 using OptimizelySDK.Utils;

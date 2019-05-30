@@ -129,7 +129,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
             sw.Start();
             var config = configManager.GetConfig();
             sw.Stop();
-            Assert.GreaterOrEqual(sw.Elapsed.TotalMilliseconds, 1000);
+            Assert.GreaterOrEqual(sw.Elapsed.TotalMilliseconds, 950);
         }
 
         [Test]
