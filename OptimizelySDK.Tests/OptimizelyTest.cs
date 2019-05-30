@@ -30,8 +30,6 @@ using OptimizelySDK.Notifications;
 using OptimizelySDK.Tests.NotificationTests;
 using OptimizelySDK.Utils;
 using OptimizelySDK.DatafileManagement;
-using Newtonsoft.Json;
-using System.Reflection;
 
 namespace OptimizelySDK.Tests
 {
@@ -87,7 +85,8 @@ namespace OptimizelySDK.Tests
             Optimizely = new Optimizely(TestData.Datafile, EventDispatcherMock.Object, LoggerMock.Object, ErrorHandlerMock.Object);
             OptimizelyWithTypedAudiences = new Optimizely(TestData.TypedAudienceDatafile, EventDispatcherMock.Object, LoggerMock.Object, ErrorHandlerMock.Object);
 
-            Helper = new OptimizelyHelper {
+            Helper = new OptimizelyHelper
+            {
                 Datafile = TestData.Datafile,
                 EventDispatcher = EventDispatcherMock.Object,
                 Logger = LoggerMock.Object,
@@ -95,7 +94,8 @@ namespace OptimizelySDK.Tests
                 SkipJsonValidation = false,
             };
 
-            OptimizelyMock = new Mock<Optimizely>(TestData.Datafile, EventDispatcherMock.Object, LoggerMock.Object, ErrorHandlerMock.Object, null, false) {
+            OptimizelyMock = new Mock<Optimizely>(TestData.Datafile, EventDispatcherMock.Object, LoggerMock.Object, ErrorHandlerMock.Object, null, false)
+            {
                 CallBase = true
             };
 
@@ -286,7 +286,7 @@ namespace OptimizelySDK.Tests
             };
 
             var variation = Optimizely.GetVariation("test_experiment", "test_user", attributes);
-
+            
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "User \"test_user\" is not in the forced variation map."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Assigned bucket [3037] to user [test_user] with bucketing ID [test_user]."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "User [test_user] is in variation [control] of experiment [test_experiment]."), Times.Once);
@@ -331,7 +331,7 @@ namespace OptimizelySDK.Tests
 
             EventBuilderMock.Verify(b => b.CreateImpressionEvent(It.IsAny<ProjectConfig>(), It.IsAny<Experiment>(),
                 It.IsAny<string>(), It.IsAny<string>(), It.IsAny<UserAttributes>()), Times.Never);
-
+            
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Assigned bucket [8495] to user [not_in_variation_user] with bucketing ID [not_in_variation_user]."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "User [not_in_variation_user] is in no variation."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "Not activating user not_in_variation_user."), Times.Once);
@@ -356,10 +356,10 @@ namespace OptimizelySDK.Tests
             optly.SetFieldOrProperty("EventBuilder", EventBuilderMock.Object);
 
             var variation = (Variation)optly.Invoke("Activate", "group_experiment_1", "user_1", null);
-
+            
             EventBuilderMock.Verify(b => b.CreateImpressionEvent(It.IsAny<ProjectConfig>(), Config.GetExperimentFromKey("group_experiment_1"),
                     "7722360022", "user_1", null), Times.Once);
-
+            
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Assigned bucket [1922] to user [user_1] with bucketing ID [user_1]."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "User [user_1] is in experiment [group_experiment_1] of group [7722400015]."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Assigned bucket [9525] to user [user_1] with bucketing ID [user_1]."), Times.Once);
@@ -382,7 +382,7 @@ namespace OptimizelySDK.Tests
 
             EventBuilderMock.Verify(b => b.CreateImpressionEvent(It.IsAny<ProjectConfig>(), It.IsAny<Experiment>(),
               It.IsAny<string>(), It.IsAny<string>(), It.IsAny<UserAttributes>()), Times.Never);
-
+            
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "User \"test_user\" does not meet conditions to be in experiment \"test_experiment\"."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "Not activating user test_user."), Times.Once);
 
@@ -428,7 +428,7 @@ namespace OptimizelySDK.Tests
 
             EventBuilderMock.Verify(b => b.CreateImpressionEvent(It.IsAny<ProjectConfig>(), Config.GetExperimentFromKey("test_experiment"),
                     "7722370027", "test_user", OptimizelyHelper.NullUserAttributes), Times.Once);
-
+            
             //"User "test_user" is not in the forced variation map."
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "User \"test_user\" is not in the forced variation map."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Assigned bucket [3037] to user [test_user] with bucketing ID [test_user]."), Times.Once);
@@ -475,12 +475,12 @@ namespace OptimizelySDK.Tests
 
             var optly = Helper.CreatePrivateOptimizely();
             optly.SetFieldOrProperty("EventBuilder", EventBuilderMock.Object);
-
+            
             var variation = (Variation)optly.Invoke("Activate", "test_experiment", "test_user", userAttributes);
 
             EventBuilderMock.Verify(b => b.CreateImpressionEvent(It.IsAny<ProjectConfig>(), Config.GetExperimentFromKey("test_experiment"),
                     "7722370027", "test_user", userAttributes), Times.Once);
-
+            
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Assigned bucket [3037] to user [test_user] with bucketing ID [test_user]."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "User [test_user] is in variation [control] of experiment [test_experiment]."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "Activating user test_user in experiment test_experiment."), Times.Once);
@@ -526,7 +526,7 @@ namespace OptimizelySDK.Tests
             };
 
             var variation = Optimizely.GetVariation("test_experiment", "test_user", attributes);
-
+            
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Assigned bucket [3037] to user [test_user] with bucketing ID [test_user]."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "User [test_user] is in variation [control] of experiment [test_experiment]."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "This decision will not be saved since the UserProfileService is null."), Times.Once);
@@ -696,7 +696,7 @@ namespace OptimizelySDK.Tests
             optly.SetFieldOrProperty("EventDispatcher", new InvalidEventDispatcher());
 
             var variation = (Variation)optly.Invoke("Activate", "test_experiment", "test_user", OptimizelyHelper.UserAttributes);
-
+            
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Assigned bucket [3037] to user [test_user] with bucketing ID [test_user]."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "User [test_user] is in variation [control] of experiment [test_experiment]."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "Activating user test_user in experiment test_experiment."), Times.Once);
@@ -764,7 +764,7 @@ namespace OptimizelySDK.Tests
             });
 
         }
-
+        
         [Test]
         public void TestForcedVariationPreceedsWhitelistedVariation()
         {
@@ -807,7 +807,7 @@ namespace OptimizelySDK.Tests
             var userId = "testUser3";
             var variationKey = "vtag2";
             var fbVariationKey = "vtag1";
-
+            
 
             UserProfile userProfile = new UserProfile(userId, new Dictionary<string, Decision>
             {
@@ -829,13 +829,13 @@ namespace OptimizelySDK.Tests
 
             var variation2 = optimizely.GetVariation(experimentKey, userId);
             Assert.IsTrue(TestData.CompareObjects(expectedFbVariation, variation2));
-
+            
             //remove forced variation and re-check userprofile
             Assert.IsTrue(optimizely.SetForcedVariation(experimentKey, userId, null));
 
             variationUserProfile = optimizely.GetVariation(experimentKey, userId);
             Assert.IsTrue(TestData.CompareObjects(expectedVariation, variationUserProfile));
-
+            
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "User \"testUser3\" is not in the forced variation map."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "No previously activated variation of experiment \"etag1\" for user \"testUser3\" found in user profile."), Times.Exactly(2));
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Assigned bucket [4969] to user [testUser3] with bucketing ID [testUser3]."), Times.Exactly(2));
@@ -964,7 +964,7 @@ namespace OptimizelySDK.Tests
             // call getForcedVariation with valid experiment key and valid user ID
             var actualForcedVariation = Optimizely.GetForcedVariation("test_experiment", TestUserId);
             Assert.IsTrue(TestData.CompareObjects(expectedForcedVariation, actualForcedVariation));
-
+            
             // call getForcedVariation with invalid experiment and valid userID
             actualForcedVariation = Optimizely.GetForcedVariation("invalid_experiment", TestUserId);
             Assert.Null(actualForcedVariation);
@@ -980,7 +980,7 @@ namespace OptimizelySDK.Tests
             actualForcedVariation = Optimizely.GetForcedVariation("paused_experiment", "test_user2");
 
             Assert.IsTrue(TestData.CompareObjects(expectedForcedVariation2, actualForcedVariation));
-
+            
             // confirm that the second setForcedVariation call did not invalidate the first call to that method
             actualForcedVariation = Optimizely.GetForcedVariation("test_experiment", TestUserId);
 
@@ -1003,7 +1003,7 @@ namespace OptimizelySDK.Tests
             var userId = "test_user";
             var experimentKey = "test_experiment";
             Optimizely.SetForcedVariation(experimentKey, userId, "test_variation");
-
+            
             Assert.Null(Optimizely.GetForcedVariation("test_experiment", userId));
             Assert.Null(Optimizely.GetForcedVariation("", userId));
             Assert.Null(Optimizely.GetForcedVariation(null, userId));
@@ -1067,7 +1067,7 @@ namespace OptimizelySDK.Tests
             var experimentId = "7716830082";
             var variationKey = "variation";
             var variationId = "7721010009";
-
+            
             Assert.True(Optimizely.SetForcedVariation(experimentKey, userId, variationKey), "Set variation for paused experiment should have passed.");
             var variation = Optimizely.GetVariation(experimentKey, userId);
 
@@ -1095,7 +1095,7 @@ namespace OptimizelySDK.Tests
             Experiment experiment = new Experiment();
             experiment.Key = "group_experiment_1";
 
-            EventBuilderMock.Setup(b => b.CreateImpressionEvent(Config, It.IsAny<Experiment>(), It.IsAny<string>()/*"group_exp_1_var_2"*/, "user_1", null))
+            EventBuilderMock.Setup(b => b.CreateImpressionEvent(Config, It.IsAny<Experiment>(), It.IsAny <string>()/*"group_exp_1_var_2"*/, "user_1", null))
                .Returns(new LogEvent("logx.optimizely.com/decision", parameters, "POST", new Dictionary<string, string> { }));
 
             var optly = Helper.CreatePrivateOptimizely();
@@ -1104,13 +1104,13 @@ namespace OptimizelySDK.Tests
 
             // Set forced variation
             Assert.True((bool)optly.Invoke("SetForcedVariation", experimentKey, userId, variationKey), "Set variation for paused experiment should have failed.");
-
+            
             // Activate
             var variation = (Variation)optly.Invoke("Activate", "group_experiment_1", "user_1", null);
-
+            
             EventBuilderMock.Verify(b => b.CreateImpressionEvent(It.IsAny<ProjectConfig>(), Config.GetExperimentFromKey("group_experiment_1"),
                     "7722360022", "user_1", null), Times.Once);
-
+            
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, string.Format(@"Set variation ""{0}"" for experiment ""{1}"" and user ""{2}"" in the forced variation map.", variationId, experimentId, userId)), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "User \"user_1\" is not in the forced variation map."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Assigned bucket [1922] to user [user_1] with bucketing ID [user_1]."), Times.Once);
@@ -1221,7 +1221,7 @@ namespace OptimizelySDK.Tests
             OptimizelyMock.Setup(om => om.GetFeatureVariableValueForType<string>(It.IsAny<string>(), variableKeyNonBoolean, It.IsAny<string>(),
                 It.IsAny<UserAttributes>(), featureVariableType)).Returns("non_boolean_value");
             Assert.Null(OptimizelyMock.Object.GetFeatureVariableBoolean(featureKey, variableKeyNonBoolean, TestUserId, null));
-
+            
             OptimizelyMock.Setup(om => om.GetFeatureVariableValueForType<bool?>(It.IsAny<string>(), variableKeyNull, It.IsAny<string>(),
                 It.IsAny<UserAttributes>(), featureVariableType)).Returns<bool?>(null);
             Assert.Null(OptimizelyMock.Object.GetFeatureVariableBoolean(featureKey, variableKeyNull, TestUserId, null));
@@ -1248,7 +1248,7 @@ namespace OptimizelySDK.Tests
             OptimizelyMock.Setup(om => om.GetFeatureVariableValueForType<string>(It.IsAny<string>(), variableKeyNonDouble, It.IsAny<string>(),
                 It.IsAny<UserAttributes>(), featureVariableType)).Returns("non_double_value");
             Assert.Null(OptimizelyMock.Object.GetFeatureVariableDouble(featureKey, variableKeyNonDouble, TestUserId, null));
-
+            
             OptimizelyMock.Setup(om => om.GetFeatureVariableValueForType<double?>(It.IsAny<string>(), variableKeyNull, It.IsAny<string>(),
                 It.IsAny<UserAttributes>(), featureVariableType)).Returns<double?>(null);
             Assert.Null(OptimizelyMock.Object.GetFeatureVariableDouble(featureKey, variableKeyNull, TestUserId, null));
@@ -1266,11 +1266,11 @@ namespace OptimizelySDK.Tests
             OptimizelyMock.Setup(om => om.GetFeatureVariableValueForType<int?>(It.IsAny<string>(), variableKeyInt, It.IsAny<string>(),
                 It.IsAny<UserAttributes>(), featureVariableType)).Returns(100);
             Assert.AreEqual(100, OptimizelyMock.Object.GetFeatureVariableInteger(featureKey, variableKeyInt, TestUserId, null));
-
+            
             OptimizelyMock.Setup(om => om.GetFeatureVariableValueForType<string>(It.IsAny<string>(), variableNonInt, It.IsAny<string>(),
                 It.IsAny<UserAttributes>(), featureVariableType)).Returns("non_integer_value");
             Assert.Null(OptimizelyMock.Object.GetFeatureVariableInteger(featureKey, variableNonInt, TestUserId, null));
-
+            
             OptimizelyMock.Setup(om => om.GetFeatureVariableValueForType<int?>(It.IsAny<string>(), variableKeyNull, It.IsAny<string>(),
                 It.IsAny<UserAttributes>(), featureVariableType)).Returns<string>(null);
             Assert.Null(OptimizelyMock.Object.GetFeatureVariableInteger(featureKey, variableKeyNull, TestUserId, null));
@@ -1312,10 +1312,10 @@ namespace OptimizelySDK.Tests
             var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_FEATURE_TEST);
 
             DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, null)).Returns(decision);
-
+            
             var optly = Helper.CreatePrivateOptimizely();
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
-
+            
             var variableValue = (double)optly.Invoke("GetFeatureVariableDouble", featureKey, variableKey, TestUserId, null);
             Assert.AreEqual(expectedValue, variableValue);
 
@@ -1340,10 +1340,10 @@ namespace OptimizelySDK.Tests
             };
 
             DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, userAttributes)).Returns(decision);
-
+            
             var optly = Helper.CreatePrivateOptimizely();
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
-
+            
             var variableValue = (int)optly.Invoke("GetFeatureVariableInteger", featureKey, variableKey, TestUserId, userAttributes);
             Assert.AreEqual(expectedValue, variableValue);
 
@@ -1362,10 +1362,10 @@ namespace OptimizelySDK.Tests
             var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_FEATURE_TEST);
 
             DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, null)).Returns(decision);
-
+            
             var optly = Helper.CreatePrivateOptimizely();
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
-
+            
             var variableValue = (double)optly.Invoke("GetFeatureVariableDouble", featureKey, variableKey, TestUserId, null);
             Assert.AreEqual(expectedValue, variableValue);
 
@@ -1390,7 +1390,7 @@ namespace OptimizelySDK.Tests
             };
 
             DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, userAttributes)).Returns(decision);
-
+            
             var optly = Helper.CreatePrivateOptimizely();
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
 
@@ -1412,10 +1412,10 @@ namespace OptimizelySDK.Tests
             var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT);
 
             DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, null)).Returns(decision);
-
+            
             var optly = Helper.CreatePrivateOptimizely();
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
-
+            
             var variableValue = (bool)optly.Invoke("GetFeatureVariableBoolean", featureKey, variableKey, TestUserId, null);
             Assert.AreEqual(expectedValue, variableValue);
 
@@ -1443,7 +1443,7 @@ namespace OptimizelySDK.Tests
 
             var optly = Helper.CreatePrivateOptimizely();
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
-
+            
             var variableValue = (string)optly.Invoke("GetFeatureVariableString", featureKey, variableKey, TestUserId, userAttributes);
             Assert.AreEqual(expectedValue, variableValue);
 
@@ -1462,10 +1462,10 @@ namespace OptimizelySDK.Tests
             var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT);
 
             DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, null)).Returns(decision);
-
+            
             var optly = Helper.CreatePrivateOptimizely();
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
-
+            
             var variableValue = (bool)optly.Invoke("GetFeatureVariableBoolean", featureKey, variableKey, TestUserId, null);
             Assert.AreEqual(expectedValue, variableValue);
 
@@ -1490,7 +1490,7 @@ namespace OptimizelySDK.Tests
             };
 
             DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, userAttributes)).Returns(decision);
-
+            
             var optly = Helper.CreatePrivateOptimizely();
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
 
@@ -1563,7 +1563,7 @@ namespace OptimizelySDK.Tests
             Assert.IsNull(Optimizely.GetFeatureVariableValueForType<bool?>("double_single_variable_feature", variableKey, TestUserId, null, variableType));
 
             LoggerMock.Verify(l => l.Log(LogLevel.ERROR, $@"Feature key ""{featureKey}"" is not in datafile."));
-            LoggerMock.Verify(l => l.Log(LogLevel.ERROR,
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, 
                 $@"No feature variable was found for key ""{variableKey}"" in feature flag ""double_single_variable_feature""."));
         }
 
@@ -1662,14 +1662,14 @@ namespace OptimizelySDK.Tests
 
             var optly = Helper.CreatePrivateOptimizely();
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
-
+            
             var variableValue = (double?)optly.InvokeGeneric("GetFeatureVariableValueForType", new Type[] { typeof(double?) }, featureKey, variableKey, TestUserId, null, variableType);
             Assert.AreEqual(expectedValue, variableValue);
 
             LoggerMock.Verify(l => l.Log(LogLevel.INFO,
                 $@"Returning variable value ""{variableValue}"" for variation ""{variation.Key}"" of feature flag ""{featureKey}""."));
         }
-
+        
         // Verify that GetFeatureVariableValueForType returns correct variable value for rollout rule.
         [Test]
         public void TestGetFeatureVariableValueForTypeWithRolloutRule()
@@ -1678,7 +1678,7 @@ namespace OptimizelySDK.Tests
             var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
             var variableKey = "boolean_variable";
             //experimentid - 177772
-            var experiment = Config.Rollouts[0].Experiments[1];
+            var experiment = Config.Rollouts[0].Experiments[1]; 
             var variation = Config.GetVariationFromId(experiment.Key, "177773");
             var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT);
             var expectedVariableValue = false;
@@ -1708,7 +1708,7 @@ namespace OptimizelySDK.Tests
 
             Assert.IsFalse(Optimizely.IsFeatureEnabled(featureKey, null, null));
             Assert.IsFalse(Optimizely.IsFeatureEnabled(featureKey, "", null));
-
+                   
             Assert.IsFalse(Optimizely.IsFeatureEnabled(null, TestUserId, null));
             Assert.IsFalse(Optimizely.IsFeatureEnabled("", TestUserId, null));
 
@@ -1722,7 +1722,7 @@ namespace OptimizelySDK.Tests
         {
             var featureKey = "feature_not_found";
             Assert.IsFalse(Optimizely.IsFeatureEnabled(featureKey, TestUserId, null));
-
+            
             LoggerMock.Verify(l => l.Log(LogLevel.ERROR, $@"Feature key ""{featureKey}"" is not in datafile."));
         }
 
@@ -1968,9 +1968,9 @@ namespace OptimizelySDK.Tests
 
             // Adding notification listeners.
             var notificationType = NotificationCenter.NotificationType.Activate;
-            optStronglyTyped.NotificationCenter.AddNotification(notificationType, NotificationCallbackMock.Object.TestActivateCallback);
+            optStronglyTyped. NotificationCenter.AddNotification(notificationType, NotificationCallbackMock.Object.TestActivateCallback);
             optStronglyTyped.NotificationCenter.AddNotification(notificationType, NotificationCallbackMock.Object.TestAnotherActivateCallback);
-
+                        
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
             optly.SetFieldOrProperty("EventBuilder", EventBuilderMock.Object);
 
@@ -2039,15 +2039,15 @@ namespace OptimizelySDK.Tests
             NotificationCallbackMock.Setup(nc => nc.TestAnotherTrackCallback(It.IsAny<string>(), It.IsAny<string>(),
                 It.IsAny<UserAttributes>(), It.IsAny<EventTags>(), It.IsAny<LogEvent>()));
             EventBuilderMock.Setup(ebm => ebm.CreateConversionEvent(It.IsAny<ProjectConfig>(), It.IsAny<string>(),
-                It.IsAny<string>(), It.IsAny<UserAttributes>(),
+                It.IsAny<string>(), It.IsAny<UserAttributes>(), 
                 It.IsAny<EventTags>())).Returns(logEvent);
             DecisionServiceMock.Setup(ds => ds.GetVariation(experiment, TestUserId, userAttributes)).Returns(variation);
-
+            
             // Adding notification listeners.
             var notificationType = NotificationCenter.NotificationType.Track;
             optStronglyTyped.NotificationCenter.AddNotification(notificationType, NotificationCallbackMock.Object.TestTrackCallback);
             optStronglyTyped.NotificationCenter.AddNotification(notificationType, NotificationCallbackMock.Object.TestAnotherTrackCallback);
-
+            
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
             optly.SetFieldOrProperty("EventBuilder", EventBuilderMock.Object);
 
@@ -2117,10 +2117,10 @@ namespace OptimizelySDK.Tests
 
             var optly = Helper.CreatePrivateOptimizely();
             var optStronglyTyped = optly.GetObject() as Optimizely;
-
+            
             optStronglyTyped.NotificationCenter.AddNotification(NotificationCenter.NotificationType.Decision, NotificationCallbackMock.Object.TestDecisionCallback);
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
-
+            
             optly.Invoke("Activate", experimentKey, TestUserId, userAttributes);
             var decisionInfo = new Dictionary<string, object>
             {
@@ -2136,7 +2136,7 @@ namespace OptimizelySDK.Tests
         {
             var experimentKey = "test_experiment";
             var experiment = Config.GetExperimentFromKey(experimentKey);
-
+            
             NotificationCallbackMock.Setup(nc => nc.TestDecisionCallback(It.IsAny<string>(), It.IsAny<string>(),
                 It.IsAny<UserAttributes>(), It.IsAny<Dictionary<string, object>>()));
             DecisionServiceMock.Setup(ds => ds.GetVariation(experiment, TestUserId, null)).Returns<Variation>(null);
@@ -2294,7 +2294,7 @@ namespace OptimizelySDK.Tests
             var variation = Config.GetVariationFromKey("test_experiment_double_feature", "variation");
             var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
             var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_FEATURE_TEST);
-
+            
             DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, null)).Returns(decision);
             NotificationCallbackMock.Setup(nc => nc.TestDecisionCallback(It.IsAny<string>(), It.IsAny<string>(),
                 It.IsAny<UserAttributes>(), It.IsAny<Dictionary<string, object>>()));
@@ -2308,7 +2308,7 @@ namespace OptimizelySDK.Tests
 
             bool result = (bool)optly.Invoke("IsFeatureEnabled", featureKey, TestUserId, null);
             Assert.False(result);
-
+            
             var decisionInfo = new Dictionary<string, object>
             {
                 { "featureKey", featureKey },
@@ -2922,7 +2922,7 @@ namespace OptimizelySDK.Tests
         {
             var optly = new Optimizely("Random datafile", null, LoggerMock.Object);
             Assert.IsEmpty(optly.GetEnabledFeatures("some_user", null));
-
+            
             LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'GetEnabledFeatures'."), Times.Once);
 
         }
@@ -2943,7 +2943,7 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestGetEnabledFeaturesWithSomeFeaturesEnabledForUser()
         {
-            string[] enabledFeatures =
+            string[] enabledFeatures = 
             {
                 "boolean_feature",
                 "double_single_variable_feature",
@@ -2964,13 +2964,13 @@ namespace OptimizelySDK.Tests
                 { "location", "San Francisco" }
             };
 
-            OptimizelyMock.Setup(om => om.IsFeatureEnabled(It.IsIn<string>(enabledFeatures), TestUserId,
+            OptimizelyMock.Setup(om => om.IsFeatureEnabled(It.IsIn<string>(enabledFeatures), TestUserId, 
                 It.IsAny<UserAttributes>())).Returns(true);
             OptimizelyMock.Setup(om => om.IsFeatureEnabled(It.IsIn<string>(notEnabledFeatures), TestUserId,
                 It.IsAny<UserAttributes>())).Returns(false);
 
             var actualFeaturesList = OptimizelyMock.Object.GetEnabledFeatures(TestUserId, userAttributes);
-
+            
             // Verify that the returned feature list contains only enabledFeatures.
             CollectionAssert.AreEquivalent(enabledFeatures, actualFeaturesList);
             Array.ForEach(notEnabledFeatures, nef => CollectionAssert.DoesNotContain(actualFeaturesList, nef));
@@ -3285,7 +3285,7 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestGetFeatureVariableIntegerReturnsDefaultValueWithComplexAudienceConditions()
         {
-            var userAttributes = new UserAttributes { };
+            var userAttributes = new UserAttributes {};
 
             // Should be excluded - no audiences match with no attributes.
             var value = OptimizelyWithTypedAudiences.GetFeatureVariableInteger("feat2_with_var", "z", "user1", userAttributes);
