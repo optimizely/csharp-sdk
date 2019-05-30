@@ -36,8 +36,8 @@ namespace OptimizelySDK
         private EventBuilder EventBuilder;
 
         private IEventDispatcher EventDispatcher;
-        
-        private ProjectConfig Config;
+
+        private ProjectConfigManager ProjectConfigManager;
 
         private ILogger Logger;
 
@@ -92,39 +92,23 @@ namespace OptimizelySDK
                           ILogger logger = null,
                           IErrorHandler errorHandler = null,
                           UserProfileService userProfileService = null,
-                          bool skipJsonValidation = false,
-                          ProjectConfig projectConfig = null,
-                          ProjectConfigManager projectConfigManager = null)
+                          bool skipJsonValidation = false)
         {
-            IsValid = false; // invalid until proven valid
-            Logger = logger ?? new NoOpLogger();
-            EventDispatcher = eventDispatcher ?? new DefaultEventDispatcher(Logger);
-            ErrorHandler = errorHandler ?? new NoOpErrorHandler();
-            Bucketer = new Bucketer(Logger);
-            EventBuilder = new EventBuilder(Bucketer, Logger);
-            UserProfileService = userProfileService;
-            NotificationCenter = new NotificationCenter(Logger);
-            Config = projectConfig;
+            try {
+                IsValid = false; // invalid until proven valid
+                Initialize(eventDispatcher, logger, errorHandler, userProfileService);
 
-            try
-            {
-                if (Config == null && !string.IsNullOrEmpty(datafile))
-                {
-                    if (ValidateInputs(datafile, skipJsonValidation))
-                    {
-                        Config = DatafileProjectConfig.Create(datafile, Logger, ErrorHandler);
-                        IsValid = true;
-                    }
-                    else
-                    {
-                        Logger.Log(LogLevel.ERROR, "Provided 'datafile' has invalid schema.");
-                    }
+                if (ValidateInputs(datafile, skipJsonValidation)) {
+                    var config = DatafileProjectConfig.Create(datafile, Logger, ErrorHandler);
+                    IsValid = true;
+                    ProjectConfigManager = new AtomicProjectConfigManager();
+                    ProjectConfigManager.SetConfig(config);
+
+                } else {
+                    Logger.Log(LogLevel.ERROR, "Provided 'datafile' has invalid schema.");
                 }
 
-                DecisionService = new DecisionService(Bucketer, ErrorHandler, Config, userProfileService, Logger);
-            }
-            catch (Exception ex)
-            {
+            } catch (Exception ex) {
                 string error = String.Empty;
                 if (ex.GetType() == typeof(ConfigParseException))
                     error = ex.Message;
@@ -136,6 +120,31 @@ namespace OptimizelySDK
             }
         }
 
+
+        public Optimizely(ProjectConfigManager configManager,
+                         IEventDispatcher eventDispatcher = null,
+                         ILogger logger = null,
+                         IErrorHandler errorHandler = null,
+                         UserProfileService userProfileService = null)
+        {
+            ProjectConfigManager = configManager;
+            Initialize(eventDispatcher, logger, errorHandler, userProfileService);
+        }
+
+        private void Initialize(IEventDispatcher eventDispatcher = null,
+                         ILogger logger = null,
+                         IErrorHandler errorHandler = null,
+                         UserProfileService userProfileService = null)
+        {
+            Logger = logger ?? new NoOpLogger();
+            EventDispatcher = eventDispatcher ?? new DefaultEventDispatcher(Logger);
+            ErrorHandler = errorHandler ?? new NoOpErrorHandler();
+            Bucketer = new Bucketer(Logger);
+            EventBuilder = new EventBuilder(Bucketer, Logger);
+            UserProfileService = userProfileService;
+            NotificationCenter = new NotificationCenter(Logger);
+            DecisionService = new DecisionService(Bucketer, ErrorHandler, ProjectConfigManager, userProfileService, Logger);
+        }
 
         /// <summary>
         /// Helper function to validate all required conditions before performing activate or track.

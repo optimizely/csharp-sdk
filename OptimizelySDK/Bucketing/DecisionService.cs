@@ -38,7 +38,7 @@ namespace OptimizelySDK.Bucketing
     {
         private Bucketer Bucketer;
         private IErrorHandler ErrorHandler;
-        private ProjectConfig ProjectConfig;
+        private ProjectConfigManager ProjectConfigManager;
         private UserProfileService UserProfileService;
         private ILogger Logger;
         
@@ -47,14 +47,14 @@ namespace OptimizelySDK.Bucketing
         /// </summary>
         /// <param name = "bucketer" > Base bucketer to allocate new users to an experiment.</param>
         /// <param name = "errorHandler" > The error handler of the Optimizely client.</param>
-        /// <param name = "projectConfig" > Optimizely Project Config representing the datafile.</param>
+        /// <param name = "projectConfigManager" > Optimizely Project Config representing the datafile.</param>
         /// <param name = "userProfileService" ></ param >
         /// < param name= "logger" > UserProfileService implementation for storing user info.</param>
-        public DecisionService(Bucketer bucketer, IErrorHandler errorHandler, ProjectConfig projectConfig, UserProfileService userProfileService, ILogger logger)
+        public DecisionService(Bucketer bucketer, IErrorHandler errorHandler, ProjectConfigManager projectConfigManager, UserProfileService userProfileService, ILogger logger)
         {
             Bucketer = bucketer;
             ErrorHandler = errorHandler;
-            ProjectConfig = projectConfig;
+            ProjectConfigManager = projectConfigManager;
             UserProfileService = userProfileService;
             Logger = logger;
         }
@@ -68,10 +68,11 @@ namespace OptimizelySDK.Bucketing
         /// <returns>The Variation the user is allocated into.</returns>
         public virtual Variation GetVariation(Experiment experiment, string userId, UserAttributes filteredAttributes)
         {
+            var config = ProjectConfigManager.GetConfig();
             if (!ExperimentUtils.IsExperimentActive(experiment, Logger)) return null;
 
             // check if a forced variation is set
-            var forcedVariation = ProjectConfig.GetForcedVariation(experiment.Key, userId);
+            var forcedVariation = config.GetForcedVariation(experiment.Key, userId);
             if (forcedVariation != null)
                 return forcedVariation;
 
@@ -106,12 +107,12 @@ namespace OptimizelySDK.Bucketing
                 }
             }
 
-            if (ExperimentUtils.IsUserInExperiment(ProjectConfig, experiment, filteredAttributes, Logger))
+            if (ExperimentUtils.IsUserInExperiment(config, experiment, filteredAttributes, Logger))
             {
                 // Get Bucketing ID from user attributes.
                 string bucketingId = GetBucketingId(userId, filteredAttributes);
 
-                variation = Bucketer.Bucket(ProjectConfig, experiment, bucketingId, userId);
+                variation = Bucketer.Bucket(config, experiment, bucketingId, userId);
 
                 if (variation != null && variation.Key != null)
                 {
@@ -185,9 +186,10 @@ namespace OptimizelySDK.Bucketing
             try
             {
                 string variationId = decision.VariationId;
+                var config = ProjectConfigManager.GetConfig();
 
-                Variation savedVariation = ProjectConfig.ExperimentIdMap[experimentId].VariationIdToVariationMap.ContainsKey(variationId) 
-                    ? ProjectConfig.ExperimentIdMap[experimentId].VariationIdToVariationMap[variationId] 
+                Variation savedVariation = config.ExperimentIdMap[experimentId].VariationIdToVariationMap.ContainsKey(variationId) 
+                    ? config.ExperimentIdMap[experimentId].VariationIdToVariationMap[variationId] 
                     : null;
 
                 if (savedVariation == null)
@@ -256,7 +258,7 @@ namespace OptimizelySDK.Bucketing
         /// <param name = "filteredAttributes" >The user's attributes. This should be filtered to just attributes in the Datafile.</param>
         /// <returns>null if the user is not bucketed into the rollout or if the feature flag was not attached to a rollout.
         /// otherwise the FeatureDecision entity</returns>
-        public virtual FeatureDecision GetVariationForFeatureRollout(FeatureFlag featureFlag, string userId, UserAttributes filteredAttributes)
+        public virtual FeatureDecision GetVariationForFeatureRollout(FeatureFlag featureFlag, string userId, UserAttributes filteredAttributes, ProjectConfig config)
         {
             if (featureFlag == null)
             {
@@ -270,7 +272,7 @@ namespace OptimizelySDK.Bucketing
                 return null;
             }
 
-            Rollout rollout = ProjectConfig.GetRolloutFromId(featureFlag.RolloutId);
+            Rollout rollout = config.GetRolloutFromId(featureFlag.RolloutId);
 
             if (string.IsNullOrEmpty(rollout.Id))
             {
@@ -288,9 +290,9 @@ namespace OptimizelySDK.Bucketing
             for (int i=0; i < rolloutRulesLength - 1; i++)
             {
                 var rolloutRule = rollout.Experiments[i];
-                if (ExperimentUtils.IsUserInExperiment(ProjectConfig, rolloutRule, filteredAttributes, Logger))
+                if (ExperimentUtils.IsUserInExperiment(config, rolloutRule, filteredAttributes, Logger))
                 {
-                    variation = Bucketer.Bucket(ProjectConfig, rolloutRule, bucketingId, userId);
+                    variation = Bucketer.Bucket(config, rolloutRule, bucketingId, userId);
                     if (variation == null || string.IsNullOrEmpty(variation.Id))
                         break;
 
@@ -298,22 +300,22 @@ namespace OptimizelySDK.Bucketing
                 }
                 else
                 {
-                    var audience = ProjectConfig.GetAudience(rolloutRule.AudienceIds[0]);
+                    var audience = config.GetAudience(rolloutRule.AudienceIds[0]);
                     Logger.Log(LogLevel.DEBUG, $"User \"{userId}\" does not meet the conditions to be in rollout rule for audience \"{audience.Name}\".");
                 }
             }
 
             // Get the last rule which is everyone else rule.
             var everyoneElseRolloutRule = rollout.Experiments[rolloutRulesLength - 1];
-            if (ExperimentUtils.IsUserInExperiment(ProjectConfig, everyoneElseRolloutRule, filteredAttributes, Logger))
+            if (ExperimentUtils.IsUserInExperiment(config, everyoneElseRolloutRule, filteredAttributes, Logger))
             {
-                variation = Bucketer.Bucket(ProjectConfig, everyoneElseRolloutRule, bucketingId, userId);
+                variation = Bucketer.Bucket(config, everyoneElseRolloutRule, bucketingId, userId);
                 if (variation != null && !string.IsNullOrEmpty(variation.Id))
                     return new FeatureDecision(everyoneElseRolloutRule, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT);
             }
             else
             {
-                var audience = ProjectConfig.GetAudience(everyoneElseRolloutRule.AudienceIds[0]);
+                var audience = config.GetAudience(everyoneElseRolloutRule.AudienceIds[0]);
                 Logger.Log(LogLevel.DEBUG, $"User \"{userId}\" does not meet the conditions to be in rollout rule for audience \"{audience.Name}\".");
             }
 
@@ -328,7 +330,7 @@ namespace OptimizelySDK.Bucketing
         /// <param name = "filteredAttributes" >The user's attributes. This should be filtered to just attributes in the Datafile.</param>
         /// <returns>null if the user is not bucketed into the rollout or if the feature flag was not attached to a rollout.
         /// Otherwise the FeatureDecision entity</returns>
-        public virtual FeatureDecision GetVariationForFeatureExperiment(FeatureFlag featureFlag, string userId, UserAttributes filteredAttributes)
+        public virtual FeatureDecision GetVariationForFeatureExperiment(FeatureFlag featureFlag, string userId, UserAttributes filteredAttributes, ProjectConfig config)
         {
             if (featureFlag == null)
             {
@@ -344,7 +346,7 @@ namespace OptimizelySDK.Bucketing
 
             foreach (var experimentId in featureFlag.ExperimentIds)
             {
-                var experiment = ProjectConfig.GetExperimentFromId(experimentId);
+                var experiment = config.GetExperimentFromId(experimentId);
 
                 if (string.IsNullOrEmpty(experiment.Key))
                     continue;
@@ -370,16 +372,16 @@ namespace OptimizelySDK.Bucketing
         /// <param name = "filteredAttributes" >The user's attributes. This should be filtered to just attributes in the Datafile.</param>
         /// <returns>null if the user is not bucketed into any variation or the FeatureDecision entity if the user is 
         /// successfully bucketed.</returns>
-        public virtual FeatureDecision GetVariationForFeature(FeatureFlag featureFlag, string userId, UserAttributes filteredAttributes)
+        public virtual FeatureDecision GetVariationForFeature(FeatureFlag featureFlag, string userId, UserAttributes filteredAttributes, ProjectConfig config)
         {
             // Check if the feature flag has an experiment and the user is bucketed into that experiment.
-            var decision = GetVariationForFeatureExperiment(featureFlag, userId, filteredAttributes);
+            var decision = GetVariationForFeatureExperiment(featureFlag, userId, filteredAttributes, config);
 
             if (decision != null)
                 return decision;
 
             // Check if the feature flag has rollout and the the user is bucketed into one of its rules.
-            decision = GetVariationForFeatureRollout(featureFlag, userId, filteredAttributes);
+            decision = GetVariationForFeatureRollout(featureFlag, userId, filteredAttributes, config);
 
             if (decision != null)
             {
