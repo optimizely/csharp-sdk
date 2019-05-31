@@ -216,7 +216,7 @@
     <Compile Include="..\OptimizelySDK\Entity\Rollout.cs">
       <Link>Entity\Rollout</Link>
     </Compile>
-	<Compile Include="..\OptimizelySDK\DatafileManagement\ProjectConfig.cs">
+	<Compile Include="..\OptimizelySDK\ProjectConfig.cs">
       <Link>DatafileManagement\ProjectConfig</Link>
     </Compile>
 	<Compile Include="..\OptimizelySDK\DatafileManagement\DatafileProjectConfig.cs">

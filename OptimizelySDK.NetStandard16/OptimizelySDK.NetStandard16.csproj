@@ -68,7 +68,7 @@
         <Compile Include="..\OptimizelySDK\Bucketing\UserProfile.cs" />
         <Compile Include="..\OptimizelySDK\Bucketing\UserProfileService.cs" />
         <Compile Include="..\OptimizelySDK\Bucketing\UserProfileUtil.cs" />
-		<Compile Include="..\OptimizelySDK\DatafileManagement\ProjectConfig.cs" />
+		<Compile Include="..\OptimizelySDK\ProjectConfig.cs" />
 		<Compile Include="..\OptimizelySDK\DatafileManagement\DatafileProjectConfig.cs" />
 		<Compile Include="..\OptimizelySDK\DatafileManagement\ProjectConfigManager.cs" />
 		<Compile Include="..\OptimizelySDK\DatafileManagement\PollingProjectConfigManager.cs" />
