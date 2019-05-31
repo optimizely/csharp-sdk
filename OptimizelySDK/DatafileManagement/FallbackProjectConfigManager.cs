@@ -16,7 +16,7 @@
 
 namespace OptimizelySDK.DatafileManagement
 {
-    public class AtomicProjectConfigManager : ProjectConfigManager
+    public class FallbackProjectConfigManager : ProjectConfigManager
     {
         private ProjectConfig ProjectConfig;
 

@@ -125,7 +125,7 @@
     <Compile Include="DatafileManagement\ProjectConfigManager.cs" />
     <Compile Include="DatafileManagement\PollingProjectConfigManager.cs" />
     <Compile Include="DatafileManagement\HttpProjectConfigManager.cs" />
-    <Compile Include="DatafileManagement\AtomicProjectConfigManager.cs" />
+    <Compile Include="DatafileManagement\FallbackProjectConfigManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Utils\schema.json" />

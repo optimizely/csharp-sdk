@@ -22,7 +22,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
     [TestFixture]
     public class AtomicProjectConfigManagerTest
     {
-        private AtomicProjectConfigManager ConfigManager = new AtomicProjectConfigManager();
+        private FallbackProjectConfigManager ConfigManager = new FallbackProjectConfigManager();
 
         [Test]
         public void TestStaticProjectConfigManagerReturnsCorrectProjectConfig()

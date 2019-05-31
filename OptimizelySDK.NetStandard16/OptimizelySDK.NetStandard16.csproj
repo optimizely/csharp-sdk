@@ -73,7 +73,7 @@
 		<Compile Include="..\OptimizelySDK\DatafileManagement\ProjectConfigManager.cs" />
 		<Compile Include="..\OptimizelySDK\DatafileManagement\PollingProjectConfigManager.cs" />
 		<Compile Include="..\OptimizelySDK\DatafileManagement\HttpProjectConfigManager.cs" />
-		<Compile Include="..\OptimizelySDK\DatafileManagement\AtomicProjectConfigManager.cs">
+		<Compile Include="..\OptimizelySDK\DatafileManagement\FallbackProjectConfigManager.cs">
 		  <Link>AtomicProjectConfigManager.cs</Link>
 		</Compile>
     </ItemGroup>
