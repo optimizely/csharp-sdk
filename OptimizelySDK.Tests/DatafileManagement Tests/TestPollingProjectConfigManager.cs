@@ -28,7 +28,7 @@ namespace OptimizelySDK.Tests.DatafileManagementTests
         TestPollingData[] PollingData;
         public int Counter = 0;
 
-        public TestPollingProjectConfigManager(TimeSpan period, TimeSpan blockingTimeout, ILogger logger, int[] pollingSequence, bool startByDefault = true) : base(period, blockingTimeout, logger, startByDefault)
+        public TestPollingProjectConfigManager(TimeSpan period, TimeSpan blockingTimeout, ILogger logger, int[] pollingSequence, bool startByDefault = true) : base(period, blockingTimeout, logger, null, startByDefault)
         {
             if (pollingSequence != null) {
                 System.Collections.Generic.List<TestPollingData> pollingData = new System.Collections.Generic.List<TestPollingData>();
@@ -39,7 +39,7 @@ namespace OptimizelySDK.Tests.DatafileManagementTests
             }
         }
 
-        public TestPollingProjectConfigManager(TimeSpan period, TimeSpan blockingTimeout, ILogger logger, TestPollingData[] pollingData, bool startByDefault = true) : base(period, blockingTimeout, logger, startByDefault)
+        public TestPollingProjectConfigManager(TimeSpan period, TimeSpan blockingTimeout, ILogger logger, TestPollingData[] pollingData, bool startByDefault = true) : base(period, blockingTimeout, logger, null, startByDefault)
         {
             if (pollingData != null) {
                 this.PollingData = pollingData;
@@ -57,8 +57,7 @@ namespace OptimizelySDK.Tests.DatafileManagementTests
                 // Will automatically change version if ChangeVersion is true.
                 response = PollingData[Counter].ConfigVersioned;
             }
-            System.Diagnostics.Debug.WriteLine("response != null");
-            System.Diagnostics.Debug.WriteLine(response != null);
+
             Counter++;
             System.Threading.Tasks.Task.Delay(waitingTime).Wait(-1);
             // Returning null, since we need to check polling functionality.

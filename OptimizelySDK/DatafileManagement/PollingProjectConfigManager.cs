@@ -19,6 +19,7 @@ using System.Threading;
 using OptimizelySDK.Logger;
 using OptimizelySDK.Utils;
 using System.Threading.Tasks;
+using OptimizelySDK.ErrorHandler;
 
 namespace OptimizelySDK.DatafileManagement
 {
@@ -32,6 +33,7 @@ namespace OptimizelySDK.DatafileManagement
         private Timer SchedulerService;
 
         protected ILogger Logger { get; set; }
+        protected IErrorHandler ErrorHandler { get; set; }
         protected TimeSpan BlockingTimeout;
         protected TaskCompletionSource<bool> CompletableConfigManager = new TaskCompletionSource<bool>();
         // Variables to control blocking/syncing.
@@ -39,11 +41,13 @@ namespace OptimizelySDK.DatafileManagement
 
         protected event Action<ProjectConfig> DatafileUpdate_Notification;
 
-        public PollingProjectConfigManager(TimeSpan period, TimeSpan blockingTimeout, ILogger logger = null, bool StartByDefault = true)
+        public PollingProjectConfigManager(TimeSpan period, TimeSpan blockingTimeout, ILogger logger = null, IErrorHandler errorHandler = null, bool StartByDefault = true)
         {
             Logger = logger;
+            ErrorHandler = errorHandler;
             BlockingTimeout = blockingTimeout;
             PollingInterval = period;
+
 
             // Never start, start only when Start is called.
             SchedulerService = new Timer((object state) => { Run(); }, this, -1, -1);

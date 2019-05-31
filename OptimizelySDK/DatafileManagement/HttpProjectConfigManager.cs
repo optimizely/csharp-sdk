@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Logger;
 using System;
 using System.Collections.Generic;
@@ -27,7 +28,7 @@ namespace OptimizelySDK.DatafileManagement
         private string Url;
         private string LastModifiedSince = string.Empty;
 
-        private HttpProjectConfigManager(TimeSpan period, string url, ILogger logger, TimeSpan blockingTimeout) : base(period, blockingTimeout, logger)
+        private HttpProjectConfigManager(TimeSpan period, string url, TimeSpan blockingTimeout, ILogger logger, IErrorHandler errorHandler) : base(period, blockingTimeout, logger, errorHandler)
         {
             Url = url;
         }
@@ -41,11 +42,6 @@ namespace OptimizelySDK.DatafileManagement
             //t.Start();
             //return t;
         }
-        static ProjectConfig ParseProjectConfig(string datafile)
-        {
-            return DatafileProjectConfig.Create(datafile, null, null);
-        }
-
 
 #if !NET40 && !NET35
         private static System.Net.Http.HttpClient Client;
@@ -128,7 +124,7 @@ namespace OptimizelySDK.DatafileManagement
             if (datafile == null)
                 return null;
 
-            return ParseProjectConfig(datafile);
+            return DatafileProjectConfig.Create(datafile, Logger, ErrorHandler);
         }
         
         public class Builder
@@ -138,6 +134,7 @@ namespace OptimizelySDK.DatafileManagement
             private string Url;
             private string Format = "https://cdn.optimizely.com/datafiles/{0}.json";
             private ILogger Logger;
+            private IErrorHandler ErrorHandler;
             private TimeSpan Period;
             private TimeSpan BlockingTimeoutSpan;
 
@@ -181,7 +178,13 @@ namespace OptimizelySDK.DatafileManagement
             {
                 Logger = logger;
                 return this;
-            }            
+            }
+
+            public Builder WithErrorHandler(IErrorHandler errorHandler)
+            {
+                ErrorHandler = errorHandler;
+                return this;
+            }
 
             /// <summary>
             /// HttpProjectConfigManager.Builder that builds and starts a HttpProjectConfigManager.
@@ -205,19 +208,19 @@ namespace OptimizelySDK.DatafileManagement
                     Logger = new DefaultLogger();
 
                 if (!string.IsNullOrEmpty(Url))
-                    return new HttpProjectConfigManager(Period, Url, Logger, BlockingTimeoutSpan);
+                    return new HttpProjectConfigManager(Period, Url, BlockingTimeoutSpan, Logger, ErrorHandler);
 
                 if (string.IsNullOrEmpty(SdkKey))
                     throw new Exception("SdkKey cannot be null");
 
                 Url = string.Format(Format, SdkKey);
-                var configManager = new HttpProjectConfigManager(Period, Url, Logger, BlockingTimeoutSpan);
+                var configManager = new HttpProjectConfigManager(Period, Url, BlockingTimeoutSpan, Logger, ErrorHandler);
 
                 if (Datafile != null)
                 {
                     try
                     {
-                        var config = ParseProjectConfig(Datafile);
+                        var config = DatafileProjectConfig.Create(Datafile, Logger, ErrorHandler);
                         configManager.SetConfig(config);
                     }
                     catch (Exception ex)
