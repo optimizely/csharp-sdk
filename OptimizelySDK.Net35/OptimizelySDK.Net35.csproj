@@ -216,16 +216,16 @@
       <Link>Entity\Rollout</Link>
     </Compile>
 	<Compile Include="..\OptimizelySDK\ProjectConfig.cs">
-      <Link>DatafileManagement\ProjectConfig</Link>
+      <Link>ProjectConfig</Link>
     </Compile>
-	<Compile Include="..\OptimizelySDK\DatafileManagement\DatafileProjectConfig.cs">
-      <Link>DatafileManagement\DatafileProjectConfig</Link>
+	<Compile Include="..\OptimizelySDK\Config\DatafileProjectConfig.cs">
+      <Link>Config\DatafileProjectConfig</Link>
     </Compile>
-	<Compile Include="..\OptimizelySDK\DatafileManagement\ProjectConfigManager.cs">
-      <Link>DatafileManagement\ProjectConfigManager</Link>
+	<Compile Include="..\OptimizelySDK\Config\ProjectConfigManager.cs">
+      <Link>Config\ProjectConfigManager</Link>
     </Compile>
-	<Compile Include="..\OptimizelySDK\DatafileManagement\FallbackProjectConfigManager.cs">
-	  <Link>DatafileManagement\AtomicProjectConfigManager.cs</Link>
+	<Compile Include="..\OptimizelySDK\Config\FallbackProjectConfigManager.cs">
+	  <Link>Config\FallbackProjectConfigManager.cs</Link>
 	</Compile>
   </ItemGroup>
   <ItemGroup>

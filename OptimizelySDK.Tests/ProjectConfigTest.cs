@@ -25,7 +25,7 @@ using OptimizelySDK.Entity;
 using Newtonsoft.Json;
 using OptimizelySDK.Event.Builder;
 using OptimizelySDK.Utils;
-using OptimizelySDK.DatafileManagement;
+using OptimizelySDK.Config;
 
 namespace OptimizelySDK.Tests
 {

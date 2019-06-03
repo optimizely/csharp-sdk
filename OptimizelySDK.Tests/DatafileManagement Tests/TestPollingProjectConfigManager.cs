@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading;
-using OptimizelySDK.DatafileManagement;
+using OptimizelySDK.Config;
 using OptimizelySDK.Logger;
 
 namespace OptimizelySDK.Tests.DatafileManagementTests

@@ -15,7 +15,7 @@
  */
 
 using NUnit.Framework;
-using OptimizelySDK.DatafileManagement;
+using OptimizelySDK.Config;
 
 namespace OptimizelySDK.Tests.DatafileManagement_Tests
 {

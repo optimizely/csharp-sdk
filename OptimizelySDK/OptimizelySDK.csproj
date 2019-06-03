@@ -121,11 +121,11 @@
     <Compile Include="Bucketing\UserProfileService.cs" />
     <Compile Include="Bucketing\DecisionService.cs" />
     <Compile Include="ProjectConfig.cs" />
-    <Compile Include="DatafileManagement\DatafileProjectConfig.cs" />
-    <Compile Include="DatafileManagement\ProjectConfigManager.cs" />
-    <Compile Include="DatafileManagement\PollingProjectConfigManager.cs" />
-    <Compile Include="DatafileManagement\HttpProjectConfigManager.cs" />
-    <Compile Include="DatafileManagement\FallbackProjectConfigManager.cs" />
+    <Compile Include="Config\DatafileProjectConfig.cs" />
+    <Compile Include="Config\ProjectConfigManager.cs" />
+    <Compile Include="Config\PollingProjectConfigManager.cs" />
+    <Compile Include="Config\HttpProjectConfigManager.cs" />
+    <Compile Include="Config\FallbackProjectConfigManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Utils\schema.json" />
