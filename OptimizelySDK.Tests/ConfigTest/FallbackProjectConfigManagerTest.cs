@@ -22,13 +22,14 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
     [TestFixture]
     public class AtomicProjectConfigManagerTest
     {
-        private FallbackProjectConfigManager ConfigManager = new FallbackProjectConfigManager();
+        private FallbackProjectConfigManager ConfigManager;
 
         [Test]
         public void TestStaticProjectConfigManagerReturnsCorrectProjectConfig()
         {
             var expectedConfig = DatafileProjectConfig.Create(TestData.TypedAudienceDatafile, null, null);
-            ConfigManager.SetConfig(expectedConfig);
+            ConfigManager = new FallbackProjectConfigManager(expectedConfig);
+
             Assert.True(TestData.CompareObjects(expectedConfig, ConfigManager.GetConfig()));
         }
     }

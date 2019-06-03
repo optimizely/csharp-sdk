@@ -20,15 +20,14 @@ namespace OptimizelySDK.Config
     {
         private ProjectConfig ProjectConfig;
 
+        public FallbackProjectConfigManager(ProjectConfig config)
+        {
+            ProjectConfig = config;
+        }
+
         public ProjectConfig GetConfig()
         {
             return ProjectConfig;
-        }
-
-        public bool SetConfig(ProjectConfig projectConfig)
-        {
-            ProjectConfig = projectConfig;
-            return true;
         }
     }
 }
