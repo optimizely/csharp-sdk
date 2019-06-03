@@ -37,7 +37,7 @@ namespace OptimizelySDK
 
         private IEventDispatcher EventDispatcher;
 
-        private ProjectConfigManager ProjectConfigManager;
+        public ProjectConfigManager ProjectConfigManager;
 
         private ILogger Logger;
 
@@ -101,8 +101,7 @@ namespace OptimizelySDK
                 if (ValidateInputs(datafile, skipJsonValidation)) {
                     var config = DatafileProjectConfig.Create(datafile, Logger, ErrorHandler);
                     IsValid = true;
-                    ProjectConfigManager = new AtomicProjectConfigManager();
-                    ProjectConfigManager.SetConfig(config);
+                    ProjectConfigManager = new FallbackProjectConfigManager(config);
                 } else {
                     Logger.Log(LogLevel.ERROR, "Provided 'datafile' has invalid schema.");
                 }
@@ -682,8 +681,8 @@ namespace OptimizelySDK
             var config = ProjectConfigManager?.GetConfig();
             if (!IsValid || config == null)
             {
-                Logger.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'activate'.");
-                return null;
+                Logger.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'GetEnabledFeatures'.");
+                return enabledFeaturesList;
             }
 
             if (!ValidateStringInputs(new Dictionary<string, string> { { USER_ID, userId } }))
