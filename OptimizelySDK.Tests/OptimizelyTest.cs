@@ -29,7 +29,7 @@ using OptimizelySDK.Bucketing;
 using OptimizelySDK.Notifications;
 using OptimizelySDK.Tests.NotificationTests;
 using OptimizelySDK.Utils;
-using OptimizelySDK.DatafileManagement;
+using OptimizelySDK.Config;
 
 namespace OptimizelySDK.Tests
 {

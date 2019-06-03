@@ -21,7 +21,7 @@ using OptimizelySDK.Utils;
 using System.Threading.Tasks;
 using OptimizelySDK.ErrorHandler;
 
-namespace OptimizelySDK.DatafileManagement
+namespace OptimizelySDK.Config
 {
     public abstract class PollingProjectConfigManager : ProjectConfigManager
     {

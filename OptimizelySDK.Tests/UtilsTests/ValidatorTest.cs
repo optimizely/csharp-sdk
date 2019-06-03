@@ -18,7 +18,7 @@ using OptimizelySDK.Logger;
 using OptimizelySDK.Utils;
 using OptimizelySDK.Entity;
 using NUnit.Framework;
-using OptimizelySDK.DatafileManagement;
+using OptimizelySDK.Config;
 
 namespace OptimizelySDK.Tests.UtilsTests
 {

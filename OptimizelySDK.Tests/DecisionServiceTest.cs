@@ -23,7 +23,7 @@ using OptimizelySDK.Entity;
 using NUnit.Framework;
 using OptimizelySDK.Bucketing;
 using OptimizelySDK.Utils;
-using OptimizelySDK.DatafileManagement;
+using OptimizelySDK.Config;
 
 namespace OptimizelySDK.Tests
 {

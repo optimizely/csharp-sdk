@@ -25,7 +25,7 @@ using OptimizelySDK.Notifications;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using OptimizelySDK.DatafileManagement;
+using OptimizelySDK.Config;
 
 namespace OptimizelySDK
 {

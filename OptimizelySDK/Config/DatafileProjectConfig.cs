@@ -22,7 +22,7 @@ using OptimizelySDK.Utils;
 using System.Collections.Generic;
 using Attribute = OptimizelySDK.Entity.Attribute;
 
-namespace OptimizelySDK.DatafileManagement
+namespace OptimizelySDK.Config
 {
     public class DatafileProjectConfig : ProjectConfig
     {

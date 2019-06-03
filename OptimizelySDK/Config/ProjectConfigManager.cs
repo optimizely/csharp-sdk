@@ -14,21 +14,10 @@
  * limitations under the License.
  */
 
-namespace OptimizelySDK.DatafileManagement
+namespace OptimizelySDK.Config
 {
-    public class FallbackProjectConfigManager : ProjectConfigManager
+    public interface ProjectConfigManager
     {
-        private ProjectConfig ProjectConfig;
-
-        public ProjectConfig GetConfig()
-        {
-            return ProjectConfig;
-        }
-
-        public bool SetConfig(ProjectConfig projectConfig)
-        {
-            ProjectConfig = projectConfig;
-            return true;
-        }
+        ProjectConfig GetConfig();
     }
 }
