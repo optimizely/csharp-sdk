@@ -130,7 +130,7 @@ namespace OptimizelySDK.Config
             // SetResult raise exception if called again, that's why Try is used.
             CompletableConfigManager.TrySetResult(true);
 
-            Update_Notification?.Invoke();
+            ProjectConfig_Notification?.Invoke();
 
             return true;
         }
