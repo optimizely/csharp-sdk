@@ -39,7 +39,7 @@ namespace OptimizelySDK.Config
         // Variables to control blocking/syncing.
         public object mutex = new Object();
 
-        protected event Action<ProjectConfig> DatafileUpdate_Notification;
+        protected event Action ProjectConfig_Notification;
 
         public PollingProjectConfigManager(TimeSpan period, TimeSpan blockingTimeout, ILogger logger = null, IErrorHandler errorHandler = null, bool StartByDefault = true)
         {
@@ -130,7 +130,7 @@ namespace OptimizelySDK.Config
             // SetResult raise exception if called again, that's why Try is used.
             CompletableConfigManager.TrySetResult(true);
 
-            DatafileUpdate_Notification?.Invoke(projectConfig);
+            Update_Notification?.Invoke();
 
             return true;
         }
@@ -140,7 +140,11 @@ namespace OptimizelySDK.Config
             if (Monitor.TryEnter(mutex)){
                 try {
                     var config = Poll();
-                    SetConfig(config);
+
+                    // during in-flight, if PollingProjectConfigManagerStopped, then don't need to set.
+                    if(IsStarted)
+                        SetConfig(config);
+
                 } catch (Exception exception) {
                     Logger.Log(LogLevel.ERROR, "Unable to get project config. Error: " + exception.Message);
                 } finally {
