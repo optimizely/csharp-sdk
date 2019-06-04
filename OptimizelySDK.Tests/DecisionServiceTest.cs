@@ -37,7 +37,7 @@ namespace OptimizelySDK.Tests
         private Mock<UserProfileService> UserProfileServiceMock;
         private Mock<Bucketer> BucketerMock;
         private Mock<DecisionService> DecisionServiceMock;
-        
+
         private ProjectConfig ProjectConfig;
         private Experiment WhitelistedExperiment;
         private Variation WhitelistedVariation;
@@ -46,23 +46,27 @@ namespace OptimizelySDK.Tests
         private Variation VariationWithKeyControl;
         private Variation VariationWithKeyVariation;
 
+        private ProjectConfig Config;
+
         [SetUp]
         public void SetUp()
         {
-            LoggerMock              = new Mock<ILogger>();
-            ErrorHandlerMock        = new Mock<IErrorHandler>();
-            UserProfileServiceMock  = new Mock<UserProfileService>();
-            BucketerMock            = new Mock<Bucketer>(LoggerMock.Object);
-            
-            ProjectConfig           = DatafileProjectConfig.Create(TestData.Datafile, LoggerMock.Object, ErrorHandlerMock.Object);
-            WhitelistedExperiment   = ProjectConfig.ExperimentIdMap["224"];
-            WhitelistedVariation    = WhitelistedExperiment.VariationKeyToVariationMap["vtag5"];
-            
-            DecisionService         = new DecisionService(new Bucketer(LoggerMock.Object), ErrorHandlerMock.Object, null, LoggerMock.Object);
-            DecisionServiceMock     = new Mock<DecisionService>(BucketerMock.Object, ErrorHandlerMock.Object, null, LoggerMock.Object) { CallBase = true };
+            LoggerMock = new Mock<ILogger>();
+            ErrorHandlerMock = new Mock<IErrorHandler>();
+            UserProfileServiceMock = new Mock<UserProfileService>();
+            BucketerMock = new Mock<Bucketer>(LoggerMock.Object);
 
-            VariationWithKeyControl     = ProjectConfig.GetVariationFromKey("test_experiment", "control");
-            VariationWithKeyVariation   = ProjectConfig.GetVariationFromKey("test_experiment", "variation");
+            ProjectConfig = DatafileProjectConfig.Create(TestData.Datafile, LoggerMock.Object, ErrorHandlerMock.Object);
+            WhitelistedExperiment = ProjectConfig.ExperimentIdMap["224"];
+            WhitelistedVariation = WhitelistedExperiment.VariationKeyToVariationMap["vtag5"];
+
+            DecisionService = new DecisionService(new Bucketer(LoggerMock.Object), ErrorHandlerMock.Object, null, LoggerMock.Object);
+            DecisionServiceMock = new Mock<DecisionService>(BucketerMock.Object, ErrorHandlerMock.Object, null, LoggerMock.Object) { CallBase = true };
+
+            VariationWithKeyControl = ProjectConfig.GetVariationFromKey("test_experiment", "control");
+            VariationWithKeyVariation = ProjectConfig.GetVariationFromKey("test_experiment", "variation");
+
+            Config = DatafileProjectConfig.Create(TestData.Datafile, LoggerMock.Object, ErrorHandlerMock.Object);
         }
 
         [Test]
@@ -144,8 +148,7 @@ namespace OptimizelySDK.Tests
                 {userId, invalidVariationKey }
             };
 
-            var experiment = new Experiment
-            {
+            var experiment = new Experiment {
                 Id = "1234",
                 Key = "exp_key",
                 Status = "Running",
@@ -477,8 +480,7 @@ namespace OptimizelySDK.Tests
         public void TestGetVariationForFeatureExperimentGivenExperimentNotInDataFile()
         {
             var booleanFeature = ProjectConfig.GetFeatureFlagFromKey("boolean_feature");
-            var featureFlag = new FeatureFlag
-            {
+            var featureFlag = new FeatureFlag {
                 Id = booleanFeature.Id,
                 Key = booleanFeature.Key,
                 RolloutId = booleanFeature.RolloutId,
@@ -515,7 +517,7 @@ namespace OptimizelySDK.Tests
             var expectedDecision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_FEATURE_TEST);
             var userAttributes = new UserAttributes();
 
-            DecisionServiceMock.Setup(ds => ds.GetVariation(ProjectConfig.GetExperimentFromKey("test_experiment_multivariate"), 
+            DecisionServiceMock.Setup(ds => ds.GetVariation(ProjectConfig.GetExperimentFromKey("test_experiment_multivariate"),
                 "user1", ProjectConfig, userAttributes)).Returns(variation);
 
             var featureFlag = ProjectConfig.GetFeatureFlagFromKey("multi_variate_feature");
@@ -535,7 +537,7 @@ namespace OptimizelySDK.Tests
             var userAttributes = new UserAttributes();
             var expectedDecision = new FeatureDecision(mutexExperiment, variation, FeatureDecision.DECISION_SOURCE_FEATURE_TEST);
 
-            DecisionServiceMock.Setup(ds => ds.GetVariation(ProjectConfig.GetExperimentFromKey("group_experiment_1"), "user1", ProjectConfig, 
+            DecisionServiceMock.Setup(ds => ds.GetVariation(ProjectConfig.GetExperimentFromKey("group_experiment_1"), "user1", ProjectConfig,
                 userAttributes)).Returns(variation);
 
             var featureFlag = ProjectConfig.GetFeatureFlagFromKey("boolean_feature");
@@ -577,7 +579,7 @@ namespace OptimizelySDK.Tests
                 Key = featureFlag.Key,
                 ExperimentIds = new List<string>(featureFlag.ExperimentIds),
                 Variables = featureFlag.Variables
-                };
+            };
 
             DecisionServiceMock.Setup(ds => ds.GetVariationForFeatureExperiment(It.IsAny<FeatureFlag>(), It.IsAny<string>(), It.IsAny<UserAttributes>(), ProjectConfig)).Returns<Variation>(null);
 
@@ -586,7 +588,7 @@ namespace OptimizelySDK.Tests
 
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "The feature flag \"boolean_feature\" is not used in a rollout."));
         }
-        
+
         // Should return the variation the user is bucketed into when the user is bucketed into the targeting rule
         [Test]
         public void TestGetVariationForFeatureRolloutWhenUserIsBucketedInTheTargetingRule()
@@ -602,7 +604,7 @@ namespace OptimizelySDK.Tests
                 { "browser_type", "chrome" }
             };
 
-            BucketerMock.Setup(bm => bm.Bucket(It.IsAny<ProjectConfig>(), It.IsAny<Experiment>(), It.IsAny<string>(), 
+            BucketerMock.Setup(bm => bm.Bucket(It.IsAny<ProjectConfig>(), It.IsAny<Experiment>(), It.IsAny<string>(),
                 It.IsAny<string>())).Returns(variation);
             var decisionService = new DecisionService(BucketerMock.Object, ErrorHandlerMock.Object, null, LoggerMock.Object);
 
@@ -653,7 +655,7 @@ namespace OptimizelySDK.Tests
             var actualDecision = decisionService.GetVariationForFeatureRollout(featureFlag, "user_1", userAttributes, ProjectConfig);
             Assert.IsNull(actualDecision);
         }
-        
+
         // Should return expected variation when the user is attempted to be bucketed into all targeting rules
         // including Everyone Else rule
         [Test]
@@ -679,7 +681,7 @@ namespace OptimizelySDK.Tests
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, $"User \"user_1\" does not meet the conditions to be in rollout rule for audience \"{ProjectConfig.AudienceIdMap[experiment0.AudienceIds[0]].Name}\"."));
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, $"User \"user_1\" does not meet the conditions to be in rollout rule for audience \"{ProjectConfig.AudienceIdMap[experiment1.AudienceIds[0]].Name}\"."));
         }
-        
+
         [Test]
         public void TestGetVariationForFeatureRolloutAudienceAndTrafficeAllocationCheck()
         {
@@ -784,7 +786,7 @@ namespace OptimizelySDK.Tests
             var variation = expectedExperiment.Variations[0];
             var expectedDecision = new FeatureDecision(expectedExperiment, variation, FeatureDecision.DECISION_SOURCE_FEATURE_TEST);
 
-            DecisionServiceMock.Setup(ds => ds.GetVariationForFeatureExperiment(It.IsAny<FeatureFlag>(), It.IsAny<string>(), 
+            DecisionServiceMock.Setup(ds => ds.GetVariationForFeatureExperiment(It.IsAny<FeatureFlag>(), It.IsAny<string>(),
                 It.IsAny<UserAttributes>(), ProjectConfig)).Returns(expectedDecision);
 
             var actualDecision = DecisionServiceMock.Object.GetVariationForFeature(featureFlag, "user1", ProjectConfig, new UserAttributes());
@@ -803,9 +805,9 @@ namespace OptimizelySDK.Tests
             var variation = expectedExperiment.Variations[0];
             var expectedDecision = new FeatureDecision(expectedExperiment, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT);
 
-            DecisionServiceMock.Setup(ds => ds.GetVariationForFeatureExperiment(It.IsAny<FeatureFlag>(), It.IsAny<string>(), 
+            DecisionServiceMock.Setup(ds => ds.GetVariationForFeatureExperiment(It.IsAny<FeatureFlag>(), It.IsAny<string>(),
                 It.IsAny<UserAttributes>(), ProjectConfig)).Returns<Variation>(null);
-            DecisionServiceMock.Setup(ds => ds.GetVariationForFeatureRollout(It.IsAny<FeatureFlag>(), It.IsAny<string>(), 
+            DecisionServiceMock.Setup(ds => ds.GetVariationForFeatureRollout(It.IsAny<FeatureFlag>(), It.IsAny<string>(),
                 It.IsAny<UserAttributes>(), ProjectConfig)).Returns(expectedDecision);
 
             var actualDecision = DecisionServiceMock.Object.GetVariationForFeature(featureFlag, "user1", ProjectConfig, new UserAttributes());
@@ -870,5 +872,141 @@ namespace OptimizelySDK.Tests
         }
 
         #endregion // GetVariationForFeature Tests
+
+        #region // Forced variation Tests
+        [Test]
+        public void TestSetGetForcedVariation()
+        {
+            var userId = "test_user";
+            var invalidUserId = "invalid_user";
+            var experimentKey = "test_experiment";
+            var experimentKey2 = "group_experiment_1";
+            var invalidExperimentKey = "invalid_experiment";
+            var expectedVariationKey = "control";
+            var expectedVariationKey2 = "group_exp_1_var_1";
+            var invalidVariationKey = "invalid_variation";
+
+            var userAttributes = new UserAttributes
+            {
+                {"device_type", "iPhone" },
+                {"location", "San Francisco" }
+            };
+
+            var optlyObject = new Optimizely(TestData.Datafile, new ValidEventDispatcher(), LoggerMock.Object);
+            optlyObject.Activate("test_experiment", "test_user", userAttributes);
+
+            // invalid experiment key should return a null variation
+            Assert.False(DecisionService.SetForcedVariation(invalidExperimentKey, userId, expectedVariationKey, Config));
+            Assert.Null(DecisionService.GetForcedVariation(invalidExperimentKey, userId, Config));
+
+            // setting a null variation should return a null variation
+            Assert.True(DecisionService.SetForcedVariation(experimentKey, userId, null, Config));
+            Assert.Null(DecisionService.GetForcedVariation(experimentKey, userId, Config));
+
+            // setting an invalid variation should return a null variation
+            Assert.False(DecisionService.SetForcedVariation(experimentKey, userId, invalidVariationKey, Config));
+            Assert.Null(DecisionService.GetForcedVariation(experimentKey, userId, Config));
+
+            // confirm the forced variation is returned after a set
+            Assert.True(DecisionService.SetForcedVariation(experimentKey, userId, expectedVariationKey, Config));
+            var actualForcedVariation = DecisionService.GetForcedVariation(experimentKey, userId, Config);
+            Assert.AreEqual(expectedVariationKey, actualForcedVariation.Key);
+
+            // check multiple sets
+            Assert.True(DecisionService.SetForcedVariation(experimentKey2, userId, expectedVariationKey2, Config));
+            var actualForcedVariation2 = DecisionService.GetForcedVariation(experimentKey2, userId, Config);
+            Assert.AreEqual(expectedVariationKey2, actualForcedVariation2.Key);
+            // make sure the second set does not overwrite the first set
+            actualForcedVariation = DecisionService.GetForcedVariation(experimentKey, userId, Config);
+            Assert.AreEqual(expectedVariationKey, actualForcedVariation.Key);
+            // make sure unsetting the second experiment-to-variation mapping does not unset the
+            // first experiment-to-variation mapping
+            Assert.True(DecisionService.SetForcedVariation(experimentKey2, userId, null, Config));
+            actualForcedVariation = DecisionService.GetForcedVariation(experimentKey, userId, Config);
+            Assert.AreEqual(expectedVariationKey, actualForcedVariation.Key);
+
+            // an invalid user ID should return a null variation
+            Assert.Null(DecisionService.GetForcedVariation(experimentKey, invalidUserId, Config));
+        }
+
+        // test that all the logs in setForcedVariation are getting called
+        [Test]
+        public void TestSetForcedVariationLogs()
+        {
+            var userId = "test_user";
+            var experimentKey = "test_experiment";
+            var experimentId = "7716830082";
+            var invalidExperimentKey = "invalid_experiment";
+            var variationKey = "control";
+            var variationId = "7722370027";
+            var invalidVariationKey = "invalid_variation";
+
+            DecisionService.SetForcedVariation(invalidExperimentKey, userId, variationKey, Config);
+            DecisionService.SetForcedVariation(experimentKey, userId, null, Config);
+            DecisionService.SetForcedVariation(experimentKey, userId, invalidVariationKey, Config);
+            DecisionService.SetForcedVariation(experimentKey, userId, variationKey, Config);
+
+            LoggerMock.Verify(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()), Times.Exactly(4));
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, string.Format(@"Experiment key ""{0}"" is not in datafile.", invalidExperimentKey)));
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, string.Format(@"Variation mapped to experiment ""{0}"" has been removed for user ""{1}"".", experimentKey, userId)));
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, string.Format(@"No variation key ""{0}"" defined in datafile for experiment ""{1}"".", invalidVariationKey, experimentKey)));
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, string.Format(@"Set variation ""{0}"" for experiment ""{1}"" and user ""{2}"" in the forced variation map.", variationId, experimentId, userId)));
+        }
+
+        // test that all the logs in getForcedVariation are getting called
+        [Test]
+        public void TestGetForcedVariationLogs()
+        {
+            var userId = "test_user";
+            var invalidUserId = "invalid_user";
+            var experimentKey = "test_experiment";
+            var experimentId = "7716830082";
+            var invalidExperimentKey = "invalid_experiment";
+            var pausedExperimentKey = "paused_experiment";
+            var variationKey = "control";
+            var variationId = "7722370027";
+
+            DecisionService.SetForcedVariation(experimentKey, userId, variationKey, Config);
+            DecisionService.GetForcedVariation(experimentKey, invalidUserId, Config);
+            DecisionService.GetForcedVariation(invalidExperimentKey, userId, Config);
+            DecisionService.GetForcedVariation(pausedExperimentKey, userId, Config);
+            DecisionService.GetForcedVariation(experimentKey, userId, Config);
+
+            LoggerMock.Verify(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()), Times.Exactly(5));
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, string.Format(@"Set variation ""{0}"" for experiment ""{1}"" and user ""{2}"" in the forced variation map.", variationId, experimentId, userId)));
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, string.Format(@"User ""{0}"" is not in the forced variation map.", invalidUserId)));
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, string.Format(@"Experiment key ""{0}"" is not in datafile.", invalidExperimentKey)));
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, string.Format(@"No experiment ""{0}"" mapped to user ""{1}"" in the forced variation map.", pausedExperimentKey, userId)));
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, string.Format(@"Variation ""{0}"" is mapped to experiment ""{1}"" and user ""{2}"" in the forced variation map", variationKey, experimentKey, userId)));
+        }
+
+        [Test]
+        public void TestSetForcedVariationMultipleSets()
+        {
+
+            Assert.True(DecisionService.SetForcedVariation("test_experiment", "test_user_1", "variation", Config));
+            Assert.AreEqual(DecisionService.GetForcedVariation("test_experiment", "test_user_1", Config).Key, "variation");
+
+            // same user, same experiment, different variation
+            Assert.True(DecisionService.SetForcedVariation("test_experiment", "test_user_1", "control", Config));
+            Assert.AreEqual(DecisionService.GetForcedVariation("test_experiment", "test_user_1", Config).Key, "control");
+
+            // same user, different experiment
+            Assert.True(DecisionService.SetForcedVariation("group_experiment_1", "test_user_1", "group_exp_1_var_1", Config));
+            Assert.AreEqual(DecisionService.GetForcedVariation("group_experiment_1", "test_user_1", Config).Key, "group_exp_1_var_1");
+
+            // different user
+            Assert.True(DecisionService.SetForcedVariation("test_experiment", "test_user_2", "variation", Config));
+            Assert.AreEqual(DecisionService.GetForcedVariation("test_experiment", "test_user_2", Config).Key, "variation");
+
+            // different user, different experiment
+            Assert.True(DecisionService.SetForcedVariation("group_experiment_1", "test_user_2", "group_exp_1_var_1", Config));
+            Assert.AreEqual(DecisionService.GetForcedVariation("group_experiment_1", "test_user_2", Config).Key, "group_exp_1_var_1");
+
+            // make sure the first user forced variations are still valid
+            Assert.AreEqual(DecisionService.GetForcedVariation("test_experiment", "test_user_1", Config).Key, "control");
+            Assert.AreEqual(DecisionService.GetForcedVariation("group_experiment_1", "test_user_1", Config).Key, "group_exp_1_var_1");
+        }
+        #endregion
     }
 }

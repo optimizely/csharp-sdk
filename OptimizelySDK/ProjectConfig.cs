@@ -97,14 +97,6 @@ namespace OptimizelySDK
         Dictionary<string, Audience> AudienceIdMap { get; }
 
         /// <summary>
-        /// Associative array of user IDs to an associative array
-        /// of experiments to variations.This contains all the forced variations
-        /// set by the user by calling setForcedVariation (it is not the same as the
-        /// whitelisting forcedVariations data structure in the Experiments class).
-        /// </summary>
-        Dictionary<string, Dictionary<string, string>> ForcedVariationMap { get; }
-
-        /// <summary>
         /// Associative array of Feature Key to Feature(s) in the datafile
         /// </summary>
         Dictionary<string, FeatureFlag> FeatureKeyMap { get; }
@@ -218,23 +210,6 @@ namespace OptimizelySDK
         /// <returns>Variation Entity corresponding to the provided experiment key and variation ID or a dummy 
         /// entity if key or ID is invalid</returns>
         Variation GetVariationFromId(string experimentKey, string variationId);
-
-        /// <summary>
-        /// Gets the forced variation for the given user and experiment.  
-        /// </summary>
-        /// <param name="experimentKey">The experiment key</param>
-        /// <param name="userId">The user ID</param>
-        /// <returns>Variation entity which the given user and experiment should be forced into.</returns>
-        Variation GetForcedVariation(string experimentKey, string userId);
-
-        /// <summary>
-        /// Sets an associative array of user IDs to an associative array of experiments to forced variations.
-        /// </summary>
-        /// <param name="experimentKey">The experiment key</param>
-        /// <param name="userId">The user ID</param>
-        /// <param name="variationKey">The variation key</param>
-        /// <returns>A boolean value that indicates if the set completed successfully.</returns>
-        bool SetForcedVariation(string experimentKey, string userId, string variationKey);
 
         /// <summary>
         /// Get the feature from the key
