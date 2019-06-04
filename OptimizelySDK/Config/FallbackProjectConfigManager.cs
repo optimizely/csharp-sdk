@@ -16,6 +16,7 @@
 
 namespace OptimizelySDK.Config
 {
+    /// TODO: Cleanup done in other PR. sohail/optimizelydfm
     public class FallbackProjectConfigManager : ProjectConfigManager
     {
         private ProjectConfig ProjectConfig;

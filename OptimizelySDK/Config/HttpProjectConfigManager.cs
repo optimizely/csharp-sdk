@@ -27,6 +27,7 @@ namespace OptimizelySDK.Config
     {
         private string Url;
         private string LastModifiedSince = string.Empty;
+        public Action RemoteProjectConfig_Notification;
 
         private HttpProjectConfigManager(TimeSpan period, string url, TimeSpan blockingTimeout, ILogger logger, IErrorHandler errorHandler) : base(period, blockingTimeout, logger, errorHandler)
         {
@@ -36,11 +37,6 @@ namespace OptimizelySDK.Config
         public Task OnReady()
         {
             return CompletableConfigManager.Task;
-            //Task t = new Task(() => {
-            //    CompletableConfigManager.Task.Wait(this.BlockingTimeout);
-            //});
-            //t.Start();
-            //return t;
         }
 
 #if !NET40 && !NET35
@@ -228,6 +224,7 @@ namespace OptimizelySDK.Config
                         Logger.Log(LogLevel.WARN, "Error parsing fallback datafile." + ex.Message);
                     }
                 }
+                configManager.ProjectConfig_Notification += () => { configManager.RemoteProjectConfig_Notification.Invoke(); };
 
                 // Optionally block until config is available.
                 if (!defer)
