@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2017-2019, Optimizely
+ * Copyright 2019, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -156,7 +156,7 @@ namespace OptimizelySDK.Config
         private Dictionary<string, List<string>> ExperimentFeatureMap = new Dictionary<string, List<string>>();
 
 
-        //========================= Callbacks ===========================
+        //========================= Interfaces ===========================
 
         /// <summary>
         /// Logger for logging

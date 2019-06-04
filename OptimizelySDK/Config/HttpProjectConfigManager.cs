@@ -36,11 +36,6 @@ namespace OptimizelySDK.Config
         public Task OnReady()
         {
             return CompletableConfigManager.Task;
-            //Task t = new Task(() => {
-            //    CompletableConfigManager.Task.Wait(this.BlockingTimeout);
-            //});
-            //t.Start();
-            //return t;
         }
 
 #if !NET40 && !NET35
