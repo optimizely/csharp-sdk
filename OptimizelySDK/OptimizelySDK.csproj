@@ -126,6 +126,7 @@
     <Compile Include="Config\PollingProjectConfigManager.cs" />
     <Compile Include="Config\HttpProjectConfigManager.cs" />
     <Compile Include="Config\FallbackProjectConfigManager.cs" />
+    <Compile Include="OptimizelyFactory.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Utils\schema.json" />

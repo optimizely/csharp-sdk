@@ -118,7 +118,15 @@ namespace OptimizelySDK
             }
         }
 
-
+        /// <summary>
+        /// Initializes a new instance of the <see cref="T:OptimizelySDK.Optimizely"/> class.
+        /// </summary>
+        /// <param name="configManager">Config manager.</param>
+        /// <param name="eventDispatcher">Event dispatcher.</param>
+        /// <param name="logger">Logger.</param>
+        /// <param name="errorHandler">Error handler.</param>
+        /// <param name="userProfileService">User profile service.</param>
+        /// TODO: Add unit tests
         public Optimizely(ProjectConfigManager configManager,
                          IEventDispatcher eventDispatcher = null,
                          ILogger logger = null,
@@ -206,7 +214,7 @@ namespace OptimizelySDK
                 return null;
             }
 
-            var variation = GetVariation(experimentKey, userId, userAttributes);
+            var variation = GetVariation(experimentKey, userId, config, userAttributes);
 
             if (variation == null || variation.Key == null)
             {
@@ -300,8 +308,20 @@ namespace OptimizelySDK
         public Variation GetVariation(string experimentKey, string userId, UserAttributes userAttributes = null)
         {
             var config = ProjectConfigManager?.GetConfig();
-            if (!IsValid || config == null) 
-            {
+            return GetVariation(experimentKey, userId, config, userAttributes);
+        }
+
+        /// <summary>
+        /// Get variation where user will be bucketed from the given ProjectConfig.
+        /// </summary>
+        /// <param name="experimentKey">experimentKey string Key identifying the experiment</param>
+        /// <param name="userId">ID for the user</param>
+        /// <param name="config">ProjectConfig to be used for variation</param>
+        /// <param name="userAttributes">Attributes for the users</param>
+        /// <returns>null|Variation Representing variation</returns>
+        private Variation GetVariation(string experimentKey, string userId, ProjectConfig config, UserAttributes userAttributes = null)
+        {
+            if (!IsValid || config == null) {
                 Logger.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'GetVariation'.");
                 return null;
             }
@@ -313,7 +333,7 @@ namespace OptimizelySDK
             };
 
             if (!ValidateStringInputs(inputValues))
-                return null; 
+                return null;
 
             Experiment experiment = config.GetExperimentFromKey(experimentKey);
             if (experiment.Key == null)
