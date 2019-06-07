@@ -25,6 +25,7 @@ using OptimizelySDK.Notifications;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using OptimizelySDK.Config;
 
 namespace OptimizelySDK
 {
@@ -102,18 +103,19 @@ namespace OptimizelySDK
             UserProfileService = userProfileService;
             NotificationCenter = new NotificationCenter(Logger);
 
-            try
-            {
-                if (!ValidateInputs(datafile, skipJsonValidation))
+            try {
+
+                if (!ValidateInputs(datafile, skipJsonValidation)) 
                 {
                     Logger.Log(LogLevel.ERROR, "Provided 'datafile' has invalid schema.");
                     return;
                 }
 
-                Config = ProjectConfig.Create(datafile, Logger, ErrorHandler);
+                Config = DatafileProjectConfig.Create(datafile, Logger, ErrorHandler);
                 IsValid = true;
+
                 DecisionService = new DecisionService(Bucketer, ErrorHandler, Config, userProfileService, Logger);
-            }
+            } 
             catch (Exception ex)
             {
                 string error = String.Empty;

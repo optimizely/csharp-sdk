@@ -17,6 +17,7 @@
 using Moq;
 using NUnit.Framework;
 using OptimizelySDK.AudienceConditions;
+using OptimizelySDK.Config;
 using OptimizelySDK.Entity;
 using OptimizelySDK.Logger;
 

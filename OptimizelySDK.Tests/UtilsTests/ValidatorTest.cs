@@ -18,6 +18,7 @@ using OptimizelySDK.Logger;
 using OptimizelySDK.Utils;
 using OptimizelySDK.Entity;
 using NUnit.Framework;
+using OptimizelySDK.Config;
 
 namespace OptimizelySDK.Tests.UtilsTests
 {
@@ -34,7 +35,7 @@ namespace OptimizelySDK.Tests.UtilsTests
             Logger = new DefaultLogger();
             ErrorHandler = new DefaultErrorHandler();
 
-            Config = ProjectConfig.Create(TestData.Datafile, Logger, ErrorHandler);
+            Config = DatafileProjectConfig.Create(TestData.Datafile, Logger, ErrorHandler);
         }
 
         [Test]

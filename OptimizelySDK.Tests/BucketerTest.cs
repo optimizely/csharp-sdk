@@ -16,6 +16,7 @@
 using Moq;
 using NUnit.Framework;
 using OptimizelySDK.Bucketing;
+using OptimizelySDK.Config;
 using OptimizelySDK.Entity;
 using OptimizelySDK.Logger;
 
@@ -58,7 +59,7 @@ namespace OptimizelySDK.Tests
         public void Initialize()
         {
             LoggerMock = new Mock<ILogger>();
-            Config = ProjectConfig.Create(TestData.Datafile, LoggerMock.Object, new ErrorHandler.NoOpErrorHandler());
+            Config = DatafileProjectConfig.Create(TestData.Datafile, LoggerMock.Object, new ErrorHandler.NoOpErrorHandler());
         }
 
         [TestFixtureSetUp]

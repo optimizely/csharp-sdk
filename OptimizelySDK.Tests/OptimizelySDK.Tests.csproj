@@ -72,6 +72,9 @@
   <ItemGroup>
     <Compile Include="AudienceConditionsTests\ConditionEvaluationTest.cs" />
     <Compile Include="AudienceConditionsTests\ConditionsTest.cs" />
+    <Compile Include="DatafileManagement Tests\HttpProjectConfigManagerTest.cs" />
+    <Compile Include="DatafileManagement Tests\PollingProjectConfigManagerTest.cs" />
+    <Compile Include="DatafileManagement Tests\AtomicProjectConfigManagerTest.cs" />
     <Compile Include="DecisionServiceTest.cs" />
     <Compile Include="DefaultErrorHandlerTest.cs" />
     <Compile Include="EventTests\DefaultEventDispatcherTest.cs" />
@@ -92,6 +95,7 @@
     <Compile Include="UtilsTests\PrivateObject.cs" />
     <Compile Include="UtilsTests\ValidatorTest.cs" />
     <Compile Include="ValidEventDispatcher.cs" />
+    <Compile Include="DatafileManagement Tests\TestPollingProjectConfigManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="App.config" />
