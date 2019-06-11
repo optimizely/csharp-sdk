@@ -37,8 +37,6 @@ namespace OptimizelySDK
 
         private IEventDispatcher EventDispatcher;
 
-        public ProjectConfigManager ProjectConfigManager;
-
         private ILogger Logger;
 
         private IErrorHandler ErrorHandler;
@@ -48,6 +46,8 @@ namespace OptimizelySDK
         private DecisionService DecisionService;
 
         public NotificationCenter NotificationCenter;
+
+        public ProjectConfigManager ProjectConfigManager;
 
         public bool IsValid { get; private set; }
 
@@ -191,7 +191,7 @@ namespace OptimizelySDK
         public Variation Activate(string experimentKey, string userId, UserAttributes userAttributes = null)
         {
             var config = ProjectConfigManager?.GetConfig();
-            if (!IsValid || config == null)
+            if (!IsValid && config == null)
             {
                 Logger.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'activate'.");
                 return null;
@@ -249,7 +249,7 @@ namespace OptimizelySDK
         public void Track(string eventKey, string userId, UserAttributes userAttributes = null, EventTags eventTags = null)
         {
             var config = ProjectConfigManager?.GetConfig();
-            if (!IsValid || config == null) 
+            if (!IsValid && config == null) 
             {
                 Logger.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'track'.");
                 return;
@@ -321,7 +321,7 @@ namespace OptimizelySDK
         /// <returns>null|Variation Representing variation</returns>
         private Variation GetVariation(string experimentKey, string userId, ProjectConfig config, UserAttributes userAttributes = null)
         {
-            if (!IsValid || config == null) {
+            if (!IsValid && config == null) {
                 Logger.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'GetVariation'.");
                 return null;
             }
@@ -364,7 +364,7 @@ namespace OptimizelySDK
         public bool SetForcedVariation(string experimentKey, string userId, string variationKey)
         {
             var config = ProjectConfigManager?.GetConfig();
-            if (!IsValid || config == null)
+            if (!IsValid && config == null)
             {
                 return false;
             }
@@ -387,7 +387,7 @@ namespace OptimizelySDK
         public Variation GetForcedVariation(string experimentKey, string userId)
         {
             var config = ProjectConfigManager?.GetConfig();
-            if (!IsValid || config == null) {
+            if (!IsValid && config == null) {
                 return null;
             }
 
@@ -416,7 +416,7 @@ namespace OptimizelySDK
         public virtual bool IsFeatureEnabled(string featureKey, string userId, UserAttributes userAttributes = null)
         {
             var config = ProjectConfigManager?.GetConfig();
-            if (!IsValid || config == null) {
+            if (!IsValid && config == null) {
 
                 Logger.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'GetVariation'.");
 
@@ -588,7 +588,7 @@ namespace OptimizelySDK
         {
             var config = ProjectConfigManager?.GetConfig();
 
-            if (!IsValid || config == null) {
+            if (!IsValid && config == null) {
                 Logger.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'activate'.");
                 return null;
             }
@@ -607,7 +607,7 @@ namespace OptimizelySDK
         public double? GetFeatureVariableDouble(string featureKey, string variableKey, string userId, UserAttributes userAttributes = null)
         {
             var config = ProjectConfigManager?.GetConfig();
-            if (!IsValid || config == null) {
+            if (!IsValid && config == null) {
                 Logger.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'activate'.");
                 return null;
             }
@@ -626,7 +626,7 @@ namespace OptimizelySDK
         public int? GetFeatureVariableInteger(string featureKey, string variableKey, string userId, UserAttributes userAttributes = null)
         {
             var config = ProjectConfigManager?.GetConfig();
-            if (!IsValid || config == null) {
+            if (!IsValid && config == null) {
                 Logger.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'activate'.");
                 return null;
             }
@@ -645,7 +645,7 @@ namespace OptimizelySDK
         public string GetFeatureVariableString(string featureKey, string variableKey, string userId, UserAttributes userAttributes = null)
         {
             var config = ProjectConfigManager?.GetConfig();
-            if (!IsValid || config == null) {
+            if (!IsValid && config == null) {
                 Logger.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'activate'.");
                 return null;
             }
@@ -657,11 +657,11 @@ namespace OptimizelySDK
         /// Sends impression event.
         /// </summary>
         /// <param name="experiment">The experiment</param>
-        /// <param name="variationId">The variation entity</param>
+        /// <param name="variation">The variation entity</param>
         /// <param name="userId">The user ID</param>
         /// <param name="userAttributes">The user's attributes</param>
-        private void SendImpressionEvent(Experiment experiment, Variation variation, string userId, 
-        UserAttributes userAttributes, ProjectConfig config)
+        private void SendImpressionEvent(Experiment experiment, Variation variation, string userId,
+                                         UserAttributes userAttributes, ProjectConfig config)
         {
             if (experiment.IsExperimentRunning)
             {
@@ -699,7 +699,7 @@ namespace OptimizelySDK
             List<string> enabledFeaturesList = new List<string>();
 
             var config = ProjectConfigManager?.GetConfig();
-            if (!IsValid || config == null)
+            if (!IsValid && config == null)
             {
                 Logger.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'GetEnabledFeatures'.");
                 return enabledFeaturesList;
