@@ -135,6 +135,9 @@ namespace OptimizelySDK
         {
             ProjectConfigManager = configManager;
             Initialize(eventDispatcher, logger, errorHandler, userProfileService);
+            ProjectConfigManager.NotifyOnProjectConfigUpdate += () => {
+                NotificationCenter.SendNotifications(NotificationCenter.NotificationType.OptimizelyConfigUpdate);
+            };
         }
 
         private void Initialize(IEventDispatcher eventDispatcher = null,

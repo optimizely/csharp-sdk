@@ -28,7 +28,8 @@ namespace OptimizelySDK.Tests.DatafileManagementTests
         TestPollingData[] PollingData;
         public int Counter = 0;
 
-        public TestPollingProjectConfigManager(TimeSpan period, TimeSpan blockingTimeout, ILogger logger, int[] pollingSequence, bool startByDefault = true) : base(period, blockingTimeout, logger, null, startByDefault)
+        public TestPollingProjectConfigManager(TimeSpan period, TimeSpan blockingTimeout, bool autoUpdate, ILogger logger, int[] pollingSequence) 
+            : base(period, blockingTimeout, autoUpdate, logger, null)
         {
             if (pollingSequence != null) {
                 System.Collections.Generic.List<TestPollingData> pollingData = new System.Collections.Generic.List<TestPollingData>();
@@ -39,7 +40,8 @@ namespace OptimizelySDK.Tests.DatafileManagementTests
             }
         }
 
-        public TestPollingProjectConfigManager(TimeSpan period, TimeSpan blockingTimeout, ILogger logger, TestPollingData[] pollingData, bool startByDefault = true) : base(period, blockingTimeout, logger, null, startByDefault)
+        public TestPollingProjectConfigManager(TimeSpan period, TimeSpan blockingTimeout, bool autoUpdate, ILogger logger, TestPollingData[] pollingData, bool startByDefault = true) 
+            : base(period, blockingTimeout, autoUpdate, logger, null)
         {
             if (pollingData != null) {
                 this.PollingData = pollingData;

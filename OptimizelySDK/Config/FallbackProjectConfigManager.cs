@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+using System;
+
 namespace OptimizelySDK.Config
 {
     /// <summary>
@@ -23,7 +25,8 @@ namespace OptimizelySDK.Config
     public class FallbackProjectConfigManager : ProjectConfigManager
     {
         private ProjectConfig ProjectConfig;
-
+        public event Action NotifyOnProjectConfigUpdate;
+        
         /// <summary>
         /// Initializes a new instance of the FallbackProjectConfigManager class
         /// with the given ProjectConfig instance.

@@ -35,7 +35,8 @@ namespace OptimizelySDK.Notifications
         {
             Activate,   // Activate called.
             Track,      // Track called.
-            Decision    // A decision is made in the system. i.e. user activation, feature access or feature-variable value retrieval.
+            Decision,    // A decision is made in the system. i.e. user activation, feature access or feature-variable value retrieval.
+            OptimizelyConfigUpdate // When datafile is updated using HttpProjectConfigManager.
         };
 
         /// <summary>
@@ -70,25 +71,27 @@ namespace OptimizelySDK.Notifications
         /// <param name="decisionInfo">Dictionary containing decision information</param>
         public delegate void DecisionCallback(string type, string userId, UserAttributes userAttributes, Dictionary<string, object> decisionInfo);
 
+        /// <summary>
+        /// Delegate for project config update.
+        /// </summary>
+        public delegate void OptimizelyConfigUpdate();
+
         private ILogger Logger;
 
         // Notification Id represeting number of notifications.
         public int NotificationId { get; private set; } = 1;
 
         // Associative array of notification type to notification id and notification pair.
-        private Dictionary<NotificationType, Dictionary<int, object>> Notifications = 
+        private Dictionary<NotificationType, Dictionary<int, object>> Notifications =
             new Dictionary<NotificationType, Dictionary<int, object>>();
 
         /// <summary>
         /// Property representing total notifications count.
         /// </summary>
-        public int NotificationsCount
-        {
-            get
-            {
+        public int NotificationsCount {
+            get {
                 int notificationsCount = 0;
-                foreach (var notificationsMap in Notifications.Values)
-                {
+                foreach (var notificationsMap in Notifications.Values) {
                     notificationsCount += notificationsMap.Count;
                 }
 
@@ -104,8 +107,7 @@ namespace OptimizelySDK.Notifications
         {
             Logger = logger ?? new NoOpLogger();
 
-            foreach (NotificationType notificationType in Enum.GetValues(typeof(NotificationType)))
-            {
+            foreach (NotificationType notificationType in Enum.GetValues(typeof(NotificationType))) {
                 Notifications[notificationType] = new Dictionary<int, object>();
             }
         }
@@ -156,6 +158,14 @@ namespace OptimizelySDK.Notifications
             return AddNotification(notificationType, (object)decisionCallback);
         }
 
+        public int AddNotification(NotificationType notificationType, OptimizelyConfigUpdate optimizelyConfigUpdate)
+        {
+            if (!IsNotificationTypeValid(notificationType, NotificationType.OptimizelyConfigUpdate))
+                return 0;
+
+            return AddNotification(notificationType, (object)optimizelyConfigUpdate);
+        }
+
         /// <summary>
         /// Validate notification type.
         /// </summary>
@@ -164,8 +174,7 @@ namespace OptimizelySDK.Notifications
         /// <returns>true if notification type is valid, false otherwise</returns>
         private bool IsNotificationTypeValid(NotificationType providedNotificationType, NotificationType expectedNotificationType)
         {
-            if (providedNotificationType != expectedNotificationType)
-            {
+            if (providedNotificationType != expectedNotificationType) {
                 Logger.Log(LogLevel.ERROR, $@"Invalid notification type provided for ""{expectedNotificationType}"" callback.");
                 return false;
             }
@@ -185,12 +194,9 @@ namespace OptimizelySDK.Notifications
 
             if (!Notifications.ContainsKey(notificationType) || Notifications[notificationType].Count == 0)
                 Notifications[notificationType][NotificationId] = notificationCallback;
-            else
-            {
-                foreach(var notification in this.Notifications[notificationType])
-                {
-                    if ((Delegate)notification.Value == (Delegate)notificationCallback)
-                    {
+            else {
+                foreach (var notification in this.Notifications[notificationType]) {
+                    if ((Delegate)notification.Value == (Delegate)notificationCallback) {
                         Logger.Log(LogLevel.ERROR, "The notification callback already exists.");
                         return -1;
                     }
@@ -212,10 +218,8 @@ namespace OptimizelySDK.Notifications
         /// <returns>Returns true if found and removed, false otherwise.</returns>
         public bool RemoveNotification(int notificationId)
         {
-            foreach(var key in Notifications.Keys)
-            {
-                if (Notifications[key] != null && Notifications[key].Any(notification => notification.Key == notificationId))
-                {
+            foreach (var key in Notifications.Keys) {
+                if (Notifications[key] != null && Notifications[key].Any(notification => notification.Key == notificationId)) {
                     Notifications[key].Remove(notificationId);
                     return true;
                 }
@@ -238,8 +242,7 @@ namespace OptimizelySDK.Notifications
         /// </summary>
         public void ClearAllNotifications()
         {
-            foreach (var notificationsMap in Notifications.Values)
-            {
+            foreach (var notificationsMap in Notifications.Values) {
                 notificationsMap.Clear();
             }
         }
@@ -251,15 +254,11 @@ namespace OptimizelySDK.Notifications
         /// <param name="args">Arguments to pass in notification callbacks</param>
         public void SendNotifications(NotificationType notificationType, params object[] args)
         {
-            foreach (var notification in Notifications[notificationType])
-            {
-                try
-                {
+            foreach (var notification in Notifications[notificationType]) {
+                try {
                     Delegate d = notification.Value as Delegate;
                     d.DynamicInvoke(args);
-                }
-                catch (Exception exception)
-                {
+                } catch (Exception exception) {
                     Logger.Log(LogLevel.ERROR, "Problem calling notify callback. Error: " + exception.Message);
                 }
             }

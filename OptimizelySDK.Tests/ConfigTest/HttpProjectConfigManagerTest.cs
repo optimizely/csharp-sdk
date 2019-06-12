@@ -43,6 +43,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
                 .WithLogger(LoggerMock.Object)
                 .WithPollingInterval(TimeSpan.FromMilliseconds(1000))
                 .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(500))
+                .WithStartByDefault()
                 .Build();
 
             httpManager.OnReady().Wait(System.Threading.Timeout.Infinite);
@@ -57,6 +58,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
                 .WithLogger(LoggerMock.Object)
                 .WithPollingInterval(TimeSpan.FromMilliseconds(1000))
                 .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(500))
+                .WithStartByDefault()
                 .Build();
 
             httpManager.OnReady().Wait(System.Threading.Timeout.Infinite);
@@ -72,6 +74,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
                 .WithLogger(LoggerMock.Object)
                 .WithPollingInterval(TimeSpan.FromMilliseconds(1000))
                 .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(500))
+                .WithStartByDefault()
                 .Build();
 
             httpManager.OnReady().Wait(System.Threading.Timeout.Infinite);
@@ -88,6 +91,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
                 .WithLogger(LoggerMock.Object)
                 .WithPollingInterval(TimeSpan.FromMilliseconds(1000))
                 .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(500))
+                .WithStartByDefault()
                 .Build();
 
             stopwatch.Start();

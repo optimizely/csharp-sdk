@@ -34,6 +34,7 @@ namespace OptimizelySDK.Config
         private TimeSpan PollingInterval;
         public bool IsStarted { get; private set; }
         private bool scheduleWhenFinished = false;
+        public bool AutoUpdate { get; private set; }
 
         private ProjectConfig CurrentProjectConfig;
         private Timer SchedulerService;
@@ -45,22 +46,18 @@ namespace OptimizelySDK.Config
         // Variables to control blocking/syncing.
         public object mutex = new Object();
 
-        protected event Action ProjectConfig_Notification;
+        public event Action NotifyOnProjectConfigUpdate;
 
-        public PollingProjectConfigManager(TimeSpan period, TimeSpan blockingTimeout, ILogger logger = null, IErrorHandler errorHandler = null, bool StartByDefault = true)
+        public PollingProjectConfigManager(TimeSpan period, TimeSpan blockingTimeout, bool autoUpdate = false, ILogger logger = null, IErrorHandler errorHandler = null)
         {
             Logger = logger;
             ErrorHandler = errorHandler;
             BlockingTimeout = blockingTimeout;
             PollingInterval = period;
-
+            AutoUpdate = autoUpdate;
 
             // Never start, start only when Start is called.
             SchedulerService = new Timer((object state) => { Run(); }, this, -1, -1);
-            if(StartByDefault) {
-                Start();
-            }
-
         }
 
         /// <summary>
@@ -81,7 +78,7 @@ namespace OptimizelySDK.Config
             }
 
             Logger.Log(LogLevel.WARN, $"Starting Config scheduler with interval: {PollingInterval} milliseconds.");
-            SchedulerService.Change(TimeSpan.Zero, PollingInterval);
+            SchedulerService.Change(TimeSpan.Zero, AutoUpdate ? PollingInterval : TimeSpan.FromMilliseconds(-1));
             IsStarted = true;
         }
 
@@ -156,7 +153,7 @@ namespace OptimizelySDK.Config
             // SetResult raise exception if called again, that's why Try is used.
             CompletableConfigManager.TrySetResult(true);
 
-            ProjectConfig_Notification?.Invoke();
+            NotifyOnProjectConfigUpdate?.Invoke();
 
             return true;
         }
