@@ -24,8 +24,14 @@ using Attribute = OptimizelySDK.Entity.Attribute;
 
 namespace OptimizelySDK.Config
 {
+    /// <summary>
+    /// Implementation of ProjectConfig interface backed by a JSON data file.
+    /// </summary>
     public class DatafileProjectConfig : ProjectConfig
     {
+        /// <summary>
+        /// Datafile versions.
+        /// </summary>
         public enum OPTLYSDKVersion
         {
             V2 = 2,
@@ -33,6 +39,9 @@ namespace OptimizelySDK.Config
             V4 = 4
         }
 
+        /// <summary>
+        /// Prefix used for reserved attributes.
+        /// </summary>
         public const string RESERVED_ATTRIBUTE_PREFIX = "$opt_";
 
         /// <summary>
@@ -68,7 +77,9 @@ namespace OptimizelySDK.Config
         /// </summary>
         public bool? BotFiltering { get; set; }
 
-
+        /// <summary>
+        /// Supported datafile versions list.
+        /// </summary>
         private static List<OPTLYSDKVersion> SupportedVersions = new List<OPTLYSDKVersion> {
             OPTLYSDKVersion.V2,
             OPTLYSDKVersion.V3,
@@ -298,6 +309,13 @@ namespace OptimizelySDK.Config
             }
         }
 
+        /// <summary>
+        /// Parse datafile string to create ProjectConfig instance.
+        /// </summary>
+        /// <param name="content">datafile</param>
+        /// <param name="logger">Logger instance</param>
+        /// <param name="errorHandler">ErrorHandler instance</param>
+        /// <returns>ProjectConfig instance created from datafile string</returns>
         public static ProjectConfig Create(string content, ILogger logger, IErrorHandler errorHandler)
         {
             DatafileProjectConfig config = GetConfig(content);

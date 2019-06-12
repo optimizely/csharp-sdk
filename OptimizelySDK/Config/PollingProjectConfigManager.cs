@@ -23,6 +23,12 @@ using OptimizelySDK.ErrorHandler;
 
 namespace OptimizelySDK.Config
 {
+    /// <summary>
+    /// Abstract class that implements ProjectConfigManager interface and provides 
+    /// basic scheduling and caching.
+    /// Instances of this class, must implement the <see cref="Poll()"/> method
+    /// which is responsible for fetching a given ProjectConfig.
+    /// </summary>
     public abstract class PollingProjectConfigManager : ProjectConfigManager
     {
         private TimeSpan PollingInterval;
@@ -57,8 +63,15 @@ namespace OptimizelySDK.Config
 
         }
 
+        /// <summary>
+        /// Abstract method for fetching ProjectConfig instance.
+        /// </summary>
+        /// <returns>ProjectConfig instance</returns>
         protected abstract ProjectConfig Poll();
 
+        /// <summary>
+        /// Starts datafile scheduler.
+        /// </summary>
         public void Start()
         {
             if (IsStarted)
@@ -72,6 +85,9 @@ namespace OptimizelySDK.Config
             IsStarted = true;
         }
 
+        /// <summary>
+        /// Stops datafile scheduler.
+        /// </summary>
         public void Stop() 
         {
             // don't call now and onwards.
@@ -81,6 +97,11 @@ namespace OptimizelySDK.Config
             Logger.Log(LogLevel.WARN, $"Stopping Config scheduler.");
         }
 
+        /// <summary>
+        /// Retrieve ProjectConfig instance and waits untill the instance
+        /// gets available or blocking timeout expires.
+        /// </summary>
+        /// <returns>ProjectConfig</returns>
         public ProjectConfig GetConfig()
         {
             if (IsStarted)
@@ -108,6 +129,11 @@ namespace OptimizelySDK.Config
             return projectConfig ?? CurrentProjectConfig;
         }
 
+        /// <summary>
+        /// Sets the latest available ProjectConfig valid instance.
+        /// </summary>
+        /// <param name="projectConfig">ProjectConfig</param>
+        /// <returns>true if the ProjectConfig saved successfully, false otherwise</returns>
         public bool SetConfig(ProjectConfig projectConfig)
         {
             // trigger now, due because of delayed latency response
@@ -134,7 +160,11 @@ namespace OptimizelySDK.Config
 
             return true;
         }
-        
+
+        /// <summary>
+        /// Scheduler method that periodically runs on provided
+        /// polling interval.
+        /// </summary>
         public virtual void Run()
         {
             if (Monitor.TryEnter(mutex)){

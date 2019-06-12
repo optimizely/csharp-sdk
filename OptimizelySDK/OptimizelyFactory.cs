@@ -7,6 +7,10 @@ using OptimizelySDK.Logger;
 
 namespace OptimizelySDK
 {
+
+    /// TODO: Need to check with Mike, no need of this class 
+    /// after component emitting notification.
+    /// 
     /// <summary>
     /// Optimizely factory.
     /// </summary>
