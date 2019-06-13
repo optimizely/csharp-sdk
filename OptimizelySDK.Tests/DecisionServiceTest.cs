@@ -148,7 +148,8 @@ namespace OptimizelySDK.Tests
                 {userId, invalidVariationKey }
             };
 
-            var experiment = new Experiment {
+            var experiment = new Experiment
+            {
                 Id = "1234",
                 Key = "exp_key",
                 Status = "Running",
@@ -480,7 +481,8 @@ namespace OptimizelySDK.Tests
         public void TestGetVariationForFeatureExperimentGivenExperimentNotInDataFile()
         {
             var booleanFeature = ProjectConfig.GetFeatureFlagFromKey("boolean_feature");
-            var featureFlag = new FeatureFlag {
+            var featureFlag = new FeatureFlag
+            {
                 Id = booleanFeature.Id,
                 Key = booleanFeature.Key,
                 RolloutId = booleanFeature.RolloutId,
@@ -573,7 +575,8 @@ namespace OptimizelySDK.Tests
         public void TestGetVariationForFeatureRolloutWhenRolloutIsNotInDataFile()
         {
             var featureFlag = ProjectConfig.GetFeatureFlagFromKey("boolean_feature");
-            var invalidRolloutFeature = new FeatureFlag {
+            var invalidRolloutFeature = new FeatureFlag
+            {
                 RolloutId = "invalid_rollout_id",
                 Id = featureFlag.Id,
                 Key = featureFlag.Key,
@@ -873,7 +876,7 @@ namespace OptimizelySDK.Tests
 
         #endregion // GetVariationForFeature Tests
 
-        #region // Forced variation Tests
+        #region Forced variation Tests
         [Test]
         public void TestSetGetForcedVariation()
         {
@@ -1007,6 +1010,7 @@ namespace OptimizelySDK.Tests
             Assert.AreEqual(DecisionService.GetForcedVariation("test_experiment", "test_user_1", Config).Key, "control");
             Assert.AreEqual(DecisionService.GetForcedVariation("group_experiment_1", "test_user_1", Config).Key, "group_exp_1_var_1");
         }
-        #endregion
+
+        #endregion // Forced variation Tests
     }
 }
