@@ -29,7 +29,7 @@ namespace OptimizelySDK.Config
     /// Instances of this class, must implement the <see cref="Poll()"/> method
     /// which is responsible for fetching a given ProjectConfig.
     /// </summary>
-    public abstract class PollingProjectConfigManager : ProjectConfigManager
+    public abstract class PollingProjectConfigManager : ProjectConfigManager, IDisposable
     {
         private TimeSpan PollingInterval;
         public bool IsStarted { get; private set; }
@@ -156,6 +156,11 @@ namespace OptimizelySDK.Config
             NotifyOnProjectConfigUpdate?.Invoke();
 
             return true;
+        }
+
+        public void Dispose()
+        {
+            SchedulerService.Dispose();
         }
 
         /// <summary>

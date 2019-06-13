@@ -27,7 +27,6 @@ namespace OptimizelySDK.Config
     {
         private string Url;
         private string LastModifiedSince = string.Empty;
-        public Action RemoteProjectConfig_Notification;
 
         private HttpProjectConfigManager(TimeSpan period, string url, TimeSpan blockingTimeout, bool startByDefault, ILogger logger, IErrorHandler errorHandler) 
             : base(period, blockingTimeout, startByDefault, logger, errorHandler)
@@ -253,9 +252,7 @@ namespace OptimizelySDK.Config
                 // Optionally block until config is available.
                 if (!defer)
                     configManager.GetConfig();
-
-
-
+                    
                 return configManager;
             }
         }
