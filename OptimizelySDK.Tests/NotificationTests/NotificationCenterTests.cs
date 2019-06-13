@@ -241,6 +241,7 @@ namespace OptimizelySDK.Tests.NotificationTests
         public virtual void TestDecisionCallback(string type, string userId, UserAttributes userAttributes,
             Dictionary<string, object> decisionInfo) {
         }
+        public virtual void TestConfigUpdateCallback() { }
     }
     #endregion // Test Notification callbacks class.
 }
