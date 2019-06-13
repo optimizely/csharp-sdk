@@ -648,6 +648,138 @@ namespace OptimizelySDK.Tests
         //      - valid and invalid user ID
         //      - valid and invalid experiment key
         //      - valid and invalid variation key, null variation key
+        [Test]
+        public void TestSetGetForcedVariation()
+        {
+            var userId = "test_user";
+            var invalidUserId = "invalid_user";
+            var experimentKey = "test_experiment";
+            var experimentKey2 = "group_experiment_1";
+            var invalidExperimentKey = "invalid_experiment";
+            var expectedVariationKey = "control";
+            var expectedVariationKey2 = "group_exp_1_var_1";
+            var invalidVariationKey = "invalid_variation";
+
+            var userAttributes = new UserAttributes
+            {
+                {"device_type", "iPhone" },
+                {"location", "San Francisco" }
+            };
+
+            var optlyObject = new Optimizely(TestData.Datafile, new ValidEventDispatcher(), LoggerMock.Object);
+            optlyObject.Activate("test_experiment", "test_user", userAttributes);
+
+            // invalid experiment key should return a null variation	
+            Assert.False(Config.SetForcedVariation(invalidExperimentKey, userId, expectedVariationKey));
+            Assert.Null(Config.GetForcedVariation(invalidExperimentKey, userId));
+
+            // setting a null variation should return a null variation	
+            Assert.True(Config.SetForcedVariation(experimentKey, userId, null));
+            Assert.Null(Config.GetForcedVariation(experimentKey, userId));
+
+            // setting an invalid variation should return a null variation	
+            Assert.False(Config.SetForcedVariation(experimentKey, userId, invalidVariationKey));
+            Assert.Null(Config.GetForcedVariation(experimentKey, userId));
+
+            // confirm the forced variation is returned after a set	
+            Assert.True(Config.SetForcedVariation(experimentKey, userId, expectedVariationKey));
+            var actualForcedVariation = Config.GetForcedVariation(experimentKey, userId);
+            Assert.AreEqual(expectedVariationKey, actualForcedVariation.Key);
+
+            // check multiple sets	
+            Assert.True(Config.SetForcedVariation(experimentKey2, userId, expectedVariationKey2));
+            var actualForcedVariation2 = Config.GetForcedVariation(experimentKey2, userId);
+            Assert.AreEqual(expectedVariationKey2, actualForcedVariation2.Key);
+            // make sure the second set does not overwrite the first set	
+            actualForcedVariation = Config.GetForcedVariation(experimentKey, userId);
+            Assert.AreEqual(expectedVariationKey, actualForcedVariation.Key);
+            // make sure unsetting the second experiment-to-variation mapping does not unset the	
+            // first experiment-to-variation mapping	
+            Assert.True(Config.SetForcedVariation(experimentKey2, userId, null));
+            actualForcedVariation = Config.GetForcedVariation(experimentKey, userId);
+            Assert.AreEqual(expectedVariationKey, actualForcedVariation.Key);
+
+            // an invalid user ID should return a null variation	
+            Assert.Null(Config.GetForcedVariation(experimentKey, invalidUserId));
+        }
+
+        // test that all the logs in setForcedVariation are getting called	
+        [Test]
+        public void TestSetForcedVariationLogs()
+        {
+            var userId = "test_user";
+            var experimentKey = "test_experiment";
+            var experimentId = "7716830082";
+            var invalidExperimentKey = "invalid_experiment";
+            var variationKey = "control";
+            var variationId = "7722370027";
+            var invalidVariationKey = "invalid_variation";
+
+            Config.SetForcedVariation(invalidExperimentKey, userId, variationKey);
+            Config.SetForcedVariation(experimentKey, userId, null);
+            Config.SetForcedVariation(experimentKey, userId, invalidVariationKey);
+            Config.SetForcedVariation(experimentKey, userId, variationKey);
+
+            LoggerMock.Verify(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()), Times.Exactly(4));
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, string.Format(@"Experiment key ""{0}"" is not in datafile.", invalidExperimentKey)));
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, string.Format(@"Variation mapped to experiment ""{0}"" has been removed for user ""{1}"".", experimentKey, userId)));
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, string.Format(@"No variation key ""{0}"" defined in datafile for experiment ""{1}"".", invalidVariationKey, experimentKey)));
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, string.Format(@"Set variation ""{0}"" for experiment ""{1}"" and user ""{2}"" in the forced variation map.", variationId, experimentId, userId)));
+        }
+
+        // test that all the logs in getForcedVariation are getting called	
+        [Test]
+        public void TestGetForcedVariationLogs()
+        {
+            var userId = "test_user";
+            var invalidUserId = "invalid_user";
+            var experimentKey = "test_experiment";
+            var experimentId = "7716830082";
+            var invalidExperimentKey = "invalid_experiment";
+            var pausedExperimentKey = "paused_experiment";
+            var variationKey = "control";
+            var variationId = "7722370027";
+
+            Config.SetForcedVariation(experimentKey, userId, variationKey);
+            Config.GetForcedVariation(experimentKey, invalidUserId);
+            Config.GetForcedVariation(invalidExperimentKey, userId);
+            Config.GetForcedVariation(pausedExperimentKey, userId);
+            Config.GetForcedVariation(experimentKey, userId);
+
+            LoggerMock.Verify(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()), Times.Exactly(5));
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, string.Format(@"Set variation ""{0}"" for experiment ""{1}"" and user ""{2}"" in the forced variation map.", variationId, experimentId, userId)));
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, string.Format(@"User ""{0}"" is not in the forced variation map.", invalidUserId)));
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, string.Format(@"Experiment key ""{0}"" is not in datafile.", invalidExperimentKey)));
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, string.Format(@"No experiment ""{0}"" mapped to user ""{1}"" in the forced variation map.", pausedExperimentKey, userId)));
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, string.Format(@"Variation ""{0}"" is mapped to experiment ""{1}"" and user ""{2}"" in the forced variation map", variationKey, experimentKey, userId)));
+        }
+
+        [Test]
+        public void TestSetForcedVariationMultipleSets()
+        {
+            Assert.True(Config.SetForcedVariation("test_experiment", "test_user_1", "variation"));
+            Assert.AreEqual(Config.GetForcedVariation("test_experiment", "test_user_1").Key, "variation");
+
+            // same user, same experiment, different variation	
+            Assert.True(Config.SetForcedVariation("test_experiment", "test_user_1", "control"));
+            Assert.AreEqual(Config.GetForcedVariation("test_experiment", "test_user_1").Key, "control");
+
+            // same user, different experiment	
+            Assert.True(Config.SetForcedVariation("group_experiment_1", "test_user_1", "group_exp_1_var_1"));
+            Assert.AreEqual(Config.GetForcedVariation("group_experiment_1", "test_user_1").Key, "group_exp_1_var_1");
+
+            // different user	
+            Assert.True(Config.SetForcedVariation("test_experiment", "test_user_2", "variation"));
+            Assert.AreEqual(Config.GetForcedVariation("test_experiment", "test_user_2").Key, "variation");
+
+            // different user, different experiment	
+            Assert.True(Config.SetForcedVariation("group_experiment_1", "test_user_2", "group_exp_1_var_1"));
+            Assert.AreEqual(Config.GetForcedVariation("group_experiment_1", "test_user_2").Key, "group_exp_1_var_1");
+
+            // make sure the first user forced variations are still valid	
+            Assert.AreEqual(Config.GetForcedVariation("test_experiment", "test_user_1").Key, "control");
+            Assert.AreEqual(Config.GetForcedVariation("group_experiment_1", "test_user_1").Key, "group_exp_1_var_1");
+        }
 
         [Test]
         public void TestVariationFeatureEnabledProperty()

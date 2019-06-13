@@ -39,15 +39,7 @@ namespace OptimizelySDK.Bucketing
         private IErrorHandler ErrorHandler;
         private UserProfileService UserProfileService;
         private ILogger Logger;
-
-        /// <summary>   
-        /// Associative array of user IDs to an associative array   
-        /// of experiments to variations.This contains all the forced variations    
-        /// set by the user by calling setForcedVariation (it is not the same as the    
-        /// whitelisting forcedVariations data structure in the Experiments class). 
-        /// </summary>
-        private Dictionary<string, Dictionary<string, string>> ForcedVariationMap;
-
+        
         /// <summary>
         ///  Initialize a decision service for the Optimizely client.
         /// </summary>
@@ -61,7 +53,6 @@ namespace OptimizelySDK.Bucketing
             ErrorHandler = errorHandler;
             UserProfileService = userProfileService;
             Logger = logger;
-            ForcedVariationMap = new Dictionary<string, Dictionary<string, string>>();
         }
 
         /// <summary>
@@ -76,7 +67,7 @@ namespace OptimizelySDK.Bucketing
             if (!ExperimentUtils.IsExperimentActive(experiment, Logger)) return null;
 
             // check if a forced variation is set
-            var forcedVariation = GetForcedVariation(experiment.Key, userId, config);
+            var forcedVariation = config.GetForcedVariation(experiment.Key, userId);
             if (forcedVariation != null)
                 return forcedVariation;
 
@@ -136,102 +127,6 @@ namespace OptimizelySDK.Bucketing
 
             return null;
         }
-
-        /// <summary>
-        /// Gets the forced variation for the given user and experiment.  
-        /// </summary>
-        /// <param name="experimentKey">The experiment key</param>
-        /// <param name="userId">The user ID</param>
-        /// <param name="config">Project Config</param>
-        /// <returns>Variation entity which the given user and experiment should be forced into.</returns>
-        public Variation GetForcedVariation(string experimentKey, string userId, ProjectConfig config)
-        {
-            if (ForcedVariationMap.ContainsKey(userId) == false) {
-                Logger.Log(LogLevel.DEBUG, string.Format(@"User ""{0}"" is not in the forced variation map.", userId));
-                return null;
-            }
-
-            Dictionary<string, string> experimentToVariationMap = ForcedVariationMap[userId];
-
-            string experimentId = config.GetExperimentFromKey(experimentKey).Id;
-
-            // this case is logged in getExperimentFromKey  
-            if (string.IsNullOrEmpty(experimentId))
-                return null;
-
-            if (experimentToVariationMap.ContainsKey(experimentId) == false) {
-                Logger.Log(LogLevel.DEBUG, string.Format(@"No experiment ""{0}"" mapped to user ""{1}"" in the forced variation map.", experimentKey, userId));
-                return null;
-            }
-
-            string variationId = experimentToVariationMap[experimentId];
-
-            if (string.IsNullOrEmpty(variationId)) {
-                Logger.Log(LogLevel.DEBUG, string.Format(@"No variation mapped to experiment ""{0}"" in the forced variation map.", experimentKey));
-                return null;
-            }
-
-            string variationKey = config.GetVariationFromId(experimentKey, variationId).Key;
-
-            // this case is logged in getVariationFromKey   
-            if (string.IsNullOrEmpty(variationKey))
-                return null;
-
-            Logger.Log(LogLevel.DEBUG, string.Format(@"Variation ""{0}"" is mapped to experiment ""{1}"" and user ""{2}"" in the forced variation map", variationKey, experimentKey, userId));
-
-            Variation variation = config.GetVariationFromKey(experimentKey, variationKey);
-
-            return variation;
-        }
-
-        /// <summary>
-        /// Sets an associative array of user IDs to an associative array of experiments to forced variations.
-        /// </summary>
-        /// <param name="experimentKey">The experiment key</param>
-        /// <param name="userId">The user ID</param>
-        /// <param name="variationKey">The variation key</param>
-        /// <param name="config">Project Config</param>
-        /// <returns>A boolean value that indicates if the set completed successfully.</returns>
-        public bool SetForcedVariation(string experimentKey, string userId, string variationKey, ProjectConfig config)
-        {
-            // Empty variation key is considered as invalid.    
-            if (variationKey != null && variationKey.Length == 0) {
-                Logger.Log(LogLevel.DEBUG, "Variation key is invalid.");
-                return false;
-            }
-
-            var experimentId = config.GetExperimentFromKey(experimentKey).Id;
-
-            // this case is logged in getExperimentFromKey  
-            if (string.IsNullOrEmpty(experimentId))
-                return false;
-
-            // clear the forced variation if the variation key is null  
-            if (variationKey == null) {
-                if (ForcedVariationMap.ContainsKey(userId) && ForcedVariationMap[userId].ContainsKey(experimentId))
-                    ForcedVariationMap[userId].Remove(experimentId);
-
-                Logger.Log(LogLevel.DEBUG, string.Format(@"Variation mapped to experiment ""{0}"" has been removed for user ""{1}"".", experimentKey, userId));
-                return true;
-            }
-
-            string variationId = config.GetVariationFromKey(experimentKey, variationKey).Id;
-
-            // this case is logged in getVariationFromKey   
-            if (string.IsNullOrEmpty(variationId))
-                return false;
-
-            // Add User if not exist.   
-            if (ForcedVariationMap.ContainsKey(userId) == false)
-                ForcedVariationMap[userId] = new Dictionary<string, string>();
-
-            // Add/Replace Experiment to Variation ID map.  
-            ForcedVariationMap[userId][experimentId] = variationId;
-
-            Logger.Log(LogLevel.DEBUG, string.Format(@"Set variation ""{0}"" for experiment ""{1}"" and user ""{2}"" in the forced variation map.", variationId, experimentId, userId));
-            return true;
-        }
-
 
         /// <summary>
         /// Get the variation the user has been whitelisted into.

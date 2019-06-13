@@ -375,7 +375,7 @@ namespace OptimizelySDK
                 { EXPERIMENT_KEY, experimentKey }
             };
 
-            return ValidateStringInputs(inputValues) && DecisionService.SetForcedVariation(experimentKey, userId, variationKey, config);
+            return ValidateStringInputs(inputValues) && config.SetForcedVariation(experimentKey, userId, variationKey);
         }
 
         /// <summary>
@@ -400,7 +400,7 @@ namespace OptimizelySDK
             if (!ValidateStringInputs(inputValues))
                 return null;
 
-            return DecisionService.GetForcedVariation(experimentKey, userId, config);
+            return config.GetForcedVariation(experimentKey, userId);
         }
 
         #region  FeatureFlag APIs
