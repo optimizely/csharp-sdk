@@ -27,7 +27,6 @@ namespace OptimizelySDK
             var errorHandler = new DefaultErrorHandler();
             var eventDispatcher = new DefaultEventDispatcher(logger);
             var builder = new HttpProjectConfigManager.Builder();
-            // don't block
             var configManager = builder
                 .WithSdkKey(sdkKey)
                 .WithDatafile(fallback)
