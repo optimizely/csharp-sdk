@@ -29,7 +29,7 @@ namespace OptimizelySDK.Config
     /// Instances of this class, must implement the <see cref="Poll()"/> method
     /// which is responsible for fetching a given ProjectConfig.
     /// </summary>
-    public abstract class PollingProjectConfigManager : ProjectConfigManager, IDisposable
+    public abstract class PollingProjectConfigManager : ProjectConfigManager
     {
         private TimeSpan PollingInterval;
         public bool IsStarted { get; private set; }
@@ -38,13 +38,12 @@ namespace OptimizelySDK.Config
 
         private ProjectConfig CurrentProjectConfig;
         private Timer SchedulerService;
-
         protected ILogger Logger { get; set; }
         protected IErrorHandler ErrorHandler { get; set; }
         protected TimeSpan BlockingTimeout;
         protected TaskCompletionSource<bool> CompletableConfigManager = new TaskCompletionSource<bool>();
         // Variables to control blocking/syncing.
-        public object mutex = new Object();
+        public int resourceInUse = 0;
 
         public event Action NotifyOnProjectConfigUpdate;
 
@@ -77,7 +76,7 @@ namespace OptimizelySDK.Config
                 return;
             }
 
-            Logger.Log(LogLevel.WARN, $"Starting Config scheduler with interval: {PollingInterval} milliseconds.");
+            Logger.Log(LogLevel.WARN, $"Starting Config scheduler with interval: {PollingInterval}.");
             SchedulerService.Change(TimeSpan.Zero, AutoUpdate ? PollingInterval : TimeSpan.FromMilliseconds(-1));
             IsStarted = true;
         }
@@ -134,7 +133,7 @@ namespace OptimizelySDK.Config
         public bool SetConfig(ProjectConfig projectConfig)
         {
             // trigger now, due because of delayed latency response
-            if(scheduleWhenFinished && IsStarted) {
+            if (scheduleWhenFinished && IsStarted) {
                 // Can't directly call Run, it will be part of previous thread then.
                 // Call immediately, because it's due now.
                 scheduleWhenFinished = false;
@@ -152,7 +151,6 @@ namespace OptimizelySDK.Config
 
             // SetResult raise exception if called again, that's why Try is used.
             CompletableConfigManager.TrySetResult(true);
-
             NotifyOnProjectConfigUpdate?.Invoke();
 
             return true;
@@ -169,7 +167,7 @@ namespace OptimizelySDK.Config
         /// </summary>
         public virtual void Run()
         {
-            if (Monitor.TryEnter(mutex)){
+            if (Interlocked.Exchange(ref resourceInUse, 1) == 0){
                 try {
                     var config = Poll();
 
@@ -180,7 +178,7 @@ namespace OptimizelySDK.Config
                 } catch (Exception exception) {
                     Logger.Log(LogLevel.ERROR, "Unable to get project config. Error: " + exception.Message);
                 } finally {
-                    Monitor.Exit(mutex);
+                    Interlocked.Exchange(ref resourceInUse, 0);
                 }
             }
             else {

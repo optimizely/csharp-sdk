@@ -74,7 +74,7 @@ namespace OptimizelySDK.Notifications
         /// <summary>
         /// Delegate for project config update.
         /// </summary>
-        public delegate void OptimizelyConfigUpdate();
+        public delegate void OptimizelyConfigUpdateCallback();
 
         private ILogger Logger;
 
@@ -158,7 +158,7 @@ namespace OptimizelySDK.Notifications
             return AddNotification(notificationType, (object)decisionCallback);
         }
 
-        public int AddNotification(NotificationType notificationType, OptimizelyConfigUpdate optimizelyConfigUpdate)
+        public int AddNotification(NotificationType notificationType, OptimizelyConfigUpdateCallback optimizelyConfigUpdate)
         {
             if (!IsNotificationTypeValid(notificationType, NotificationType.OptimizelyConfigUpdate))
                 return 0;

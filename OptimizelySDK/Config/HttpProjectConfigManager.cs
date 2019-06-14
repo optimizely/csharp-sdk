@@ -28,8 +28,8 @@ namespace OptimizelySDK.Config
         private string Url;
         private string LastModifiedSince = string.Empty;
 
-        private HttpProjectConfigManager(TimeSpan period, string url, TimeSpan blockingTimeout, bool startByDefault, ILogger logger, IErrorHandler errorHandler) 
-            : base(period, blockingTimeout, startByDefault, logger, errorHandler)
+        private HttpProjectConfigManager(TimeSpan period, string url, TimeSpan blockingTimeout, bool autoUpdate, ILogger logger, IErrorHandler errorHandler) 
+            : base(period, blockingTimeout, autoUpdate, logger, errorHandler)
         {
             Url = url;
         }
@@ -46,7 +46,6 @@ namespace OptimizelySDK.Config
         }
         private string GetRemoteDatafileResponse()
         {
-
             var request = new System.Net.Http.HttpRequestMessage {
                 RequestUri = new Uri(Url),
                 Method = System.Net.Http.HttpMethod.Get,
@@ -231,7 +230,7 @@ namespace OptimizelySDK.Config
                 }
                     
 
-                configManager = new HttpProjectConfigManager(Period, Url, BlockingTimeoutSpan, StartByDefault, Logger, ErrorHandler);
+                configManager = new HttpProjectConfigManager(Period, Url, BlockingTimeoutSpan, AutoUpdate, Logger, ErrorHandler);
 
                 if (Datafile != null)
                 {
