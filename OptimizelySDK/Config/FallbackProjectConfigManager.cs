@@ -18,7 +18,7 @@ namespace OptimizelySDK.Config
 {
     /// <summary>
     /// Implementation of ProjectConfigManager interface that simply
-    /// returns the stored ProjectConfig instance.
+    /// returns the stored ProjectConfig instance which is mutable and cannot be changed.
     /// </summary>
     public class FallbackProjectConfigManager : ProjectConfigManager
     {
