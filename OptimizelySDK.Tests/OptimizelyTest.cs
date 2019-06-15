@@ -182,6 +182,34 @@ namespace OptimizelySDK.Tests
 
         #region Test Validate
         [Test]
+        public void TestInvalidInstanceLogMessages()
+        {
+            string datafile = "{\"name\":\"optimizely\"}";
+            var optimizely = new Optimizely(datafile, null, LoggerMock.Object);
+
+            Assert.IsNull(optimizely.GetVariation(string.Empty, string.Empty));
+            Assert.IsNull(optimizely.Activate(string.Empty, string.Empty));
+            optimizely.Track(string.Empty, string.Empty);
+            Assert.IsFalse(optimizely.IsFeatureEnabled(string.Empty, string.Empty));
+            Assert.AreEqual(optimizely.GetEnabledFeatures(string.Empty).Count, 0);
+            Assert.IsNull(optimizely.GetFeatureVariableBoolean(string.Empty, string.Empty, string.Empty));
+            Assert.IsNull(optimizely.GetFeatureVariableString(string.Empty, string.Empty, string.Empty));
+            Assert.IsNull(optimizely.GetFeatureVariableDouble(string.Empty, string.Empty, string.Empty));
+            Assert.IsNull(optimizely.GetFeatureVariableInteger(string.Empty, string.Empty, string.Empty));
+
+            LoggerMock.Verify(log => log.Log(LogLevel.ERROR, "Provided 'datafile' has invalid schema."), Times.Once);
+            LoggerMock.Verify(log => log.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'GetVariation'."), Times.Once);
+            LoggerMock.Verify(log => log.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'Activate'."), Times.Once);
+            LoggerMock.Verify(log => log.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'Track'."), Times.Once);
+            LoggerMock.Verify(log => log.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'IsFeatureEnabled'."), Times.Once);
+            LoggerMock.Verify(log => log.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'GetEnabledFeatures'."), Times.Once);
+            LoggerMock.Verify(log => log.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'GetFeatureVariableBoolean'."), Times.Once);
+            LoggerMock.Verify(log => log.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'GetFeatureVariableString'."), Times.Once);
+            LoggerMock.Verify(log => log.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'GetFeatureVariableDouble'."), Times.Once);
+            LoggerMock.Verify(log => log.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'GetFeatureVariableInteger'."), Times.Once);
+
+        }
+        [Test]
         public void TestValidateInputsInvalidFileJsonValidationNotSkipped()
         {
             string datafile = "{\"name\":\"optimizely\"}";
@@ -503,7 +531,7 @@ namespace OptimizelySDK.Tests
             var optly = new Optimizely("Random datafile", null, LoggerMock.Object);
             var variationkey = optly.Activate("some_experiment", "some_user");
             LoggerMock.Verify(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()), Times.Exactly(2));
-            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'activate'."), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'Activate'."), Times.Once);
             //Assert.IsNull(variationkey);
         }
 
@@ -562,7 +590,7 @@ namespace OptimizelySDK.Tests
             var optly = new Optimizely("Random datafile", null, LoggerMock.Object);
             optly.Track("some_event", "some_user");
             LoggerMock.Verify(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()), Times.Exactly(2));
-            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'track'."), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'Track'."), Times.Once);
         }
         #endregion
 

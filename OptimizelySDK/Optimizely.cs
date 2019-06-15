@@ -193,7 +193,7 @@ namespace OptimizelySDK
             var config = ProjectConfigManager?.GetConfig();
             if (!IsValid && config == null)
             {
-                Logger.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'activate'.");
+                Logger.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'Activate'.");
                 return null;
             }
 
@@ -251,7 +251,7 @@ namespace OptimizelySDK
             var config = ProjectConfigManager?.GetConfig();
             if (!IsValid && config == null) 
             {
-                Logger.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'track'.");
+                Logger.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'Track'.");
                 return;
             }
 
@@ -488,12 +488,13 @@ namespace OptimizelySDK
         /// <param name="variableType">Variable type</param>
         /// <returns>string | null Feature variable value</returns>
         public virtual T GetFeatureVariableValueForType<T>(string featureKey, string variableKey, string userId, 
-            UserAttributes userAttributes, FeatureVariable.VariableType variableType)
+                                                                     UserAttributes userAttributes, FeatureVariable.VariableType variableType)
         {
 
             var config = ProjectConfigManager?.GetConfig();
             if (!IsValid && config == null) {
-                Logger.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'activate'.");
+
+                Logger.Log(LogLevel.ERROR, $@"Datafile has invalid format. Failing '{FeatureVariable.GetFeatureVariableTypeName(variableType)}'.");
                 return default(T);
             }
 
@@ -594,11 +595,6 @@ namespace OptimizelySDK
         {
             var config = ProjectConfigManager?.GetConfig();
 
-            if (!IsValid && config == null) {
-                Logger.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'GetFeatureVariableBoolean'.");
-                return null;
-            }
-
             return GetFeatureVariableValueForType<bool?>(featureKey, variableKey, userId, userAttributes, FeatureVariable.VariableType.BOOLEAN);
         }
 
@@ -612,12 +608,6 @@ namespace OptimizelySDK
         /// <returns>double | Feature variable value or null</returns>
         public double? GetFeatureVariableDouble(string featureKey, string variableKey, string userId, UserAttributes userAttributes = null)
         {
-            var config = ProjectConfigManager?.GetConfig();
-            if (!IsValid && config == null) {
-                Logger.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'activate'.");
-                return null;
-            }
-
             return GetFeatureVariableValueForType<double?>(featureKey, variableKey, userId, userAttributes, FeatureVariable.VariableType.DOUBLE);
         }
 
@@ -631,12 +621,6 @@ namespace OptimizelySDK
         /// <returns>int | Feature variable value or null</returns>
         public int? GetFeatureVariableInteger(string featureKey, string variableKey, string userId, UserAttributes userAttributes = null)
         {
-            var config = ProjectConfigManager?.GetConfig();
-            if (!IsValid && config == null) {
-                Logger.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'activate'.");
-                return null;
-            }
-
             return GetFeatureVariableValueForType<int?>(featureKey, variableKey, userId, userAttributes, FeatureVariable.VariableType.INTEGER);
         }
 
@@ -650,12 +634,6 @@ namespace OptimizelySDK
         /// <returns>string | Feature variable value or null</returns>
         public string GetFeatureVariableString(string featureKey, string variableKey, string userId, UserAttributes userAttributes = null)
         {
-            var config = ProjectConfigManager?.GetConfig();
-            if (!IsValid && config == null) {
-                Logger.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'activate'.");
-                return null;
-            }
-
             return GetFeatureVariableValueForType<string>(featureKey, variableKey, userId, userAttributes, FeatureVariable.VariableType.STRING);
         }
 
