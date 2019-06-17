@@ -148,8 +148,7 @@ namespace OptimizelySDK.Tests
                 {userId, invalidVariationKey }
             };
 
-            var experiment = new Experiment
-            {
+            var experiment = new Experiment {
                 Id = "1234",
                 Key = "exp_key",
                 Status = "Running",
@@ -481,8 +480,7 @@ namespace OptimizelySDK.Tests
         public void TestGetVariationForFeatureExperimentGivenExperimentNotInDataFile()
         {
             var booleanFeature = ProjectConfig.GetFeatureFlagFromKey("boolean_feature");
-            var featureFlag = new FeatureFlag
-            {
+            var featureFlag = new FeatureFlag {
                 Id = booleanFeature.Id,
                 Key = booleanFeature.Key,
                 RolloutId = booleanFeature.RolloutId,
