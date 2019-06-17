@@ -234,6 +234,9 @@
 	<Compile Include="..\OptimizelySDK\Config\FallbackProjectConfigManager.cs">
 	  <Link>Config\FallbackProjectConfigManager.cs</Link>
 	</Compile>
+	<Compile Include="..\OptimizelySDK\OptimizelyFactory.cs">
+	  <Link>OptimizelyFactory.cs</Link>
+	</Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\OptimizelySDK\Utils\schema.json">

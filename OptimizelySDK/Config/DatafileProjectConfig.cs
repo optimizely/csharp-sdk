@@ -24,8 +24,14 @@ using Attribute = OptimizelySDK.Entity.Attribute;
 
 namespace OptimizelySDK.Config
 {
+    /// <summary>
+    /// Implementation of ProjectConfig interface backed by a JSON data file.
+    /// </summary>
     public class DatafileProjectConfig : ProjectConfig
     {
+        /// <summary>
+        /// Datafile versions.
+        /// </summary>
         public enum OPTLYSDKVersion
         {
             V2 = 2,
@@ -33,6 +39,9 @@ namespace OptimizelySDK.Config
             V4 = 4
         }
 
+        /// <summary>
+        /// Prefix used for reserved attributes.
+        /// </summary>
         public const string RESERVED_ATTRIBUTE_PREFIX = "$opt_";
 
         /// <summary>
@@ -68,7 +77,9 @@ namespace OptimizelySDK.Config
         /// </summary>
         public bool? BotFiltering { get; set; }
 
-
+        /// <summary>
+        /// Supported datafile versions list.
+        /// </summary>
         private static List<OPTLYSDKVersion> SupportedVersions = new List<OPTLYSDKVersion> {
             OPTLYSDKVersion.V2,
             OPTLYSDKVersion.V3,
@@ -128,12 +139,12 @@ namespace OptimizelySDK.Config
         private Dictionary<string, Audience> _AudienceIdMap;
         public Dictionary<string, Audience> AudienceIdMap { get { return _AudienceIdMap; } }
 
-        /// <summary>
-        /// Associative array of user IDs to an associative array
-        /// of experiments to variations.This contains all the forced variations
-        /// set by the user by calling setForcedVariation (it is not the same as the
-        /// whitelisting forcedVariations data structure in the Experiments class).
-        /// </summary>
+        /// <summary>	
+        /// Associative array of user IDs to an associative array	
+        /// of experiments to variations.This contains all the forced variations	
+        /// set by the user by calling setForcedVariation (it is not the same as the	
+        /// whitelisting forcedVariations data structure in the Experiments class).	
+        /// </summary>	
         private Dictionary<string, Dictionary<string, string>> _ForcedVariationMap;
         public Dictionary<string, Dictionary<string, string>> ForcedVariationMap { get { return _ForcedVariationMap; } }
 
@@ -307,6 +318,13 @@ namespace OptimizelySDK.Config
             }
         }
 
+        /// <summary>
+        /// Parse datafile string to create ProjectConfig instance.
+        /// </summary>
+        /// <param name="content">datafile</param>
+        /// <param name="logger">Logger instance</param>
+        /// <param name="errorHandler">ErrorHandler instance</param>
+        /// <returns>ProjectConfig instance created from datafile string</returns>
         public static ProjectConfig Create(string content, ILogger logger, IErrorHandler errorHandler)
         {
             DatafileProjectConfig config = GetConfig(content);
@@ -473,102 +491,102 @@ namespace OptimizelySDK.Config
             return new Variation();
         }
 
-        /// <summary>
-        /// Gets the forced variation for the given user and experiment.  
-        /// </summary>
-        /// <param name="experimentKey">The experiment key</param>
-        /// <param name="userId">The user ID</param>
-        /// <returns>Variation entity which the given user and experiment should be forced into.</returns>
-        public Variation GetForcedVariation(string experimentKey, string userId)
-        {
-            if (_ForcedVariationMap.ContainsKey(userId) == false)
-            {
-                Logger.Log(LogLevel.DEBUG, string.Format(@"User ""{0}"" is not in the forced variation map.", userId));
-                return null;
-            }
+        /// <summary>	
+        /// Gets the forced variation for the given user and experiment.  	
+        /// </summary>	
+        /// <param name="experimentKey">The experiment key</param>	
+        /// <param name="userId">The user ID</param>	
+        /// <returns>Variation entity which the given user and experiment should be forced into.</returns>	
+        public Variation GetForcedVariation(string experimentKey, string userId)	
+        {	
+            if (_ForcedVariationMap.ContainsKey(userId) == false)	
+            {	
+                Logger.Log(LogLevel.DEBUG, string.Format(@"User ""{0}"" is not in the forced variation map.", userId));	
+                return null;	
+            }	
 
-            Dictionary<string, string> experimentToVariationMap = _ForcedVariationMap[userId];
+             Dictionary<string, string> experimentToVariationMap = _ForcedVariationMap[userId];	
 
-            string experimentId = GetExperimentFromKey(experimentKey).Id;
+             string experimentId = GetExperimentFromKey(experimentKey).Id;	
 
-            // this case is logged in getExperimentFromKey
-            if (string.IsNullOrEmpty(experimentId))
-                return null;
-            
-            if (experimentToVariationMap.ContainsKey(experimentId) == false)
-            {
-                Logger.Log(LogLevel.DEBUG, string.Format(@"No experiment ""{0}"" mapped to user ""{1}"" in the forced variation map.", experimentKey, userId));
-                return null;
-            }
-            
-            string variationId = experimentToVariationMap[experimentId];
+             // this case is logged in getExperimentFromKey	
+            if (string.IsNullOrEmpty(experimentId))	
+                return null;	
 
-            if (string.IsNullOrEmpty(variationId))
-            {
-                Logger.Log(LogLevel.DEBUG, string.Format(@"No variation mapped to experiment ""{0}"" in the forced variation map.", experimentKey));
-                return null;
-            }
-            
-            string variationKey = GetVariationFromId(experimentKey, variationId).Key;
+             if (experimentToVariationMap.ContainsKey(experimentId) == false)	
+            {	
+                Logger.Log(LogLevel.DEBUG, string.Format(@"No experiment ""{0}"" mapped to user ""{1}"" in the forced variation map.", experimentKey, userId));	
+                return null;	
+            }	
 
-            // this case is logged in getVariationFromKey
-            if (string.IsNullOrEmpty(variationKey))
-                return null;
+             string variationId = experimentToVariationMap[experimentId];	
 
-            Logger.Log(LogLevel.DEBUG, string.Format(@"Variation ""{0}"" is mapped to experiment ""{1}"" and user ""{2}"" in the forced variation map", variationKey, experimentKey, userId));
-            
-            Variation variation = GetVariationFromKey(experimentKey, variationKey);
+             if (string.IsNullOrEmpty(variationId))	
+            {	
+                Logger.Log(LogLevel.DEBUG, string.Format(@"No variation mapped to experiment ""{0}"" in the forced variation map.", experimentKey));	
+                return null;	
+            }	
 
-            return variation;
-        }
+             string variationKey = GetVariationFromId(experimentKey, variationId).Key;	
 
-        /// <summary>
-        /// Sets an associative array of user IDs to an associative array of experiments to forced variations.
-        /// </summary>
-        /// <param name="experimentKey">The experiment key</param>
-        /// <param name="userId">The user ID</param>
-        /// <param name="variationKey">The variation key</param>
-        /// <returns>A boolean value that indicates if the set completed successfully.</returns>
-        public bool SetForcedVariation(string experimentKey, string userId, string variationKey)
-        {
-            // Empty variation key is considered as invalid.
-            if (variationKey != null && variationKey.Length == 0)
-            {
-                Logger.Log(LogLevel.DEBUG, "Variation key is invalid.");
-                return false;
-            }
+             // this case is logged in getVariationFromKey	
+            if (string.IsNullOrEmpty(variationKey))	
+                return null;	
 
-            var experimentId = GetExperimentFromKey(experimentKey).Id;
+             Logger.Log(LogLevel.DEBUG, string.Format(@"Variation ""{0}"" is mapped to experiment ""{1}"" and user ""{2}"" in the forced variation map", variationKey, experimentKey, userId));	
 
-            // this case is logged in getExperimentFromKey
-            if (string.IsNullOrEmpty(experimentId))
-                return false;
+             Variation variation = GetVariationFromKey(experimentKey, variationKey);	
 
-            // clear the forced variation if the variation key is null
-            if (variationKey == null)
-            {
-                if (_ForcedVariationMap.ContainsKey(userId) && _ForcedVariationMap[userId].ContainsKey(experimentId))
-                    _ForcedVariationMap[userId].Remove(experimentId);
+             return variation;	
+        }	
 
-                Logger.Log(LogLevel.DEBUG, string.Format(@"Variation mapped to experiment ""{0}"" has been removed for user ""{1}"".", experimentKey, userId));
-                return true;
-            }
-            
-            string variationId = GetVariationFromKey(experimentKey, variationKey).Id;
+         /// <summary>	
+        /// Sets an associative array of user IDs to an associative array of experiments to forced variations.	
+        /// </summary>	
+        /// <param name="experimentKey">The experiment key</param>	
+        /// <param name="userId">The user ID</param>	
+        /// <param name="variationKey">The variation key</param>	
+        /// <returns>A boolean value that indicates if the set completed successfully.</returns>	
+        public bool SetForcedVariation(string experimentKey, string userId, string variationKey)	
+        {	
+            // Empty variation key is considered as invalid.	
+            if (variationKey != null && variationKey.Length == 0)	
+            {	
+                Logger.Log(LogLevel.DEBUG, "Variation key is invalid.");	
+                return false;	
+            }	
 
-            // this case is logged in getVariationFromKey
-            if (string.IsNullOrEmpty(variationId))
-                return false;
+             var experimentId = GetExperimentFromKey(experimentKey).Id;	
 
-            // Add User if not exist.
-            if (_ForcedVariationMap.ContainsKey(userId) == false)
-                _ForcedVariationMap[userId] = new Dictionary<string, string>();
+             // this case is logged in getExperimentFromKey	
+            if (string.IsNullOrEmpty(experimentId))	
+                return false;	
 
-            // Add/Replace Experiment to Variation ID map.
-            _ForcedVariationMap[userId][experimentId] = variationId;
+             // clear the forced variation if the variation key is null	
+            if (variationKey == null)	
+            {	
+                if (_ForcedVariationMap.ContainsKey(userId) && _ForcedVariationMap[userId].ContainsKey(experimentId))	
+                    _ForcedVariationMap[userId].Remove(experimentId);	
 
-            Logger.Log(LogLevel.DEBUG, string.Format(@"Set variation ""{0}"" for experiment ""{1}"" and user ""{2}"" in the forced variation map.", variationId, experimentId, userId));
-            return true;
+                 Logger.Log(LogLevel.DEBUG, string.Format(@"Variation mapped to experiment ""{0}"" has been removed for user ""{1}"".", experimentKey, userId));	
+                return true;	
+            }	
+
+             string variationId = GetVariationFromKey(experimentKey, variationKey).Id;	
+
+             // this case is logged in getVariationFromKey	
+            if (string.IsNullOrEmpty(variationId))	
+                return false;	
+
+             // Add User if not exist.	
+            if (_ForcedVariationMap.ContainsKey(userId) == false)	
+                _ForcedVariationMap[userId] = new Dictionary<string, string>();	
+
+             // Add/Replace Experiment to Variation ID map.	
+            _ForcedVariationMap[userId][experimentId] = variationId;	
+
+             Logger.Log(LogLevel.DEBUG, string.Format(@"Set variation ""{0}"" for experiment ""{1}"" and user ""{2}"" in the forced variation map.", variationId, experimentId, userId));	
+            return true;	
         }
 
         /// <summary>

@@ -16,8 +16,16 @@
 
 namespace OptimizelySDK.Config
 {
+    /// <summary>
+    /// Interface for fetching ProjectConfig instance.
+    /// </summary>
     public interface ProjectConfigManager
     {
+
+        /// <summary>
+        /// Implementations of this method should block until a datafile is available.
+        /// </summary>
+        /// <returns>ProjectConfig instance</returns>
         ProjectConfig GetConfig();
     }
 }

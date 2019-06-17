@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2017, Optimizely
+ * Copyright 2017, 2019, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,26 @@ namespace OptimizelySDK.Entity
         public string DefaultValue { get; set; }
         public VariableType Type { get; set; }
         public VariableStatus Status { get; set; }
-        
+
+        /// <summary>
+        /// Returns the feature variable api name based on VariableType.
+        /// </summary>
+        /// <returns>The feature variable type name.</returns>
+        /// <param name="variableType">Variable type.</param>
+        public static string GetFeatureVariableTypeName(VariableType variableType)
+        {
+            switch (variableType) {
+                case FeatureVariable.VariableType.BOOLEAN:
+                    return "GetFeatureVariableBoolean";
+                case FeatureVariable.VariableType.DOUBLE:
+                    return "GetFeatureVariableDouble";
+                case FeatureVariable.VariableType.INTEGER:
+                    return "GetFeatureVariableInteger";
+                case FeatureVariable.VariableType.STRING:
+                    return "GetFeatureVariableString";
+                default:
+                    return null;
+            }
+        }
     }
 }
