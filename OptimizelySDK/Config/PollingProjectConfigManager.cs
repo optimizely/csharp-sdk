@@ -176,7 +176,7 @@ namespace OptimizelySDK.Config
                         SetConfig(config);
 
                 } catch (Exception exception) {
-                    Logger.Log(LogLevel.ERROR, "Unable to get project config. Error: " + exception.Message);
+                    Logger.Log(LogLevel.ERROR, "Unable to get project config. Error: " + exception.GetAllMessages());
                 } finally {
                     Interlocked.Exchange(ref resourceInUse, 0);
                 }
