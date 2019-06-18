@@ -59,8 +59,10 @@ namespace OptimizelySDK
             }
         }
 
-        public static String SDK_VERSION {
-            get {
+        public static String SDK_VERSION
+        {
+            get
+            {
                 // Example output: "2.1.0" .  Should be kept in synch with NuGet package version.
 #if NET35
                 Assembly assembly = Assembly.GetExecutingAssembly();
@@ -75,8 +77,10 @@ namespace OptimizelySDK
             }
         }
 
-        public static String SDK_TYPE {
-            get {
+        public static String SDK_TYPE
+        {
+            get
+            {
                 return "csharp-sdk";
             }
         }
@@ -139,6 +143,7 @@ namespace OptimizelySDK
                          UserProfileService userProfileService = null)
         {
             ProjectConfigManager = configManager;
+
             InitializeComponents(eventDispatcher, logger, errorHandler, userProfileService);
         }
 
@@ -254,6 +259,7 @@ namespace OptimizelySDK
         public void Track(string eventKey, string userId, UserAttributes userAttributes = null, EventTags eventTags = null)
         {
             var config = ProjectConfigManager?.GetConfig();
+
             if (config == null)
             {
                 Logger.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'Track'.");
@@ -271,7 +277,7 @@ namespace OptimizelySDK
 
             var eevent = config.GetEvent(eventKey);
 
-            if (eevent.Key == null) 
+            if (eevent.Key == null)
             {
                 Logger.Log(LogLevel.INFO, string.Format("Not tracking user {0} for event {1}.", userId, eventKey));
                 return;
@@ -289,11 +295,11 @@ namespace OptimizelySDK
             Logger.Log(LogLevel.DEBUG, string.Format("Dispatching conversion event to URL {0} with params {1}.",
                 conversionEvent.Url, conversionEvent.GetParamsAsJson()));
 
-            try 
+            try
             {
                 EventDispatcher.DispatchEvent(conversionEvent);
-            } 
-            catch (Exception exception) 
+            }
+            catch (Exception exception)
             {
                 Logger.Log(LogLevel.ERROR, string.Format("Unable to dispatch conversion event. Error {0}", exception.Message));
             }
@@ -369,6 +375,7 @@ namespace OptimizelySDK
         public bool SetForcedVariation(string experimentKey, string userId, string variationKey)
         {
             var config = ProjectConfigManager?.GetConfig();
+
             if (config == null)
             {
                 return false;
@@ -379,8 +386,8 @@ namespace OptimizelySDK
                 { USER_ID, userId },
                 { EXPERIMENT_KEY, experimentKey }
             };
-
-            return ValidateStringInputs(inputValues) && config.SetForcedVariation(experimentKey, userId, variationKey);
+            
+            return ValidateStringInputs(inputValues) && DecisionService.SetForcedVariation(experimentKey, userId, variationKey, config);
         }
 
         /// <summary>
@@ -392,6 +399,7 @@ namespace OptimizelySDK
         public Variation GetForcedVariation(string experimentKey, string userId)
         {
             var config = ProjectConfigManager?.GetConfig();
+
             if (config == null) {
                 return null;
             }
@@ -404,8 +412,8 @@ namespace OptimizelySDK
 
             if (!ValidateStringInputs(inputValues))
                 return null;
-
-            return config.GetForcedVariation(experimentKey, userId);
+                
+            return DecisionService.GetForcedVariation(experimentKey, userId, config);
         }
 
         #region  FeatureFlag APIs
@@ -421,6 +429,7 @@ namespace OptimizelySDK
         public virtual bool IsFeatureEnabled(string featureKey, string userId, UserAttributes userAttributes = null)
         {
             var config = ProjectConfigManager?.GetConfig();
+
             if (config == null) {
 
                 Logger.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'IsFeatureEnabled'.");
@@ -502,7 +511,7 @@ namespace OptimizelySDK
                 Logger.Log(LogLevel.ERROR, $@"Datafile has invalid format. Failing '{FeatureVariable.GetFeatureVariableTypeName(variableType)}'.");
                 return default(T);
             }
-
+            
             var inputValues = new Dictionary<string, string>
             {
                 { USER_ID, userId },
@@ -613,6 +622,7 @@ namespace OptimizelySDK
         /// <returns>double | Feature variable value or null</returns>
         public double? GetFeatureVariableDouble(string featureKey, string variableKey, string userId, UserAttributes userAttributes = null)
         {
+
             return GetFeatureVariableValueForType<double?>(featureKey, variableKey, userId, userAttributes, FeatureVariable.VariableType.DOUBLE);
         }
 
@@ -639,6 +649,13 @@ namespace OptimizelySDK
         /// <returns>string | Feature variable value or null</returns>
         public string GetFeatureVariableString(string featureKey, string variableKey, string userId, UserAttributes userAttributes = null)
         {
+            var config = ProjectConfigManager?.GetConfig();
+            if (!IsValid && config == null)
+            {
+                Logger.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'GetFeatureVariableString'.");
+                return null;
+            }
+
             return GetFeatureVariableValueForType<string>(featureKey, variableKey, userId, userAttributes, FeatureVariable.VariableType.STRING);
         }
 
@@ -688,6 +705,7 @@ namespace OptimizelySDK
             List<string> enabledFeaturesList = new List<string>();
 
             var config = ProjectConfigManager?.GetConfig();
+
             if (config == null)
             {
                 Logger.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'GetEnabledFeatures'.");
@@ -730,7 +748,7 @@ namespace OptimizelySDK
                 inputs.Remove(USER_ID);
             }
 
-            foreach(var input in inputs)
+            foreach (var input in inputs)
             {
                 if (string.IsNullOrEmpty(input.Value))
                 {
@@ -741,7 +759,7 @@ namespace OptimizelySDK
 
             return isValid;
         }
-        
+
         private object GetTypeCastedVariableValue(string value, FeatureVariable.VariableType type)
         {
             object result = null;
