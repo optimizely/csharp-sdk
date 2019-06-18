@@ -20,7 +20,7 @@ namespace OptimizelySDK.Config
 {
     /// <summary>
     /// Implementation of ProjectConfigManager interface that simply
-    /// returns the stored ProjectConfig instance.
+    /// returns the stored ProjectConfig instance which is immmutable.
     /// </summary>
     public class FallbackProjectConfigManager : ProjectConfigManager
     {
@@ -31,7 +31,7 @@ namespace OptimizelySDK.Config
         /// Initializes a new instance of the FallbackProjectConfigManager class
         /// with the given ProjectConfig instance.
         /// </summary>
-        /// <param name="config">Config.</param>
+        /// <param name="config">Instance of ProjectConfig.</param>
         public FallbackProjectConfigManager(ProjectConfig config)
         {
             ProjectConfig = config;

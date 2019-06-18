@@ -102,14 +102,14 @@ namespace OptimizelySDK.Config
         /// <summary>
         /// Associative array of experiment ID to Experiment(s) in the datafile
         /// </summary>
-        private Dictionary<string, Experiment> _ExperimentIdMap 
+        private Dictionary<string, Experiment> _ExperimentIdMap
             = new Dictionary<string, Experiment>();
         public Dictionary<string, Experiment> ExperimentIdMap { get { return _ExperimentIdMap; } }
 
         /// <summary>
         /// Associative array of experiment key to associative array of variation key to variations
         /// </summary>
-        private Dictionary<string, Dictionary<string, Variation>> _VariationKeyMap 
+        private Dictionary<string, Dictionary<string, Variation>> _VariationKeyMap
             = new Dictionary<string, Dictionary<string, Variation>>();
         public Dictionary<string, Dictionary<string, Variation>> VariationKeyMap { get { return _VariationKeyMap; } }
 
@@ -117,7 +117,7 @@ namespace OptimizelySDK.Config
         /// <summary>
         /// Associative array of experiment key to associative array of variation ID to variations
         /// </summary>
-        private Dictionary<string, Dictionary<string, Variation>> _VariationIdMap 
+        private Dictionary<string, Dictionary<string, Variation>> _VariationIdMap
             = new Dictionary<string, Dictionary<string, Variation>>();
         public Dictionary<string, Dictionary<string, Variation>> VariationIdMap { get { return _VariationIdMap; } }
 
@@ -194,7 +194,7 @@ namespace OptimizelySDK.Config
         /// Associative list of Attributes.
         /// </summary>
         public Attribute[] Attributes { get; set; }
-    
+
         /// <summary>
         /// Associative list of Audiences.
         /// </summary>
@@ -254,7 +254,7 @@ namespace OptimizelySDK.Config
                     experiment.GroupId = group.Id;
                     experiment.GroupPolicy = group.Policy;
                 }
-                
+
                 // RJE: I believe that this is equivalent to this:
                 // $this->_experimentKeyMap = array_merge($this->_experimentKeyMap, $experimentsInGroup);
                 foreach (string key in experimentsInGroup.Keys)
@@ -284,7 +284,7 @@ namespace OptimizelySDK.Config
                 {
                     _VariationKeyMap[rolloutRule.Key] = new Dictionary<string, Variation>();
                     _VariationIdMap[rolloutRule.Key] = new Dictionary<string, Variation>();
-                    
+
                     if (rolloutRule.Variations != null)
                     {
                         foreach (var variation in rolloutRule.Variations)
@@ -455,7 +455,7 @@ namespace OptimizelySDK.Config
                 _VariationKeyMap[experimentKey].ContainsKey(variationKey))
                 return _VariationKeyMap[experimentKey][variationKey];
 
-            string message = string.Format(@"No variation key ""{0}"" defined in datafile for experiment ""{1}"".", 
+            string message = string.Format(@"No variation key ""{0}"" defined in datafile for experiment ""{1}"".",
                 variationKey, experimentKey);
             Logger.Log(LogLevel.ERROR, message);
             ErrorHandler.HandleError(new Exceptions.InvalidVariationException("Provided variation is not in datafile."));
@@ -521,7 +521,7 @@ namespace OptimizelySDK.Config
         /// <returns>Attribute ID corresponding to the provided attribute key. Attribute key if it is a reserved attribute</returns>
         public string GetAttributeId(string attributeKey)
         {
-            
+
             var hasReservedPrefix = attributeKey.StartsWith(RESERVED_ATTRIBUTE_PREFIX);
 
             if (_AttributeKeyMap.ContainsKey(attributeKey))

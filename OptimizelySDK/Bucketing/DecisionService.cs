@@ -82,7 +82,7 @@ namespace OptimizelySDK.Bucketing
 
             var variation = GetWhitelistedVariation(experiment, userId);
 
-            if (variation != null)   return variation;
+            if (variation != null) return variation;
             UserProfile userProfile = null;
             if (UserProfileService != null)
             {
@@ -128,7 +128,7 @@ namespace OptimizelySDK.Bucketing
                     }
                     else
                         Logger.Log(LogLevel.INFO, "This decision will not be saved since the UserProfileService is null.");
-                 }
+                }
 
                 return variation;
             }
@@ -146,7 +146,8 @@ namespace OptimizelySDK.Bucketing
         /// <returns>Variation entity which the given user and experiment should be forced into.</returns>
         public Variation GetForcedVariation(string experimentKey, string userId, ProjectConfig config)
         {
-            if (ForcedVariationMap.ContainsKey(userId) == false) {
+            if (ForcedVariationMap.ContainsKey(userId) == false)
+            {
                 Logger.Log(LogLevel.DEBUG, string.Format(@"User ""{0}"" is not in the forced variation map.", userId));
                 return null;
             }
@@ -159,14 +160,16 @@ namespace OptimizelySDK.Bucketing
             if (string.IsNullOrEmpty(experimentId))
                 return null;
 
-            if (experimentToVariationMap.ContainsKey(experimentId) == false) {
+            if (experimentToVariationMap.ContainsKey(experimentId) == false)
+            {
                 Logger.Log(LogLevel.DEBUG, string.Format(@"No experiment ""{0}"" mapped to user ""{1}"" in the forced variation map.", experimentKey, userId));
                 return null;
             }
 
             string variationId = experimentToVariationMap[experimentId];
 
-            if (string.IsNullOrEmpty(variationId)) {
+            if (string.IsNullOrEmpty(variationId))
+            {
                 Logger.Log(LogLevel.DEBUG, string.Format(@"No variation mapped to experiment ""{0}"" in the forced variation map.", experimentKey));
                 return null;
             }
@@ -195,7 +198,8 @@ namespace OptimizelySDK.Bucketing
         public bool SetForcedVariation(string experimentKey, string userId, string variationKey, ProjectConfig config)
         {
             // Empty variation key is considered as invalid.    
-            if (variationKey != null && variationKey.Length == 0) {
+            if (variationKey != null && variationKey.Length == 0)
+            {
                 Logger.Log(LogLevel.DEBUG, "Variation key is invalid.");
                 return false;
             }
@@ -207,7 +211,8 @@ namespace OptimizelySDK.Bucketing
                 return false;
 
             // clear the forced variation if the variation key is null  
-            if (variationKey == null) {
+            if (variationKey == null)
+            {
                 if (ForcedVariationMap.ContainsKey(userId) && ForcedVariationMap[userId].ContainsKey(experimentId))
                     ForcedVariationMap[userId].Remove(experimentId);
 
@@ -250,7 +255,7 @@ namespace OptimizelySDK.Bucketing
 
             string forcedVariationKey = userIdToVariationKeyMap[userId];
             Variation forcedVariation = experiment.VariationKeyToVariationMap.ContainsKey(forcedVariationKey)
-                ? experiment.VariationKeyToVariationMap[forcedVariationKey] 
+                ? experiment.VariationKeyToVariationMap[forcedVariationKey]
                 : null;
 
             if (forcedVariation != null)
@@ -287,8 +292,8 @@ namespace OptimizelySDK.Bucketing
             {
                 string variationId = decision.VariationId;
 
-                Variation savedVariation = config.ExperimentIdMap[experimentId].VariationIdToVariationMap.ContainsKey(variationId) 
-                    ? config.ExperimentIdMap[experimentId].VariationIdToVariationMap[variationId] 
+                Variation savedVariation = config.ExperimentIdMap[experimentId].VariationIdToVariationMap.ContainsKey(variationId)
+                    ? config.ExperimentIdMap[experimentId].VariationIdToVariationMap[variationId]
                     : null;
 
                 if (savedVariation == null)
@@ -381,12 +386,12 @@ namespace OptimizelySDK.Bucketing
 
             Variation variation = null;
             var rolloutRulesLength = rollout.Experiments.Count;
-            
+
             // Get Bucketing ID from user attributes.
             string bucketingId = GetBucketingId(userId, filteredAttributes);
 
             // For all rules before the everyone else rule
-            for (int i=0; i < rolloutRulesLength - 1; i++)
+            for (int i = 0; i < rolloutRulesLength - 1; i++)
             {
                 var rolloutRule = rollout.Experiments[i];
                 if (ExperimentUtils.IsUserInExperiment(config, rolloutRule, filteredAttributes, Logger))
@@ -487,7 +492,7 @@ namespace OptimizelySDK.Bucketing
                 Logger.Log(LogLevel.INFO, $"The user \"{userId}\" is bucketed into a rollout for feature flag \"{featureFlag.Key}\".");
                 return decision;
             }
-            
+
             Logger.Log(LogLevel.INFO, $"The user \"{userId}\" is not bucketed into a rollout for feature flag \"{featureFlag.Key}\".");
             return new FeatureDecision(null, null, FeatureDecision.DECISION_SOURCE_ROLLOUT);
         }

@@ -170,7 +170,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
             Assert.AreEqual(3, configManager.Counter);
         }
 
-        // TODO: Need to check if already added this unit test.
+
         [Test]
         public void TestWaitUntilValidDatafileIsNotGivenOrTimedout()
         {
