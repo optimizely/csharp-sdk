@@ -51,9 +51,9 @@ jobs:
         srcclr: true
       script:
         # strongname signing is taken care of in build step
-        - dotnet build OptimizelySDK.NetStandard16/OptimizelySDK.NetStandard16.csproj /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=$TRAVIS_BUILD_DIR/keypair.snk
+        - dotnet build OptimizelySDK.NetStandard16/OptimizelySDK.NetStandard16.csproj /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=$TRAVIS_BUILD_DIR/keypair.snk -c Release
         # TODO: no dotnet test yet for NetStandard16
       after_success:
         - pip install --user awscli
         # upload dll build artifacts to s3 with -unsigned suffix
-        - ([ ${TRAVIS_BRANCH} = "master" ] && [ ${TRAVIS_EVENT_TYPE} = "push" ]) && (AWS_ACCESS_KEY_ID=$OFTA_KEY AWS_SECRET_ACCESS_KEY=$OFTA_SECRET AWS_DEFAULT_REGION=$OFTA_REGION aws s3 cp ./OptimizelySDK.NetStandard16/bin/Debug/netstandard1.6/OptimizelySDK.NetStandard16.dll s3://optly-fs-travisci-artifacts/${TRAVIS_REPO_SLUG}/${TRAVIS_BUILD_NUMBER}/${TRAVIS_JOB_NUMBER}/OptimizelySDK.NetStandard16.dll-unsigned)
+        - ([ ${TRAVIS_BRANCH} = "master" ] && [ ${TRAVIS_EVENT_TYPE} = "push" ]) && (AWS_ACCESS_KEY_ID=$OFTA_KEY AWS_SECRET_ACCESS_KEY=$OFTA_SECRET AWS_DEFAULT_REGION=$OFTA_REGION aws s3 cp ./OptimizelySDK.NetStandard16/bin/Release/netstandard1.6/OptimizelySDK.NetStandard16.dll s3://optly-fs-travisci-artifacts/${TRAVIS_REPO_SLUG}/${TRAVIS_BUILD_NUMBER}/${TRAVIS_JOB_NUMBER}/OptimizelySDK.NetStandard16.dll-unsigned)
