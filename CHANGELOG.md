@@ -1,3 +1,9 @@
+## 3.1.1
+June 19th, 2019
+
+### Bug Fixes:
+* Build OptimizelySDK.NetStandard16.dll in Release mode
+
 ## 3.1.0
 May 9th, 2019
 
