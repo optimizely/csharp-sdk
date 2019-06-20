@@ -133,7 +133,7 @@ namespace OptimizelySDK.Config
             private IErrorHandler ErrorHandler;
             private TimeSpan Period = TimeSpan.FromMinutes(5);
             private TimeSpan BlockingTimeoutSpan = TimeSpan.FromSeconds(15);
-            private bool AutoUpdate;
+            private bool AutoUpdate = true;
             private bool StartByDefault;
             private NotificationCenter NotificationCenter;
 

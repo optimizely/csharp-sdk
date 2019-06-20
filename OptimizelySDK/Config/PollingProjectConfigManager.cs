@@ -47,7 +47,7 @@ namespace OptimizelySDK.Config
 
         public event Action NotifyOnProjectConfigUpdate;
 
-        public PollingProjectConfigManager(TimeSpan period, TimeSpan blockingTimeout, bool autoUpdate = false, ILogger logger = null, IErrorHandler errorHandler = null)
+        public PollingProjectConfigManager(TimeSpan period, TimeSpan blockingTimeout, bool autoUpdate = true, ILogger logger = null, IErrorHandler errorHandler = null)
         {
             Logger = logger;
             ErrorHandler = errorHandler;
