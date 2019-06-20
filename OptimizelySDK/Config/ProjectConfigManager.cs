@@ -28,10 +28,5 @@ namespace OptimizelySDK.Config
         /// </summary>
         /// <returns>ProjectConfig instance</returns>
         ProjectConfig GetConfig();
-
-        /// <summary>
-        /// Occurs when ProjectConfig is updated.
-        /// </summary>
-        event Action NotifyOnProjectConfigUpdate;
     }
 }

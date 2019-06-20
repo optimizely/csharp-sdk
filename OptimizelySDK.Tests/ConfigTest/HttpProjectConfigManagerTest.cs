@@ -80,7 +80,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
                 .WithPollingInterval(TimeSpan.FromMilliseconds(1000))
                 .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(500))
                 .WithStartByDefault()
-                .Build();
+                .Build(true);
 
             httpManager.OnReady().Wait(System.Threading.Timeout.Infinite);
             Assert.NotNull(httpManager.GetConfig());

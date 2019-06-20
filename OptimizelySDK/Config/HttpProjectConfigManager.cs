@@ -16,6 +16,7 @@
 
 using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Logger;
+using OptimizelySDK.Notifications;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -134,6 +135,7 @@ namespace OptimizelySDK.Config
             private TimeSpan BlockingTimeoutSpan = TimeSpan.FromSeconds(15);
             private bool AutoUpdate;
             private bool StartByDefault;
+            private NotificationCenter NotificationCenter;
 
             public Builder WithBlockingTimeoutPeriod(TimeSpan blockingTimeoutSpan)
             {
@@ -197,6 +199,13 @@ namespace OptimizelySDK.Config
                 return this;
             }
 
+            public Builder WithNotificationCenter(NotificationCenter notificationCenter)
+            {
+                NotificationCenter = notificationCenter;
+
+                return this;
+            }
+
             /// <summary>
             /// HttpProjectConfigManager.Builder that builds and starts a HttpProjectConfigManager.
             /// This is the default builder which will block until a config is available.
@@ -244,6 +253,11 @@ namespace OptimizelySDK.Config
                         Logger.Log(LogLevel.WARN, "Error parsing fallback datafile." + ex.Message);
                     }
                 }
+                
+                configManager.NotifyOnProjectConfigUpdate += () => {
+                    NotificationCenter?.SendNotifications(NotificationCenter.NotificationType.OptimizelyConfigUpdate);
+                };
+                
 
                 if (StartByDefault)
                     configManager.Start();

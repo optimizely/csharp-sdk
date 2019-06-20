@@ -2993,16 +2993,19 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestDFMNotificationWhenProjectConfigIsUpdated()
         {
+            NotificationCenter notificationCenter = new NotificationCenter();
             NotificationCallbackMock.Setup(notification => notification.TestConfigUpdateCallback());
+
 
             var httpManager = new HttpProjectConfigManager.Builder()
                                                           .WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z")
                                                           .WithLogger(LoggerMock.Object)
                                                           .WithPollingInterval(TimeSpan.FromMilliseconds(1000))
                                                           .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(500))
+                                                          .WithNotificationCenter(notificationCenter)
                                                           .Build();
 
-            var optimizely = new Optimizely(httpManager);
+            var optimizely = new Optimizely(httpManager, notificationCenter);
             httpManager.Start();
             optimizely.NotificationCenter.AddNotification(NotificationCenter.NotificationType.OptimizelyConfigUpdate, NotificationCallbackMock.Object.TestConfigUpdateCallback);
             httpManager.OnReady().Wait(-1);

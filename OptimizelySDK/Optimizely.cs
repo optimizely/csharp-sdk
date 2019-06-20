@@ -137,6 +137,7 @@ namespace OptimizelySDK
         /// <param name="errorHandler">Error handler.</param>
         /// <param name="userProfileService">User profile service.</param>
         public Optimizely(ProjectConfigManager configManager,
+                         NotificationCenter notificationCenter = null,
                          IEventDispatcher eventDispatcher = null,
                          ILogger logger = null,
                          IErrorHandler errorHandler = null,
@@ -144,18 +145,14 @@ namespace OptimizelySDK
         {
             ProjectConfigManager = configManager;
 
-            InitializeComponents(eventDispatcher, logger, errorHandler, userProfileService);
-
-            // Subscribing notification
-            ProjectConfigManager.NotifyOnProjectConfigUpdate += () => {
-                NotificationCenter.SendNotifications(NotificationCenter.NotificationType.OptimizelyConfigUpdate);
-            };
+            InitializeComponents(eventDispatcher, logger, errorHandler, userProfileService, notificationCenter);
         }
 
         private void InitializeComponents(IEventDispatcher eventDispatcher = null,
                          ILogger logger = null,
                          IErrorHandler errorHandler = null,
-                         UserProfileService userProfileService = null)
+                         UserProfileService userProfileService = null,
+                         NotificationCenter notificationCenter = null)
         {
             Logger = logger ?? new NoOpLogger();
             EventDispatcher = eventDispatcher ?? new DefaultEventDispatcher(Logger);
@@ -163,7 +160,7 @@ namespace OptimizelySDK
             Bucketer = new Bucketer(Logger);
             EventBuilder = new EventBuilder(Bucketer, Logger);
             UserProfileService = userProfileService;
-            NotificationCenter = new NotificationCenter(Logger);
+            NotificationCenter = notificationCenter ?? new NotificationCenter(Logger);
             DecisionService = new DecisionService(Bucketer, ErrorHandler, userProfileService, Logger);
         }
 
