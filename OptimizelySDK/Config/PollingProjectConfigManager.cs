@@ -29,8 +29,10 @@ namespace OptimizelySDK.Config
     /// Instances of this class, must implement the <see cref="Poll()"/> method
     /// which is responsible for fetching a given ProjectConfig.
     /// </summary>
-    public abstract class PollingProjectConfigManager : ProjectConfigManager
+    public abstract class PollingProjectConfigManager : ProjectConfigManager, IDisposable
     {
+        public bool Disposed { get; private set; }
+
         private TimeSpan PollingInterval;
         public bool IsStarted { get; private set; }
         private bool scheduleWhenFinished = false;
@@ -70,7 +72,7 @@ namespace OptimizelySDK.Config
         /// </summary>
         public void Start()
         {
-            if (IsStarted)
+            if (IsStarted && !Disposed)
             {
                 Logger.Log(LogLevel.WARN, "Manager already started.");
                 return;
@@ -86,6 +88,7 @@ namespace OptimizelySDK.Config
         /// </summary>
         public void Stop() 
         {
+            if (Disposed) return;
             // don't call now and onwards.
             SchedulerService.Change(-1, -1);
 
@@ -100,6 +103,7 @@ namespace OptimizelySDK.Config
         /// <returns>ProjectConfig</returns>
         public ProjectConfig GetConfig()
         {
+            if (Disposed) return null;
             if (IsStarted)
             {
                 try
@@ -163,9 +167,14 @@ namespace OptimizelySDK.Config
             return true;
         }
         
-        public void Dispose()
+        public virtual void Dispose()
         {
+            if (Disposed) return;
+
+            SchedulerService.Change(-1, -1);
             SchedulerService.Dispose();
+            CurrentProjectConfig = null;
+            Disposed = true;
         }
 
         /// <summary>

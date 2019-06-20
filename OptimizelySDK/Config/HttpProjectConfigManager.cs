@@ -78,8 +78,7 @@ namespace OptimizelySDK.Config
 
             return content.Result;  
         }
-#elif NET40
-        //TODO: Need to revise this method.
+#elif NET40        
         private string GetRemoteDatafileResponse()
         {
             var request = (System.Net.HttpWebRequest)System.Net.WebRequest.Create(Url);

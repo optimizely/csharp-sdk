@@ -29,7 +29,7 @@ using OptimizelySDK.Config;
 
 namespace OptimizelySDK
 {
-    public class Optimizely : IOptimizely
+    public class Optimizely : IOptimizely, IDisposable
     {
         private Bucketer Bucketer;
 
@@ -90,6 +90,7 @@ namespace OptimizelySDK
         public const string EVENT_KEY = "Event Key";
         public const string FEATURE_KEY = "Feature Key";
         public const string VARIABLE_KEY = "Variable Key";
+        public bool Disposed { get; private set; }
 
         /// <summary>
         /// Optimizely constructor for managing Full Stack .NET projects.
@@ -781,5 +782,14 @@ namespace OptimizelySDK
 
             return result;
         }
-    }
+
+        public void Dispose()
+        {
+            if (Disposed) return;
+
+            Disposed = true;
+            (ProjectConfigManager as IDisposable)?.Dispose();
+            ProjectConfigManager = null;
+        }
+    }    
 }
