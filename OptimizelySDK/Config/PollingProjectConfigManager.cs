@@ -150,9 +150,13 @@ namespace OptimizelySDK.Config
             CurrentProjectConfig = projectConfig;
 
             // SetResult raise exception if called again, that's why Try is used.
-            NotifyOnProjectConfigUpdate?.Invoke();
             CompletableConfigManager.TrySetResult(true);
 
+            // Invoke event in separate thread.
+            new Task(() => {
+                NotifyOnProjectConfigUpdate?.Invoke();
+            }).Start();            
+            
             return true;
         }
         

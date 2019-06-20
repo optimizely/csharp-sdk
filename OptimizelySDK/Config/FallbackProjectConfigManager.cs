@@ -24,8 +24,7 @@ namespace OptimizelySDK.Config
     /// </summary>
     public class FallbackProjectConfigManager : ProjectConfigManager
     {
-        private ProjectConfig ProjectConfig;
-        public event Action NotifyOnProjectConfigUpdate;
+        private ProjectConfig ProjectConfig;        
         
         /// <summary>
         /// Initializes a new instance of the FallbackProjectConfigManager class
