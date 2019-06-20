@@ -2989,6 +2989,53 @@ namespace OptimizelySDK.Tests
 
         #endregion // Decision Listener
 
+        #region DFM Notification
+        [Test]
+        public void TestDFMNotificationWhenProjectConfigIsUpdated()
+        {
+            NotificationCenter notificationCenter = new NotificationCenter();
+            NotificationCallbackMock.Setup(notification => notification.TestConfigUpdateCallback());
+
+
+            var httpManager = new HttpProjectConfigManager.Builder()
+                                                          .WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z")
+                                                          .WithLogger(LoggerMock.Object)
+                                                          .WithPollingInterval(TimeSpan.FromMilliseconds(1000))
+                                                          .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(500))
+                                                          .WithNotificationCenter(notificationCenter)
+                                                          .Build();
+
+            var optimizely = new Optimizely(httpManager, notificationCenter);
+            httpManager.Start();
+            optimizely.NotificationCenter.AddNotification(NotificationCenter.NotificationType.OptimizelyConfigUpdate, NotificationCallbackMock.Object.TestConfigUpdateCallback);
+            httpManager.OnReady().Wait(-1);
+
+            NotificationCallbackMock.Verify(nc => nc.TestConfigUpdateCallback(), Times.Once);
+        }
+
+        [Test]
+        public void TestDFMWhenDatafileProvidedDoesNotNotifyWithoutStart()
+        {
+            var httpManager = new HttpProjectConfigManager.Builder()
+                .WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z")
+                .WithDatafile(TestData.Datafile)
+                .WithLogger(LoggerMock.Object)
+                .WithPollingInterval(TimeSpan.FromMilliseconds(1000))
+                .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(500))                
+                .Build();
+
+
+            var optimizely = new Optimizely(httpManager);
+            optimizely.NotificationCenter.AddNotification(NotificationCenter.NotificationType.OptimizelyConfigUpdate, NotificationCallbackMock.Object.TestConfigUpdateCallback);
+            httpManager.OnReady().Wait(-1);
+
+            NotificationCallbackMock.Verify(nc => nc.TestConfigUpdateCallback(), Times.Never);
+        }
+
+
+
+        #endregion // DFM Notification
+
         #endregion // Test NotificationCenter
 
         #region Test GetEnabledFeatures

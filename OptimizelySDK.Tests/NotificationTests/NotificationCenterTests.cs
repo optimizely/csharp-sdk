@@ -22,6 +22,7 @@ using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Event;
 using OptimizelySDK.Logger;
 using OptimizelySDK.Notifications;
+using System;
 using System.Collections.Generic;
 using NotificationType = OptimizelySDK.Notifications.NotificationCenter.NotificationType;
 
@@ -77,6 +78,10 @@ namespace OptimizelySDK.Tests.NotificationTests
             // Verify that notifications of other types will also gets added successfully.
             NotificationCenter.AddNotification(NotificationTypeTrack, TestNotificationCallbacks.TestTrackCallback);
             Assert.AreEqual(3, NotificationCenter.NotificationsCount);
+
+            // Verify that notifications of other types will also gets added successfully.
+            NotificationCenter.AddNotification(NotificationType.OptimizelyConfigUpdate, TestNotificationCallbacks.TestConfigUpdateCallback);
+            Assert.AreEqual(4, NotificationCenter.NotificationsCount);
         }
 
         [Test]
@@ -118,10 +123,16 @@ namespace OptimizelySDK.Tests.NotificationTests
             // Verify that callbacks added successfully.
             Assert.AreEqual(3, NotificationCenter.NotificationsCount);
 
+            // Add config update callback.
+            NotificationCenter.AddNotification(NotificationType.OptimizelyConfigUpdate, TestNotificationCallbacks.TestConfigUpdateCallback);
+            // Verify that callbacks added successfully.
+            Assert.AreEqual(4, NotificationCenter.NotificationsCount);
+
+
             // Verify that only decision callbacks are removed.
             NotificationCenter.ClearNotifications(NotificationTypeActivate);
-            Assert.AreEqual(1, NotificationCenter.NotificationsCount);
-            
+            Assert.AreEqual(2, NotificationCenter.NotificationsCount);
+
             // Verify that ClearNotifications does not break on calling twice for same type.
             NotificationCenter.ClearNotifications(NotificationTypeActivate);
             NotificationCenter.ClearNotifications(NotificationTypeActivate);
@@ -165,24 +176,24 @@ namespace OptimizelySDK.Tests.NotificationTests
             notificationCallbackMock.Setup(nc => nc.TestActivateCallback(It.IsAny<Experiment>(), It.IsAny<string>(),
                 It.IsAny<UserAttributes>(), It.IsAny<Variation>(), It.IsAny<LogEvent>()));
 
-            notificationCallbackMock.Setup(nc => nc.TestAnotherActivateCallback(It.IsAny<Experiment>(), 
+            notificationCallbackMock.Setup(nc => nc.TestAnotherActivateCallback(It.IsAny<Experiment>(),
                 It.IsAny<string>(), It.IsAny<UserAttributes>(), It.IsAny<Variation>(), It.IsAny<LogEvent>()));
 
 
             // Adding decision notifications.
             NotificationCenter.AddNotification(NotificationTypeActivate, notificationCallbackMock.Object.TestActivateCallback);
             NotificationCenter.AddNotification(NotificationTypeActivate, notificationCallbackMock.Object.TestAnotherActivateCallback);
-            
+
 
             // Adding track notifications.
             NotificationCenter.AddNotification(NotificationTypeTrack, notificationCallbackMock.Object.TestTrackCallback);
-            
+
             // Fire decision type notifications.
-            NotificationCenter.SendNotifications(NotificationTypeActivate, config.GetExperimentFromKey("test_experiment"), 
+            NotificationCenter.SendNotifications(NotificationTypeActivate, config.GetExperimentFromKey("test_experiment"),
                 "testUser", new UserAttributes(), config.GetVariationFromId("test_experiment", "7722370027"), logEventMocker.Object);
 
             // Verify that only the registered notifications of decision type are called.
-            notificationCallbackMock.Verify(nc => nc.TestActivateCallback(It.IsAny<Experiment>(), It.IsAny<string>(), 
+            notificationCallbackMock.Verify(nc => nc.TestActivateCallback(It.IsAny<Experiment>(), It.IsAny<string>(),
                 It.IsAny<UserAttributes>(), It.IsAny<Variation>(), It.IsAny<LogEvent>()), Times.Once);
 
             notificationCallbackMock.Verify(nc => nc.TestAnotherActivateCallback(It.IsAny<Experiment>(), It.IsAny<string>(),
@@ -202,7 +213,7 @@ namespace OptimizelySDK.Tests.NotificationTests
             NotificationCenter.SendNotifications(NotificationTypeActivate, config.GetExperimentFromKey("test_experiment"),
                 "testUser", new UserAttributes(), config.GetVariationFromId("test_experiment", "7722370027"), null);
 
-            
+
             // Again verify notifications which were registered are not called. 
             notificationCallbackMock.Verify(nc => nc.TestActivateCallback(It.IsAny<Experiment>(), It.IsAny<string>(),
                 It.IsAny<UserAttributes>(), It.IsAny<Variation>(), It.IsAny<LogEvent>()), Times.Never);
@@ -213,6 +224,7 @@ namespace OptimizelySDK.Tests.NotificationTests
             notificationCallbackMock.Verify(nc => nc.TestTrackCallback(It.IsAny<string>(), It.IsAny<string>(),
                 It.IsAny<UserAttributes>(), It.IsAny<EventTags>(), It.IsAny<LogEvent>()), Times.Never);
         }
+
     }
 
     #region Test Notification callbacks class.
@@ -241,6 +253,7 @@ namespace OptimizelySDK.Tests.NotificationTests
         public virtual void TestDecisionCallback(string type, string userId, UserAttributes userAttributes,
             Dictionary<string, object> decisionInfo) {
         }
+        public virtual void TestConfigUpdateCallback() { }
     }
     #endregion // Test Notification callbacks class.
 }

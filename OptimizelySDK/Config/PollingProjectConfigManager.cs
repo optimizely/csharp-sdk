@@ -34,33 +34,29 @@ namespace OptimizelySDK.Config
         private TimeSpan PollingInterval;
         public bool IsStarted { get; private set; }
         private bool scheduleWhenFinished = false;
+        public bool AutoUpdate { get; private set; }
 
         private ProjectConfig CurrentProjectConfig;
         private Timer SchedulerService;
-
         protected ILogger Logger { get; set; }
         protected IErrorHandler ErrorHandler { get; set; }
         protected TimeSpan BlockingTimeout;
         protected TaskCompletionSource<bool> CompletableConfigManager = new TaskCompletionSource<bool>();
         // Variables to control blocking/syncing.
-        public object mutex = new Object();
+        public int resourceInUse = 0;
 
-        protected event Action ProjectConfig_Notification;
+        public event Action NotifyOnProjectConfigUpdate;
 
-        public PollingProjectConfigManager(TimeSpan period, TimeSpan blockingTimeout, ILogger logger = null, IErrorHandler errorHandler = null, bool StartByDefault = true)
+        public PollingProjectConfigManager(TimeSpan period, TimeSpan blockingTimeout, bool autoUpdate = true, ILogger logger = null, IErrorHandler errorHandler = null)
         {
             Logger = logger;
             ErrorHandler = errorHandler;
             BlockingTimeout = blockingTimeout;
             PollingInterval = period;
-
+            AutoUpdate = autoUpdate;
 
             // Never start, start only when Start is called.
             SchedulerService = new Timer((object state) => { Run(); }, this, -1, -1);
-            if(StartByDefault) {
-                Start();
-            }
-
         }
 
         /// <summary>
@@ -80,8 +76,8 @@ namespace OptimizelySDK.Config
                 return;
             }
 
-            Logger.Log(LogLevel.WARN, $"Starting Config scheduler with interval: {PollingInterval} milliseconds.");
-            SchedulerService.Change(TimeSpan.Zero, PollingInterval);
+            Logger.Log(LogLevel.WARN, $"Starting Config scheduler with interval: {PollingInterval}.");
+            SchedulerService.Change(TimeSpan.Zero, AutoUpdate ? PollingInterval : TimeSpan.FromMilliseconds(-1));
             IsStarted = true;
         }
 
@@ -137,7 +133,7 @@ namespace OptimizelySDK.Config
         public bool SetConfig(ProjectConfig projectConfig)
         {
             // trigger now, due because of delayed latency response
-            if(scheduleWhenFinished && IsStarted) {
+            if (scheduleWhenFinished && IsStarted) {
                 // Can't directly call Run, it will be part of previous thread then.
                 // Call immediately, because it's due now.
                 scheduleWhenFinished = false;
@@ -156,9 +152,20 @@ namespace OptimizelySDK.Config
             // SetResult raise exception if called again, that's why Try is used.
             CompletableConfigManager.TrySetResult(true);
 
-            ProjectConfig_Notification?.Invoke();
-
+            // Invoke event in separate task.
+            // SetConfig should be released, as soon as it sets ProjectConfig
+            // otherwise, it will still use mutex resource and any upcoming scheduled requests will be deffered
+            // if notification callback is taking too long time to execute.
+            new Task(() => {
+                NotifyOnProjectConfigUpdate?.Invoke();
+            }).Start();            
+            
             return true;
+        }
+        
+        public void Dispose()
+        {
+            SchedulerService.Dispose();
         }
 
         /// <summary>
@@ -167,7 +174,7 @@ namespace OptimizelySDK.Config
         /// </summary>
         public virtual void Run()
         {
-            if (Monitor.TryEnter(mutex)){
+            if (Interlocked.Exchange(ref resourceInUse, 1) == 0){
                 try {
                     var config = Poll();
 
@@ -176,9 +183,9 @@ namespace OptimizelySDK.Config
                         SetConfig(config);
 
                 } catch (Exception exception) {
-                    Logger.Log(LogLevel.ERROR, "Unable to get project config. Error: " + exception.Message);
+                    Logger.Log(LogLevel.ERROR, "Unable to get project config. Error: " + exception.GetAllMessages());
                 } finally {
-                    Monitor.Exit(mutex);
+                    Interlocked.Exchange(ref resourceInUse, 0);
                 }
             }
             else {

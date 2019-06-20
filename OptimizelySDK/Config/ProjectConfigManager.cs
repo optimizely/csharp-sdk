@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+using System;
+
 namespace OptimizelySDK.Config
 {
     /// <summary>
@@ -21,7 +23,6 @@ namespace OptimizelySDK.Config
     /// </summary>
     public interface ProjectConfigManager
     {
-
         /// <summary>
         /// Implementations of this method should block until a datafile is available.
         /// </summary>

@@ -16,6 +16,7 @@
 
 using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Logger;
+using OptimizelySDK.Notifications;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,9 +28,9 @@ namespace OptimizelySDK.Config
     {
         private string Url;
         private string LastModifiedSince = string.Empty;
-        public Action RemoteProjectConfig_Notification;
 
-        private HttpProjectConfigManager(TimeSpan period, string url, TimeSpan blockingTimeout, ILogger logger, IErrorHandler errorHandler) : base(period, blockingTimeout, logger, errorHandler)
+        private HttpProjectConfigManager(TimeSpan period, string url, TimeSpan blockingTimeout, bool autoUpdate, ILogger logger, IErrorHandler errorHandler) 
+            : base(period, blockingTimeout, autoUpdate, logger, errorHandler)
         {
             Url = url;
         }
@@ -46,7 +47,6 @@ namespace OptimizelySDK.Config
         }
         private string GetRemoteDatafileResponse()
         {
-
             var request = new System.Net.Http.HttpRequestMessage {
                 RequestUri = new Uri(Url),
                 Method = System.Net.Http.HttpMethod.Get,
@@ -131,8 +131,11 @@ namespace OptimizelySDK.Config
             private string Format = "https://cdn.optimizely.com/datafiles/{0}.json";
             private ILogger Logger;
             private IErrorHandler ErrorHandler;
-            private TimeSpan Period;
-            private TimeSpan BlockingTimeoutSpan;
+            private TimeSpan Period = TimeSpan.FromMinutes(5);
+            private TimeSpan BlockingTimeoutSpan = TimeSpan.FromSeconds(15);
+            private bool AutoUpdate = true;
+            private bool StartByDefault;
+            private NotificationCenter NotificationCenter;
 
             public Builder WithBlockingTimeoutPeriod(TimeSpan blockingTimeoutSpan)
             {
@@ -182,6 +185,27 @@ namespace OptimizelySDK.Config
                 return this;
             }
 
+            public Builder WithAutoUpdate(bool autoUpdate)
+            {
+                AutoUpdate = autoUpdate;
+
+                return this;
+            }
+
+            public Builder WithStartByDefault(bool startByDefault=true)
+            {
+                StartByDefault = startByDefault;
+
+                return this;
+            }
+
+            public Builder WithNotificationCenter(NotificationCenter notificationCenter)
+            {
+                NotificationCenter = notificationCenter;
+
+                return this;
+            }
+
             /// <summary>
             /// HttpProjectConfigManager.Builder that builds and starts a HttpProjectConfigManager.
             /// This is the default builder which will block until a config is available.
@@ -200,17 +224,22 @@ namespace OptimizelySDK.Config
             /// <returns>HttpProjectConfigManager instance</returns>
             public HttpProjectConfigManager Build(bool defer)
             {
+                HttpProjectConfigManager configManager = null;
                 if (Logger == null)
                     Logger = new DefaultLogger();
 
-                if (!string.IsNullOrEmpty(Url))
-                    return new HttpProjectConfigManager(Period, Url, BlockingTimeoutSpan, Logger, ErrorHandler);
-
-                if (string.IsNullOrEmpty(SdkKey))
+                if (string.IsNullOrEmpty(Url) && string.IsNullOrEmpty(SdkKey))
+                {
+                    ErrorHandler.HandleError(new Exception("SdkKey cannot be null"));
                     throw new Exception("SdkKey cannot be null");
+                }
+                else if (!string.IsNullOrEmpty(SdkKey))
+                {
+                    Url = string.Format(Format, SdkKey);
+                }
+                    
 
-                Url = string.Format(Format, SdkKey);
-                var configManager = new HttpProjectConfigManager(Period, Url, BlockingTimeoutSpan, Logger, ErrorHandler);
+                configManager = new HttpProjectConfigManager(Period, Url, BlockingTimeoutSpan, AutoUpdate, Logger, ErrorHandler);
 
                 if (Datafile != null)
                 {
@@ -224,12 +253,19 @@ namespace OptimizelySDK.Config
                         Logger.Log(LogLevel.WARN, "Error parsing fallback datafile." + ex.Message);
                     }
                 }
-                configManager.ProjectConfig_Notification += () => { configManager.RemoteProjectConfig_Notification.Invoke(); };
+                
+                configManager.NotifyOnProjectConfigUpdate += () => {
+                    NotificationCenter?.SendNotifications(NotificationCenter.NotificationType.OptimizelyConfigUpdate);
+                };
+                
+
+                if (StartByDefault)
+                    configManager.Start();
 
                 // Optionally block until config is available.
                 if (!defer)
                     configManager.GetConfig();
-
+                    
                 return configManager;
             }
         }

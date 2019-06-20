@@ -4,6 +4,7 @@ using OptimizelySDK.Config;
 using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Event.Dispatcher;
 using OptimizelySDK.Logger;
+using OptimizelySDK.Notifications;
 
 namespace OptimizelySDK
 {
@@ -27,20 +28,23 @@ namespace OptimizelySDK
             var errorHandler = new DefaultErrorHandler();
             var eventDispatcher = new DefaultEventDispatcher(logger);
             var builder = new HttpProjectConfigManager.Builder();
+            var notificationCenter = new NotificationCenter();
+
             var configManager = builder
                 .WithSdkKey(sdkKey)
                 .WithDatafile(fallback)
                 .WithLogger(logger)
                 .WithErrorHandler(errorHandler)
+                .WithNotificationCenter(notificationCenter)
                 .Build(true);
 
-            return NewDefaultInstance(configManager, eventDispatcher, errorHandler, logger);
+            return NewDefaultInstance(configManager, notificationCenter, eventDispatcher, errorHandler, logger);
         }
 
-        public static Optimizely NewDefaultInstance(ProjectConfigManager configManager, IEventDispatcher eventDispatcher = null,
+        public static Optimizely NewDefaultInstance(ProjectConfigManager configManager, NotificationCenter notificationCenter = null, IEventDispatcher eventDispatcher = null,
                                                     IErrorHandler errorHandler = null, ILogger logger = null, UserProfileService userprofileService = null)
-        {
-            return new Optimizely(configManager, eventDispatcher, logger, errorHandler, userprofileService);      
+        {            
+            return new Optimizely(configManager, notificationCenter, eventDispatcher, logger, errorHandler, userprofileService);      
         }
     }
 }

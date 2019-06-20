@@ -137,6 +137,7 @@ namespace OptimizelySDK
         /// <param name="errorHandler">Error handler.</param>
         /// <param name="userProfileService">User profile service.</param>
         public Optimizely(ProjectConfigManager configManager,
+                         NotificationCenter notificationCenter = null,
                          IEventDispatcher eventDispatcher = null,
                          ILogger logger = null,
                          IErrorHandler errorHandler = null,
@@ -144,13 +145,14 @@ namespace OptimizelySDK
         {
             ProjectConfigManager = configManager;
 
-            InitializeComponents(eventDispatcher, logger, errorHandler, userProfileService);
+            InitializeComponents(eventDispatcher, logger, errorHandler, userProfileService, notificationCenter);
         }
 
         private void InitializeComponents(IEventDispatcher eventDispatcher = null,
                          ILogger logger = null,
                          IErrorHandler errorHandler = null,
-                         UserProfileService userProfileService = null)
+                         UserProfileService userProfileService = null,
+                         NotificationCenter notificationCenter = null)
         {
             Logger = logger ?? new NoOpLogger();
             EventDispatcher = eventDispatcher ?? new DefaultEventDispatcher(Logger);
@@ -158,7 +160,7 @@ namespace OptimizelySDK
             Bucketer = new Bucketer(Logger);
             EventBuilder = new EventBuilder(Bucketer, Logger);
             UserProfileService = userProfileService;
-            NotificationCenter = new NotificationCenter(Logger);
+            NotificationCenter = notificationCenter ?? new NotificationCenter(Logger);
             DecisionService = new DecisionService(Bucketer, ErrorHandler, userProfileService, Logger);
         }
 
@@ -201,6 +203,7 @@ namespace OptimizelySDK
         public Variation Activate(string experimentKey, string userId, UserAttributes userAttributes = null)
         {
             var config = ProjectConfigManager?.GetConfig();
+
             if (config == null)
             {
                 Logger.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'Activate'.");
@@ -332,7 +335,8 @@ namespace OptimizelySDK
         /// <returns>null|Variation Representing variation</returns>
         private Variation GetVariation(string experimentKey, string userId, ProjectConfig config, UserAttributes userAttributes = null)
         {
-            if (config == null) {
+            if (config == null)
+            {
                 Logger.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'GetVariation'.");
                 return null;
             }
@@ -386,7 +390,6 @@ namespace OptimizelySDK
                 { USER_ID, userId },
                 { EXPERIMENT_KEY, experimentKey }
             };
-            
             return ValidateStringInputs(inputValues) && DecisionService.SetForcedVariation(experimentKey, userId, variationKey, config);
         }
 
@@ -400,7 +403,8 @@ namespace OptimizelySDK
         {
             var config = ProjectConfigManager?.GetConfig();
 
-            if (config == null) {
+            if (config == null)
+            {
                 return null;
             }
 
@@ -412,7 +416,7 @@ namespace OptimizelySDK
 
             if (!ValidateStringInputs(inputValues))
                 return null;
-                
+
             return DecisionService.GetForcedVariation(experimentKey, userId, config);
         }
 
@@ -607,8 +611,6 @@ namespace OptimizelySDK
         /// <returns>bool | Feature variable value or null</returns>
         public bool? GetFeatureVariableBoolean(string featureKey, string variableKey, string userId, UserAttributes userAttributes = null)
         {
-            var config = ProjectConfigManager?.GetConfig();
-
             return GetFeatureVariableValueForType<bool?>(featureKey, variableKey, userId, userAttributes, FeatureVariable.VariableType.BOOLEAN);
         }
 
@@ -622,7 +624,6 @@ namespace OptimizelySDK
         /// <returns>double | Feature variable value or null</returns>
         public double? GetFeatureVariableDouble(string featureKey, string variableKey, string userId, UserAttributes userAttributes = null)
         {
-
             return GetFeatureVariableValueForType<double?>(featureKey, variableKey, userId, userAttributes, FeatureVariable.VariableType.DOUBLE);
         }
 
@@ -649,13 +650,6 @@ namespace OptimizelySDK
         /// <returns>string | Feature variable value or null</returns>
         public string GetFeatureVariableString(string featureKey, string variableKey, string userId, UserAttributes userAttributes = null)
         {
-            var config = ProjectConfigManager?.GetConfig();
-            if (!IsValid && config == null)
-            {
-                Logger.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'GetFeatureVariableString'.");
-                return null;
-            }
-
             return GetFeatureVariableValueForType<string>(featureKey, variableKey, userId, userAttributes, FeatureVariable.VariableType.STRING);
         }
 

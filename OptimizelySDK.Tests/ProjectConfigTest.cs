@@ -644,10 +644,11 @@ namespace OptimizelySDK.Tests
             Assert.AreEqual("1592310167", config.AccountId);
         }
 
-        // Test set/get forced variation for the following cases:
+        // test set/get forced variation for the following cases:
         //      - valid and invalid user ID
         //      - valid and invalid experiment key
         //      - valid and invalid variation key, null variation key
+
         [Test]
         public void TestVariationFeatureEnabledProperty()
         {
