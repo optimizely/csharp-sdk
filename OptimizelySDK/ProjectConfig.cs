@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2019, Optimizely
+ * Copyright 2017-2019, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -238,7 +238,5 @@ namespace OptimizelySDK
         /// <param name="experimentId">Experiment Id</param>
         /// <returns>true if experiment belongs to any feature, false otherwise</returns>
         bool IsFeatureExperiment(string experimentId);
-
-        // TODO: Need to check, Create should be part of this interface.
     }
 }
