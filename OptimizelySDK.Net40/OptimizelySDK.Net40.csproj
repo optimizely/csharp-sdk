@@ -155,9 +155,6 @@
     <Compile Include="..\OptimizelySDK\Optimizely.cs">
       <Link>Optimizely.cs</Link>
     </Compile>
-    <Compile Include="..\OptimizelySDK\ProjectConfig.cs">
-      <Link>ProjectConfig.cs</Link>
-    </Compile>
     <Compile Include="..\OptimizelySDK\Utils\ConfigParser.cs">
       <Link>Utils\ConfigParser.cs</Link>
     </Compile>
@@ -219,6 +216,27 @@
     <Compile Include="..\OptimizelySDK\Entity\Rollout.cs">
       <Link>Entity\Rollout</Link>
     </Compile>
+	<Compile Include="..\OptimizelySDK\ProjectConfig.cs">
+      <Link>ProjectConfig</Link>
+    </Compile>
+	<Compile Include="..\OptimizelySDK\Config\DatafileProjectConfig.cs">
+      <Link>Config\DatafileProjectConfig</Link>
+    </Compile>
+	<Compile Include="..\OptimizelySDK\Config\ProjectConfigManager.cs">
+      <Link>Config\ProjectConfigManager</Link>
+    </Compile>
+	<Compile Include="..\OptimizelySDK\Config\PollingProjectConfigManager.cs">
+      <Link>Config\PollingProjectConfigManager</Link>
+    </Compile>
+	<Compile Include="..\OptimizelySDK\Config\HttpProjectConfigManager.cs">
+      <Link>Config\HttpProjectConfigManager</Link>
+    </Compile>
+	<Compile Include="..\OptimizelySDK\Config\FallbackProjectConfigManager.cs">
+	  <Link>Config\FallbackProjectConfigManager.cs</Link>
+	</Compile>
+	<Compile Include="..\OptimizelySDK\OptimizelyFactory.cs">
+	  <Link>OptimizelyFactory.cs</Link>
+	</Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\OptimizelySDK\Utils\schema.json">

@@ -51,7 +51,6 @@
         <Compile Include="..\OptimizelySDK\Logger\NoOpLogger.cs" />
 		<Compile Include="..\OptimizelySDK\Notifications\NotificationCenter.cs" />
         <Compile Include="..\OptimizelySDK\Optimizely.cs" />
-        <Compile Include="..\OptimizelySDK\ProjectConfig.cs" />
         <Compile Include="..\OptimizelySDK\Utils\EventTagUtils.cs" />
         <Compile Include="..\OptimizelySDK\Utils\Validator.cs" />
         <Compile Include=".\Properties\AssemblyInfo.cs" />
@@ -69,6 +68,17 @@
         <Compile Include="..\OptimizelySDK\Bucketing\UserProfile.cs" />
         <Compile Include="..\OptimizelySDK\Bucketing\UserProfileService.cs" />
         <Compile Include="..\OptimizelySDK\Bucketing\UserProfileUtil.cs" />
+		<Compile Include="..\OptimizelySDK\ProjectConfig.cs" />
+		<Compile Include="..\OptimizelySDK\Config\DatafileProjectConfig.cs" />
+		<Compile Include="..\OptimizelySDK\Config\ProjectConfigManager.cs" />
+		<Compile Include="..\OptimizelySDK\Config\PollingProjectConfigManager.cs" />
+		<Compile Include="..\OptimizelySDK\Config\HttpProjectConfigManager.cs" />
+		<Compile Include="..\OptimizelySDK\Config\FallbackProjectConfigManager.cs">
+		  <Link>AtomicProjectConfigManager.cs</Link>
+		</Compile>
+		<Compile Include="..\OptimizelySDK\OptimizelyFactory.cs">
+		  <Link>OptimizelyFactory.cs</Link>
+		</Compile>
     </ItemGroup>
     <ItemGroup>
         <EmbeddedResource Include="..\OptimizelySDK\Utils\schema.json">

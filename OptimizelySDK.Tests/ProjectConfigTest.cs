@@ -25,6 +25,7 @@ using OptimizelySDK.Entity;
 using Newtonsoft.Json;
 using OptimizelySDK.Event.Builder;
 using OptimizelySDK.Utils;
+using OptimizelySDK.Config;
 
 namespace OptimizelySDK.Tests
 {
@@ -42,7 +43,7 @@ namespace OptimizelySDK.Tests
             ErrorHandlerMock = new Mock<IErrorHandler>();
             ErrorHandlerMock.Setup(e => e.HandleError(It.IsAny<Exception>()));
 
-            Config = ProjectConfig.Create(TestData.Datafile, LoggerMock.Object, ErrorHandlerMock.Object);
+            Config = DatafileProjectConfig.Create(TestData.Datafile, LoggerMock.Object, ErrorHandlerMock.Object);
         }
 
         public static Dictionary<string, object> CreateDictionary(string name, object entityObject)
@@ -638,7 +639,7 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TempProjectConfigTest()
         {
-            ProjectConfig config = ProjectConfig.Create(TestData.Datafile, new Mock<ILogger>().Object, new DefaultErrorHandler());
+            ProjectConfig config = DatafileProjectConfig.Create(TestData.Datafile, new Mock<ILogger>().Object, new DefaultErrorHandler());
             Assert.IsNotNull(config);
             Assert.AreEqual("1592310167", config.AccountId);
         }
@@ -647,138 +648,6 @@ namespace OptimizelySDK.Tests
         //      - valid and invalid user ID
         //      - valid and invalid experiment key
         //      - valid and invalid variation key, null variation key
-        [Test]
-        public void TestSetGetForcedVariation()
-        {
-            var userId = "test_user";
-            var invalidUserId = "invalid_user";
-            var experimentKey = "test_experiment";
-            var experimentKey2 = "group_experiment_1";
-            var invalidExperimentKey = "invalid_experiment";
-            var expectedVariationKey = "control";
-            var expectedVariationKey2 = "group_exp_1_var_1";
-            var invalidVariationKey = "invalid_variation";
-
-            var userAttributes = new UserAttributes
-            {
-                {"device_type", "iPhone" },
-                {"location", "San Francisco" }
-            };
-
-            var optlyObject = new Optimizely(TestData.Datafile, new ValidEventDispatcher(), LoggerMock.Object);
-            optlyObject.Activate("test_experiment", "test_user", userAttributes);
-
-            // invalid experiment key should return a null variation
-            Assert.False(Config.SetForcedVariation(invalidExperimentKey, userId, expectedVariationKey));
-            Assert.Null(Config.GetForcedVariation(invalidExperimentKey, userId));
-
-            // setting a null variation should return a null variation
-            Assert.True(Config.SetForcedVariation(experimentKey, userId, null));
-            Assert.Null(Config.GetForcedVariation(experimentKey, userId));
-
-            // setting an invalid variation should return a null variation
-            Assert.False(Config.SetForcedVariation(experimentKey, userId, invalidVariationKey));
-            Assert.Null(Config.GetForcedVariation(experimentKey, userId));
-
-            // confirm the forced variation is returned after a set
-            Assert.True(Config.SetForcedVariation(experimentKey, userId, expectedVariationKey));
-            var actualForcedVariation = Config.GetForcedVariation(experimentKey, userId);
-            Assert.AreEqual(expectedVariationKey, actualForcedVariation.Key);
-
-            // check multiple sets
-            Assert.True(Config.SetForcedVariation(experimentKey2, userId, expectedVariationKey2));
-            var actualForcedVariation2 = Config.GetForcedVariation(experimentKey2, userId);
-            Assert.AreEqual(expectedVariationKey2, actualForcedVariation2.Key);
-            // make sure the second set does not overwrite the first set
-            actualForcedVariation = Config.GetForcedVariation(experimentKey, userId);
-            Assert.AreEqual(expectedVariationKey, actualForcedVariation.Key);
-            // make sure unsetting the second experiment-to-variation mapping does not unset the
-            // first experiment-to-variation mapping
-            Assert.True(Config.SetForcedVariation(experimentKey2, userId, null));
-            actualForcedVariation = Config.GetForcedVariation(experimentKey, userId);
-            Assert.AreEqual(expectedVariationKey, actualForcedVariation.Key);
-
-            // an invalid user ID should return a null variation
-            Assert.Null(Config.GetForcedVariation(experimentKey, invalidUserId));
-        }
-
-        // test that all the logs in setForcedVariation are getting called
-        [Test]
-        public void TestSetForcedVariationLogs()
-        {
-            var userId = "test_user";
-            var experimentKey = "test_experiment";
-            var experimentId = "7716830082";
-            var invalidExperimentKey = "invalid_experiment";
-            var variationKey = "control";
-            var variationId = "7722370027";
-            var invalidVariationKey = "invalid_variation";
-            
-            Config.SetForcedVariation(invalidExperimentKey, userId, variationKey);
-            Config.SetForcedVariation(experimentKey, userId, null);
-            Config.SetForcedVariation(experimentKey, userId, invalidVariationKey);
-            Config.SetForcedVariation(experimentKey, userId, variationKey);
-
-            LoggerMock.Verify(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()), Times.Exactly(4));
-            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, string.Format(@"Experiment key ""{0}"" is not in datafile.", invalidExperimentKey)));
-            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, string.Format(@"Variation mapped to experiment ""{0}"" has been removed for user ""{1}"".", experimentKey, userId)));
-            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, string.Format(@"No variation key ""{0}"" defined in datafile for experiment ""{1}"".", invalidVariationKey, experimentKey)));
-            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, string.Format(@"Set variation ""{0}"" for experiment ""{1}"" and user ""{2}"" in the forced variation map.", variationId, experimentId, userId)));
-        }
-
-        // test that all the logs in getForcedVariation are getting called
-        [Test]
-        public void TestGetForcedVariationLogs()
-        {
-            var userId = "test_user";
-            var invalidUserId = "invalid_user";
-            var experimentKey = "test_experiment";
-            var experimentId = "7716830082";
-            var invalidExperimentKey = "invalid_experiment";
-            var pausedExperimentKey = "paused_experiment";
-            var variationKey = "control";
-            var variationId = "7722370027";
-
-            Config.SetForcedVariation(experimentKey, userId, variationKey);
-            Config.GetForcedVariation(experimentKey, invalidUserId);
-            Config.GetForcedVariation(invalidExperimentKey, userId);
-            Config.GetForcedVariation(pausedExperimentKey, userId);
-            Config.GetForcedVariation(experimentKey, userId);
-
-            LoggerMock.Verify(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()), Times.Exactly(5));
-            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, string.Format(@"Set variation ""{0}"" for experiment ""{1}"" and user ""{2}"" in the forced variation map.", variationId, experimentId, userId)));
-            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, string.Format(@"User ""{0}"" is not in the forced variation map.", invalidUserId)));
-            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, string.Format(@"Experiment key ""{0}"" is not in datafile.", invalidExperimentKey)));
-            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, string.Format(@"No experiment ""{0}"" mapped to user ""{1}"" in the forced variation map.", pausedExperimentKey, userId)));
-            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, string.Format(@"Variation ""{0}"" is mapped to experiment ""{1}"" and user ""{2}"" in the forced variation map", variationKey, experimentKey, userId)));
-        }
-        
-        [Test]
-        public void TestSetForcedVariationMultipleSets()
-        {
-            Assert.True(Config.SetForcedVariation("test_experiment", "test_user_1", "variation"));
-            Assert.AreEqual(Config.GetForcedVariation("test_experiment", "test_user_1").Key, "variation");
-            
-            // same user, same experiment, different variation
-            Assert.True(Config.SetForcedVariation("test_experiment", "test_user_1", "control"));
-            Assert.AreEqual(Config.GetForcedVariation("test_experiment", "test_user_1").Key, "control");
-            
-            // same user, different experiment
-            Assert.True(Config.SetForcedVariation("group_experiment_1", "test_user_1", "group_exp_1_var_1"));
-            Assert.AreEqual(Config.GetForcedVariation("group_experiment_1", "test_user_1").Key, "group_exp_1_var_1");
-
-            // different user
-            Assert.True(Config.SetForcedVariation("test_experiment", "test_user_2", "variation"));
-            Assert.AreEqual(Config.GetForcedVariation("test_experiment", "test_user_2").Key, "variation");
-            
-            // different user, different experiment
-            Assert.True(Config.SetForcedVariation("group_experiment_1", "test_user_2", "group_exp_1_var_1"));
-            Assert.AreEqual(Config.GetForcedVariation("group_experiment_1", "test_user_2").Key, "group_exp_1_var_1");
-
-            // make sure the first user forced variations are still valid
-            Assert.AreEqual(Config.GetForcedVariation("test_experiment", "test_user_1").Key, "control");
-            Assert.AreEqual(Config.GetForcedVariation("group_experiment_1", "test_user_1").Key, "group_exp_1_var_1");
-        }
 
         [Test]
         public void TestVariationFeatureEnabledProperty()
@@ -799,7 +668,7 @@ namespace OptimizelySDK.Tests
             if (projConfig.TryGetValue("botFiltering", out JToken token))
             {
                 projConfig.Property("botFiltering").Remove();
-                var configWithoutBotFilter = ProjectConfig.Create(JsonConvert.SerializeObject(projConfig),
+                var configWithoutBotFilter = DatafileProjectConfig.Create(JsonConvert.SerializeObject(projConfig),
                     LoggerMock.Object, ErrorHandlerMock.Object);
 
                 // Verify that bot filtering is null when not defined in datafile.
@@ -825,9 +694,9 @@ namespace OptimizelySDK.Tests
             attributes.Add((JObject)JToken.FromObject(reservedAttr));
 
             // Verify that attribute Id is returned and warning is logged for attribute key with reserved prefix that exists in datafile.
-            var reservedAttrConfig = ProjectConfig.Create(JsonConvert.SerializeObject(projConfig), LoggerMock.Object, ErrorHandlerMock.Object);
+            var reservedAttrConfig = DatafileProjectConfig.Create(JsonConvert.SerializeObject(projConfig), LoggerMock.Object, ErrorHandlerMock.Object);
             Assert.AreEqual(reservedAttrConfig.GetAttributeId(reservedPrefixAttrKey), reservedAttrConfig.GetAttribute(reservedPrefixAttrKey).Id);
-            LoggerMock.Verify(l => l.Log(LogLevel.WARN, $@"Attribute {reservedPrefixAttrKey} unexpectedly has reserved prefix {ProjectConfig.RESERVED_ATTRIBUTE_PREFIX}; using attribute ID instead of reserved attribute name."));
+            LoggerMock.Verify(l => l.Log(LogLevel.WARN, $@"Attribute {reservedPrefixAttrKey} unexpectedly has reserved prefix {DatafileProjectConfig.RESERVED_ATTRIBUTE_PREFIX}; using attribute ID instead of reserved attribute name."));
         }
 
         [Test]
@@ -841,34 +710,34 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestCreateThrowsWithNullDatafile()
         {
-            var exception = Assert.Throws<ConfigParseException>(() => ProjectConfig.Create(null, null, null));
+            var exception = Assert.Throws<ConfigParseException>(() => DatafileProjectConfig.Create(null, null, null));
             Assert.AreEqual("Unable to parse null datafile.", exception.Message);
         }
 
         [Test]
         public void TestCreateThrowsWithEmptyDatafile()
         {
-            var exception = Assert.Throws<ConfigParseException>(() => ProjectConfig.Create("", null, null));
+            var exception = Assert.Throws<ConfigParseException>(() => DatafileProjectConfig.Create("", null, null));
             Assert.AreEqual("Unable to parse empty datafile.", exception.Message);
         }
 
         [Test]
         public void TestCreateThrowsWithUnsupportedDatafileVersion()
         {
-            var exception = Assert.Throws<ConfigParseException>(() => ProjectConfig.Create(TestData.UnsupportedVersionDatafile, null, null));
+            var exception = Assert.Throws<ConfigParseException>(() => DatafileProjectConfig.Create(TestData.UnsupportedVersionDatafile, null, null));
             Assert.AreEqual($"This version of the C# SDK does not support the given datafile version: 5", exception.Message);
         }
 
         [Test]
         public void TestCreateDoesNotThrowWithValidDatafile()
         {
-            Assert.DoesNotThrow(() => ProjectConfig.Create(TestData.Datafile, null, null));
+            Assert.DoesNotThrow(() => DatafileProjectConfig.Create(TestData.Datafile, null, null));
         }
 
         [Test]
         public void TestExperimentAudiencesRetrivedFromTypedAudiencesFirstThenFromAudiences()
         {
-            var typedConfig = ProjectConfig.Create(TestData.TypedAudienceDatafile, null, null);
+            var typedConfig = DatafileProjectConfig.Create(TestData.TypedAudienceDatafile, null, null);
             var experiment = typedConfig.GetExperimentFromKey("feat_with_var_test");
 
             var expectedAudienceIds = new string[] { "3468206642", "3988293898", "3988293899", "3468206646", "3468206647", "3468206644", "3468206643" };
@@ -878,7 +747,7 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestIsFeatureExperimentReturnsFalseForExperimentThatDoesNotBelongToAnyFeature()
         {
-            var typedConfig = ProjectConfig.Create(TestData.TypedAudienceDatafile, null, null);
+            var typedConfig = DatafileProjectConfig.Create(TestData.TypedAudienceDatafile, null, null);
             var experiment = typedConfig.GetExperimentFromKey("typed_audience_experiment");
 
             Assert.False(typedConfig.IsFeatureExperiment(experiment.Id));
@@ -887,7 +756,7 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestIsFeatureExperimentReturnsTrueForExperimentThatBelongsToAFeature()
         {
-            var typedConfig = ProjectConfig.Create(TestData.TypedAudienceDatafile, null, null);
+            var typedConfig = DatafileProjectConfig.Create(TestData.TypedAudienceDatafile, null, null);
             var experiment = typedConfig.GetExperimentFromKey("feat2_with_var_test");
 
             Assert.True(typedConfig.IsFeatureExperiment(experiment.Id));

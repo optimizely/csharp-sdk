@@ -105,7 +105,6 @@
     <Compile Include="Logger\NoOpLogger.cs" />
     <Compile Include="Notifications\NotificationCenter.cs" />
     <Compile Include="Optimizely.cs" />
-    <Compile Include="ProjectConfig.cs" />
     <Compile Include="Bucketing\UserProfile.cs" />
     <Compile Include="Utils\AttributeMatchTypes.cs" />
     <Compile Include="Utils\ConditionParser.cs" />
@@ -121,6 +120,13 @@
     <Compile Include="Utils\Schema.cs" />
     <Compile Include="Bucketing\UserProfileService.cs" />
     <Compile Include="Bucketing\DecisionService.cs" />
+    <Compile Include="ProjectConfig.cs" />
+    <Compile Include="Config\DatafileProjectConfig.cs" />
+    <Compile Include="Config\ProjectConfigManager.cs" />
+    <Compile Include="Config\PollingProjectConfigManager.cs" />
+    <Compile Include="Config\HttpProjectConfigManager.cs" />
+    <Compile Include="Config\FallbackProjectConfigManager.cs" />
+    <Compile Include="OptimizelyFactory.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Utils\schema.json" />
@@ -128,6 +134,7 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
