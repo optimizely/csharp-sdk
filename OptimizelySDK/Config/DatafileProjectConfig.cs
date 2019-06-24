@@ -320,8 +320,8 @@ namespace OptimizelySDK.Config
         {
             DatafileProjectConfig config = GetConfig(content);
 
-            config.Logger = logger;
-            config.ErrorHandler = errorHandler;
+            config.Logger = logger ?? new NoOpLogger();
+            config.ErrorHandler = errorHandler ?? new NoOpErrorHandler();
 
             config.Initialize();
 
