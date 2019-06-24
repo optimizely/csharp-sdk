@@ -104,6 +104,7 @@ namespace OptimizelySDK.Config
         public ProjectConfig GetConfig()
         {
             if (Disposed) return null;
+
             if (IsStarted)
             {
                 try
@@ -155,14 +156,9 @@ namespace OptimizelySDK.Config
 
             // SetResult raise exception if called again, that's why Try is used.
             CompletableConfigManager.TrySetResult(true);
+                        
+            NotifyOnProjectConfigUpdate?.Invoke();            
 
-            // Invoke event in separate task.
-            // SetConfig should be released, as soon as it sets ProjectConfig
-            // otherwise, it will still use mutex resource and any upcoming scheduled requests will be deffered
-            // if notification callback is taking too long time to execute.
-            new Task(() => {
-                NotifyOnProjectConfigUpdate?.Invoke();
-            }).Start();            
             
             return true;
         }

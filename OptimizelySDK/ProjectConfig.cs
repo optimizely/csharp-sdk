@@ -238,7 +238,5 @@ namespace OptimizelySDK
         /// <param name="experimentId">Experiment Id</param>
         /// <returns>true if experiment belongs to any feature, false otherwise</returns>
         bool IsFeatureExperiment(string experimentId);
-
-        // TODO: Need to check, Create should be part of this interface.
     }
 }

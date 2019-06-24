@@ -110,8 +110,6 @@ namespace OptimizelySDK.Config
             return null;
         }
 #endif
-
-
         protected override ProjectConfig Poll()
         {
             var datafile = GetRemoteDatafileResponse();
