@@ -180,7 +180,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
                 new TestPollingData { PollingTime = 50, ChangeVersion = false, ConfigDatafile = null}
             };
 
-            var configManager = new TestPollingProjectConfigManager(TimeSpan.FromMilliseconds(500), TimeSpan.FromMilliseconds(1300), true, LoggerMock.Object, data.ToArray());
+            var configManager = new TestPollingProjectConfigManager(TimeSpan.FromMilliseconds(1000), TimeSpan.FromMilliseconds(2500), true, LoggerMock.Object, data.ToArray());
             configManager.Start();
             // after 3rd attempt should be released with null.
             var config = configManager.GetConfig();
