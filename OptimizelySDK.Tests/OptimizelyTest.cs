@@ -124,8 +124,7 @@ namespace OptimizelySDK.Tests
         #region OptimizelyHelper
         private class OptimizelyHelper
         {
-            static Type[] ParameterTypes = new[]
-            {
+            static Type[] ParameterTypes = {
                 typeof(string),
                 typeof(IEventDispatcher),
                 typeof(ILogger),
@@ -3417,5 +3416,92 @@ namespace OptimizelySDK.Tests
         }
 
         #endregion // Test Audience Combinations
+
+        #region Disposable Optimizely
+
+        [Test]
+        public void TestOptimizelyDisposeAlsoDisposedConfigManager()
+        {
+            var httpManager = new HttpProjectConfigManager.Builder()
+                                                          .WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z")
+                                                          .WithLogger(LoggerMock.Object)
+                                                          .WithPollingInterval(TimeSpan.FromMilliseconds(5000))
+                                                          .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(500))                                                          
+                                                          .Build();
+            var optimizely = new Optimizely(httpManager);
+            optimizely.Dispose();
+
+            Assert.True(optimizely.Disposed);
+            Assert.True(httpManager.Disposed);
+        }
+
+        [Test]
+        public void TestDisposeInvalidateObject()
+        {
+            var httpManager = new HttpProjectConfigManager.Builder()
+                                                          .WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z")
+                                                          .WithLogger(LoggerMock.Object)
+                                                          .WithPollingInterval(TimeSpan.FromMilliseconds(5000))
+                                                          .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(500))
+                                                          .Build();
+            var optimizely = new Optimizely(httpManager);
+            optimizely.Dispose();
+
+            Assert.False(optimizely.IsValid);
+        }
+
+        [Test]
+        public void TestAfterDisposeAPIsNoLongerValid()
+        {
+            var httpManager = new HttpProjectConfigManager.Builder()
+                                                          .WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z")
+                                                          .WithDatafile(TestData.Datafile)
+                                                          .WithLogger(LoggerMock.Object)                                                          
+                                                          .WithPollingInterval(TimeSpan.FromMilliseconds(50000))
+                                                          .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(500))
+                                                          .Build(true);
+            var optimizely = new Optimizely(httpManager);
+            httpManager.Start();
+            var activate = optimizely.Activate("test_experiment", TestUserId, new UserAttributes() {
+                { "device_type", "iPhone" }, { "location", "San Francisco" } });
+            Assert.NotNull(activate);
+            optimizely.Dispose();
+            var activateAfterDispose = optimizely.Activate("test_experiment", TestUserId, new UserAttributes() {
+                { "device_type", "iPhone" }, { "location", "San Francisco" } });
+            Assert.Null(activateAfterDispose);
+        }
+
+        [Test]
+        public void TestNonDisposableConfigManagerDontCrash()
+        {
+            var fallbackConfigManager = new FallbackProjectConfigManager(Config);
+
+            var optimizely = new Optimizely(fallbackConfigManager);
+            optimizely.Dispose();
+            Assert.True(optimizely.Disposed);
+        }
+
+        [Test]
+        public void TestAfterDisposeAPIsShouldNotCrash()
+        {
+            var fallbackConfigManager = new FallbackProjectConfigManager(Config);
+
+            var optimizely = new Optimizely(fallbackConfigManager);
+            optimizely.Dispose();
+            Assert.True(optimizely.Disposed);
+
+            Assert.IsNull(optimizely.GetVariation(string.Empty, string.Empty));
+            Assert.IsNull(optimizely.Activate(string.Empty, string.Empty));
+            optimizely.Track(string.Empty, string.Empty);
+            Assert.IsFalse(optimizely.IsFeatureEnabled(string.Empty, string.Empty));
+            Assert.AreEqual(optimizely.GetEnabledFeatures(string.Empty).Count, 0);
+            Assert.IsNull(optimizely.GetFeatureVariableBoolean(string.Empty, string.Empty, string.Empty));
+            Assert.IsNull(optimizely.GetFeatureVariableString(string.Empty, string.Empty, string.Empty));
+            Assert.IsNull(optimizely.GetFeatureVariableDouble(string.Empty, string.Empty, string.Empty));
+            Assert.IsNull(optimizely.GetFeatureVariableInteger(string.Empty, string.Empty, string.Empty));
+
+        }
+
+        #endregion
     }
 }

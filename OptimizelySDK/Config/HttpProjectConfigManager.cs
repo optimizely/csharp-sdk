@@ -78,40 +78,38 @@ namespace OptimizelySDK.Config
 
             return content.Result;  
         }
-#elif NET40
-        //TODO: Need to revise this method.	
-        private string GetRemoteDatafileResponse()	
-        {	
-            var request = (System.Net.HttpWebRequest)System.Net.WebRequest.Create(Url);	
+#elif NET40        
+        private string GetRemoteDatafileResponse()
+        {
+            var request = (System.Net.HttpWebRequest)System.Net.WebRequest.Create(Url);
 
-             // Send If-Modified-Since header if Last-Modified-Since header contains any value.	
-            if (!string.IsNullOrEmpty(LastModifiedSince))	
-                request.Headers.Add("If-Modified-Since", LastModifiedSince);	
-            var result = (System.Net.HttpWebResponse)request.GetResponse();	
+            // Send If-Modified-Since header if Last-Modified-Since header contains any value.
+            if (!string.IsNullOrEmpty(LastModifiedSince))
+                request.Headers.Add("If-Modified-Since", LastModifiedSince);
+            var result = (System.Net.HttpWebResponse)request.GetResponse();
 
-             // TODO: Need to revise this code.	
-            if (result.StatusCode != System.Net.HttpStatusCode.OK) {	
-                Logger.Log(LogLevel.ERROR, "Unexpected response from event endpoint, status: " + result.StatusCode);	
-            }	
-            var lastModified = result.Headers.GetValues("Last-Modified");	
-            if(!string.IsNullOrEmpty(lastModified.First()))	
-            {	
-                LastModifiedSince = lastModified.First();	
-            }	
+            // TODO: Need to revise this code.
+            if (result.StatusCode != System.Net.HttpStatusCode.OK) {
+                Logger.Log(LogLevel.ERROR, "Unexpected response from event endpoint, status: " + result.StatusCode);
+            }
+            var lastModified = result.Headers.GetValues("Last-Modified");
+            if(!string.IsNullOrEmpty(lastModified.First()))
+            {
+                LastModifiedSince = lastModified.First();
+            }
 
-             var encoding = System.Text.Encoding.ASCII;	
-            using (var reader = new System.IO.StreamReader(result.GetResponseStream(), encoding)) {	
-                string responseText = reader.ReadToEnd();	
-                return responseText;	
-            }	
-        }	
+            var encoding = System.Text.Encoding.ASCII;
+            using (var reader = new System.IO.StreamReader(result.GetResponseStream(), encoding)) {
+                string responseText = reader.ReadToEnd();
+                return responseText;
+            }
+        }
 #else
-        private string GetRemoteDatafileResponse()	
-        {	
-            return null;	
-        }	
+        private string GetRemoteDatafileResponse()
+        {
+            return null;
+        }
 #endif
-
         protected override ProjectConfig Poll()
         {
             var datafile = GetRemoteDatafileResponse();

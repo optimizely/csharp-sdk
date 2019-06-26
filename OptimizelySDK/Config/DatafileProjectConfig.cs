@@ -321,7 +321,7 @@ namespace OptimizelySDK.Config
             DatafileProjectConfig config = GetConfig(content);
 
             config.Logger = logger ?? new NoOpLogger();
-            config.ErrorHandler = errorHandler ?? new NoOpErrorHandler();
+            config.ErrorHandler = errorHandler ?? new NoOpErrorHandler(logger);
 
             config.Initialize();
 
