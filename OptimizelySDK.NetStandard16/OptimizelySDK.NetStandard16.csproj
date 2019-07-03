@@ -79,6 +79,36 @@
 		<Compile Include="..\OptimizelySDK\OptimizelyFactory.cs">
 		  <Link>OptimizelyFactory.cs</Link>
 		</Compile>
+		<Compile Include="..\OptimizelySDK\Event\Entity\ConversionEvent.cs">
+		  <Link>ConversionEvent.cs</Link>
+		</Compile>
+		<Compile Include="..\OptimizelySDK\Event\Entity\EventBatch.cs">
+		  <Link>EventBatch.cs</Link>
+		</Compile>
+		<Compile Include="..\OptimizelySDK\Event\Entity\EventContext.cs">
+		  <Link>EventContext.cs</Link>
+		</Compile>
+		<Compile Include="..\OptimizelySDK\Event\Entity\ImpressionEvent.cs">
+		  <Link>ImpressionEvent.cs</Link>
+		</Compile>
+		<Compile Include="..\OptimizelySDK\Event\Entity\Snapshot.cs">
+		  <Link>Snapshot.cs</Link>
+		</Compile>
+		<Compile Include="..\OptimizelySDK\Event\Entity\SnapshotEvent.cs">
+		  <Link>SnapshotEvent.cs</Link>
+		</Compile>
+		<Compile Include="..\OptimizelySDK\Event\Entity\UserEvent.cs">
+		  <Link>UserEvent.cs</Link>
+		</Compile>
+		<Compile Include="..\OptimizelySDK\Event\Entity\Visitor.cs">
+		  <Link>Visitor.cs</Link>
+		</Compile>
+		<Compile Include="..\OptimizelySDK\Event\Entity\VisitorAttribute.cs">
+		  <Link>VisitorAttribute.cs</Link>
+		</Compile>
+		<Compile Include="..\OptimizelySDK\Event\Entity\Decision.cs">
+		  <Link>DecisionEvent.cs</Link>
+		</Compile>
     </ItemGroup>
     <ItemGroup>
         <EmbeddedResource Include="..\OptimizelySDK\Utils\schema.json">

@@ -127,6 +127,16 @@
     <Compile Include="Config\HttpProjectConfigManager.cs" />
     <Compile Include="Config\FallbackProjectConfigManager.cs" />
     <Compile Include="OptimizelyFactory.cs" />
+    <Compile Include="Event\Entity\UserEvent.cs" />
+    <Compile Include="Event\Entity\ConversionEvent.cs" />
+    <Compile Include="Event\Entity\ImpressionEvent.cs" />
+    <Compile Include="Event\Entity\VisitorAttribute.cs" />
+    <Compile Include="Event\Entity\Visitor.cs" />
+    <Compile Include="Event\Entity\Decision.cs" />
+    <Compile Include="Event\Entity\Snapshot.cs" />
+    <Compile Include="Event\Entity\SnapshotEvent.cs" />
+    <Compile Include="Event\Entity\EventBatch.cs" />
+    <Compile Include="Event\Entity\EventContext.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Utils\schema.json" />
@@ -135,6 +145,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Event\Entity\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

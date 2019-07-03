@@ -227,6 +227,36 @@
 	<Compile Include="..\OptimizelySDK\Config\FallbackProjectConfigManager.cs">
 	  <Link>Config\FallbackProjectConfigManager.cs</Link>
 	</Compile>
+	<Compile Include="..\OptimizelySDK\Event\Entity\ConversionEvent.cs">
+	  <Link>Event\Entity\ConversionEvent.cs</Link>
+	</Compile>
+	<Compile Include="..\OptimizelySDK\Event\Entity\Decision.cs">
+	  <Link>Event\Entity\Decision.cs</Link>
+	</Compile>
+	<Compile Include="..\OptimizelySDK\Event\Entity\EventBatch.cs">
+	  <Link>Event\Entity\EventBatch.cs</Link>
+	</Compile>
+	<Compile Include="..\OptimizelySDK\Event\Entity\EventContext.cs">
+	  <Link>Event\Entity\EventContext.cs</Link>
+	</Compile>
+	<Compile Include="..\OptimizelySDK\Event\Entity\ImpressionEvent.cs">
+	  <Link>Event\Entity\ImpressionEvent.cs</Link>
+	</Compile>
+	<Compile Include="..\OptimizelySDK\Event\Entity\Snapshot.cs">
+	  <Link>Event\Entity\Snapshot.cs</Link>
+	</Compile>
+	<Compile Include="..\OptimizelySDK\Event\Entity\SnapshotEvent.cs">
+	  <Link>Event\Entity\SnapshotEvent.cs</Link>
+	</Compile>
+	<Compile Include="..\OptimizelySDK\Event\Entity\UserEvent.cs">
+	  <Link>Event\Entity\UserEvent.cs</Link>
+	</Compile>
+	<Compile Include="..\OptimizelySDK\Event\Entity\Visitor.cs">
+	  <Link>Event\Entity\Visitor.cs</Link>
+	</Compile>
+	<Compile Include="..\OptimizelySDK\Event\Entity\VisitorAttribute.cs">
+	  <Link>Event\Entity\VisitorAttribute.cs</Link>
+	</Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\OptimizelySDK\Utils\schema.json">
