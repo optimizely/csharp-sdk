@@ -18,22 +18,20 @@ using Newtonsoft.Json;
 
 namespace OptimizelySDK.Event.Entity
 {
-    public class EventBatch : EventContext
+    public class EventBatch
     {
+        [JsonIgnore]
+        public EventContext EventContext;
+
         [JsonProperty("enrich_decisions")]
         public bool EnrichDecisions { get; private set; }
 
         [JsonProperty("visitors")]
         public List<Visitor> Visitors { get; private set; }
 
-        public EventBatch(string accountId, string projectId, string revision, string clientName, string clientVersion, bool anonymizeIP, bool enrichDecisions)
+        public EventBatch(EventContext eventContext, bool enrichDecisions)
         {
-            AccountId = accountId;
-            ProjectId = projectId;
-            Revision = revision;
-            ClientName = clientName;
-            ClientVersion = clientVersion;
-            AnonymizeIP = anonymizeIP;
+            EventContext = eventContext;
             EnrichDecisions = enrichDecisions;
 
             Visitors = new List<Visitor>();

@@ -17,7 +17,7 @@ using OptimizelySDK.Entity;
 
 namespace OptimizelySDK.Event.Entity
 {
-    public class ConversionEvent : EventContext
+    public class ConversionEvent : UserEvent
     {
         public string UserId { get; private set; }
         public VisitorAttribute[] UserAttributes { get; private set; }
