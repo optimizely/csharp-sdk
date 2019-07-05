@@ -20,8 +20,23 @@ namespace OptimizelySDK.Event.Entity
 {
     public class EventBatch
     {
-        [JsonIgnore]
-        public EventContext EventContext;
+        [JsonProperty("account_id")]
+        public string AccountId { get; private set; }
+
+        [JsonProperty("project_id")]
+        public string ProjectId { get; private set; }
+
+        [JsonProperty("revision")]
+        public string Revision { get; private set; }
+
+        [JsonProperty("client_name")]
+        public string ClientName { get; private set; }
+
+        [JsonProperty("client_version")]
+        public string ClientVersion { get; private set; }
+
+        [JsonProperty("anonymize_ip")]
+        public bool AnonymizeIP { get; private set; }
 
         [JsonProperty("enrich_decisions")]
         public bool EnrichDecisions { get; private set; }
@@ -29,12 +44,84 @@ namespace OptimizelySDK.Event.Entity
         [JsonProperty("visitors")]
         public List<Visitor> Visitors { get; private set; }
 
-        public EventBatch(EventContext eventContext, bool enrichDecisions)
+        public class Builder
         {
-            EventContext = eventContext;
-            EnrichDecisions = enrichDecisions;
+            private string AccountId;
+            private string ProjectId;
+            private string Revision;
+            private string ClientName;
+            private string ClientVersion;
+            private bool AnonymizeIP;
+            private bool EnrichDecisions;
+            private List<Visitor> Visitors;
 
-            Visitors = new List<Visitor>();
+            public EventBatch Build()
+            {
+                EventBatch eventBatch = new EventBatch();
+                eventBatch.AccountId = AccountId;
+                eventBatch.ProjectId = ProjectId;
+                eventBatch.Revision = Revision;
+                eventBatch.ClientName = ClientName;
+                eventBatch.ClientVersion = ClientVersion;
+                eventBatch.AnonymizeIP = AnonymizeIP;
+                eventBatch.EnrichDecisions = EnrichDecisions;
+                eventBatch.Visitors = Visitors ?? new List<Visitor>();
+
+                return eventBatch;
+            }
+
+            public Builder WithAccountId(string accountId)
+            {
+                AccountId = accountId;
+
+                return this;
+            }
+
+            public Builder WithProjectID(string projectId)
+            {
+                ProjectId = projectId;
+
+                return this;
+            }
+
+            public Builder WithRevision(string revision)
+            {
+                Revision = revision;
+
+                return this;
+            }
+
+            public Builder WithClientName(string clientName)
+            {
+                ClientName = clientName;
+
+                return this;
+            }
+
+            public Builder WithClientVersion(string clientVersion)
+            {
+                ClientVersion = clientVersion;
+
+                return this;
+            }
+
+            public Builder WithAnonymizeIP(bool anonymizeIP)
+            {
+                AnonymizeIP = anonymizeIP;
+                return this;
+            }
+
+            public Builder WithEnrichDecisions(bool enrichDecisions)
+            {
+                EnrichDecisions = enrichDecisions;
+                return this;
+            }
+
+            public Builder WithVisitors(Visitor[] visitors)
+            {
+                Visitors = new List<Visitor>(visitors);
+                return this;
+            }
         }
     }
 }
