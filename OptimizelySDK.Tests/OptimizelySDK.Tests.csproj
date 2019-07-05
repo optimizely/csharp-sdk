@@ -97,6 +97,7 @@
     <Compile Include="ValidEventDispatcher.cs" />
     <Compile Include="ConfigTest\TestPollingProjectConfigManager.cs" />
     <Compile Include="EntityTests\FeatureVariableTest.cs" />
+    <Compile Include="EventTests\EventEntitiesTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="App.config" />
