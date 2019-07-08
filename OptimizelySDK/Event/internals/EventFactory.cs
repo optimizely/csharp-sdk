@@ -14,49 +14,49 @@
  * limitations under the License.
  */
 
-using Newtonsoft.Json;
+using System.Collections.Generic;
+using System.Linq;
+using Newtonsoft.Json.Linq;
+using OptimizelySDK.Entity;
 using OptimizelySDK.Event.Builder;
 using OptimizelySDK.Event.Entity;
 using OptimizelySDK.Logger;
 using OptimizelySDK.Utils;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+
 
 namespace OptimizelySDK.Event.internals
 {
     public class EventFactory
     {
-        private static ILogger Logger;
+        private const string CUSTOM_ATTRIBUTE_FEATURE_TYPE = "custom";
         public const string EVENT_ENDPOINT = "https://logx.optimizely.com/v1/events";  // Should be part of the datafile
+
         private const string ACTIVATE_EVENT_KEY = "campaign_activated";
 
         public static LogEvent CreateLogEvent(UserEvent userEvent, ILogger logger) {
-            Logger = logger;
-            List<UserEvent> userEventList = new List<UserEvent>();
-            userEventList.Add(userEvent);
-            return CreateLogEvent(userEventList);
+                        
+            return CreateLogEvent(new UserEvent[] { userEvent }, logger);
         }
 
-        public static LogEvent CreateLogEvent(List<UserEvent> userEvents) {
+        public static LogEvent CreateLogEvent(UserEvent[] userEvents, ILogger logger) {
+
             EventBatch.Builder builder = new EventBatch.Builder();
+
             List<Visitor> visitors = new List<Visitor>(userEvents.Count());
 
             foreach (UserEvent userEvent in userEvents) {
 
-                if (userEvent == null) {
-                    continue;
-                }
-
                 if (userEvent is ImpressionEvent) {
                     visitors.Add(CreateVisitor((ImpressionEvent) userEvent));
                 }
-
-                if (userEvent is ConversionEvent) {
-                    visitors.Add(CreateVisitor((ConversionEvent) userEvent));
+                else if (userEvent is ConversionEvent) {                
+                    visitors.Add(CreateVisitor((ConversionEvent) userEvent, logger));
                 }
-
-                // This needs an interface.
+                else {
+                    //TODO: Need to log a message, invalid UserEvent added in a list.
+                    continue;
+                }
+               
                 var userContext = userEvent.Context;
 
                 builder.WithClientName(Params.CLIENT_ENGINE)
@@ -72,40 +72,43 @@ namespace OptimizelySDK.Event.internals
             }
 
             builder.WithVisitors(visitors.ToArray());
-            var json = JsonConvert.SerializeObject(builder.Build());
-            var dictionary = JsonConvert.DeserializeObject<Dictionary<string, object>>(json);
-            return new LogEvent(EVENT_ENDPOINT, dictionary, "POST", headers: new Dictionary<string, string>
-                {
-                    { "Content-type", "application/json" }
-                });
+
+            EventBatch eventBatch = builder.Build();
+
+            var eventBatchDictionary = JObject.FromObject(eventBatch).ToObject<Dictionary<string, object>>();
+
+            return new LogEvent(EVENT_ENDPOINT, eventBatchDictionary, "POST", headers: new Dictionary<string, string> {
+                { "Content-type", "application/json" }
+            });
         }
 
         private static Visitor CreateVisitor(ImpressionEvent impressionEvent) {
+
             if (impressionEvent == null) {
                 return null;
             }
 
-            var userContext = impressionEvent.Context;
+            var eventContext = impressionEvent.Context;
 
-            Decision decision = new Decision(impressionEvent.Experiment.LayerId,
-                impressionEvent.Experiment.Id,
-                impressionEvent.Variation.Id);
+            Decision decision = new Decision(impressionEvent.Experiment?.LayerId,
+                impressionEvent.Experiment?.Id,
+                impressionEvent.Variation?.Id);
 
             SnapshotEvent snapshotEvent = new SnapshotEvent(impressionEvent.Experiment.LayerId,
                 impressionEvent.UUID,
                 ACTIVATE_EVENT_KEY,
-                impressionEvent.TimeStamp,
-                null,
-                null,
-                null);
+                impressionEvent.Timestamp);
 
-            Snapshot snapshot = new Snapshot(new SnapshotEvent[] { snapshotEvent }, new Decision[] { decision });
-
-            return new Visitor(new Snapshot[] { snapshot }, impressionEvent.UserAttributes, impressionEvent.UserId);
+            Snapshot snapshot = new Snapshot(
+                new SnapshotEvent[] { snapshotEvent },
+                new Decision[] { decision });
             
+            var visitor = new Visitor(new Snapshot[] { snapshot }, impressionEvent.VisitorAttributes, impressionEvent.UserId);
+
+            return visitor;
         }
 
-        private static Visitor CreateVisitor(ConversionEvent conversionEvent) {
+        private static Visitor CreateVisitor(ConversionEvent conversionEvent, ILogger logger) {
             if (conversionEvent == null) {
                 return null;
             }
@@ -114,71 +117,46 @@ namespace OptimizelySDK.Event.internals
 
             SnapshotEvent snapshotEvent = new SnapshotEvent(conversionEvent.Event.Id,
                 conversionEvent.UUID,
-                conversionEvent.Event.Key,
-                conversionEvent.TimeStamp,
-                (int?) EventTagUtils.GetRevenueValue(conversionEvent.EventTags, Logger),
-                (long?) EventTagUtils.GetNumericValue(conversionEvent.EventTags, Logger),
+                conversionEvent.Event?.Key,
+                conversionEvent.Timestamp,
+                (int?) EventTagUtils.GetRevenueValue(conversionEvent.EventTags, logger),
+                (long?) EventTagUtils.GetNumericValue(conversionEvent.EventTags, logger),
                 conversionEvent.EventTags);
 
             Snapshot snapshot = new Snapshot(new SnapshotEvent[] { snapshotEvent });
+            
+            var visitor = new Visitor(new Snapshot[] { snapshot }, conversionEvent.VisitorAttributes, conversionEvent.UserId);
 
-            return new Visitor(new Snapshot[] { snapshot }, conversionEvent.UserAttributes, conversionEvent.UserId);
-      
+            return visitor;
         }
+        
+        public static VisitorAttribute[] BuildAttributeList(UserAttributes userAttributes, ProjectConfig config)
+        {            
+            if (config == null)
+                return null;
 
-        /**
-        private static VisitorAttribute[] BuildAttributeList(ProjectConfig projectConfig, VisitorAttribute[] attributes)
-        {
             List<VisitorAttribute> attributesList = new List<VisitorAttribute>();
 
-            if (attributes != null)
+            if (userAttributes != null)
             {
-                foreach (VisitorAttribute visitorAttribute in attributes)
-                {
+                foreach (var validUserAttribute in userAttributes.Where(attribute => Validator.IsUserAttributeValid(attribute))) {
 
-                    // Ignore attributes with empty key
-                    if (string.IsNullOrEmpty(visitorAttribute.Key))
-                    {
-                        continue;
+                    var attributeId = config.GetAttributeId(validUserAttribute.Key);
+                    if (!string.IsNullOrEmpty(attributeId)) {
+                        attributesList.Add(new VisitorAttribute(entityId: attributeId, key: validUserAttribute.Key,
+                            type: CUSTOM_ATTRIBUTE_FEATURE_TYPE, value: validUserAttribute.Value));
                     }
-
-                    // Filter down to the types of values we're allowed to track.
-                    // Don't allow Longs, BigIntegers, or BigDecimals - they /can/ theoretically be serialized as JSON numbers
-                    // but may take on values that can't be faithfully parsed by the backend.
-                    // https://developers.optimizely.com/x/events/api/#Attribute
-                    if (visitorAttribute.Value == null ||
-                        !((visitorAttribute.Value is string) ||
-                            (visitorAttribute.Value is bool) ||
-                            (Validator.IsValidNumericValue(visitorAttribute.Value))))
-                    {
-                        continue;
-                    }
-
-                    string attributeId = projectConfig.GetAttributeId(visitorAttribute.Key);
-                    if (attributeId == null)
-                    {
-                        continue;
-                    }
-
-                    VisitorAttribute visitorAttr = new VisitorAttribute(attributeId, visitorAttribute.Key, "custom_attribute", visitorAttribute.Value);
-
-                    attributesList.Add(visitorAttr);
                 }
-            }   
+            }
 
             //checks if botFiltering value is not set in the project config file.
-            if (projectConfig.BotFiltering != null)
-            {
-                VisitorAttribute attribute = new VisitorAttribute(ControlAttributes.BOT_FILTERING_ATTRIBUTE,
-                    ControlAttributes.BOT_FILTERING_ATTRIBUTE,
-                    "custom_attribute",
-                    projectConfig.BotFiltering);
+            if (config.BotFiltering.HasValue) {
 
-                attributesList.Add(attribute);
+                attributesList.Add(new VisitorAttribute(entityId: ControlAttributes.BOT_FILTERING_ATTRIBUTE,
+                    key: ControlAttributes.BOT_FILTERING_ATTRIBUTE, type: CUSTOM_ATTRIBUTE_FEATURE_TYPE, value: config.BotFiltering));                
             }
 
             return attributesList.ToArray();
         }
-        **/
     }
 }

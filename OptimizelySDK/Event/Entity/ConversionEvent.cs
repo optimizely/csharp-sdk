@@ -20,9 +20,95 @@ namespace OptimizelySDK.Event.Entity
     public class ConversionEvent : UserEvent
     {
         public string UserId { get; private set; }
-        public VisitorAttribute[] UserAttributes { get; private set; }
+        public VisitorAttribute[] VisitorAttributes { get; private set; }
 
-        public OptimizelySDK.Entity.Event Event { get; set; }
-        public EventTags EventTags { get; set; }
+        public OptimizelySDK.Entity.Event Event { get; private set; }
+        public EventTags EventTags { get; private set; }
+        public bool BotFiltering { get; private set; }
+
+        public class Builder
+        {
+            private string UserId;
+            private VisitorAttribute[] VisitorAttributes;
+            private OptimizelySDK.Entity.Event Event;
+            private EventTags EventTags;
+            private EventContext EventContext;
+            private string UUID;
+            private long Timestamp;
+            private bool BotFiltering;
+
+            public Builder WithUserId(string userId)
+            {
+                UserId = userId;
+
+                return this;
+            }            
+
+            public Builder WithUUID(string uuid)
+            {
+                UUID = uuid;
+                return this;
+            }
+
+            public Builder WithTimestamp(long timestamp)
+            {
+                Timestamp = timestamp;
+
+                return this;
+            }
+
+            public Builder WithEventContext(EventContext eventContext)
+            {
+                EventContext = eventContext;
+
+                return this;
+            }
+
+            public Builder WithEvent(OptimizelySDK.Entity.Event @event)
+            {
+                Event = @event;
+
+                return this;
+            }
+
+            public Builder WithVisitorAttributes(VisitorAttribute[] visitorAttributes)
+            {
+                VisitorAttributes = visitorAttributes;
+
+                return this;
+            }
+
+            public Builder WithEventTags(EventTags eventTags)
+            {
+                EventTags = eventTags;
+
+                return this;
+            }
+
+            public Builder WithBotFilteringEnabled(bool botFiltering)
+            {
+                BotFiltering = botFiltering;
+
+                return this;
+            }
+
+            public ConversionEvent Build()
+            {
+                var conversionEvent = new ConversionEvent();
+
+                conversionEvent.Context = EventContext;
+                conversionEvent.UUID = UUID;
+                conversionEvent.Timestamp = Timestamp;
+
+                conversionEvent.EventTags = EventTags;
+                conversionEvent.VisitorAttributes = VisitorAttributes;
+                conversionEvent.UserId = UserId;
+                conversionEvent.Event = Event;
+                conversionEvent.BotFiltering = BotFiltering;
+
+                return conversionEvent;
+            }
+        }
+
     }
 }

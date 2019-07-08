@@ -267,6 +267,9 @@
 	<Compile Include="..\OptimizelySDK\Event\Entity\VisitorAttribute.cs">
 	  <Link>Event\Entity\VisitorAttribute.cs</Link>
 	</Compile>
+	<Compile Include="..\OptimizelySDK\Event\internals\EventFactory.cs">
+	  <Link>Event\internals\EventFactory.cs</Link>
+	</Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\OptimizelySDK\Utils\schema.json">

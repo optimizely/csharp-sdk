@@ -17,8 +17,8 @@ namespace OptimizelySDK.Event.Entity
 {
     public class UserEvent
     {
-        public EventContext Context { get; private set; }
-        public string UUID { get; private set; }
-        public long TimeStamp { get; private set; }
+        public EventContext Context { get; protected set; }
+        public string UUID { get; protected set; }
+        public long Timestamp { get; protected set; }
     }
 }

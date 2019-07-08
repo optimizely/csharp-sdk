@@ -41,7 +41,7 @@ namespace OptimizelySDK.Event.Entity
         [JsonProperty("tags", NullValueHandling = NullValueHandling.Ignore)]
         public EventTags EventTags { get; private set; }
 
-        public SnapshotEvent(string entityId, string uuid, string key, long timestamp, int? revenue, long? value, EventTags eventTags)
+        public SnapshotEvent(string entityId, string uuid, string key, long timestamp, int? revenue = null, long? value = null, EventTags eventTags = null)
         {
             EntityId = entityId;
             UUID = uuid;
