@@ -98,6 +98,7 @@
     <Compile Include="Event\Dispatcher\HttpClientEventDispatcher45.cs" />
     <Compile Include="Event\Dispatcher\IEventDispatcher.cs" />
     <Compile Include="Event\internals\EventFactory.cs" />
+    <Compile Include="Event\internals\UserEventFactory.cs" />
     <Compile Include="Event\LogEvent.cs" />
     <Compile Include="Exceptions\OptimizelyException.cs" />
     <Compile Include="IOptimizely.cs" />

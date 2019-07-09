@@ -9,7 +9,7 @@ namespace OptimizelySDK.Event.internals
                                                             Experiment activatedExperiment,
                                                             Variation variation,
                                                             string userId,
-                                                            VisitorAttribute[] visitorAttributes)
+                                                            UserAttributes userAttributes)
         {
 
             var eventContext = new EventContext.Builder()
@@ -24,7 +24,7 @@ namespace OptimizelySDK.Event.internals
                 .WithExperiment(activatedExperiment)
                 .WithUserId(userId)
                 .WithVariation(variation)
-                .WithVisitorAttributes(visitorAttributes)
+                .WithVisitorAttributes(EventFactory.BuildAttributeList(userAttributes, projectConfig))
                 .Build();
             
         }
@@ -32,7 +32,7 @@ namespace OptimizelySDK.Event.internals
         public static ConversionEvent CreateConversionEvent(ProjectConfig projectConfig,
                                                             string userId,
                                                             string eventId,
-                                                            VisitorAttribute[] visitorAttributes,
+                                                            UserAttributes userAttributes,
                                                             EventTags eventTags)
         {
             
@@ -49,7 +49,7 @@ namespace OptimizelySDK.Event.internals
                 .WithEventTags(eventTags)
                 .WithEvent(projectConfig.GetEvent(eventId))
                 .WithUserId(userId)
-                .WithVisitorAttributes(visitorAttributes)
+                .WithVisitorAttributes(EventFactory.BuildAttributeList(userAttributes, projectConfig))
                 .Build();
             
         }
