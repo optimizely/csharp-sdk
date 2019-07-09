@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 using OptimizelySDK.Entity;
+using System;
 
 namespace OptimizelySDK.Event.Entity
 {
@@ -24,7 +25,7 @@ namespace OptimizelySDK.Event.Entity
 
         public OptimizelySDK.Entity.Event Event { get; private set; }
         public EventTags EventTags { get; private set; }
-        public bool BotFiltering { get; private set; }
+        public bool? BotFiltering { get; private set; }
 
         public class Builder
         {
@@ -33,9 +34,7 @@ namespace OptimizelySDK.Event.Entity
             private OptimizelySDK.Entity.Event Event;
             private EventTags EventTags;
             private EventContext EventContext;
-            private string UUID;
-            private long Timestamp;
-            private bool BotFiltering;
+            private bool? BotFiltering;
 
             public Builder WithUserId(string userId)
             {
@@ -43,19 +42,6 @@ namespace OptimizelySDK.Event.Entity
 
                 return this;
             }            
-
-            public Builder WithUUID(string uuid)
-            {
-                UUID = uuid;
-                return this;
-            }
-
-            public Builder WithTimestamp(long timestamp)
-            {
-                Timestamp = timestamp;
-
-                return this;
-            }
 
             public Builder WithEventContext(EventContext eventContext)
             {
@@ -85,7 +71,7 @@ namespace OptimizelySDK.Event.Entity
                 return this;
             }
 
-            public Builder WithBotFilteringEnabled(bool botFiltering)
+            public Builder WithBotFilteringEnabled(bool? botFiltering)
             {
                 BotFiltering = botFiltering;
 
@@ -97,8 +83,8 @@ namespace OptimizelySDK.Event.Entity
                 var conversionEvent = new ConversionEvent();
 
                 conversionEvent.Context = EventContext;
-                conversionEvent.UUID = UUID;
-                conversionEvent.Timestamp = Timestamp;
+                conversionEvent.UUID = Guid.NewGuid().ToString();
+                conversionEvent.Timestamp = SecondsSince1970 * 1000;
 
                 conversionEvent.EventTags = EventTags;
                 conversionEvent.VisitorAttributes = VisitorAttributes;

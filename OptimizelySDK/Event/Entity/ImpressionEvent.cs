@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 using OptimizelySDK.Entity;
+using System;
 
 namespace OptimizelySDK.Event.Entity
 {
@@ -24,7 +25,7 @@ namespace OptimizelySDK.Event.Entity
 
         public Experiment Experiment { get; set; }
         public Variation Variation { get; set; }
-        public bool BotFiltering { get; set; }
+        public bool? BotFiltering { get; set; }
 
         public class Builder
         {
@@ -36,24 +37,11 @@ namespace OptimizelySDK.Event.Entity
             public VisitorAttribute[] VisitorAttributes;
             private Experiment Experiment;
             private Variation Variation;
-            private bool BotFiltering;
+            private bool? BotFiltering;
 
             public Builder WithUserId(string userId)
             {
                 UserId = userId;
-
-                return this;
-            }
-
-            public Builder WithUUID(string uuid)
-            {
-                UUID = uuid;
-                return this;
-            }
-
-            public Builder WithTimestamp(long timestamp)
-            {
-                Timestamp = timestamp;
 
                 return this;
             }
@@ -86,7 +74,7 @@ namespace OptimizelySDK.Event.Entity
                 return this;
             }
 
-            public Builder WithBotFilteringEnabled(bool botFiltering)
+            public Builder WithBotFilteringEnabled(bool? botFiltering)
             {
                 BotFiltering = botFiltering;
 
@@ -98,8 +86,8 @@ namespace OptimizelySDK.Event.Entity
                 var impressionEvent = new ImpressionEvent();
 
                 impressionEvent.Context = EventContext;
-                impressionEvent.UUID = UUID;
-                impressionEvent.Timestamp = Timestamp;
+                impressionEvent.UUID = Guid.NewGuid().ToString();
+                impressionEvent.Timestamp = SecondsSince1970 * 1000;
 
                 impressionEvent.Experiment = Experiment;
                 impressionEvent.VisitorAttributes = VisitorAttributes;

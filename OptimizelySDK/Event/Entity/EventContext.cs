@@ -36,5 +36,66 @@ namespace OptimizelySDK.Event.Entity
 
         [JsonProperty("anonymize_ip")]
         public bool AnonymizeIP { get; protected set; }
+
+        public class Builder
+        {
+            private string AccountId;
+            private string ProjectId;
+            private string Revision;
+            private string ClientName;
+            private string ClientVersion;
+            private bool AnonymizeIP;
+
+            public Builder WithAccountId(string accountId)
+            {
+                AccountId = accountId;
+                return this;
+            }
+
+            public Builder WithProjectId(string projectId)
+            {
+                ProjectId = projectId;
+                return this;
+            }
+
+            public Builder WithRevision(string revision)
+            {
+                Revision = revision;
+                return this;
+            }
+
+            public Builder WithClientName(string clientName)
+            {
+                ClientName = clientName;
+                return this;
+            }
+
+            public Builder WithClientVersion(string clientVersion)
+            {
+                ClientVersion = clientVersion;
+                return this;
+            }
+
+            public Builder WithAnonymizeIP(bool anonymizeIP)
+            {
+                AnonymizeIP = anonymizeIP;
+                return this;
+            }
+            
+            public EventContext Build()
+            {
+                var eventContext = new EventContext();
+
+                eventContext.AccountId = AccountId;
+                eventContext.ProjectId = ProjectId;
+                eventContext.Revision = Revision;
+                eventContext.ClientName = ClientName;
+                eventContext.ClientVersion = ClientVersion;
+                eventContext.AnonymizeIP = AnonymizeIP;
+
+                return eventContext;
+            }
+        }
+
     }
 }

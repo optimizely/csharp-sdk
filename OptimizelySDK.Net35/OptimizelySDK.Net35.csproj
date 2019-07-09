@@ -260,6 +260,9 @@
 	<Compile Include="..\OptimizelySDK\Event\internals\EventFactory.cs">
 	  <Link>Event\internals\EventFactory.cs</Link>
 	</Compile>
+	<Compile Include="..\OptimizelySDK\Event\internals\UserEventFactory.cs">
+	  <Link>Event\internals\UserEventFactory.cs</Link>
+	</Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\OptimizelySDK\Utils\schema.json">

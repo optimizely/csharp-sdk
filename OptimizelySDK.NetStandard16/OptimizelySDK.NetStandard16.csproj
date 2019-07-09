@@ -112,6 +112,9 @@
 		<Compile Include="..\OptimizelySDK\Event\internals\EventFactory.cs">
 		  <Link>EventFactory.cs</Link>
 		</Compile>
+		<Compile Include="..\OptimizelySDK\Event\internals\UserEventFactory.cs">
+		  <Link>UserEventFactory.cs</Link>
+		</Compile>
     </ItemGroup>
     <ItemGroup>
         <EmbeddedResource Include="..\OptimizelySDK\Utils\schema.json">
