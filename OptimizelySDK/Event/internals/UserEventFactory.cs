@@ -7,12 +7,23 @@ namespace OptimizelySDK.Event.internals
     {
         public static ImpressionEvent CreateImpressionEvent(ProjectConfig projectConfig,
                                                             Experiment activatedExperiment,
+                                                            string variationId,
+                                                            string userId,
+                                                            UserAttributes userAttributes)
+        {
+            Variation variation = projectConfig.GetVariationFromId(activatedExperiment?.Key, variationId);
+            return CreateImpressionEvent(projectConfig, activatedExperiment, variation, userId, userAttributes);
+        }
+
+        public static ImpressionEvent CreateImpressionEvent(ProjectConfig projectConfig,
+                                                            Experiment activatedExperiment,
                                                             Variation variation,
                                                             string userId,
                                                             UserAttributes userAttributes)
         {
 
             var eventContext = new EventContext.Builder()
+                .WithProjectId(projectConfig.ProjectId)
                 .WithAccountId(projectConfig.AccountId)
                 .WithAnonymizeIP(projectConfig.AnonymizeIP)
                 .WithRevision(projectConfig.Revision)
@@ -31,13 +42,14 @@ namespace OptimizelySDK.Event.internals
 
         public static ConversionEvent CreateConversionEvent(ProjectConfig projectConfig,
                                                             string userId,
-                                                            string eventId,
+                                                            string eventKey,
                                                             UserAttributes userAttributes,
                                                             EventTags eventTags)
         {
             
 
             var eventContext = new EventContext.Builder()
+                    .WithProjectId(projectConfig.ProjectId)
                     .WithAccountId(projectConfig.AccountId)
                     .WithAnonymizeIP(projectConfig.AnonymizeIP)
                     .WithRevision(projectConfig.Revision)
@@ -47,11 +59,10 @@ namespace OptimizelySDK.Event.internals
                 .WithBotFilteringEnabled(projectConfig.BotFiltering)
                 .WithEventContext(eventContext)
                 .WithEventTags(eventTags)
-                .WithEvent(projectConfig.GetEvent(eventId))
+                .WithEvent(projectConfig.GetEvent(eventKey))
                 .WithUserId(userId)
                 .WithVisitorAttributes(EventFactory.BuildAttributeList(userAttributes, projectConfig))
-                .Build();
-            
+                .Build();            
         }
     }
 }
