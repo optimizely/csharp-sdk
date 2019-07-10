@@ -136,15 +136,7 @@ namespace OptimizelySDK.Config
         /// <param name="projectConfig">ProjectConfig</param>
         /// <returns>true if the ProjectConfig saved successfully, false otherwise</returns>
         public bool SetConfig(ProjectConfig projectConfig)
-        {
-            // trigger now, due because of delayed latency response
-            if (scheduleWhenFinished && IsStarted) {
-                // Can't directly call Run, it will be part of previous thread then.
-                // Call immediately, because it's due now.
-                scheduleWhenFinished = false;
-                SchedulerService.Change(TimeSpan.FromSeconds(0), PollingInterval);
-            }
-
+        {            
             if (projectConfig == null)
                 return false;
                 
@@ -191,6 +183,13 @@ namespace OptimizelySDK.Config
                     Logger.Log(LogLevel.ERROR, "Unable to get project config. Error: " + exception.GetAllMessages());
                 } finally {
                     Interlocked.Exchange(ref resourceInUse, 0);
+
+                    // trigger now, due because of delayed latency response
+                    if (scheduleWhenFinished && IsStarted) {                        
+                        // Call immediately, because it's due now.
+                        scheduleWhenFinished = false;
+                        SchedulerService.Change(TimeSpan.FromSeconds(0), PollingInterval);
+                    }
                 }
             }
             else {
