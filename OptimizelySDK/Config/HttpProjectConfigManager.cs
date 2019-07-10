@@ -122,14 +122,18 @@ namespace OptimizelySDK.Config
         
         public class Builder
         {
+            private const long MAX_MILLISECONDS_LIMIT = 4294967294;
+            private readonly TimeSpan DEFAULT_PERIOD = TimeSpan.FromMinutes(5);
+            private readonly TimeSpan DEFAULT_BLOCKINGOUT_PERIOD = TimeSpan.FromSeconds(15);
+
             private string Datafile;
             private string SdkKey;
             private string Url;
             private string Format = "https://cdn.optimizely.com/datafiles/{0}.json";
             private ILogger Logger;
             private IErrorHandler ErrorHandler;
-            private TimeSpan Period = TimeSpan.FromMinutes(5);
-            private TimeSpan BlockingTimeoutSpan = TimeSpan.FromSeconds(15);
+            private TimeSpan Period;
+            private TimeSpan BlockingTimeoutSpan;
             private bool AutoUpdate = true;
             private bool StartByDefault;
             private NotificationCenter NotificationCenter;
@@ -143,42 +147,49 @@ namespace OptimizelySDK.Config
             public Builder WithDatafile(string datafile)
             {
                 Datafile = datafile;
+
                 return this;
             }
 
             public Builder WithSdkKey(string sdkKey)
             {
                 SdkKey = sdkKey;
+
                 return this;
             }
 
             public Builder WithUrl(string url)
             {
                 Url = url;
+
                 return this;
             }
 
             public Builder WithPollingInterval(TimeSpan period)
-            {
+            {                
                 Period = period;
+
                 return this;
             }
 
             public Builder WithFormat(string format)
             {
                 Format = format;
+
                 return this;
             }
             
             public Builder WithLogger(ILogger logger)
             {
                 Logger = logger;
+
                 return this;
             }
 
             public Builder WithErrorHandler(IErrorHandler errorHandler)
             {
                 ErrorHandler = errorHandler;
+
                 return this;
             }
 
@@ -222,19 +233,34 @@ namespace OptimizelySDK.Config
             public HttpProjectConfigManager Build(bool defer)
             {
                 HttpProjectConfigManager configManager = null;
+
                 if (Logger == null)
                     Logger = new DefaultLogger();
 
+                if (ErrorHandler == null)
+                    ErrorHandler = new DefaultErrorHandler();
+
                 if (string.IsNullOrEmpty(Url) && string.IsNullOrEmpty(SdkKey))
                 {
-                    ErrorHandler.HandleError(new Exception("SdkKey cannot be null"));
-                    throw new Exception("SdkKey cannot be null");
+                    ErrorHandler.HandleError(new Exception("SdkKey cannot be null"));                    
                 }
                 else if (!string.IsNullOrEmpty(SdkKey))
                 {
                     Url = string.Format(Format, SdkKey);
                 }
+
+                if (Period.TotalMilliseconds <= 0 || Period.TotalMilliseconds > MAX_MILLISECONDS_LIMIT) {
+                    Logger.Log(LogLevel.INFO, $"Period is not valid for periodic calls, using default period {DEFAULT_PERIOD.TotalMilliseconds}ms");
+                    Period = DEFAULT_PERIOD;
+                }
                     
+
+                if (BlockingTimeoutSpan.TotalMilliseconds <= 0 || BlockingTimeoutSpan.TotalMilliseconds > MAX_MILLISECONDS_LIMIT) {
+                    Logger.Log(LogLevel.INFO, $"Blocking timeout is not valid, using default blocking timeout {DEFAULT_BLOCKINGOUT_PERIOD.TotalMilliseconds}ms");
+                    BlockingTimeoutSpan = DEFAULT_BLOCKINGOUT_PERIOD;
+                }
+                    
+
 
                 configManager = new HttpProjectConfigManager(Period, Url, BlockingTimeoutSpan, AutoUpdate, Logger, ErrorHandler);
 
