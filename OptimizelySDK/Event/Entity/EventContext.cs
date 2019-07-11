@@ -17,6 +17,9 @@ using Newtonsoft.Json;
 
 namespace OptimizelySDK.Event.Entity
 {
+    /// <summary>
+    /// Class represents event context
+    /// </summary>
     public class EventContext
     {
         [JsonProperty("account_id")]
@@ -37,6 +40,9 @@ namespace OptimizelySDK.Event.Entity
         [JsonProperty("anonymize_ip")]
         public bool AnonymizeIP { get; protected set; }
 
+        /// <summary>
+        /// EventContext builder
+        /// </summary>
         public class Builder
         {
             private string AccountId;
@@ -69,7 +75,11 @@ namespace OptimizelySDK.Event.Entity
                 AnonymizeIP = anonymizeIP;
                 return this;
             }
-            
+
+            /// <summary>
+            /// Build EventContext instance
+            /// </summary>
+            /// <returns>EventContext instance</returns>
             public EventContext Build()
             {
                 var eventContext = new EventContext();

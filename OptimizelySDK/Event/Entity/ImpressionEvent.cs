@@ -18,6 +18,9 @@ using System;
 
 namespace OptimizelySDK.Event.Entity
 {
+    /// <summary>
+    /// Class represents impression event
+    /// </summary>
     public class ImpressionEvent : UserEvent
     {
         public string UserId { get; private set; }
@@ -27,6 +30,9 @@ namespace OptimizelySDK.Event.Entity
         public Variation Variation { get; set; }
         public bool? BotFiltering { get; set; }
 
+        /// <summary>
+        /// ImpressionEvent builder
+        /// </summary>
         public class Builder
         {
             private string UserId;            
@@ -81,6 +87,10 @@ namespace OptimizelySDK.Event.Entity
                 return this;
             }
 
+            /// <summary>
+            /// Build ImpressionEvent instance
+            /// </summary>
+            /// <returns>ImpressionEvent instance</returns>
             public ImpressionEvent Build()
             {
                 var impressionEvent = new ImpressionEvent();

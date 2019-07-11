@@ -18,6 +18,9 @@ using System;
 
 namespace OptimizelySDK.Event.Entity
 {
+    /// <summary>
+    /// Class represents conversion event
+    /// </summary>
     public class ConversionEvent : UserEvent
     {
         public string UserId { get; private set; }
@@ -27,6 +30,9 @@ namespace OptimizelySDK.Event.Entity
         public EventTags EventTags { get; private set; }
         public bool? BotFiltering { get; private set; }
 
+        /// <summary>
+        /// ConversionEvent builder
+        /// </summary>
         public class Builder
         {
             private string UserId;
@@ -78,6 +84,10 @@ namespace OptimizelySDK.Event.Entity
                 return this;
             }
 
+            /// <summary>
+            /// Build ConversionEvent instance.
+            /// </summary>
+            /// <returns>ConversionEvent instance</returns>
             public ConversionEvent Build()
             {
                 var conversionEvent = new ConversionEvent();

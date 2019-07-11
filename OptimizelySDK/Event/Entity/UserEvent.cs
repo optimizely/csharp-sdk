@@ -17,6 +17,9 @@ using System;
 
 namespace OptimizelySDK.Event.Entity
 {
+    /// <summary>
+    /// Class represent user event
+    /// </summary>
     public class UserEvent
     {
         /// <summary>

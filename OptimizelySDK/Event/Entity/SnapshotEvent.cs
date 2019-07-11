@@ -17,6 +17,9 @@ using Newtonsoft.Json;
 using OptimizelySDK.Entity;
 namespace OptimizelySDK.Event.Entity
 {
+    /// <summary>
+    /// Class represents snapshot event
+    /// </summary>
     public class SnapshotEvent
     {
         [JsonProperty("entity_id")]
@@ -40,7 +43,7 @@ namespace OptimizelySDK.Event.Entity
 
         [JsonProperty("tags", NullValueHandling = NullValueHandling.Ignore)]
         public EventTags EventTags { get; private set; }
-
+        
         public SnapshotEvent(string entityId, string uuid, string key, long timestamp, int? revenue = null, float? value = null, EventTags eventTags = null)
         {
             EntityId = entityId;
