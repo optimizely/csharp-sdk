@@ -109,17 +109,11 @@
 		<Compile Include="..\OptimizelySDK\Event\Entity\Decision.cs">
 		  <Link>DecisionEvent.cs</Link>
 		</Compile>
-		<Compile Include="..\OptimizelySDK\Event\internals\EventFactory.cs">
+		<Compile Include="..\OptimizelySDK\Event\Internals\EventFactory.cs">
 		  <Link>EventFactory.cs</Link>
 		</Compile>
-		<Compile Include="..\OptimizelySDK\Event\internals\UserEventFactory.cs">
-		  <Link>UserEventFactory.cs</Link>
-		</Compile>
-		<Compile Include="..\OptimizelySDK\Event\Internals\EventFactory.cs">
-		  <Link>Internals\EventFactory.cs</Link>
-		</Compile>
 		<Compile Include="..\OptimizelySDK\Event\Internals\UserEventFactory.cs">
-		  <Link>Internals\UserEventFactory.cs</Link>
+		  <Link>UserEventFactory.cs</Link>
 		</Compile>
     </ItemGroup>
     <ItemGroup>

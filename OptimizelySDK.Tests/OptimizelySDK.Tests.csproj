@@ -100,7 +100,6 @@
     <Compile Include="EventTests\EventEntitiesTest.cs" />
     <Compile Include="EventTests\InternalsTest\UserEventFactoryTest.cs" />
     <Compile Include="EventTests\InternalsTest\EventFactoryTest.cs" />
-    <Compile Include="Properties\DecisionServiceTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="App.config" />

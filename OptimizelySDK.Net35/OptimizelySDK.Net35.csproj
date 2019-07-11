@@ -257,11 +257,11 @@
 	<Compile Include="..\OptimizelySDK\Event\Entity\VisitorAttribute.cs">
 	  <Link>Event\Entity\VisitorAttribute.cs</Link>
 	</Compile>
-	<Compile Include="..\OptimizelySDK\Event\internals\EventFactory.cs">
-	  <Link>Event\internals\EventFactory.cs</Link>
+	<Compile Include="..\OptimizelySDK\Event\Internals\EventFactory.cs">
+	  <Link>Event\Internals\EventFactory.cs</Link>
 	</Compile>
-	<Compile Include="..\OptimizelySDK\Event\internals\UserEventFactory.cs">
-	  <Link>Event\internals\UserEventFactory.cs</Link>
+	<Compile Include="..\OptimizelySDK\Event\Internals\UserEventFactory.cs">
+	  <Link>Event\Internals\UserEventFactory.cs</Link>
 	</Compile>
   </ItemGroup>
   <ItemGroup>
