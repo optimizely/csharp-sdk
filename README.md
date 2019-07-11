@@ -116,11 +116,11 @@ The SDK key is used to compose the outbound HTTP request to the default datafile
 
 ##### Polling interval
 
-The polling interval is used to specify a fixed delay between consecutive HTTP requests for the datafile.
+The polling interval is used to specify a fixed delay between consecutive HTTP requests for the datafile. Between 1 to 4294967294 miliseconds is valid duration. Otherwise default 5 minutes will be used.
 
 ##### Blocking Timeout Period
 
-The blocking timeout period is used to specify a maximum time to wait for initial bootstrapping.
+The blocking timeout period is used to specify a maximum time to wait for initial bootstrapping. Between 1 to 4294967294 miliseconds is valid blocking timeout period. Otherwise default value 15 seconds will be used.
 
 ##### Initial datafile
 
