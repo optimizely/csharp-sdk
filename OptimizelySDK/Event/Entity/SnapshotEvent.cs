@@ -36,12 +36,12 @@ namespace OptimizelySDK.Event.Entity
         public int? Revenue { get; private set; }
 
         [JsonProperty("value", NullValueHandling = NullValueHandling.Ignore)]
-        public long? Value { get; private set; }
+        public float? Value { get; private set; }
 
         [JsonProperty("tags", NullValueHandling = NullValueHandling.Ignore)]
         public EventTags EventTags { get; private set; }
 
-        public SnapshotEvent(string entityId, string uuid, string key, long timestamp, int? revenue = null, long? value = null, EventTags eventTags = null)
+        public SnapshotEvent(string entityId, string uuid, string key, long timestamp, int? revenue = null, float? value = null, EventTags eventTags = null)
         {
             EntityId = entityId;
             UUID = uuid;
@@ -51,6 +51,5 @@ namespace OptimizelySDK.Event.Entity
             Value = value;
             EventTags = eventTags;
         }
-
     }
 }

@@ -59,12 +59,14 @@ namespace OptimizelySDK.Event.internals
                
                 var userContext = userEvent.Context;
 
-                builder.WithClientName(Params.CLIENT_ENGINE)
-                    .WithClientVersion(Optimizely.SDK_VERSION)
+                builder
+                    .WithClientName(userContext.ClientName)
+                    .WithClientVersion(userContext.ClientVersion)
                     .WithAccountId(userContext.AccountId)
                     .WithAnonymizeIP(userContext.AnonymizeIP)
                     .WithProjectID(userContext.ProjectId)
-                    .WithRevision(userContext.Revision);
+                    .WithRevision(userContext.Revision)
+                    .WithEnrichDecisions(true);                    
             }
 
             if (visitors.Count == 0) {
@@ -78,7 +80,7 @@ namespace OptimizelySDK.Event.internals
             var eventBatchDictionary = JObject.FromObject(eventBatch).ToObject<Dictionary<string, object>>();
 
             return new LogEvent(EVENT_ENDPOINT, eventBatchDictionary, "POST", headers: new Dictionary<string, string> {
-                { "Content-type", "application/json" }
+                { "Content-Type", "application/json" }
             });
         }
 
@@ -114,13 +116,14 @@ namespace OptimizelySDK.Event.internals
             }
 
             EventContext userContext = conversionEvent.Context;
-
+            var revenue = EventTagUtils.GetRevenueValue(conversionEvent.EventTags, logger) as int?;
+            var value = EventTagUtils.GetNumericValue(conversionEvent.EventTags, logger) as float?;
             SnapshotEvent snapshotEvent = new SnapshotEvent(conversionEvent.Event.Id,
                 conversionEvent.UUID,
                 conversionEvent.Event?.Key,
                 conversionEvent.Timestamp,
-                (int?) EventTagUtils.GetRevenueValue(conversionEvent.EventTags, logger),
-                (long?) EventTagUtils.GetNumericValue(conversionEvent.EventTags, logger),
+                revenue,
+                value,
                 conversionEvent.EventTags);
 
             Snapshot snapshot = new Snapshot(new SnapshotEvent[] { snapshotEvent });

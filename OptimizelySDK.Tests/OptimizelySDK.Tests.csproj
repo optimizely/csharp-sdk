@@ -98,6 +98,9 @@
     <Compile Include="ConfigTest\TestPollingProjectConfigManager.cs" />
     <Compile Include="EntityTests\FeatureVariableTest.cs" />
     <Compile Include="EventTests\EventEntitiesTest.cs" />
+    <Compile Include="EventTests\InternalsTest\UserEventFactoryTest.cs" />
+    <Compile Include="EventTests\InternalsTest\EventFactoryTest.cs" />
+    <Compile Include="Properties\DecisionServiceTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="App.config" />
@@ -122,6 +125,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="EntityTests\" />
+    <Folder Include="EventTests\InternalsTest\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.

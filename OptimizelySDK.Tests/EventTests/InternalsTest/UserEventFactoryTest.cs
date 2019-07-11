@@ -88,7 +88,7 @@ namespace OptimizelySDK.Tests.EventTests.InternalsTest
                 { "company", "Optimizely" }
             };
 
-            var conversionEvent = UserEventFactory.CreateConversionEvent(projectConfig, userId, eventKey, userAttributes, null);
+            var conversionEvent = UserEventFactory.CreateConversionEvent(projectConfig, eventKey, userId, userAttributes, null);
 
             Assert.AreEqual(Config.ProjectId, conversionEvent.Context.ProjectId);
             Assert.AreEqual(Config.Revision, conversionEvent.Context.Revision);
@@ -122,7 +122,7 @@ namespace OptimizelySDK.Tests.EventTests.InternalsTest
                 { "company", "Optimizely" }
             };
 
-            var conversionEvent = UserEventFactory.CreateConversionEvent(projectConfig, userId, eventKey, userAttributes, eventTags);
+            var conversionEvent = UserEventFactory.CreateConversionEvent(projectConfig, eventKey, userId, userAttributes, eventTags);
 
             Assert.AreEqual(Config.ProjectId, conversionEvent.Context.ProjectId);
             Assert.AreEqual(Config.Revision, conversionEvent.Context.Revision);

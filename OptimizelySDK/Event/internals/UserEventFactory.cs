@@ -26,7 +26,7 @@ namespace OptimizelySDK.Event.internals
                 .WithProjectId(projectConfig.ProjectId)
                 .WithAccountId(projectConfig.AccountId)
                 .WithAnonymizeIP(projectConfig.AnonymizeIP)
-                .WithRevision(projectConfig.Revision)
+                .WithRevision(projectConfig.Revision)                
                 .Build();
 
             return new ImpressionEvent.Builder()
@@ -40,9 +40,9 @@ namespace OptimizelySDK.Event.internals
             
         }
 
-        public static ConversionEvent CreateConversionEvent(ProjectConfig projectConfig,
-                                                            string userId,
+        public static ConversionEvent CreateConversionEvent(ProjectConfig projectConfig,                                                            
                                                             string eventKey,
+                                                            string userId,
                                                             UserAttributes userAttributes,
                                                             EventTags eventTags)
         {

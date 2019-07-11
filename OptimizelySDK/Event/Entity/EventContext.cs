@@ -64,18 +64,6 @@ namespace OptimizelySDK.Event.Entity
                 return this;
             }
 
-            public Builder WithClientName(string clientName)
-            {
-                ClientName = clientName;
-                return this;
-            }
-
-            public Builder WithClientVersion(string clientVersion)
-            {
-                ClientVersion = clientVersion;
-                return this;
-            }
-
             public Builder WithAnonymizeIP(bool anonymizeIP)
             {
                 AnonymizeIP = anonymizeIP;
@@ -89,8 +77,8 @@ namespace OptimizelySDK.Event.Entity
                 eventContext.AccountId = AccountId;
                 eventContext.ProjectId = ProjectId;
                 eventContext.Revision = Revision;
-                eventContext.ClientName = ClientName;
-                eventContext.ClientVersion = ClientVersion;
+                eventContext.ClientName = Optimizely.SDK_TYPE;
+                eventContext.ClientVersion = Optimizely.SDK_VERSION;
                 eventContext.AnonymizeIP = AnonymizeIP;
 
                 return eventContext;
