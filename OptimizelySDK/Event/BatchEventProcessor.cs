@@ -6,7 +6,6 @@ using System.Threading;
 using OptimizelySDK.Utils;
 using OptimizelySDK.Logger;
 using OptimizelySDK.ErrorHandler;
-using OptimizelySDK.Event.internals;
 using System.Linq;
 using OptimizelySDK.Event.Dispatcher;
 
@@ -40,20 +39,20 @@ namespace OptimizelySDK.Event
 
 
         private IEventDispatcher EventDispatcher;
-        //        BlockingCollection<object> EventQueue; to-do: add supported .net 3.5 lib
+        BlockingCollection<object> EventQueue; 
         private List<UserEvent> CurrentBatch = new List<UserEvent>();
 
 
         // Variables to control blocking/syncing.
         public int resourceInUse = 0;
 
-        private BatchEventProcessor(List<UserEvent> currentBatch, IEventDispatcher eventDispatcher, int batchSize, TimeSpan flushInterval, bool autoUpdate = true, ILogger logger = null, IErrorHandler errorHandler = null) {
+        private BatchEventProcessor(BlockingCollection<object> eventQueue, IEventDispatcher eventDispatcher, int batchSize, TimeSpan flushInterval, bool autoUpdate = true, ILogger logger = null, IErrorHandler errorHandler = null) {
             Logger = logger;
             ErrorHandler = errorHandler;
             EventDispatcher = eventDispatcher;
             FlushInterval = flushInterval;
             AutoUpdate = autoUpdate;
-            CurrentBatch = currentBatch;
+            EventQueue = eventQueue;
             //EventQueue = eventQueue;
             BatchSize = batchSize;
 
@@ -84,14 +83,29 @@ namespace OptimizelySDK.Event
             {
                 if (Interlocked.Exchange(ref resourceInUse, 1) == 0)
                 {
+                    object item;
+                    try
+                    {
+                        // Consume the BlockingCollection
+                        while (EventQueue.TryTake(out item))
+                        {
+                            if (item is UserEvent)
+                                AddToBatch((UserEvent)item);
+                            else if (item == SHUTDOWN_SIGNAL)
+                            {
+                                Logger.Log(LogLevel.INFO, "Received shutdown signal.");
+                                Stop();
+                            }
+                        }
+                    }
+                    catch (InvalidOperationException e)
+                    {
+                        // An InvalidOperationException means that Take() was called on a completed collection
+                        Logger.Log(LogLevel.DEBUG, "Unable to take item from eventQueue: " + e.GetAllMessages());
+                    }
+
                     Logger.Log(LogLevel.DEBUG, "Deadline exceeded flushing current batch.");
                     Flush();
-
-                    if (CurrentBatch.Count == 0)
-                    {
-                        Logger.Log(LogLevel.DEBUG, "Empty item, sleeping for 50ms.");
-                        Thread.Sleep(50);
-                    }
 
                 }
             }
@@ -113,7 +127,7 @@ namespace OptimizelySDK.Event
             {
                 return;
             }
-
+            
             List<UserEvent> toProcessBatch = new List<UserEvent>(CurrentBatch);
             CurrentBatch.Clear(); 
 
@@ -142,7 +156,7 @@ namespace OptimizelySDK.Event
             Logger.Log(LogLevel.WARN, $"Stopping scheduler.");
         }
         
-        public void Process(object userEvent) {
+        public void Process(UserEvent userEvent) {
             Logger.Log(LogLevel.DEBUG, "Received userEvent: " + userEvent);
 
             if (Disposed) { 
@@ -150,13 +164,10 @@ namespace OptimizelySDK.Event
                 return;
             }
 
-            if (userEvent == SHUTDOWN_SIGNAL)
+            if (EventQueue.TryAdd(userEvent))
             {
-                Logger.Log(LogLevel.INFO, "Received shutdown signal.");
-                Stop();
+                Logger.Log(LogLevel.WARN, "Payload not accepted by the queue.");
             }
-
-            AddToBatch((UserEvent) userEvent);
         }
         
         private void AddToBatch(UserEvent userEvent) {

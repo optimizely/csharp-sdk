@@ -91,6 +91,7 @@
     <Compile Include="ErrorHandler\DefaultErrorHandler.cs" />
     <Compile Include="ErrorHandler\IErrorHandler.cs" />
     <Compile Include="ErrorHandler\NoOpErrorHandler.cs" />
+    <Compile Include="Event\BatchEventProcessor.cs" />
     <Compile Include="Event\Builder\EventBuilder.cs" />
     <Compile Include="Event\Builder\Params.cs" />
     <Compile Include="Event\Dispatcher\DefaultEventDispatcher.cs" />
@@ -98,6 +99,7 @@
     <Compile Include="Event\Dispatcher\HttpClientEventDispatcher45.cs" />
     <Compile Include="Event\Dispatcher\IEventDispatcher.cs" />
     <Compile Include="Event\EventFactory.cs" />
+    <Compile Include="Event\EventProcessor.cs" />
     <Compile Include="Event\UserEventFactory.cs" />
     <Compile Include="Event\LogEvent.cs" />
     <Compile Include="Exceptions\OptimizelyException.cs" />

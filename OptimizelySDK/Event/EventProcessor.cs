@@ -9,6 +9,6 @@ namespace OptimizelySDK.Event
      **/
     public interface EventProcessor
     {
-        void Process(object userEvent);
+        void Process(UserEvent userEvent);
     }
 }

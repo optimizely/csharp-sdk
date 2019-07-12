@@ -276,6 +276,12 @@
 	<Compile Include="..\OptimizelySDK\Event\UserEventFactory.cs">
 	  <Link>Event\UserEventFactory.cs</Link>
 	</Compile>
+	<Compile Include="..\OptimizelySDK\Event\BatchEventProcessor.cs">
+	  <Link>Event\BatchEventProcessor.cs</Link>
+	</Compile>
+	<Compile Include="..\OptimizelySDK\Event\EventProcessor.cs">
+	  <Link>Event\EventProcessor.cs</Link>
+	</Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\OptimizelySDK\Utils\schema.json">
