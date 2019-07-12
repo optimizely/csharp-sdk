@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2017-2019, Optimizely
+ * Copyright 2019, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,14 +18,18 @@ using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json.Linq;
 using OptimizelySDK.Entity;
-using OptimizelySDK.Event.Builder;
 using OptimizelySDK.Event.Entity;
 using OptimizelySDK.Logger;
 using OptimizelySDK.Utils;
 
 
-namespace OptimizelySDK.Event.internals
+namespace OptimizelySDK.Event
 {
+    /// <summary>
+    /// EventFactory builds LogEvent objects from a given UserEvent.
+    /// This class serves to separate concerns between events in the SDK and the API used 
+    /// to record the events via the <see href="https://developers.optimizely.com/x/events/api/index.html">Optimizely Events API</see>.
+    /// </summary>
     public class EventFactory
     {
         private const string CUSTOM_ATTRIBUTE_FEATURE_TYPE = "custom";
@@ -33,11 +37,23 @@ namespace OptimizelySDK.Event.internals
 
         private const string ACTIVATE_EVENT_KEY = "campaign_activated";
 
+        /// <summary>
+        /// Create LogEvent instance
+        /// </summary>
+        /// <param name="userEvent">The UserEvent entity</param>
+        /// <param name="logger">The ILogger entity</param>
+        /// <returns>LogEvent instance</returns>
         public static LogEvent CreateLogEvent(UserEvent userEvent, ILogger logger) {
                         
             return CreateLogEvent(new UserEvent[] { userEvent }, logger);
         }
 
+        /// <summary>
+        /// Create LogEvent instance
+        /// </summary>
+        /// <param name="userEvents">The UserEvent array</param>
+        /// <param name="logger">The ILogger entity</param>
+        /// <returns>LogEvent instance</returns>
         public static LogEvent CreateLogEvent(UserEvent[] userEvents, ILogger logger) {
 
             EventBatch.Builder builder = new EventBatch.Builder();
@@ -84,6 +100,11 @@ namespace OptimizelySDK.Event.internals
             });
         }
 
+        /// <summary>
+        /// Create Visitor instance
+        /// </summary>
+        /// <param name="impressionEvent">The ImpressionEvent entity</param>
+        /// <returns>Visitor instance if ImpressionEvent is valid, null otherwise</returns>
         private static Visitor CreateVisitor(ImpressionEvent impressionEvent) {
 
             if (impressionEvent == null) {
@@ -96,10 +117,12 @@ namespace OptimizelySDK.Event.internals
                 impressionEvent.Experiment?.Id,
                 impressionEvent.Variation?.Id);
 
-            SnapshotEvent snapshotEvent = new SnapshotEvent(impressionEvent.Experiment.LayerId,
-                impressionEvent.UUID,
-                ACTIVATE_EVENT_KEY,
-                impressionEvent.Timestamp);
+            SnapshotEvent snapshotEvent = new SnapshotEvent.Builder()
+                .WithUUID(impressionEvent.UUID)
+                .WithEntityId(impressionEvent.Experiment.LayerId)
+                .WithKey(ACTIVATE_EVENT_KEY)
+                .WithTimeStamp(impressionEvent.Timestamp)
+                .Build();
 
             Snapshot snapshot = new Snapshot(
                 new SnapshotEvent[] { snapshotEvent },
@@ -110,6 +133,12 @@ namespace OptimizelySDK.Event.internals
             return visitor;
         }
 
+        /// <summary>
+        /// Create Visitor instance
+        /// </summary>
+        /// <param name="conversionEvent">The ConversionEvent entity</param>
+        /// <param name="logger">The ILogger entity</param>
+        /// <returns>Visitor instance if ConversionEvent is valid, null otherwise</returns>
         private static Visitor CreateVisitor(ConversionEvent conversionEvent, ILogger logger) {
             if (conversionEvent == null) {
                 return null;
@@ -118,13 +147,16 @@ namespace OptimizelySDK.Event.internals
             EventContext userContext = conversionEvent.Context;
             var revenue = EventTagUtils.GetRevenueValue(conversionEvent.EventTags, logger) as int?;
             var value = EventTagUtils.GetNumericValue(conversionEvent.EventTags, logger) as float?;
-            SnapshotEvent snapshotEvent = new SnapshotEvent(conversionEvent.Event.Id,
-                conversionEvent.UUID,
-                conversionEvent.Event?.Key,
-                conversionEvent.Timestamp,
-                revenue,
-                value,
-                conversionEvent.EventTags);
+            SnapshotEvent snapshotEvent = new SnapshotEvent.Builder()
+                .WithUUID(conversionEvent.UUID)
+                .WithEntityId(conversionEvent.Event.Id)
+                .WithKey(conversionEvent.Event?.Key)
+                .WithTimeStamp(conversionEvent.Timestamp)
+                .WithRevenue(revenue)
+                .WithValue(value)
+                .WithEventTags(conversionEvent.EventTags)
+                .Build();
+            
 
             Snapshot snapshot = new Snapshot(new SnapshotEvent[] { snapshotEvent });
             
@@ -132,7 +164,13 @@ namespace OptimizelySDK.Event.internals
 
             return visitor;
         }
-        
+
+        /// <summary>
+        /// Create Visitor Attributes list
+        /// </summary>
+        /// <param name="userAttributes">The user's attributes</param>
+        /// <param name="config">ProjectConfig instance</param>
+        /// <returns>VisitorAttribute array if config is valid, null otherwise</returns>
         public static VisitorAttribute[] BuildAttributeList(UserAttributes userAttributes, ProjectConfig config)
         {            
             if (config == null)
@@ -163,3 +201,4 @@ namespace OptimizelySDK.Event.internals
         }
     }
 }
+

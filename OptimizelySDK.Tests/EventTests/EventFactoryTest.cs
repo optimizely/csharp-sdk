@@ -6,11 +6,10 @@ using OptimizelySDK.Config;
 using OptimizelySDK.Entity;
 using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Event;
-using OptimizelySDK.Event.internals;
 using OptimizelySDK.Logger;
 using OptimizelySDK.Utils;
 
-namespace OptimizelySDK.Tests.EventTests.InternalsTest
+namespace OptimizelySDK.Tests.EventTests
 {
     [TestFixture]
     public class EventFactoryTest

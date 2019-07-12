@@ -16,7 +16,6 @@
 
 using OptimizelySDK.Entity;
 using OptimizelySDK.Logger;
-using Moq;
 using OptimizelySDK.Event.Builder;
 using OptimizelySDK.Event;
 using System.Collections.Generic;

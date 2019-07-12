@@ -17,6 +17,9 @@ using Newtonsoft.Json;
 using OptimizelySDK.Entity;
 namespace OptimizelySDK.Event.Entity
 {
+    /// <summary>
+    /// Class represents snapshot event
+    /// </summary>
     public class SnapshotEvent
     {
         [JsonProperty("entity_id")]
@@ -41,15 +44,77 @@ namespace OptimizelySDK.Event.Entity
         [JsonProperty("tags", NullValueHandling = NullValueHandling.Ignore)]
         public EventTags EventTags { get; private set; }
 
-        public SnapshotEvent(string entityId, string uuid, string key, long timestamp, int? revenue = null, float? value = null, EventTags eventTags = null)
+        public class Builder
         {
-            EntityId = entityId;
-            UUID = uuid;
-            Key = key;
-            TimeStamp = timestamp;
-            Revenue = revenue;
-            Value = value;
-            EventTags = eventTags;
+            private string EntityId;
+            private string UUID;
+            private string Key;
+            private long TimeStamp;
+            private int? Revenue;
+            private float? Value;
+            private EventTags EventTags;
+
+            public SnapshotEvent Build()
+            {
+                SnapshotEvent snapshotEvent = new SnapshotEvent();
+                snapshotEvent.EntityId = EntityId;
+                snapshotEvent.UUID = UUID;
+                snapshotEvent.Key = Key;
+                snapshotEvent.TimeStamp = TimeStamp;
+                snapshotEvent.Revenue = Revenue;
+                snapshotEvent.Value = Value;
+                snapshotEvent.EventTags = EventTags;
+
+                return snapshotEvent;
+            }
+
+            public Builder WithEntityId(string entityId)
+            {
+                EntityId = entityId;
+
+                return this;
+            }
+
+            public Builder WithUUID(string uuid)
+            {
+                UUID = uuid;
+
+                return this;
+            }
+
+            public Builder WithKey(string key)
+            {
+                Key = key;
+
+                return this;
+            }
+
+            public Builder WithTimeStamp(long timeStamp)
+            {
+                TimeStamp = timeStamp;
+
+                return this;
+            }
+
+            public Builder WithRevenue(int? revenue)
+            {
+                Revenue = revenue;
+
+                return this;
+            }
+
+            public Builder WithValue(float? value)
+            {
+                Value = value;
+                return this;
+            }
+
+            public Builder WithEventTags(EventTags eventTags)
+            {
+                EventTags = eventTags;
+                return this;
+            }
         }
+       
     }
 }

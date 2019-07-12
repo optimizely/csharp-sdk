@@ -1,13 +1,12 @@
-﻿using System;
-using Moq;
+﻿using Moq;
 using NUnit.Framework;
 using OptimizelySDK.Config;
 using OptimizelySDK.Entity;
 using OptimizelySDK.ErrorHandler;
-using OptimizelySDK.Event.internals;
+using OptimizelySDK.Event;
 using OptimizelySDK.Logger;
 
-namespace OptimizelySDK.Tests.EventTests.InternalsTest
+namespace OptimizelySDK.Tests.EventTests
 {
     public class UserEventFactoryTest
     {
