@@ -1,7 +1,7 @@
 ﻿using OptimizelySDK.Entity;
 using OptimizelySDK.Event.Entity;
 
-namespace OptimizelySDK.Event.internals
+namespace OptimizelySDK.Event
 {
     /// <summary>
     /// UserEventFactory builds ImpressionEvent and ConversionEvent objects from a given UserEvent.

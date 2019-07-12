@@ -95,8 +95,15 @@ namespace OptimizelySDK.Tests.EventTests
 
             var visitorAttribute1 = new VisitorAttribute(entityId: "7723280020", type: "custom", value: "iPhone", key: "device_type");
             var visitorAttribute2 = new VisitorAttribute(entityId: ControlAttributes.BOT_FILTERING_ATTRIBUTE, type: "custom", value: true, key: ControlAttributes.BOT_FILTERING_ATTRIBUTE);
-            var snapshotEvent = new SnapshotEvent(uuid: guid.ToString(), entityId: "7719770039", key: "campaign_activated",
-                value: null, revenue: null, timestamp: timeStamp, eventTags: null);
+            var snapshotEvent = new SnapshotEvent.Builder()
+                .WithUUID(guid.ToString())
+                .WithEntityId("7719770039")
+                .WithKey("campaign_activated")
+                .WithValue(null)
+                .WithRevenue(null)
+                .WithTimeStamp(timeStamp)
+                .WithEventTags(null)
+                .Build();
             
             var decision = new Decision("7719770039", "7716830082", "77210100090");
             var snapshot = new Snapshot(events: new SnapshotEvent[] { snapshotEvent }, decisions: new Decision[] { decision });
@@ -204,13 +211,20 @@ namespace OptimizelySDK.Tests.EventTests
             
             var visitorAttribute = new VisitorAttribute(entityId: "111094", type: "custom", value: "test_value", key: "test_attribute");
 
-            var snapshotEvent = new SnapshotEvent(uuid: guid.ToString(), entityId: "111095", key: "event_with_multiple_running_experiments",
-                value: (long?)1.234, revenue: 4200, timestamp: timeStamp, eventTags: new EventTags
+            var snapshotEvent = new SnapshotEvent.Builder()
+                .WithUUID(guid.ToString())
+                .WithEntityId("111095")
+                .WithKey("event_with_multiple_running_experiments")
+                .WithValue((long?)1.234)
+                .WithRevenue(4200)
+                .WithTimeStamp(timeStamp)
+                .WithEventTags(new EventTags
                 {
                     {"non-revenue", "abc"},
                     {"revenue", 4200},
                     {"value", 1.234}
-                });
+                })
+                .Build();
 
             var snapshot = new Snapshot(events: new SnapshotEvent[] { snapshotEvent });
 

@@ -62,15 +62,6 @@ namespace OptimizelySDK.Event.Builder
         }
 
         /// <summary>
-        /// Helper to compute Unix time (i.e. since Jan 1, 1970)
-        /// </summary>
-        private static long SecondsSince1970 {
-            get {
-                return (long)(DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalSeconds;
-            }
-        }
-
-        /// <summary>
         /// Helper function to set parameters common to impression and conversion event
         /// </summary>
         /// <param name="config">ProjectConfig Configuration for the project</param>
@@ -150,7 +141,7 @@ namespace OptimizelySDK.Event.Builder
                     new Dictionary<string, object>
                     {
                         { "entity_id", experiment.LayerId },
-                        { "timestamp", SecondsSince1970*1000 },
+                        { "timestamp", GeneralUtils.SecondsSince1970*1000 },
                         { "key", ACTIVATE_EVENT_KEY },
                         { "uuid", Guid.NewGuid() }
                     }
@@ -171,7 +162,7 @@ namespace OptimizelySDK.Event.Builder
             var eventDict = new Dictionary<string, object>
                 {
                         { Params.ENTITY_ID, config.EventKeyMap[eventKey].Id },
-                        { Params.TIMESTAMP, SecondsSince1970*1000 },
+                        { Params.TIMESTAMP, GeneralUtils.SecondsSince1970*1000 },
                         { "uuid", Guid.NewGuid() },
                         { "key", eventKey }
                     };

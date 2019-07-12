@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 using OptimizelySDK.Entity;
+using OptimizelySDK.Utils;
 using System;
 
 namespace OptimizelySDK.Event.Entity
@@ -97,7 +98,7 @@ namespace OptimizelySDK.Event.Entity
 
                 impressionEvent.Context = EventContext;
                 impressionEvent.UUID = Guid.NewGuid().ToString();
-                impressionEvent.Timestamp = SecondsSince1970 * 1000;
+                impressionEvent.Timestamp = GeneralUtils.SecondsSince1970 * 1000;
 
                 impressionEvent.Experiment = Experiment;
                 impressionEvent.VisitorAttributes = VisitorAttributes;

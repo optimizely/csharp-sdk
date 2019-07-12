@@ -98,8 +98,8 @@
     <Compile Include="ConfigTest\TestPollingProjectConfigManager.cs" />
     <Compile Include="EntityTests\FeatureVariableTest.cs" />
     <Compile Include="EventTests\EventEntitiesTest.cs" />
-    <Compile Include="EventTests\InternalsTest\UserEventFactoryTest.cs" />
-    <Compile Include="EventTests\InternalsTest\EventFactoryTest.cs" />
+    <Compile Include="EventTests\UserEventFactoryTest.cs" />
+    <Compile Include="EventTests\EventFactoryTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="App.config" />
