@@ -2,7 +2,7 @@
 
 namespace OptimizelySDK.Utils
 {
-    class GeneralUtils
+    class DateTimeUtils
     {
         /// <summary>
         /// Helper to compute Unix time (i.e. since Jan 1, 1970)

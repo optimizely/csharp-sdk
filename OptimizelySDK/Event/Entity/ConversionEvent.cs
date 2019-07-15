@@ -95,7 +95,7 @@ namespace OptimizelySDK.Event.Entity
 
                 conversionEvent.Context = EventContext;
                 conversionEvent.UUID = Guid.NewGuid().ToString();
-                conversionEvent.Timestamp = GeneralUtils.SecondsSince1970 * 1000;
+                conversionEvent.Timestamp = DateTimeUtils.SecondsSince1970 * 1000;
 
                 conversionEvent.EventTags = EventTags;
                 conversionEvent.VisitorAttributes = VisitorAttributes;
