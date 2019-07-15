@@ -13,12 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+using System;
+
 namespace OptimizelySDK.Event.Entity
 {
+    /// <summary>
+    /// Class represent user event
+    /// </summary>
     public class UserEvent
     {
-        public EventContext Context { get; private set; }
-        public string UUID { get; private set; }
-        public long TimeStamp { get; private set; }
+        public EventContext Context { get; protected set; }
+        public string UUID { get; protected set; }
+        public long Timestamp { get; protected set; }
     }
 }

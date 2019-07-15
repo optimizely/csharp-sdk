@@ -17,6 +17,9 @@ using Newtonsoft.Json;
 
 namespace OptimizelySDK.Event.Entity
 {
+    /// <summary>
+    /// Class represents event context
+    /// </summary>
     public class EventContext
     {
         [JsonProperty("account_id")]
@@ -36,5 +39,61 @@ namespace OptimizelySDK.Event.Entity
 
         [JsonProperty("anonymize_ip")]
         public bool AnonymizeIP { get; protected set; }
+
+        /// <summary>
+        /// EventContext builder
+        /// </summary>
+        public class Builder
+        {
+            private string AccountId;
+            private string ProjectId;
+            private string Revision;
+            private string ClientName;
+            private string ClientVersion;
+            private bool AnonymizeIP;
+
+            public Builder WithAccountId(string accountId)
+            {
+                AccountId = accountId;
+                return this;
+            }
+
+            public Builder WithProjectId(string projectId)
+            {
+                ProjectId = projectId;
+                return this;
+            }
+
+            public Builder WithRevision(string revision)
+            {
+                Revision = revision;
+                return this;
+            }
+
+            public Builder WithAnonymizeIP(bool anonymizeIP)
+            {
+                AnonymizeIP = anonymizeIP;
+                return this;
+            }
+
+            /// <summary>
+            /// Build EventContext instance
+            /// </summary>
+            /// <returns>EventContext instance</returns>
+            public EventContext Build()
+            {
+                var eventContext = new EventContext();
+
+                eventContext.AccountId = AccountId;
+                eventContext.ProjectId = ProjectId;
+                eventContext.Revision = Revision;
+                eventContext.ClientName = Optimizely.SDK_TYPE;
+                eventContext.ClientVersion = Optimizely.SDK_VERSION;
+                eventContext.AnonymizeIP = AnonymizeIP;
+
+                return eventContext;
+            }
+        }
+
     }
 }

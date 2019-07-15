@@ -62,6 +62,7 @@
 		<Compile Include="..\OptimizelySDK\Utils\ConditionParser.cs" />
 		<Compile Include="..\OptimizelySDK\Utils\AttributeMatchTypes.cs" />
 		<Compile Include="..\OptimizelySDK\Utils\DecisionInfoTypes.cs" />
+		<Compile Include="..\OptimizelySDK\Utils\DateTimeUtils.cs" />
         <Compile Include="..\OptimizelySDK\Bucketing\Bucketer.cs" />
         <Compile Include="..\OptimizelySDK\Bucketing\Decision.cs" />
         <Compile Include="..\OptimizelySDK\Bucketing\DecisionService.cs" />
@@ -108,6 +109,12 @@
 		</Compile>
 		<Compile Include="..\OptimizelySDK\Event\Entity\Decision.cs">
 		  <Link>DecisionEvent.cs</Link>
+		</Compile>
+		<Compile Include="..\OptimizelySDK\Event\EventFactory.cs">
+		  <Link>EventFactory.cs</Link>
+		</Compile>
+		<Compile Include="..\OptimizelySDK\Event\UserEventFactory.cs">
+		  <Link>UserEventFactory.cs</Link>
 		</Compile>
     </ItemGroup>
     <ItemGroup>

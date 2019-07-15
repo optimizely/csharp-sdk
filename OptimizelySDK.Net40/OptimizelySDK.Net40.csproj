@@ -182,6 +182,9 @@
 	<Compile Include="..\OptimizelySDK\Utils\DecisionInfoTypes.cs">
       <Link>Utils\DecisionInfoTypes.cs</Link>
     </Compile>
+	<Compile Include="..\OptimizelySDK\Utils\DateTimeUtils.cs">
+      <Link>Utils\DateTimeUtils.cs</Link>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="..\OptimizelySDK\Bucketing\Bucketer.cs">
       <Link>Bucketing\Bucketer.cs</Link>
@@ -266,6 +269,12 @@
 	</Compile>
 	<Compile Include="..\OptimizelySDK\Event\Entity\VisitorAttribute.cs">
 	  <Link>Event\Entity\VisitorAttribute.cs</Link>
+	</Compile>
+	<Compile Include="..\OptimizelySDK\Event\EventFactory.cs">
+	  <Link>Event\EventFactory.cs</Link>
+	</Compile>
+	<Compile Include="..\OptimizelySDK\Event\UserEventFactory.cs">
+	  <Link>Event\UserEventFactory.cs</Link>
 	</Compile>
   </ItemGroup>
   <ItemGroup>
