@@ -46,7 +46,7 @@ namespace OptimizelySDK.Event
         // Variables to control blocking/syncing.
         public int resourceInUse = 0;
 
-        private BatchEventProcessor(BlockingCollection<object> eventQueue, IEventDispatcher eventDispatcher, int batchSize, TimeSpan flushInterval, bool autoUpdate = true, ILogger logger = null, IErrorHandler errorHandler = null) {
+        public BatchEventProcessor(BlockingCollection<object> eventQueue, IEventDispatcher eventDispatcher, int batchSize, TimeSpan flushInterval, IErrorHandler errorHandler = null, bool autoUpdate = true, ILogger logger = null) {
             Logger = logger;
             ErrorHandler = errorHandler;
             EventDispatcher = eventDispatcher;
