@@ -181,8 +181,8 @@
 	<Compile Include="..\OptimizelySDK\Utils\DecisionInfoTypes.cs">
       <Link>Utils\DecisionInfoTypes.cs</Link>
     </Compile>
-	<Compile Include="..\OptimizelySDK\Utils\GeneralUtils.cs">
-      <Link>Utils\GeneralUtils.cs</Link>
+	<Compile Include="..\OptimizelySDK\Utils\DateTimeUtils.cs">
+      <Link>Utils\DateTimeUtils.cs</Link>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="..\OptimizelySDK\Bucketing\Bucketer.cs">

@@ -141,7 +141,7 @@ namespace OptimizelySDK.Event.Builder
                     new Dictionary<string, object>
                     {
                         { "entity_id", experiment.LayerId },
-                        { "timestamp", GeneralUtils.SecondsSince1970*1000 },
+                        { "timestamp", DateTimeUtils.SecondsSince1970*1000 },
                         { "key", ACTIVATE_EVENT_KEY },
                         { "uuid", Guid.NewGuid() }
                     }
@@ -162,7 +162,7 @@ namespace OptimizelySDK.Event.Builder
             var eventDict = new Dictionary<string, object>
                 {
                         { Params.ENTITY_ID, config.EventKeyMap[eventKey].Id },
-                        { Params.TIMESTAMP, GeneralUtils.SecondsSince1970*1000 },
+                        { Params.TIMESTAMP, DateTimeUtils.SecondsSince1970*1000 },
                         { "uuid", Guid.NewGuid() },
                         { "key", eventKey }
                     };

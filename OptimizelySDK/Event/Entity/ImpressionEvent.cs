@@ -98,7 +98,7 @@ namespace OptimizelySDK.Event.Entity
 
                 impressionEvent.Context = EventContext;
                 impressionEvent.UUID = Guid.NewGuid().ToString();
-                impressionEvent.Timestamp = GeneralUtils.SecondsSince1970 * 1000;
+                impressionEvent.Timestamp = DateTimeUtils.SecondsSince1970 * 1000;
 
                 impressionEvent.Experiment = Experiment;
                 impressionEvent.VisitorAttributes = VisitorAttributes;

@@ -62,7 +62,7 @@
 		<Compile Include="..\OptimizelySDK\Utils\ConditionParser.cs" />
 		<Compile Include="..\OptimizelySDK\Utils\AttributeMatchTypes.cs" />
 		<Compile Include="..\OptimizelySDK\Utils\DecisionInfoTypes.cs" />
-		<Compile Include="..\OptimizelySDK\Utils\GeneralUtils.cs" />
+		<Compile Include="..\OptimizelySDK\Utils\DateTimeUtils.cs" />
         <Compile Include="..\OptimizelySDK\Bucketing\Bucketer.cs" />
         <Compile Include="..\OptimizelySDK\Bucketing\Decision.cs" />
         <Compile Include="..\OptimizelySDK\Bucketing\DecisionService.cs" />
