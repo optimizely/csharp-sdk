@@ -21,7 +21,8 @@ namespace OptimizelySDK.Event
      * maximum duration before the resulting LogEvent is sent to the NotificationManager.
      */
     public class BatchEventProcessor: EventProcessor, IDisposable {
-        
+
+        // Don't make it static. make it const. 
         private static object SHUTDOWN_SIGNAL = new object();
 
         public bool Disposed { get; private set; }
@@ -36,7 +37,7 @@ namespace OptimizelySDK.Event
 
         protected ILogger Logger { get; set; }
         protected IErrorHandler ErrorHandler { get; set; }
-
+        public static object mutex = new object();
 
         private IEventDispatcher EventDispatcher;
         BlockingCollection<object> EventQueue; 
@@ -48,7 +49,11 @@ namespace OptimizelySDK.Event
 
         public BatchEventProcessor() {
         }
-
+        /// <summary>
+        ///  This doesn't fit here, please copy Java sdk code.
+        /////Thread t = new Thread(Run);
+        /////t.Start();
+        /// </summary>
         public void Start()
         {
             if (IsStarted && !Disposed)
@@ -56,7 +61,8 @@ namespace OptimizelySDK.Event
                 Logger.Log(LogLevel.WARN, "Service already started.");
                 return;
             }
-
+            // We don't really need to setup timer. We just need a thread, which will be recursively checking
+            // either batchsize meets condition or delayed time. 
             SchedulerService.Change(TimeSpan.Zero, AutoUpdate ? FlushInterval : TimeSpan.FromMilliseconds(-1));
             IsStarted = true;
         }
@@ -67,14 +73,20 @@ namespace OptimizelySDK.Event
         /// </summary>
         public virtual void Run()
         {
+
+            
+
+
             try
             {
+                // we don't really need of these stuff.
                 if (Interlocked.Exchange(ref resourceInUse, 1) == 0)
                 {
                     object item;
                     try
                     {
                         // Consume the BlockingCollection
+                        // Specify timeout
                         while (EventQueue.TryTake(out item))
                         {
                             if (item is UserEvent)
@@ -115,15 +127,20 @@ namespace OptimizelySDK.Event
             {
                 return;
             }
+
+            List<UserEvent> toProcessBatch = null;
+            // This should be mutex
+            lock (mutex) {
+                toProcessBatch = new List<UserEvent>(CurrentBatch);
+                CurrentBatch.Clear();
+            }
             
-            List<UserEvent> toProcessBatch = new List<UserEvent>(CurrentBatch);
-            CurrentBatch.Clear(); 
 
             LogEvent logEvent = EventFactory.CreateLogEvent(toProcessBatch.ToArray(), Logger);
 
             try
             {
-                EventDispatcher.DispatchEvent(logEvent);
+                EventDispatcher?.DispatchEvent(logEvent);
             }
             catch (Exception e)
             {
