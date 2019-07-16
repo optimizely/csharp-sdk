@@ -58,19 +58,20 @@ namespace OptimizelySDK.Tests.EventTests
         }
 
         [Test]
-        public async void testFlushOnMaxTimeout()
+        public void testFlushOnMaxTimeout()
         {
             SetEventProcessor(EventDispatcherMock.Object);
 
             UserEvent userEvent = BuildConversionEvent(EventName);
             eventProcessor.Process(userEvent);
             TimeSpan awaitTimeSpan = MAX_DURATION_MS;
-            await Task.Delay(awaitTimeSpan.Add(TimeSpan.FromMilliseconds(2000)));
+            Task.Delay(awaitTimeSpan.Add(TimeSpan.FromMilliseconds(2000))).Wait();
 
             Assert.AreEqual(0, eventQueue.Count);
             eventProcessor.Stop();
         }
 
+        [Test]
         public void TestFlushMaxBatchSize()
         {
             SetEventProcessor(EventDispatcherMock.Object);
@@ -84,14 +85,13 @@ namespace OptimizelySDK.Tests.EventTests
 
         private void SetEventProcessor(IEventDispatcher eventDispatcher)
         {
-            eventProcessor = new BatchEventProcessor(eventQueue,
-                EventDispatcherMock.Object,
-                MAX_BATCH_SIZE,
-                MAX_DURATION_MS,
-                null,
-                true,
-                Logger
-                );
+            eventProcessor = new BatchEventProcessor.Builder()
+                .WithEventQueue(eventQueue)
+                .WithEventDispatcher(EventDispatcherMock.Object)
+                .WithMaxBatchSize(MAX_BATCH_SIZE)
+                .WithFlushInterval(MAX_DURATION_MS)
+                .WithLogger(Logger)
+                .Build();
         }
 
         private ConversionEvent BuildConversionEvent(string eventName)

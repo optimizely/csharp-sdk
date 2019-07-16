@@ -46,19 +46,7 @@ namespace OptimizelySDK.Event
         // Variables to control blocking/syncing.
         public int resourceInUse = 0;
 
-        public BatchEventProcessor(BlockingCollection<object> eventQueue, IEventDispatcher eventDispatcher, int batchSize, TimeSpan flushInterval, IErrorHandler errorHandler = null, bool autoUpdate = true, ILogger logger = null) {
-            Logger = logger;
-            ErrorHandler = errorHandler;
-            EventDispatcher = eventDispatcher;
-            FlushInterval = flushInterval;
-            AutoUpdate = autoUpdate;
-            EventQueue = eventQueue;
-            //EventQueue = eventQueue;
-            BatchSize = batchSize;
-
-            // Never start, start only when Start is called.
-            SchedulerService = new Timer((object state) => { Run(); }, this, -1, -1);
-            Start();
+        public BatchEventProcessor() {
         }
 
         public void Start()
@@ -213,5 +201,88 @@ namespace OptimizelySDK.Event
             SchedulerService.Dispose();
             Disposed = true;
         }
+
+        public class Builder
+        {
+            private BlockingCollection<object> EventQueue;
+            private IEventDispatcher EventDispatcher;
+            private int BatchSize;
+            private TimeSpan FlushInterval;
+            private IErrorHandler ErrorHandler;
+            private bool AutoUpdate;
+            private ILogger Logger;
+
+
+            public Builder WithEventQueue(BlockingCollection<object> eventQueue)
+            {
+                EventQueue = eventQueue;
+
+                return this;
+            }
+
+            public Builder WithEventDispatcher(IEventDispatcher eventDispatcher)
+            {
+                EventDispatcher = eventDispatcher;
+
+                return this;
+            }
+
+            public Builder WithMaxBatchSize(int batchSize)
+            {
+                BatchSize = batchSize;
+
+                return this;
+            }
+
+            public Builder WithFlushInterval(TimeSpan flushInterval)
+            {
+                FlushInterval = flushInterval;
+
+                return this;
+            }
+
+            public Builder WithErrorHandler(IErrorHandler errorHandler = null)
+            {
+                ErrorHandler = errorHandler;
+
+                return this;
+            }
+
+            public Builder WithAutoUpdate(bool autoUpdate = true)
+            {
+                AutoUpdate = autoUpdate;
+
+                return this;
+            }
+
+            public Builder WithLogger(ILogger logger = null)
+            {
+                Logger = logger;
+
+                return this;
+            }
+
+            /// <summary>
+            /// Build BatchEventProcessor instance.
+            /// </summary>
+            /// <returns>BatchEventProcessor instance</returns>
+            public BatchEventProcessor Build()
+            {
+                var batchEventProcessor = new BatchEventProcessor();
+                batchEventProcessor.Logger = Logger;
+                batchEventProcessor.ErrorHandler = ErrorHandler;
+                batchEventProcessor.EventDispatcher = EventDispatcher;
+                batchEventProcessor.FlushInterval = FlushInterval;
+                batchEventProcessor.AutoUpdate = AutoUpdate;
+                batchEventProcessor.EventQueue = EventQueue;
+                batchEventProcessor.BatchSize = BatchSize;
+                
+                // Never start, start only when Start is called.
+                batchEventProcessor.SchedulerService = new Timer((object state) => { batchEventProcessor.Run(); }, this, -1, -1);
+                batchEventProcessor.Start();
+                return batchEventProcessor;
+            }
+        }
+
     }
 }
