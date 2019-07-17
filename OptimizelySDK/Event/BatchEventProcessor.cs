@@ -8,6 +8,8 @@ using OptimizelySDK.Logger;
 using OptimizelySDK.ErrorHandler;
 using System.Linq;
 using OptimizelySDK.Event.Dispatcher;
+using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace OptimizelySDK.Event
 {
@@ -24,6 +26,7 @@ namespace OptimizelySDK.Event
 
         // Don't make it static. make it const. 
         private static object SHUTDOWN_SIGNAL = new object();
+        private static object FLUSH_SIGNAL = new object();
 
         public bool Disposed { get; private set; }
 
@@ -31,13 +34,14 @@ namespace OptimizelySDK.Event
         private int BatchSize;
 
         public bool IsStarted { get; private set; }
-        private bool ScheduleWhenFinished = false;
-        public bool AutoUpdate { get; private set; }
-        private Timer SchedulerService;
+        
+        private Task Executer;
+        private Stopwatch StopWatch = new Stopwatch();
 
         protected ILogger Logger { get; set; }
         protected IErrorHandler ErrorHandler { get; set; }
         public static object mutex = new object();
+        public TimeSpan WaitingTimeout { get; set; }
 
         private IEventDispatcher EventDispatcher;
         BlockingCollection<object> EventQueue; 
@@ -61,9 +65,9 @@ namespace OptimizelySDK.Event
                 Logger.Log(LogLevel.WARN, "Service already started.");
                 return;
             }
-            // We don't really need to setup timer. We just need a thread, which will be recursively checking
-            // either batchsize meets condition or delayed time. 
-            SchedulerService.Change(TimeSpan.Zero, AutoUpdate ? FlushInterval : TimeSpan.FromMilliseconds(-1));
+
+            StopWatch.Start();
+            Executer = Task.Factory.StartNew(() => Run());
             IsStarted = true;
         }
 
@@ -73,29 +77,45 @@ namespace OptimizelySDK.Event
         /// </summary>
         public virtual void Run()
         {
-
-            
-
-
             try
             {
                 // we don't really need of these stuff.
                 if (Interlocked.Exchange(ref resourceInUse, 1) == 0)
                 {
-                    object item;
                     try
                     {
-                        // Consume the BlockingCollection
-                        // Specify timeout
-                        while (EventQueue.TryTake(out item))
+                        while (true)
                         {
-                            if (item is UserEvent)
-                                AddToBatch((UserEvent)item);
-                            else if (item == SHUTDOWN_SIGNAL)
+                            if (StopWatch.ElapsedMilliseconds > FlushInterval.Milliseconds)
+                            {
+                                Logger.Log(LogLevel.DEBUG, "Deadline exceeded flushing current batch.");
+                                Flush();
+                            }
+
+                            // Consume the BlockingCollection
+                            // Specify timeout
+                            if (!EventQueue.TryTake(out object item, 50))
+                            {
+                                Logger.Log(LogLevel.DEBUG, "Empty item, sleeping for 50ms.");
+                                Thread.Sleep(50);
+                                continue;
+                            }
+
+                            if (item == SHUTDOWN_SIGNAL)
                             {
                                 Logger.Log(LogLevel.INFO, "Received shutdown signal.");
-                                Stop();
+                                break;
                             }
+
+                            if (item == FLUSH_SIGNAL)
+                            {
+                                Logger.Log(LogLevel.DEBUG, "Received flush signal.");
+                                Flush();
+                                continue;
+                            }
+
+                            if (item is UserEvent userEvent)
+                                AddToBatch(userEvent);
                         }
                     }
                     catch (InvalidOperationException e)
@@ -106,7 +126,6 @@ namespace OptimizelySDK.Event
 
                     Logger.Log(LogLevel.DEBUG, "Deadline exceeded flushing current batch.");
                     Flush();
-
                 }
             }
             catch (Exception exception)
@@ -154,8 +173,11 @@ namespace OptimizelySDK.Event
         public void Stop()
         {
             if (Disposed) return;
-            // don't call now and onwards.
-            SchedulerService.Change(-1, -1);
+
+            EventQueue.Add(SHUTDOWN_SIGNAL);
+
+            if (!Executer.Wait(WaitingTimeout))
+                Logger.Log(LogLevel.ERROR, $"Timeout exceeded attempting to close for {WaitingTimeout.Milliseconds} ms");
 
             IsStarted = false;
             Logger.Log(LogLevel.WARN, $"Stopping scheduler.");
@@ -181,6 +203,10 @@ namespace OptimizelySDK.Event
                 Flush();
                 CurrentBatch = new List<UserEvent>();
             }
+
+            // Reset the deadline if starting a new batch.
+            if (CurrentBatch.Count == 0)
+                StopWatch.Restart();
 
             CurrentBatch.Add(userEvent);
             if (CurrentBatch.Count >= BatchSize) {
@@ -214,8 +240,8 @@ namespace OptimizelySDK.Event
         {
             if (Disposed) return;
 
-            SchedulerService.Change(-1, -1);
-            SchedulerService.Dispose();
+            //SchedulerService.Change(-1, -1);
+            //SchedulerService.Dispose();
             Disposed = true;
         }
 
@@ -226,9 +252,9 @@ namespace OptimizelySDK.Event
             private int BatchSize;
             private TimeSpan FlushInterval;
             private IErrorHandler ErrorHandler;
-            private bool AutoUpdate;
+            private bool StartByDefault;
             private ILogger Logger;
-
+            private TimeSpan WaitingTimeout;
 
             public Builder WithEventQueue(BlockingCollection<object> eventQueue)
             {
@@ -265,9 +291,9 @@ namespace OptimizelySDK.Event
                 return this;
             }
 
-            public Builder WithAutoUpdate(bool autoUpdate = true)
+            public Builder WithStartByDefault(bool startByDefault = true)
             {
-                AutoUpdate = autoUpdate;
+                StartByDefault = startByDefault;
 
                 return this;
             }
@@ -275,6 +301,13 @@ namespace OptimizelySDK.Event
             public Builder WithLogger(ILogger logger = null)
             {
                 Logger = logger;
+
+                return this;
+            }
+
+            public Builder WithWaitingTimeout(TimeSpan timeout)
+            {
+                WaitingTimeout = timeout;
 
                 return this;
             }
@@ -290,13 +323,13 @@ namespace OptimizelySDK.Event
                 batchEventProcessor.ErrorHandler = ErrorHandler;
                 batchEventProcessor.EventDispatcher = EventDispatcher;
                 batchEventProcessor.FlushInterval = FlushInterval;
-                batchEventProcessor.AutoUpdate = AutoUpdate;
                 batchEventProcessor.EventQueue = EventQueue;
                 batchEventProcessor.BatchSize = BatchSize;
-                
-                // Never start, start only when Start is called.
-                batchEventProcessor.SchedulerService = new Timer((object state) => { batchEventProcessor.Run(); }, this, -1, -1);
-                batchEventProcessor.Start();
+                batchEventProcessor.WaitingTimeout = WaitingTimeout;
+
+                if (StartByDefault)
+                    batchEventProcessor.Start();
+
                 return batchEventProcessor;
             }
         }
