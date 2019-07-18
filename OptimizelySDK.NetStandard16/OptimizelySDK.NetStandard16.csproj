@@ -9,6 +9,10 @@
 
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     </PropertyGroup>
+	<PropertyGroup>
+    	<DefineConstants>;$(DefineConstants);<NETSTANDARD>NetStandardIdentifier</NETSTANDARD>
+    	</DefineConstants>
+	</PropertyGroup>
     <ItemGroup>
 		<Compile Include="..\OptimizelySDK\AudienceConditions\AndCondition.cs" />
 		<Compile Include="..\OptimizelySDK\AudienceConditions\AudienceIdCondition.cs" />
@@ -121,6 +125,9 @@
 		</Compile>
 		<Compile Include="..\OptimizelySDK\Event\EventProcessor.cs">
 		  <Link>EventProcessor.cs</Link>
+		</Compile>
+		<Compile Include="..\OptimizelySDK\Event\ExecutorService.cs">
+		  <Link>ExecutorService.cs</Link>
 		</Compile>
     </ItemGroup>
     <ItemGroup>
