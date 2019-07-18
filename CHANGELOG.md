@@ -1,5 +1,5 @@
 ## 3.2.0
-May 9th, 2019
+July 22nd, 2019
 
  ### New Features:
 * Added support for automatic datafile management via `HttpProjectConfigManager` for framework 4.0 or above:
