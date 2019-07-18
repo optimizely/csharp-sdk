@@ -10,6 +10,7 @@ using System.Linq;
 using OptimizelySDK.Event.Dispatcher;
 using System.Threading.Tasks;
 using System.Diagnostics;
+using OptimizelySDK.Notifications;
 
 namespace OptimizelySDK.Event
 {
@@ -34,14 +35,23 @@ namespace OptimizelySDK.Event
         private int BatchSize;
 
         public bool IsStarted { get; private set; }
-        
+
+        // TODO: Move this logic in a separate class.
+#if NETSTANDARD1_6
         private Task Executer;
+#else
+        private Thread Executer;
+#endif
+
         private Stopwatch StopWatch = new Stopwatch();
 
         protected ILogger Logger { get; set; }
         protected IErrorHandler ErrorHandler { get; set; }
-        public static object mutex = new object();
         public TimeSpan WaitingTimeout { get; set; }
+        public NotificationCenter NotificationCenter { get; set; }
+
+        private readonly object flushLock = new object();
+        private readonly object addToBatchLock = new object();
 
         private IEventDispatcher EventDispatcher;
         BlockingCollection<object> EventQueue; 
@@ -67,7 +77,13 @@ namespace OptimizelySDK.Event
             }
 
             StopWatch.Start();
+
+#if NETSTANDARD1_6
             Executer = Task.Factory.StartNew(() => Run());
+#else
+            Executer = new Thread(() => Run());
+            Executer.Start();
+#endif
             IsStarted = true;
         }
 
@@ -79,54 +95,48 @@ namespace OptimizelySDK.Event
         {
             try
             {
-                // we don't really need of these stuff.
-                if (Interlocked.Exchange(ref resourceInUse, 1) == 0)
+                while (true)
                 {
-                    try
+                    if (StopWatch.ElapsedMilliseconds > FlushInterval.Milliseconds)
                     {
-                        while (true)
-                        {
-                            if (StopWatch.ElapsedMilliseconds > FlushInterval.Milliseconds)
-                            {
-                                Logger.Log(LogLevel.DEBUG, "Deadline exceeded flushing current batch.");
-                                Flush();
-                            }
-
-                            // Consume the BlockingCollection
-                            // Specify timeout
-                            if (!EventQueue.TryTake(out object item, 50))
-                            {
-                                Logger.Log(LogLevel.DEBUG, "Empty item, sleeping for 50ms.");
-                                Thread.Sleep(50);
-                                continue;
-                            }
-
-                            if (item == SHUTDOWN_SIGNAL)
-                            {
-                                Logger.Log(LogLevel.INFO, "Received shutdown signal.");
-                                break;
-                            }
-
-                            if (item == FLUSH_SIGNAL)
-                            {
-                                Logger.Log(LogLevel.DEBUG, "Received flush signal.");
-                                Flush();
-                                continue;
-                            }
-
-                            if (item is UserEvent userEvent)
-                                AddToBatch(userEvent);
-                        }
-                    }
-                    catch (InvalidOperationException e)
-                    {
-                        // An InvalidOperationException means that Take() was called on a completed collection
-                        Logger.Log(LogLevel.DEBUG, "Unable to take item from eventQueue: " + e.GetAllMessages());
+                        Logger.Log(LogLevel.DEBUG, "Deadline exceeded flushing current batch.");
+                        Flush();
                     }
 
-                    Logger.Log(LogLevel.DEBUG, "Deadline exceeded flushing current batch.");
-                    Flush();
+                    // Consume the BlockingCollection
+                    // Specify timeout
+                    if (!EventQueue.TryTake(out object item, 50))
+                    {
+                        Logger.Log(LogLevel.DEBUG, "Empty item, sleeping for 50ms.");
+#if NETSTANDARD1_6
+                        Task.Delay(50).Wait();
+#else
+                        Thread.Sleep(50);
+#endif
+                        continue;
+                    }
+
+                    if (item == SHUTDOWN_SIGNAL)
+                    {
+                        Logger.Log(LogLevel.INFO, "Received shutdown signal.");
+                        break;
+                    }
+
+                    if (item == FLUSH_SIGNAL)
+                    {
+                        Logger.Log(LogLevel.DEBUG, "Received flush signal.");
+                        Flush();
+                        continue;
+                    }
+
+                    if (item is UserEvent userEvent)
+                        AddToBatch(userEvent);
                 }
+            }
+            catch (InvalidOperationException e)
+            {
+                // An InvalidOperationException means that Take() was called on a completed collection
+                Logger.Log(LogLevel.DEBUG, "Unable to take item from eventQueue: " + e.GetAllMessages());
             }
             catch (Exception exception)
             {
@@ -135,7 +145,6 @@ namespace OptimizelySDK.Event
             finally
             {
                 Logger.Log(LogLevel.INFO, "Exiting processing loop. Attempting to flush pending events.");
-                Interlocked.Exchange(ref resourceInUse, 0);
                 Flush();
             }
         }
@@ -149,13 +158,16 @@ namespace OptimizelySDK.Event
 
             List<UserEvent> toProcessBatch = null;
             // This should be mutex
-            lock (mutex) {
+            lock (flushLock)
+            {
                 toProcessBatch = new List<UserEvent>(CurrentBatch);
                 CurrentBatch.Clear();
             }
             
 
             LogEvent logEvent = EventFactory.CreateLogEvent(toProcessBatch.ToArray(), Logger);
+
+            // TODO: Call NotificationCenter.Send(logEvent) here.
 
             try
             {
@@ -176,7 +188,14 @@ namespace OptimizelySDK.Event
 
             EventQueue.Add(SHUTDOWN_SIGNAL);
 
-            if (!Executer.Wait(WaitingTimeout))
+            bool isTerminated = false;
+
+#if NETSTANDARD1_6
+            isTerminated = Executer.Wait(WaitingTimeout);
+#else
+            isTerminated = Executer.Join(WaitingTimeout);
+#endif
+            if (!isTerminated)
                 Logger.Log(LogLevel.ERROR, $"Timeout exceeded attempting to close for {WaitingTimeout.Milliseconds} ms");
 
             IsStarted = false;
@@ -197,11 +216,15 @@ namespace OptimizelySDK.Event
             }
         }
         
-        private void AddToBatch(UserEvent userEvent) {
+        private void AddToBatch(UserEvent userEvent)
+        {
             if (ShouldSplit(userEvent))
             {
-                Flush();
-                CurrentBatch = new List<UserEvent>();
+                lock (addToBatchLock)
+                {
+                    Flush();
+                    CurrentBatch = new List<UserEvent>();
+                }
             }
 
             // Reset the deadline if starting a new batch.
@@ -252,7 +275,7 @@ namespace OptimizelySDK.Event
             private int BatchSize;
             private TimeSpan FlushInterval;
             private IErrorHandler ErrorHandler;
-            private bool StartByDefault;
+            private NotificationCenter NotificationCenter;
             private ILogger Logger;
             private TimeSpan WaitingTimeout;
 
@@ -291,9 +314,9 @@ namespace OptimizelySDK.Event
                 return this;
             }
 
-            public Builder WithStartByDefault(bool startByDefault = true)
+            public Builder WithNotificationCenter(NotificationCenter notificationCenter)
             {
-                StartByDefault = startByDefault;
+                NotificationCenter = notificationCenter;
 
                 return this;
             }
@@ -318,6 +341,16 @@ namespace OptimizelySDK.Event
             /// <returns>BatchEventProcessor instance</returns>
             public BatchEventProcessor Build()
             {
+                return Build(true);
+            }
+
+            /// <summary>
+            /// Build BatchEventProcessor instance.
+            /// </summary>
+            /// <param name="shouldStart">Should start event processor on initializtion</param>
+            /// <returns>BatchEventProcessor instance</returns>
+            public BatchEventProcessor Build(bool shouldStart)
+            {
                 var batchEventProcessor = new BatchEventProcessor();
                 batchEventProcessor.Logger = Logger;
                 batchEventProcessor.ErrorHandler = ErrorHandler;
@@ -326,8 +359,9 @@ namespace OptimizelySDK.Event
                 batchEventProcessor.EventQueue = EventQueue;
                 batchEventProcessor.BatchSize = BatchSize;
                 batchEventProcessor.WaitingTimeout = WaitingTimeout;
+                batchEventProcessor.NotificationCenter = NotificationCenter;
 
-                if (StartByDefault)
+                if (shouldStart)
                     batchEventProcessor.Start();
 
                 return batchEventProcessor;
