@@ -26,8 +26,8 @@ namespace OptimizelySDK.Event
     public class BatchEventProcessor: EventProcessor, IDisposable {
 
         // Don't make it static. make it const. 
-        private static object SHUTDOWN_SIGNAL = new object();
-        private static object FLUSH_SIGNAL = new object();
+        private readonly object SHUTDOWN_SIGNAL = new object();
+        private readonly object FLUSH_SIGNAL = new object();
 
         public bool Disposed { get; private set; }
 
@@ -43,6 +43,7 @@ namespace OptimizelySDK.Event
         private Thread Executer;
 #endif
 
+        // Remove stopwatch, it's expensive. and part of diagnostic class which sjpi;d
         private Stopwatch StopWatch = new Stopwatch();
 
         protected ILogger Logger { get; set; }
@@ -56,18 +57,7 @@ namespace OptimizelySDK.Event
         private IEventDispatcher EventDispatcher;
         BlockingCollection<object> EventQueue; 
         private List<UserEvent> CurrentBatch = new List<UserEvent>();
-
-
-        // Variables to control blocking/syncing.
-        public int resourceInUse = 0;
-
-        public BatchEventProcessor() {
-        }
-        /// <summary>
-        ///  This doesn't fit here, please copy Java sdk code.
-        /////Thread t = new Thread(Run);
-        /////t.Start();
-        /// </summary>
+              
         public void Start()
         {
             if (IsStarted && !Disposed)
@@ -158,10 +148,11 @@ namespace OptimizelySDK.Event
 
             List<UserEvent> toProcessBatch = null;
             // This should be mutex
+            // rename it to mutex
             lock (flushLock)
             {
                 toProcessBatch = new List<UserEvent>(CurrentBatch);
-                CurrentBatch.Clear();
+                CurrentBatch = new List<UserEvent>();
             }
             
 
@@ -220,18 +211,18 @@ namespace OptimizelySDK.Event
         {
             if (ShouldSplit(userEvent))
             {
-                lock (addToBatchLock)
-                {
-                    Flush();
-                    CurrentBatch = new List<UserEvent>();
-                }
+                Flush();
+                CurrentBatch = new List<UserEvent>();
             }
 
             // Reset the deadline if starting a new batch.
             if (CurrentBatch.Count == 0)
                 StopWatch.Restart();
 
-            CurrentBatch.Add(userEvent);
+            lock (flushLock) {
+                CurrentBatch.Add(userEvent);
+            }
+            
             if (CurrentBatch.Count >= BatchSize) {
                 Flush();
             }
@@ -347,9 +338,9 @@ namespace OptimizelySDK.Event
             /// <summary>
             /// Build BatchEventProcessor instance.
             /// </summary>
-            /// <param name="shouldStart">Should start event processor on initializtion</param>
+            /// <param name="start">Should start event processor on initializtion</param>
             /// <returns>BatchEventProcessor instance</returns>
-            public BatchEventProcessor Build(bool shouldStart)
+            public BatchEventProcessor Build(bool start)
             {
                 var batchEventProcessor = new BatchEventProcessor();
                 batchEventProcessor.Logger = Logger;
@@ -361,7 +352,7 @@ namespace OptimizelySDK.Event
                 batchEventProcessor.WaitingTimeout = WaitingTimeout;
                 batchEventProcessor.NotificationCenter = NotificationCenter;
 
-                if (shouldStart)
+                if (start)
                     batchEventProcessor.Start();
 
                 return batchEventProcessor;
