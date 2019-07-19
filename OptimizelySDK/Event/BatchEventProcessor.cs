@@ -8,7 +8,6 @@ using OptimizelySDK.Logger;
 using OptimizelySDK.ErrorHandler;
 using System.Linq;
 using OptimizelySDK.Event.Dispatcher;
-using System.Threading.Tasks;
 using System.Diagnostics;
 using OptimizelySDK.Notifications;
 
@@ -35,28 +34,19 @@ namespace OptimizelySDK.Event
         private int BatchSize;
 
         public bool IsStarted { get; private set; }
-
-        // TODO: Move this logic in a separate class.
-#if NETSTANDARD1_6
-        private Task Executer;
-#else
         private Thread Executer;
-#endif
-
-        // Remove stopwatch, it's expensive. and part of diagnostic class which sjpi;d
-        private Stopwatch StopWatch = new Stopwatch();
-
+        
         protected ILogger Logger { get; set; }
         protected IErrorHandler ErrorHandler { get; set; }
         public TimeSpan WaitingTimeout { get; set; }
         public NotificationCenter NotificationCenter { get; set; }
 
-        private readonly object flushLock = new object();
-        private readonly object addToBatchLock = new object();
+        private readonly object mutex = new object();
 
         private IEventDispatcher EventDispatcher;
         BlockingCollection<object> EventQueue; 
         private List<UserEvent> CurrentBatch = new List<UserEvent>();
+        private long FlushingIntervalDeadline;
               
         public void Start()
         {
@@ -66,14 +56,10 @@ namespace OptimizelySDK.Event
                 return;
             }
 
-            StopWatch.Start();
-
-#if NETSTANDARD1_6
-            Executer = Task.Factory.StartNew(() => Run());
-#else
+            FlushingIntervalDeadline = DateTime.Now.Millisecond + FlushInterval.Milliseconds;
+            
             Executer = new Thread(() => Run());
             Executer.Start();
-#endif
             IsStarted = true;
         }
 
@@ -87,22 +73,16 @@ namespace OptimizelySDK.Event
             {
                 while (true)
                 {
-                    if (StopWatch.ElapsedMilliseconds > FlushInterval.Milliseconds)
+                    if (DateTime.Now.Millisecond > FlushingIntervalDeadline)
                     {
                         Logger.Log(LogLevel.DEBUG, "Deadline exceeded flushing current batch.");
                         Flush();
                     }
-
-                    // Consume the BlockingCollection
-                    // Specify timeout
+                    
                     if (!EventQueue.TryTake(out object item, 50))
                     {
                         Logger.Log(LogLevel.DEBUG, "Empty item, sleeping for 50ms.");
-#if NETSTANDARD1_6
-                        Task.Delay(50).Wait();
-#else
                         Thread.Sleep(50);
-#endif
                         continue;
                     }
 
@@ -149,7 +129,7 @@ namespace OptimizelySDK.Event
             List<UserEvent> toProcessBatch = null;
             // This should be mutex
             // rename it to mutex
-            lock (flushLock)
+            lock (mutex)
             {
                 toProcessBatch = new List<UserEvent>(CurrentBatch);
                 CurrentBatch = new List<UserEvent>();
@@ -178,15 +158,8 @@ namespace OptimizelySDK.Event
             if (Disposed) return;
 
             EventQueue.Add(SHUTDOWN_SIGNAL);
-
-            bool isTerminated = false;
-
-#if NETSTANDARD1_6
-            isTerminated = Executer.Wait(WaitingTimeout);
-#else
-            isTerminated = Executer.Join(WaitingTimeout);
-#endif
-            if (!isTerminated)
+            
+            if (!Executer.Join(WaitingTimeout))
                 Logger.Log(LogLevel.ERROR, $"Timeout exceeded attempting to close for {WaitingTimeout.Milliseconds} ms");
 
             IsStarted = false;
@@ -217,9 +190,9 @@ namespace OptimizelySDK.Event
 
             // Reset the deadline if starting a new batch.
             if (CurrentBatch.Count == 0)
-                StopWatch.Restart();
+                FlushingIntervalDeadline = DateTime.Now.Millisecond + FlushInterval.Milliseconds;
 
-            lock (flushLock) {
+            lock (mutex) {
                 CurrentBatch.Add(userEvent);
             }
             

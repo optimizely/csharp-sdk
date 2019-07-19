@@ -120,14 +120,8 @@
 		<Compile Include="..\OptimizelySDK\Event\UserEventFactory.cs">
 		  <Link>UserEventFactory.cs</Link>
 		</Compile>
-		<Compile Include="..\OptimizelySDK\Event\BatchEventProcessor.cs">
-		  <Link>BatchEventProcessor.cs</Link>
-		</Compile>
 		<Compile Include="..\OptimizelySDK\Event\EventProcessor.cs">
 		  <Link>EventProcessor.cs</Link>
-		</Compile>
-		<Compile Include="..\OptimizelySDK\Event\ExecutorService.cs">
-		  <Link>ExecutorService.cs</Link>
 		</Compile>
     </ItemGroup>
     <ItemGroup>
