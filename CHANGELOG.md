@@ -10,7 +10,7 @@ July 22nd, 2019
     - Requests for the datafile are made in a separate thread and are scheduled with fixed delay.
     - Configuration updates can be subscribed to via the NotificationCenter built with the `HttpProjectConfigManager`.
     - `Optimizely` instance must be disposed after the use or `HttpProjectConfigManager` must be disposed after the use to release resources.
-- The [`OptimizelyFactory`](https://github.com/optimizely/csharp-sdk/blob/master/OptimizelySDK/OptimizelyFactory.cs) provides basic methods for instantiating the Optimizely SDK with a minimal number of parameters.
+- The [`OptimizelyFactory`](https://github.com/optimizely/csharp-sdk/blob/master/OptimizelySDK/OptimizelyFactory.cs) provides basic methods for instantiating the Optimizely SDK with a minimal number of parameters. Check [`README.md`](https://github.com/optimizely/csharp-sdk#use-optimizelyfactory) for more details.
 
 ## 3.1.1
 June 19th, 2019
