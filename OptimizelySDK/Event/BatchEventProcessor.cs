@@ -127,18 +127,16 @@ namespace OptimizelySDK.Event
             }
 
             List<UserEvent> toProcessBatch = null;
-            // This should be mutex
-            // rename it to mutex
             lock (mutex)
             {
                 toProcessBatch = new List<UserEvent>(CurrentBatch);
-                CurrentBatch = new List<UserEvent>();
+                CurrentBatch.Clear();
             }
             
 
             LogEvent logEvent = EventFactory.CreateLogEvent(toProcessBatch.ToArray(), Logger);
 
-            // TODO: Call NotificationCenter.Send(logEvent) here.
+            NotificationCenter?.SendNotifications(NotificationCenter.NotificationType.LogEvent, logEvent);
 
             try
             {

@@ -6,6 +6,8 @@ using OptimizelySDK.Event;
 using OptimizelySDK.Event.Dispatcher;
 using OptimizelySDK.Event.Entity;
 using OptimizelySDK.Logger;
+using OptimizelySDK.Notifications;
+using OptimizelySDK.Tests.NotificationTests;
 using System;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
@@ -15,7 +17,7 @@ namespace OptimizelySDK.Tests.EventTests
     [TestFixture]
     class BatchEventProcessorTest
     {
-        private static string TestUserId = string.Empty;
+        private static string TestUserId = "testUserId";
         private const string EventId = "eventId";
         private const string EventName = "eventName";
 
@@ -23,36 +25,45 @@ namespace OptimizelySDK.Tests.EventTests
         private TimeSpan MAX_DURATION_MS = TimeSpan.FromMilliseconds(1000);
 
         private ProjectConfig Config;
-        private ILogger Logger;
+        private Mock<ProjectConfig> ConfigMock;
+
+        private Mock<ILogger> LoggerMock;
         private BlockingCollection<object> eventQueue;
-        private BatchEventProcessor eventProcessor;
+        private BatchEventProcessor EventProcessor;
         private Mock<IEventDispatcher> EventDispatcherMock;
+
+        private NotificationCenter NotificationCenter = new NotificationCenter();
+        private Mock<TestNotificationCallbacks> NotificationCallbackMock;
 
         [TestFixtureSetUp]
         public void Setup()
         {
-            TestUserId = "testUserId";
-            var logger = new NoOpLogger();
-            Config = DatafileProjectConfig.Create(TestData.Datafile, logger, new ErrorHandler.NoOpErrorHandler());
+            LoggerMock = new Mock<ILogger>();
+            LoggerMock.Setup(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()));
+
+            Config = DatafileProjectConfig.Create(TestData.Datafile, LoggerMock.Object, new ErrorHandler.NoOpErrorHandler());
+            ConfigMock = new Mock<ProjectConfig>();
+
+            ConfigMock.SetupGet(config => config.Revision).Returns("1");
+            ConfigMock.SetupGet(config => config.ProjectId).Returns("X");
+
             eventQueue = new BlockingCollection<object>(100);
             EventDispatcherMock = new Mock<IEventDispatcher>();
 
+            NotificationCallbackMock = new Mock<TestNotificationCallbacks>();
+            NotificationCallbackMock.Setup(nc => nc.TestLogEventCallback(It.IsAny<LogEvent>()));
 
+            NotificationCenter.AddNotification(NotificationCenter.NotificationType.LogEvent,
+                NotificationCallbackMock.Object.TestLogEventCallback);
         }
-
-        [TestFixtureTearDown]
-        public void TearDown()
-        {
-            eventProcessor.Stop();
-        }
-
+        
         [Test]
         public void TestDrainOnClose()
         {
             UserEvent userEvent = BuildConversionEvent(EventName);
             SetEventProcessor(EventDispatcherMock.Object);
-            eventProcessor.Process(userEvent);
-            eventProcessor.Stop();
+            EventProcessor.Process(userEvent);
+            EventProcessor.Stop();
 
             Assert.AreEqual(0, eventQueue.Count);
         }
@@ -63,12 +74,12 @@ namespace OptimizelySDK.Tests.EventTests
             SetEventProcessor(EventDispatcherMock.Object);
 
             UserEvent userEvent = BuildConversionEvent(EventName);
-            eventProcessor.Process(userEvent);
+            EventProcessor.Process(userEvent);
             TimeSpan awaitTimeSpan = MAX_DURATION_MS;
             Task.Delay(awaitTimeSpan.Add(TimeSpan.FromMilliseconds(2000))).Wait();
 
             Assert.AreEqual(0, eventQueue.Count);
-            eventProcessor.Stop();
+            EventProcessor.Stop();
         }
 
         [Test]
@@ -78,19 +89,20 @@ namespace OptimizelySDK.Tests.EventTests
             for ( int i = 0; i < MAX_BATCH_SIZE; i++ ) {
                 string eventName = EventName + i;
                 UserEvent userEvent = BuildConversionEvent(eventName);
-                eventProcessor.Process(userEvent);
+                EventProcessor.Process(userEvent);
             }
             Assert.AreEqual(0, eventQueue.Count);
         }
 
         private void SetEventProcessor(IEventDispatcher eventDispatcher)
         {
-            eventProcessor = new BatchEventProcessor.Builder()
+            EventProcessor = new BatchEventProcessor.Builder()
                 .WithEventQueue(eventQueue)
-                .WithEventDispatcher(EventDispatcherMock.Object)
+                .WithEventDispatcher(eventDispatcher)
                 .WithMaxBatchSize(MAX_BATCH_SIZE)
                 .WithFlushInterval(MAX_DURATION_MS)
-                .WithLogger(Logger)
+                .WithLogger(LoggerMock.Object)
+                .WithNotificationCenter(NotificationCenter)
                 .Build();
         }
 
