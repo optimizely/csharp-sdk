@@ -258,7 +258,7 @@ namespace OptimizelySDK.Config
                 }
 
                 if (IsPollingIntervalProvided && (Period.TotalMilliseconds <= 0 || Period.TotalMilliseconds > MAX_MILLISECONDS_LIMIT)) {
-                    Logger.Log(LogLevel.DEBUG, $"Period is not valid for periodic calls, using default period {DEFAULT_PERIOD.TotalMilliseconds}ms");
+                    Logger.Log(LogLevel.DEBUG, $"Polling interval is not valid for periodic calls, using default period {DEFAULT_PERIOD.TotalMilliseconds}ms");
                     Period = DEFAULT_PERIOD;
                 } else {
                     Logger.Log(LogLevel.DEBUG, $"No polling interval provided, using default period {DEFAULT_PERIOD.TotalMilliseconds}ms");
