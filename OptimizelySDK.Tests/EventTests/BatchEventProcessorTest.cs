@@ -23,6 +23,7 @@ namespace OptimizelySDK.Tests.EventTests
 
         private const int MAX_BATCH_SIZE = 10;
         private TimeSpan MAX_DURATION_MS = TimeSpan.FromMilliseconds(1000);
+        private TimeSpan TIMEOUT_INTERVAL_MS = TimeSpan.FromMilliseconds(5000);
 
         private ProjectConfig Config;
         private Mock<ProjectConfig> ConfigMock;
@@ -60,16 +61,17 @@ namespace OptimizelySDK.Tests.EventTests
         [Test]
         public void TestDrainOnClose()
         {
-            UserEvent userEvent = BuildConversionEvent(EventName);
             SetEventProcessor(EventDispatcherMock.Object);
+
+            UserEvent userEvent = BuildConversionEvent(EventName);
             EventProcessor.Process(userEvent);
             EventProcessor.Stop();
 
-            Assert.AreEqual(0, eventQueue.Count);
+            Assert.AreEqual(0, EventProcessor.EventQueue.Count);
         }
 
         [Test]
-        public void testFlushOnMaxTimeout()
+        public void TestFlushOnMaxTimeout()
         {
             SetEventProcessor(EventDispatcherMock.Object);
 
@@ -101,6 +103,7 @@ namespace OptimizelySDK.Tests.EventTests
                 .WithEventDispatcher(eventDispatcher)
                 .WithMaxBatchSize(MAX_BATCH_SIZE)
                 .WithFlushInterval(MAX_DURATION_MS)
+                .WithTimeoutInterval(TIMEOUT_INTERVAL_MS)
                 .WithLogger(LoggerMock.Object)
                 .WithNotificationCenter(NotificationCenter)
                 .Build();

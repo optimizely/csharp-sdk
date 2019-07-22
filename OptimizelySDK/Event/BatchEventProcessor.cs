@@ -22,29 +22,32 @@ namespace OptimizelySDK.Event
      * the BlockingQueue and buffers them for either a configured batch size or for a
      * maximum duration before the resulting LogEvent is sent to the NotificationManager.
      */
-    public class BatchEventProcessor: EventProcessor, IDisposable {
+    public class BatchEventProcessor: EventProcessor, IDisposable
+    {
+        private const int DEFAULT_BATCH_SIZE = 50;
+        private static readonly TimeSpan DEFAULT_FLUSH_INTERVAL = TimeSpan.FromMinutes(1);
+        private static readonly TimeSpan DEFAULT_TIMEOUT_INTERVAL = TimeSpan.FromMinutes(5);
 
-        // Don't make it static. make it const. 
+        private int BatchSize;
+        private TimeSpan FlushInterval;
+        private TimeSpan TimeoutInterval;
+
         private readonly object SHUTDOWN_SIGNAL = new object();
         private readonly object FLUSH_SIGNAL = new object();
 
         public bool Disposed { get; private set; }
-
-        private TimeSpan FlushInterval;
-        private int BatchSize;
 
         public bool IsStarted { get; private set; }
         private Thread Executer;
         
         protected ILogger Logger { get; set; }
         protected IErrorHandler ErrorHandler { get; set; }
-        public TimeSpan WaitingTimeout { get; set; }
         public NotificationCenter NotificationCenter { get; set; }
 
         private readonly object mutex = new object();
 
         private IEventDispatcher EventDispatcher;
-        BlockingCollection<object> EventQueue; 
+        public BlockingCollection<object> EventQueue { get; private set; } 
         private List<UserEvent> CurrentBatch = new List<UserEvent>();
         private long FlushingIntervalDeadline;
               
@@ -157,8 +160,8 @@ namespace OptimizelySDK.Event
 
             EventQueue.Add(SHUTDOWN_SIGNAL);
             
-            if (!Executer.Join(WaitingTimeout))
-                Logger.Log(LogLevel.ERROR, $"Timeout exceeded attempting to close for {WaitingTimeout.Milliseconds} ms");
+            if (!Executer.Join(TimeoutInterval))
+                Logger.Log(LogLevel.ERROR, $"Timeout exceeded attempting to close for {TimeoutInterval.Milliseconds} ms");
 
             IsStarted = false;
             Logger.Log(LogLevel.WARN, $"Stopping scheduler.");
@@ -234,12 +237,12 @@ namespace OptimizelySDK.Event
         {
             private BlockingCollection<object> EventQueue;
             private IEventDispatcher EventDispatcher;
-            private int BatchSize;
-            private TimeSpan FlushInterval;
+            private int? BatchSize;
+            private TimeSpan? FlushInterval;
+            private TimeSpan? TimeoutInterval;
             private IErrorHandler ErrorHandler;
             private NotificationCenter NotificationCenter;
             private ILogger Logger;
-            private TimeSpan WaitingTimeout;
 
             public Builder WithEventQueue(BlockingCollection<object> eventQueue)
             {
@@ -290,9 +293,9 @@ namespace OptimizelySDK.Event
                 return this;
             }
 
-            public Builder WithWaitingTimeout(TimeSpan timeout)
+            public Builder WithTimeoutInterval(TimeSpan timeout)
             {
-                WaitingTimeout = timeout;
+                TimeoutInterval = timeout;
 
                 return this;
             }
@@ -317,11 +320,12 @@ namespace OptimizelySDK.Event
                 batchEventProcessor.Logger = Logger;
                 batchEventProcessor.ErrorHandler = ErrorHandler;
                 batchEventProcessor.EventDispatcher = EventDispatcher;
-                batchEventProcessor.FlushInterval = FlushInterval;
                 batchEventProcessor.EventQueue = EventQueue;
-                batchEventProcessor.BatchSize = BatchSize;
-                batchEventProcessor.WaitingTimeout = WaitingTimeout;
                 batchEventProcessor.NotificationCenter = NotificationCenter;
+
+                batchEventProcessor.BatchSize = BatchSize ?? BatchEventProcessor.DEFAULT_BATCH_SIZE;
+                batchEventProcessor.FlushInterval = FlushInterval ?? BatchEventProcessor.DEFAULT_FLUSH_INTERVAL;
+                batchEventProcessor.TimeoutInterval = TimeoutInterval ?? BatchEventProcessor.DEFAULT_TIMEOUT_INTERVAL;
 
                 if (start)
                     batchEventProcessor.Start();
