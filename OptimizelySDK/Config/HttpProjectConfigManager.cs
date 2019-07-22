@@ -137,8 +137,14 @@ namespace OptimizelySDK.Config
             private bool StartByDefault;
             private NotificationCenter NotificationCenter;
 
+
+            private bool IsBlockingTimeoutProvided = false;
+            private bool IsPollingIntervalProvided = false;
+
             public Builder WithBlockingTimeoutPeriod(TimeSpan blockingTimeoutSpan)
             {
+                IsBlockingTimeoutProvided = true;
+
                 BlockingTimeoutSpan = blockingTimeoutSpan;
 
                 return this;
@@ -165,7 +171,9 @@ namespace OptimizelySDK.Config
             }
 
             public Builder WithPollingInterval(TimeSpan period)
-            {                
+            {
+                IsPollingIntervalProvided = true;
+
                 Period = period;
 
                 return this;
@@ -248,15 +256,19 @@ namespace OptimizelySDK.Config
                     Url = string.Format(Format, SdkKey);
                 }
 
-                if (Period.TotalMilliseconds <= 0 || Period.TotalMilliseconds > MAX_MILLISECONDS_LIMIT) {
-                    Logger.Log(LogLevel.INFO, $"Period is not valid for periodic calls, using default period {DEFAULT_PERIOD.TotalMilliseconds}ms");
+                if (IsPollingIntervalProvided && (Period.TotalMilliseconds <= 0 || Period.TotalMilliseconds > MAX_MILLISECONDS_LIMIT)) {
+                    Logger.Log(LogLevel.DEBUG, $"Polling interval is not valid for periodic calls, using default period {DEFAULT_PERIOD.TotalMilliseconds}ms");
                     Period = DEFAULT_PERIOD;
+                } else {
+                    Logger.Log(LogLevel.DEBUG, $"No polling interval provided, using default period {DEFAULT_PERIOD.TotalMilliseconds}ms");
                 }
                     
 
-                if (BlockingTimeoutSpan.TotalMilliseconds <= 0 || BlockingTimeoutSpan.TotalMilliseconds > MAX_MILLISECONDS_LIMIT) {
-                    Logger.Log(LogLevel.INFO, $"Blocking timeout is not valid, using default blocking timeout {DEFAULT_BLOCKINGOUT_PERIOD.TotalMilliseconds}ms");
+                if (IsBlockingTimeoutProvided && (BlockingTimeoutSpan.TotalMilliseconds <= 0 || BlockingTimeoutSpan.TotalMilliseconds > MAX_MILLISECONDS_LIMIT)) {
+                    Logger.Log(LogLevel.DEBUG, $"Blocking timeout is not valid, using default blocking timeout {DEFAULT_BLOCKINGOUT_PERIOD.TotalMilliseconds}ms");
                     BlockingTimeoutSpan = DEFAULT_BLOCKINGOUT_PERIOD;
+                } else {
+                    Logger.Log(LogLevel.DEBUG, $"No Blocking timeout provided, using default blocking timeout {DEFAULT_BLOCKINGOUT_PERIOD.TotalMilliseconds}ms");
                 }
                     
 
