@@ -79,7 +79,7 @@ namespace OptimizelySDK.Event
                     if (DateTime.Now.Millisecond > FlushingIntervalDeadline)
                     {
                         Logger.Log(LogLevel.DEBUG, "Deadline exceeded flushing current batch.");
-                        Flush();
+                        FlushQueue();
                     }
                     
                     if (!EventQueue.TryTake(out object item, 50))
@@ -98,7 +98,7 @@ namespace OptimizelySDK.Event
                     if (item == FLUSH_SIGNAL)
                     {
                         Logger.Log(LogLevel.DEBUG, "Received flush signal.");
-                        Flush();
+                        FlushQueue();
                         continue;
                     }
 
@@ -118,11 +118,16 @@ namespace OptimizelySDK.Event
             finally
             {
                 Logger.Log(LogLevel.INFO, "Exiting processing loop. Attempting to flush pending events.");
-                Flush();
+                FlushQueue();
             }
         }
-            
-        private void Flush()
+
+        public void Flush()
+        {
+            EventQueue.Add(FLUSH_SIGNAL);
+        }
+
+        private void FlushQueue()
         {
             if (CurrentBatch.Count == 0)
             {
@@ -152,7 +157,7 @@ namespace OptimizelySDK.Event
         }
 
         /// <summary>
-        /// Stops datafile scheduler.
+        /// Stops batch event processor.
         /// </summary>
         public void Stop()
         {
@@ -185,7 +190,7 @@ namespace OptimizelySDK.Event
         {
             if (ShouldSplit(userEvent))
             {
-                Flush();
+                FlushQueue();
                 CurrentBatch = new List<UserEvent>();
             }
 
@@ -198,7 +203,7 @@ namespace OptimizelySDK.Event
             }
             
             if (CurrentBatch.Count >= BatchSize) {
-                Flush();
+                FlushQueue();
             }
         }
 
