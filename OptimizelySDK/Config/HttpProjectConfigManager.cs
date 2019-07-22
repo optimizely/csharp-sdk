@@ -78,7 +78,7 @@ namespace OptimizelySDK.Config
 
             return content.Result;  
         }
-#elif NET40        
+#elif NET40      
         private string GetRemoteDatafileResponse()
         {
             var request = (System.Net.HttpWebRequest)System.Net.WebRequest.Create(Url);
@@ -87,8 +87,7 @@ namespace OptimizelySDK.Config
             if (!string.IsNullOrEmpty(LastModifiedSince))
                 request.Headers.Add("If-Modified-Since", LastModifiedSince);
             var result = (System.Net.HttpWebResponse)request.GetResponse();
-
-            // TODO: Need to revise this code.
+            
             if (result.StatusCode != System.Net.HttpStatusCode.OK) {
                 Logger.Log(LogLevel.ERROR, "Unexpected response from event endpoint, status: " + result.StatusCode);
             }
