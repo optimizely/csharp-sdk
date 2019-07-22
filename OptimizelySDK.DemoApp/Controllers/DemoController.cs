@@ -44,7 +44,7 @@ namespace OptimizelySDK.DemoApp.Controllers
             new Visitor { Id = 5, Name = "Randall", Age = 29 },
         };
 
-        private static Config ConfigRepo = new Config();
+        private static Models.Config ConfigRepo = new Models.Config();
         private static Optimizely Optimizely = null;
         private static InMemoryHandler InMemoryHandler = new InMemoryHandler();
         private static Logger.ILogger Logger = new MultiLogger(new[] { new Logger.DefaultLogger(), (Logger.ILogger)InMemoryHandler, new Log4NetLogger() });
@@ -76,7 +76,7 @@ namespace OptimizelySDK.DemoApp.Controllers
         }
 
         [HttpPost]
-        public ActionResult Config(Config config)
+        public ActionResult Config(Models.Config config)
         {
             ConfigRepo = config;
             string url = string.Format("https://cdn.optimizely.com/json/{0}.json", config.ProjectId);
