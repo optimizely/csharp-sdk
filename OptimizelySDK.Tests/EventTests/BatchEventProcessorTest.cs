@@ -14,41 +14,22 @@ using System.Threading;
 
 namespace OptimizelySDK.Tests.EventTests
 {
-    public class CountdownEventDispatcher : IEventDispatcher
-    {
-        public ILogger Logger { get; set; }
-
-        private CountdownEvent CountdownEvent;
-
-        public CountdownEventDispatcher(CountdownEvent countdownEvent)
-        {
-            CountdownEvent = countdownEvent;
-        }
-
-        public void DispatchEvent(LogEvent logEvent)
-        {
-            CountdownEvent.Signal();
-        }
-    }
-
     [TestFixture]
     class BatchEventProcessorTest
     {
         private static string TestUserId = "testUserId";
-        private const string EventId = "eventId";
-        private const string EventName = "eventName";
+        private const string EventName = "purchase";
 
         private const int MAX_BATCH_SIZE = 10;
         private const int MAX_DURATION_MS = 1000;
         private const int TIMEOUT_INTERVAL_MS = 5000;
 
         private ProjectConfig Config;
-        private Mock<ProjectConfig> ConfigMock;
-
         private Mock<ILogger> LoggerMock;
         private BlockingCollection<object> eventQueue;
         private BatchEventProcessor EventProcessor;
         private Mock<IEventDispatcher> EventDispatcherMock;
+        private TestEventDispatcher TestEventDispatcher;
 
         private NotificationCenter NotificationCenter = new NotificationCenter();
         private Mock<TestNotificationCallbacks> NotificationCallbackMock;
@@ -60,11 +41,7 @@ namespace OptimizelySDK.Tests.EventTests
             LoggerMock.Setup(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()));
 
             Config = DatafileProjectConfig.Create(TestData.Datafile, LoggerMock.Object, new ErrorHandler.NoOpErrorHandler());
-            ConfigMock = new Mock<ProjectConfig>() { CallBase = true };
-
-            ConfigMock.SetupGet(config => config.Revision);
-            ConfigMock.SetupGet(config => config.ProjectId);
-
+            
             eventQueue = new BlockingCollection<object>(100);
             EventDispatcherMock = new Mock<IEventDispatcher>();
 
@@ -84,12 +61,16 @@ namespace OptimizelySDK.Tests.EventTests
         [Test]
         public void TestDrainOnClose()
         {
-            SetEventProcessor(EventDispatcherMock.Object);
+            var eventDispatcher = new TestEventDispatcher();
+            SetEventProcessor(eventDispatcher);
 
             UserEvent userEvent = BuildConversionEvent(EventName);
             EventProcessor.Process(userEvent);
-            EventProcessor.Stop();
+            eventDispatcher.ExpectConversion(EventName, TestUserId);
 
+            Thread.Sleep(500);
+
+            Assert.True(eventDispatcher.CompareEvents());
             Assert.AreEqual(0, EventProcessor.EventQueue.Count);
         }
 
@@ -97,11 +78,16 @@ namespace OptimizelySDK.Tests.EventTests
         public void TestFlushOnMaxTimeout()
         {
             var countdownEvent = new CountdownEvent(1);
-            SetEventProcessor(new CountdownEventDispatcher(countdownEvent));
+            var eventDispatcher = new TestEventDispatcher(countdownEvent);
+            SetEventProcessor(eventDispatcher);
 
             UserEvent userEvent = BuildConversionEvent(EventName);
             EventProcessor.Process(userEvent);
+            eventDispatcher.ExpectConversion(EventName, TestUserId);
 
+            Thread.Sleep(500);
+
+            Assert.True(eventDispatcher.CompareEvents());
             Assert.True(countdownEvent.Wait(TimeSpan.FromMilliseconds(MAX_DURATION_MS * 3)), "Exceeded timeout waiting for notification.");
             Assert.AreEqual(0, EventProcessor.EventQueue.Count);
         }
@@ -110,17 +96,20 @@ namespace OptimizelySDK.Tests.EventTests
         public void TestFlushMaxBatchSize()
         {
             var countdownEvent = new CountdownEvent(1);
-            SetEventProcessor(new CountdownEventDispatcher(countdownEvent));
+            var eventDispatcher = new TestEventDispatcher(countdownEvent);
+            SetEventProcessor(eventDispatcher);
 
             for (int i = 0; i < MAX_BATCH_SIZE; i++)
             {
                 string eventName = EventName + i;
                 UserEvent userEvent = BuildConversionEvent(eventName);
                 EventProcessor.Process(userEvent);
+                eventDispatcher.ExpectConversion(eventName, TestUserId);
             }
 
-            EventProcessor.Stop();
+            Thread.Sleep(500);
 
+            Assert.True(eventDispatcher.CompareEvents());
             countdownEvent.Wait();
             Assert.AreEqual(0, EventProcessor.EventQueue.Count);
         }
@@ -129,15 +118,21 @@ namespace OptimizelySDK.Tests.EventTests
         public void TestFlush()
         {
             var countdownEvent = new CountdownEvent(2);
-            SetEventProcessor(new CountdownEventDispatcher(countdownEvent));
+            var eventDispatcher = new TestEventDispatcher(countdownEvent);
+            SetEventProcessor(eventDispatcher);
 
             UserEvent userEvent = BuildConversionEvent(EventName);
             EventProcessor.Process(userEvent);
             EventProcessor.Flush();
+            eventDispatcher.ExpectConversion(EventName, TestUserId);
 
             EventProcessor.Process(userEvent);
             EventProcessor.Flush();
+            eventDispatcher.ExpectConversion(EventName, TestUserId);
 
+            Thread.Sleep(500);
+
+            Assert.True(eventDispatcher.CompareEvents());
             Assert.True(countdownEvent.Wait(TimeSpan.FromMilliseconds(MAX_DURATION_MS / 2)), "Exceeded timeout waiting for notification.");
             Assert.AreEqual(0, EventProcessor.EventQueue.Count);
         }
@@ -146,19 +141,24 @@ namespace OptimizelySDK.Tests.EventTests
         public void TestFlushOnMismatchRevision()
         {
             var countdownEvent = new CountdownEvent(2);
-            SetEventProcessor(new CountdownEventDispatcher(countdownEvent));
+            var eventDispatcher = new TestEventDispatcher(countdownEvent);
+            SetEventProcessor(eventDispatcher);
 
-            ConfigMock.SetupGet(config => config.Revision).Returns("1");
-            ConfigMock.SetupGet(config => config.ProjectId).Returns("X");
-            var userEvent1 = BuildConversionEvent(EventName, ConfigMock.Object);
+            Config.Revision = "1";
+            Config.ProjectId = "X";
+            var userEvent1 = BuildConversionEvent(EventName, Config);
             EventProcessor.Process(userEvent1);
+            eventDispatcher.ExpectConversion(EventName, TestUserId);
 
-            ConfigMock.SetupGet(config => config.Revision).Returns("2");
-            ConfigMock.SetupGet(config => config.ProjectId).Returns("X");
-            var userEvent2 = BuildConversionEvent(EventName, ConfigMock.Object);
+            Config.Revision = "2";
+            Config.ProjectId = "X";
+            var userEvent2 = BuildConversionEvent(EventName, Config);
             EventProcessor.Process(userEvent2);
+            eventDispatcher.ExpectConversion(EventName, TestUserId);
 
-            EventProcessor.Stop();
+            Thread.Sleep(500);
+
+            Assert.True(eventDispatcher.CompareEvents());
             Assert.True(countdownEvent.Wait(TimeSpan.FromMilliseconds(MAX_DURATION_MS * 3)), "Exceeded timeout waiting for notification.");
         }
 
@@ -166,19 +166,24 @@ namespace OptimizelySDK.Tests.EventTests
         public void TestFlushOnMismatchProjectId()
         {
             var countdownEvent = new CountdownEvent(2);
-            SetEventProcessor(new CountdownEventDispatcher(countdownEvent));
+            var eventDispatcher = new TestEventDispatcher(countdownEvent);
+            SetEventProcessor(eventDispatcher);
 
-            ConfigMock.SetupGet(config => config.Revision).Returns("1");
-            ConfigMock.SetupGet(config => config.ProjectId).Returns("X");
-            var userEvent1 = BuildConversionEvent(EventName, ConfigMock.Object);
+            Config.Revision = "1";
+            Config.ProjectId = "X";
+            var userEvent1 = BuildConversionEvent(EventName, Config);
             EventProcessor.Process(userEvent1);
+            eventDispatcher.ExpectConversion(EventName, TestUserId);
 
-            ConfigMock.SetupGet(config => config.Revision).Returns("1");
-            ConfigMock.SetupGet(config => config.ProjectId).Returns("Y");
-            var userEvent2 = BuildConversionEvent(EventName, ConfigMock.Object);
+            Config.Revision = "1";
+            Config.ProjectId = "Y";
+            var userEvent2 = BuildConversionEvent(EventName, Config);
             EventProcessor.Process(userEvent2);
+            eventDispatcher.ExpectConversion(EventName, TestUserId);
 
-            EventProcessor.Stop();
+            Thread.Sleep(500);
+
+            Assert.True(eventDispatcher.CompareEvents());
             Assert.True(countdownEvent.Wait(TimeSpan.FromMilliseconds(MAX_DURATION_MS * 3)), "Exceeded timeout waiting for notification.");
             Assert.AreEqual(0, EventProcessor.EventQueue.Count);
         }
@@ -187,14 +192,19 @@ namespace OptimizelySDK.Tests.EventTests
         public void TestStopAndStart()
         {
             var countdownEvent = new CountdownEvent(2);
-            SetEventProcessor(new CountdownEventDispatcher(countdownEvent));
+            var eventDispatcher = new TestEventDispatcher(countdownEvent);
+            SetEventProcessor(eventDispatcher);
 
             UserEvent userEvent = BuildConversionEvent(EventName);
             EventProcessor.Process(userEvent);
+            eventDispatcher.ExpectConversion(EventName, TestUserId);
+            Thread.Sleep(500);
+            Assert.True(eventDispatcher.CompareEvents());
+
             EventProcessor.Stop();
 
             EventProcessor.Process(userEvent);
-
+            eventDispatcher.ExpectConversion(EventName, TestUserId);
             EventProcessor.Start();
             EventProcessor.Stop();
 
@@ -249,7 +259,7 @@ namespace OptimizelySDK.Tests.EventTests
 
         private static ConversionEvent BuildConversionEvent(string eventName, ProjectConfig projectConfig)
         {
-            return UserEventFactory.CreateConversionEvent(projectConfig, EventId, TestUserId,
+            return UserEventFactory.CreateConversionEvent(projectConfig, eventName, TestUserId,
                 new UserAttributes(), new EventTags());
         }
     }

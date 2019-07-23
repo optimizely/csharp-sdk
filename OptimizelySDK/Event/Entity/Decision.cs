@@ -26,6 +26,8 @@ namespace OptimizelySDK.Event.Entity
         [JsonProperty("variation_id")]
         public string VariationId { get; private set; }
 
+        public Decision() {}
+
         public Decision(string campaignId, string experimentId, string variationId)
         {
             CampaignId = campaignId;

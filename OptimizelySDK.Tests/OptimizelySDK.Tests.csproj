@@ -81,6 +81,7 @@
     <Compile Include="EventTests\DefaultEventDispatcherTest.cs" />
     <Compile Include="EventTests\EventBuilderTest.cs" />
     <Compile Include="EventTests\LogEventTest.cs" />
+    <Compile Include="EventTests\TestEventDispatcher.cs" />
     <Compile Include="InvalidEventDispatcher.cs" />
     <Compile Include="NotificationTests\NotificationCenterTests.cs" />
     <Compile Include="OptimizelyTest.cs" />
