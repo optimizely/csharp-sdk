@@ -101,10 +101,9 @@ namespace OptimizelySDK.Tests.EventTests
 
             for (int i = 0; i < MAX_BATCH_SIZE; i++)
             {
-                string eventName = EventName + i;
-                UserEvent userEvent = BuildConversionEvent(eventName);
+                UserEvent userEvent = BuildConversionEvent(EventName);
                 EventProcessor.Process(userEvent);
-                eventDispatcher.ExpectConversion(eventName, TestUserId);
+                eventDispatcher.ExpectConversion(EventName, TestUserId);
             }
 
             Thread.Sleep(500);

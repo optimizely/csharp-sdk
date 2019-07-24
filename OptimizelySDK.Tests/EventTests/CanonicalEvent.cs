@@ -1,5 +1,6 @@
 ﻿using OptimizelySDK.Entity;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace OptimizelySDK.Tests.EventTests
 {
@@ -29,14 +30,37 @@ namespace OptimizelySDK.Tests.EventTests
             if (obj == null)
                 return false;
 
-            var canonicalEvent = (CanonicalEvent)obj;
+            CanonicalEvent canonicalEvent = obj as CanonicalEvent;
+            if (canonicalEvent == null)
+                return false;
 
-            return ExperimentId == canonicalEvent.ExperimentId &&
-                VariationId == canonicalEvent.VariationId &&
-                EventName == canonicalEvent.EventName &&
-                VisitorId == canonicalEvent.VisitorId &&
-                Attributes == canonicalEvent.Attributes &&
-                Tags == canonicalEvent.Tags;
+            if (ExperimentId != canonicalEvent.ExperimentId ||
+                VariationId != canonicalEvent.VariationId ||
+                EventName != canonicalEvent.EventName ||
+                VisitorId != canonicalEvent.VisitorId)
+                return false;
+
+            if (!Attributes.OrderBy(pair => pair.Key)
+                .SequenceEqual(canonicalEvent.Attributes.OrderBy(pair => pair.Key)))
+                return false;
+
+            if (!Tags.OrderBy(pair => pair.Key)
+                .SequenceEqual(canonicalEvent.Tags.OrderBy(pair => pair.Key)))
+                return false;
+
+            return true;
+        }
+
+        public override int GetHashCode()
+        {
+            var hashCode = -907746114;
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(ExperimentId);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(VariationId);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(EventName);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(VisitorId);
+            hashCode = hashCode * -1521134295 + EqualityComparer<Dictionary<string, object>>.Default.GetHashCode(Attributes);
+            hashCode = hashCode * -1521134295 + EqualityComparer<EventTags>.Default.GetHashCode(Tags);
+            return hashCode;
         }
     }
 }

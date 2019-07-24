@@ -19,10 +19,6 @@ namespace OptimizelySDK.Tests.EventTests
         private readonly CountdownEvent CountdownEvent;
 
         private const string IMPRESSION_EVENT_NAME = "campaign_activated";
-        // Not used.
-        private readonly long TIMESTAMP = TestData.SecondsSince1970();
-        private readonly Guid GUID = Guid.NewGuid();
-
         private List<CanonicalEvent> ExpectedEvents = new List<CanonicalEvent>();
         private List<CanonicalEvent> ActualEvents = new List<CanonicalEvent>();
 
@@ -42,7 +38,7 @@ namespace OptimizelySDK.Tests.EventTests
                 var expectedEvent = ExpectedEvents[count];
                 var actualEvent = ActualEvents[count];
 
-                if (!expectedEvent.Equals(expectedEvent))
+                if (!expectedEvent.Equals(actualEvent))
                     return false;
             }
 
