@@ -224,19 +224,27 @@ namespace OptimizelySDK.Tests.EventTests
             Assert.True(countdownEvent.Wait(TimeSpan.FromMilliseconds(MAX_DURATION_MS * 3)), "Exceeded timeout waiting for notification.");
         }
 
-        //[Test]
-        //public void TestCloseTimeout()
-        //{
-        //    var countdownEvent = new CountdownEvent(1);
-        //    NotificationCenter.AddNotification(NotificationCenter.NotificationType.LogEvent, logEvent => countdownEvent.Signal());
-        //    SetEventProcessor(EventDispatcherMock.Object);
+        [Test]
+        public void TestCloseTimeout()
+        {
+            var countdownEvent = new CountdownEvent(1);
+            var eventDispatcher = new CountdownEventDispatcher { CountdownEvent = countdownEvent };
+            SetEventProcessor(EventDispatcherMock.Object);
 
-        //    UserEvent userEvent = BuildConversionEvent(EventName);
-        //    EventProcessor.Process(userEvent);
-        //    EventProcessor.Stop();
+            UserEvent userEvent = BuildConversionEvent(EventName);
+            EventProcessor.Process(userEvent);
+            EventProcessor.Stop();
 
-        //    Assert.True(countdownEvent.Wait(TimeSpan.FromMilliseconds(MAX_DURATION_MS * 3)), "Exceeded timeout waiting for notification.");
-        //}
+            countdownEvent.Signal();
+        }
+        
+        class CountdownEventDispatcher : IEventDispatcher
+        {
+            public ILogger Logger { get; set; }
+            public CountdownEvent CountdownEvent { get; set; }
+            public void DispatchEvent(LogEvent logEvent) => Assert.False(!CountdownEvent.Wait(TimeSpan.FromMilliseconds(TIMEOUT_INTERVAL_MS * 2)));
+        }
+
 
         private void SetEventProcessor(IEventDispatcher eventDispatcher)
         {
