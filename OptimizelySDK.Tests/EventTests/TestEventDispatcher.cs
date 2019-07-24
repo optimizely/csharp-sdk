@@ -19,6 +19,7 @@ namespace OptimizelySDK.Tests.EventTests
         private readonly CountdownEvent CountdownEvent;
 
         private const string IMPRESSION_EVENT_NAME = "campaign_activated";
+        // Not used.
         private readonly long TIMESTAMP = TestData.SecondsSince1970();
         private readonly Guid GUID = Guid.NewGuid();
 
@@ -97,41 +98,6 @@ namespace OptimizelySDK.Tests.EventTests
         {
             var expectedEvent = new CanonicalEvent(experimentId, variationId, eventName, visitorId, attributes, tags);
             ExpectedEvents.Add(expectedEvent);
-        }
-    }
-
-    public class CanonicalEvent
-    {
-        private string ExperimentId;
-        private string VariationId;
-        private string EventName;
-        private string VisitorId;
-        private Dictionary<string, object> Attributes;
-        private EventTags Tags;
-
-        public CanonicalEvent(string experimentId, string variationId, string eventName, string visitorId, Dictionary<string, object> attributes, EventTags tags)
-        {
-            ExperimentId = experimentId;
-            VariationId = variationId;
-            EventName = eventName;
-            VisitorId = visitorId;
-            Attributes = attributes ?? new Dictionary<string, object>();
-            Tags = tags ?? new EventTags();
-        }
-
-        public override bool Equals(object obj)
-        {
-            if (obj == null)
-                return false;
-
-            var canonicalEvent = (CanonicalEvent)obj;
-
-            return ExperimentId == canonicalEvent.ExperimentId &&
-                VariationId == canonicalEvent.VariationId &&
-                EventName == canonicalEvent.EventName &&
-                VisitorId == canonicalEvent.VisitorId &&
-                Attributes == canonicalEvent.Attributes &&
-                Tags == canonicalEvent.Tags;
         }
     }
 }
