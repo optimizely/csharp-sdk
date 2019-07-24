@@ -20,9 +20,9 @@ namespace OptimizelySDK.Tests.EventTests
         private static string TestUserId = "testUserId";
         private const string EventName = "purchase";
 
-        private const int MAX_BATCH_SIZE = 10;
-        private const int MAX_DURATION_MS = 1000;
-        private const int TIMEOUT_INTERVAL_MS = 5000;
+        public const int MAX_BATCH_SIZE = 10;
+        public const int MAX_DURATION_MS = 1000;
+        public const int TIMEOUT_INTERVAL_MS = 5000;
 
         private ProjectConfig Config;
         private Mock<ILogger> LoggerMock;
@@ -237,14 +237,6 @@ namespace OptimizelySDK.Tests.EventTests
 
             countdownEvent.Signal();
         }
-        
-        class CountdownEventDispatcher : IEventDispatcher
-        {
-            public ILogger Logger { get; set; }
-            public CountdownEvent CountdownEvent { get; set; }
-            public void DispatchEvent(LogEvent logEvent) => Assert.False(!CountdownEvent.Wait(TimeSpan.FromMilliseconds(TIMEOUT_INTERVAL_MS * 2)));
-        }
-
 
         private void SetEventProcessor(IEventDispatcher eventDispatcher)
         {
@@ -269,5 +261,12 @@ namespace OptimizelySDK.Tests.EventTests
             return UserEventFactory.CreateConversionEvent(projectConfig, eventName, TestUserId,
                 new UserAttributes(), new EventTags());
         }
+    }
+
+    class CountdownEventDispatcher : IEventDispatcher
+    {
+        public ILogger Logger { get; set; }
+        public CountdownEvent CountdownEvent { get; set; }
+        public void DispatchEvent(LogEvent logEvent) => Assert.False(!CountdownEvent.Wait(TimeSpan.FromMilliseconds(BatchEventProcessorTest.TIMEOUT_INTERVAL_MS * 2)));
     }
 }
