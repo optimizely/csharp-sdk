@@ -66,3 +66,22 @@ jobs:
         - pip install --user awscli
         # upload dll build artifacts to s3 with -unsigned suffix
         - ([ ${TRAVIS_BRANCH} = "$RELEASE_BRANCH" ] && [ ${TRAVIS_EVENT_TYPE} = "push" ]) && (AWS_ACCESS_KEY_ID=$OFTA_KEY AWS_SECRET_ACCESS_KEY=$OFTA_SECRET AWS_DEFAULT_REGION=$OFTA_REGION aws s3 cp ./OptimizelySDK.NetStandard16/bin/Release/netstandard1.6/OptimizelySDK.NetStandard16.dll s3://optly-fs-travisci-artifacts/${TRAVIS_REPO_SLUG}/${TRAVIS_BUILD_NUMBER}/${TRAVIS_JOB_NUMBER}/OptimizelySDK.NetStandard16.dll-unsigned)
+
+    - stage: 'NetStandard20'
+      language: csharp
+      # dotnet only works on trusty https://github.com/travis-ci/travis-ci/issues/5189
+      dist: trusty
+      mono: none
+      dotnet: 2.1.502
+      install:
+        - dotnet restore OptimizelySDK.NetStandard20/OptimizelySDK.NetStandard20.csproj
+      addons:
+        srcclr: true
+      script:
+        # strongname signing is taken care of in build step
+        - dotnet build OptimizelySDK.NetStandard20/OptimizelySDK.NetStandard20.csproj /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=$TRAVIS_BUILD_DIR/keypair.snk -c Release
+        # TODO: no dotnet test yet for NetStandard16
+      after_success:
+        - pip install --user awscli
+        # upload dll build artifacts to s3 with -unsigned suffix
+        - ([ ${TRAVIS_BRANCH} = "$RELEASE_BRANCH" ] && [ ${TRAVIS_EVENT_TYPE} = "push" ]) && (AWS_ACCESS_KEY_ID=$OFTA_KEY AWS_SECRET_ACCESS_KEY=$OFTA_SECRET AWS_DEFAULT_REGION=$OFTA_REGION aws s3 cp ./OptimizelySDK.NetStandard20/bin/Release/netstandard2.0/OptimizelySDK.NetStandard20.dll s3://optly-fs-travisci-artifacts/${TRAVIS_REPO_SLUG}/${TRAVIS_BUILD_NUMBER}/${TRAVIS_JOB_NUMBER}/OptimizelySDK.NetStandard20.dll-unsigned)        
