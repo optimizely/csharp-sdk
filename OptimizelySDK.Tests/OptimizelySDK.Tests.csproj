@@ -102,6 +102,7 @@
     <Compile Include="EventTests\EventEntitiesTest.cs" />
     <Compile Include="EventTests\UserEventFactoryTest.cs" />
     <Compile Include="EventTests\EventFactoryTest.cs" />
+    <Compile Include="EventTests\CanonicalEvent.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="App.config" />
