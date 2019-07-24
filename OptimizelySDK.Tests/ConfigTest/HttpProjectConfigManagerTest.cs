@@ -130,7 +130,8 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
                 .WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z")
                 .WithLogger(LoggerMock.Object)
                 .WithPollingInterval(TimeSpan.FromSeconds(2))
-                .WithBlockingTimeoutPeriod(TimeSpan.FromSeconds(0))                                
+                // negligible timeout
+                .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(50))                                
                 .WithStartByDefault()
                 .Build(false);
 
@@ -176,6 +177,89 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
             NotificationCallbackMock.Verify(nc => nc.TestConfigUpdateCallback(), Times.Never);
             Assert.NotNull(httpManager.GetConfig()); Assert.NotNull(httpManager.GetConfig());
         }
-    #endregion
-}
+
+        [Test]
+        public void TestDefaultBlockingTimeoutWhileProvidingZero()
+        {                        
+            var httpManager = new HttpProjectConfigManager.Builder()
+                .WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z")
+                .WithDatafile(TestData.Datafile)
+                .WithLogger(LoggerMock.Object)
+                .WithPollingInterval(TimeSpan.FromMilliseconds(1000))
+                .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(0))
+                .WithStartByDefault(true)
+                .Build(true);
+            
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, $"Blocking timeout is not valid, using default blocking timeout {TimeSpan.FromSeconds(15).TotalMilliseconds}ms"));
+        }
+
+        [Test]
+        public void TestDefaultPeriodWhileProvidingZero()
+        {
+            var httpManager = new HttpProjectConfigManager.Builder()
+                .WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z")
+                .WithDatafile(TestData.Datafile)
+                .WithLogger(LoggerMock.Object)
+                .WithPollingInterval(TimeSpan.FromMilliseconds(0))
+                .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(1000))
+                .WithStartByDefault(true)
+                .Build(true);
+
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, $"Polling interval is not valid for periodic calls, using default period {TimeSpan.FromMinutes(5).TotalMilliseconds}ms"));
+        }
+
+        [Test]
+        public void TestDefaultPeriodWhileProvidingNegative()
+        {
+            var httpManager = new HttpProjectConfigManager.Builder()
+                .WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z")
+                .WithDatafile(TestData.Datafile)
+                .WithLogger(LoggerMock.Object)
+                .WithPollingInterval(TimeSpan.FromMilliseconds(-1))
+                .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(1000))
+                .WithStartByDefault(true)
+                .Build(true);
+
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, $"Polling interval is not valid for periodic calls, using default period {TimeSpan.FromMinutes(5).TotalMilliseconds}ms"));            
+        }
+
+        [Test]
+        public void TestDefaultPeriodWhileNotProvidingValue()
+        {
+            var httpManager = new HttpProjectConfigManager.Builder()
+                .WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z")
+                .WithDatafile(TestData.Datafile)
+                .WithLogger(LoggerMock.Object)                
+                .Build(true);
+
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, $"No polling interval provided, using default period {TimeSpan.FromMinutes(5).TotalMilliseconds}ms"));
+        }
+
+        [Test]
+        public void TestDefaultBlockingTimeoutWhileNotProvidingValue()
+        {
+            var httpManager = new HttpProjectConfigManager.Builder()
+                .WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z")
+                .WithDatafile(TestData.Datafile)
+                .WithLogger(LoggerMock.Object)                
+                .Build(true);
+
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, $"No Blocking timeout provided, using default blocking timeout {TimeSpan.FromSeconds(15).TotalMilliseconds}ms"));
+        }
+
+        [Test]
+        public void TestDefaultValuesWhenNotProvided()
+        {
+            var httpManager = new HttpProjectConfigManager.Builder()
+                .WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z")
+                .WithDatafile(TestData.Datafile)
+                .WithLogger(LoggerMock.Object)
+                .Build(true);
+
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, $"No polling interval provided, using default period {TimeSpan.FromMinutes(5).TotalMilliseconds}ms"));
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, $"No Blocking timeout provided, using default blocking timeout {TimeSpan.FromSeconds(15).TotalMilliseconds}ms"));
+        }
+
+        #endregion
+    }
 }
