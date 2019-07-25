@@ -24,7 +24,6 @@ using OptimizelySDK.Logger;
 using OptimizelySDK.ErrorHandler;
 using System.Linq;
 using OptimizelySDK.Event.Dispatcher;
-using OptimizelySDK.Notifications;
 
 namespace OptimizelySDK.Event
 {
@@ -73,9 +72,7 @@ namespace OptimizelySDK.Event
                 return;
             }
 
-            var currentTimeInMillis = (DateTime.Now - new DateTime(1970, 1, 1)).TotalMilliseconds;
-            FlushingIntervalDeadline = Convert.ToInt64(currentTimeInMillis + FlushInterval.TotalMilliseconds);
-            
+            FlushingIntervalDeadline = DateTime.Now.MillisecondsSince1970() + (long)FlushInterval.TotalMilliseconds;
             Executer = new Thread(() => Run());
             Executer.Start();
             IsStarted = true;
@@ -91,8 +88,7 @@ namespace OptimizelySDK.Event
             {
                 while (true)
                 {
-                    var currentTimeInMillis = (DateTime.Now - new DateTime(1970, 1, 1)).TotalMilliseconds;
-                    if (currentTimeInMillis > FlushingIntervalDeadline)
+                    if (DateTime.Now.MillisecondsSince1970() > FlushingIntervalDeadline)
                     {
                         Logger.Log(LogLevel.DEBUG, $"Deadline exceeded flushing current batch, {DateTime.Now.Millisecond}, {FlushingIntervalDeadline}.");
                         FlushQueue();
@@ -210,10 +206,7 @@ namespace OptimizelySDK.Event
 
             // Reset the deadline if starting a new batch.
             if (CurrentBatch.Count == 0)
-            {
-                var currentTimeInMillis = (DateTime.Now - new DateTime(1970, 1, 1)).TotalMilliseconds;
-                FlushingIntervalDeadline = Convert.ToInt64(currentTimeInMillis + FlushInterval.TotalMilliseconds);
-            }
+                FlushingIntervalDeadline = DateTime.Now.MillisecondsSince1970() + (long)FlushInterval.TotalMilliseconds;
 
             lock (mutex) {
                 CurrentBatch.Add(userEvent);
@@ -229,7 +222,12 @@ namespace OptimizelySDK.Event
                 return false;
             }
 
-            EventContext currentContext = CurrentBatch.Last().Context;
+            EventContext currentContext;
+            lock (mutex)
+            {
+                currentContext = CurrentBatch.Last().Context;
+            }
+
             EventContext newContext = userEvent.Context;
 
             // Revisions should match
