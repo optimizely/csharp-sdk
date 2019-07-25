@@ -68,8 +68,8 @@ namespace OptimizelySDK.Tests.EventTests
             EventProcessor.Process(userEvent);
             eventDispatcher.ExpectConversion(EventName, TestUserId);
 
-            Thread.Sleep(500);
-
+            Thread.Sleep(1500);
+            
             Assert.True(eventDispatcher.CompareEvents());
             Assert.AreEqual(0, EventProcessor.EventQueue.Count);
         }
@@ -85,7 +85,7 @@ namespace OptimizelySDK.Tests.EventTests
             EventProcessor.Process(userEvent);
             eventDispatcher.ExpectConversion(EventName, TestUserId);
 
-            Thread.Sleep(500);
+            Thread.Sleep(1500);
 
             Assert.True(eventDispatcher.CompareEvents());
             Assert.True(countdownEvent.Wait(TimeSpan.FromMilliseconds(MAX_DURATION_MS * 3)), "Exceeded timeout waiting for notification.");
@@ -96,7 +96,7 @@ namespace OptimizelySDK.Tests.EventTests
         public void TestFlushMaxBatchSize()
         {
             var countdownEvent = new CountdownEvent(1);
-            var eventDispatcher = new TestEventDispatcher(countdownEvent);
+            var eventDispatcher = new TestEventDispatcher(countdownEvent) { Logger = LoggerMock.Object };
             SetEventProcessor(eventDispatcher);
 
             for (int i = 0; i < MAX_BATCH_SIZE; i++)
@@ -106,11 +106,13 @@ namespace OptimizelySDK.Tests.EventTests
                 eventDispatcher.ExpectConversion(EventName, TestUserId);
             }
 
-            Thread.Sleep(500);
+            Thread.Sleep(1000);
 
             Assert.True(eventDispatcher.CompareEvents());
             countdownEvent.Wait();
             Assert.AreEqual(0, EventProcessor.EventQueue.Count);
+
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, It.IsAny<string>()), Times.Never);
         }
 
         [Test]
@@ -129,7 +131,7 @@ namespace OptimizelySDK.Tests.EventTests
             EventProcessor.Flush();
             eventDispatcher.ExpectConversion(EventName, TestUserId);
 
-            Thread.Sleep(500);
+            Thread.Sleep(1500);
 
             Assert.True(eventDispatcher.CompareEvents());
             Assert.True(countdownEvent.Wait(TimeSpan.FromMilliseconds(MAX_DURATION_MS / 2)), "Exceeded timeout waiting for notification.");
@@ -155,7 +157,7 @@ namespace OptimizelySDK.Tests.EventTests
             EventProcessor.Process(userEvent2);
             eventDispatcher.ExpectConversion(EventName, TestUserId);
 
-            Thread.Sleep(500);
+            Thread.Sleep(1500);
 
             Assert.True(eventDispatcher.CompareEvents());
             Assert.True(countdownEvent.Wait(TimeSpan.FromMilliseconds(MAX_DURATION_MS * 3)), "Exceeded timeout waiting for notification.");
@@ -180,7 +182,7 @@ namespace OptimizelySDK.Tests.EventTests
             EventProcessor.Process(userEvent2);
             eventDispatcher.ExpectConversion(EventName, TestUserId);
 
-            Thread.Sleep(500);
+            Thread.Sleep(1500);
 
             Assert.True(eventDispatcher.CompareEvents());
             Assert.True(countdownEvent.Wait(TimeSpan.FromMilliseconds(MAX_DURATION_MS * 3)), "Exceeded timeout waiting for notification.");
@@ -197,7 +199,7 @@ namespace OptimizelySDK.Tests.EventTests
             UserEvent userEvent = BuildConversionEvent(EventName);
             EventProcessor.Process(userEvent);
             eventDispatcher.ExpectConversion(EventName, TestUserId);
-            Thread.Sleep(500);
+            Thread.Sleep(1500);
             Assert.True(eventDispatcher.CompareEvents());
 
             EventProcessor.Stop();

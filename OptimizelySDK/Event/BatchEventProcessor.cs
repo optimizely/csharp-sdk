@@ -74,7 +74,8 @@ namespace OptimizelySDK.Event
                 return;
             }
 
-            FlushingIntervalDeadline = DateTime.Now.Millisecond + FlushInterval.Milliseconds;
+            var currentTimeInMillis = (DateTime.Now - new DateTime(1970, 1, 1)).TotalMilliseconds;
+            FlushingIntervalDeadline = Convert.ToInt64(currentTimeInMillis + FlushInterval.TotalMilliseconds);
             
             Executer = new Thread(() => Run());
             Executer.Start();
@@ -91,9 +92,10 @@ namespace OptimizelySDK.Event
             {
                 while (true)
                 {
-                    if (DateTime.Now.Millisecond > FlushingIntervalDeadline)
+                    var currentTimeInMillis = (DateTime.Now - new DateTime(1970, 1, 1)).TotalMilliseconds;
+                    if (currentTimeInMillis > FlushingIntervalDeadline)
                     {
-                        Logger.Log(LogLevel.DEBUG, "Deadline exceeded flushing current batch.");
+                        Logger.Log(LogLevel.DEBUG, $"Deadline exceeded flushing current batch, {DateTime.Now.Millisecond}, {FlushingIntervalDeadline}.");
                         FlushQueue();
                     }
                     
@@ -211,7 +213,10 @@ namespace OptimizelySDK.Event
 
             // Reset the deadline if starting a new batch.
             if (CurrentBatch.Count == 0)
-                FlushingIntervalDeadline = DateTime.Now.Millisecond + FlushInterval.Milliseconds;
+            {
+                var currentTimeInMillis = (DateTime.Now - new DateTime(1970, 1, 1)).TotalMilliseconds;
+                FlushingIntervalDeadline = Convert.ToInt64(currentTimeInMillis + FlushInterval.TotalMilliseconds);
+            }
 
             lock (mutex) {
                 CurrentBatch.Add(userEvent);
