@@ -47,6 +47,7 @@ namespace OptimizelySDK.Config
         }
         private string GetRemoteDatafileResponse()
         {
+            Logger.Log(LogLevel.INFO, $"Fetching from URL {Url}");
             var request = new System.Net.Http.HttpRequestMessage {
                 RequestUri = new Uri(Url),
                 Method = System.Net.Http.HttpMethod.Get,
