@@ -175,6 +175,9 @@
 	  <Compile Include="..\OptimizelySDK\Utils\ConditionParser.cs">
       <Link>Utils\ConditionParser.cs</Link>
     </Compile>
+	<Compile Include="..\OptimizelySDK\Utils\DateTimeExtensions.cs">
+      <Link>Utils\DateTimeExtensions.cs</Link>
+    </Compile>
 	<Compile Include="..\OptimizelySDK\Utils\AttributeMatchTypes.cs">
       <Link>Utils\AttributeMatchTypes.cs</Link>
     </Compile>

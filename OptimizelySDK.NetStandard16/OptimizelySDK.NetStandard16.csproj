@@ -64,6 +64,7 @@
 		<Compile Include="..\OptimizelySDK\Utils\ExceptionExtensions.cs" />
 		<Compile Include="..\OptimizelySDK\Utils\ExperimentUtils.cs" />
 		<Compile Include="..\OptimizelySDK\Utils\ConditionParser.cs" />
+		<Compile Include="..\OptimizelySDK\Utils\DateTimeExtensions.cs" />
 		<Compile Include="..\OptimizelySDK\Utils\AttributeMatchTypes.cs" />
 		<Compile Include="..\OptimizelySDK\Utils\DecisionInfoTypes.cs" />
 		<Compile Include="..\OptimizelySDK\Utils\DateTimeUtils.cs" />

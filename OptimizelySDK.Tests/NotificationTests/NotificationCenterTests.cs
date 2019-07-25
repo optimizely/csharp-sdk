@@ -82,10 +82,6 @@ namespace OptimizelySDK.Tests.NotificationTests
             // Verify that notifications of other types will also gets added successfully.
             NotificationCenter.AddNotification(NotificationType.OptimizelyConfigUpdate, TestNotificationCallbacks.TestConfigUpdateCallback);
             Assert.AreEqual(4, NotificationCenter.NotificationsCount);
-
-            // Verify that notifications of other types will also gets added successfully.
-            NotificationCenter.AddNotification(NotificationType.LogEvent, TestNotificationCallbacks.TestLogEventCallback);
-            Assert.AreEqual(5, NotificationCenter.NotificationsCount);
         }
 
         [Test]
@@ -183,11 +179,11 @@ namespace OptimizelySDK.Tests.NotificationTests
             notificationCallbackMock.Setup(nc => nc.TestAnotherActivateCallback(It.IsAny<Experiment>(),
                 It.IsAny<string>(), It.IsAny<UserAttributes>(), It.IsAny<Variation>(), It.IsAny<LogEvent>()));
 
-            notificationCallbackMock.Setup(nc => nc.TestLogEventCallback(It.IsAny<LogEvent>()));
 
             // Adding decision notifications.
             NotificationCenter.AddNotification(NotificationTypeActivate, notificationCallbackMock.Object.TestActivateCallback);
             NotificationCenter.AddNotification(NotificationTypeActivate, notificationCallbackMock.Object.TestAnotherActivateCallback);
+
 
             // Adding track notifications.
             NotificationCenter.AddNotification(NotificationTypeTrack, notificationCallbackMock.Object.TestTrackCallback);
@@ -206,14 +202,8 @@ namespace OptimizelySDK.Tests.NotificationTests
             notificationCallbackMock.Verify(nc => nc.TestTrackCallback(It.IsAny<string>(), It.IsAny<string>(),
                 It.IsAny<UserAttributes>(), It.IsAny<EventTags>(), It.IsAny<LogEvent>()), Times.Never);
 
-            // Add logEvent Notification.
-            NotificationCenter.AddNotification(NotificationType.LogEvent, notificationCallbackMock.Object.TestLogEventCallback);
 
-            // Fire logEvent Notification.
-            NotificationCenter.SendNotifications(NotificationType.LogEvent, logEventMocker.Object);
 
-            // Verify that registered notifications of logEvent type are called.
-            notificationCallbackMock.Verify(nc => nc.TestLogEventCallback(It.IsAny<LogEvent>()), Times.Once);
 
             // Verify that after clearing notifications, SendNotification should not call any notification
             // which were previously registered. 
@@ -263,11 +253,7 @@ namespace OptimizelySDK.Tests.NotificationTests
         public virtual void TestDecisionCallback(string type, string userId, UserAttributes userAttributes,
             Dictionary<string, object> decisionInfo) {
         }
-        public virtual void TestConfigUpdateCallback() {
-        }
-
-        public virtual void TestLogEventCallback(LogEvent logEvent) {
-        }
+        public virtual void TestConfigUpdateCallback() { }
     }
     #endregion // Test Notification callbacks class.
 }
