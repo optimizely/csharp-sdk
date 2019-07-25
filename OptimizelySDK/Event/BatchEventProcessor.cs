@@ -57,7 +57,6 @@ namespace OptimizelySDK.Event
         
         protected ILogger Logger { get; set; }
         protected IErrorHandler ErrorHandler { get; set; }
-        public NotificationCenter NotificationCenter { get; set; }
 
         private readonly object mutex = new object();
 
@@ -160,9 +159,7 @@ namespace OptimizelySDK.Event
             
 
             LogEvent logEvent = EventFactory.CreateLogEvent(toProcessBatch.ToArray(), Logger);
-
-            NotificationCenter?.SendNotifications(NotificationCenter.NotificationType.LogEvent, logEvent);
-
+            
             try
             {
                 EventDispatcher?.DispatchEvent(logEvent);
@@ -266,7 +263,6 @@ namespace OptimizelySDK.Event
             private TimeSpan? FlushInterval;
             private TimeSpan? TimeoutInterval;
             private IErrorHandler ErrorHandler;
-            private NotificationCenter NotificationCenter;
             private ILogger Logger;
 
             public Builder WithEventQueue(BlockingCollection<object> eventQueue)
@@ -303,14 +299,7 @@ namespace OptimizelySDK.Event
 
                 return this;
             }
-
-            public Builder WithNotificationCenter(NotificationCenter notificationCenter)
-            {
-                NotificationCenter = notificationCenter;
-
-                return this;
-            }
-
+            
             public Builder WithLogger(ILogger logger = null)
             {
                 Logger = logger;
@@ -346,8 +335,7 @@ namespace OptimizelySDK.Event
                 batchEventProcessor.ErrorHandler = ErrorHandler;
                 batchEventProcessor.EventDispatcher = EventDispatcher;
                 batchEventProcessor.EventQueue = EventQueue;
-                batchEventProcessor.NotificationCenter = NotificationCenter;
-
+                
                 batchEventProcessor.BatchSize = BatchSize ?? BatchEventProcessor.DEFAULT_BATCH_SIZE;
                 batchEventProcessor.FlushInterval = FlushInterval ?? BatchEventProcessor.DEFAULT_FLUSH_INTERVAL;
                 batchEventProcessor.TimeoutInterval = TimeoutInterval ?? BatchEventProcessor.DEFAULT_TIMEOUT_INTERVAL;

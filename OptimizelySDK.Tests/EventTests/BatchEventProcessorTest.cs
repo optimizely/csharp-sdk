@@ -31,9 +31,6 @@ namespace OptimizelySDK.Tests.EventTests
         private Mock<IEventDispatcher> EventDispatcherMock;
         private TestEventDispatcher TestEventDispatcher;
 
-        private NotificationCenter NotificationCenter = new NotificationCenter();
-        private Mock<TestNotificationCallbacks> NotificationCallbackMock;
-
         [SetUp]
         public void Setup()
         {
@@ -44,12 +41,6 @@ namespace OptimizelySDK.Tests.EventTests
             
             eventQueue = new BlockingCollection<object>(100);
             EventDispatcherMock = new Mock<IEventDispatcher>();
-
-            NotificationCallbackMock = new Mock<TestNotificationCallbacks>();
-            NotificationCallbackMock.Setup(nc => nc.TestLogEventCallback(It.IsAny<LogEvent>()));
-
-            NotificationCenter.AddNotification(NotificationCenter.NotificationType.LogEvent,
-                NotificationCallbackMock.Object.TestLogEventCallback);
         }
 
         [TearDown]
@@ -211,21 +202,7 @@ namespace OptimizelySDK.Tests.EventTests
 
             Assert.True(countdownEvent.Wait(TimeSpan.FromMilliseconds(MAX_DURATION_MS * 3)), "Exceeded timeout waiting for notification.");
         }
-
-        [Test]
-        public void TestNotificationCenter()
-        {
-            var countdownEvent = new CountdownEvent(1);
-            NotificationCenter.AddNotification(NotificationCenter.NotificationType.LogEvent, logEvent => countdownEvent.Signal());
-            SetEventProcessor(EventDispatcherMock.Object);
-
-            UserEvent userEvent = BuildConversionEvent(EventName);
-            EventProcessor.Process(userEvent);
-            EventProcessor.Stop();
-            
-            Assert.True(countdownEvent.Wait(TimeSpan.FromMilliseconds(MAX_DURATION_MS * 3)), "Exceeded timeout waiting for notification.");
-        }
-
+        
         [Test]
         public void TestCloseTimeout()
         {
@@ -249,7 +226,6 @@ namespace OptimizelySDK.Tests.EventTests
                 .WithFlushInterval(TimeSpan.FromMilliseconds(MAX_DURATION_MS))
                 .WithTimeoutInterval(TimeSpan.FromMilliseconds(TIMEOUT_INTERVAL_MS))
                 .WithLogger(LoggerMock.Object)
-                .WithNotificationCenter(NotificationCenter)
                 .Build();
         }
 
