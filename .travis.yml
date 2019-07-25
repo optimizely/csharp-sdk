@@ -1,5 +1,9 @@
 language: minimal
 
+env:
+  global:
+    RELEASE_BRANCH: "3.2.x"
+
 # Integration tests need to run first to reset the PR build status to pending
 stages:
   - name: 'Integration tests'
@@ -42,7 +46,7 @@ jobs:
       after_success:
         - pip install --user awscli
         # upload dll build artifacts to s3 with -unsigned suffix
-        - ([ ${TRAVIS_BRANCH} = "master" ] && [ ${TRAVIS_EVENT_TYPE} = "push" ]) && find . -path './OptimizelySDK*bin/Release/OptimizelySDK*.dll' -not -regex '.*Tests.*' -print0 | while IFS= read -r -d '' file; do (AWS_ACCESS_KEY_ID=$OFTA_KEY AWS_SECRET_ACCESS_KEY=$OFTA_SECRET AWS_DEFAULT_REGION=$OFTA_REGION aws s3 cp $file s3://optly-fs-travisci-artifacts/${TRAVIS_REPO_SLUG}/${TRAVIS_BUILD_NUMBER}/${TRAVIS_JOB_NUMBER}/$(basename $file)-unsigned); done
+        - ([ ${TRAVIS_BRANCH} = "$RELEASE_BRANCH" ] && [ ${TRAVIS_EVENT_TYPE} = "push" ]) && find . -path './OptimizelySDK*bin/Release/OptimizelySDK*.dll' -not -regex '.*Tests.*' -print0 | while IFS= read -r -d '' file; do (AWS_ACCESS_KEY_ID=$OFTA_KEY AWS_SECRET_ACCESS_KEY=$OFTA_SECRET AWS_DEFAULT_REGION=$OFTA_REGION aws s3 cp $file s3://optly-fs-travisci-artifacts/${TRAVIS_REPO_SLUG}/${TRAVIS_BUILD_NUMBER}/${TRAVIS_JOB_NUMBER}/$(basename $file)-unsigned); done
 
     - stage: 'NetStandard16'
       language: csharp
@@ -61,4 +65,4 @@ jobs:
       after_success:
         - pip install --user awscli
         # upload dll build artifacts to s3 with -unsigned suffix
-        - ([ ${TRAVIS_BRANCH} = "master" ] && [ ${TRAVIS_EVENT_TYPE} = "push" ]) && (AWS_ACCESS_KEY_ID=$OFTA_KEY AWS_SECRET_ACCESS_KEY=$OFTA_SECRET AWS_DEFAULT_REGION=$OFTA_REGION aws s3 cp ./OptimizelySDK.NetStandard16/bin/Release/netstandard1.6/OptimizelySDK.NetStandard16.dll s3://optly-fs-travisci-artifacts/${TRAVIS_REPO_SLUG}/${TRAVIS_BUILD_NUMBER}/${TRAVIS_JOB_NUMBER}/OptimizelySDK.NetStandard16.dll-unsigned)
+        - ([ ${TRAVIS_BRANCH} = "$RELEASE_BRANCH" ] && [ ${TRAVIS_EVENT_TYPE} = "push" ]) && (AWS_ACCESS_KEY_ID=$OFTA_KEY AWS_SECRET_ACCESS_KEY=$OFTA_SECRET AWS_DEFAULT_REGION=$OFTA_REGION aws s3 cp ./OptimizelySDK.NetStandard16/bin/Release/netstandard1.6/OptimizelySDK.NetStandard16.dll s3://optly-fs-travisci-artifacts/${TRAVIS_REPO_SLUG}/${TRAVIS_BUILD_NUMBER}/${TRAVIS_JOB_NUMBER}/OptimizelySDK.NetStandard16.dll-unsigned)
