@@ -243,13 +243,16 @@
     <None Include="..\OptimizelySDK\Event\.DS_Store">
       <Link>Event\.DS_Store</Link>
     </None>
-    <None Include="..\OptimizelySDK\Utils\schema.json">
-      <Link>Utils\schema.json</Link>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="murmurhash-signed" Version="1.0.2" />
     <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
     <PackageReference Include="NJsonSchema" Version="8.30.6304.31883" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\OptimizelySDK\Utils\schema.json">
+      <Link>Utils\schema.json</Link>
+      <LogicalName>OptimizelySDK.Utils.schema.json</LogicalName>
+    </EmbeddedResource>
   </ItemGroup>
 </Project>
