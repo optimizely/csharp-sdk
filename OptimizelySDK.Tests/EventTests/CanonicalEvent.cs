@@ -1,4 +1,5 @@
 ﻿using OptimizelySDK.Entity;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -22,9 +23,7 @@ namespace OptimizelySDK.Tests.EventTests
             Attributes = attributes ?? new Dictionary<string, object>();
             Tags = tags ?? new EventTags();
         }
-
-        // if u really need to use Equals, use hashcode as well.
-        // i don't thiknk so it's need, u may use overloaded operator to check if it's equal or not.
+        
         public override bool Equals(object obj)
         {
             if (obj == null)
@@ -61,6 +60,24 @@ namespace OptimizelySDK.Tests.EventTests
             hashCode = hashCode * -1521134295 + EqualityComparer<Dictionary<string, object>>.Default.GetHashCode(Attributes);
             hashCode = hashCode * -1521134295 + EqualityComparer<EventTags>.Default.GetHashCode(Tags);
             return hashCode;
+        }
+
+        public static bool operator ==(CanonicalEvent lhs, CanonicalEvent rhs)
+        {
+            if (Object.ReferenceEquals(lhs, null))
+            {
+                if (Object.ReferenceEquals(rhs, null))
+                    return true;
+
+                return false;
+            }
+
+            return lhs.Equals(rhs);
+        }
+
+        public static bool operator !=(CanonicalEvent lhs, CanonicalEvent rhs)
+        {
+            return !(lhs == rhs);
         }
     }
 }

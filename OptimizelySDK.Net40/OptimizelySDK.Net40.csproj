@@ -19,7 +19,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;NET35</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;NET35;NET40</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -160,6 +160,9 @@
     </Compile>
 	<Compile Include="..\OptimizelySDK\Utils\ConditionParser.cs">
       <Link>Utils\ConditionParser.cs</Link>
+    </Compile>
+	<Compile Include="..\OptimizelySDK\Utils\DateTimeExtensions.cs">
+      <Link>Utils\DateTimeExtensions.cs</Link>
     </Compile>
     <Compile Include="..\OptimizelySDK\Utils\EventTagUtils.cs">
       <Link>Utils\EventTagUtils.cs</Link>

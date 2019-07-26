@@ -38,7 +38,7 @@ namespace OptimizelySDK.Tests.EventTests
                 var expectedEvent = ExpectedEvents[count];
                 var actualEvent = ActualEvents[count];
 
-                if (!expectedEvent.Equals(actualEvent))
+                if (expectedEvent != actualEvent)
                     return false;
             }
 
@@ -77,7 +77,18 @@ namespace OptimizelySDK.Tests.EventTests
                 }
             }
 
-            CountdownEvent?.Signal();
+            try
+            {
+                CountdownEvent?.Signal();
+            }
+            catch (ObjectDisposedException)
+            {
+                Logger.Log(LogLevel.ERROR, "The CountdownEvent instance has already been disposed.");
+            }
+            catch (InvalidOperationException)
+            {
+                Logger.Log(LogLevel.ERROR, "The CountdownEvent instance has already been set.");
+            }
         }
 
         public void ExpectImpression(string experimentId, string variationId, string userId, UserAttributes attributes = null)

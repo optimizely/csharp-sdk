@@ -1,3 +1,17 @@
+## 3.2.0
+July 22nd, 2019
+
+### New Features:
+* Added support for automatic datafile management via `HttpProjectConfigManager` for framework 4.0 or above:
+  * The [`HttpProjectConfigManager`](https://github.com/optimizely/csharp-sdk/blob/master/OptimizelySDK/Config/HttpProjectConfigManager.cs) is an implementation of the abstract
+      [`PollingProjectConfigManager`](https://github.com/optimizely/csharp-sdk/blob/master/OptimizelySDK/Config/PollingProjectConfigManager.cs) class.
+    - Users must first build the `HttpProjectConfigManager` with an SDK key and then and provide that instance to the `Optimizely` instance.
+    - An initial datafile can be provided to the `HttpProjectConfigManager` to bootstrap before making HTTP requests for the hosted datafile.
+    - Requests for the datafile are made in a separate thread and are scheduled with fixed delay.
+    - Configuration updates can be subscribed to via the NotificationCenter built with the `HttpProjectConfigManager`.
+    - `Optimizely` instance must be disposed after the use or `HttpProjectConfigManager` must be disposed after the use to release resources.
+* The [`OptimizelyFactory`](https://github.com/optimizely/csharp-sdk/blob/master/OptimizelySDK/OptimizelyFactory.cs) provides basic methods for instantiating the Optimizely SDK with a minimal number of parameters. Check [`README.md`](https://github.com/optimizely/csharp-sdk#use-optimizelyfactory) for more details.
+
 ## 3.1.1
 June 19th, 2019
 

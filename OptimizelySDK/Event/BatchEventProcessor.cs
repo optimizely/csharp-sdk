@@ -24,7 +24,6 @@ using OptimizelySDK.Logger;
 using OptimizelySDK.ErrorHandler;
 using System.Linq;
 using OptimizelySDK.Event.Dispatcher;
-using OptimizelySDK.Notifications;
 
 namespace OptimizelySDK.Event
 {
@@ -57,7 +56,6 @@ namespace OptimizelySDK.Event
         
         protected ILogger Logger { get; set; }
         protected IErrorHandler ErrorHandler { get; set; }
-        public NotificationCenter NotificationCenter { get; set; }
 
         private readonly object mutex = new object();
 
@@ -74,8 +72,7 @@ namespace OptimizelySDK.Event
                 return;
             }
 
-            FlushingIntervalDeadline = DateTime.Now.Millisecond + FlushInterval.Milliseconds;
-            
+            FlushingIntervalDeadline = DateTime.Now.MillisecondsSince1970() + (long)FlushInterval.TotalMilliseconds;
             Executer = new Thread(() => Run());
             Executer.Start();
             IsStarted = true;
@@ -91,9 +88,9 @@ namespace OptimizelySDK.Event
             {
                 while (true)
                 {
-                    if (DateTime.Now.Millisecond > FlushingIntervalDeadline)
+                    if (DateTime.Now.MillisecondsSince1970() > FlushingIntervalDeadline)
                     {
-                        Logger.Log(LogLevel.DEBUG, "Deadline exceeded flushing current batch.");
+                        Logger.Log(LogLevel.DEBUG, $"Deadline exceeded flushing current batch, {DateTime.Now.Millisecond}, {FlushingIntervalDeadline}.");
                         FlushQueue();
                     }
                     
@@ -158,9 +155,7 @@ namespace OptimizelySDK.Event
             
 
             LogEvent logEvent = EventFactory.CreateLogEvent(toProcessBatch.ToArray(), Logger);
-
-            NotificationCenter?.SendNotifications(NotificationCenter.NotificationType.LogEvent, logEvent);
-
+            
             try
             {
                 EventDispatcher?.DispatchEvent(logEvent);
@@ -211,7 +206,7 @@ namespace OptimizelySDK.Event
 
             // Reset the deadline if starting a new batch.
             if (CurrentBatch.Count == 0)
-                FlushingIntervalDeadline = DateTime.Now.Millisecond + FlushInterval.Milliseconds;
+                FlushingIntervalDeadline = DateTime.Now.MillisecondsSince1970() + (long)FlushInterval.TotalMilliseconds;
 
             lock (mutex) {
                 CurrentBatch.Add(userEvent);
@@ -227,7 +222,12 @@ namespace OptimizelySDK.Event
                 return false;
             }
 
-            EventContext currentContext = CurrentBatch.Last().Context;
+            EventContext currentContext;
+            lock (mutex)
+            {
+                currentContext = CurrentBatch.Last().Context;
+            }
+
             EventContext newContext = userEvent.Context;
 
             // Revisions should match
@@ -261,7 +261,6 @@ namespace OptimizelySDK.Event
             private TimeSpan? FlushInterval;
             private TimeSpan? TimeoutInterval;
             private IErrorHandler ErrorHandler;
-            private NotificationCenter NotificationCenter;
             private ILogger Logger;
 
             public Builder WithEventQueue(BlockingCollection<object> eventQueue)
@@ -298,14 +297,7 @@ namespace OptimizelySDK.Event
 
                 return this;
             }
-
-            public Builder WithNotificationCenter(NotificationCenter notificationCenter)
-            {
-                NotificationCenter = notificationCenter;
-
-                return this;
-            }
-
+            
             public Builder WithLogger(ILogger logger = null)
             {
                 Logger = logger;
@@ -341,8 +333,7 @@ namespace OptimizelySDK.Event
                 batchEventProcessor.ErrorHandler = ErrorHandler;
                 batchEventProcessor.EventDispatcher = EventDispatcher;
                 batchEventProcessor.EventQueue = EventQueue;
-                batchEventProcessor.NotificationCenter = NotificationCenter;
-
+                
                 batchEventProcessor.BatchSize = BatchSize ?? BatchEventProcessor.DEFAULT_BATCH_SIZE;
                 batchEventProcessor.FlushInterval = FlushInterval ?? BatchEventProcessor.DEFAULT_FLUSH_INTERVAL;
                 batchEventProcessor.TimeoutInterval = TimeoutInterval ?? BatchEventProcessor.DEFAULT_TIMEOUT_INTERVAL;
