@@ -36,7 +36,8 @@ namespace OptimizelySDK.Notifications
             Activate,   // Activate called.
             Track,      // Track called.
             Decision,    // A decision is made in the system. i.e. user activation, feature access or feature-variable value retrieval.
-            OptimizelyConfigUpdate // When datafile is updated using HttpProjectConfigManager.
+            OptimizelyConfigUpdate, // When datafile is updated using HttpProjectConfigManager.
+            LogEvent    // LogEvent notification sends on flushing batch-event. // When datafile is updated using HttpProjectConfigManager.
         };
 
         /// <summary>
@@ -75,6 +76,12 @@ namespace OptimizelySDK.Notifications
         /// Delegate for project config update.
         /// </summary>
         public delegate void OptimizelyConfigUpdateCallback();
+
+        /// <summary>
+        /// Delegate for batch-event flushing.
+        /// </summary>
+        /// <param name="logEvent">The log event</param>
+        public delegate void LogEventCallback(LogEvent logEvent);
 
         private ILogger Logger;
 
@@ -163,12 +170,34 @@ namespace OptimizelySDK.Notifications
             return AddNotification(notificationType, (object)decisionCallback);
         }
 
+        /// <summary>
+        /// Add a notification callback of config-update type to the notification center.
+        /// </summary>
+        /// <param name="notificationType">Notification type</param>
+        /// <param name="optimizelyConfigUpdate">Callback function to call when event gets triggered</param>
+        /// <returns>0 for invalid notification type, -1 for adding existing notification
+        /// or the notification id of newly added notification.</returns>
         public int AddNotification(NotificationType notificationType, OptimizelyConfigUpdateCallback optimizelyConfigUpdate)
         {
             if (!IsNotificationTypeValid(notificationType, NotificationType.OptimizelyConfigUpdate))
                 return 0;
 
             return AddNotification(notificationType, (object)optimizelyConfigUpdate);
+        }
+
+        /// <summary>
+        /// Add a notification callback of logEvent type to the notification center.
+        /// </summary>
+        /// <param name="notificationType">Notification type</param>
+        /// <param name="logEventCallback">Callback function to call when event gets triggered</param>
+        /// <returns>0 for invalid notification type, -1 for adding existing notification
+        /// or the notification id of newly added notification.</returns>
+        public int AddNotification(NotificationType notificationType, LogEventCallback logEventCallback)
+        {
+            if (!IsNotificationTypeValid(notificationType, NotificationType.LogEvent))
+                return 0;
+
+            return AddNotification(notificationType, (object)logEventCallback);
         }
 
         /// <summary>
