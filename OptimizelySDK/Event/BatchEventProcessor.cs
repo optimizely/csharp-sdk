@@ -38,8 +38,9 @@ namespace OptimizelySDK.Event
      */
     public class BatchEventProcessor: EventProcessor, IDisposable
     {
-        private const int DEFAULT_BATCH_SIZE = 50;
-        private static readonly TimeSpan DEFAULT_FLUSH_INTERVAL = TimeSpan.FromMinutes(1);
+        private const int DEFAULT_BATCH_SIZE = 10;
+        private const int DEFAULT_QUEUE_CAPACITY = 1000;
+        private static readonly TimeSpan DEFAULT_FLUSH_INTERVAL = TimeSpan.FromSeconds(30);
         private static readonly TimeSpan DEFAULT_TIMEOUT_INTERVAL = TimeSpan.FromMinutes(5);
 
         private int BatchSize;
@@ -255,7 +256,7 @@ namespace OptimizelySDK.Event
 
         public class Builder
         {
-            private BlockingCollection<object> EventQueue;
+            private BlockingCollection<object> EventQueue = new BlockingCollection<object>(DEFAULT_QUEUE_CAPACITY);
             private IEventDispatcher EventDispatcher;
             private int? BatchSize;
             private TimeSpan? FlushInterval;
@@ -334,9 +335,9 @@ namespace OptimizelySDK.Event
                 batchEventProcessor.EventDispatcher = EventDispatcher;
                 batchEventProcessor.EventQueue = EventQueue;
                 
-                batchEventProcessor.BatchSize = BatchSize ?? BatchEventProcessor.DEFAULT_BATCH_SIZE;
-                batchEventProcessor.FlushInterval = FlushInterval ?? BatchEventProcessor.DEFAULT_FLUSH_INTERVAL;
-                batchEventProcessor.TimeoutInterval = TimeoutInterval ?? BatchEventProcessor.DEFAULT_TIMEOUT_INTERVAL;
+                batchEventProcessor.BatchSize = BatchSize ?? DEFAULT_BATCH_SIZE;
+                batchEventProcessor.FlushInterval = FlushInterval ?? DEFAULT_FLUSH_INTERVAL;
+                batchEventProcessor.TimeoutInterval = TimeoutInterval ?? DEFAULT_TIMEOUT_INTERVAL;
 
                 if (start)
                     batchEventProcessor.Start();

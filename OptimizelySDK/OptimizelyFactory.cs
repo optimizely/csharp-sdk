@@ -17,6 +17,7 @@ using System;
 using OptimizelySDK.Bucketing;
 using OptimizelySDK.Config;
 using OptimizelySDK.ErrorHandler;
+using OptimizelySDK.Event;
 using OptimizelySDK.Event.Dispatcher;
 using OptimizelySDK.Logger;
 using OptimizelySDK.Notifications;
@@ -32,6 +33,24 @@ namespace OptimizelySDK
     /// TODO: Add unit test of this class.
     public static class OptimizelyFactory
     {
+        // @sohail: We can also create a new static method NewDefaultInstance(batchsize, flushInterval = null)
+        // But that results in an extra parameter when user only needs to set the flush interval.
+        private static int MaxEventBatchSize;
+        private static TimeSpan MaxEventFlushInterval;
+
+#if !NETSTANDARD1_6
+        public static void SetMaxEventBatchSize(int batchSize)
+        {
+            MaxEventBatchSize = batchSize;
+        }
+
+        public static void SetMaxEventFlushInterval(TimeSpan flushInterval)
+        {
+            MaxEventFlushInterval = flushInterval;
+        }
+#endif
+
+
         public static Optimizely NewDefaultInstance(string sdkKey)
         {
             return NewDefaultInstance(sdkKey, null);
@@ -58,8 +77,17 @@ namespace OptimizelySDK
 
         public static Optimizely NewDefaultInstance(ProjectConfigManager configManager, NotificationCenter notificationCenter = null, IEventDispatcher eventDispatcher = null,
                                                     IErrorHandler errorHandler = null, ILogger logger = null, UserProfileService userprofileService = null)
-        {            
-            return new Optimizely(configManager, notificationCenter, eventDispatcher, logger, errorHandler, userprofileService);      
+        {
+            EventProcessor eventProcessor = null;
+
+#if !NETSTANDARD1_6
+            eventProcessor = new BatchEventProcessor.Builder()
+                .WithMaxBatchSize(MaxEventBatchSize)
+                .WithFlushInterval(MaxEventFlushInterval)
+                .WithEventDispatcher(eventDispatcher)
+                .Build();
+#endif
+            return new Optimizely(configManager, notificationCenter, eventDispatcher, logger, errorHandler, userprofileService, eventProcessor);      
         }
     }
 }

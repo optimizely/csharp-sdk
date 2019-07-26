@@ -112,6 +112,11 @@ namespace OptimizelySDK.Notifications
             }
         }
 
+        public int GetNotificationCount(NotificationType notificationType)
+        {
+            return Notifications.ContainsKey(notificationType) ? Notifications[notificationType].Count : 0;
+        }
+
         /// <summary>
         /// Add a notification callback of decision type to the notification center.
         /// </summary>
