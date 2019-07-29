@@ -25,7 +25,7 @@
         <Compile Include="..\OptimizelySDK\Entity\Audience.cs" />
         <Compile Include="..\OptimizelySDK\Entity\Entity.cs" />
         <Compile Include="..\OptimizelySDK\Entity\Event.cs" />
-        <Compile Include="..\OptimizelySDK\Entity\EventAttributes.cs" />
+        <Compile Include="..\OptimizelySDK\Entity\EventTags.cs" />
         <Compile Include="..\OptimizelySDK\Entity\Experiment.cs" />
 		<Compile Include="..\OptimizelySDK\Entity\FeatureDecision.cs" />
         <Compile Include="..\OptimizelySDK\Entity\ForcedVariation.cs" />
@@ -64,7 +64,6 @@
 		<Compile Include="..\OptimizelySDK\Utils\ExceptionExtensions.cs" />
 		<Compile Include="..\OptimizelySDK\Utils\ExperimentUtils.cs" />
 		<Compile Include="..\OptimizelySDK\Utils\ConditionParser.cs" />
-		<Compile Include="..\OptimizelySDK\Utils\DateTimeExtensions.cs" />
 		<Compile Include="..\OptimizelySDK\Utils\AttributeMatchTypes.cs" />
 		<Compile Include="..\OptimizelySDK\Utils\DecisionInfoTypes.cs" />
 		<Compile Include="..\OptimizelySDK\Utils\DateTimeUtils.cs" />

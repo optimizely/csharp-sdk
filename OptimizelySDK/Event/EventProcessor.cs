@@ -21,6 +21,7 @@ namespace OptimizelySDK.Event
     /**
      * EventProcessor interface is used to provide an intermediary processing stage within
      * event production. It's assumed that the EventProcessor dispatches events via a provided
+     * EventDispatcher
      **/
     public interface EventProcessor
     {
