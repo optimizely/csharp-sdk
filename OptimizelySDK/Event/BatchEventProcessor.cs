@@ -38,7 +38,7 @@ namespace OptimizelySDK.Event
      */
     public class BatchEventProcessor: EventProcessor, IDisposable
     {
-        private const int DEFAULT_BATCH_SIZE = 50;
+        private const int DEFAULT_BATCH_SIZE = 10;
         private static readonly TimeSpan DEFAULT_FLUSH_INTERVAL = TimeSpan.FromMinutes(1);
         private static readonly TimeSpan DEFAULT_TIMEOUT_INTERVAL = TimeSpan.FromMinutes(5);
 
@@ -190,7 +190,7 @@ namespace OptimizelySDK.Event
                 return;
             }
 
-            if (EventQueue.TryAdd(userEvent))
+            if (!EventQueue.TryAdd(userEvent))
             {
                 Logger.Log(LogLevel.WARN, "Payload not accepted by the queue.");
             }
@@ -247,9 +247,6 @@ namespace OptimizelySDK.Event
         public void Dispose()
         {
             if (Disposed) return;
-
-            //SchedulerService.Change(-1, -1);
-            //SchedulerService.Dispose();
             Disposed = true;
         }
 
