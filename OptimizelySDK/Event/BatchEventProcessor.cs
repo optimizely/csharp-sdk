@@ -194,7 +194,7 @@ namespace OptimizelySDK.Event
                 return;
             }
 
-            if (EventQueue.TryAdd(userEvent))
+            if (!EventQueue.TryAdd(userEvent))
             {
                 Logger.Log(LogLevel.WARN, "Payload not accepted by the queue.");
             }
@@ -251,9 +251,6 @@ namespace OptimizelySDK.Event
         public void Dispose()
         {
             if (Disposed) return;
-
-            //SchedulerService.Change(-1, -1);
-            //SchedulerService.Dispose();
             Disposed = true;
         }
 

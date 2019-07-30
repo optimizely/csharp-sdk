@@ -75,7 +75,7 @@
     <Compile Include="AudienceConditions\BaseCondition.cs" />
     <Compile Include="Entity\Entity.cs" />
     <Compile Include="Entity\Event.cs" />
-    <Compile Include="Entity\EventAttributes.cs" />
+    <Compile Include="Entity\EventTags.cs" />
     <Compile Include="Entity\Experiment.cs" />
     <Compile Include="Entity\FeatureDecision.cs" />
     <Compile Include="Entity\FeatureFlag.cs" />
@@ -113,7 +113,6 @@
     <Compile Include="Bucketing\UserProfile.cs" />
     <Compile Include="Utils\AttributeMatchTypes.cs" />
     <Compile Include="Utils\ConditionParser.cs" />
-    <Compile Include="Utils\DateTimeExtensions.cs" />
     <Compile Include="Utils\DecisionInfoTypes.cs" />
     <Compile Include="Utils\EventTagUtils.cs" />
     <Compile Include="Bucketing\UserProfileUtil.cs" />
