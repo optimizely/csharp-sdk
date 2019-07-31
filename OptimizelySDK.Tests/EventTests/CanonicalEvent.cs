@@ -11,16 +11,16 @@ namespace OptimizelySDK.Tests.EventTests
         private string VariationId;
         private string EventName;
         private string VisitorId;
-        private Dictionary<string, object> Attributes;
+        private UserAttributes Attributes;
         private EventTags Tags;
 
-        public CanonicalEvent(string experimentId, string variationId, string eventName, string visitorId, Dictionary<string, object> attributes, EventTags tags)
+        public CanonicalEvent(string experimentId, string variationId, string eventName, string visitorId, UserAttributes attributes, EventTags tags)
         {
             ExperimentId = experimentId;
             VariationId = variationId;
             EventName = eventName;
             VisitorId = visitorId;
-            Attributes = attributes ?? new Dictionary<string, object>();
+            Attributes = attributes ?? new UserAttributes();
             Tags = tags ?? new EventTags();
         }
         

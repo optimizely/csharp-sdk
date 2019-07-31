@@ -64,14 +64,15 @@ namespace OptimizelySDK.Tests.EventTests
                     var decisions = snapshot.Decisions ?? new Decision[1] { new Decision() };
                     foreach (var decision in decisions)
                     {
-                        foreach (var eevent in snapshot.Events)
+                        foreach (var @event in snapshot.Events)
                         {
-                            var attributes = visitor.Attributes
-                            .Where(attr => !attr.Key.StartsWith(DatafileProjectConfig.RESERVED_ATTRIBUTE_PREFIX))
-                            .ToDictionary(attr => attr.Key, attr => attr.Value);
+                            var userAttributes = new UserAttributes();
+                            foreach (var attribute in visitor.Attributes.Where(attr => !attr.Key.StartsWith(DatafileProjectConfig.RESERVED_ATTRIBUTE_PREFIX))) {
+                                userAttributes.Add(attribute.Key, attribute.Value);
+                            }
 
-                            ActualEvents.Add(new CanonicalEvent(decision.ExperimentId, decision.VariationId, eevent.Key,
-                                visitor.VisitorId, attributes, eevent.EventTags));
+                            ActualEvents.Add(new CanonicalEvent(decision.ExperimentId, decision.VariationId, @event.Key,
+                                visitor.VisitorId, userAttributes, @event.EventTags));
                         }
                     }
                 }
