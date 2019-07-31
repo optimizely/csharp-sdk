@@ -9,6 +9,10 @@
 
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     </PropertyGroup>
+	<PropertyGroup>
+    	<DefineConstants>;$(DefineConstants);<NETSTANDARD>NetStandardIdentifier</NETSTANDARD>
+    	</DefineConstants>
+	</PropertyGroup>
     <ItemGroup>
 		<Compile Include="..\OptimizelySDK\AudienceConditions\AndCondition.cs" />
 		<Compile Include="..\OptimizelySDK\AudienceConditions\AudienceIdCondition.cs" />
@@ -21,7 +25,7 @@
         <Compile Include="..\OptimizelySDK\Entity\Audience.cs" />
         <Compile Include="..\OptimizelySDK\Entity\Entity.cs" />
         <Compile Include="..\OptimizelySDK\Entity\Event.cs" />
-        <Compile Include="..\OptimizelySDK\Entity\EventAttributes.cs" />
+        <Compile Include="..\OptimizelySDK\Entity\EventTags.cs" />
         <Compile Include="..\OptimizelySDK\Entity\Experiment.cs" />
 		<Compile Include="..\OptimizelySDK\Entity\FeatureDecision.cs" />
         <Compile Include="..\OptimizelySDK\Entity\ForcedVariation.cs" />
@@ -115,6 +119,9 @@
 		</Compile>
 		<Compile Include="..\OptimizelySDK\Event\UserEventFactory.cs">
 		  <Link>UserEventFactory.cs</Link>
+		</Compile>
+		<Compile Include="..\OptimizelySDK\Event\EventProcessor.cs">
+		  <Link>EventProcessor.cs</Link>
 		</Compile>
     </ItemGroup>
     <ItemGroup>
