@@ -85,8 +85,8 @@
     <Compile Include="..\OptimizelySDK\Entity\Event.cs">
       <Link>Entity\Event.cs</Link>
     </Compile>
-    <Compile Include="..\OptimizelySDK\Entity\EventAttributes.cs">
-      <Link>Entity\EventAttributes.cs</Link>
+    <Compile Include="..\OptimizelySDK\Entity\EventTags.cs">
+      <Link>Entity\EventTags.cs</Link>
     </Compile>
     <Compile Include="..\OptimizelySDK\Entity\Experiment.cs">
       <Link>Entity\Experiment.cs</Link>
