@@ -1,0 +1,258 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <ReleaseVersion>1.2.1</ReleaseVersion>
+    <AssemblyOriginatorKeyFile>..\keypair.snk</AssemblyOriginatorKeyFile>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\OptimizelySDK\IOptimizely.cs">
+      <Link>IOptimizely.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Optimizely.cs">
+      <Link>Optimizely.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\OptimizelyFactory.cs">
+      <Link>OptimizelyFactory.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\ProjectConfig.cs">
+      <Link>ProjectConfig.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\AudienceConditions\AndCondition.cs">
+      <Link>AudienceConditions\AndCondition.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\AudienceConditions\AudienceIdCondition.cs">
+      <Link>AudienceConditions\AudienceIdCondition.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\AudienceConditions\BaseCondition.cs">
+      <Link>AudienceConditions\BaseCondition.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\AudienceConditions\EmptyCondition.cs">
+      <Link>AudienceConditions\EmptyCondition.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\AudienceConditions\ICondition.cs">
+      <Link>AudienceConditions\ICondition.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\AudienceConditions\NotCondition.cs">
+      <Link>AudienceConditions\NotCondition.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\AudienceConditions\OrCondition.cs">
+      <Link>AudienceConditions\OrCondition.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Bucketing\Bucketer.cs">
+      <Link>Bucketing\Bucketer.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Bucketing\Decision.cs">
+      <Link>Bucketing\Decision.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Bucketing\DecisionService.cs">
+      <Link>Bucketing\DecisionService.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Bucketing\UserProfile.cs">
+      <Link>Bucketing\UserProfile.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Bucketing\UserProfileService.cs">
+      <Link>Bucketing\UserProfileService.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Bucketing\UserProfileUtil.cs">
+      <Link>Bucketing\UserProfileUtil.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Config\DatafileProjectConfig.cs">
+      <Link>Config\DatafileProjectConfig.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Config\FallbackProjectConfigManager.cs">
+      <Link>Config\FallbackProjectConfigManager.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Config\HttpProjectConfigManager.cs">
+      <Link>Config\HttpProjectConfigManager.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Config\PollingProjectConfigManager.cs">
+      <Link>Config\PollingProjectConfigManager.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Config\ProjectConfigManager.cs">
+      <Link>Config\ProjectConfigManager.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Entity\Attribute.cs">
+      <Link>Entity\Attribute.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Entity\Audience.cs">
+      <Link>Entity\Audience.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Entity\Entity.cs">
+      <Link>Entity\Entity.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Entity\Event.cs">
+      <Link>Entity\Event.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Entity\EventTags.cs">
+      <Link>Entity\EventTags.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Entity\Experiment.cs">
+      <Link>Entity\Experiment.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Entity\FeatureDecision.cs">
+      <Link>Entity\FeatureDecision.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Entity\FeatureFlag.cs">
+      <Link>Entity\FeatureFlag.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Entity\FeatureVariable.cs">
+      <Link>Entity\FeatureVariable.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Entity\FeatureVariableUsage.cs">
+      <Link>Entity\FeatureVariableUsage.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Entity\ForcedVariation.cs">
+      <Link>Entity\ForcedVariation.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Entity\Group.cs">
+      <Link>Entity\Group.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Entity\IdKeyEntity.cs">
+      <Link>Entity\IdKeyEntity.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Entity\Rollout.cs">
+      <Link>Entity\Rollout.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Entity\TrafficAllocation.cs">
+      <Link>Entity\TrafficAllocation.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Entity\UserAttributes.cs">
+      <Link>Entity\UserAttributes.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Entity\Variation.cs">
+      <Link>Entity\Variation.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\ErrorHandler\DefaultErrorHandler.cs">
+      <Link>ErrorHandler\DefaultErrorHandler.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\ErrorHandler\IErrorHandler.cs">
+      <Link>ErrorHandler\IErrorHandler.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\ErrorHandler\NoOpErrorHandler.cs">
+      <Link>ErrorHandler\NoOpErrorHandler.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Event\EventFactory.cs">
+      <Link>Event\EventFactory.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Event\LogEvent.cs">
+      <Link>Event\LogEvent.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Event\UserEventFactory.cs">
+      <Link>Event\UserEventFactory.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Event\Builder\EventBuilder.cs">
+      <Link>Event\Builder\EventBuilder.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Event\Builder\Params.cs">
+      <Link>Event\Builder\Params.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Event\Dispatcher\DefaultEventDispatcher.cs">
+      <Link>Event\Dispatcher\DefaultEventDispatcher.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Event\Dispatcher\HttpClientEventDispatcher45.cs">
+      <Link>Event\Dispatcher\HttpClientEventDispatcher45.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Event\Dispatcher\IEventDispatcher.cs">
+      <Link>Event\Dispatcher\IEventDispatcher.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Event\Dispatcher\WebRequestEventDispatcher35.cs">
+      <Link>Event\Dispatcher\WebRequestEventDispatcher35.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Event\Entity\ConversionEvent.cs">
+      <Link>Event\Entity\ConversionEvent.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Event\Entity\Decision.cs">
+      <Link>Event\Entity\Decision.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Event\Entity\EventBatch.cs">
+      <Link>Event\Entity\EventBatch.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Event\Entity\EventContext.cs">
+      <Link>Event\Entity\EventContext.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Event\Entity\ImpressionEvent.cs">
+      <Link>Event\Entity\ImpressionEvent.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Event\Entity\Snapshot.cs">
+      <Link>Event\Entity\Snapshot.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Event\Entity\SnapshotEvent.cs">
+      <Link>Event\Entity\SnapshotEvent.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Event\Entity\UserEvent.cs">
+      <Link>Event\Entity\UserEvent.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Event\Entity\Visitor.cs">
+      <Link>Event\Entity\Visitor.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Event\Entity\VisitorAttribute.cs">
+      <Link>Event\Entity\VisitorAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Exceptions\OptimizelyException.cs">
+      <Link>Exceptions\OptimizelyException.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Logger\DefaultLogger.cs">
+      <Link>Logger\DefaultLogger.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Logger\ILogger.cs">
+      <Link>Logger\ILogger.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Logger\NoOpLogger.cs">
+      <Link>Logger\NoOpLogger.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Notifications\NotificationCenter.cs">
+      <Link>Notifications\NotificationCenter.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Utils\AttributeMatchTypes.cs">
+      <Link>Utils\AttributeMatchTypes.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Utils\ConditionParser.cs">
+      <Link>Utils\ConditionParser.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Utils\ConfigParser.cs">
+      <Link>Utils\ConfigParser.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Utils\ControlAttributes.cs">
+      <Link>Utils\ControlAttributes.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Utils\DateTimeUtils.cs">
+      <Link>Utils\DateTimeUtils.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Utils\DecisionInfoTypes.cs">
+      <Link>Utils\DecisionInfoTypes.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Utils\EventTagUtils.cs">
+      <Link>Utils\EventTagUtils.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Utils\ExceptionExtensions.cs">
+      <Link>Utils\ExceptionExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Utils\ExperimentUtils.cs">
+      <Link>Utils\ExperimentUtils.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Utils\Schema.cs">
+      <Link>Utils\Schema.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Utils\Validator.cs">
+      <Link>Utils\Validator.cs</Link>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\OptimizelySDK\Event\.DS_Store">
+      <Link>Event\.DS_Store</Link>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="murmurhash-signed" Version="1.0.2" />
+    <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
+    <PackageReference Include="NJsonSchema" Version="8.30.6304.31883" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\OptimizelySDK\Utils\schema.json">
+      <Link>Utils\schema.json</Link>
+      <LogicalName>OptimizelySDK.Utils.schema.json</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
+</Project>

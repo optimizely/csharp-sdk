@@ -41,6 +41,7 @@ namespace OptimizelySDK.Event
     {
         private const int DEFAULT_BATCH_SIZE = 10;
         private const int DEFAULT_QUEUE_CAPACITY = 1000;
+
         private static readonly TimeSpan DEFAULT_FLUSH_INTERVAL = TimeSpan.FromSeconds(30);
         private static readonly TimeSpan DEFAULT_TIMEOUT_INTERVAL = TimeSpan.FromMinutes(5);
 
@@ -158,6 +159,7 @@ namespace OptimizelySDK.Event
             
 
             LogEvent logEvent = EventFactory.CreateLogEvent(toProcessBatch.ToArray(), Logger);
+
             NotificationCenter?.SendNotifications(NotificationCenter.NotificationType.LogEvent, logEvent);
 
             try
@@ -257,6 +259,7 @@ namespace OptimizelySDK.Event
         public class Builder
         {
             private BlockingCollection<object> EventQueue = new BlockingCollection<object>(DEFAULT_QUEUE_CAPACITY);
+
             private IEventDispatcher EventDispatcher;
             private int? BatchSize;
             private TimeSpan? FlushInterval;
