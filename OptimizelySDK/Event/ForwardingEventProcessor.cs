@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Event.Dispatcher;
 using OptimizelySDK.Event.Entity;
 using OptimizelySDK.Logger;
@@ -25,14 +26,16 @@ namespace OptimizelySDK.Event
     public class ForwardingEventProcessor : EventProcessor
     {
         private ILogger Logger;
+        private IErrorHandler ErrorHandler;
         private IEventDispatcher EventDispatcher;
         private NotificationCenter NotificationCenter;
 
-        public ForwardingEventProcessor(IEventDispatcher eventDispatcher, NotificationCenter notificationCenter, ILogger logger)
+        public ForwardingEventProcessor(IEventDispatcher eventDispatcher, NotificationCenter notificationCenter, ILogger logger= null, IErrorHandler errorHandler = null)
         {
             EventDispatcher = eventDispatcher;
             NotificationCenter = notificationCenter;
-            Logger = logger;
+            Logger = logger ?? new DefaultLogger();
+            ErrorHandler = errorHandler ?? new DefaultErrorHandler(Logger, false);
         }
 
         public void Process(UserEvent userEvent)
@@ -42,12 +45,16 @@ namespace OptimizelySDK.Event
 
             try
             {
+                if (userEvent is ImpressionEvent)
+                    Logger.Log(LogLevel.DEBUG, $"Dispatching impression event.");
+                else if (userEvent is ConversionEvent)
+                    Logger.Log(LogLevel.DEBUG, $"Dispatching conversion event.");                
                 EventDispatcher.DispatchEvent(logEvent);
             }
             catch (Exception ex)
             {
-                Logger.Log(LogLevel.ERROR, $"Error dispatching event: {logEvent}. {ex.Message}");
-                throw;
+                Logger.Log(LogLevel.ERROR, $"Error dispatching event: {logEvent.GetParamsAsJson()}. {ex.Message}");
+                ErrorHandler.HandleError(ex);
             }
         }
     }
