@@ -784,8 +784,10 @@ namespace OptimizelySDK
             if (Disposed) return;
 
             Disposed = true;
+
             (ProjectConfigManager as IDisposable)?.Dispose();
             (EventProcessor as IDisposable)?.Dispose();
+
             ProjectConfigManager = null;
         }
     }    
