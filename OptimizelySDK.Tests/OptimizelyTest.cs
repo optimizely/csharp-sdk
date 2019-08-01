@@ -30,6 +30,7 @@ using OptimizelySDK.Notifications;
 using OptimizelySDK.Tests.NotificationTests;
 using OptimizelySDK.Utils;
 using OptimizelySDK.Config;
+using OptimizelySDK.Event.Entity;
 
 namespace OptimizelySDK.Tests
 {
@@ -47,6 +48,7 @@ namespace OptimizelySDK.Tests
         private OptimizelyHelper Helper;
         private Mock<Optimizely> OptimizelyMock;
         private Mock<DecisionService> DecisionServiceMock;
+        private Mock<EventProcessor> EventProcessorMock;
         private NotificationCenter NotificationCenter;
         private Mock<TestNotificationCallbacks> NotificationCallbackMock;
         private Variation VariationWithKeyControl;
@@ -70,6 +72,9 @@ namespace OptimizelySDK.Tests
             ErrorHandlerMock.Setup(e => e.HandleError(It.IsAny<Exception>()));
 
             EventBuilderMock = new Mock<EventBuilder>(new Bucketer(LoggerMock.Object), LoggerMock.Object);
+            EventProcessorMock = new Mock<EventProcessor>();
+
+            EventProcessorMock.Setup(b => b.Process(It.IsAny<UserEvent>()));
 
             EventBuilderMock.Setup(b => b.CreateImpressionEvent(It.IsAny<ProjectConfig>(), It.IsAny<Experiment>(),
                 It.IsAny<string>(), It.IsAny<string>(), It.IsAny<UserAttributes>()));
@@ -381,24 +386,20 @@ namespace OptimizelySDK.Tests
                 { "param2", "val2" }
             };
 
-            EventBuilderMock.Setup(b => b.CreateImpressionEvent(It.IsAny<ProjectConfig>(), It.IsAny<Experiment>(),
-               It.IsAny<string>(), It.IsAny<string>(), It.IsAny<UserAttributes>()))
-               .Returns(new LogEvent("logx.optimizely.com/decision", parameters, "POST", new Dictionary<string, string> { }));
-
+            
             var optly = Helper.CreatePrivateOptimizely();
             optly.SetFieldOrProperty("EventBuilder", EventBuilderMock.Object);
 
             var variation = (Variation)optly.Invoke("Activate", "group_experiment_1", "user_1", null);
-            
-            EventBuilderMock.Verify(b => b.CreateImpressionEvent(It.IsAny<ProjectConfig>(), Config.GetExperimentFromKey("group_experiment_1"),
-                    "7722360022", "user_1", null), Times.Once);
-            
+
+            EventDispatcherMock.Verify(dispatcher => dispatcher.DispatchEvent(It.IsAny<LogEvent>()), Times.Once);
+
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Assigned bucket [1922] to user [user_1] with bucketing ID [user_1]."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "User [user_1] is in experiment [group_experiment_1] of group [7722400015]."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Assigned bucket [9525] to user [user_1] with bucketing ID [user_1]."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "User [user_1] is in variation [group_exp_1_var_2] of experiment [group_experiment_1]."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "Activating user user_1 in experiment group_experiment_1."), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, @"Dispatching impression event to URL logx.optimizely.com/decision with params {""param1"":""val1"",""param2"":""val2""}."), Times.Once);
+    //        LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, @"Dispatching impression event to URL logx.optimizely.com/decision with params {""param1"":""val1"",""param2"":""val2""}."), Times.Once);
 
             Assert.IsTrue(TestData.CompareObjects(GroupVariation, variation));
         }
@@ -425,24 +426,20 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestActivateWithAttributes()
         {
-            EventBuilderMock.Setup(b => b.CreateImpressionEvent(It.IsAny<ProjectConfig>(), It.IsAny<Experiment>(),
-              It.IsAny<string>(), It.IsAny<string>(), It.IsAny<UserAttributes>()))
-              .Returns(new LogEvent("logx.optimizely.com/decision", OptimizelyHelper.SingleParameter, "POST", new Dictionary<string, string> { }));
-
+           
             var optly = Helper.CreatePrivateOptimizely();
             optly.SetFieldOrProperty("EventBuilder", EventBuilderMock.Object);
 
             var variation = (Variation)optly.Invoke("Activate", "test_experiment", "test_user", OptimizelyHelper.UserAttributes);
 
-            EventBuilderMock.Verify(b => b.CreateImpressionEvent(It.IsAny<ProjectConfig>(), Config.GetExperimentFromKey("test_experiment"),
-                    "7722370027", "test_user", OptimizelyHelper.UserAttributes), Times.Once);
+            EventDispatcherMock.Verify(dispatcher => dispatcher.DispatchEvent(It.IsAny<LogEvent>()), Times.Once);
 
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "User \"test_user\" is not in the forced variation map."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Assigned bucket [3037] to user [test_user] with bucketing ID [test_user]."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "User [test_user] is in variation [control] of experiment [test_experiment]."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "This decision will not be saved since the UserProfileService is null."));
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "Activating user test_user in experiment test_experiment."), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, @"Dispatching impression event to URL logx.optimizely.com/decision with params {""param1"":""val1""}."), Times.Once);
+//            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, @"Dispatching impression event to URL logx.optimizely.com/decision with params {""param1"":""val1""}."), Times.Once);
 
             Assert.IsTrue(TestData.CompareObjects(VariationWithKeyControl, variation));
         }
@@ -450,24 +447,20 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestActivateWithNullAttributes()
         {
-            EventBuilderMock.Setup(b => b.CreateImpressionEvent(It.IsAny<ProjectConfig>(), It.IsAny<Experiment>(),
-              It.IsAny<string>(), It.IsAny<string>(), It.IsAny<UserAttributes>()))
-              .Returns(new LogEvent("logx.optimizely.com/decision", OptimizelyHelper.SingleParameter, "POST", new Dictionary<string, string> { }));
-
+           
             var optly = Helper.CreatePrivateOptimizely();
             optly.SetFieldOrProperty("EventBuilder", EventBuilderMock.Object);
 
             var variation = (Variation)optly.Invoke("Activate", "test_experiment", "test_user", OptimizelyHelper.NullUserAttributes);
 
-            EventBuilderMock.Verify(b => b.CreateImpressionEvent(It.IsAny<ProjectConfig>(), Config.GetExperimentFromKey("test_experiment"),
-                    "7722370027", "test_user", OptimizelyHelper.NullUserAttributes), Times.Once);
-            
+            EventDispatcherMock.Verify(dispatcher => dispatcher.DispatchEvent(It.IsAny<LogEvent>()), Times.Once);
+
             //"User "test_user" is not in the forced variation map."
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "User \"test_user\" is not in the forced variation map."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Assigned bucket [3037] to user [test_user] with bucketing ID [test_user]."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "User [test_user] is in variation [control] of experiment [test_experiment]."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "Activating user test_user in experiment test_experiment."), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, @"Dispatching impression event to URL logx.optimizely.com/decision with params {""param1"":""val1""}."), Times.Once);
+           // LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, @"Dispatching impression event to URL logx.optimizely.com/decision with params {""param1"":""val1""}."), Times.Once);
 
             Assert.IsTrue(TestData.CompareObjects(VariationWithKeyControl, variation));
         }
@@ -502,22 +495,17 @@ namespace OptimizelySDK.Tests
                 {"double_key", 3.14 }
             };
 
-            EventBuilderMock.Setup(b => b.CreateImpressionEvent(It.IsAny<ProjectConfig>(), It.IsAny<Experiment>(),
-              It.IsAny<string>(), It.IsAny<string>(), It.IsAny<UserAttributes>()))
-              .Returns(new LogEvent("logx.optimizely.com/decision", OptimizelyHelper.SingleParameter, "POST", new Dictionary<string, string> { }));
-
             var optly = Helper.CreatePrivateOptimizely();
             optly.SetFieldOrProperty("EventBuilder", EventBuilderMock.Object);
             
             var variation = (Variation)optly.Invoke("Activate", "test_experiment", "test_user", userAttributes);
 
-            EventBuilderMock.Verify(b => b.CreateImpressionEvent(It.IsAny<ProjectConfig>(), Config.GetExperimentFromKey("test_experiment"),
-                    "7722370027", "test_user", userAttributes), Times.Once);
-            
+            EventDispatcherMock.Verify(dispatcher => dispatcher.DispatchEvent(It.IsAny<LogEvent>()), Times.Once);
+
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Assigned bucket [3037] to user [test_user] with bucketing ID [test_user]."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "User [test_user] is in variation [control] of experiment [test_experiment]."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "Activating user test_user in experiment test_experiment."), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, @"Dispatching impression event to URL logx.optimizely.com/decision with params {""param1"":""val1""}."), Times.Once);
+           // LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, @"Dispatching impression event to URL logx.optimizely.com/decision with params {""param1"":""val1""}."), Times.Once);
 
             Assert.IsTrue(TestData.CompareObjects(VariationWithKeyControl, variation));
         }
@@ -610,33 +598,28 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestTrackNoAttributesNoEventValue()
         {
-            EventBuilderMock.Setup(b => b.CreateConversionEvent(It.IsAny<ProjectConfig>(), It.IsAny<string>(),
-                It.IsAny<string>(), It.IsAny<UserAttributes>(), It.IsAny<EventTags>()))
-              .Returns(new LogEvent("logx.optimizely.com/track", OptimizelyHelper.SingleParameter,
-                                        "POST", new Dictionary<string, string> { }));
-
             var optly = Helper.CreatePrivateOptimizely();
-            optly.SetFieldOrProperty("EventBuilder", EventBuilderMock.Object);
             optly.Invoke("Track", "purchase", "test_user", null, null);
 
+            // EventProcessorMock.Verify(processor => processor.Process(It.IsAny<ConversionEvent>()), Times.Once);
+
+            EventDispatcherMock.Verify(dispatcher => dispatcher.DispatchEvent(It.IsAny<LogEvent>()), Times.Once);
+
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "Tracking event purchase for user test_user."), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Dispatching conversion event to URL logx.optimizely.com/track with params {\"param1\":\"val1\"}."), Times.Once);
+          //  LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Dispatching conversion event to URL logx.optimizely.com/track with params {\"param1\":\"val1\"}."), Times.Once);
         }
 
         [Test]
         public void TestTrackWithAttributesNoEventValue()
         {
-            EventBuilderMock.Setup(b => b.CreateConversionEvent(It.IsAny<ProjectConfig>(), It.IsAny<string>(),
-                It.IsAny<string>(), It.IsAny<UserAttributes>(), It.IsAny<EventTags>()))
-             .Returns(new LogEvent("logx.optimizely.com/track", OptimizelyHelper.SingleParameter,
-                                       "POST", new Dictionary<string, string> { }));
-
             var optly = Helper.CreatePrivateOptimizely();
             optly.SetFieldOrProperty("EventBuilder", EventBuilderMock.Object);
             optly.Invoke("Track", "purchase", "test_user", OptimizelyHelper.UserAttributes, null);
 
+            EventDispatcherMock.Verify(dispatcher => dispatcher.DispatchEvent(It.IsAny<LogEvent>()), Times.Once);
+
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "Tracking event purchase for user test_user."), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Dispatching conversion event to URL logx.optimizely.com/track with params {\"param1\":\"val1\"}."), Times.Once);
+//            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Dispatching conversion event to URL logx.optimizely.com/track with params {\"param1\":\"val1\"}."), Times.Once);
         }
 
         [Test]
@@ -651,20 +634,16 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestTrackNoAttributesWithEventValue()
         {
-            EventBuilderMock.Setup(b => b.CreateConversionEvent(It.IsAny<ProjectConfig>(), It.IsAny<string>(),
-                It.IsAny<string>(), It.IsAny<UserAttributes>(), It.IsAny<EventTags>()))
-             .Returns(new LogEvent("logx.optimizely.com/track", OptimizelyHelper.SingleParameter,
-                                       "POST", new Dictionary<string, string> { }));
-
             var optly = Helper.CreatePrivateOptimizely();
             optly.SetFieldOrProperty("EventBuilder", EventBuilderMock.Object);
             optly.Invoke("Track", "purchase", "test_user", null, new EventTags
             {
                 { "revenue", 42 }
             });
+            EventDispatcherMock.Verify(dispatcher => dispatcher.DispatchEvent(It.IsAny<LogEvent>()), Times.Once);
 
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "Tracking event purchase for user test_user."), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Dispatching conversion event to URL logx.optimizely.com/track with params {\"param1\":\"val1\"}."), Times.Once);
+//            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Dispatching conversion event to URL logx.optimizely.com/track with params {\"param1\":\"val1\"}."), Times.Once);
         }
 
         [Test]
@@ -676,11 +655,6 @@ namespace OptimizelySDK.Tests
                 { "company", "Optimizely" },
             };
 
-            EventBuilderMock.Setup(b => b.CreateConversionEvent(It.IsAny<ProjectConfig>(), It.IsAny<string>(),
-                It.IsAny<string>(), It.IsAny<UserAttributes>(), It.IsAny<EventTags>()))
-             .Returns(new LogEvent("logx.optimizely.com/track", OptimizelyHelper.SingleParameter,
-                                       "POST", new Dictionary<string, string> { }));
-
             var optly = Helper.CreatePrivateOptimizely();
             optly.SetFieldOrProperty("EventBuilder", EventBuilderMock.Object);
             optly.Invoke("Track", "purchase", "test_user", attributes, new EventTags
@@ -688,18 +662,15 @@ namespace OptimizelySDK.Tests
                 { "revenue", 42 }
             });
 
+            EventDispatcherMock.Verify(dispatcher => dispatcher.DispatchEvent(It.IsAny<LogEvent>()), Times.Once);
+
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "Tracking event purchase for user test_user."), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Dispatching conversion event to URL logx.optimizely.com/track with params {\"param1\":\"val1\"}."), Times.Once);
+          //  LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Dispatching conversion event to URL logx.optimizely.com/track with params {\"param1\":\"val1\"}."), Times.Once);
         }
 
         [Test]
         public void TestTrackWithNullAttributesWithNullEventValue()
         {
-            EventBuilderMock.Setup(b => b.CreateConversionEvent(It.IsAny<ProjectConfig>(), It.IsAny<string>(),
-                It.IsAny<string>(), It.IsAny<UserAttributes>(), It.IsAny<EventTags>()))
-             .Returns(new LogEvent("logx.optimizely.com/track", OptimizelyHelper.SingleParameter,
-                                       "POST", new Dictionary<string, string> { }));
-
             var optly = Helper.CreatePrivateOptimizely();
             optly.SetFieldOrProperty("EventBuilder", EventBuilderMock.Object);
             optly.Invoke("Track", "purchase", "test_user", OptimizelyHelper.NullUserAttributes, new EventTags
@@ -708,11 +679,13 @@ namespace OptimizelySDK.Tests
                 { "wont_send_null", null}
             });
 
-            LoggerMock.Verify(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()), Times.Exactly(3));
+            EventDispatcherMock.Verify(dispatcher => dispatcher.DispatchEvent(It.IsAny<LogEvent>()), Times.Once);
+
+            LoggerMock.Verify(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()), Times.Exactly(5));
 
             LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "[EventTags] Null value for key wont_send_null removed and will not be sent to results."));
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "Tracking event purchase for user test_user."));
-            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Dispatching conversion event to URL logx.optimizely.com/track with params {\"param1\":\"val1\"}."));
+//            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Dispatching conversion event to URL logx.optimizely.com/track with params {\"param1\":\"val1\"}."));
         }
         #endregion
 
@@ -720,21 +693,19 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestInvalidDispatchImpressionEvent()
         {
-            EventBuilderMock.Setup(b => b.CreateImpressionEvent(It.IsAny<ProjectConfig>(), It.IsAny<Experiment>(),
-              It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Entity.UserAttributes>()))
-              .Returns(new LogEvent("logx.optimizely.com/decision", OptimizelyHelper.SingleParameter, "POST", new Dictionary<string, string> { }));
-
             var optly = Helper.CreatePrivateOptimizely();
             optly.SetFieldOrProperty("EventBuilder", EventBuilderMock.Object);
             optly.SetFieldOrProperty("EventDispatcher", new InvalidEventDispatcher());
 
             var variation = (Variation)optly.Invoke("Activate", "test_experiment", "test_user", OptimizelyHelper.UserAttributes);
-            
+
+            EventDispatcherMock.Verify(dispatcher => dispatcher.DispatchEvent(It.IsAny<LogEvent>()), Times.Once);
+
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Assigned bucket [3037] to user [test_user] with bucketing ID [test_user]."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "User [test_user] is in variation [control] of experiment [test_experiment]."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "Activating user test_user in experiment test_experiment."), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, @"Dispatching impression event to URL logx.optimizely.com/decision with params {""param1"":""val1""}."), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Unable to dispatch impression event. Error Invalid dispatch event"), Times.Once);
+            //LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, @"Dispatching impression event to URL logx.optimizely.com/decision with params {""param1"":""val1""}."), Times.Once);
+            //LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Unable to dispatch impression event. Error Invalid dispatch event"), Times.Once);
 
             Assert.IsTrue(TestData.CompareObjects(VariationWithKeyControl, variation));
         }
@@ -742,19 +713,16 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestInvalidDispatchConversionEvent()
         {
-            EventBuilderMock.Setup(b => b.CreateConversionEvent(It.IsAny<ProjectConfig>(), It.IsAny<string>(),
-                 It.IsAny<string>(), It.IsAny<UserAttributes>(), It.IsAny<EventTags>()))
-               .Returns(new LogEvent("logx.optimizely.com/track", OptimizelyHelper.SingleParameter,
-                                         "POST", new Dictionary<string, string> { }));
-
             var optly = Helper.CreatePrivateOptimizely();
             optly.SetFieldOrProperty("EventBuilder", EventBuilderMock.Object);
             optly.SetFieldOrProperty("EventDispatcher", new InvalidEventDispatcher());
 
             optly.Invoke("Track", "purchase", "test_user", null, null);
 
+            EventDispatcherMock.Verify(dispatcher => dispatcher.DispatchEvent(It.IsAny<LogEvent>()), Times.Once);
+
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "Tracking event purchase for user test_user."), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Dispatching conversion event to URL logx.optimizely.com/track with params {\"param1\":\"val1\"}."), Times.Once);
+            //LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Dispatching conversion event to URL logx.optimizely.com/track with params {\"param1\":\"val1\"}."), Times.Once);
         }
         #endregion
 
@@ -842,9 +810,9 @@ namespace OptimizelySDK.Tests
             var fbVariationKey = "vtag1";
             
 
-            UserProfile userProfile = new UserProfile(userId, new Dictionary<string, Decision>
+            UserProfile userProfile = new UserProfile(userId, new Dictionary<string, Bucketing.Decision>
             {
-                { experimentKey, new Decision(variationKey)}
+                { experimentKey, new Bucketing.Decision(variationKey)}
             });
 
             userProfileServiceMock.Setup(_ => _.Lookup(userId)).Returns(userProfile.ToMap());
@@ -1128,9 +1096,6 @@ namespace OptimizelySDK.Tests
             Experiment experiment = new Experiment();
             experiment.Key = "group_experiment_1";
 
-            EventBuilderMock.Setup(b => b.CreateImpressionEvent(Config, It.IsAny<Experiment>(), It.IsAny <string>()/*"group_exp_1_var_2"*/, "user_1", null))
-               .Returns(new LogEvent("logx.optimizely.com/decision", parameters, "POST", new Dictionary<string, string> { }));
-
             var optly = Helper.CreatePrivateOptimizely();
             optly.SetFieldOrProperty("EventBuilder", EventBuilderMock.Object);
             optly.SetFieldOrProperty("ProjectConfigManager", ConfigManager);
@@ -1140,10 +1105,9 @@ namespace OptimizelySDK.Tests
             
             // Activate
             var variation = (Variation)optly.Invoke("Activate", "group_experiment_1", "user_1", null);
-            
-            EventBuilderMock.Verify(b => b.CreateImpressionEvent(It.IsAny<ProjectConfig>(), Config.GetExperimentFromKey("group_experiment_1"),
-                    "7722360022", "user_1", null), Times.Once);
-            
+
+            EventDispatcherMock.Verify(dispatcher => dispatcher.DispatchEvent(It.IsAny<LogEvent>()), Times.Once);
+
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, string.Format(@"Set variation ""{0}"" for experiment ""{1}"" and user ""{2}"" in the forced variation map.", variationId, experimentId, userId)), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "User \"user_1\" is not in the forced variation map."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Assigned bucket [1922] to user [user_1] with bucketing ID [user_1]."), Times.Once);
@@ -1152,7 +1116,7 @@ namespace OptimizelySDK.Tests
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "User [user_1] is in variation [group_exp_1_var_2] of experiment [group_experiment_1]."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "This decision will not be saved since the UserProfileService is null."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "Activating user user_1 in experiment group_experiment_1."), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, @"Dispatching impression event to URL logx.optimizely.com/decision with params {""param1"":""val1"",""param2"":""val2""}."), Times.Once);
+//            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, @"Dispatching impression event to URL logx.optimizely.com/decision with params {""param1"":""val1"",""param2"":""val2""}."), Times.Once);
 
             Assert.IsTrue(TestData.CompareObjects(GroupVariation, variation));
         }
@@ -1170,10 +1134,6 @@ namespace OptimizelySDK.Tests
                 { "param1", "val1" }
             };
 
-            EventBuilderMock.Setup(b => b.CreateConversionEvent(It.IsAny<ProjectConfig>(), It.IsAny<string>(),
-                It.IsAny<string>(), It.IsAny<UserAttributes>(), It.IsAny<EventTags>()))
-                .Returns(new LogEvent("logx.optimizely.com/track", parameters, "POST", new Dictionary<string, string> { }));
-
             var optly = Helper.CreatePrivateOptimizely();
             optly.SetFieldOrProperty("EventBuilder", EventBuilderMock.Object);
 
@@ -1182,11 +1142,12 @@ namespace OptimizelySDK.Tests
 
             // Track
             optly.Invoke("Track", "purchase", "test_user", null, null);
+            EventDispatcherMock.Verify(dispatcher => dispatcher.DispatchEvent(It.IsAny<LogEvent>()), Times.Once);
 
-            LoggerMock.Verify(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()), Times.Exactly(3));
+            LoggerMock.Verify(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()), Times.Exactly(4));
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, string.Format(@"Set variation ""{0}"" for experiment ""{1}"" and user ""{2}"" in the forced variation map.", variationId, experimentId, userId)), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "Tracking event purchase for user test_user."), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Dispatching conversion event to URL logx.optimizely.com/track with params {\"param1\":\"val1\"}."), Times.Once);
+//            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Dispatching conversion event to URL logx.optimizely.com/track with params {\"param1\":\"val1\"}."), Times.Once);
         }
 
         [Test]
@@ -2002,9 +1963,7 @@ namespace OptimizelySDK.Tests
             var variation = Config.GetVariationFromKey(experimentKey, variationKey);
             var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
             var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_FEATURE_TEST);
-            var logEvent = new LogEvent("https://logx.optimizely.com/v1/events", OptimizelyHelper.SingleParameter,
-                "POST", new Dictionary<string, string> { });
-
+            
             // Mocking objects.
             NotificationCallbackMock.Setup(nc => nc.TestActivateCallback(It.IsAny<Experiment>(), It.IsAny<string>(),
                 It.IsAny<UserAttributes>(), It.IsAny<Variation>(), It.IsAny<LogEvent>()));
@@ -2012,8 +1971,6 @@ namespace OptimizelySDK.Tests
                 It.IsAny<UserAttributes>(), It.IsAny<Variation>(), It.IsAny<LogEvent>()));
             NotificationCallbackMock.Setup(nc => nc.TestTrackCallback(It.IsAny<string>(), It.IsAny<string>(),
                 It.IsAny<UserAttributes>(), It.IsAny<EventTags>(), It.IsAny<LogEvent>()));
-            EventBuilderMock.Setup(ebm => ebm.CreateImpressionEvent(It.IsAny<ProjectConfig>(), It.IsAny<Experiment>(),
-                It.IsAny<string>(), It.IsAny<string>(), It.IsAny<UserAttributes>())).Returns(logEvent);
             DecisionServiceMock.Setup(ds => ds.GetVariation(experiment, TestUserId, It.IsAny<ProjectConfig>(), userAttributes)).Returns(variation);
             DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, It.IsAny<ProjectConfig>(), userAttributes)).Returns(decision);
 
@@ -2033,8 +1990,10 @@ namespace OptimizelySDK.Tests
             optly.Invoke("IsFeatureEnabled", featureKey, TestUserId, userAttributes);
 
             // Verify that all the registered callbacks are called once for both Activate and IsFeatureEnabled.
-            NotificationCallbackMock.Verify(nc => nc.TestActivateCallback(experiment, TestUserId, userAttributes, variation, logEvent), Times.Exactly(2));
-            NotificationCallbackMock.Verify(nc => nc.TestAnotherActivateCallback(experiment, TestUserId, userAttributes, variation, logEvent), Times.Exactly(2));
+            EventDispatcherMock.Verify(dispatcher => dispatcher.DispatchEvent(It.IsAny<LogEvent>()), Times.Exactly(2));
+
+            NotificationCallbackMock.Verify(nc => nc.TestActivateCallback(experiment, TestUserId, userAttributes, variation, It.IsAny<LogEvent>()), Times.Exactly(2));
+            NotificationCallbackMock.Verify(nc => nc.TestAnotherActivateCallback(experiment, TestUserId, userAttributes, variation, It.IsAny<LogEvent>()), Times.Exactly(2));
         }
 
         [Test]
@@ -2092,9 +2051,6 @@ namespace OptimizelySDK.Tests
                 It.IsAny<UserAttributes>(), It.IsAny<EventTags>(), It.IsAny<LogEvent>()));
             NotificationCallbackMock.Setup(nc => nc.TestAnotherTrackCallback(It.IsAny<string>(), It.IsAny<string>(),
                 It.IsAny<UserAttributes>(), It.IsAny<EventTags>(), It.IsAny<LogEvent>()));
-            EventBuilderMock.Setup(ebm => ebm.CreateConversionEvent(It.IsAny<ProjectConfig>(), It.IsAny<string>(),
-                It.IsAny<string>(), It.IsAny<UserAttributes>(), 
-                It.IsAny<EventTags>())).Returns(logEvent);
             DecisionServiceMock.Setup(ds => ds.GetVariation(experiment, TestUserId, Config, userAttributes)).Returns(variation);
             
             // Adding notification listeners.
@@ -2109,8 +2065,9 @@ namespace OptimizelySDK.Tests
             optly.Invoke("Track", eventKey, TestUserId, userAttributes, eventTags);
 
             // Verify that all the registered callbacks for Track are called.
-            NotificationCallbackMock.Verify(nc => nc.TestTrackCallback(eventKey, TestUserId, userAttributes, eventTags, logEvent), Times.Exactly(1));
-            NotificationCallbackMock.Verify(nc => nc.TestAnotherTrackCallback(eventKey, TestUserId, userAttributes, eventTags, logEvent), Times.Exactly(1));
+            EventDispatcherMock.Verify(dispatcher => dispatcher.DispatchEvent(It.IsAny<LogEvent>()), Times.Once);
+            NotificationCallbackMock.Verify(nc => nc.TestTrackCallback(eventKey, TestUserId, userAttributes, eventTags, It.IsAny<LogEvent>()), Times.Exactly(1));
+            NotificationCallbackMock.Verify(nc => nc.TestAnotherTrackCallback(eventKey, TestUserId, userAttributes, eventTags, It.IsAny<LogEvent>()), Times.Exactly(1));
         }
 
         #region Decision Listener
