@@ -11,6 +11,7 @@ namespace OptimizelySDK.Tests.EventTests
         private string VariationId;
         private string EventName;
         private string VisitorId;
+
         private UserAttributes Attributes;
         private EventTags Tags;
 
@@ -20,6 +21,7 @@ namespace OptimizelySDK.Tests.EventTests
             VariationId = variationId;
             EventName = eventName;
             VisitorId = visitorId;
+
             Attributes = attributes ?? new UserAttributes();
             Tags = tags ?? new EventTags();
         }
