@@ -108,8 +108,7 @@ namespace OptimizelySDK
                           ILogger logger = null,
                           IErrorHandler errorHandler = null,
                           UserProfileService userProfileService = null,
-                          bool skipJsonValidation = false,
-                          EventProcessor eventProcessor = null)
+                          bool skipJsonValidation = false)
         {
             try {
                 InitializeComponents(eventDispatcher, logger, errorHandler, userProfileService);
@@ -151,7 +150,7 @@ namespace OptimizelySDK
         {
             ProjectConfigManager = configManager;
 
-            InitializeComponents(eventDispatcher, logger, errorHandler, userProfileService, notificationCenter);
+            InitializeComponents(eventDispatcher, logger, errorHandler, userProfileService, notificationCenter, eventProcessor);
         }
 
         private void InitializeComponents(IEventDispatcher eventDispatcher = null,
