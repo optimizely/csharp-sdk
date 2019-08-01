@@ -40,7 +40,7 @@ namespace OptimizelySDK.Event
     public class BatchEventProcessor: EventProcessor, IDisposable
     {
         private const int DEFAULT_BATCH_SIZE = 10;
-        private static readonly TimeSpan DEFAULT_FLUSH_INTERVAL = TimeSpan.FromMinutes(1);
+        private static readonly TimeSpan DEFAULT_FLUSH_INTERVAL = TimeSpan.FromSeconds(30);
         private static readonly TimeSpan DEFAULT_TIMEOUT_INTERVAL = TimeSpan.FromMinutes(5);
 
         private int BatchSize;
@@ -157,6 +157,7 @@ namespace OptimizelySDK.Event
             
 
             LogEvent logEvent = EventFactory.CreateLogEvent(toProcessBatch.ToArray(), Logger);
+
             NotificationCenter?.SendNotifications(NotificationCenter.NotificationType.LogEvent, logEvent);
 
             try
