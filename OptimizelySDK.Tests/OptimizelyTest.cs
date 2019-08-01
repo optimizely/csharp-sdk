@@ -116,7 +116,7 @@ namespace OptimizelySDK.Tests
             Config = null;            
         }
         #endregion
-
+        
         #region OptimizelyHelper
         private class OptimizelyHelper
         {

@@ -40,16 +40,17 @@ namespace OptimizelySDK.Event
 
         public void Process(UserEvent userEvent)
         {
-            var logEvent = EventFactory.CreateLogEvent(userEvent, Logger);
-            NotificationCenter?.SendNotifications(NotificationCenter.NotificationType.LogEvent, logEvent);
+            var logEvent = EventFactory.CreateLogEvent(userEvent, Logger);            
 
             try
             {
                 if (userEvent is ImpressionEvent)
                     Logger.Log(LogLevel.DEBUG, $"Dispatching impression event.");
                 else if (userEvent is ConversionEvent)
-                    Logger.Log(LogLevel.DEBUG, $"Dispatching conversion event.");                
+                    Logger.Log(LogLevel.DEBUG, $"Dispatching conversion event.");
+
                 EventDispatcher.DispatchEvent(logEvent);
+                NotificationCenter?.SendNotifications(NotificationCenter.NotificationType.LogEvent, logEvent);
             }
             catch (Exception ex)
             {
