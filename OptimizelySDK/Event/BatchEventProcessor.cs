@@ -253,6 +253,8 @@ namespace OptimizelySDK.Event
         public void Dispose()
         {
             if (Disposed) return;
+
+            Stop();
             Disposed = true;
         }
 

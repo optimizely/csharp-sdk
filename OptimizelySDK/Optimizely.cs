@@ -103,15 +103,17 @@ namespace OptimizelySDK
         /// <param name="logger">LoggerInterface</param>
         /// <param name="errorHandler">ErrorHandlerInterface</param>
         /// <param name="skipJsonValidation">boolean representing whether JSON schema validation needs to be performed</param>
+        /// <param name="eventProcessor">EventProcessor</param>
         public Optimizely(string datafile,
                           IEventDispatcher eventDispatcher = null,
                           ILogger logger = null,
                           IErrorHandler errorHandler = null,
                           UserProfileService userProfileService = null,
-                          bool skipJsonValidation = false)
+                          bool skipJsonValidation = false,
+                          EventProcessor eventProcessor = null)
         {
             try {
-                InitializeComponents(eventDispatcher, logger, errorHandler, userProfileService);
+                InitializeComponents(eventDispatcher, logger, errorHandler, userProfileService, null, eventProcessor);
 
                 if (ValidateInputs(datafile, skipJsonValidation)) {
                     var config = DatafileProjectConfig.Create(datafile, Logger, ErrorHandler);
@@ -140,6 +142,7 @@ namespace OptimizelySDK
         /// <param name="logger">Logger.</param>
         /// <param name="errorHandler">Error handler.</param>
         /// <param name="userProfileService">User profile service.</param>
+        /// <param name="eventProcessor">EventProcessor</param>
         public Optimizely(ProjectConfigManager configManager,
                          NotificationCenter notificationCenter = null,
                          IEventDispatcher eventDispatcher = null,
