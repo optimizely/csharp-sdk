@@ -85,6 +85,7 @@ namespace OptimizelySDK
                 .WithMaxBatchSize(MaxEventBatchSize)
                 .WithFlushInterval(MaxEventFlushInterval)
                 .WithEventDispatcher(eventDispatcher)
+                .WithNotificationCenter(notificationCenter)
                 .Build();
 #endif
             return new Optimizely(configManager, notificationCenter, eventDispatcher, logger, errorHandler, userprofileService, eventProcessor);      
