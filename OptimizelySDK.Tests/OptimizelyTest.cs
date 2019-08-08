@@ -125,7 +125,8 @@ namespace OptimizelySDK.Tests
                 typeof(IEventDispatcher),
                 typeof(ILogger),
                 typeof(IErrorHandler),
-                typeof(bool)
+                typeof(bool),
+                typeof(EventProcessor)
             };
 
             public static Dictionary<string, object> SingleParameter = new Dictionary<string, object>
