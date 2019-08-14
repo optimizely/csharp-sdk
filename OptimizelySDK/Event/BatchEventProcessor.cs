@@ -140,6 +140,7 @@ namespace OptimizelySDK.Event
 
         public void Flush()
         {
+            FlushingIntervalDeadline = DateTime.Now.MillisecondsSince1970() + (long)FlushInterval.TotalMilliseconds;
             EventQueue.Add(FLUSH_SIGNAL);
         }
 
@@ -263,9 +264,9 @@ namespace OptimizelySDK.Event
             private BlockingCollection<object> EventQueue = new BlockingCollection<object>(DEFAULT_QUEUE_CAPACITY);
 
             private IEventDispatcher EventDispatcher;
-            private int? BatchSize;
-            private TimeSpan? FlushInterval;
-            private TimeSpan? TimeoutInterval;
+            private int BatchSize;
+            private TimeSpan FlushInterval;
+            private TimeSpan TimeoutInterval;
             private IErrorHandler ErrorHandler;
             private ILogger Logger;
             private NotificationCenter NotificationCenter;
@@ -349,9 +350,9 @@ namespace OptimizelySDK.Event
                 batchEventProcessor.EventQueue = EventQueue;
                 batchEventProcessor.NotificationCenter = NotificationCenter;
 
-                batchEventProcessor.BatchSize = BatchSize ?? BatchEventProcessor.DEFAULT_BATCH_SIZE;
-                batchEventProcessor.FlushInterval = FlushInterval ?? BatchEventProcessor.DEFAULT_FLUSH_INTERVAL;
-                batchEventProcessor.TimeoutInterval = TimeoutInterval ?? BatchEventProcessor.DEFAULT_TIMEOUT_INTERVAL;
+                batchEventProcessor.BatchSize = BatchSize < 1 ? BatchEventProcessor.DEFAULT_BATCH_SIZE : BatchSize;
+                batchEventProcessor.FlushInterval = FlushInterval < TimeSpan.FromSeconds(1) ? BatchEventProcessor.DEFAULT_FLUSH_INTERVAL : FlushInterval;
+                batchEventProcessor.TimeoutInterval = TimeoutInterval < TimeSpan.FromSeconds(1) ? BatchEventProcessor.DEFAULT_TIMEOUT_INTERVAL : TimeoutInterval;
 
                 if (start)
                     batchEventProcessor.Start();
