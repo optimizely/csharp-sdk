@@ -24,21 +24,15 @@ using OptimizelySDK.Notifications;
 
 namespace OptimizelySDK
 {
-    /// after component emitting notification.
-    /// 
     /// <summary>
-    /// Optimizely factory.
+    /// Optimizely factory to provides basic utility to instantiate the Optimizely SDK with a minimal number of configuration options.
     /// </summary>
-    /// TODO: Add documentation of this class
-    /// TODO: Add unit test of this class.
     public static class OptimizelyFactory
     {
-        // @sohail: We can also create a new static method NewDefaultInstance(batchsize, flushInterval = null)
-        // But that results in an extra parameter when user only needs to set the flush interval.
         private static int MaxEventBatchSize;
         private static TimeSpan MaxEventFlushInterval;
 
-#if !NETSTANDARD1_6
+#if !NETSTANDARD1_6 && !NET35
         public static void SetBatchSize(int batchSize)
         {
             MaxEventBatchSize = batchSize;
@@ -80,7 +74,7 @@ namespace OptimizelySDK
         {
             EventProcessor eventProcessor = null;
 
-#if !NETSTANDARD1_6
+#if !NETSTANDARD1_6 && !NET35
             eventProcessor = new BatchEventProcessor.Builder()
                 .WithMaxBatchSize(MaxEventBatchSize)
                 .WithFlushInterval(MaxEventFlushInterval)
