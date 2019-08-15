@@ -44,11 +44,6 @@ namespace OptimizelySDK.Event
 
             try
             {
-                if (userEvent is ImpressionEvent)
-                    Logger.Log(LogLevel.DEBUG, $"Dispatching impression event.");
-                else if (userEvent is ConversionEvent)
-                    Logger.Log(LogLevel.DEBUG, $"Dispatching conversion event.");
-
                 EventDispatcher.DispatchEvent(logEvent);
                 NotificationCenter?.SendNotifications(NotificationCenter.NotificationType.LogEvent, logEvent);
             }
