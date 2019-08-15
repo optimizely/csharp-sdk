@@ -99,8 +99,7 @@ namespace OptimizelySDK.Event
                     }
                     
                     if (!EventQueue.TryTake(out object item, 50))
-                    {
-                        Logger.Log(LogLevel.DEBUG, "Empty item, sleeping for 50ms.");
+                    {                        
                         Thread.Sleep(50);
                         continue;
                     }
