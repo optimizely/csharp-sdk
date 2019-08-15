@@ -39,12 +39,12 @@ namespace OptimizelySDK
         private static TimeSpan MaxEventFlushInterval;
 
 #if !NETSTANDARD1_6
-        public static void SetMaxEventBatchSize(int batchSize)
+        public static void SetBatchSize(int batchSize)
         {
             MaxEventBatchSize = batchSize;
         }
 
-        public static void SetMaxEventFlushInterval(TimeSpan flushInterval)
+        public static void SetFlushInterval(TimeSpan flushInterval)
         {
             MaxEventFlushInterval = flushInterval;
         }

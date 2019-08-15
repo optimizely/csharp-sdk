@@ -677,7 +677,7 @@ namespace OptimizelySDK.Tests
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Assigned bucket [3037] to user [test_user] with bucketing ID [test_user]."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "User [test_user] is in variation [control] of experiment [test_experiment]."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "Activating user test_user in experiment test_experiment."), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, @"Dispatching impression event."), Times.Once);
+            
             // Need to see how error handler can be verified.
             LoggerMock.Verify(l => l.Log(LogLevel.ERROR, It.IsAny<string>()), Times.Once);
 
@@ -694,8 +694,7 @@ namespace OptimizelySDK.Tests
 
             EventDispatcherMock.Verify(dispatcher => dispatcher.DispatchEvent(It.IsAny<LogEvent>()), Times.Once);
 
-            LoggerMock.Verify(l => l.Log(LogLevel.INFO, "Tracking event purchase for user test_user."), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Dispatching conversion event."), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.INFO, "Tracking event purchase for user test_user."), Times.Once);            
         }
         #endregion
 

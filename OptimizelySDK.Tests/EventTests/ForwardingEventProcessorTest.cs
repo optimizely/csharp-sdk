@@ -45,9 +45,7 @@ namespace OptimizelySDK.Tests.EventTests
         public void TestEventHandlerWithConversionEvent()
         {
             var userEvent = CreateConversionEvent(EventName);
-            EventProcessor.Process(userEvent);
-
-            LoggerMock.Verify(logger => logger.Log(LogLevel.DEBUG, "Dispatching conversion event."), Times.Once);
+            EventProcessor.Process(userEvent);            
 
             Assert.True(EventDispatcher.IsUpdated);
         }
@@ -60,8 +58,7 @@ namespace OptimizelySDK.Tests.EventTests
             var userEvent = CreateConversionEvent(EventName);
 
             eventProcessor.Process(userEvent);
-
-            LoggerMock.Verify(logger => logger.Log(LogLevel.DEBUG, "Dispatching conversion event."), Times.Once);
+            
             ErrorHandlerMock.Verify(errorHandler => errorHandler.HandleError(It.IsAny<Exception>()), Times.Once );            
         }
 
