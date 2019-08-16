@@ -133,6 +133,9 @@
     <Compile Include="..\OptimizelySDK\Event\LogEvent.cs">
       <Link>Event\LogEvent.cs</Link>
     </Compile>
+	<Compile Include="..\OptimizelySDK\Event\ForwardingEventProcessor.cs">
+      <Link>Event\ForwardingEventProcessor.cs</Link>
+    </Compile>
     <Compile Include="..\OptimizelySDK\Exceptions\OptimizelyException.cs">
       <Link>Exceptions\OptimizelyException.cs</Link>
     </Compile>

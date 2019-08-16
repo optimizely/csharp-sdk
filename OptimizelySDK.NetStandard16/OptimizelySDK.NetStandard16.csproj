@@ -48,6 +48,7 @@
         <Compile Include="..\OptimizelySDK\Event\Dispatcher\HttpClientEventDispatcher45.cs" />
         <Compile Include="..\OptimizelySDK\Event\Dispatcher\IEventDispatcher.cs" />
         <Compile Include="..\OptimizelySDK\Event\LogEvent.cs" />
+		<Compile Include="..\OptimizelySDK\Event\ForwardingEventProcessor.cs" />
         <Compile Include="..\OptimizelySDK\Exceptions\OptimizelyException.cs" />
         <Compile Include="..\OptimizelySDK\IOptimizely.cs" />
         <Compile Include="..\OptimizelySDK\Logger\DefaultLogger.cs" />

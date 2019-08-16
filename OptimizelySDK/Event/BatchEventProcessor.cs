@@ -40,6 +40,8 @@ namespace OptimizelySDK.Event
     public class BatchEventProcessor: EventProcessor, IDisposable
     {
         private const int DEFAULT_BATCH_SIZE = 10;
+        private const int DEFAULT_QUEUE_CAPACITY = 1000;
+
         private static readonly TimeSpan DEFAULT_FLUSH_INTERVAL = TimeSpan.FromSeconds(30);
         private static readonly TimeSpan DEFAULT_TIMEOUT_INTERVAL = TimeSpan.FromMinutes(5);
 
@@ -97,8 +99,7 @@ namespace OptimizelySDK.Event
                     }
                     
                     if (!EventQueue.TryTake(out object item, 50))
-                    {
-                        Logger.Log(LogLevel.DEBUG, "Empty item, sleeping for 50ms.");
+                    {                        
                         Thread.Sleep(50);
                         continue;
                     }
@@ -138,6 +139,7 @@ namespace OptimizelySDK.Event
 
         public void Flush()
         {
+            FlushingIntervalDeadline = DateTime.Now.MillisecondsSince1970() + (long)FlushInterval.TotalMilliseconds;
             EventQueue.Add(FLUSH_SIGNAL);
         }
 
@@ -251,16 +253,19 @@ namespace OptimizelySDK.Event
         public void Dispose()
         {
             if (Disposed) return;
+
+            Stop();
             Disposed = true;
         }
 
         public class Builder
         {
-            private BlockingCollection<object> EventQueue;
+            private BlockingCollection<object> EventQueue = new BlockingCollection<object>(DEFAULT_QUEUE_CAPACITY);
+
             private IEventDispatcher EventDispatcher;
-            private int? BatchSize;
-            private TimeSpan? FlushInterval;
-            private TimeSpan? TimeoutInterval;
+            private int BatchSize;
+            private TimeSpan FlushInterval;
+            private TimeSpan TimeoutInterval;
             private IErrorHandler ErrorHandler;
             private ILogger Logger;
             private NotificationCenter NotificationCenter;
@@ -344,9 +349,9 @@ namespace OptimizelySDK.Event
                 batchEventProcessor.EventQueue = EventQueue;
                 batchEventProcessor.NotificationCenter = NotificationCenter;
 
-                batchEventProcessor.BatchSize = BatchSize ?? BatchEventProcessor.DEFAULT_BATCH_SIZE;
-                batchEventProcessor.FlushInterval = FlushInterval ?? BatchEventProcessor.DEFAULT_FLUSH_INTERVAL;
-                batchEventProcessor.TimeoutInterval = TimeoutInterval ?? BatchEventProcessor.DEFAULT_TIMEOUT_INTERVAL;
+                batchEventProcessor.BatchSize = BatchSize < 1 ? BatchEventProcessor.DEFAULT_BATCH_SIZE : BatchSize;
+                batchEventProcessor.FlushInterval = FlushInterval < TimeSpan.FromSeconds(1) ? BatchEventProcessor.DEFAULT_FLUSH_INTERVAL : FlushInterval;
+                batchEventProcessor.TimeoutInterval = TimeoutInterval < TimeSpan.FromSeconds(1) ? BatchEventProcessor.DEFAULT_TIMEOUT_INTERVAL : TimeoutInterval;
 
                 if (start)
                     batchEventProcessor.Start();

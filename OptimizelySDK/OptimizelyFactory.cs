@@ -17,21 +17,34 @@ using System;
 using OptimizelySDK.Bucketing;
 using OptimizelySDK.Config;
 using OptimizelySDK.ErrorHandler;
+using OptimizelySDK.Event;
 using OptimizelySDK.Event.Dispatcher;
 using OptimizelySDK.Logger;
 using OptimizelySDK.Notifications;
 
 namespace OptimizelySDK
 {
-    /// after component emitting notification.
-    /// 
     /// <summary>
-    /// Optimizely factory.
+    /// Optimizely factory to provides basic utility to instantiate the Optimizely SDK with a minimal number of configuration options.
     /// </summary>
-    /// TODO: Add documentation of this class
-    /// TODO: Add unit test of this class.
     public static class OptimizelyFactory
     {
+        private static int MaxEventBatchSize;
+        private static TimeSpan MaxEventFlushInterval;
+
+#if !NETSTANDARD1_6 && !NET35
+        public static void SetBatchSize(int batchSize)
+        {
+            MaxEventBatchSize = batchSize;
+        }
+
+        public static void SetFlushInterval(TimeSpan flushInterval)
+        {
+            MaxEventFlushInterval = flushInterval;
+        }
+#endif
+
+
         public static Optimizely NewDefaultInstance(string sdkKey)
         {
             return NewDefaultInstance(sdkKey, null);
@@ -58,8 +71,18 @@ namespace OptimizelySDK
 
         public static Optimizely NewDefaultInstance(ProjectConfigManager configManager, NotificationCenter notificationCenter = null, IEventDispatcher eventDispatcher = null,
                                                     IErrorHandler errorHandler = null, ILogger logger = null, UserProfileService userprofileService = null)
-        {            
-            return new Optimizely(configManager, notificationCenter, eventDispatcher, logger, errorHandler, userprofileService);      
+        {
+            EventProcessor eventProcessor = null;
+
+#if !NETSTANDARD1_6 && !NET35
+            eventProcessor = new BatchEventProcessor.Builder()
+                .WithMaxBatchSize(MaxEventBatchSize)
+                .WithFlushInterval(MaxEventFlushInterval)
+                .WithEventDispatcher(eventDispatcher)
+                .WithNotificationCenter(notificationCenter)
+                .Build();
+#endif
+            return new Optimizely(configManager, notificationCenter, eventDispatcher, logger, errorHandler, userprofileService, eventProcessor);      
         }
     }
 }

@@ -26,6 +26,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using OptimizelySDK.Config;
+using OptimizelySDK.Event;
 
 namespace OptimizelySDK
 {
@@ -48,6 +49,8 @@ namespace OptimizelySDK
         public NotificationCenter NotificationCenter;
 
         public ProjectConfigManager ProjectConfigManager;
+
+        private EventProcessor EventProcessor;
 
         /// <summary>
         /// It returns true if the ProjectConfig is valid otherwise false.
@@ -100,15 +103,17 @@ namespace OptimizelySDK
         /// <param name="logger">LoggerInterface</param>
         /// <param name="errorHandler">ErrorHandlerInterface</param>
         /// <param name="skipJsonValidation">boolean representing whether JSON schema validation needs to be performed</param>
+        /// <param name="eventProcessor">EventProcessor</param>
         public Optimizely(string datafile,
                           IEventDispatcher eventDispatcher = null,
                           ILogger logger = null,
                           IErrorHandler errorHandler = null,
                           UserProfileService userProfileService = null,
-                          bool skipJsonValidation = false)
+                          bool skipJsonValidation = false,
+                          EventProcessor eventProcessor = null)
         {
             try {
-                InitializeComponents(eventDispatcher, logger, errorHandler, userProfileService);
+                InitializeComponents(eventDispatcher, logger, errorHandler, userProfileService, null, eventProcessor);
 
                 if (ValidateInputs(datafile, skipJsonValidation)) {
                     var config = DatafileProjectConfig.Create(datafile, Logger, ErrorHandler);
@@ -137,23 +142,26 @@ namespace OptimizelySDK
         /// <param name="logger">Logger.</param>
         /// <param name="errorHandler">Error handler.</param>
         /// <param name="userProfileService">User profile service.</param>
+        /// <param name="eventProcessor">EventProcessor</param>
         public Optimizely(ProjectConfigManager configManager,
                          NotificationCenter notificationCenter = null,
                          IEventDispatcher eventDispatcher = null,
                          ILogger logger = null,
                          IErrorHandler errorHandler = null,
-                         UserProfileService userProfileService = null)
+                         UserProfileService userProfileService = null,
+                         EventProcessor eventProcessor = null)
         {
             ProjectConfigManager = configManager;
 
-            InitializeComponents(eventDispatcher, logger, errorHandler, userProfileService, notificationCenter);
+            InitializeComponents(eventDispatcher, logger, errorHandler, userProfileService, notificationCenter, eventProcessor);
         }
 
         private void InitializeComponents(IEventDispatcher eventDispatcher = null,
                          ILogger logger = null,
                          IErrorHandler errorHandler = null,
                          UserProfileService userProfileService = null,
-                         NotificationCenter notificationCenter = null)
+                         NotificationCenter notificationCenter = null,
+                         EventProcessor eventProcessor = null)
         {
             Logger = logger ?? new NoOpLogger();
             EventDispatcher = eventDispatcher ?? new DefaultEventDispatcher(Logger);
@@ -163,6 +171,7 @@ namespace OptimizelySDK
             UserProfileService = userProfileService;
             NotificationCenter = notificationCenter ?? new NotificationCenter(Logger);
             DecisionService = new DecisionService(Bucketer, ErrorHandler, userProfileService, Logger);
+            EventProcessor = eventProcessor ?? new ForwardingEventProcessor(EventDispatcher, NotificationCenter, Logger);
         }
 
         /// <summary>
@@ -293,23 +302,16 @@ namespace OptimizelySDK
                 eventTags = eventTags.FilterNullValues(Logger);
             }
 
-            var conversionEvent = EventBuilder.CreateConversionEvent(config, eventKey,
-                userId, userAttributes, eventTags);
+            var userEvent = UserEventFactory.CreateConversionEvent(config, eventKey, userId, userAttributes, eventTags);
+            EventProcessor.Process(userEvent);
             Logger.Log(LogLevel.INFO, string.Format("Tracking event {0} for user {1}.", eventKey, userId));
-            Logger.Log(LogLevel.DEBUG, string.Format("Dispatching conversion event to URL {0} with params {1}.",
-                conversionEvent.Url, conversionEvent.GetParamsAsJson()));
 
-            try
+            if (NotificationCenter.GetNotificationCount(NotificationCenter.NotificationType.Track) > 0)
             {
-                EventDispatcher.DispatchEvent(conversionEvent);
-            }
-            catch (Exception exception)
-            {
-                Logger.Log(LogLevel.ERROR, string.Format("Unable to dispatch conversion event. Error {0}", exception.Message));
-            }
-
-            NotificationCenter.SendNotifications(NotificationCenter.NotificationType.Track, eventKey, userId,
+                var conversionEvent = EventFactory.CreateLogEvent(userEvent, Logger);
+                NotificationCenter.SendNotifications(NotificationCenter.NotificationType.Track, eventKey, userId,
                 userAttributes, eventTags, conversionEvent);
+            }
         }
 
 
@@ -666,22 +668,19 @@ namespace OptimizelySDK
         {
             if (experiment.IsExperimentRunning)
             {
-                var impressionEvent = EventBuilder.CreateImpressionEvent(config, experiment, variation.Id, userId, userAttributes);
+                var userEvent = UserEventFactory.CreateImpressionEvent(config, experiment, variation.Id, userId, userAttributes);
+                EventProcessor.Process(userEvent);
                 Logger.Log(LogLevel.INFO, string.Format("Activating user {0} in experiment {1}.", userId, experiment.Key));
-                Logger.Log(LogLevel.DEBUG, string.Format("Dispatching impression event to URL {0} with params {1}.",
-                    impressionEvent.Url, impressionEvent.GetParamsAsJson()));
 
-                try
+                // Kept For backwards compatibility.
+                // This notification is deprecated and the new DecisionNotifications
+                // are sent via their respective method calls.
+                if (NotificationCenter.GetNotificationCount(NotificationCenter.NotificationType.Activate) > 0)
                 {
-                    EventDispatcher.DispatchEvent(impressionEvent);
-                }
-                catch (Exception exception)
-                {
-                    Logger.Log(LogLevel.ERROR, string.Format("Unable to dispatch impression event. Error {0}", exception.Message));
-                }
-
-                NotificationCenter.SendNotifications(NotificationCenter.NotificationType.Activate, experiment, userId,
+                    var impressionEvent = EventFactory.CreateLogEvent(userEvent, Logger);
+                    NotificationCenter.SendNotifications(NotificationCenter.NotificationType.Activate, experiment, userId,
                     userAttributes, variation, impressionEvent);
+                }
             }
             else
             {
@@ -788,7 +787,10 @@ namespace OptimizelySDK
             if (Disposed) return;
 
             Disposed = true;
+
             (ProjectConfigManager as IDisposable)?.Dispose();
+            (EventProcessor as IDisposable)?.Dispose();
+
             ProjectConfigManager = null;
         }
     }    

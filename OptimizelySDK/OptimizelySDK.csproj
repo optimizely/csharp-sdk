@@ -100,6 +100,7 @@
     <Compile Include="Event\Dispatcher\IEventDispatcher.cs" />
     <Compile Include="Event\EventFactory.cs" />
     <Compile Include="Event\EventProcessor.cs" />
+    <Compile Include="Event\ForwardingEventProcessor.cs" />
     <Compile Include="Event\UserEventFactory.cs" />
     <Compile Include="Event\LogEvent.cs" />
     <Compile Include="Exceptions\OptimizelyException.cs" />

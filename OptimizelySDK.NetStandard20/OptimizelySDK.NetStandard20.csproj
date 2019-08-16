@@ -238,6 +238,15 @@
     <Compile Include="..\OptimizelySDK\Utils\Validator.cs">
       <Link>Utils\Validator.cs</Link>
     </Compile>
+    <Compile Include="..\OptimizelySDK\Event\BatchEventProcessor.cs">
+      <Link>Event\BatchEventProcessor.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Event\ForwardingEventProcessor.cs">
+      <Link>Event\ForwardingEventProcessor.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Event\EventProcessor.cs">
+      <Link>Event\EventProcessor.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\OptimizelySDK\Event\.DS_Store">

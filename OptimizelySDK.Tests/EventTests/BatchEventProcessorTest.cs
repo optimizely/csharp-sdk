@@ -212,6 +212,52 @@ namespace OptimizelySDK.Tests.EventTests
         }
 
         [Test]
+        public void TestDispose()
+        {
+            var countdownEvent = new CountdownEvent(2);
+            var eventDispatcher = new TestEventDispatcher(countdownEvent);
+            SetEventProcessor(eventDispatcher);
+
+            Assert.IsTrue(EventProcessor.IsStarted);
+
+            UserEvent userEvent = BuildConversionEvent(EventName);
+            EventProcessor.Process(userEvent);
+            eventDispatcher.ExpectConversion(EventName, TestUserId);
+
+            EventProcessor.Dispose();
+
+            Assert.True(eventDispatcher.CompareEvents());
+
+            // make sure, isStarted is false while dispose.
+            Assert.False(EventProcessor.IsStarted);
+        }
+
+        [Test]
+        public void TestDisposeDontRaiseException()
+        {
+            var countdownEvent = new CountdownEvent(2);
+            var eventDispatcher = new TestEventDispatcher(countdownEvent);
+            SetEventProcessor(eventDispatcher);
+
+            Assert.IsTrue(EventProcessor.IsStarted);
+
+            UserEvent userEvent = BuildConversionEvent(EventName);
+            EventProcessor.Process(userEvent);
+            eventDispatcher.ExpectConversion(EventName, TestUserId);
+
+            EventProcessor.Dispose();
+
+            Assert.True(eventDispatcher.CompareEvents());
+
+            // make sure, isStarted is false while dispose.
+            Assert.False(EventProcessor.IsStarted);
+
+            // Need to make sure, after dispose, process shouldn't raise exception
+            EventProcessor.Process(userEvent);
+
+        }
+
+        [Test]
         public void TestNotificationCenter()
         {
             var countdownEvent = new CountdownEvent(1);
