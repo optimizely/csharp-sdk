@@ -1,3 +1,20 @@
+# Optimizely Csharp SDK Changelog
+
+## 3.2.0
+August 19th, 2019
+
+### New Features:
+- Introduced `UserEventFactory` which will return impression and conversion event.
+- Added `EventFactory` taking `UserEvents` and creating Logevent.
+- Introduced `EventProcessor` interface with `BatchEventProcessor` and `ForwardingEventProcessor` implementation.
+- Introduced `LogEvent` notification.
+- Added `BatchEventProcessor` as the default implementation within the `OptimizelyFactory` class.
+
+### Deprecated
+- `EventBuilder` was deprecated and now we will be using `UserEventFactory` and `EventFactory` to create logEvents.
+- `LogEvent` was deprecated from `TrackNotification` and `ActivateNotification` notifications in favor of explicit `LogEvent` notification.
+- New features will no longer be supported on `.net framework 1.6`
+
 ## 3.2.0
 July 22nd, 2019
 
