@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 using System;
+using System.Configuration;
 using OptimizelySDK.Bucketing;
 using OptimizelySDK.Config;
 using OptimizelySDK.ErrorHandler;
@@ -44,6 +45,51 @@ namespace OptimizelySDK
         }
 #endif
 
+        public static Optimizely NewDefaultInstance()
+        {
+            var OptlySDKConfigSection = ConfigurationManager.GetSection("optlySDKConfigSection") as OptimizelySDKConfigSection;
+
+            HttpProjectConfigElement httpProjectConfigElement = OptlySDKConfigSection.HttpProjectConfig;
+
+            if (httpProjectConfigElement == null) return null;
+
+            var logger = new DefaultLogger();
+            var errorHandler = new DefaultErrorHandler();
+            var eventDispatcher = new DefaultEventDispatcher(logger);
+            var builder = new HttpProjectConfigManager.Builder();
+            var notificationCenter = new NotificationCenter();
+            
+            var configManager = builder
+                .WithSdkKey(httpProjectConfigElement.SDKKey)
+                .WithUrl(httpProjectConfigElement.Url)
+                .WithFormat(httpProjectConfigElement.DatafileUrlFormat)
+                .WithPollingInterval(TimeSpan.FromMilliseconds(httpProjectConfigElement.PollingIntervalInMs))
+                .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(httpProjectConfigElement.BlockingTimeOutInMs))
+                .WithDatafile(httpProjectConfigElement.Datafile)
+                .WithLogger(logger)
+                .WithErrorHandler(errorHandler)
+                .WithNotificationCenter(notificationCenter)
+                .Build(true);
+
+            EventProcessor eventProcessor = null;
+
+#if !NETSTANDARD1_6 && !NET35
+            var batchEventProcessorElement = OptlySDKConfigSection.BatchEventProcessor;
+
+            if (batchEventProcessorElement == null) return null;
+
+            eventProcessor = new BatchEventProcessor.Builder()
+                .WithMaxBatchSize(batchEventProcessorElement.BatchSize)
+                .WithFlushInterval(TimeSpan.FromMilliseconds(batchEventProcessorElement.FlushIntervalInMs))
+                .WithTimeoutInterval(TimeSpan.FromMilliseconds(batchEventProcessorElement.TimeoutIntervalInMs))
+                .WithEventDispatcher(eventDispatcher)
+                .WithNotificationCenter(notificationCenter)
+                .Build();
+#endif
+
+            return NewDefaultInstance(configManager, notificationCenter, eventDispatcher, errorHandler, logger, eventProcessor: eventProcessor);
+
+        }
 
         public static Optimizely NewDefaultInstance(string sdkKey)
         {
@@ -66,12 +112,7 @@ namespace OptimizelySDK
                 .WithNotificationCenter(notificationCenter)
                 .Build(true);
 
-            return NewDefaultInstance(configManager, notificationCenter, eventDispatcher, errorHandler, logger);
-        }
 
-        public static Optimizely NewDefaultInstance(ProjectConfigManager configManager, NotificationCenter notificationCenter = null, IEventDispatcher eventDispatcher = null,
-                                                    IErrorHandler errorHandler = null, ILogger logger = null, UserProfileService userprofileService = null)
-        {
             EventProcessor eventProcessor = null;
 
 #if !NETSTANDARD1_6 && !NET35
@@ -82,6 +123,13 @@ namespace OptimizelySDK
                 .WithNotificationCenter(notificationCenter)
                 .Build();
 #endif
+
+            return NewDefaultInstance(configManager, notificationCenter, eventDispatcher, errorHandler, logger, eventProcessor: eventProcessor);
+        }
+
+        public static Optimizely NewDefaultInstance(ProjectConfigManager configManager, NotificationCenter notificationCenter = null, IEventDispatcher eventDispatcher = null,
+                                                    IErrorHandler errorHandler = null, ILogger logger = null, UserProfileService userprofileService = null, EventProcessor eventProcessor = null)
+        {
             return new Optimizely(configManager, notificationCenter, eventDispatcher, logger, errorHandler, userprofileService, eventProcessor);      
         }
     }
