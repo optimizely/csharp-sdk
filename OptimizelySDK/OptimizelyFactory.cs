@@ -44,16 +44,24 @@ namespace OptimizelySDK
             MaxEventFlushInterval = flushInterval;
         }
 #endif
-
         public static Optimizely NewDefaultInstance()
         {
-            var OptlySDKConfigSection = ConfigurationManager.GetSection("optlySDKConfigSection") as OptimizelySDKConfigSection;
+            var logger = new DefaultLogger();
+            OptimizelySDKConfigSection OptlySDKConfigSection = null;
+            try
+            {
+                OptlySDKConfigSection = ConfigurationManager.GetSection("optlySDKConfigSection") as OptimizelySDKConfigSection;
+            }
+            catch (ConfigurationErrorsException ex)
+            {
+                logger.Log(LogLevel.ERROR, "Invalid App.Config. Unable to initialize optimizely instance" + ex.Message);
+                return null;    
+            }            
 
             HttpProjectConfigElement httpProjectConfigElement = OptlySDKConfigSection.HttpProjectConfig;
 
             if (httpProjectConfigElement == null) return null;
 
-            var logger = new DefaultLogger();
             var errorHandler = new DefaultErrorHandler();
             var eventDispatcher = new DefaultEventDispatcher(logger);
             var builder = new HttpProjectConfigManager.Builder();
@@ -65,7 +73,6 @@ namespace OptimizelySDK
                 .WithFormat(httpProjectConfigElement.DatafileUrlFormat)
                 .WithPollingInterval(TimeSpan.FromMilliseconds(httpProjectConfigElement.PollingIntervalInMs))
                 .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(httpProjectConfigElement.BlockingTimeOutInMs))
-                .WithDatafile(httpProjectConfigElement.Datafile)
                 .WithLogger(logger)
                 .WithErrorHandler(errorHandler)
                 .WithNotificationCenter(notificationCenter)
@@ -82,6 +89,7 @@ namespace OptimizelySDK
                 .WithMaxBatchSize(batchEventProcessorElement.BatchSize)
                 .WithFlushInterval(TimeSpan.FromMilliseconds(batchEventProcessorElement.FlushIntervalInMs))
                 .WithTimeoutInterval(TimeSpan.FromMilliseconds(batchEventProcessorElement.TimeoutIntervalInMs))
+                .WithLogger(logger)
                 .WithEventDispatcher(eventDispatcher)
                 .WithNotificationCenter(notificationCenter)
                 .Build();
@@ -111,7 +119,6 @@ namespace OptimizelySDK
                 .WithErrorHandler(errorHandler)
                 .WithNotificationCenter(notificationCenter)
                 .Build(true);
-
 
             EventProcessor eventProcessor = null;
 

@@ -16,12 +16,6 @@ namespace OptimizelySDK.Config
             get { return (string)base["url"]; }
         }
 
-        [ConfigurationProperty("datafile")]
-        public string Datafile
-        {
-            get { return (string)base["datafile"]; }
-        }
-        
         [ConfigurationProperty("datafileUrlFormat")]
         public string DatafileUrlFormat
         {
@@ -56,12 +50,13 @@ namespace OptimizelySDK.Config
     public class BatchEventProcessorElement : ConfigurationElement
     {
         [ConfigurationProperty("batchSize")]
-        public int BatchSize {
+        public int BatchSize
+        {
             get { return (int)base["batchSize"]; }
         }
 
         [ConfigurationProperty("flushIntervalInMs")]
-        public double FlushIntervalInMs
+        public int FlushIntervalInMs
         {
             get { return base["flushIntervalInMs"] is int ? (int)base["flushIntervalInMs"] : 0; }
         }
@@ -73,7 +68,8 @@ namespace OptimizelySDK.Config
         }
 
         [ConfigurationProperty("defaultStart")]
-        public bool DefaultStart {
+        public bool DefaultStart
+        {
             get { return (bool)base["defaultStart"]; }
         }
     }
@@ -83,13 +79,13 @@ namespace OptimizelySDK.Config
         [ConfigurationProperty("HttpProjectConfig")]
         public HttpProjectConfigElement HttpProjectConfig
         {
-            get { return ((HttpProjectConfigElement)(base["HttpProjectConfig"])); }
+            get { return (HttpProjectConfigElement)base["HttpProjectConfig"]; }
             set { base["HttpProjectConfig"] = value; }
         }
 
         [ConfigurationProperty("BatchEventProcessor")]
         public BatchEventProcessorElement BatchEventProcessor {
-            get { return ((BatchEventProcessorElement)(base["BatchEventProcessor"])); }
+            get { return (BatchEventProcessorElement)(base["BatchEventProcessor"]); }
             set { base["BatchEventProcessor"] = value; }
         }
     }
