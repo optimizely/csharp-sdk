@@ -68,7 +68,7 @@ The Optimizely client object accepts the following plug-ins:
 2. `ILogger` exposes a single method, Log, to record activity in the SDK.  An example of a class to bridge the SDK's Log to Log4Net is provided in the Demo Application.
 3. `IErrorHandler` allows you to implement custom logic when Exceptions are thrown.  Note that Exception information is already included in the Log.
 4. `ProjectConfigManager` exposes method for retrieving ProjectConfig instance. Examples include `FallbackProjectConfigManager` and `HttpProjectConfigManager`.
-5. `EventProcessor` provide an intermediary processing stage within event production. It's assumed that the EventProcessor dispatches events via a provided EventDispatcher. Examples include `ForwardingEventProcessor` and `BatchEventProcessor`.
+5. `EventProcessor` provides an intermediary processing stage within event production. It's assumed that the EventProcessor dispatches events via a provided EventDispatcher. Examples include `ForwardingEventProcessor` and `BatchEventProcessor`.
 These are optional plug-ins and default behavior is implement if none are provided.
 
 #### OptimizelyFactory
