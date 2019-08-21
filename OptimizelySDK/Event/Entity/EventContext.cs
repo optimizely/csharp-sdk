@@ -48,8 +48,6 @@ namespace OptimizelySDK.Event.Entity
             private string AccountId;
             private string ProjectId;
             private string Revision;
-            private string ClientName;
-            private string ClientVersion;
             private bool AnonymizeIP;
 
             public Builder WithAccountId(string accountId)

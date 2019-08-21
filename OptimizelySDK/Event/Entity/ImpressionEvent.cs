@@ -36,9 +36,7 @@ namespace OptimizelySDK.Event.Entity
         /// </summary>
         public class Builder
         {
-            private string UserId;            
-            private string UUID;
-            private long Timestamp;
+            private string UserId;
             private EventContext EventContext;
 
             public VisitorAttribute[] VisitorAttributes;
