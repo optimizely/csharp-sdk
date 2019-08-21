@@ -145,6 +145,8 @@ namespace OptimizelySDK.Event
 
         private void FlushQueue()
         {
+            FlushingIntervalDeadline = DateTime.Now.MillisecondsSince1970() + (long)FlushInterval.TotalMilliseconds;
+
             if (CurrentBatch.Count == 0)
             {
                 return;
@@ -350,8 +352,8 @@ namespace OptimizelySDK.Event
                 batchEventProcessor.NotificationCenter = NotificationCenter;
 
                 batchEventProcessor.BatchSize = BatchSize < 1 ? BatchEventProcessor.DEFAULT_BATCH_SIZE : BatchSize;
-                batchEventProcessor.FlushInterval = FlushInterval < TimeSpan.FromSeconds(1) ? BatchEventProcessor.DEFAULT_FLUSH_INTERVAL : FlushInterval;
-                batchEventProcessor.TimeoutInterval = TimeoutInterval < TimeSpan.FromSeconds(1) ? BatchEventProcessor.DEFAULT_TIMEOUT_INTERVAL : TimeoutInterval;
+                batchEventProcessor.FlushInterval = FlushInterval <= TimeSpan.FromSeconds(0) ? BatchEventProcessor.DEFAULT_FLUSH_INTERVAL : FlushInterval;
+                batchEventProcessor.TimeoutInterval = TimeoutInterval <= TimeSpan.FromSeconds(0) ? BatchEventProcessor.DEFAULT_TIMEOUT_INTERVAL : TimeoutInterval;
 
                 if (start)
                     batchEventProcessor.Start();

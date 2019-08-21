@@ -16,8 +16,7 @@ namespace OptimizelySDK.Tests.EventTests
     {
 
         private string TestUserId = string.Empty;
-        private ProjectConfig Config;
-        private ILogger Logger;
+        private ProjectConfig Config;        
 
         [TestFixtureSetUp]
         public void Setup()
