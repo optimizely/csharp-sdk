@@ -28,8 +28,7 @@ namespace OptimizelySDK.Tests.EventTests
         private Mock<ILogger> LoggerMock;
         private BlockingCollection<object> eventQueue;
         private BatchEventProcessor EventProcessor;
-        private Mock<IEventDispatcher> EventDispatcherMock;
-        private TestEventDispatcher TestEventDispatcher;
+        private Mock<IEventDispatcher> EventDispatcherMock;        
         private NotificationCenter NotificationCenter = new NotificationCenter();
         private Mock<TestNotificationCallbacks> NotificationCallbackMock;
 
