@@ -9,12 +9,12 @@ August 22nd, 2019
 - To configure event batching, set the `eventBatchSize` and `eventFlushInterval` properties in the `OptimizelyFactory` using `OptimizelyFactory.SetBatchSize(int batchSize)` and `OptimizelyFactory.SetFlushInterval(TimeSpan flushInterval)` and then create `OptimizelyFactory.NewDefaultInstance`.
 - Event batching is enabled by default. `eventBatchSize` defaults to `10`. `eventFlushInterval` defaults to `30000` Milliseconds.
 - Updated the `dispose` method representing the process of closing the instance. When `dispose` is called, any events waiting to be sent as part of a batched event request will be immediately batched and sent to the event dispatcher.
-- If any such requests were sent to the event dispatcher, `close` returns a `Promise` that fulfills after the event dispatcher calls the response callback for each request. Otherwise, `close` returns an immediately-fulfilled `Promise`.
+- If any such requests were sent to the event dispatcher, `close` waits for provided `TimeoutInterval` before closing, so that events get successfully dispatched.
 
 ### Deprecated
 - `EventBuilder` was deprecated and now we will be using `UserEventFactory` and `EventFactory` to create logEvents.
 - `LogEvent` was deprecated from `TrackNotification` and `ActivateNotification` notifications in favor of explicit `LogEvent` notification.
-- New features will no longer be supported on `.net standard 1.6`
+- New features will no longer be supported on `.net standard 1.6` and `.net 3.5`
 
 ## 3.2.0
 July 22nd, 2019
