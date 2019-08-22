@@ -23,6 +23,7 @@ using System.Linq;
 
 namespace OptimizelySDK.Event.Builder
 {
+    [Obsolete("This class is deprecated. Use 'OptimizelySDK.Event.EventFactory'.")]
     public class EventBuilder
     {
         private const string IMPRESSION_ENDPOINT = "https://logx.optimizely.com/v1/events";
