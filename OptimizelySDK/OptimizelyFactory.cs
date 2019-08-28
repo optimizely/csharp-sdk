@@ -76,6 +76,7 @@ namespace OptimizelySDK
 
 #if !NETSTANDARD1_6 && !NET35
             eventProcessor = new BatchEventProcessor.Builder()
+                .WithLogger(logger)
                 .WithMaxBatchSize(MaxEventBatchSize)
                 .WithFlushInterval(MaxEventFlushInterval)
                 .WithEventDispatcher(eventDispatcher)

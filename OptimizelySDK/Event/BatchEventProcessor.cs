@@ -347,7 +347,7 @@ namespace OptimizelySDK.Event
                 var batchEventProcessor = new BatchEventProcessor();
                 batchEventProcessor.Logger = Logger;
                 batchEventProcessor.ErrorHandler = ErrorHandler;
-                batchEventProcessor.EventDispatcher = EventDispatcher;
+                batchEventProcessor.EventDispatcher = EventDispatcher ?? new DefaultEventDispatcher(Logger);
                 batchEventProcessor.EventQueue = EventQueue;
                 batchEventProcessor.NotificationCenter = NotificationCenter;
 
