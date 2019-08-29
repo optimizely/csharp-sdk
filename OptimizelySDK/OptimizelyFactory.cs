@@ -43,13 +43,12 @@ namespace OptimizelySDK
         {
             MaxEventFlushInterval = flushInterval;
         }
-#endif
+
         public static void SetLogger(ILogger logger)
         {
             OptimizelyLogger = logger;
         }
-
-
+#endif
         public static Optimizely NewDefaultInstance(string sdkKey)
         {
             return NewDefaultInstance(sdkKey, null);
