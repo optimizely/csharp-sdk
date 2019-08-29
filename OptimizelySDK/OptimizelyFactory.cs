@@ -56,7 +56,7 @@ namespace OptimizelySDK
 
         public static Optimizely NewDefaultInstance(string sdkKey, string fallback)
         {
-            var logger = OptimizelyLogger ?? new DefaultLogger();
+            var logger = OptimizelyLogger ?? new NoOpLogger();
             var errorHandler = new DefaultErrorHandler();
             var eventDispatcher = new DefaultEventDispatcher(logger);
             var builder = new HttpProjectConfigManager.Builder();

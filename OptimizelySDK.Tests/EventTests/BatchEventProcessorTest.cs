@@ -8,6 +8,7 @@ using OptimizelySDK.Event.Entity;
 using OptimizelySDK.Logger;
 using OptimizelySDK.Notifications;
 using OptimizelySDK.Tests.NotificationTests;
+using OptimizelySDK.Tests.UtilsTests;
 using System;
 using System.Collections.Concurrent;
 using System.Threading;
@@ -24,6 +25,7 @@ namespace OptimizelySDK.Tests.EventTests
         public const int MAX_DURATION_MS = 1000;
         public const int TIMEOUT_INTERVAL_MS = 5000;
 
+        private PrivateObject privateObject;
         private ProjectConfig Config;
         private Mock<ILogger> LoggerMock;
         private BlockingCollection<object> eventQueue;
@@ -134,6 +136,17 @@ namespace OptimizelySDK.Tests.EventTests
             Assert.True(eventDispatcher.CompareEvents());
             Assert.True(countdownEvent.Wait(TimeSpan.FromMilliseconds(MAX_DURATION_MS / 2)), "Exceeded timeout waiting for notification.");
             Assert.AreEqual(0, EventProcessor.EventQueue.Count);
+        }
+
+        [Test]
+        public void TestDefaultEventDispatcherIfNotProvided()
+        {
+            SetEventProcessor(null);
+            UserEvent userEvent = BuildConversionEvent(EventName);
+            EventProcessor.Process(userEvent);
+            EventProcessor.Flush();
+            privateObject = new PrivateObject(EventProcessor.GetType(), null, null);
+            Assert.AreEqual(privateObject.GetFieldOrProperyType("EventDispatcher"), typeof(IEventDispatcher));
         }
 
         [Test]
