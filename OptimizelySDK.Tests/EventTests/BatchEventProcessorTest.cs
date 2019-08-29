@@ -2,13 +2,13 @@
 using NUnit.Framework;
 using OptimizelySDK.Config;
 using OptimizelySDK.Entity;
+using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Event;
 using OptimizelySDK.Event.Dispatcher;
 using OptimizelySDK.Event.Entity;
 using OptimizelySDK.Logger;
 using OptimizelySDK.Notifications;
 using OptimizelySDK.Tests.NotificationTests;
-using OptimizelySDK.Tests.UtilsTests;
 using System;
 using System.Collections.Concurrent;
 using System.Threading;
@@ -24,8 +24,7 @@ namespace OptimizelySDK.Tests.EventTests
         public const int MAX_BATCH_SIZE = 10;
         public const int MAX_DURATION_MS = 1000;
         public const int TIMEOUT_INTERVAL_MS = 5000;
-
-        private PrivateObject privateObject;
+        
         private ProjectConfig Config;
         private Mock<ILogger> LoggerMock;
         private BlockingCollection<object> eventQueue;
@@ -142,11 +141,23 @@ namespace OptimizelySDK.Tests.EventTests
         public void TestDefaultEventDispatcherIfNotProvided()
         {
             SetEventProcessor(null);
-            UserEvent userEvent = BuildConversionEvent(EventName);
-            EventProcessor.Process(userEvent);
-            EventProcessor.Flush();
-            privateObject = new PrivateObject(EventProcessor.GetType(), null, null);
-            Assert.AreEqual(privateObject.GetFieldOrProperyType("EventDispatcher"), typeof(IEventDispatcher));
+
+            Assert.True(EventProcessor.EventDispatcher is DefaultEventDispatcher);
+        }
+
+        [Test]
+        public void TestNoOpLoggerIfNotProvided()
+        {
+            EventProcessor = new BatchEventProcessor.Builder().Build();
+
+            Assert.True(EventProcessor.Logger is OptimizelySDK.Logger.NoOpLogger);
+        }
+
+        [Test]
+        public void TestNoOpErrorHandlerIfNotProvided()
+        {
+            EventProcessor = new BatchEventProcessor.Builder().Build();
+            Assert.True(EventProcessor.ErrorHandler is NoOpErrorHandler);
         }
 
         [Test]

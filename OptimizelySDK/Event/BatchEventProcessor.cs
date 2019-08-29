@@ -57,13 +57,13 @@ namespace OptimizelySDK.Event
         public bool IsStarted { get; private set; }
         private Thread Executer;
         
-        protected ILogger Logger { get; set; }
-        protected IErrorHandler ErrorHandler { get; set; }
+        public ILogger Logger { get; protected set; }
+        public IErrorHandler ErrorHandler { get; protected set; }
         public NotificationCenter NotificationCenter { get; set; }
 
         private readonly object mutex = new object();
 
-        private IEventDispatcher EventDispatcher;
+        public IEventDispatcher EventDispatcher { get; private set; }
         public BlockingCollection<object> EventQueue { get; private set; } 
         private List<UserEvent> CurrentBatch = new List<UserEvent>();
         private long FlushingIntervalDeadline;
@@ -345,12 +345,11 @@ namespace OptimizelySDK.Event
             public BatchEventProcessor Build(bool start)
             {
                 var batchEventProcessor = new BatchEventProcessor();
-                batchEventProcessor.Logger = Logger;
-                batchEventProcessor.ErrorHandler = ErrorHandler;
+                batchEventProcessor.Logger = Logger ?? new NoOpLogger();
+                batchEventProcessor.ErrorHandler = ErrorHandler ?? new NoOpErrorHandler(Logger);
                 batchEventProcessor.EventDispatcher = EventDispatcher ?? new DefaultEventDispatcher(Logger);
                 batchEventProcessor.EventQueue = EventQueue;
-                batchEventProcessor.NotificationCenter = NotificationCenter;
-
+                batchEventProcessor.NotificationCenter = NotificationCenter;                
                 batchEventProcessor.BatchSize = BatchSize < 1 ? BatchEventProcessor.DEFAULT_BATCH_SIZE : BatchSize;
                 batchEventProcessor.FlushInterval = FlushInterval <= TimeSpan.FromSeconds(0) ? BatchEventProcessor.DEFAULT_FLUSH_INTERVAL : FlushInterval;
                 batchEventProcessor.TimeoutInterval = TimeoutInterval <= TimeSpan.FromSeconds(0) ? BatchEventProcessor.DEFAULT_TIMEOUT_INTERVAL : TimeoutInterval;
