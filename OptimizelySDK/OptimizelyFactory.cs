@@ -31,6 +31,7 @@ namespace OptimizelySDK
     {
         private static int MaxEventBatchSize;
         private static TimeSpan MaxEventFlushInterval;
+        private static ILogger OptimizelyLogger;
 
 #if !NETSTANDARD1_6 && !NET35
         public static void SetBatchSize(int batchSize)
@@ -43,6 +44,10 @@ namespace OptimizelySDK
             MaxEventFlushInterval = flushInterval;
         }
 #endif
+        public static void SetLogger(ILogger logger)
+        {
+            OptimizelyLogger = logger;
+        }
 
 
         public static Optimizely NewDefaultInstance(string sdkKey)
@@ -52,7 +57,7 @@ namespace OptimizelySDK
 
         public static Optimizely NewDefaultInstance(string sdkKey, string fallback)
         {
-            var logger = new DefaultLogger();
+            var logger = OptimizelyLogger ?? new DefaultLogger();
             var errorHandler = new DefaultErrorHandler();
             var eventDispatcher = new DefaultEventDispatcher(logger);
             var builder = new HttpProjectConfigManager.Builder();
