@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 using System;
+#if !NETSTANDARD1_6 && !NET35
 using System.Configuration;
+#endif
+
 using OptimizelySDK.Bucketing;
 using OptimizelySDK.Config;
 using OptimizelySDK.ErrorHandler;
