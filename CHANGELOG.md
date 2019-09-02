@@ -1,7 +1,7 @@
 # Optimizely Csharp SDK Changelog
 
 ## 3.3.0
-August 22nd, 2019
+September 3rd, 2019
 
 ### New Features:
 - Added support for event batching via the event processor.
