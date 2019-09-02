@@ -7,6 +7,9 @@ namespace OptimizelySDK.Tests
     [TestFixture]
     public class OptimizelyConfigHandlerTest
     {
+
+#if !NETSTANDARD1_6 && !NET35
+
         [Test]
         public void TestHTTPAppConfigSection()
         {
@@ -33,5 +36,7 @@ namespace OptimizelySDK.Tests
             Assert.AreEqual(batchSetting.TimeoutIntervalInMs, 10000);
             Assert.IsTrue(batchSetting.DefaultStart);
         }
+#endif
+
     }
 }

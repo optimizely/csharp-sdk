@@ -49,7 +49,7 @@ namespace OptimizelySDK
         {
             OptimizelyLogger = logger;
         }
-#endif
+
         public static Optimizely NewDefaultInstance()
         {
             var logger = OptimizelyLogger ?? new DefaultLogger();
@@ -86,7 +86,6 @@ namespace OptimizelySDK
 
             EventProcessor eventProcessor = null;
 
-#if !NETSTANDARD1_6 && !NET35
             var batchEventProcessorElement = OptlySDKConfigSection.BatchEventProcessor;
 
             if (batchEventProcessorElement == null) return null;
@@ -99,11 +98,11 @@ namespace OptimizelySDK
                 .WithEventDispatcher(eventDispatcher)
                 .WithNotificationCenter(notificationCenter)
                 .Build();
-#endif
 
             return NewDefaultInstance(configManager, notificationCenter, eventDispatcher, errorHandler, logger, eventProcessor: eventProcessor);
 
         }
+#endif
 
         public static Optimizely NewDefaultInstance(string sdkKey)
         {
