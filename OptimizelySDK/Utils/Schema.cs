@@ -26,7 +26,7 @@ namespace OptimizelySDK.Utils
         {
             if (cache != null)
                 return cache;
-#if NET35
+#if NET35 || NET40
             var assembly = Assembly.GetExecutingAssembly();
 #else
             var assembly = typeof(Schema).GetTypeInfo().Assembly;

@@ -2,6 +2,7 @@
 using NUnit.Framework;
 using OptimizelySDK.Config;
 using OptimizelySDK.Entity;
+using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Event;
 using OptimizelySDK.Event.Dispatcher;
 using OptimizelySDK.Event.Entity;
@@ -23,13 +24,12 @@ namespace OptimizelySDK.Tests.EventTests
         public const int MAX_BATCH_SIZE = 10;
         public const int MAX_DURATION_MS = 1000;
         public const int TIMEOUT_INTERVAL_MS = 5000;
-
+        
         private ProjectConfig Config;
         private Mock<ILogger> LoggerMock;
         private BlockingCollection<object> eventQueue;
         private BatchEventProcessor EventProcessor;
-        private Mock<IEventDispatcher> EventDispatcherMock;
-        private TestEventDispatcher TestEventDispatcher;
+        private Mock<IEventDispatcher> EventDispatcherMock;        
         private NotificationCenter NotificationCenter = new NotificationCenter();
         private Mock<TestNotificationCallbacks> NotificationCallbackMock;
 
@@ -135,6 +135,29 @@ namespace OptimizelySDK.Tests.EventTests
             Assert.True(eventDispatcher.CompareEvents());
             Assert.True(countdownEvent.Wait(TimeSpan.FromMilliseconds(MAX_DURATION_MS / 2)), "Exceeded timeout waiting for notification.");
             Assert.AreEqual(0, EventProcessor.EventQueue.Count);
+        }
+
+        [Test]
+        public void TestDefaultEventDispatcherIfNotProvided()
+        {
+            SetEventProcessor(null);
+
+            Assert.True(EventProcessor.EventDispatcher is DefaultEventDispatcher);
+        }
+
+        [Test]
+        public void TestNoOpLoggerIfNotProvided()
+        {
+            EventProcessor = new BatchEventProcessor.Builder().Build();
+
+            Assert.True(EventProcessor.Logger is OptimizelySDK.Logger.NoOpLogger);
+        }
+
+        [Test]
+        public void TestNoOpErrorHandlerIfNotProvided()
+        {
+            EventProcessor = new BatchEventProcessor.Builder().Build();
+            Assert.True(EventProcessor.ErrorHandler is NoOpErrorHandler);
         }
 
         [Test]

@@ -41,6 +41,11 @@ namespace OptimizelySDK.Tests.UtilsTests
                 Type.DefaultBinder, createdInstance, new object[] { value });
         }
 
+        public Type GetFieldOrProperyType(string propertyName)
+        {
+            return instanceType.GetField(propertyName, BindingFlags.NonPublic | BindingFlags.Instance).FieldType;
+        }
+
         public object Invoke(string name, params object[] args)
         {
             return instanceType.InvokeMember(name, BindingFlags.Instance | BindingFlags.Public | BindingFlags.InvokeMethod | BindingFlags.NonPublic,

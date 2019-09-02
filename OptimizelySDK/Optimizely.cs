@@ -30,6 +30,11 @@ using OptimizelySDK.Event;
 
 namespace OptimizelySDK
 {
+#if NET35
+    [Obsolete("Net3.5 SDK support is deprecated, use NET4.0 or above")]
+#elif NETSTANDARD1_6
+    [Obsolete("Net standard 1.6 SDK support is deprecated, use Net standard 2.0 or above")]
+#endif
     public class Optimizely : IOptimizely, IDisposable
     {
         private Bucketer Bucketer;
@@ -67,7 +72,7 @@ namespace OptimizelySDK
             get
             {
                 // Example output: "2.1.0" .  Should be kept in synch with NuGet package version.
-#if NET35
+#if NET35 || NET40
                 Assembly assembly = Assembly.GetExecutingAssembly();
 #else
                 Assembly assembly = typeof(Optimizely).GetTypeInfo().Assembly;
@@ -423,7 +428,7 @@ namespace OptimizelySDK
             return DecisionService.GetForcedVariation(experimentKey, userId, config);
         }
 
-        #region  FeatureFlag APIs
+#region  FeatureFlag APIs
 
         /// <summary>
         /// Determine whether a feature is enabled.
@@ -719,7 +724,7 @@ namespace OptimizelySDK
             return enabledFeaturesList;
         }
 
-        #endregion // FeatureFlag APIs
+#endregion // FeatureFlag APIs
 
         /// <summary>
         /// Validate all string inputs are not null or empty.
