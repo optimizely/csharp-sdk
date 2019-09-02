@@ -32,7 +32,7 @@ namespace OptimizelySDK.Utils
         /// <param name="configJson">ProjectConfig JSON</param>
         /// <param name="schemaJson">Schema JSON for ProjectConfig.  If none is provided, use the one already in the project</param>
         /// <returns>Whether the ProjectConfig is valid</returns>
-#if !NET35
+#if !NET35 && !NET40
         public static bool ValidateJSONSchema(string configJson, string schemaJson = null)
         {
             try
@@ -49,7 +49,8 @@ namespace OptimizelySDK.Utils
             }
         }
 #endif
-#if NET35
+
+#if NET35 || NET40
         public static bool ValidateJSONSchema(string configJson, string schemaJson = null)
         {
             return true;

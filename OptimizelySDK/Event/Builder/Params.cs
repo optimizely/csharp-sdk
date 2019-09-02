@@ -13,8 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+using System;
+
 namespace OptimizelySDK.Event.Builder
 {
+    [Obsolete("This class is deprecated.")]
     public static class Params
     {
         public const string ACCOUNT_ID          = "account_id";
