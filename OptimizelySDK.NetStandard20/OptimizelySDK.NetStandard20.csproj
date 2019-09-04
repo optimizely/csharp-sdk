@@ -73,8 +73,8 @@
     <Compile Include="..\OptimizelySDK\Config\ProjectConfigManager.cs">
       <Link>Config\ProjectConfigManager.cs</Link>
     </Compile>
-	<Compile Include="..\OptimizelySDK\Config\OptimizelyConfigHandler.cs">
-      <Link>Config\OptimizelyConfigHandler.cs</Link>
+	<Compile Include="..\OptimizelySDK\ClientConfigHandler.cs">
+      <Link>Config\ClientConfigHandler.cs</Link>
     </Compile>
     <Compile Include="..\OptimizelySDK\Entity\Attribute.cs">
       <Link>Entity\Attribute.cs</Link>

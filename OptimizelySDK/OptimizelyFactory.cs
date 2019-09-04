@@ -36,6 +36,7 @@ namespace OptimizelySDK
         private static int MaxEventBatchSize;
         private static TimeSpan MaxEventFlushInterval;
         private static ILogger OptimizelyLogger;
+        private const string ConfigSectionName = "optlySDKConfigSection";
 
 #if !NETSTANDARD1_6 && !NET35
         public static void SetBatchSize(int batchSize)
@@ -59,7 +60,7 @@ namespace OptimizelySDK
             OptimizelySDKConfigSection OptlySDKConfigSection = null;
             try
             {
-                OptlySDKConfigSection = ConfigurationManager.GetSection("optlySDKConfigSection") as OptimizelySDKConfigSection;
+                OptlySDKConfigSection = ConfigurationManager.GetSection(ConfigSectionName) as OptimizelySDKConfigSection;
             }
             catch (ConfigurationErrorsException ex)
             {

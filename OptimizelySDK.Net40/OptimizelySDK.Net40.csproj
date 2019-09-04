@@ -232,8 +232,8 @@
 	<Compile Include="..\OptimizelySDK\Config\PollingProjectConfigManager.cs">
       <Link>Config\PollingProjectConfigManager</Link>
     </Compile>
-	<Compile Include="..\OptimizelySDK\Config\OptimizelyConfigHandler.cs">
-      <Link>Config\OptimizelyConfigHandler</Link>
+	<Compile Include="..\OptimizelySDK\ClientConfigHandler.cs">
+      <Link>ClientConfigHandler</Link>
     </Compile>
 	<Compile Include="..\OptimizelySDK\Config\HttpProjectConfigManager.cs">
       <Link>Config\HttpProjectConfigManager</Link>

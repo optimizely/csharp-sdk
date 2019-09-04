@@ -86,7 +86,7 @@
     <Compile Include="EventTests\TestForwardingEventDispatcher.cs" />
     <Compile Include="InvalidEventDispatcher.cs" />
     <Compile Include="NotificationTests\NotificationCenterTests.cs" />
-    <Compile Include="OptimizelyConfigHandlerTest.cs" />
+    <Compile Include="ClientConfigHandlerTest.cs" />
     <Compile Include="OptimizelyTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestBucketer.cs" />
