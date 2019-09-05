@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
@@ -72,6 +72,9 @@
     </Compile>
     <Compile Include="..\OptimizelySDK\Config\ProjectConfigManager.cs">
       <Link>Config\ProjectConfigManager.cs</Link>
+    </Compile>
+	<Compile Include="..\OptimizelySDK\ClientConfigHandler.cs">
+      <Link>Config\ClientConfigHandler.cs</Link>
     </Compile>
     <Compile Include="..\OptimizelySDK\Entity\Attribute.cs">
       <Link>Entity\Attribute.cs</Link>
@@ -257,6 +260,7 @@
     <PackageReference Include="murmurhash-signed" Version="1.0.2" />
     <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
     <PackageReference Include="NJsonSchema" Version="8.30.6304.31883" />
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="4.5.0" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="..\OptimizelySDK\Utils\schema.json">

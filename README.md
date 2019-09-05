@@ -90,6 +90,42 @@ You can also provide default datafile with the SDK key.
 ```
 Optimizely optimizely = OptimizelyFactory.newDefaultInstance(<<SDK_KEY>>, <<Fallback>>);
 ```
+##### Using App.config in OptimizelyFactory
+
+OptimizelyFactory provides support of setting configuration variables in App.config:
+User can provide variables using following procedure:
+1. In App.config file of your project in **<configuration>** add following:
+```
+<configSections>
+    <section name="optlySDKConfigSection"
+             type="OptimizelySDK.OptimizelySDKConfigSection, OptimizelySDK, Version=3.2.0.0, Culture=neutral, PublicKeyToken=null" />
+  </configSections>
+```
+2. Now add **optlySDKConfigSection** below **<configSections>**. In this section you can add and set following **HttpProjectConfigManager** and **BatchEventProcessor** variables: 
+```
+<optlySDKConfigSection>
+  
+    <HttpProjectConfig sdkKey="43214321" 
+                       url="www.testurl.com" 
+                       format="https://cdn.optimizely.com/data/{0}.json" 
+                       pollingInterval="2000" 
+                       blockingTimeOutPeriod="10000" 
+                       autoUpdate="true" 
+                       defaultStart="true">
+    </HttpProjectConfig>
+
+    <BatchEventProcessor batchSize="10"
+                         flushInterval="2000"
+                         timeoutInterval="10000"
+                         defaultStart="true">
+    </BatchEventProcessor>
+  
+  </optlySDKConfigSection>
+```
+3. After setting these variables you can instantiate the Optimizely SDK using function:
+```
+Optimizely optimizely = OptimizelyFactory.newDefaultInstance();
+```
 
 #### HttpProjectConfigManager
 

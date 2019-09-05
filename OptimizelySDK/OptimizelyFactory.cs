@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 using System;
+#if !NETSTANDARD1_6 && !NET35
+using System.Configuration;
+#endif
+
 using OptimizelySDK.Bucketing;
 using OptimizelySDK.Config;
 using OptimizelySDK.ErrorHandler;
@@ -32,6 +36,7 @@ namespace OptimizelySDK
         private static int MaxEventBatchSize;
         private static TimeSpan MaxEventFlushInterval;
         private static ILogger OptimizelyLogger;
+        private const string ConfigSectionName = "optlySDKConfigSection";
 
 #if !NETSTANDARD1_6 && !NET35
         public static void SetBatchSize(int batchSize)
@@ -48,7 +53,61 @@ namespace OptimizelySDK
         {
             OptimizelyLogger = logger;
         }
+
+        public static Optimizely NewDefaultInstance()
+        {
+            var logger = OptimizelyLogger ?? new DefaultLogger();
+            OptimizelySDKConfigSection OptlySDKConfigSection = null;
+            try
+            {
+                OptlySDKConfigSection = ConfigurationManager.GetSection(ConfigSectionName) as OptimizelySDKConfigSection;
+            }
+            catch (ConfigurationErrorsException ex)
+            {
+                logger.Log(LogLevel.ERROR, "Invalid App.Config. Unable to initialize optimizely instance" + ex.Message);
+                return null;    
+            }            
+
+            HttpProjectConfigElement httpProjectConfigElement = OptlySDKConfigSection.HttpProjectConfig;
+
+            if (httpProjectConfigElement == null) return null;
+
+            var errorHandler = new DefaultErrorHandler();
+            var eventDispatcher = new DefaultEventDispatcher(logger);
+            var builder = new HttpProjectConfigManager.Builder();
+            var notificationCenter = new NotificationCenter();
+            
+            var configManager = builder
+                .WithSdkKey(httpProjectConfigElement.SDKKey)
+                .WithUrl(httpProjectConfigElement.Url)
+                .WithFormat(httpProjectConfigElement.Format)
+                .WithPollingInterval(TimeSpan.FromMilliseconds(httpProjectConfigElement.PollingInterval))
+                .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(httpProjectConfigElement.BlockingTimeOutPeriod))
+                .WithLogger(logger)
+                .WithErrorHandler(errorHandler)
+                .WithNotificationCenter(notificationCenter)
+                .Build(true);
+
+            EventProcessor eventProcessor = null;
+
+            var batchEventProcessorElement = OptlySDKConfigSection.BatchEventProcessor;
+
+            if (batchEventProcessorElement == null) return null;
+
+            eventProcessor = new BatchEventProcessor.Builder()
+                .WithMaxBatchSize(batchEventProcessorElement.BatchSize)
+                .WithFlushInterval(TimeSpan.FromMilliseconds(batchEventProcessorElement.FlushInterval))
+                .WithTimeoutInterval(TimeSpan.FromMilliseconds(batchEventProcessorElement.TimeoutInterval))
+                .WithLogger(logger)
+                .WithEventDispatcher(eventDispatcher)
+                .WithNotificationCenter(notificationCenter)
+                .Build();
+
+            return NewDefaultInstance(configManager, notificationCenter, eventDispatcher, errorHandler, logger, eventProcessor: eventProcessor);
+
+        }
 #endif
+
         public static Optimizely NewDefaultInstance(string sdkKey)
         {
             return NewDefaultInstance(sdkKey, null);
@@ -70,12 +129,6 @@ namespace OptimizelySDK
                 .WithNotificationCenter(notificationCenter)
                 .Build(true);
 
-            return NewDefaultInstance(configManager, notificationCenter, eventDispatcher, errorHandler, logger);
-        }
-
-        public static Optimizely NewDefaultInstance(ProjectConfigManager configManager, NotificationCenter notificationCenter = null, IEventDispatcher eventDispatcher = null,
-                                                    IErrorHandler errorHandler = null, ILogger logger = null, UserProfileService userprofileService = null)
-        {
             EventProcessor eventProcessor = null;
 
 #if !NETSTANDARD1_6 && !NET35
@@ -87,6 +140,13 @@ namespace OptimizelySDK
                 .WithNotificationCenter(notificationCenter)
                 .Build();
 #endif
+
+            return NewDefaultInstance(configManager, notificationCenter, eventDispatcher, errorHandler, logger, eventProcessor: eventProcessor);
+        }
+
+        public static Optimizely NewDefaultInstance(ProjectConfigManager configManager, NotificationCenter notificationCenter = null, IEventDispatcher eventDispatcher = null,
+                                                    IErrorHandler errorHandler = null, ILogger logger = null, UserProfileService userprofileService = null, EventProcessor eventProcessor = null)
+        {
             return new Optimizely(configManager, notificationCenter, eventDispatcher, logger, errorHandler, userprofileService, eventProcessor);      
         }
     }
