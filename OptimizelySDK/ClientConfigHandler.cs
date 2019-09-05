@@ -32,10 +32,10 @@ namespace OptimizelySDK
             get { return (string)base["url"]; }
         }
 
-        [ConfigurationProperty("datafileUrlFormat")]
-        public string DatafileUrlFormat
+        [ConfigurationProperty("format")]
+        public string Format
         {
-            get { return (string)base["datafileUrlFormat"]; }
+            get { return (string)base["format"]; }
         }
 
         [ConfigurationProperty("pollingInterval")]

@@ -80,7 +80,7 @@ namespace OptimizelySDK
             var configManager = builder
                 .WithSdkKey(httpProjectConfigElement.SDKKey)
                 .WithUrl(httpProjectConfigElement.Url)
-                .WithFormat(httpProjectConfigElement.DatafileUrlFormat)
+                .WithFormat(httpProjectConfigElement.Format)
                 .WithPollingInterval(TimeSpan.FromMilliseconds(httpProjectConfigElement.PollingInterval))
                 .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(httpProjectConfigElement.BlockingTimeOutPeriod))
                 .WithLogger(logger)

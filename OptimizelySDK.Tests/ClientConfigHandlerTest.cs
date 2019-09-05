@@ -33,7 +33,7 @@ namespace OptimizelySDK.Tests
             Assert.IsNotNull(httpSetting);
             Assert.IsTrue(httpSetting.AutoUpdate);
             Assert.AreEqual(httpSetting.BlockingTimeOutPeriod, 10000);
-            Assert.AreEqual(httpSetting.DatafileUrlFormat, "https://cdn.optimizely.com/data/{0}.json");
+            Assert.AreEqual(httpSetting.Format, "https://cdn.optimizely.com/data/{0}.json");
             Assert.IsTrue(httpSetting.DefaultStart);
             Assert.AreEqual(httpSetting.PollingInterval, 2000);
             Assert.AreEqual(httpSetting.SDKKey, "43214321");

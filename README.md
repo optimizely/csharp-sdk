@@ -107,16 +107,16 @@ User can provide variables using following procedure:
   
     <HttpProjectConfig sdkKey="43214321" 
                        url="www.testurl.com" 
-                       datafileUrlFormat="https://cdn.optimizely.com/data/{0}.json" 
-                       pollingIntervalInMs="2000" 
-                       blockingTimeOutInMs="10000" 
+                       format="https://cdn.optimizely.com/data/{0}.json" 
+                       pollingInterval="2000" 
+                       blockingTimeOutPeriod="10000" 
                        autoUpdate="true" 
                        defaultStart="true">
     </HttpProjectConfig>
 
     <BatchEventProcessor batchSize="10"
-                         flushIntervalInMs="2000"
-                         timeoutIntervalInMs="10000"
+                         flushInterval="2000"
+                         timeoutInterval="10000"
                          defaultStart="true">
     </BatchEventProcessor>
   
