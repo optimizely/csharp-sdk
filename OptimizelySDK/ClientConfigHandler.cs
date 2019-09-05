@@ -38,16 +38,16 @@ namespace OptimizelySDK
             get { return (string)base["datafileUrlFormat"]; }
         }
 
-        [ConfigurationProperty("pollingIntervalInMs")]
-        public int PollingIntervalInMs
+        [ConfigurationProperty("pollingInterval")]
+        public int PollingInterval
         {
-            get { return base["pollingIntervalInMs"] is int ? (int)base["pollingIntervalInMs"] : 0; }
+            get { return base["pollingInterval"] is int ? (int)base["pollingInterval"] : 0; }
         }
 
-        [ConfigurationProperty("blockingTimeOutInMs")]
-        public int BlockingTimeOutInMs
+        [ConfigurationProperty("blockingTimeOutPeriod")]
+        public int BlockingTimeOutPeriod
         {
-            get { return base["blockingTimeOutInMs"] is int ? (int)base["blockingTimeOutInMs"] : 0; }
+            get { return base["blockingTimeOutPeriod"] is int ? (int)base["blockingTimeOutPeriod"] : 0; }
         }
 
         [ConfigurationProperty("autoUpdate")]
@@ -71,16 +71,16 @@ namespace OptimizelySDK
             get { return (int)base["batchSize"]; }
         }
 
-        [ConfigurationProperty("flushIntervalInMs")]
-        public int FlushIntervalInMs
+        [ConfigurationProperty("flushInterval")]
+        public int FlushInterval
         {
-            get { return base["flushIntervalInMs"] is int ? (int)base["flushIntervalInMs"] : 0; }
+            get { return base["flushInterval"] is int ? (int)base["flushInterval"] : 0; }
         }
 
-        [ConfigurationProperty("timeoutIntervalInMs")]
-        public int TimeoutIntervalInMs
+        [ConfigurationProperty("timeoutInterval")]
+        public int TimeoutInterval
         {
-            get { return base["timeoutIntervalInMs"] is int ? (int)base["timeoutIntervalInMs"] : 0; }
+            get { return base["timeoutInterval"] is int ? (int)base["timeoutInterval"] : 0; }
         }
 
         [ConfigurationProperty("defaultStart")]
