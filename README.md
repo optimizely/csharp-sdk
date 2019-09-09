@@ -172,7 +172,7 @@ This option enables user to provide a custom URL format to fetch the datafile.
 
 ##### Start by default
 
-This option is used to specify whether to start the config manager on initialization.
+This option is used to specify whether to start the config manager on initialization or not. If no value is provided, by default it is true and will start polling datafile from remote immediately.
 
 ## Development
 
