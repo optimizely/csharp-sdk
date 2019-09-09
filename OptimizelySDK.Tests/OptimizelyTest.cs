@@ -2908,6 +2908,7 @@ namespace OptimizelySDK.Tests
                                                           .WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z")
                                                           .WithLogger(LoggerMock.Object)
                                                           .WithPollingInterval(TimeSpan.FromMilliseconds(1000))
+                                                          .WithStartByDefault(false)
                                                           .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(500))
                                                           .WithNotificationCenter(notificationCenter)
                                                           .Build();

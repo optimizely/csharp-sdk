@@ -135,7 +135,7 @@ namespace OptimizelySDK.Config
             private TimeSpan Period;
             private TimeSpan BlockingTimeoutSpan;
             private bool AutoUpdate = true;
-            private bool StartByDefault;
+            private bool StartByDefault = true;
             private NotificationCenter NotificationCenter;
 
 
