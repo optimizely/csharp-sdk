@@ -124,17 +124,18 @@ namespace OptimizelySDK.Config
             private const long MAX_MILLISECONDS_LIMIT = 4294967294;
             private readonly TimeSpan DEFAULT_PERIOD = TimeSpan.FromMinutes(5);
             private readonly TimeSpan DEFAULT_BLOCKINGOUT_PERIOD = TimeSpan.FromSeconds(15);
+            private readonly string DEFAULT_FORMAT = "https://cdn.optimizely.com/datafiles/{0}.json";
 
             private string Datafile;
             private string SdkKey;
             private string Url;
-            private string Format = "https://cdn.optimizely.com/datafiles/{0}.json";
+            private string Format;
             private ILogger Logger;
             private IErrorHandler ErrorHandler;
             private TimeSpan Period;
             private TimeSpan BlockingTimeoutSpan;
             private bool AutoUpdate = true;
-            private bool StartByDefault;
+            private bool StartByDefault = true;
             private NotificationCenter NotificationCenter;
 
 
@@ -246,6 +247,10 @@ namespace OptimizelySDK.Config
 
                 if (ErrorHandler == null)
                     ErrorHandler = new DefaultErrorHandler();
+
+                if (string.IsNullOrEmpty(Format)) {
+                    Format = DEFAULT_FORMAT;
+                }
 
                 if (string.IsNullOrEmpty(Url) && string.IsNullOrEmpty(SdkKey))
                 {

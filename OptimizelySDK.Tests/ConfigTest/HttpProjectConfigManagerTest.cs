@@ -56,6 +56,22 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         }
 
         [Test]
+        public void TestHttpConfigManagerRetreiveProjectConfigGivenEmptyFormatUseDefaultFormat()
+        {
+            HttpProjectConfigManager httpManager = new HttpProjectConfigManager.Builder()
+                 .WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z")
+                 .WithFormat("")
+                 .WithLogger(LoggerMock.Object)
+                 .WithPollingInterval(TimeSpan.FromMilliseconds(1000))
+                 .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(500))
+                 .WithStartByDefault()
+                 .Build();
+
+            httpManager.OnReady().Wait(System.Threading.Timeout.Infinite);
+            Assert.NotNull(httpManager.GetConfig());
+        }
+
+        [Test]
         public void TestHttpConfigManagerRetreiveProjectConfigBySDKKey()
         {
             HttpProjectConfigManager httpManager = new HttpProjectConfigManager.Builder()

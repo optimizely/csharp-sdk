@@ -39,6 +39,7 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.configuration" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
@@ -230,6 +231,9 @@
     </Compile>
 	<Compile Include="..\OptimizelySDK\Config\PollingProjectConfigManager.cs">
       <Link>Config\PollingProjectConfigManager</Link>
+    </Compile>
+	<Compile Include="..\OptimizelySDK\ClientConfigHandler.cs">
+      <Link>ClientConfigHandler</Link>
     </Compile>
 	<Compile Include="..\OptimizelySDK\Config\HttpProjectConfigManager.cs">
       <Link>Config\HttpProjectConfigManager</Link>
