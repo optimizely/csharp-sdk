@@ -2,7 +2,7 @@ language: minimal
 
 env:
   global:
-    RELEASE_BRANCH: "3.2.x"
+    RELEASE_BRANCH: "3.3.x"
 
 # Integration tests need to run first to reset the PR build status to pending
 stages:
@@ -84,4 +84,4 @@ jobs:
       after_success:
         - pip install --user awscli
         # upload dll build artifacts to s3 with -unsigned suffix
-        - ([ ${TRAVIS_BRANCH} = "$RELEASE_BRANCH" ] && [ ${TRAVIS_EVENT_TYPE} = "push" ]) && (AWS_ACCESS_KEY_ID=$OFTA_KEY AWS_SECRET_ACCESS_KEY=$OFTA_SECRET AWS_DEFAULT_REGION=$OFTA_REGION aws s3 cp ./OptimizelySDK.NetStandard20/bin/Release/netstandard2.0/OptimizelySDK.NetStandard20.dll s3://optly-fs-travisci-artifacts/${TRAVIS_REPO_SLUG}/${TRAVIS_BUILD_NUMBER}/${TRAVIS_JOB_NUMBER}/OptimizelySDK.NetStandard20.dll-unsigned)        
+        - ([ ${TRAVIS_BRANCH} = "$RELEASE_BRANCH" ] && [ ${TRAVIS_EVENT_TYPE} = "push" ]) && (AWS_ACCESS_KEY_ID=$OFTA_KEY AWS_SECRET_ACCESS_KEY=$OFTA_SECRET AWS_DEFAULT_REGION=$OFTA_REGION aws s3 cp ./OptimizelySDK.NetStandard20/bin/Release/netstandard2.0/OptimizelySDK.NetStandard20.dll s3://optly-fs-travisci-artifacts/${TRAVIS_REPO_SLUG}/${TRAVIS_BUILD_NUMBER}/${TRAVIS_JOB_NUMBER}/OptimizelySDK.NetStandard20.dll-unsigned)
