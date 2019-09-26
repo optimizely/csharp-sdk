@@ -35,10 +35,22 @@ namespace OptimizelySDK
     {
         private static int MaxEventBatchSize;
         private static TimeSpan MaxEventFlushInterval;
+        private static TimeSpan PollingInterval;
+        private static TimeSpan BlockingTimeoutPeriod;
         private static ILogger OptimizelyLogger;
         private const string ConfigSectionName = "optlySDKConfigSection";
 
 #if !NETSTANDARD1_6 && !NET35
+        public static void SetPollingInterval(TimeSpan pollingInterval)
+        {
+            PollingInterval = pollingInterval;
+        }
+
+        public static void SetBlockingTimeoutPeriod(TimeSpan blockingTimeoutPeriod)
+        {
+            BlockingTimeoutPeriod = blockingTimeoutPeriod;
+        }
+
         public static void SetBatchSize(int batchSize)
         {
             MaxEventBatchSize = batchSize;
@@ -124,6 +136,8 @@ namespace OptimizelySDK
             var configManager = builder
                 .WithSdkKey(sdkKey)
                 .WithDatafile(fallback)
+                .WithPollingInterval(PollingInterval)
+                .WithBlockingTimeoutPeriod(BlockingTimeoutPeriod)
                 .WithLogger(logger)
                 .WithErrorHandler(errorHandler)
                 .WithNotificationCenter(notificationCenter)
