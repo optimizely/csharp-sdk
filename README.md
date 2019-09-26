@@ -68,7 +68,7 @@ The Optimizely client object accepts the following plug-ins:
 2. `ILogger` exposes a single method, Log, to record activity in the SDK.  An example of a class to bridge the SDK's Log to Log4Net is provided in the Demo Application.
 3. `IErrorHandler` allows you to implement custom logic when Exceptions are thrown.  Note that Exception information is already included in the Log.
 4. `ProjectConfigManager` exposes method for retrieving ProjectConfig instance. Examples include `FallbackProjectConfigManager` and `HttpProjectConfigManager`.
-
+5. `EventProcessor` provides an intermediary processing stage within event production. It's assumed that the EventProcessor dispatches events via a provided EventDispatcher. Examples include `ForwardingEventProcessor` and `BatchEventProcessor`.
 These are optional plug-ins and default behavior is implement if none are provided.
 
 #### OptimizelyFactory
@@ -126,6 +126,37 @@ User can provide variables using following procedure:
 ```
 Optimizely optimizely = OptimizelyFactory.newDefaultInstance();
 ```
+
+#### BatchEventProcessor
+[BatchEventProcessor](https://github.com/optimizely/csharp-sdk/blob/master/OptimizelySDK/Event/BatchEventProcessor.cs) is a batched implementation of the [EventProcessor](https://github.com/optimizely/csharp-sdk/blob/master/OptimizelySDK/Event/EventProcessor.cs)
+     * Events passed to the BatchEventProcessor are immediately added to a BlockingQueue.
+     * The BatchEventProcessor maintains a single consumer thread that pulls events off of the BlockingQueue and buffers them for either a configured batch size or for a maximum duration before the resulting LogEvent is sent to the NotificationManager.
+##### Use BatchEventProcessor
+
+```
+EventProcessor eventProcessor = new BatchEventProcessor.Builder()
+                .WithMaxBatchSize(MaxEventBatchSize)
+                .WithFlushInterval(MaxEventFlushInterval)
+                .WithEventDispatcher(eventDispatcher)
+                .WithNotificationCenter(notificationCenter)
+                .Build();
+```
+
+##### Max Event Batch Size
+
+The Max event batch size is used to limit eventQueue batch size and events will be dispatched when limit reaches.
+
+##### Flush Interval
+
+The FlushInterval is used to specify a delay between consecutive flush events call. Event batch will be dispatched after meeting this specified timeSpan.
+
+##### Event Dispatcher 
+
+Custom EventDispatcher can be passed.
+
+##### Notification Center
+
+Custom NotificationCenter can be passed. 
 
 #### HttpProjectConfigManager
 
