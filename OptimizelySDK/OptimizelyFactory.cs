@@ -93,8 +93,8 @@ namespace OptimizelySDK
                 .WithSdkKey(httpProjectConfigElement.SDKKey)
                 .WithUrl(httpProjectConfigElement.Url)
                 .WithFormat(httpProjectConfigElement.Format)
-                .WithPollingInterval(TimeSpan.FromMilliseconds(httpProjectConfigElement.PollingInterval))
-                .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(httpProjectConfigElement.BlockingTimeOutPeriod))
+                .WithPollingInterval(PollingInterval.Milliseconds != 0 ? PollingInterval : TimeSpan.FromMilliseconds(httpProjectConfigElement.PollingInterval))
+                .WithBlockingTimeoutPeriod(BlockingTimeoutPeriod.TotalMilliseconds != 0 ? BlockingTimeoutPeriod : TimeSpan.FromMilliseconds(httpProjectConfigElement.BlockingTimeOutPeriod))
                 .WithLogger(logger)
                 .WithErrorHandler(errorHandler)
                 .WithNotificationCenter(notificationCenter)
@@ -107,8 +107,8 @@ namespace OptimizelySDK
             if (batchEventProcessorElement == null) return null;
 
             eventProcessor = new BatchEventProcessor.Builder()
-                .WithMaxBatchSize(batchEventProcessorElement.BatchSize)
-                .WithFlushInterval(TimeSpan.FromMilliseconds(batchEventProcessorElement.FlushInterval))
+                .WithMaxBatchSize(MaxEventBatchSize != 0? MaxEventBatchSize : batchEventProcessorElement.BatchSize)
+                .WithFlushInterval(MaxEventFlushInterval.Milliseconds != 0 ? MaxEventFlushInterval : TimeSpan.FromMilliseconds(batchEventProcessorElement.FlushInterval))
                 .WithTimeoutInterval(TimeSpan.FromMilliseconds(batchEventProcessorElement.TimeoutInterval))
                 .WithLogger(logger)
                 .WithEventDispatcher(eventDispatcher)

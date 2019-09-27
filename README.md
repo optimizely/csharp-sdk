@@ -127,6 +127,13 @@ User can provide variables using following procedure:
 Optimizely optimizely = OptimizelyFactory.newDefaultInstance();
 ```
 
+Note: If variables are set using: 
+- OptimizelyFactory.SetPollingInterval(TimeSpan pollingInterval)
+- OptimizelyFactory.SetBlockingTimeoutPeriod(TimeSpan blockingTimeoutPeriod)
+- OptimizelyFactory.SetBatchSize(int batchSize)
+- OptimizelyFactory.SetFlushInterval(TimeSpan flushInterval)
+Then these above set variables will be used, even if they are also present in App.config.
+
 #### HttpProjectConfigManager
 
 [`HttpProjectConfigManager`](https://github.com/optimizely/csharp-sdk/blob/master/OptimizelySDK/Config/HttpProjectConfigManager.cs)

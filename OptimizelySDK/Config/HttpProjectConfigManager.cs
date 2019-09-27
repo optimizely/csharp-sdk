@@ -264,7 +264,7 @@ namespace OptimizelySDK.Config
                 if (IsPollingIntervalProvided && (Period.TotalMilliseconds <= 0 || Period.TotalMilliseconds > MAX_MILLISECONDS_LIMIT)) {
                     Logger.Log(LogLevel.DEBUG, $"Polling interval is not valid for periodic calls, using default period {DEFAULT_PERIOD.TotalMilliseconds}ms");
                     Period = DEFAULT_PERIOD;
-                } else {
+                } else if (!IsPollingIntervalProvided) {
                     Logger.Log(LogLevel.DEBUG, $"No polling interval provided, using default period {DEFAULT_PERIOD.TotalMilliseconds}ms");
                 }
                     
@@ -272,7 +272,7 @@ namespace OptimizelySDK.Config
                 if (IsBlockingTimeoutProvided && (BlockingTimeoutSpan.TotalMilliseconds <= 0 || BlockingTimeoutSpan.TotalMilliseconds > MAX_MILLISECONDS_LIMIT)) {
                     Logger.Log(LogLevel.DEBUG, $"Blocking timeout is not valid, using default blocking timeout {DEFAULT_BLOCKINGOUT_PERIOD.TotalMilliseconds}ms");
                     BlockingTimeoutSpan = DEFAULT_BLOCKINGOUT_PERIOD;
-                } else {
+                } else if (!IsBlockingTimeoutProvided) {
                     Logger.Log(LogLevel.DEBUG, $"No Blocking timeout provided, using default blocking timeout {DEFAULT_BLOCKINGOUT_PERIOD.TotalMilliseconds}ms");
                 }
                     
