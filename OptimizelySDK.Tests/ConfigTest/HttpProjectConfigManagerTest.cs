@@ -205,7 +205,11 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
                 .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(0))
                 .WithStartByDefault(true)
                 .Build(true);
-            
+
+            var fieldInfo = httpManager.GetType().GetField("BlockingTimeout", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+            var expectedBlockingTimeout = (TimeSpan)fieldInfo.GetValue(httpManager);
+            Assert.AreNotEqual(expectedBlockingTimeout.TotalSeconds, TimeSpan.Zero.TotalSeconds);
+
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, $"Blocking timeout is not valid, using default blocking timeout {TimeSpan.FromSeconds(15).TotalMilliseconds}ms"));
         }
 
@@ -220,6 +224,10 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
                 .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(1000))
                 .WithStartByDefault(true)
                 .Build(true);
+
+            var fieldInfo = typeof(PollingProjectConfigManager).GetField("PollingInterval", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+            var expectedPollingInterval = (TimeSpan)fieldInfo.GetValue(httpManager);
+            Assert.AreNotEqual(expectedPollingInterval.TotalSeconds, TimeSpan.Zero.TotalSeconds);
 
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, $"Polling interval is not valid for periodic calls, using default period {TimeSpan.FromMinutes(5).TotalMilliseconds}ms"));
         }
@@ -236,6 +244,10 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
                 .WithStartByDefault(true)
                 .Build(true);
 
+            var fieldInfo = typeof(PollingProjectConfigManager).GetField("PollingInterval", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+            var expectedPollingInterval = (TimeSpan)fieldInfo.GetValue(httpManager);
+            Assert.AreNotEqual(expectedPollingInterval.TotalSeconds, TimeSpan.Zero.TotalSeconds);
+
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, $"Polling interval is not valid for periodic calls, using default period {TimeSpan.FromMinutes(5).TotalMilliseconds}ms"));            
         }
 
@@ -247,6 +259,10 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
                 .WithDatafile(TestData.Datafile)
                 .WithLogger(LoggerMock.Object)                
                 .Build(true);
+            
+            var fieldInfo = typeof(PollingProjectConfigManager).GetField("PollingInterval", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+            var expectedPollingInterval = (TimeSpan)fieldInfo.GetValue(httpManager);
+            Assert.AreNotEqual(expectedPollingInterval.TotalSeconds, TimeSpan.Zero.TotalSeconds);
 
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, $"No polling interval provided, using default period {TimeSpan.FromMinutes(5).TotalMilliseconds}ms"));
         }
@@ -259,6 +275,10 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
                 .WithDatafile(TestData.Datafile)
                 .WithLogger(LoggerMock.Object)                
                 .Build(true);
+
+            var fieldInfo = httpManager.GetType().GetField("BlockingTimeout", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+            var expectedBlockingTimeout = (TimeSpan)fieldInfo.GetValue(httpManager);
+            Assert.AreNotEqual(expectedBlockingTimeout.TotalSeconds, TimeSpan.Zero.TotalSeconds);
 
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, $"No Blocking timeout provided, using default blocking timeout {TimeSpan.FromSeconds(15).TotalMilliseconds}ms"));
         }
