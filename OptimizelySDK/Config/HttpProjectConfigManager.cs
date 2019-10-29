@@ -266,6 +266,7 @@ namespace OptimizelySDK.Config
                     Period = DEFAULT_PERIOD;
                 } else if (!IsPollingIntervalProvided) {
                     Logger.Log(LogLevel.DEBUG, $"No polling interval provided, using default period {DEFAULT_PERIOD.TotalMilliseconds}ms");
+                    Period = DEFAULT_PERIOD;
                 }
                     
 
@@ -274,9 +275,9 @@ namespace OptimizelySDK.Config
                     BlockingTimeoutSpan = DEFAULT_BLOCKINGOUT_PERIOD;
                 } else if (!IsBlockingTimeoutProvided) {
                     Logger.Log(LogLevel.DEBUG, $"No Blocking timeout provided, using default blocking timeout {DEFAULT_BLOCKINGOUT_PERIOD.TotalMilliseconds}ms");
+                    BlockingTimeoutSpan = DEFAULT_BLOCKINGOUT_PERIOD;
                 }
                     
-
 
                 configManager = new HttpProjectConfigManager(Period, Url, BlockingTimeoutSpan, AutoUpdate, Logger, ErrorHandler);
 
