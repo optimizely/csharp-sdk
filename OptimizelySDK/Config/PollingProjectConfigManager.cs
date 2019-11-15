@@ -80,6 +80,7 @@ namespace OptimizelySDK.Config
 
             Logger.Log(LogLevel.WARN, $"Starting Config scheduler with interval: {PollingInterval}.");
             SchedulerService.Change(TimeSpan.Zero, AutoUpdate ? PollingInterval : TimeSpan.FromMilliseconds(-1));
+            Logger.Log(LogLevel.WARN, "Scheduler started.");
             IsStarted = true;
         }
 
@@ -136,22 +137,23 @@ namespace OptimizelySDK.Config
         /// <param name="projectConfig">ProjectConfig</param>
         /// <returns>true if the ProjectConfig saved successfully, false otherwise</returns>
         public bool SetConfig(ProjectConfig projectConfig)
-        {            
+        {
+            Logger.Log(LogLevel.WARN, "In set config");
             if (projectConfig == null)
                 return false;
                 
             var previousVersion = CurrentProjectConfig == null ? "null" : CurrentProjectConfig.Revision;
             if (projectConfig.Revision == previousVersion)
                 return false;
-            
+            Logger.Log(LogLevel.WARN, "setting config");
             CurrentProjectConfig = projectConfig;
 
             // SetResult raise exception if called again, that's why Try is used.
             CompletableConfigManager.TrySetResult(true);
-                        
-            NotifyOnProjectConfigUpdate?.Invoke();            
+            Logger.Log(LogLevel.WARN, "Invoke before");
+            NotifyOnProjectConfigUpdate?.Invoke();
+            Logger.Log(LogLevel.WARN, "Invoke after");
 
-            
             return true;
         }
         
@@ -171,14 +173,16 @@ namespace OptimizelySDK.Config
         /// </summary>
         public virtual void Run()
         {
+            Logger.Log(LogLevel.WARN, "In Run start.");
             if (Interlocked.Exchange(ref resourceInUse, 1) == 0){
                 try {
+                    Logger.Log(LogLevel.WARN, "In Run before poll.");
                     var config = Poll();
-
+                    Logger.Log(LogLevel.WARN, "In Run after poll.");
                     // during in-flight, if PollingProjectConfigManagerStopped, then don't need to set.
-                    if(IsStarted)
+                    if (IsStarted)
                         SetConfig(config);
-
+                    Logger.Log(LogLevel.WARN, "In Run after setconfig.");
                 } catch (Exception exception) {
                     Logger.Log(LogLevel.ERROR, "Unable to get project config. Error: " + exception.GetAllMessages());
                 } finally {
