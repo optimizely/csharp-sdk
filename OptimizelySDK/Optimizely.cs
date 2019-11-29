@@ -27,6 +27,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using OptimizelySDK.Config;
 using OptimizelySDK.Event;
+using OptimizelySDK.OptlyConfig;
 
 namespace OptimizelySDK
 {
@@ -722,6 +723,16 @@ namespace OptimizelySDK
             }
 
             return enabledFeaturesList;
+        }
+
+        public OptimizelyConfig GetOptimizelyConfig()
+        {
+            var config = ProjectConfigManager?.GetConfig();
+            if (config == null)
+            {
+                return null;
+            }
+            return new OptimizelyConfig().GetOptimizelyConfig(config);
         }
 
 #endregion // FeatureFlag APIs
