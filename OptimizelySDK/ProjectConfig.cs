@@ -238,5 +238,12 @@ namespace OptimizelySDK
         /// <param name="experimentId">Experiment Id</param>
         /// <returns>true if experiment belongs to any feature, false otherwise</returns>
         bool IsFeatureExperiment(string experimentId);
+
+        /// <summary>
+        /// provides List of features associated with given experiment.
+        /// </summary>
+        /// <param name="experimentId">Experiment Id</param>
+        /// <returns>List| Feature flag ids list, null otherwise</returns>
+        List<string> GetExperimentFeatureList(string experimentId);
     }
 }

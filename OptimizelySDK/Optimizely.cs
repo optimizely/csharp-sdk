@@ -725,7 +725,7 @@ namespace OptimizelySDK
             return enabledFeaturesList;
         }
 
-        public OptimizelyConfig GetOptimizelyConfig()
+        public IOptimizelyConfig GetOptimizelyConfig()
         {
             var config = ProjectConfigManager?.GetConfig();
             if (config == null)

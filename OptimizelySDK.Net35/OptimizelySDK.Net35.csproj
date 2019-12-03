@@ -287,6 +287,9 @@
 	<Compile Include="..\OptimizelySDK\OptlyConfig\OptimizelyVariation.cs">
 	  <Link>OptlyConfig\OptimizelyVariation.cs</Link>
 	</Compile>
+	<Compile Include="..\OptimizelySDK\OptlyConfig\IOptimizelyConfig.cs">
+	  <Link>OptlyConfig\IOptimizelyConfig.cs</Link>
+	</Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\OptimizelySDK\Utils\schema.json">
