@@ -113,8 +113,8 @@
     <Compile Include="Notifications\NotificationCenter.cs" />
     <Compile Include="Optimizely.cs" />
     <Compile Include="Bucketing\UserProfile.cs" />
-    <Compile Include="OptlyConfig\IOptimizelyConfig.cs" />
     <Compile Include="OptlyConfig\OptimizelyConfig.cs" />
+    <Compile Include="OptlyConfig\OptimizelyConfigService.cs" />
     <Compile Include="OptlyConfig\OptimizelyExperiment.cs" />
     <Compile Include="OptlyConfig\OptimizelyFeature.cs" />
     <Compile Include="OptlyConfig\OptimizelyVariable.cs" />

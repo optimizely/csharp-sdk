@@ -3419,7 +3419,7 @@ namespace OptimizelySDK.Tests
         public void TestGetOptimizelyConfig()
         {
             ProjectConfig actualConfig = OptimizelyMock.Object.ProjectConfigManager?.GetConfig();
-            IOptimizelyConfig optimizelyConfig = OptimizelyMock.Object.GetOptimizelyConfig();
+            OptimizelyConfig optimizelyConfig = OptimizelyMock.Object.GetOptimizelyConfig();
             Assert.AreEqual(optimizelyConfig.Revision, actualConfig.Revision);
         }
 

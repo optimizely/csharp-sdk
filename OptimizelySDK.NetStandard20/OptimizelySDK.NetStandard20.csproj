@@ -265,8 +265,8 @@
     <Compile Include="..\OptimizelySDK\OptlyConfig\OptimizelyVariation.cs">
       <Link>OptlyConfig\OptimizelyVariation.cs</Link>
     </Compile>
-    <Compile Include="..\OptimizelySDK\OptlyConfig\IOptimizelyConfig.cs">
-      <Link>OptlyConfig\IOptimizelyConfig.cs</Link>
+    <Compile Include="..\OptimizelySDK\OptlyConfig\OptimizelyConfigService.cs">
+      <Link>OptlyConfig\OptimizelyConfigService.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup>

@@ -725,14 +725,14 @@ namespace OptimizelySDK
             return enabledFeaturesList;
         }
 
-        public IOptimizelyConfig GetOptimizelyConfig()
+        public OptimizelyConfig GetOptimizelyConfig()
         {
             var config = ProjectConfigManager?.GetConfig();
             if (config == null)
             {
                 return null;
             }
-            return new OptimizelyConfig().GetOptimizelyConfig(config);
+            return new OptimizelyConfigService().GetOptimizelyConfig(config);
         }
 
 #endregion // FeatureFlag APIs
