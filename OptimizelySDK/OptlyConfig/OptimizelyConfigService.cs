@@ -40,10 +40,10 @@ namespace OptimizelySDK.OptlyConfig
             {
                 if (!rolloutExperimentIds.Contains(experiment.Id))
                 {
-                    var variationMap = new Dictionary<string, OptimizelyVariation>();
+                    var variationsMap = new Dictionary<string, OptimizelyVariation>();
                     foreach (Variation variation in experiment.Variations)
                     {
-                        var variablesMap = MergeFeatureVariables((DatafileProjectConfig)configObj,
+                        var variablesMap = MergeFeatureVariables(configObj,
                             featureIdMap,
                             experiment.Id,
                             variation.FeatureEnabled ?? false,
@@ -54,12 +54,12 @@ namespace OptimizelySDK.OptlyConfig
                         optimizelyVariation.Key = variation.Key;
                         optimizelyVariation.FeatureEnabled = variation.FeatureEnabled;
                         optimizelyVariation.VariablesMap = variablesMap;
-                        variationMap.Add(variation.Key, optimizelyVariation);
+                        variationsMap.Add(variation.Key, optimizelyVariation);
                     }
                     var optimizelyExperiment = new OptimizelyExperiment();
                     optimizelyExperiment.Id = experiment.Id;
                     optimizelyExperiment.Key = experiment.Key;
-                    optimizelyExperiment.VariationsMap = variationMap;
+                    optimizelyExperiment.VariationsMap = variationsMap;
                     ExperimentsMap.Add(experiment.Key, optimizelyExperiment);
                 }
             }
@@ -70,14 +70,14 @@ namespace OptimizelySDK.OptlyConfig
         /// <summary>
         /// Make map of featureVariable which are associated with given feature experiment 
         /// </summary>
-        /// <param name="configObj">The Datafile project config</param>
+        /// <param name="configObj">The project config</param>
         /// <param name="variableIdMap">Map containing variable ID as key and Object of featureVariable</param>
         /// <param name="experimentId">experimentId of featureExperiment</param>
         /// <param name="featureEnabled">featureEnabled of variation</param>
         /// <param name="featureVariableUsageInstances">list of FeatureVariableUsage containing key and value</param>
         /// <returns>Dictionary | Dictionary of FeatureVariable key and value as FeatureVariable object</returns>
         private Dictionary<string, OptimizelyVariable> MergeFeatureVariables(
-           DatafileProjectConfig configObj,
+           ProjectConfig configObj,
            Dictionary<string, FeatureVariable> variableIdMap,
            string experimentId,
            bool featureEnabled,
