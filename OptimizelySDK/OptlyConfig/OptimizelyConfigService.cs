@@ -23,7 +23,7 @@ using OptimizelySDK.Utils;
 
 namespace OptimizelySDK.OptlyConfig
 {
-    public class OptimizelyConfigService : OptimizelyConfig
+    public class OptimizelyConfigService
     {
         /// <summary>
         /// Gets Map of all experiments except rollouts
@@ -36,16 +36,16 @@ namespace OptimizelySDK.OptlyConfig
             var rolloutExperimentIds = GetRolloutExperimentIds(configObj.Rollouts);
             var featureIdMap = GetVariableIdMap(configObj);
 
-            foreach (Experiment ex in configObj.Experiments)
+            foreach (Experiment experiment in configObj.Experiments)
             {
-                if (!rolloutExperimentIds.Contains(ex.Id))
+                if (!rolloutExperimentIds.Contains(experiment.Id))
                 {
                     var variationMap = new Dictionary<string, OptimizelyVariation>();
-                    foreach (Variation variation in ex.Variations)
+                    foreach (Variation variation in experiment.Variations)
                     {
                         var variablesMap = MergeFeatureVariables((DatafileProjectConfig)configObj,
                             featureIdMap,
-                            ex.Id,
+                            experiment.Id,
                             variation.FeatureEnabled ?? false,
                             variation.FeatureVariableUsageInstances);
 
@@ -57,10 +57,10 @@ namespace OptimizelySDK.OptlyConfig
                         variationMap.Add(variation.Key, optimizelyVariation);
                     }
                     var optimizelyExperiment = new OptimizelyExperiment();
-                    optimizelyExperiment.Id = ex.Id;
-                    optimizelyExperiment.Key = ex.Key;
+                    optimizelyExperiment.Id = experiment.Id;
+                    optimizelyExperiment.Key = experiment.Key;
                     optimizelyExperiment.VariationsMap = variationMap;
-                    ExperimentsMap.Add(ex.Key, optimizelyExperiment);
+                    ExperimentsMap.Add(experiment.Key, optimizelyExperiment);
                 }
             }
 
@@ -214,10 +214,11 @@ namespace OptimizelySDK.OptlyConfig
 
         public OptimizelyConfig GetOptimizelyConfig(ProjectConfig configObj)
         {
-            Revision = configObj.Revision;
-            ExperimentsMap = GetExperimentsMap(configObj);
-            FeaturesMap = GetFeaturesMap(configObj, ExperimentsMap);
-            return this;
+            OptimizelyConfig optimizelyConfig = new OptimizelyConfig();
+            optimizelyConfig.Revision = configObj.Revision;
+            optimizelyConfig.ExperimentsMap = GetExperimentsMap(configObj);
+            optimizelyConfig.FeaturesMap = GetFeaturesMap(configObj, optimizelyConfig.ExperimentsMap);
+            return optimizelyConfig;
         }
 
     }
