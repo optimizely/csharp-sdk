@@ -18,7 +18,15 @@ namespace OptimizelySDK.OptlyConfig
 {
     public class OptimizelyVariable : Entity.IdKeyEntity
     {
-        public string Type { get; set; }
-        public string Value { get; set; }
+        public string Type { get; private set; }
+        public string Value { get; private set; }
+
+        public OptimizelyVariable(string id, string key, string type, string value)
+        {
+            Id = id;
+            Key = key;
+            Type = type;
+            Value = value;
+        }
     }
 }

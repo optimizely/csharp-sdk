@@ -732,7 +732,7 @@ namespace OptimizelySDK
             {
                 return null;
             }
-            return new OptimizelyConfigService().GetOptimizelyConfig(config);
+            return OptimizelyConfigService.getInstance().GetOptimizelyConfig(config);
         }
 
 #endregion // FeatureFlag APIs

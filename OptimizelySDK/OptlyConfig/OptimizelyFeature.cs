@@ -19,7 +19,15 @@ namespace OptimizelySDK.OptlyConfig
 {
     public class OptimizelyFeature : Entity.IdKeyEntity
     {
-        public Dictionary<string, OptimizelyExperiment> ExperimentsMap = new Dictionary<string, OptimizelyExperiment>();
-        public Dictionary<string, OptimizelyVariable> VariablesMap = new Dictionary<string, OptimizelyVariable>();
+        public Dictionary<string, OptimizelyExperiment> ExperimentsMap { get; private set; }
+        public Dictionary<string, OptimizelyVariable> VariablesMap { get; private set; }
+
+        public OptimizelyFeature(string id, string key, Dictionary<string, OptimizelyExperiment> experimentsMap, Dictionary<string, OptimizelyVariable> variablesMap)
+        {
+            Id = id;
+            Key = key;
+            ExperimentsMap = experimentsMap;
+            VariablesMap = variablesMap;
+        }
     }
 }

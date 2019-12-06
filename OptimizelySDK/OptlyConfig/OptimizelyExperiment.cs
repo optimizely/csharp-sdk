@@ -20,6 +20,13 @@ namespace OptimizelySDK.OptlyConfig
 {
     public class OptimizelyExperiment : Entity.IdKeyEntity
     {
-        public Dictionary<string, OptimizelyVariation> VariationsMap = new Dictionary<string, OptimizelyVariation>();
+        public Dictionary<string, OptimizelyVariation> VariationsMap { get; private set; }
+
+        public OptimizelyExperiment(string id, string key, Dictionary<string, OptimizelyVariation> variationsMap)
+        {
+            Id = id;
+            Key = key;
+            VariationsMap = variationsMap;
+        }
     }
 }

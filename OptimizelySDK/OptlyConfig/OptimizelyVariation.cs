@@ -22,7 +22,15 @@ namespace OptimizelySDK.OptlyConfig
     public class OptimizelyVariation : Entity.IdKeyEntity
     {
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-        public bool? FeatureEnabled { get; set; }
-        public Dictionary<string, OptimizelyVariable> VariablesMap = new Dictionary<string, OptimizelyVariable>();
+        public bool? FeatureEnabled { get; private set; }
+        public Dictionary<string, OptimizelyVariable> VariablesMap { get; private set; }
+
+        public OptimizelyVariation(string id, string key, bool? featureEnabled, Dictionary<string, OptimizelyVariable> variablesMap)
+        {
+            Id = id;
+            Key = key;
+            FeatureEnabled = featureEnabled;
+            VariablesMap = variablesMap;
+        }
     }
 }
