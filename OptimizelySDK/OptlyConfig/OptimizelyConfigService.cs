@@ -47,7 +47,7 @@ namespace OptimizelySDK.OptlyConfig
         {
             var experimentsMap = new Dictionary<string, OptimizelyExperiment>();
             var rolloutExperimentIds = GetRolloutExperimentIds(projectConfig.Rollouts);
-            var featureIdMap = GetVariableIdMap(projectConfig);
+            var featureVariableIdMap = GetVariableIdMap(projectConfig);
 
             foreach (Experiment experiment in projectConfig.Experiments)
             {
@@ -57,7 +57,7 @@ namespace OptimizelySDK.OptlyConfig
                     foreach (Variation variation in experiment.Variations)
                     {
                         var variablesMap = MergeFeatureVariables(projectConfig,
-                            featureIdMap,
+                            featureVariableIdMap,
                             experiment.Id,
                             variation.FeatureEnabled ?? false,
                             variation.FeatureVariableUsageInstances);
