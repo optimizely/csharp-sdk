@@ -3421,6 +3421,67 @@ namespace OptimizelySDK.Tests
             ProjectConfig actualConfig = OptimizelyMock.Object.ProjectConfigManager?.GetConfig();
             OptimizelyConfig optimizelyConfig = OptimizelyMock.Object.GetOptimizelyConfig();
             Assert.AreEqual(optimizelyConfig.Revision, actualConfig.Revision);
+            foreach (var actualEx in actualConfig.Experiments)
+            {
+                Assert.True(optimizelyConfig.ExperimentsMap.ContainsKey(actualEx.Key));
+                var exMap = optimizelyConfig.ExperimentsMap[actualEx.Key];
+                Assert.AreEqual(actualEx.Id, exMap.Id);
+
+                Assert.AreEqual(actualEx.Variations.Length, exMap.VariationsMap.Count);
+                foreach (var variation in actualEx.Variations)
+                {
+                    Assert.True(exMap.VariationsMap.ContainsKey(variation.Key));
+                    var exVar = exMap.VariationsMap[variation.Key];
+                    Assert.AreEqual(variation.Id, exVar.Id);
+                    Assert.AreEqual(variation.FeatureEnabled, exVar.FeatureEnabled);
+
+                    if (variation.FeatureVariableUsageInstances == null)
+                    {
+                        Assert.AreEqual(exVar.VariablesMap.Count, 0);
+                    }
+                    else
+                    {
+                        // This check that optimizelyConfig variationMap contains all the variables which were in FeatureVariableUsageInstances 
+                        foreach (var acVariables in variation.FeatureVariableUsageInstances)
+                        {
+                            bool checkEvery = false;
+                            foreach (var exVariable in exVar.VariablesMap.Values)
+                            {
+                                if (acVariables.Id == exVariable.Id)
+                                {
+                                    if (variation.FeatureEnabled != null && variation.FeatureEnabled == true)
+                                    {
+                                        Assert.AreEqual(acVariables.Value, exVariable.Value);
+                                    } 
+                                    else
+                                    {
+                                        Assert.AreNotEqual(acVariables.Value, exVariable.Value);
+                                    }
+                                    checkEvery = true;
+                                    break;
+                                }
+                            }
+                            Assert.True(checkEvery);
+                        }
+                    }
+                }
+            }
+
+            foreach (var actualfeatures in actualConfig.FeatureFlags)
+            {
+                Assert.True(optimizelyConfig.FeaturesMap.ContainsKey(actualfeatures.Key));
+                var featMap = optimizelyConfig.FeaturesMap[actualfeatures.Key];
+                Assert.AreEqual(actualfeatures.Id, featMap.Id);
+
+                // This check that optimizelyConfig variationMap contains all the variables which were in FeatureVariableUsageInstances 
+                foreach (var acVariable in actualfeatures.Variables)
+                {
+                    Assert.True(featMap.VariablesMap.ContainsKey(acVariable.Key));
+                    Assert.AreEqual(featMap.VariablesMap[acVariable.Key].Id, acVariable.Id);
+                    Assert.AreEqual(featMap.VariablesMap[acVariable.Key].Type, acVariable.Type.ToString().ToLower());
+                    Assert.AreEqual(featMap.VariablesMap[acVariable.Key].Value, acVariable.DefaultValue);
+                }
+            }
         }
 
         #endregion
