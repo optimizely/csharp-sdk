@@ -21,10 +21,10 @@ namespace OptimizelySDK.OptlyConfig
     public class OptimizelyConfig
     {
         public string Revision { get; private set; }
-        public Dictionary<string, OptimizelyExperiment> ExperimentsMap { get; private set; }
-        public Dictionary<string, OptimizelyFeature> FeaturesMap { get; private set; }
+        public IDictionary<string, OptimizelyExperiment> ExperimentsMap { get; private set; }
+        public IDictionary<string, OptimizelyFeature> FeaturesMap { get; private set; }
 
-        public OptimizelyConfig(string revision, Dictionary<string, OptimizelyExperiment> experimentsMap, Dictionary<string, OptimizelyFeature> featuresMap)
+        public OptimizelyConfig(string revision, IDictionary<string, OptimizelyExperiment> experimentsMap, IDictionary<string, OptimizelyFeature> featuresMap)
         {
             Revision = revision;
             ExperimentsMap = experimentsMap;

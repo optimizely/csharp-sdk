@@ -24,18 +24,18 @@ namespace OptimizelySDK.OptlyConfig
 {
     public class OptimizelyConfigService
     {
-        private static OptimizelyConfigService OptimizelyConfigInstance;
+        private static OptimizelyConfigService Instance;
 
         private OptimizelyConfigService() { }
 
         public static OptimizelyConfigService getInstance()
         {
-            if (OptimizelyConfigInstance == null)
+            if (Instance == null)
             { 
-                OptimizelyConfigInstance = new OptimizelyConfigService();
+                Instance = new OptimizelyConfigService();
             }
 
-            return OptimizelyConfigInstance;
+            return Instance;
         }
 
         /// <summary>
@@ -43,7 +43,7 @@ namespace OptimizelySDK.OptlyConfig
         /// </summary>
         /// <param name="projectConfig">The project config</param>
         /// <returns>Dictionary | Dictionary of experiment key and value as experiment object</returns>
-        private Dictionary<string, OptimizelyExperiment> GetExperimentsMap(ProjectConfig projectConfig)
+        private IDictionary<string, OptimizelyExperiment> GetExperimentsMap(ProjectConfig projectConfig)
         {
             var experimentsMap = new Dictionary<string, OptimizelyExperiment>();
             var rolloutExperimentIds = GetRolloutExperimentIds(projectConfig.Rollouts);
@@ -89,9 +89,9 @@ namespace OptimizelySDK.OptlyConfig
         /// <param name="featureEnabled">featureEnabled of variation</param>
         /// <param name="featureVariableUsageInstances">list of FeatureVariableUsage containing key and value</param>
         /// <returns>Dictionary | Dictionary of FeatureVariable key and value as FeatureVariable object</returns>
-        private Dictionary<string, OptimizelyVariable> MergeFeatureVariables(
+        private IDictionary<string, OptimizelyVariable> MergeFeatureVariables(
            ProjectConfig projectConfig,
-           Dictionary<string, FeatureVariable> variableIdMap,
+           IDictionary<string, FeatureVariable> variableIdMap,
            string experimentId,
            bool featureEnabled,
            List<FeatureVariableUsage> featureVariableUsageInstances)
@@ -139,7 +139,7 @@ namespace OptimizelySDK.OptlyConfig
         /// </summary>
         /// <param name="projectConfig">The project config</param>
         /// <returns>Dictionary | Dictionary of FeatureFlag key and value as OptimizelyFeature object</returns>
-        private Dictionary<string, OptimizelyFeature> GetFeaturesMap(ProjectConfig projectConfig, Dictionary<string, OptimizelyExperiment> experimentsMap)
+        private IDictionary<string, OptimizelyFeature> GetFeaturesMap(ProjectConfig projectConfig, IDictionary<string, OptimizelyExperiment> experimentsMap)
         {
             var FeaturesMap = new Dictionary<string, OptimizelyFeature>();
             foreach (var featureFlag in projectConfig.FeatureFlags)
@@ -179,7 +179,7 @@ namespace OptimizelySDK.OptlyConfig
         /// </summary>
         /// <param name="projectConfig">The project config</param>
         /// <returns>Dictionary | Dictionary of FeatureFlag key and value as list of all FeatureVariable inside it</returns>
-        private Dictionary<string, List<FeatureVariable>> GetFeatureIdVariablesMap(ProjectConfig projectConfig)
+        private IDictionary<string, List<FeatureVariable>> GetFeatureIdVariablesMap(ProjectConfig projectConfig)
         {
             var featureIDVariablesMap = new Dictionary<string, List<FeatureVariable>>();
             foreach (var featureFlag in projectConfig.FeatureFlags)
@@ -194,7 +194,7 @@ namespace OptimizelySDK.OptlyConfig
         /// </summary>
         /// <param name="projectConfig">The project config</param>
         /// <returns>Dictionary | Dictionary of FeatureVariableId as key and value as object of FeatureVariable</returns>
-        private Dictionary<string, FeatureVariable> GetVariableIdMap(ProjectConfig projectConfig)
+        private IDictionary<string, FeatureVariable> GetVariableIdMap(ProjectConfig projectConfig)
         {
             var featureIdMap = new Dictionary<string, FeatureVariable>();
             foreach (FeatureFlag featureFlag in projectConfig.FeatureFlags)
