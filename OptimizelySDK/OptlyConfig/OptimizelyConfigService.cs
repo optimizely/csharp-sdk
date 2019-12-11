@@ -24,18 +24,14 @@ namespace OptimizelySDK.OptlyConfig
 {
     public class OptimizelyConfigService
     {
-        private static OptimizelyConfigService Instance;
-
-        private OptimizelyConfigService() { }
-
-        public static OptimizelyConfigService getInstance()
+        OptimizelyConfig OptimizelyConfig;
+        public OptimizelyConfigService(ProjectConfig projectConfig)
         {
-            if (Instance == null)
-            { 
-                Instance = new OptimizelyConfigService();
-            }
-
-            return Instance;
+            var experimentMap = GetExperimentsMap(projectConfig);
+            var featureMap = GetFeaturesMap(projectConfig, experimentMap);
+            OptimizelyConfig = new OptimizelyConfig(projectConfig.Revision,
+                experimentMap,
+                featureMap);
         }
 
         /// <summary>
@@ -224,14 +220,9 @@ namespace OptimizelySDK.OptlyConfig
         }
         #endregion
 
-        public OptimizelyConfig GetOptimizelyConfig(ProjectConfig projectConfig)
+        public OptimizelyConfig GetOptimizelyConfig()
         {
-            var experimentMap = GetExperimentsMap(projectConfig);
-            var featureMap = GetFeaturesMap(projectConfig, experimentMap);
-            var optimizelyConfig = new OptimizelyConfig(projectConfig.Revision,
-                experimentMap,
-                featureMap);
-            return optimizelyConfig;
+            return OptimizelyConfig;
         }
 
     }

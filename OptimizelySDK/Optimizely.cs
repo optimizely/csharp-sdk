@@ -728,11 +728,14 @@ namespace OptimizelySDK
         public OptimizelyConfig GetOptimizelyConfig()
         {
             var config = ProjectConfigManager?.GetConfig();
+
             if (config == null)
             {
+                Logger.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'GetOptimizelyConfig'.");
                 return null;
             }
-            return OptimizelyConfigService.getInstance().GetOptimizelyConfig(config);
+
+            return new OptimizelyConfigService(config).GetOptimizelyConfig();
         }
 
 #endregion // FeatureFlag APIs

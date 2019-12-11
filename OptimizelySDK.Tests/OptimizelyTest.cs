@@ -3470,16 +3470,70 @@ namespace OptimizelySDK.Tests
             foreach (var actualfeatures in actualConfig.FeatureFlags)
             {
                 Assert.True(optimizelyConfig.FeaturesMap.ContainsKey(actualfeatures.Key));
-                var featMap = optimizelyConfig.FeaturesMap[actualfeatures.Key];
-                Assert.AreEqual(actualfeatures.Id, featMap.Id);
+                var expectedFeatMap = optimizelyConfig.FeaturesMap[actualfeatures.Key];
+                Assert.AreEqual(actualfeatures.Id, expectedFeatMap.Id);
+                Assert.AreEqual(actualfeatures.Key, expectedFeatMap.Key);
 
                 // This check that optimizelyConfig variationMap contains all the variables which were in FeatureVariableUsageInstances 
                 foreach (var acVariable in actualfeatures.Variables)
                 {
-                    Assert.True(featMap.VariablesMap.ContainsKey(acVariable.Key));
-                    Assert.AreEqual(featMap.VariablesMap[acVariable.Key].Id, acVariable.Id);
-                    Assert.AreEqual(featMap.VariablesMap[acVariable.Key].Type, acVariable.Type.ToString().ToLower());
-                    Assert.AreEqual(featMap.VariablesMap[acVariable.Key].Value, acVariable.DefaultValue);
+                    Assert.True(expectedFeatMap.VariablesMap.ContainsKey(acVariable.Key));
+                    Assert.AreEqual(expectedFeatMap.VariablesMap[acVariable.Key].Id, acVariable.Id);
+                    Assert.AreEqual(expectedFeatMap.VariablesMap[acVariable.Key].Key, acVariable.Key);
+                    Assert.AreEqual(expectedFeatMap.VariablesMap[acVariable.Key].Type, acVariable.Type.ToString().ToLower());
+                    Assert.AreEqual(expectedFeatMap.VariablesMap[acVariable.Key].Value, acVariable.DefaultValue);
+                }
+                foreach (var expectedExpMap in expectedFeatMap.ExperimentsMap.Values)
+                {
+                    bool checkIfExpExist = false;
+                    foreach (var actualFeatureExpId in actualfeatures.ExperimentIds)
+                    {
+                        if (expectedExpMap.Id == actualFeatureExpId)
+                        {
+                            checkIfExpExist = true;
+                        }
+                    }
+                    Assert.IsTrue(checkIfExpExist);
+
+                    var actualEx = actualConfig.GetExperimentFromId(expectedExpMap.Id);
+                    foreach (var variation in actualEx.Variations)
+                    {
+                        Assert.True(expectedExpMap.VariationsMap.ContainsKey(variation.Key));
+                        var exVar = expectedExpMap.VariationsMap[variation.Key];
+                        Assert.AreEqual(variation.Id, exVar.Id);
+                        Assert.AreEqual(variation.Key, exVar.Key);
+                        Assert.AreEqual(variation.FeatureEnabled, exVar.FeatureEnabled);
+
+                        if (variation.FeatureVariableUsageInstances == null)
+                        {
+                            Assert.AreEqual(exVar.VariablesMap.Count, 0);
+                        }
+                        else
+                        {
+                            // This check that optimizelyConfig variationMap contains all the variables which were in FeatureVariableUsageInstances 
+                            foreach (var acVariables in variation.FeatureVariableUsageInstances)
+                            {
+                                bool checkEvery = false;
+                                foreach (var exVariable in exVar.VariablesMap.Values)
+                                {
+                                    if (acVariables.Id == exVariable.Id)
+                                    {
+                                        if (variation.FeatureEnabled != null && variation.FeatureEnabled == true)
+                                        {
+                                            Assert.AreEqual(acVariables.Value, exVariable.Value);
+                                        }
+                                        else
+                                        {
+                                            Assert.AreNotEqual(acVariables.Value, exVariable.Value);
+                                        }
+                                        checkEvery = true;
+                                        break;
+                                    }
+                                }
+                                Assert.True(checkEvery);
+                            }
+                        }
+                    }
                 }
             }
         }
