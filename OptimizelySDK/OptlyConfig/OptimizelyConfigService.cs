@@ -95,7 +95,7 @@ namespace OptimizelySDK.OptlyConfig
             var variablesMap = new Dictionary<string, OptimizelyVariable>();
             var featureList = projectConfig.GetExperimentFeatureList(experimentId);
             var featureIdVariablesMap = GetFeatureIdVariablesMap(projectConfig);
-            if (featureList != null)
+            if (featureList != null && featureList.Count > 0)
             {
                 if (featureVariableUsageInstances != null)
                 {
@@ -110,22 +110,19 @@ namespace OptimizelySDK.OptlyConfig
                     });
                 }
 
-                featureList.ForEach(featureId =>
+                featureIdVariablesMap[featureList[0]].ForEach(featureVariable =>
                 {
-                    featureIdVariablesMap[featureId].ForEach(featureVariable =>
+                    if (!variablesMap.ContainsKey(featureVariable.Key))
                     {
-                        if (!variablesMap.ContainsKey(featureVariable.Key))
-                        {
-                            var optimizelyVariable = new OptimizelyVariable(featureVariable.Id,
-                                featureVariable.Key,
-                                featureVariable.Type.ToString().ToLower(),
-                                featureVariable.DefaultValue);
+                        var optimizelyVariable = new OptimizelyVariable(featureVariable.Id,
+                            featureVariable.Key,
+                            featureVariable.Type.ToString().ToLower(),
+                            featureVariable.DefaultValue);
                             
-                            variablesMap.Add(featureVariable.Key, optimizelyVariable);
-                        }
-                    });
+                        variablesMap.Add(featureVariable.Key, optimizelyVariable);
+                    }
                 });
-
+                
             }
             return variablesMap;
         }
