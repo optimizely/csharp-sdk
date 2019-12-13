@@ -3418,124 +3418,96 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestGetOptimizelyConfig()
         {
-            ProjectConfig actualConfig = OptimizelyMock.Object.ProjectConfigManager?.GetConfig();
-            OptimizelyConfig optimizelyConfig = OptimizelyMock.Object.GetOptimizelyConfig();
-            Assert.AreEqual(optimizelyConfig.Revision, actualConfig.Revision);
-            foreach (var actualEx in actualConfig.Experiments)
+            var datafileProjectConfig = DatafileProjectConfig.Create(TestData.TypedAudienceDatafile, new NoOpLogger(), new ErrorHandler.NoOpErrorHandler());
+            IDictionary<string, OptimizelyExperiment> experimentsMap = new Dictionary<string, OptimizelyExperiment>
             {
-                Assert.True(optimizelyConfig.ExperimentsMap.ContainsKey(actualEx.Key));
-                var exMap = optimizelyConfig.ExperimentsMap[actualEx.Key];
-                Assert.AreEqual(actualEx.Id, exMap.Id);
-
-                Assert.AreEqual(actualEx.Variations.Length, exMap.VariationsMap.Count);
-                foreach (var variation in actualEx.Variations)
                 {
-                    Assert.True(exMap.VariationsMap.ContainsKey(variation.Key));
-                    var exVar = exMap.VariationsMap[variation.Key];
-                    Assert.AreEqual(variation.Id, exVar.Id);
-                    Assert.AreEqual(variation.FeatureEnabled, exVar.FeatureEnabled);
-
-                    if (variation.FeatureVariableUsageInstances == null)
-                    {
-                        Assert.AreEqual(exVar.VariablesMap.Count, 0);
-                    }
-                    else
-                    {
-                        // This check that optimizelyConfig variationMap contains all the variables which were in FeatureVariableUsageInstances 
-                        foreach (var acVariables in variation.FeatureVariableUsageInstances)
+                    "feat_with_var_test", new OptimizelyExperiment(
+                        id: "11564051718",
+                        key:"feat_with_var_test",
+                        new Dictionary<string, OptimizelyVariation>
                         {
-                            bool checkEvery = false;
-                            foreach (var exVariable in exVar.VariablesMap.Values)
                             {
-                                if (acVariables.Id == exVariable.Id)
-                                {
-                                    if (variation.FeatureEnabled != null && variation.FeatureEnabled == true)
+                                "variation_2", new OptimizelyVariation (
+                                    id: "11617170975",
+                                    key: "variation_2",
+                                    featureEnabled: true,
+                                    new Dictionary<string, OptimizelyVariable>
                                     {
-                                        Assert.AreEqual(acVariables.Value, exVariable.Value);
-                                    } 
-                                    else
-                                    {
-                                        Assert.AreNotEqual(acVariables.Value, exVariable.Value);
-                                    }
-                                    checkEvery = true;
-                                    break;
-                                }
-                            }
-                            Assert.True(checkEvery);
-                        }
-                    }
-                }
-            }
-
-            foreach (var actualfeatures in actualConfig.FeatureFlags)
-            {
-                Assert.True(optimizelyConfig.FeaturesMap.ContainsKey(actualfeatures.Key));
-                var expectedFeatMap = optimizelyConfig.FeaturesMap[actualfeatures.Key];
-                Assert.AreEqual(actualfeatures.Id, expectedFeatMap.Id);
-                Assert.AreEqual(actualfeatures.Key, expectedFeatMap.Key);
-
-                // This check that optimizelyConfig variationMap contains all the variables which were in FeatureVariableUsageInstances 
-                foreach (var acVariable in actualfeatures.Variables)
-                {
-                    Assert.True(expectedFeatMap.VariablesMap.ContainsKey(acVariable.Key));
-                    Assert.AreEqual(expectedFeatMap.VariablesMap[acVariable.Key].Id, acVariable.Id);
-                    Assert.AreEqual(expectedFeatMap.VariablesMap[acVariable.Key].Key, acVariable.Key);
-                    Assert.AreEqual(expectedFeatMap.VariablesMap[acVariable.Key].Type, acVariable.Type.ToString().ToLower());
-                    Assert.AreEqual(expectedFeatMap.VariablesMap[acVariable.Key].Value, acVariable.DefaultValue);
-                }
-                foreach (var expectedExpMap in expectedFeatMap.ExperimentsMap.Values)
-                {
-                    bool checkIfExpExist = false;
-                    foreach (var actualFeatureExpId in actualfeatures.ExperimentIds)
-                    {
-                        if (expectedExpMap.Id == actualFeatureExpId)
-                        {
-                            checkIfExpExist = true;
-                        }
-                    }
-                    Assert.IsTrue(checkIfExpExist);
-
-                    var actualEx = actualConfig.GetExperimentFromId(expectedExpMap.Id);
-                    foreach (var variation in actualEx.Variations)
-                    {
-                        Assert.True(expectedExpMap.VariationsMap.ContainsKey(variation.Key));
-                        var exVar = expectedExpMap.VariationsMap[variation.Key];
-                        Assert.AreEqual(variation.Id, exVar.Id);
-                        Assert.AreEqual(variation.Key, exVar.Key);
-                        Assert.AreEqual(variation.FeatureEnabled, exVar.FeatureEnabled);
-
-                        if (variation.FeatureVariableUsageInstances == null)
-                        {
-                            Assert.AreEqual(exVar.VariablesMap.Count, 0);
-                        }
-                        else
-                        {
-                            // This check that optimizelyConfig variationMap contains all the variables which were in FeatureVariableUsageInstances 
-                            foreach (var acVariables in variation.FeatureVariableUsageInstances)
-                            {
-                                bool checkEvery = false;
-                                foreach (var exVariable in exVar.VariablesMap.Values)
-                                {
-                                    if (acVariables.Id == exVariable.Id)
-                                    {
-                                        if (variation.FeatureEnabled != null && variation.FeatureEnabled == true)
                                         {
-                                            Assert.AreEqual(acVariables.Value, exVariable.Value);
+                                            "x" , new OptimizelyVariable (
+                                                id: "11535264366",
+                                                key: "x",
+                                                type: "string",
+                                                value: "xyz")
                                         }
-                                        else
-                                        {
-                                            Assert.AreNotEqual(acVariables.Value, exVariable.Value);
-                                        }
-                                        checkEvery = true;
-                                        break;
-                                    }
-                                }
-                                Assert.True(checkEvery);
+                                    })
                             }
                         }
-                    }
+                    )
+                },
+                {
+                    "typed_audience_experiment", new OptimizelyExperiment(
+                        id: "1323241597",
+                        key:"typed_audience_experiment",
+                        new Dictionary<string, OptimizelyVariation>
+                        {
+                            {
+                                "A", new OptimizelyVariation (
+                                    id: "1423767503",
+                                    key: "A",
+                                    featureEnabled: null,
+                                    new Dictionary<string, OptimizelyVariable> ())
+                            }
+                        }
+                    )
+                },
+                {
+                    "audience_combinations_experiment", new OptimizelyExperiment(
+                        id: "1323241598",
+                        key:"audience_combinations_experiment",
+                        new Dictionary<string, OptimizelyVariation>
+                        {
+                            {
+                                "A", new OptimizelyVariation (
+                                    id: "1423767504",
+                                    key: "A",
+                                    featureEnabled: null,
+                                    new Dictionary<string, OptimizelyVariable> ())
+                            }
+                        }
+                    )
+                },
+                {
+                    "feat2_with_var_test", new OptimizelyExperiment(
+                        id: "1323241599",
+                        key:"feat2_with_var_test",
+                        new Dictionary<string, OptimizelyVariation>
+                        {
+                            {
+                                "variation_2", new OptimizelyVariation (
+                                    id: "1423767505",
+                                    key: "variation_2",
+                                    featureEnabled: true,
+                                    new Dictionary<string, OptimizelyVariable>
+                                    {
+                                        {
+                                            "z" , new OptimizelyVariable (
+                                                id: "11535264367",
+                                                key: "z",
+                                                type: "integer",
+                                                value: "150")
+                                        }
+                                    })
+                            }
+                        }
+                    )
                 }
-            }
+            };
+             
+            OptimizelyConfig optimizelyConfig = new OptimizelyConfigService(datafileProjectConfig).GetOptimizelyConfig();
+            Assert.IsTrue(TestData.CompareObjects(optimizelyConfig.ExperimentsMap, experimentsMap));
+
         }
 
         #endregion
