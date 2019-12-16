@@ -3504,10 +3504,107 @@ namespace OptimizelySDK.Tests
                     )
                 }
             };
-             
-            OptimizelyConfig optimizelyConfig = new OptimizelyConfigService(datafileProjectConfig).GetOptimizelyConfig();
-            Assert.IsTrue(TestData.CompareObjects(optimizelyConfig.ExperimentsMap, experimentsMap));
 
+
+            var featuresMap = new Dictionary<string, OptimizelyFeature>
+            {
+                {
+                    "feat_no_vars", new OptimizelyFeature (
+                        id: "11477755619",
+                        key: "feat_no_vars",
+                        new Dictionary<string, OptimizelyExperiment>(),
+                        new Dictionary<string, OptimizelyVariable>())
+                },
+                {
+                    "feat_with_var", new OptimizelyFeature (
+                        id: "11567102051",
+                        key: "feat_with_var",
+                        new Dictionary<string, OptimizelyExperiment>
+                        {
+                            {
+                                "feat_with_var_test", new OptimizelyExperiment(
+                                    id: "11564051718",
+                                    key:"feat_with_var_test",
+                                    new Dictionary<string, OptimizelyVariation>
+                                    {
+                                        {
+                                            "variation_2", new OptimizelyVariation (
+                                                id: "11617170975",
+                                                key: "variation_2",
+                                                featureEnabled: true,
+                                                new Dictionary<string, OptimizelyVariable>
+                                                {
+                                                    {
+                                                        "x" , new OptimizelyVariable (
+                                                            id: "11535264366",
+                                                            key: "x",
+                                                            type: "string",
+                                                            value: "xyz")
+                                                    }
+                                                })
+                                        }
+                                    }
+                                )
+                            }
+                        },
+                        new Dictionary<string, OptimizelyVariable>
+                        {
+                            {
+                                "x", new OptimizelyVariable (id: "11535264366" , key: "x", type: "string", value: "x")
+                            }
+                        })
+                },
+                {
+                    "feat2", new OptimizelyFeature (
+                        id: "11567102052",
+                        key: "feat2",
+                        new Dictionary<string, OptimizelyExperiment>(),
+                        new Dictionary<string, OptimizelyVariable>())
+                },
+                {
+                    "feat2_with_var", new OptimizelyFeature (
+                        id: "11567102053",
+                        key: "feat2_with_var",
+                        new Dictionary<string, OptimizelyExperiment>
+                        {
+                            {
+                                "feat2_with_var_test", new OptimizelyExperiment(
+                                    id: "1323241599",
+                                    key:"feat2_with_var_test",
+                                    new Dictionary<string, OptimizelyVariation>
+                                    {
+                                        {
+                                            "variation_2", new OptimizelyVariation (
+                                                id: "1423767505",
+                                                key: "variation_2",
+                                                featureEnabled: true,
+                                                new Dictionary<string, OptimizelyVariable>
+                                                {
+                                                    {
+                                                        "z" , new OptimizelyVariable (
+                                                            id: "11535264367",
+                                                            key: "z",
+                                                            type: "integer",
+                                                            value: "150")
+                                                    }
+                                                })
+                                        }
+                                    }
+                                )
+                            }
+                        },
+                        new Dictionary<string, OptimizelyVariable>
+                        {
+                            {
+                                "z", new OptimizelyVariable (id: "11535264367" , key: "z", type: "integer", value: "10")
+                            }
+                        })
+                }
+            };
+
+            OptimizelyConfig optimizelyConfig = new OptimizelyConfigService(datafileProjectConfig).GetOptimizelyConfig();
+            OptimizelyConfig expectedOptimizelyConfig = new OptimizelyConfig(datafileProjectConfig.Revision, experimentsMap, featuresMap);
+            Assert.IsTrue(TestData.CompareObjects(optimizelyConfig, expectedOptimizelyConfig));
         }
 
         #endregion
