@@ -27,6 +27,10 @@ namespace OptimizelySDK.OptlyConfig
         OptimizelyConfig OptimizelyConfig;
         public OptimizelyConfigService(ProjectConfig projectConfig)
         {
+            if (projectConfig == null)
+            {
+                return;
+            }
             var experimentMap = GetExperimentsMap(projectConfig);
             var featureMap = GetFeaturesMap(projectConfig, experimentMap);
             OptimizelyConfig = new OptimizelyConfig(projectConfig.Revision,
@@ -42,37 +46,33 @@ namespace OptimizelySDK.OptlyConfig
         private IDictionary<string, OptimizelyExperiment> GetExperimentsMap(ProjectConfig projectConfig)
         {
             var experimentsMap = new Dictionary<string, OptimizelyExperiment>();
-            var rolloutExperimentIds = GetRolloutExperimentIds(projectConfig.Rollouts);
             var featureVariableIdMap = GetVariableIdMap(projectConfig);
 
             foreach (Experiment experiment in projectConfig.Experiments)
             {
-                if (!rolloutExperimentIds.Contains(experiment.Id))
+                var variationsMap = new Dictionary<string, OptimizelyVariation>();
+                foreach (Variation variation in experiment.Variations)
                 {
-                    var variationsMap = new Dictionary<string, OptimizelyVariation>();
-                    foreach (Variation variation in experiment.Variations)
-                    {
-                        var variablesMap = MergeFeatureVariables(projectConfig,
-                            featureVariableIdMap,
-                            experiment.Id,
-                            variation.FeatureEnabled ?? false,
-                            variation.FeatureVariableUsageInstances);
+                    var variablesMap = MergeFeatureVariables(projectConfig,
+                        featureVariableIdMap,
+                        experiment.Id,
+                        variation.FeatureEnabled ?? false,
+                        variation.FeatureVariableUsageInstances);
 
-                        var optimizelyVariation = new OptimizelyVariation(variation.Id,
-                            variation.Key,
-                            variation.FeatureEnabled,
-                            variablesMap);
+                    var optimizelyVariation = new OptimizelyVariation(variation.Id,
+                        variation.Key,
+                        variation.FeatureEnabled,
+                        variablesMap);
 
-                        variationsMap.Add(variation.Key, optimizelyVariation);
-                    }
-                    var optimizelyExperiment = new OptimizelyExperiment(experiment.Id,
-                        experiment.Key,
-                        variationsMap);
-
-                    experimentsMap.Add(experiment.Key, optimizelyExperiment);
+                    variationsMap.Add(variation.Key, optimizelyVariation);
                 }
-            }
+                var optimizelyExperiment = new OptimizelyExperiment(experiment.Id,
+                    experiment.Key,
+                    variationsMap);
 
+                experimentsMap.Add(experiment.Key, optimizelyExperiment);
+            }
+            
             return experimentsMap;
         }
 
@@ -93,9 +93,9 @@ namespace OptimizelySDK.OptlyConfig
            List<FeatureVariableUsage> featureVariableUsageInstances)
         {
             var variablesMap = new Dictionary<string, OptimizelyVariable>();
-            var featureList = projectConfig.GetExperimentFeatureList(experimentId);
+            var featureList = projectConfig.GetExperimentFeatureList(experimentId) ?? null;
             var featureIdVariablesMap = GetFeatureIdVariablesMap(projectConfig);
-            if (featureList != null && featureList.Count > 0)
+            if (featureList != null && featureList.Any())
             {
                 if (featureVariableUsageInstances != null)
                 {
@@ -193,28 +193,11 @@ namespace OptimizelySDK.OptlyConfig
             foreach (FeatureFlag featureFlag in projectConfig.FeatureFlags)
             {
                 var featureIdLocalMap = ConfigParser<FeatureVariable>.GenerateMap(entities: featureFlag.Variables, getKey: a => a.Id, clone: true);
-                featureIdMap = featureIdMap.Union(featureIdLocalMap).ToDictionary(k => k.Key, v => v.Value);
+                featureIdMap = featureIdMap.Concat(featureIdLocalMap).ToDictionary(k => k.Key, v => v.Value);
             }
             return featureIdMap;
         }
 
-        /// <summary>
-        /// Gets list of all rollout experiment Ids
-        /// </summary>
-        /// <param name="Rollouts">Array of rollout experiments</param>
-        /// <returns>List | List of rollout experiments</returns>
-        private List<string> GetRolloutExperimentIds(Rollout[] Rollouts)
-        {
-            var rolloutexperimentMap = new List<string>();
-            foreach (Rollout rollout in Rollouts)
-            {
-                rollout.Experiments.ForEach(e =>
-                {
-                    rolloutexperimentMap.Add(e.Id);
-                });
-            }
-            return rolloutexperimentMap;
-        }
         #endregion
 
         public OptimizelyConfig GetOptimizelyConfig()

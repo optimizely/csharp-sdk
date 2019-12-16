@@ -725,6 +725,10 @@ namespace OptimizelySDK
             return enabledFeaturesList;
         }
 
+        /// <summary>
+        /// Get OptimizelyConfig containing experiments and features map
+        /// </summary>
+        /// <returns>OptimizelyConfig Object</returns>
         public OptimizelyConfig GetOptimizelyConfig()
         {
             var config = ProjectConfigManager?.GetConfig();

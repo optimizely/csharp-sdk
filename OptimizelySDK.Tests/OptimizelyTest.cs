@@ -3415,8 +3415,28 @@ namespace OptimizelySDK.Tests
         #endregion
 
         #region Test GetOptimizelyConfig
+
         [Test]
-        public void TestGetOptimizelyConfig()
+        public void TestGetOptimizelyConfigNullConfig()
+        {
+            var optly = Helper.CreatePrivateOptimizely();
+            var projectConfigManager = new FallbackProjectConfigManager(null);
+            optly.SetFieldOrProperty("ProjectConfigManager", projectConfigManager);
+
+            var optimizelyConfig = optly.Invoke("GetOptimizelyConfig");
+
+            Assert.IsNull(optimizelyConfig);
+        }
+
+        [Test]
+        public void TestGetOptimizelyConfigServiceNullConfig()
+        {
+            OptimizelyConfig optimizelyConfig = new OptimizelyConfigService(null).GetOptimizelyConfig();
+            Assert.IsNull(optimizelyConfig);
+        }
+
+        [Test]
+        public void TestGetOptimizelyConfigService()
         {
             var datafileProjectConfig = DatafileProjectConfig.Create(TestData.TypedAudienceDatafile, new NoOpLogger(), new ErrorHandler.NoOpErrorHandler());
             IDictionary<string, OptimizelyExperiment> experimentsMap = new Dictionary<string, OptimizelyExperiment>
