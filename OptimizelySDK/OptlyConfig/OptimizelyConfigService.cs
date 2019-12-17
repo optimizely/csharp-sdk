@@ -99,7 +99,7 @@ namespace OptimizelySDK.OptlyConfig
             {
                 if (featureVariableUsageInstances != null)
                 {
-                    featureVariableUsageInstances.ForEach(featureVariableUsage =>
+                    foreach (var featureVariableUsage in featureVariableUsageInstances)
                     {
                         var optimizelyVariable = new OptimizelyVariable(featureVariableUsage.Id,
                             variableIdMap[featureVariableUsage.Id].Key,
@@ -107,10 +107,10 @@ namespace OptimizelySDK.OptlyConfig
                             featureEnabled ? featureVariableUsage.Value : variableIdMap[featureVariableUsage.Id].DefaultValue);
 
                         variablesMap.Add(variableIdMap[featureVariableUsage.Id].Key, optimizelyVariable);
-                    });
+                    }
                 }
 
-                featureIdVariablesMap[featureList[0]].ForEach(featureVariable =>
+                foreach (var featureVariable in featureIdVariablesMap[featureList[0]])
                 {
                     if (!variablesMap.ContainsKey(featureVariable.Key))
                     {
@@ -121,7 +121,7 @@ namespace OptimizelySDK.OptlyConfig
                             
                         variablesMap.Add(featureVariable.Key, optimizelyVariable);
                     }
-                });
+                }
                 
             }
             return variablesMap;
@@ -139,23 +139,23 @@ namespace OptimizelySDK.OptlyConfig
             {
                 var featureExperimentMap = new Dictionary<string, OptimizelyExperiment>();
                 var featureVariableMap = new Dictionary<string, OptimizelyVariable>();
-                featureFlag.ExperimentIds.ForEach(exId =>
+                foreach (var exId in featureFlag.ExperimentIds)
                 {
                     foreach (var expMap in experimentsMap)
                     {
                         if (expMap.Value.Id == exId)
                             featureExperimentMap.Add(expMap.Key, expMap.Value);
                     }
-                });
+                }
 
-                featureFlag.Variables.ForEach(variable =>
+                foreach (var variable in featureFlag.Variables)
                 {
                     var optimizelyVariable = new OptimizelyVariable(variable.Id,
                         variable.Key,
                         variable.Type.ToString().ToLower(),
                         variable.DefaultValue);
                     featureVariableMap.Add(variable.Key, optimizelyVariable);
-                });
+                }
 
                 var optimizelyFeature = new OptimizelyFeature(featureFlag.Id, featureFlag.Key, featureExperimentMap, featureVariableMap);
 
