@@ -56,7 +56,7 @@ namespace OptimizelySDK.OptlyConfig
                     var variablesMap = MergeFeatureVariables(projectConfig,
                         featureVariableIdMap,
                         experiment.Id,
-                        variation.FeatureEnabled ?? false,
+                        variation.IsFeatureEnabled,
                         variation.FeatureVariableUsageInstances);
 
                     var optimizelyVariation = new OptimizelyVariation(variation.Id,
