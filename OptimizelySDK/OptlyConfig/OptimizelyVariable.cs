@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+using OptimizelySDK.Entity;
+
 namespace OptimizelySDK.OptlyConfig
 {
     public class OptimizelyVariable : Entity.IdKeyEntity
@@ -27,6 +29,14 @@ namespace OptimizelySDK.OptlyConfig
             Key = key;
             Type = type;
             Value = value;
+        }
+
+        public OptimizelyVariable(FeatureVariable featureVariable, FeatureVariableUsage featureVariableUsage)
+        {
+            Id = featureVariable.Id;
+            Key = featureVariable.Key;
+            Type = featureVariable.Type.ToString().ToLower();
+            Value = featureVariableUsage?.Value ?? featureVariable.DefaultValue;
         }
     }
 }
