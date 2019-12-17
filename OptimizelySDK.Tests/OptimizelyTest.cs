@@ -3431,7 +3431,7 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestGetOptimizelyConfigServiceNullConfig()
         {
-            OptimizelyConfig optimizelyConfig = new OptimizelyConfigService(null).GetOptimizelyConfig();
+            OptimizelyConfig optimizelyConfig = OptimizelyConfigService.GetInstance(null).GetOptimizelyConfig();
             Assert.IsNull(optimizelyConfig);
         }
 
@@ -3622,7 +3622,7 @@ namespace OptimizelySDK.Tests
                 }
             };
 
-            OptimizelyConfig optimizelyConfig = new OptimizelyConfigService(datafileProjectConfig).GetOptimizelyConfig();
+            OptimizelyConfig optimizelyConfig = OptimizelyConfigService.GetInstance(datafileProjectConfig).GetOptimizelyConfig();
             OptimizelyConfig expectedOptimizelyConfig = new OptimizelyConfig(datafileProjectConfig.Revision, experimentsMap, featuresMap);
             Assert.IsTrue(TestData.CompareObjects(optimizelyConfig, expectedOptimizelyConfig));
         }

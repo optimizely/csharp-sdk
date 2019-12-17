@@ -24,16 +24,38 @@ namespace OptimizelySDK.OptlyConfig
 {
     public class OptimizelyConfigService
     {
-        OptimizelyConfig OptimizelyConfig;
-        public OptimizelyConfigService(ProjectConfig projectConfig)
+        private static OptimizelyConfigService Instance;
+        private OptimizelyConfig OptimizelyConfig;
+        private ProjectConfig ProjectConfig;
+
+
+        private OptimizelyConfigService() { }
+
+        public static OptimizelyConfigService GetInstance(ProjectConfig projectConfig)
         {
-            if (projectConfig == null)
+            if (Instance == null ||
+                Instance.ProjectConfig == null ||
+                !Instance.ProjectConfig.Equals(projectConfig) ||
+                !Instance.ProjectConfig.Revision.Equals(projectConfig.Revision) ||
+                !Instance.ProjectConfig.ProjectId.Equals(projectConfig.ProjectId))
+            {
+                Instance = new OptimizelyConfigService(projectConfig);
+            }
+
+            return Instance;
+        }
+
+
+        private OptimizelyConfigService(ProjectConfig projectConfig)
+        {
+            ProjectConfig = projectConfig;
+            if (ProjectConfig == null)
             {
                 return;
             }
-            var experimentMap = GetExperimentsMap(projectConfig);
-            var featureMap = GetFeaturesMap(projectConfig, experimentMap);
-            OptimizelyConfig = new OptimizelyConfig(projectConfig.Revision,
+            var experimentMap = GetExperimentsMap(ProjectConfig);
+            var featureMap = GetFeaturesMap(ProjectConfig, experimentMap);
+            OptimizelyConfig = new OptimizelyConfig(ProjectConfig.Revision,
                 experimentMap,
                 featureMap);
         }
