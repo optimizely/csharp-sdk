@@ -109,6 +109,7 @@ namespace OptimizelySDK.OptlyConfig
         /// <param name="featureEnabled">featureEnabled of variation</param>
         /// <param name="featureVariableUsageInstances">list of FeatureVariableUsage containing key and value</param>
         /// <returns>Dictionary | Dictionary of FeatureVariable key and value as FeatureVariable object</returns>
+        /// TODO: Variation can be passed.
         private IDictionary<string, OptimizelyVariable> MergeFeatureVariables(
            ProjectConfig projectConfig,
            IDictionary<string, FeatureVariable> variableIdMap,
