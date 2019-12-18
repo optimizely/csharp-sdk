@@ -17,7 +17,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using OptimizelySDK.Entity;
-using OptimizelySDK.Utils;
 
 
 namespace OptimizelySDK.OptlyConfig
@@ -80,8 +79,7 @@ namespace OptimizelySDK.OptlyConfig
                     var variablesMap = MergeFeatureVariables(projectConfig,
                         featureVariableIdMap,
                         experiment.Id,
-                        variation.IsFeatureEnabled,
-                        variation.VariableIdToVariableUsageInstanceMap);
+                        variation);
 
                     var optimizelyVariation = new OptimizelyVariation(variation.Id,
                         variation.Key,
@@ -106,38 +104,39 @@ namespace OptimizelySDK.OptlyConfig
         /// <param name="projectConfig">The project config</param>
         /// <param name="variableIdMap">Map containing variable ID as key and Object of featureVariable</param>
         /// <param name="experimentId">experimentId of featureExperiment</param>
-        /// <param name="featureEnabled">featureEnabled of variation</param>
-        /// <param name="featureVariableUsageInstances">list of FeatureVariableUsage containing key and value</param>
+        /// <param name="variation">variation</param>
         /// <returns>Dictionary | Dictionary of FeatureVariable key and value as FeatureVariable object</returns>
-        /// TODO: Variation can be passed.
         private IDictionary<string, OptimizelyVariable> MergeFeatureVariables(
            ProjectConfig projectConfig,
            IDictionary<string, FeatureVariable> variableIdMap,
            string experimentId,
-           bool featureEnabled,
-           Dictionary<string, FeatureVariableUsage> variableIdToVariableUsageMap)
+           Variation variation)
         {            
-            var featureKey = projectConfig.GetExperimentFeatureList(experimentId).FirstOrDefault();
+            var featureKey = projectConfig.GetExperimentFeatureList(experimentId)?.FirstOrDefault();
             var featureIdVariablesMap = GetFeatureIdVariablesMap(projectConfig);
+            var variablesMap = new Dictionary<string, OptimizelyVariable>();
 
             if (featureKey?.Any() ?? false)
             {
-                //TODO: We may use foreach, it's not right fit here.
-                var variablesKeyMap = featureIdVariablesMap[featureKey].Select(v =>
+                variablesMap = featureIdVariablesMap[featureKey]?.Select(f => new OptimizelyVariable(f.Id,
+                        f.Key,
+                        f.Type.ToString().ToLower(),
+                        f.DefaultValue)
+                ).ToDictionary(k => k.Key, v => v);
+
+                foreach (var featureVariableUsage in variation.FeatureVariableUsageInstances)
                 {
-                    FeatureVariableUsage featureVariableUsage = null;
-                    if (featureEnabled && variableIdToVariableUsageMap.ContainsKey(v.Key))
-                    {
-                        featureVariableUsage = variableIdToVariableUsageMap[v.Key];
-                    }
+                    var defaultVariable = variableIdMap[featureVariableUsage.Id];
+                    var optimizelyVariable = new OptimizelyVariable(featureVariableUsage.Id,
+                        defaultVariable.Key,
+                        defaultVariable.Type.ToString().ToLower(),
+                        variation.IsFeatureEnabled ? featureVariableUsage.Value : defaultVariable.DefaultValue);
 
-                    return new OptimizelyVariable(v, featureVariableUsage);
-                }).ToDictionary(k => k.Key, v => v);
-
-                return variablesKeyMap;
+                    variablesMap[defaultVariable.Key] = optimizelyVariable;
+                }
             }
 
-            return new Dictionary<string, OptimizelyVariable>();
+            return variablesMap;
         }
 
         /// <summary>
@@ -187,7 +186,7 @@ namespace OptimizelySDK.OptlyConfig
         /// <returns>Dictionary | Dictionary of FeatureFlag key and value as list of all FeatureVariable inside it</returns>
         private IDictionary<string, List<FeatureVariable>> GetFeatureIdVariablesMap(ProjectConfig projectConfig)
         {            
-            var featureIdVariablesMap = projectConfig?.FeatureFlags?.ToDictionary(k => k.Key, v => v.Variables);
+            var featureIdVariablesMap = projectConfig?.FeatureFlags?.ToDictionary(k => k.Id, v => v.Variables);
             
             return featureIdVariablesMap ?? new Dictionary<string, List<FeatureVariable>>();
         }
