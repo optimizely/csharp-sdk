@@ -52,8 +52,6 @@ namespace OptimizelySDK.OptlyConfig
             {
                 return;
             }
-            var experimentKeyMap = ProjectConfig.ExperimentKeyMap;
-
             var experimentMap = GetExperimentsMap(ProjectConfig);
             var featureMap = GetFeaturesMap(ProjectConfig, experimentMap);
             OptimizelyConfig = new OptimizelyConfig(ProjectConfig.Revision,
@@ -173,6 +171,7 @@ namespace OptimizelySDK.OptlyConfig
 
                 FeaturesMap.Add(featureFlag.Key, optimizelyFeature);
             }
+
             return FeaturesMap;
         }
 
