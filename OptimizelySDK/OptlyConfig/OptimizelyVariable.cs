@@ -38,5 +38,11 @@ namespace OptimizelySDK.OptlyConfig
             Type = featureVariable.Type.ToString().ToLower();
             Value = featureVariableUsage?.Value ?? featureVariable.DefaultValue;
         }
+
+
+        public static explicit operator OptimizelyVariable(FeatureVariable featureVariable)
+        {
+            return new OptimizelyVariable(featureVariable, null);            
+        }
     }
 }

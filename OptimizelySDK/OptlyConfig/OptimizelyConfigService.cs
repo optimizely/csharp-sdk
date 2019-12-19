@@ -30,6 +30,7 @@ namespace OptimizelySDK.OptlyConfig
 
         private OptimizelyConfigService() { }
 
+        // TODO: Remove this method, we will cache in ProjectConfig. No need of it.
         public static OptimizelyConfigService GetInstance(ProjectConfig projectConfig)
         {
             if (Instance?.ProjectConfig == null ||
@@ -143,21 +144,14 @@ namespace OptimizelySDK.OptlyConfig
         /// <returns>Dictionary | Dictionary of FeatureFlag key and value as OptimizelyFeature object</returns>
         private IDictionary<string, OptimizelyFeature> GetFeaturesMap(ProjectConfig projectConfig, IDictionary<string, OptimizelyExperiment> experimentsMap)
         {
-            var FeaturesMap = new Dictionary<string, OptimizelyFeature>();
-            foreach (var featureFlag in projectConfig.FeatureFlags)
-            {
-                var featureVariableMap = new Dictionary<string, OptimizelyVariable>();
-                var featureExperimentMap = experimentsMap.Where(expMap => featureFlag.ExperimentIds.Contains(expMap.Value.Id)).ToDictionary(k => k.Key, v => v.Value);
-                
-                foreach (var variable in featureFlag.Variables)
-                {
-                    var optimizelyVariable = new OptimizelyVariable(variable.Id,
-                        variable.Key,
-                        variable.Type.ToString().ToLower(),
-                        variable.DefaultValue);
-                    featureVariableMap.Add(variable.Key, optimizelyVariable);
-                }
+            var FeaturesMap = new Dictionary<string, OptimizelyFeature>();            
 
+            foreach (var featureFlag in projectConfig.FeatureFlags)
+            {                
+                var featureExperimentMap = experimentsMap.Where(expMap => featureFlag.ExperimentIds.Contains(expMap.Value.Id)).ToDictionary(k => k.Key, v => v.Value);
+
+                var featureVariableMap = featureFlag.Variables.Select(v => (OptimizelyVariable)v).ToDictionary(k => k.Id, v => v) ?? new Dictionary<string, OptimizelyVariable>();
+                
                 var optimizelyFeature = new OptimizelyFeature(featureFlag.Id, featureFlag.Key, featureExperimentMap, featureVariableMap);
 
                 FeaturesMap.Add(featureFlag.Key, optimizelyFeature);
