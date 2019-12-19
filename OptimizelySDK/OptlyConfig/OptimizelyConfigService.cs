@@ -146,13 +146,9 @@ namespace OptimizelySDK.OptlyConfig
             var FeaturesMap = new Dictionary<string, OptimizelyFeature>();
             foreach (var featureFlag in projectConfig.FeatureFlags)
             {
-                var featureExperimentMap = new Dictionary<string, OptimizelyExperiment>();
                 var featureVariableMap = new Dictionary<string, OptimizelyVariable>();
-                foreach (var expMap in experimentsMap.Where(expMap => featureFlag.ExperimentIds.Contains(expMap.Value.Id)))
-                {
-                    featureExperimentMap.Add(expMap.Key, expMap.Value);
-                }
-
+                var featureExperimentMap = experimentsMap.Where(expMap => featureFlag.ExperimentIds.Contains(expMap.Value.Id)).ToDictionary(k => k.Key, v => v.Value);
+                
                 foreach (var variable in featureFlag.Variables)
                 {
                     var optimizelyVariable = new OptimizelyVariable(variable.Id,
