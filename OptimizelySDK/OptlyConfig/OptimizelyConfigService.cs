@@ -32,8 +32,7 @@ namespace OptimizelySDK.OptlyConfig
 
         public static OptimizelyConfigService GetInstance(ProjectConfig projectConfig)
         {
-            if (Instance == null ||
-                Instance.ProjectConfig == null ||
+            if (Instance?.ProjectConfig == null ||
                 !Instance.ProjectConfig.Equals(projectConfig) ||
                 !Instance.ProjectConfig.Revision.Equals(projectConfig.Revision) ||
                 !Instance.ProjectConfig.ProjectId.Equals(projectConfig.ProjectId))
@@ -149,13 +148,9 @@ namespace OptimizelySDK.OptlyConfig
             {
                 var featureExperimentMap = new Dictionary<string, OptimizelyExperiment>();
                 var featureVariableMap = new Dictionary<string, OptimizelyVariable>();
-                foreach (var exId in featureFlag.ExperimentIds)
+                foreach (var expMap in experimentsMap.Where(expMap => featureFlag.ExperimentIds.Contains(expMap.Value.Id)))
                 {
-                    foreach (var expMap in experimentsMap)
-                    {
-                        if (expMap.Value.Id == exId)
-                            featureExperimentMap.Add(expMap.Key, expMap.Value);
-                    }
+                    featureExperimentMap.Add(expMap.Key, expMap.Value);
                 }
 
                 foreach (var variable in featureFlag.Variables)
