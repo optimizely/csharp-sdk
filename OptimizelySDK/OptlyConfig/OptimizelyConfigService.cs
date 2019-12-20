@@ -67,8 +67,10 @@ namespace OptimizelySDK.OptlyConfig
         {
             var experimentsMap = new Dictionary<string, OptimizelyExperiment>();
             var featureVariableIdMap = GetVariableIdMap(projectConfig);
+            List<Experiment> experiments = projectConfig.Experiments.ToList();
+            experiments = projectConfig.Groups.SelectMany(g => g.Experiments).Concat(experiments).ToList();
 
-            foreach (Experiment experiment in projectConfig.Experiments)
+            foreach (Experiment experiment in experiments)
             {
                 var variationsMap = new Dictionary<string, OptimizelyVariation>();
                 foreach (Variation variation in experiment.Variations)
