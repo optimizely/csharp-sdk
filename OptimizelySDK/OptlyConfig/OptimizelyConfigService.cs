@@ -23,37 +23,17 @@ namespace OptimizelySDK.OptlyConfig
 {
     public class OptimizelyConfigService
     {
-        private static OptimizelyConfigService Instance;
         private OptimizelyConfig OptimizelyConfig;
-        private ProjectConfig ProjectConfig;
 
-
-        private OptimizelyConfigService() { }
-
-        public static OptimizelyConfigService GetInstance(ProjectConfig projectConfig)
+        public OptimizelyConfigService(ProjectConfig projectConfig)
         {
-            if (Instance?.ProjectConfig == null ||
-                !Instance.ProjectConfig.Equals(projectConfig) ||
-                !Instance.ProjectConfig.Revision.Equals(projectConfig.Revision) ||
-                !Instance.ProjectConfig.ProjectId.Equals(projectConfig.ProjectId))
-            {
-                Instance = new OptimizelyConfigService(projectConfig);
-            }
-
-            return Instance;
-        }
-
-
-        private OptimizelyConfigService(ProjectConfig projectConfig)
-        {
-            ProjectConfig = projectConfig;
-            if (ProjectConfig == null)
+            if (projectConfig == null)
             {
                 return;
             }
-            var experimentMap = GetExperimentsMap(ProjectConfig);
-            var featureMap = GetFeaturesMap(ProjectConfig, experimentMap);
-            OptimizelyConfig = new OptimizelyConfig(ProjectConfig.Revision,
+            var experimentMap = GetExperimentsMap(projectConfig);
+            var featureMap = GetFeaturesMap(projectConfig, experimentMap);
+            OptimizelyConfig = new OptimizelyConfig(projectConfig.Revision,
                 experimentMap,
                 featureMap);
         }
@@ -67,8 +47,8 @@ namespace OptimizelySDK.OptlyConfig
         {
             var experimentsMap = new Dictionary<string, OptimizelyExperiment>();
             var featureVariableIdMap = GetVariableIdMap(projectConfig);
-            List<Experiment> experiments = projectConfig.Experiments.ToList();
-            experiments = projectConfig.Groups.SelectMany(g => g.Experiments).Concat(experiments).ToList();
+            var experiments = projectConfig?.Experiments?.ToList();
+            experiments = projectConfig?.Groups?.SelectMany(g => g.Experiments).Concat(experiments)?.ToList();
 
             foreach (Experiment experiment in experiments)
             {
@@ -145,21 +125,14 @@ namespace OptimizelySDK.OptlyConfig
         /// <returns>Dictionary | Dictionary of FeatureFlag key and value as OptimizelyFeature object</returns>
         private IDictionary<string, OptimizelyFeature> GetFeaturesMap(ProjectConfig projectConfig, IDictionary<string, OptimizelyExperiment> experimentsMap)
         {
-            var FeaturesMap = new Dictionary<string, OptimizelyFeature>();
-            foreach (var featureFlag in projectConfig.FeatureFlags)
-            {
-                var featureVariableMap = new Dictionary<string, OptimizelyVariable>();
-                var featureExperimentMap = experimentsMap.Where(expMap => featureFlag.ExperimentIds.Contains(expMap.Value.Id)).ToDictionary(k => k.Key, v => v.Value);
-                
-                foreach (var variable in featureFlag.Variables)
-                {
-                    var optimizelyVariable = new OptimizelyVariable(variable.Id,
-                        variable.Key,
-                        variable.Type.ToString().ToLower(),
-                        variable.DefaultValue);
-                    featureVariableMap.Add(variable.Key, optimizelyVariable);
-                }
+            var FeaturesMap = new Dictionary<string, OptimizelyFeature>();            
 
+            foreach (var featureFlag in projectConfig.FeatureFlags)
+            {                
+                var featureExperimentMap = experimentsMap.Where(expMap => featureFlag.ExperimentIds.Contains(expMap.Value.Id)).ToDictionary(k => k.Key, v => v.Value);
+
+                var featureVariableMap = featureFlag.Variables.Select(v => (OptimizelyVariable)v).ToDictionary(k => k.Key, v => v) ?? new Dictionary<string, OptimizelyVariable>();
+                
                 var optimizelyFeature = new OptimizelyFeature(featureFlag.Id, featureFlag.Key, featureExperimentMap, featureVariableMap);
 
                 FeaturesMap.Add(featureFlag.Key, optimizelyFeature);
