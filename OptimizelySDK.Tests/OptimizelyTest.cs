@@ -3627,6 +3627,67 @@ namespace OptimizelySDK.Tests
             Assert.IsTrue(TestData.CompareObjects(optimizelyConfig, expectedOptimizelyConfig));
         }
 
+        [Test]
+        public void TestOptimizelyConfigEntity()
+        {
+            OptimizelyConfig expectedOptlyFeature = new OptimizelyConfig("123",
+                new Dictionary<string, OptimizelyExperiment>(),
+                new Dictionary<string, OptimizelyFeature>()
+                );
+            Assert.AreEqual(expectedOptlyFeature.Revision, "123");
+            Assert.AreEqual(expectedOptlyFeature.ExperimentsMap, new Dictionary<string, OptimizelyExperiment>());
+            Assert.AreEqual(expectedOptlyFeature.FeaturesMap, new Dictionary<string, OptimizelyFeature>());
+        }
+
+        [Test]
+        public void TestOptimizelyFeatureEntity()
+        {
+            OptimizelyFeature expectedOptlyFeature = new OptimizelyFeature("1", "featKey",
+                new Dictionary<string, OptimizelyExperiment>(),
+                new Dictionary<string, OptimizelyVariable>()
+                );
+            Assert.AreEqual(expectedOptlyFeature.Id, "1");
+            Assert.AreEqual(expectedOptlyFeature.Key, "featKey");
+            Assert.AreEqual(expectedOptlyFeature.ExperimentsMap, new Dictionary<string, OptimizelyExperiment>());
+            Assert.AreEqual(expectedOptlyFeature.VariablesMap, new Dictionary<string, OptimizelyVariable>());
+        }
+
+        [Test]
+        public void TestOptimizelyExperimentEntity()
+        {
+            OptimizelyExperiment expectedOptlyExp = new OptimizelyExperiment("1", "exKey",
+                new Dictionary<string, OptimizelyVariation> {
+                    {
+                        "varKey", new OptimizelyVariation("1", "varKey", true, new Dictionary<string, OptimizelyVariable>())
+                    }
+                });
+            Assert.AreEqual(expectedOptlyExp.Id, "1");
+            Assert.AreEqual(expectedOptlyExp.Key, "exKey");
+            Assert.AreEqual(expectedOptlyExp.VariationsMap["varKey"], new OptimizelyVariation("1", "varKey", true, new Dictionary<string, OptimizelyVariable>()));
+        }
+
+        [Test]
+        public void TestOptimizelyVariationEntity()
+        {
+            OptimizelyVariation expectedOptlyVariation = new OptimizelyVariation("1", "varKey", true, new Dictionary<string, OptimizelyVariable> {
+                { "variableKey", new OptimizelyVariable("varId", "variableKey", "integer", "2")}
+            });
+            Assert.AreEqual(expectedOptlyVariation.Id, "1");
+            Assert.AreEqual(expectedOptlyVariation.Key, "varKey");
+            Assert.AreEqual(expectedOptlyVariation.FeatureEnabled, true);
+            Assert.AreEqual(expectedOptlyVariation.VariablesMap["variableKey"], new OptimizelyVariable("varId", "variableKey", "integer", "2"));
+        }
+
+        [Test]
+        public void TestOptimizelyVariableEntity()
+        {
+            OptimizelyVariable expectedOptlyVariable = new OptimizelyVariable("varId", "variableKey", "integer", "2");
+            Assert.AreEqual(expectedOptlyVariable.Id, "varId");
+            Assert.AreEqual(expectedOptlyVariable.Key, "variableKey");
+            Assert.AreEqual(expectedOptlyVariable.Type, "integer");
+            Assert.AreEqual(expectedOptlyVariable.Value, "2");
+        }
+
         #endregion
     }
 }
