@@ -122,6 +122,7 @@ namespace OptimizelySDK.OptlyConfig
         /// Gets Map of all FeatureFlags and associated experiment map inside it
         /// </summary>
         /// <param name="projectConfig">The project config</param>
+        /// <param name="experimentsMap">Dictionary of experiment key and value as experiment object</param>
         /// <returns>Dictionary | Dictionary of FeatureFlag key and value as OptimizelyFeature object</returns>
         private IDictionary<string, OptimizelyFeature> GetFeaturesMap(ProjectConfig projectConfig, IDictionary<string, OptimizelyExperiment> experimentsMap)
         {
