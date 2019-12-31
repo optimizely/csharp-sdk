@@ -85,6 +85,7 @@
 		<Compile Include="..\OptimizelySDK\OptlyConfig\OptimizelyVariable.cs" />
 		<Compile Include="..\OptimizelySDK\OptlyConfig\OptimizelyVariation.cs" />
 		<Compile Include="..\OptimizelySDK\OptlyConfig\OptimizelyConfigService.cs" />
+		<Compile Include="..\OptimizelySDK\OptlyConfig\IOptimizelyConfigManager.cs" />
 		<Compile Include="..\OptimizelySDK\Config\FallbackProjectConfigManager.cs">
 		  <Link>AtomicProjectConfigManager.cs</Link>
 		</Compile>

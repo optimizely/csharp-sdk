@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2017-2019, Optimizely
+ * Copyright 2017-2020, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use file except in compliance with the License.
@@ -737,6 +737,11 @@ namespace OptimizelySDK
             {
                 Logger.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'GetOptimizelyConfig'.");
                 return null;
+            }
+
+            if (ProjectConfigManager is IOptimizelyConfigManager)
+            {
+                return ((IOptimizelyConfigManager) ProjectConfigManager).GetOptimizelyConfig();
             }
 
             return new OptimizelyConfigService(config).GetOptimizelyConfig();
