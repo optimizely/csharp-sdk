@@ -1,7 +1,9 @@
-﻿using NUnit.Framework;
+﻿using Moq;
+using NUnit.Framework;
 using OptimizelySDK.Config;
 using OptimizelySDK.Logger;
 using OptimizelySDK.OptlyConfig;
+using System;
 using System.Collections.Generic;
 
 namespace OptimizelySDK.Tests.OptimizelyConfigTests
@@ -9,7 +11,70 @@ namespace OptimizelySDK.Tests.OptimizelyConfigTests
     [TestFixture]
     public class OptimizelyConfigTest
     {
+        private Mock<ILogger> LoggerMock;
+
+        [SetUp]
+        public void Setup()
+        {
+            LoggerMock = new Mock<ILogger>();
+            LoggerMock.Setup(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()));
+        }
+
         #region Test OptimizelyConfigService
+
+        [Test]
+        public void TestAfterDisposeGetOptimizelyConfigIsNoLongerValid()
+        {
+            var httpManager = new HttpProjectConfigManager.Builder()
+                                                          .WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z")
+                                                          .WithDatafile(TestData.Datafile)
+                                                          .WithPollingInterval(TimeSpan.FromMilliseconds(50000))
+                                                          .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(500))
+                                                          .Build(true);
+            var optimizely = new Optimizely(httpManager);
+            httpManager.Start();
+
+            var optimizelyConfig = optimizely.GetOptimizelyConfig();
+
+            Assert.NotNull(optimizelyConfig);
+            Assert.NotNull(optimizelyConfig.ExperimentsMap);
+            Assert.NotNull(optimizelyConfig.FeaturesMap);
+            Assert.NotNull(optimizelyConfig.Revision);
+
+            optimizely.Dispose();
+
+            var optimizelyConfigAfterDispose = optimizely.GetOptimizelyConfig();
+            Assert.Null(optimizelyConfigAfterDispose);
+        }
+
+        [Test]
+        public void TestPollingInvalidSdkKeyGetOptimizelyConfig()
+        {
+            HttpProjectConfigManager httpManager = new HttpProjectConfigManager.Builder()
+               .WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z")
+               .WithLogger(LoggerMock.Object)
+               .WithPollingInterval(TimeSpan.FromMilliseconds(1000))
+               .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(500))
+               .WithStartByDefault()
+               .Build();
+
+            httpManager.OnReady().Wait(System.Threading.Timeout.Infinite);
+            Assert.NotNull(httpManager.GetConfig());
+
+            var optimizely = new Optimizely(httpManager);
+
+            var optimizelyConfig = optimizely.GetOptimizelyConfig();
+
+            Assert.NotNull(optimizelyConfig);
+            Assert.NotNull(optimizelyConfig.ExperimentsMap);
+            Assert.NotNull(optimizelyConfig.FeaturesMap);
+            Assert.NotNull(optimizelyConfig.Revision);
+
+            optimizely.Dispose();
+
+            var optimizelyConfigAfterDispose = optimizely.GetOptimizelyConfig();
+            Assert.Null(optimizelyConfigAfterDispose);
+        }
 
         [Test]
         public void TestGetOptimizelyConfigServiceNullConfig()
