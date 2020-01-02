@@ -6,6 +6,7 @@ env:
 
 # Integration tests need to run first to reset the PR build status to pending
 stages:
+  - name: 'Lint markdown files'
   - name: 'Integration tests'
   - name: 'Benchmarking tests'
   - name: 'Unit Tests'
@@ -13,6 +14,15 @@ stages:
 
 jobs:
   include:
+    - stage: 'Lint markdown files'
+      language: ruby
+      rvm: 2.4.1
+      os: linux
+      install: gem install awesome_bot
+      script:
+        - find . -type f -name '*.md' -exec awesome_bot {} \;
+      notifications:
+        email: false
     - &integrationtest
       stage: 'Integration tests'
       env: SDK=csharp SDK_BRANCH=$TRAVIS_PULL_REQUEST_BRANCH
