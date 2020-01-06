@@ -91,13 +91,13 @@ namespace OptimizelySDK.OptlyConfig
            string experimentId,
            Variation variation)
         {            
-            var featureKey = projectConfig.GetExperimentFeatureList(experimentId)?.FirstOrDefault();
+            var featureId = projectConfig.GetExperimentFeatureList(experimentId)?.FirstOrDefault();
             var featureIdVariablesMap = GetFeatureIdVariablesMap(projectConfig);
             var variablesMap = new Dictionary<string, OptimizelyVariable>();
 
-            if (featureKey?.Any() ?? false)
+            if (featureId?.Any() ?? false)
             {
-                variablesMap = featureIdVariablesMap[featureKey]?.Select(f => new OptimizelyVariable(f.Id,
+                variablesMap = featureIdVariablesMap[featureId]?.Select(f => new OptimizelyVariable(f.Id,
                         f.Key,
                         f.Type.ToString().ToLower(),
                         f.DefaultValue)
