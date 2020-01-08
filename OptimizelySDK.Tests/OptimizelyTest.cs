@@ -31,6 +31,7 @@ using OptimizelySDK.Tests.NotificationTests;
 using OptimizelySDK.Utils;
 using OptimizelySDK.Config;
 using OptimizelySDK.Event.Entity;
+using OptimizelySDK.OptlyConfig;
 
 namespace OptimizelySDK.Tests
 {
@@ -3409,6 +3410,19 @@ namespace OptimizelySDK.Tests
             Assert.IsNull(optimizely.GetFeatureVariableDouble(string.Empty, string.Empty, string.Empty));
             Assert.IsNull(optimizely.GetFeatureVariableInteger(string.Empty, string.Empty, string.Empty));
 
+        }
+
+        #endregion
+
+        #region Test GetOptimizelyConfig
+
+        [Test]
+        public void TestGetOptimizelyConfigNullConfig()
+        {
+            var optly = new Optimizely(new FallbackProjectConfigManager(null));
+            var optimizelyConfig = optly.GetOptimizelyConfig();
+
+            Assert.IsNull(optimizelyConfig);
         }
 
         #endregion

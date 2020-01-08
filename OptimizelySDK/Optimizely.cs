@@ -27,6 +27,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using OptimizelySDK.Config;
 using OptimizelySDK.Event;
+using OptimizelySDK.OptlyConfig;
 
 namespace OptimizelySDK
 {
@@ -722,6 +723,23 @@ namespace OptimizelySDK
             }
 
             return enabledFeaturesList;
+        }
+
+        /// <summary>
+        /// Get OptimizelyConfig containing experiments and features map
+        /// </summary>
+        /// <returns>OptimizelyConfig Object</returns>
+        public OptimizelyConfig GetOptimizelyConfig()
+        {
+            var config = ProjectConfigManager?.GetConfig();
+
+            if (config == null)
+            {
+                Logger.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'GetOptimizelyConfig'.");
+                return null;
+            }
+
+            return new OptimizelyConfigService(config).GetOptimizelyConfig();
         }
 
 #endregion // FeatureFlag APIs

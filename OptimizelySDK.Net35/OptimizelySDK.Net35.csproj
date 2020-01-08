@@ -272,6 +272,24 @@
 	<Compile Include="..\OptimizelySDK\Event\EventProcessor.cs">
 	  <Link>Event\EventProcessor.cs</Link>
 	</Compile>
+	<Compile Include="..\OptimizelySDK\OptlyConfig\OptimizelyConfig.cs">
+	  <Link>OptlyConfig\OptimizelyConfig.cs</Link>
+	</Compile>
+	<Compile Include="..\OptimizelySDK\OptlyConfig\OptimizelyExperiment.cs">
+	  <Link>OptlyConfig\OptimizelyExperiment.cs</Link>
+	</Compile>
+	<Compile Include="..\OptimizelySDK\OptlyConfig\OptimizelyFeature.cs">
+	  <Link>OptlyConfig\OptimizelyFeature.cs</Link>
+	</Compile>
+	<Compile Include="..\OptimizelySDK\OptlyConfig\OptimizelyVariable.cs">
+	  <Link>OptlyConfig\OptimizelyVariable.cs</Link>
+	</Compile>
+	<Compile Include="..\OptimizelySDK\OptlyConfig\OptimizelyVariation.cs">
+	  <Link>OptlyConfig\OptimizelyVariation.cs</Link>
+	</Compile>
+	<Compile Include="..\OptimizelySDK\OptlyConfig\OptimizelyConfigService.cs">
+	  <Link>OptlyConfig\OptimizelyConfigService.cs</Link>
+	</Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\OptimizelySDK\Utils\schema.json">
