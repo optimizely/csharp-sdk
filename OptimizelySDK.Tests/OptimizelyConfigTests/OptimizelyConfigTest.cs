@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
+using System;
 using Moq;
 using NUnit.Framework;
 using OptimizelySDK.Config;
 using OptimizelySDK.Logger;
 using OptimizelySDK.OptlyConfig;
-using System;
 using System.Collections.Generic;
 
 namespace OptimizelySDK.Tests.OptimizelyConfigTests
@@ -27,6 +27,7 @@ namespace OptimizelySDK.Tests.OptimizelyConfigTests
     [TestFixture]
     public class OptimizelyConfigTest
     {
+
         private Mock<ILogger> LoggerMock;
 
         [SetUp]
