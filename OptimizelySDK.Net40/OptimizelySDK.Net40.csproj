@@ -307,6 +307,9 @@
 	<Compile Include="..\OptimizelySDK\OptlyConfig\OptimizelyConfigService.cs">
       <Link>OptlyConfig\OptimizelyConfigService.cs</Link>
     </Compile>
+	<Compile Include="..\OptimizelySDK\OptlyConfig\IOptimizelyConfigManager.cs">
+      <Link>OptlyConfig\IOptimizelyConfigManager.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\OptimizelySDK\Utils\schema.json">

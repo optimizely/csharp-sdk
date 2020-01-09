@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2019, Optimizely
+ * Copyright 2019-2020, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ using OptimizelySDK.Logger;
 using OptimizelySDK.Utils;
 using System.Threading.Tasks;
 using OptimizelySDK.ErrorHandler;
+using OptimizelySDK.OptlyConfig;
 
 namespace OptimizelySDK.Config
 {
@@ -29,7 +30,7 @@ namespace OptimizelySDK.Config
     /// Instances of this class, must implement the <see cref="Poll()"/> method
     /// which is responsible for fetching a given ProjectConfig.
     /// </summary>
-    public abstract class PollingProjectConfigManager : ProjectConfigManager, IDisposable
+    public abstract class PollingProjectConfigManager : ProjectConfigManager, IOptimizelyConfigManager, IDisposable
     {
         public bool Disposed { get; private set; }
 
@@ -44,6 +45,7 @@ namespace OptimizelySDK.Config
         protected IErrorHandler ErrorHandler { get; set; }
         protected TimeSpan BlockingTimeout;
         protected TaskCompletionSource<bool> CompletableConfigManager = new TaskCompletionSource<bool>();
+        private OptimizelyConfig CurrentOptimizelyConfig;
         // Variables to control blocking/syncing.
         public int resourceInUse = 0;
 
@@ -145,6 +147,7 @@ namespace OptimizelySDK.Config
                 return false;
             
             CurrentProjectConfig = projectConfig;
+            SetOptimizelyConfig(CurrentProjectConfig);
 
             // SetResult raise exception if called again, that's why Try is used.
             CompletableConfigManager.TrySetResult(true);
@@ -154,7 +157,28 @@ namespace OptimizelySDK.Config
             
             return true;
         }
-        
+
+        private void SetOptimizelyConfig(ProjectConfig projectConfig)
+        {
+            try
+            {
+                CurrentOptimizelyConfig = new OptimizelyConfigService(projectConfig).GetOptimizelyConfig();
+            }
+            catch (Exception ex)
+            {
+                Logger.Log(LogLevel.ERROR, ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Returns the cached OptimizelyConfig object.
+        /// </summary>
+        /// <returns>OptimizelyConfig | cached OptimizelyConfig object</returns>
+        public OptimizelyConfig GetOptimizelyConfig()
+        {
+            return CurrentOptimizelyConfig;
+        }
+
         public virtual void Dispose()
         {
             if (Disposed) return;
