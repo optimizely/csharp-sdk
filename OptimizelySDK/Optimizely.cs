@@ -739,10 +739,14 @@ namespace OptimizelySDK
                 return null;
             }
 
+            // PollingProjectConfigManager now also implements IOptimizelyConfigManager interface to support OptimizelyConfigService API.
+            // This check is needed in case a consumer provides their own ProjectConfigManager which does not implement IOptimizelyConfigManager interface
             if (ProjectConfigManager is IOptimizelyConfigManager)
             {
                 return ((IOptimizelyConfigManager) ProjectConfigManager).GetOptimizelyConfig();
             }
+
+            Logger.Log(LogLevel.DEBUG, "ProjectConfigManager is not instance of IOptimizelyConfigManager, generating new OptimizelyConfigObject as a fallback");
 
             return new OptimizelyConfigService(config).GetOptimizelyConfig();
         }

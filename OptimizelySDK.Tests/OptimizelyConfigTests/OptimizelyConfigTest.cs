@@ -21,6 +21,7 @@ using OptimizelySDK.Config;
 using OptimizelySDK.Logger;
 using OptimizelySDK.OptlyConfig;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace OptimizelySDK.Tests.OptimizelyConfigTests
 {
@@ -65,7 +66,7 @@ namespace OptimizelySDK.Tests.OptimizelyConfigTests
         }
 
         [Test]
-        public void TestPollingInvalidSdkKeyGetOptimizelyConfig()
+        public void TestPollingGivenOnlySdkKeyGetOptimizelyConfig()
         {
             HttpProjectConfigManager httpManager = new HttpProjectConfigManager.Builder()
                .WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z")
@@ -73,9 +74,8 @@ namespace OptimizelySDK.Tests.OptimizelyConfigTests
                .WithPollingInterval(TimeSpan.FromMilliseconds(1000))
                .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(500))
                .WithStartByDefault()
-               .Build();
+               .Build(true);
 
-            httpManager.OnReady().Wait(System.Threading.Timeout.Infinite);
             Assert.NotNull(httpManager.GetConfig());
 
             var optimizely = new Optimizely(httpManager);
@@ -86,6 +86,44 @@ namespace OptimizelySDK.Tests.OptimizelyConfigTests
             Assert.NotNull(optimizelyConfig.ExperimentsMap);
             Assert.NotNull(optimizelyConfig.FeaturesMap);
             Assert.NotNull(optimizelyConfig.Revision);
+
+            optimizely.Dispose();
+
+            var optimizelyConfigAfterDispose = optimizely.GetOptimizelyConfig();
+            Assert.Null(optimizelyConfigAfterDispose);
+        }
+
+        [Test]
+        public void TestPollingMultipleTimesGetOptimizelyConfig()
+        {
+            HttpProjectConfigManager httpManager = new HttpProjectConfigManager.Builder()
+               .WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z")
+               .WithLogger(LoggerMock.Object)
+               .WithPollingInterval(TimeSpan.FromMilliseconds(100))
+               .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(500))
+               .WithStartByDefault()
+               .Build(true);
+
+            Assert.NotNull(httpManager.GetConfig());
+
+            var optimizely = new Optimizely(httpManager);
+
+            var optimizelyConfig = optimizely.GetOptimizelyConfig();
+
+            Assert.NotNull(optimizelyConfig);
+            Assert.NotNull(optimizelyConfig.ExperimentsMap);
+            Assert.NotNull(optimizelyConfig.FeaturesMap);
+            Assert.NotNull(optimizelyConfig.Revision);
+
+            Thread.Sleep(210);
+
+            optimizelyConfig = optimizely.GetOptimizelyConfig();
+
+            Assert.NotNull(optimizelyConfig);
+            Assert.NotNull(optimizelyConfig.ExperimentsMap);
+            Assert.NotNull(optimizelyConfig.FeaturesMap);
+            Assert.NotNull(optimizelyConfig.Revision);
+
 
             optimizely.Dispose();
 

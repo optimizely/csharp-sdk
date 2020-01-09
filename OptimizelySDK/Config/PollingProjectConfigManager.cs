@@ -30,7 +30,7 @@ namespace OptimizelySDK.Config
     /// Instances of this class, must implement the <see cref="Poll()"/> method
     /// which is responsible for fetching a given ProjectConfig.
     /// </summary>
-    public abstract class PollingProjectConfigManager : ProjectConfigManager, IDisposable, IOptimizelyConfigManager
+    public abstract class PollingProjectConfigManager : ProjectConfigManager, IOptimizelyConfigManager, IDisposable
     {
         public bool Disposed { get; private set; }
 
@@ -147,7 +147,8 @@ namespace OptimizelySDK.Config
                 return false;
             
             CurrentProjectConfig = projectConfig;
-            CurrentOptimizelyConfig = new OptimizelyConfigService(CurrentProjectConfig).GetOptimizelyConfig();
+            SetOptimizelyConfig(CurrentProjectConfig);
+
             // SetResult raise exception if called again, that's why Try is used.
             CompletableConfigManager.TrySetResult(true);
                         
@@ -155,6 +156,18 @@ namespace OptimizelySDK.Config
 
             
             return true;
+        }
+
+        private void SetOptimizelyConfig(ProjectConfig projectConfig)
+        {
+            try
+            {
+                CurrentOptimizelyConfig = new OptimizelyConfigService(projectConfig).GetOptimizelyConfig();
+            }
+            catch (Exception ex)
+            {
+                Logger.Log(LogLevel.ERROR, ex.Message);
+            }
         }
 
         /// <summary>
