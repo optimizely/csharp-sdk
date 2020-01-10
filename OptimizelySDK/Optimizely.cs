@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2017-2019, Optimizely
+ * Copyright 2017-2020, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use file except in compliance with the License.
@@ -27,6 +27,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using OptimizelySDK.Config;
 using OptimizelySDK.Event;
+using OptimizelySDK.OptlyConfig;
 
 namespace OptimizelySDK
 {
@@ -722,6 +723,32 @@ namespace OptimizelySDK
             }
 
             return enabledFeaturesList;
+        }
+
+        /// <summary>
+        /// Get OptimizelyConfig containing experiments and features map
+        /// </summary>
+        /// <returns>OptimizelyConfig Object</returns>
+        public OptimizelyConfig GetOptimizelyConfig()
+        {
+            var config = ProjectConfigManager?.GetConfig();
+
+            if (config == null)
+            {
+                Logger.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'GetOptimizelyConfig'.");
+                return null;
+            }
+
+            // PollingProjectConfigManager now also implements IOptimizelyConfigManager interface to support OptimizelyConfigService API.
+            // This check is needed in case a consumer provides their own ProjectConfigManager which does not implement IOptimizelyConfigManager interface
+            if (ProjectConfigManager is IOptimizelyConfigManager)
+            {
+                return ((IOptimizelyConfigManager) ProjectConfigManager).GetOptimizelyConfig();
+            }
+
+            Logger.Log(LogLevel.DEBUG, "ProjectConfigManager is not instance of IOptimizelyConfigManager, generating new OptimizelyConfigObject as a fallback");
+
+            return new OptimizelyConfigService(config).GetOptimizelyConfig();
         }
 
 #endregion // FeatureFlag APIs

@@ -113,6 +113,13 @@
     <Compile Include="Notifications\NotificationCenter.cs" />
     <Compile Include="Optimizely.cs" />
     <Compile Include="Bucketing\UserProfile.cs" />
+    <Compile Include="OptlyConfig\IOptimizelyConfigManager.cs" />
+    <Compile Include="OptlyConfig\OptimizelyConfig.cs" />
+    <Compile Include="OptlyConfig\OptimizelyConfigService.cs" />
+    <Compile Include="OptlyConfig\OptimizelyExperiment.cs" />
+    <Compile Include="OptlyConfig\OptimizelyFeature.cs" />
+    <Compile Include="OptlyConfig\OptimizelyVariable.cs" />
+    <Compile Include="OptlyConfig\OptimizelyVariation.cs" />
     <Compile Include="Utils\AttributeMatchTypes.cs" />
     <Compile Include="Utils\ConditionParser.cs" />
     <Compile Include="Utils\DecisionInfoTypes.cs" />

@@ -542,6 +542,16 @@ namespace OptimizelySDK.Config
         }
 
         /// <summary>
+        /// provides List of features associated with given experiment.
+        /// </summary>
+        /// <param name="experimentId">Experiment Id</param>
+        /// <returns>List| Feature flag ids list, null otherwise</returns>
+        public List<string> GetExperimentFeatureList(string experimentId)
+        {
+            return IsFeatureExperiment(experimentId) ? ExperimentFeatureMap[experimentId] : null;
+        }
+
+        /// <summary>
         /// Check if the provided experiment Id belongs to any feature, false otherwise.
         /// </summary>
         /// <param name="experimentId">Experiment Id</param>
