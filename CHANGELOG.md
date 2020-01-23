@@ -1,5 +1,18 @@
 # Optimizely C# SDK Changelog
 
+## 3.4.0
+January 23rd, 2020
+
+### New Features
+- Added a new API to get a project configuration static data.
+  - Call `GetOptimizelyConfig()` to get a snapshot copy of project configuration static data.
+  - It returns an `OptimizelyConfig` instance which includes a datafile revision number, all experiments, and feature flags mapped by their key values.
+  - Added caching for `GetOptimizelyConfig` - `OptimizelyConfig` object will be cached and reused for the lifetime of the datafile
+  - For details, refer to a documention page: https://docs.developers.optimizely.com/full-stack/docs/optimizelyconfig-csharp
+
+### Bug Fixes:
+- Blocking timeout was not being assigned. When not providing any value, it was just logging not setting up periodinterval and blocking timeout value. [#202](https://github.com/optimizely/csharp-sdk/pull/202)
+
 ## 3.3.0
 September 26th, 2019
 
