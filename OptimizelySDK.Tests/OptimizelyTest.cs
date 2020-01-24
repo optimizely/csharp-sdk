@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2017-2019, Optimizely
+ * Copyright 2017-2020, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1178,7 +1178,7 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
-        public void TestGetFeatureVariableDoubleCulturedEn()
+        public void TestGetFeatureVariableDoubleFRCulture()
         {
             SetCulture("en-US");
             var fallbackConfigManager = new FallbackProjectConfigManager(Config);
@@ -1195,7 +1195,7 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
-        public void TestGetFeatureVariableIntegerCultured()
+        public void TestGetFeatureVariableIntegerFRCulture()
         {
             SetCulture("en-US");
             var fallbackConfigManager = new FallbackProjectConfigManager(Config);
@@ -1212,7 +1212,7 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
-        public void TestGetFeatureVariableBooleanCultured()
+        public void TestGetFeatureVariableBooleanFRCulture()
         {
             SetCulture("en-US");
             var fallbackConfigManager = new FallbackProjectConfigManager(Config);
@@ -1229,7 +1229,7 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
-        public void TestGetFeatureVariableStringCultured()
+        public void TestGetFeatureVariableStringFRCulture()
         {
             SetCulture("en-US");
             var fallbackConfigManager = new FallbackProjectConfigManager(Config);
