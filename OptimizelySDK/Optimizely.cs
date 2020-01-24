@@ -795,8 +795,8 @@ namespace OptimizelySDK
                     bool.TryParse(value, out bool booleanValue);
                     result = booleanValue;
                     break;
-                case FeatureVariable.VariableType.DOUBLE:
-                    double.TryParse(value, out double doubleValue);
+                case FeatureVariable.VariableType.DOUBLE:                    
+                    double.TryParse(value, System.Globalization.NumberStyles.Number, System.Globalization.CultureInfo.InvariantCulture, out double doubleValue);
                     result = doubleValue;
                     break;
                 case FeatureVariable.VariableType.INTEGER:
