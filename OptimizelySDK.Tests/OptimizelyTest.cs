@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2017-2019, Optimizely
+ * Copyright 2017-2020, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,8 @@ using OptimizelySDK.Utils;
 using OptimizelySDK.Config;
 using OptimizelySDK.Event.Entity;
 using OptimizelySDK.OptlyConfig;
+using System.Globalization;
+using System.Threading;
 
 namespace OptimizelySDK.Tests
 {
@@ -1173,6 +1175,74 @@ namespace OptimizelySDK.Tests
             OptimizelyMock.Setup(om => om.GetFeatureVariableValueForType<bool?>(It.IsAny<string>(), variableKeyNull, It.IsAny<string>(),
                 It.IsAny<UserAttributes>(), featureVariableType)).Returns<bool?>(null);
             Assert.Null(OptimizelyMock.Object.GetFeatureVariableBoolean(featureKey, variableKeyNull, TestUserId, null));
+        }
+
+        [Test]
+        public void TestGetFeatureVariableDoubleFRCulture()
+        {
+            SetCulture("en-US");
+            var fallbackConfigManager = new FallbackProjectConfigManager(Config);
+
+            var optimizely = new Optimizely(fallbackConfigManager);
+
+            var doubleValue = optimizely.GetFeatureVariableDouble("double_single_variable_feature", "double_variable", "testUser1");
+            
+            Assert.AreEqual(doubleValue, 14.99);
+
+            SetCulture("fr-FR");            
+            var doubleValueFR = optimizely.GetFeatureVariableDouble("double_single_variable_feature", "double_variable", "testUser1");
+            Assert.AreEqual(doubleValueFR, 14.99);
+        }
+
+        [Test]
+        public void TestGetFeatureVariableIntegerFRCulture()
+        {
+            SetCulture("en-US");
+            var fallbackConfigManager = new FallbackProjectConfigManager(Config);
+
+            var optimizely = new Optimizely(fallbackConfigManager);
+
+            var integerValue = optimizely.GetFeatureVariableInteger("integer_single_variable_feature", "integer_variable", "testUser1");
+
+            Assert.AreEqual(integerValue, 13);
+
+            SetCulture("fr-FR");
+            var integerValueFR = optimizely.GetFeatureVariableInteger("integer_single_variable_feature", "integer_variable", "testUser1");
+            Assert.AreEqual(integerValueFR, 13);
+        }
+
+        [Test]
+        public void TestGetFeatureVariableBooleanFRCulture()
+        {
+            SetCulture("en-US");
+            var fallbackConfigManager = new FallbackProjectConfigManager(Config);
+
+            var optimizely = new Optimizely(fallbackConfigManager);
+
+            var booleanValue = optimizely.GetFeatureVariableBoolean("boolean_single_variable_feature", "boolean_variable", "testUser1");
+
+            Assert.AreEqual(booleanValue, false);
+
+            SetCulture("fr-FR");
+            var booleanValueFR = optimizely.GetFeatureVariableBoolean("boolean_single_variable_feature", "boolean_variable", "testUser1");
+            Assert.AreEqual(booleanValueFR, false);
+        }
+
+        [Test]
+        public void TestGetFeatureVariableStringFRCulture()
+        {
+            SetCulture("en-US");
+            var fallbackConfigManager = new FallbackProjectConfigManager(Config);
+
+            var optimizely = new Optimizely(fallbackConfigManager);
+
+            var stringValue = optimizely.GetFeatureVariableString("string_single_variable_feature", "string_variable", "testUser1");
+
+            Assert.AreEqual(stringValue, "cta_1");
+
+            SetCulture("fr-FR");
+            var stringValueFR = optimizely.GetFeatureVariableString("string_single_variable_feature", "string_variable", "testUser1");
+            Assert.AreEqual(stringValueFR, "cta_1");
         }
 
         [Test]
@@ -3425,6 +3495,16 @@ namespace OptimizelySDK.Tests
             Assert.IsNull(optimizelyConfig);
         }
 
+        #endregion
+
+
+        #region Test Culture
+        public static void SetCulture(string culture)
+        {
+            var ci1 = new CultureInfo(culture);
+            Thread.CurrentThread.CurrentCulture = ci1;
+            Thread.CurrentThread.CurrentUICulture = ci1;
+        }
         #endregion
     }
 }
