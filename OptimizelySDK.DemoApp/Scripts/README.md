@@ -47,7 +47,7 @@ the poppers.
 Some of the key points are:
 
 - Position elements keeping them in their original DOM context (doesn't mess with your DOM!);
-- Allows to export the computed informations to integrate with React and other view libraries;
+- Allows to export the computed information to integrate with React and other view libraries;
 - Supports Shadow DOM elements;
 - Completely customizable thanks to the modifiers based structure;
 
@@ -122,7 +122,7 @@ var anotherPopper = new Popper(
 ### Callbacks
 
 Popper.js supports two kinds of callbacks, the `onCreate` callback is called after
-the popper has been initalized. The `onUpdate` one is called on any subsequent update.
+the popper has been initialized. The `onUpdate` one is called on any subsequent update.
 
 ```js
 const reference = document.querySelector('.my-button');
