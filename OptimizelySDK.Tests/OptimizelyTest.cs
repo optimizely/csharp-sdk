@@ -1158,7 +1158,7 @@ namespace OptimizelySDK.Tests
             var variableKeyFalse = "varFalse";
             var variableKeyNonBoolean = "varNonBoolean";
             var variableKeyNull = "varNull";
-            var featureVariableType = FeatureVariable.VariableType.BOOLEAN;
+            var featureVariableType = "boolean";
 
             OptimizelyMock.Setup(om => om.GetFeatureVariableValueForType<bool?>(It.IsAny<string>(), variableKeyTrue, It.IsAny<string>(),
                 It.IsAny<UserAttributes>(), featureVariableType)).Returns(true);
@@ -1253,7 +1253,7 @@ namespace OptimizelySDK.Tests
             var variableKeyInt = "varInt";
             var variableKeyNonDouble = "varNonDouble";
             var variableKeyNull = "varNull";
-            var featureVariableType = FeatureVariable.VariableType.DOUBLE;
+            var featureVariableType = "double";
 
             OptimizelyMock.Setup(om => om.GetFeatureVariableValueForType<double?>(It.IsAny<string>(), variableKeyDouble, It.IsAny<string>(),
                 It.IsAny<UserAttributes>(), featureVariableType)).Returns(100.54);
@@ -1279,7 +1279,7 @@ namespace OptimizelySDK.Tests
             var variableKeyInt = "varInt";
             var variableNonInt = "varNonInt";
             var variableKeyNull = "varNull";
-            var featureVariableType = FeatureVariable.VariableType.INTEGER;
+            var featureVariableType = "integer";
 
             OptimizelyMock.Setup(om => om.GetFeatureVariableValueForType<int?>(It.IsAny<string>(), variableKeyInt, It.IsAny<string>(),
                 It.IsAny<UserAttributes>(), featureVariableType)).Returns(100);
@@ -1301,7 +1301,7 @@ namespace OptimizelySDK.Tests
             var variableKeyString = "varString1";
             var variableKeyIntString = "varString2";
             var variableKeyNull = "varNull";
-            var featureVariableType = FeatureVariable.VariableType.STRING;
+            var featureVariableType = "string";
 
             OptimizelyMock.Setup(om => om.GetFeatureVariableValueForType<string>(It.IsAny<string>(), variableKeyString, It.IsAny<string>(),
                 It.IsAny<UserAttributes>(), featureVariableType)).Returns("Test String");
@@ -1558,7 +1558,7 @@ namespace OptimizelySDK.Tests
         {
             var featureKey = "featureKey";
             var variableKey = "variableKey";
-            var variableType = FeatureVariable.VariableType.BOOLEAN;
+            var variableType = "boolean";
 
             // Passing null and empty feature key.
             Assert.IsNull(Optimizely.GetFeatureVariableValueForType<bool?>(null, variableKey, TestUserId, null, variableType));
@@ -1583,7 +1583,7 @@ namespace OptimizelySDK.Tests
         {
             var featureKey = "this_feature_should_never_be_found_in_the_datafile_unless_the_datafile_creator_got_insane";
             var variableKey = "this_variable_should_never_be_found_in_the_datafile_unless_the_datafile_creator_got_insane";
-            var variableType = FeatureVariable.VariableType.BOOLEAN;
+            var variableType = "boolean";
 
             Assert.IsNull(Optimizely.GetFeatureVariableValueForType<bool?>(featureKey, variableKey, TestUserId, null, variableType));
             Assert.IsNull(Optimizely.GetFeatureVariableValueForType<bool?>("double_single_variable_feature", variableKey, TestUserId, null, variableType));
@@ -1597,10 +1597,10 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestGetFeatureVariableValueForTypeGivenInvalidVariableType()
         {
-            var variableTypeBool = FeatureVariable.VariableType.BOOLEAN;
-            var variableTypeInt = FeatureVariable.VariableType.INTEGER;
-            var variableTypeDouble = FeatureVariable.VariableType.DOUBLE;
-            var variableTypeString = FeatureVariable.VariableType.STRING;
+            var variableTypeBool = "boolean";
+            var variableTypeInt = "integer";
+            var variableTypeDouble = "double";
+            var variableTypeString = "string";
 
             Assert.IsNull(Optimizely.GetFeatureVariableValueForType<double?>("double_single_variable_feature", "double_variable", TestUserId, null, variableTypeBool));
             Assert.IsNull(Optimizely.GetFeatureVariableValueForType<bool?>("boolean_single_variable_feature", "boolean_variable", TestUserId, null, variableTypeDouble));
@@ -1608,13 +1608,23 @@ namespace OptimizelySDK.Tests
             Assert.IsNull(Optimizely.GetFeatureVariableValueForType<string>("string_single_variable_feature", "string_variable", TestUserId, null, variableTypeInt));
 
             LoggerMock.Verify(l => l.Log(LogLevel.ERROR,
-                $@"Variable is of type ""DOUBLE"", but you requested it as type ""{variableTypeBool}""."));
+                $@"Variable is of type ""double"", but you requested it as type ""{variableTypeBool}""."));
             LoggerMock.Verify(l => l.Log(LogLevel.ERROR,
-                $@"Variable is of type ""BOOLEAN"", but you requested it as type ""{variableTypeDouble}""."));
+                $@"Variable is of type ""boolean"", but you requested it as type ""{variableTypeDouble}""."));
             LoggerMock.Verify(l => l.Log(LogLevel.ERROR,
-                $@"Variable is of type ""INTEGER"", but you requested it as type ""{variableTypeString}""."));
+                $@"Variable is of type ""integer"", but you requested it as type ""{variableTypeString}""."));
             LoggerMock.Verify(l => l.Log(LogLevel.ERROR,
-                $@"Variable is of type ""STRING"", but you requested it as type ""{variableTypeInt}""."));
+                $@"Variable is of type ""string"", but you requested it as type ""{variableTypeInt}""."));
+        }
+
+        [Test]
+        public void TestUnsupportedVariableType()
+        {
+            var featureVariableStringRandomType = Optimizely.GetFeatureVariableString("", "any_key", TestUserId);
+            Assert.IsNull(featureVariableStringRandomType);
+
+            var featureVariableStringJsonType = Optimizely.GetFeatureVariableString("unsupported_variabletype", "string_json_key", TestUserId);
+            Assert.AreEqual(featureVariableStringJsonType, "{\"myvalue\": \"jsonValue\"}");            
         }
 
         // Should return default value and log message when feature is not enabled for the user.
@@ -1626,7 +1636,7 @@ namespace OptimizelySDK.Tests
             var experiment = Config.GetExperimentFromKey("test_experiment_double_feature");
             var variation = Config.GetVariationFromKey("test_experiment_double_feature", "variation");
             var variableKey = "double_variable";
-            var variableType = FeatureVariable.VariableType.DOUBLE;
+            var variableType = "double";
             var expectedValue = 14.99;
 
             var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_FEATURE_TEST);
@@ -1656,7 +1666,7 @@ namespace OptimizelySDK.Tests
             var differentVariation = Config.GetVariationFromKey("test_experiment_integer_feature", "control");
             var expectedDecision = new FeatureDecision(experiment, differentVariation, FeatureDecision.DECISION_SOURCE_FEATURE_TEST);
             var variableKey = "double_variable";
-            var variableType = FeatureVariable.VariableType.DOUBLE;
+            var variableType = "double";
             var expectedValue = 14.99;
 
             // Mock GetVariationForFeature method to return variation of different feature.
@@ -1682,7 +1692,7 @@ namespace OptimizelySDK.Tests
             var featureKey = "double_single_variable_feature";
             var featureFlag = Config.GetFeatureFlagFromKey("double_single_variable_feature");
             var variableKey = "double_variable";
-            var variableType = FeatureVariable.VariableType.DOUBLE;
+            var variableType = "double";
             var expectedValue = 42.42;
             var experiment = Config.GetExperimentFromKey("test_experiment_double_feature");
             var variation = Config.GetVariationFromKey("test_experiment_double_feature", "control");

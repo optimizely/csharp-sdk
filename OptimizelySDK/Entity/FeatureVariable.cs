@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2017, 2019, Optimizely
+ * Copyright 2017, 2019-2020, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,22 +18,20 @@ namespace OptimizelySDK.Entity
 {
     public class FeatureVariable : IdKeyEntity
     {
+        public const string STRING_TYPE = "string";
+        public const string INTEGER_TYPE = "integer";
+        public const string DOUBLE_TYPE = "double";
+        public const string BOOLEAN_TYPE = "boolean";
+        
         public enum VariableStatus
         {
             ACTIVE,
             ARCHIVED
         }
 
-        public enum VariableType
-        {
-            BOOLEAN,
-            INTEGER,
-            DOUBLE,
-            STRING
-        }
 
         public string DefaultValue { get; set; }
-        public VariableType Type { get; set; }
+        public string Type { get; set; }
         public VariableStatus Status { get; set; }
 
         /// <summary>
@@ -41,16 +39,16 @@ namespace OptimizelySDK.Entity
         /// </summary>
         /// <returns>The feature variable type name.</returns>
         /// <param name="variableType">Variable type.</param>
-        public static string GetFeatureVariableTypeName(VariableType variableType)
+        public static string GetFeatureVariableTypeName(string variableType)
         {
             switch (variableType) {
-                case FeatureVariable.VariableType.BOOLEAN:
+                case BOOLEAN_TYPE:
                     return "GetFeatureVariableBoolean";
-                case FeatureVariable.VariableType.DOUBLE:
+                case DOUBLE_TYPE:
                     return "GetFeatureVariableDouble";
-                case FeatureVariable.VariableType.INTEGER:
+                case INTEGER_TYPE:
                     return "GetFeatureVariableInteger";
-                case FeatureVariable.VariableType.STRING:
+                case STRING_TYPE:
                     return "GetFeatureVariableString";
                 default:
                     return null;
