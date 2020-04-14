@@ -561,7 +561,7 @@
 					"key": "integer_variable",
 					"type": "integer",
 					"defaultValue": "7"
-				}
+				}				
 			]
 		},
 		{
@@ -639,6 +639,28 @@
 			"rolloutId": "166662",
 			"experimentIds": [],
 			"variables": []
+		},
+		{
+			"id": "155566",
+			"key": "unsupported_variabletype",
+			"rolloutId": "166662",
+			"experimentIds": [],
+			"variables": [
+				{
+					"id": "255554",
+					"key": "any_key",
+					"type": "random",
+					"defaultValue": "{}"
+				},
+				{
+					"id": "255555",
+					"key": "string_json_key",
+					"type": "string",
+					"defaultValue": "{\"myvalue\": \"jsonValue\"}",
+					"subType": "json"
+				}
+			]
+
 		}
 	],
 	"rollouts": [

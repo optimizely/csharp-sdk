@@ -1,5 +1,5 @@
 /* 
- * Copyright 2019, Optimizely
+ * Copyright 2019-2020, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,10 +26,19 @@ namespace OptimizelySDK.Tests.EntityTests
         [Test]
         public void TestFeatureVariableTypeName()
         {
-            Assert.AreEqual(FeatureVariable.GetFeatureVariableTypeName(FeatureVariable.VariableType.BOOLEAN), "GetFeatureVariableBoolean");
-            Assert.AreEqual(FeatureVariable.GetFeatureVariableTypeName(FeatureVariable.VariableType.DOUBLE), "GetFeatureVariableDouble");
-            Assert.AreEqual(FeatureVariable.GetFeatureVariableTypeName(FeatureVariable.VariableType.INTEGER), "GetFeatureVariableInteger");
-            Assert.AreEqual(FeatureVariable.GetFeatureVariableTypeName(FeatureVariable.VariableType.STRING), "GetFeatureVariableString");
+            Assert.AreEqual(FeatureVariable.GetFeatureVariableTypeName(FeatureVariable.BOOLEAN_TYPE), "GetFeatureVariableBoolean");
+            Assert.AreEqual(FeatureVariable.GetFeatureVariableTypeName(FeatureVariable.DOUBLE_TYPE), "GetFeatureVariableDouble");
+            Assert.AreEqual(FeatureVariable.GetFeatureVariableTypeName(FeatureVariable.INTEGER_TYPE), "GetFeatureVariableInteger");
+            Assert.AreEqual(FeatureVariable.GetFeatureVariableTypeName(FeatureVariable.STRING_TYPE), "GetFeatureVariableString");
+        }
+
+        [Test]
+        public void TestConstantValues()
+        {
+            Assert.AreEqual(FeatureVariable.BOOLEAN_TYPE, "boolean");
+            Assert.AreEqual(FeatureVariable.DOUBLE_TYPE, "double");
+            Assert.AreEqual(FeatureVariable.INTEGER_TYPE, "integer");
+            Assert.AreEqual(FeatureVariable.STRING_TYPE, "string");
         }
     }
 }
