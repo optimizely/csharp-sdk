@@ -399,7 +399,8 @@ namespace OptimizelySDK.Tests
                 { "multi_variate_feature", Config.GetFeatureFlagFromKey("multi_variate_feature") },
                 { "mutex_group_feature", Config.GetFeatureFlagFromKey("mutex_group_feature") },
                 { "empty_feature", Config.GetFeatureFlagFromKey("empty_feature") },
-                { "no_rollout_experiment_feature", Config.GetFeatureFlagFromKey("no_rollout_experiment_feature") }
+                { "no_rollout_experiment_feature", Config.GetFeatureFlagFromKey("no_rollout_experiment_feature") },
+                { "unsupported_variabletype", Config.GetFeatureFlagFromKey("unsupported_variabletype") }
             };
 
             Assert.IsTrue(TestData.CompareObjects(expectedFeatureKeyMap, Config.FeatureKeyMap));
