@@ -20,7 +20,7 @@ using System.Collections.Generic;
 
 namespace OptimizelySDK.Entity
 {
-    class OptimizelyJson 
+    public class OptimizelyJson 
     {
         private ILogger Logger;
         private string Payload { get; set; }
@@ -55,7 +55,8 @@ namespace OptimizelySDK.Entity
             }
         }
 
-        public string ToString => Payload;
+        override
+        public string ToString() { return Payload; }
 
         public Dictionary<string, object> ToDictionary()
         {
@@ -70,22 +71,21 @@ namespace OptimizelySDK.Entity
         /// </summary>
         /// <param name="jsonPath">Key path for the value.</param>
         /// <returns>Value if decoded successfully</returns>
-        public object GetValue<T>(string jsonPath)
+        public T GetValue<T>(string jsonPath)
         {
             try
             {
                 string[] path = jsonPath.Split('.');
-                Dictionary<string, object> currentObject = null;
+                Dictionary<string, object> currentObject = Dict;
                 for (int i = 0; i < path.Length - 1; i++)
                 {
-                    if (currentObject[path[i]] is Dictionary<string, object>)
+                    if (currentObject[path[i]] is Newtonsoft.Json.Linq.JObject)
                     {
-                        currentObject = (Dictionary<string, object>)currentObject[path[i]];
-                    }
-                    else
-                    {
-                        Logger.Log(LogLevel.ERROR, "Value for path could not be assigned to provided type.");
-                        return false;
+                        currentObject = ((Newtonsoft.Json.Linq.JObject)currentObject[path[i]]).ToObject<Dictionary<string, object>>();
+                    } 
+                    else 
+                    { 
+                        currentObject = currentObject[path[i]] as Dictionary<string, object>;
                     }
                 }
                 return (T) currentObject[path[path.Length - 1]];
@@ -95,7 +95,7 @@ namespace OptimizelySDK.Entity
                 Logger.Log(LogLevel.ERROR, "Value for path could not be assigned to provided type.");
                 Logger.Log(LogLevel.ERROR, ex.Message);
             }
-            return false;
+            return default;
         }
     }
 }
