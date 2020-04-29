@@ -22,6 +22,8 @@ namespace OptimizelySDK.Entity
         public const string INTEGER_TYPE = "integer";
         public const string DOUBLE_TYPE = "double";
         public const string BOOLEAN_TYPE = "boolean";
+
+        public const string VARIABLE_SUB_TYPE = "json";
         
         public enum VariableStatus
         {
@@ -32,6 +34,7 @@ namespace OptimizelySDK.Entity
 
         public string DefaultValue { get; set; }
         public string Type { get; set; }
+        public string SubType { get; set; }
         public VariableStatus Status { get; set; }
 
         /// <summary>

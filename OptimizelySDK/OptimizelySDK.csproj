@@ -86,6 +86,7 @@
     <Compile Include="Entity\ForcedVariation.cs" />
     <Compile Include="Entity\Group.cs" />
     <Compile Include="Entity\IdKeyEntity.cs" />
+    <Compile Include="Entity\OptimizelyJson.cs" />
     <Compile Include="Entity\Rollout.cs" />
     <Compile Include="Entity\TrafficAllocation.cs" />
     <Compile Include="Entity\UserAttributes.cs" />
