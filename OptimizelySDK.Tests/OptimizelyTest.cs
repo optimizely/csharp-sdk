@@ -1316,6 +1316,32 @@ namespace OptimizelySDK.Tests
             Assert.Null(OptimizelyMock.Object.GetFeatureVariableString(featureKey, variableKeyNull, TestUserId, null));
         }
 
+        [Test]
+        public void TestGetFeatureVariableJSONReturnsCorrectValue()
+        {
+            var featureKey = "featureKey";
+            var variableKeyString = "varJSONString1";
+            var variableKeyIntString = "varJSONString2";
+            var variableKeyDouble = "varJSONDouble";
+            var variableKeyNull = "varNull";
+            var featureVariableType = "json";
+
+            OptimizelyMock.Setup(om => om.GetFeatureVariableValueForType<OptimizelyJson>(It.IsAny<string>(), variableKeyString, It.IsAny<string>(),
+                It.IsAny<UserAttributes>(), featureVariableType)).Returns(new OptimizelyJson("{\"string\": \"Test String\"}", LoggerMock.Object));
+            Assert.AreEqual("Test String", OptimizelyMock.Object.GetFeatureVariableJSON(featureKey, variableKeyString, TestUserId, null).GetValue<string>("string"));
+
+            OptimizelyMock.Setup(om => om.GetFeatureVariableValueForType<OptimizelyJson>(It.IsAny<string>(), variableKeyIntString, It.IsAny<string>(),
+                It.IsAny<UserAttributes>(), featureVariableType)).Returns(new OptimizelyJson("{ \"integer\": 123 }", LoggerMock.Object));
+            Assert.AreEqual(123, OptimizelyMock.Object.GetFeatureVariableJSON(featureKey, variableKeyIntString, TestUserId, null).GetValue<long>("integer"));
+
+            OptimizelyMock.Setup(om => om.GetFeatureVariableValueForType<OptimizelyJson>(It.IsAny<string>(), variableKeyDouble, It.IsAny<string>(),
+                It.IsAny<UserAttributes>(), featureVariableType)).Returns(new OptimizelyJson("{ \"double\": 123.28 }", LoggerMock.Object));
+            Assert.AreEqual(123.28, OptimizelyMock.Object.GetFeatureVariableJSON(featureKey, variableKeyDouble, TestUserId, null).GetValue<double>("double"));
+
+            OptimizelyMock.Setup(om => om.GetFeatureVariableValueForType<OptimizelyJson>(It.IsAny<string>(), variableKeyNull, It.IsAny<string>(),
+                It.IsAny<UserAttributes>(), featureVariableType)).Returns<OptimizelyJson>(null);
+            Assert.Null(OptimizelyMock.Object.GetFeatureVariableJSON(featureKey, variableKeyNull, TestUserId, null));
+        }
         #region Feature Toggle Tests
 
         [Test]

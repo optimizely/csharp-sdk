@@ -28,6 +28,7 @@ using System.Reflection;
 using OptimizelySDK.Config;
 using OptimizelySDK.Event;
 using OptimizelySDK.OptlyConfig;
+using System.Net;
 
 namespace OptimizelySDK
 {
@@ -548,9 +549,12 @@ namespace OptimizelySDK
             }
             else if (featureVariable.Type != variableType)
             {
-                Logger.Log(LogLevel.ERROR,
-                    $@"Variable is of type ""{featureVariable.Type}"", but you requested it as type ""{variableType}"".");
-                return default(T);
+                if (featureVariable.SubType != variableType || featureVariable.Type != FeatureVariable.STRING_TYPE)
+                { 
+                    Logger.Log(LogLevel.ERROR,
+                        $@"Variable is of type ""{featureVariable.Type}"", but you requested it as type ""{variableType}"".");
+                    return default(T);
+                }
             }
 
             var featureEnabled = false;
@@ -660,6 +664,19 @@ namespace OptimizelySDK
         public string GetFeatureVariableString(string featureKey, string variableKey, string userId, UserAttributes userAttributes = null)
         {
             return GetFeatureVariableValueForType<string>(featureKey, variableKey, userId, userAttributes, FeatureVariable.STRING_TYPE);
+        }
+
+        /// <summary>
+        /// Gets json sub type feature variable value.
+        /// </summary>
+        /// <param name="featureKey">The feature flag key</param>
+        /// <param name="variableKey">The variable key</param>
+        /// <param name="userId">The user ID</param>
+        /// <param name="userAttributes">The user's attributes</param>
+        /// <returns>OptimizelyJson | Feature variable value or null</returns>
+        public OptimizelyJson GetFeatureVariableJSON(string featureKey, string variableKey, string userId, UserAttributes userAttributes = null)
+        {
+            return GetFeatureVariableValueForType<OptimizelyJson>(featureKey, variableKey, userId, userAttributes, FeatureVariable.JSON_TYPE);
         }
 
         /// <summary>
@@ -805,6 +822,9 @@ namespace OptimizelySDK
                     break;
                 case FeatureVariable.STRING_TYPE:
                     result = value;
+                    break;
+                case FeatureVariable.JSON_TYPE:
+                    result = new OptimizelyJson(value, Logger);
                     break;
             }
 
