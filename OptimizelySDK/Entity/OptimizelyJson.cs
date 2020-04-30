@@ -17,10 +17,11 @@
 using OptimizelySDK.Logger;
 using System;
 using System.Collections.Generic;
+using Newtonsoft.Json.Linq;
 
 namespace OptimizelySDK.Entity
 {
-    public class OptimizelyJson 
+    public class OptimizelyJson
     {
         private ILogger Logger;
         private string Payload { get; set; }
@@ -56,7 +57,8 @@ namespace OptimizelySDK.Entity
         }
 
         override
-        public string ToString() { return Payload; }
+        public string ToString()
+        { return Payload; }
 
         public Dictionary<string, object> ToDictionary()
         {
@@ -79,16 +81,16 @@ namespace OptimizelySDK.Entity
                 Dictionary<string, object> currentObject = Dict;
                 for (int i = 0; i < path.Length - 1; i++)
                 {
-                    if (currentObject[path[i]] is Newtonsoft.Json.Linq.JObject)
+                    if (currentObject[path[i]] is JObject)
                     {
-                        currentObject = ((Newtonsoft.Json.Linq.JObject)currentObject[path[i]]).ToObject<Dictionary<string, object>>();
-                    } 
-                    else 
-                    { 
+                        currentObject = ((JObject)currentObject[path[i]]).ToObject<Dictionary<string, object>>();
+                    }
+                    else
+                    {
                         currentObject = currentObject[path[i]] as Dictionary<string, object>;
                     }
                 }
-                return (T) currentObject[path[path.Length - 1]];
+                return (T)currentObject[path[path.Length - 1]];
             }
             catch (Exception ex)
             {
