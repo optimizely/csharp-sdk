@@ -1,5 +1,12 @@
 # Optimizely C# SDK Changelog
 
+## 3.4.1
+April 29th, 2020
+
+### Bug Fixes:
+- Change FeatureVariable type from enum to string for forward compatibility. [#211](https://github.com/optimizely/csharp-sdk/pull/211)
+- GetFeatureVariableDouble was returning 0 for FR culture. Fixed this issue by returning Invariant culture. [#209](https://github.com/optimizely/csharp-sdk/pull/209)
+
 ## 3.4.0
 January 23rd, 2020
 
