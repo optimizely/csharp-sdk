@@ -97,7 +97,7 @@ namespace OptimizelySDK.Entity
                 Logger.Log(LogLevel.ERROR, "Value for path could not be assigned to provided type.");
                 Logger.Log(LogLevel.ERROR, ex.Message);
             }
-            return default;
+            return default(T);
         }
     }
 }
