@@ -515,7 +515,7 @@ namespace OptimizelySDK
         /// <param name="variableType">Variable type</param>
         /// <returns>string | null Feature variable value</returns>
         public virtual T GetFeatureVariableValueForType<T>(string featureKey, string variableKey, string userId, 
-                                                                     UserAttributes userAttributes, FeatureVariable.VariableType variableType)
+                                                                     UserAttributes userAttributes, string variableType)
         {
 
             var config = ProjectConfigManager?.GetConfig();
@@ -620,7 +620,7 @@ namespace OptimizelySDK
         /// <returns>bool | Feature variable value or null</returns>
         public bool? GetFeatureVariableBoolean(string featureKey, string variableKey, string userId, UserAttributes userAttributes = null)
         {
-            return GetFeatureVariableValueForType<bool?>(featureKey, variableKey, userId, userAttributes, FeatureVariable.VariableType.BOOLEAN);
+            return GetFeatureVariableValueForType<bool?>(featureKey, variableKey, userId, userAttributes, FeatureVariable.BOOLEAN_TYPE);
         }
 
         /// <summary>
@@ -633,7 +633,7 @@ namespace OptimizelySDK
         /// <returns>double | Feature variable value or null</returns>
         public double? GetFeatureVariableDouble(string featureKey, string variableKey, string userId, UserAttributes userAttributes = null)
         {
-            return GetFeatureVariableValueForType<double?>(featureKey, variableKey, userId, userAttributes, FeatureVariable.VariableType.DOUBLE);
+            return GetFeatureVariableValueForType<double?>(featureKey, variableKey, userId, userAttributes, FeatureVariable.DOUBLE_TYPE);
         }
 
         /// <summary>
@@ -646,7 +646,7 @@ namespace OptimizelySDK
         /// <returns>int | Feature variable value or null</returns>
         public int? GetFeatureVariableInteger(string featureKey, string variableKey, string userId, UserAttributes userAttributes = null)
         {
-            return GetFeatureVariableValueForType<int?>(featureKey, variableKey, userId, userAttributes, FeatureVariable.VariableType.INTEGER);
+            return GetFeatureVariableValueForType<int?>(featureKey, variableKey, userId, userAttributes, FeatureVariable.INTEGER_TYPE);
         }
 
         /// <summary>
@@ -659,7 +659,7 @@ namespace OptimizelySDK
         /// <returns>string | Feature variable value or null</returns>
         public string GetFeatureVariableString(string featureKey, string variableKey, string userId, UserAttributes userAttributes = null)
         {
-            return GetFeatureVariableValueForType<string>(featureKey, variableKey, userId, userAttributes, FeatureVariable.VariableType.STRING);
+            return GetFeatureVariableValueForType<string>(featureKey, variableKey, userId, userAttributes, FeatureVariable.STRING_TYPE);
         }
 
         /// <summary>
@@ -786,24 +786,24 @@ namespace OptimizelySDK
             return isValid;
         }
 
-        private object GetTypeCastedVariableValue(string value, FeatureVariable.VariableType type)
+        private object GetTypeCastedVariableValue(string value, string type)
         {
             object result = null;
             switch (type)
             {
-                case FeatureVariable.VariableType.BOOLEAN:
+                case FeatureVariable.BOOLEAN_TYPE:
                     bool.TryParse(value, out bool booleanValue);
                     result = booleanValue;
                     break;
-                case FeatureVariable.VariableType.DOUBLE:
-                    double.TryParse(value, out double doubleValue);
+                case FeatureVariable.DOUBLE_TYPE:                    
+                    double.TryParse(value, System.Globalization.NumberStyles.Number, System.Globalization.CultureInfo.InvariantCulture, out double doubleValue);
                     result = doubleValue;
                     break;
-                case FeatureVariable.VariableType.INTEGER:
+                case FeatureVariable.INTEGER_TYPE:
                     int.TryParse(value, out int intValue);
                     result = intValue;
                     break;
-                case FeatureVariable.VariableType.STRING:
+                case FeatureVariable.STRING_TYPE:
                     result = value;
                     break;
             }

@@ -24,7 +24,7 @@ Using the instructions below, you can run the app locally and mimic bucketing we
 	* Metrics: "Overall revenue"
 	* Event Key: "add_to_cart".
 	("Create New Event...", "Add to Experiment")
-5. Save and start your experment
+5. Save and start your experiment
    ("Create Experiment", "Start Experiment")
 6. In "Audiences" tab of your project's Optimizely dashboard, create 
     * 3 Audience attributes "user_id", "user_name", and "age".

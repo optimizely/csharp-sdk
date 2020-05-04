@@ -1,5 +1,25 @@
 # Optimizely C# SDK Changelog
 
+## 3.4.1
+April 29th, 2020
+
+### Bug Fixes:
+- Change FeatureVariable type from enum to string for forward compatibility. [#211](https://github.com/optimizely/csharp-sdk/pull/211)
+- GetFeatureVariableDouble was returning 0 for FR culture. Fixed this issue by returning Invariant culture. [#209](https://github.com/optimizely/csharp-sdk/pull/209)
+
+## 3.4.0
+January 23rd, 2020
+
+### New Features
+- Added a new API to get a project configuration static data.
+  - Call `GetOptimizelyConfig()` to get a snapshot copy of project configuration static data.
+  - It returns an `OptimizelyConfig` instance which includes a datafile revision number, all experiments, and feature flags mapped by their key values.
+  - Added caching for `GetOptimizelyConfig` - `OptimizelyConfig` object will be cached and reused for the lifetime of the datafile
+  - For details, refer to a documentation page: https://docs.developers.optimizely.com/full-stack/docs/optimizelyconfig-csharp
+
+### Bug Fixes:
+- Blocking timeout was not being assigned. When not providing any value, it was just logging not setting up periodinterval and blocking timeout value. [#202](https://github.com/optimizely/csharp-sdk/pull/202)
+
 ## 3.3.0
 September 26th, 2019
 
@@ -10,7 +30,7 @@ September 26th, 2019
 - To configure event batching, set the `MaxEventBatchSize` and `MaxEventFlushInterval` properties in the `OptimizelyFactory` using `OptimizelyFactory.SetBatchSize(int batchSize)` and `OptimizelyFactory.SetFlushInterval(TimeSpan flushInterval)` and then creating using `OptimizelyFactory.NewDefaultInstance`.
 - Event batching is enabled by default. `eventBatchSize` defaults to `10`. `eventFlushInterval` defaults to `30000` milliseconds.
 - Updated the `Dispose` method representing the process of closing the instance. When `Dispose` is called, any events waiting to be sent as part of a batched event request will be immediately batched and sent to the event dispatcher.
-- If any such requests were sent to the event dispatcher, `Stop` waits for provided `TimeoutInterval` before stoping, so that events get successfully dispatched.
+- If any such requests were sent to the event dispatcher, `Stop` waits for provided `TimeoutInterval` before stopping, so that events get successfully dispatched.
 - `OptimizelyFactory` now provides support of setting configuration variables from ***App.config***, User will now be able to provide configuration variables of `HttpConfigManager` and `BatchEventProcessor` in ***App.config***. Steps of usage are provided in [README.md](https://github.com/optimizely/csharp-sdk#using-appconfig-in-optimizelyfactory).
 
 ### Deprecated
@@ -106,7 +126,7 @@ October 26, 2018
 * feat(api): Accepting all types for attributes values ([#102](https://github.com/optimizely/csharp-sdk/pull/102))
 
 ### Bug fixes
-* fix(whitelistng): Removed logic from bucketing since it is checked in Decision Service. ([#98](https://github.com/optimizely/csharp-sdk/pull/98))
+* fix(whitelisting): Removed logic from bucketing since it is checked in Decision Service. ([#98](https://github.com/optimizely/csharp-sdk/pull/98))
 * fix(track): Send decisions for all experiments using an event when using track. ([#100](https://github.com/optimizely/csharp-sdk/pull/100))
 * fix(datafile-parsing): Prevent newer versions datafile ([#101](https://github.com/optimizely/csharp-sdk/pull/101))
 * fix(api): Only track attributes with valid attribute types. ([#103](https://github.com/optimizely/csharp-sdk/pull/103))
