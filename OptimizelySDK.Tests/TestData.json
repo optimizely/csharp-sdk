@@ -171,6 +171,10 @@
 						{
 							"id": "155558",
 							"value": "cta_1"
+						},
+						{
+							"id": "17014990011",
+							"value": "{\"int_var\": 1, \"boolean_key\": false}"
 						}
 					],
 					"featureEnabled": true
@@ -589,6 +593,13 @@
 					"key": "string_variable",
 					"type": "string",
 					"defaultValue": "wingardium leviosa"
+				},
+				{
+					"defaultValue": "{\"int_var\": 5212, \"boolean_key\": true}",
+					"type": "string",
+					"subType": "json",
+					"id": "17014990011",
+					"key": "json_var"
 				}
 			]
 		},
@@ -816,6 +827,10 @@
 								{
 									"id": "155558",
 									"value": "cta_4"
+								},
+								{
+									"id": "17014990011",
+									"value": "{\"int_var\": 4 , \"string_var\": \"cta_4\"}"
 								}
 							],
 							"featureEnabled": true

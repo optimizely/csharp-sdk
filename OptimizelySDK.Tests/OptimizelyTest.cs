@@ -197,6 +197,7 @@ namespace OptimizelySDK.Tests
             Assert.IsNull(optimizely.GetFeatureVariableString(string.Empty, string.Empty, string.Empty));
             Assert.IsNull(optimizely.GetFeatureVariableDouble(string.Empty, string.Empty, string.Empty));
             Assert.IsNull(optimizely.GetFeatureVariableInteger(string.Empty, string.Empty, string.Empty));
+            Assert.IsNull(optimizely.GetFeatureVariableJSON(string.Empty, string.Empty, string.Empty));
 
             LoggerMock.Verify(log => log.Log(LogLevel.ERROR, "Provided 'datafile' has invalid schema."), Times.Once);
             LoggerMock.Verify(log => log.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'GetVariation'."), Times.Once);
@@ -208,6 +209,7 @@ namespace OptimizelySDK.Tests
             LoggerMock.Verify(log => log.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'GetFeatureVariableString'."), Times.Once);
             LoggerMock.Verify(log => log.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'GetFeatureVariableDouble'."), Times.Once);
             LoggerMock.Verify(log => log.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'GetFeatureVariableInteger'."), Times.Once);
+            LoggerMock.Verify(log => log.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'GetFeatureVariableJSON'."), Times.Once);
 
         }
         [Test]
@@ -1246,6 +1248,25 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
+        public void TestGetFeatureVariableJSONFRCulture()
+        {
+            SetCulture("en-US");
+            var fallbackConfigManager = new FallbackProjectConfigManager(Config);
+
+            var optimizely = new Optimizely(fallbackConfigManager);
+
+            var optimizelyJsonValue = optimizely.GetFeatureVariableJSON("string_single_variable_feature", "json_var", "testUser1");
+
+            Assert.AreEqual(optimizelyJsonValue.GetValue<long>("int_var"), 1);
+            Assert.AreEqual(optimizelyJsonValue.GetValue<bool>("boolean_key"), false);
+
+            SetCulture("fr-FR");
+            var optimizelyJsonValueFR = optimizely.GetFeatureVariableJSON("string_single_variable_feature", "json_var", "testUser1");
+            Assert.AreEqual(optimizelyJsonValueFR.GetValue<long>("int_var"), 1);
+            Assert.AreEqual(optimizelyJsonValueFR.GetValue<bool>("boolean_key"), false);
+        }
+
+        [Test]
         public void TestGetFeatureVariableDoubleReturnsCorrectValue()
         {
             var featureKey = "featureKey";
@@ -1471,6 +1492,38 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
+        public void TestGetFeatureVariableJSONReturnsRightValueWhenUserBuckedIntoRolloutAndVariationIsToggleOn()
+        {
+            var featureKey = "string_single_variable_feature";
+            var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
+            var variableKey = "json_var";
+            var expectedStringValue = "cta_4";
+            var expectedIntValue = 4;
+            var experiment = Config.GetRolloutFromId("166661").Experiments[0];
+            var variation = Config.GetVariationFromKey(experiment.Key, "177775");
+            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT);
+            var userAttributes = new UserAttributes
+            {
+               { "device_type", "iPhone" },
+               { "company", "Optimizely" },
+               { "location", "San Francisco" }
+            };
+
+            DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, Config, userAttributes)).Returns(decision);
+
+            var optly = Helper.CreatePrivateOptimizely();
+
+            optly.SetFieldOrProperty("ProjectConfigManager", ConfigManager);
+            optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
+
+            var variableValue = (OptimizelyJson)optly.Invoke("GetFeatureVariableJSON", featureKey, variableKey, TestUserId, userAttributes);
+            Assert.AreEqual(expectedIntValue, variableValue.GetValue<long>("int_var"));
+            Assert.AreEqual(expectedStringValue, variableValue.GetValue<string>("string_var"));
+
+            LoggerMock.Verify(l => l.Log(LogLevel.INFO, $@"Returning variable value ""{variableValue}"" for variation ""{variation.Key}"" of feature flag ""{featureKey}""."));
+        }
+
+        [Test]
         public void TestGetFeatureVariableStringReturnsRightValueWhenUserBuckedIntoRolloutAndVariationIsToggleOn()
         {
             var featureKey = "string_single_variable_feature";
@@ -1632,6 +1685,7 @@ namespace OptimizelySDK.Tests
             Assert.IsNull(Optimizely.GetFeatureVariableValueForType<bool?>("boolean_single_variable_feature", "boolean_variable", TestUserId, null, variableTypeDouble));
             Assert.IsNull(Optimizely.GetFeatureVariableValueForType<int?>("integer_single_variable_feature", "integer_variable", TestUserId, null, variableTypeString));
             Assert.IsNull(Optimizely.GetFeatureVariableValueForType<string>("string_single_variable_feature", "string_variable", TestUserId, null, variableTypeInt));
+            Assert.IsNull(Optimizely.GetFeatureVariableValueForType<OptimizelyJson>("string_single_variable_feature", "json_var", TestUserId, null, variableTypeInt));
 
             LoggerMock.Verify(l => l.Log(LogLevel.ERROR,
                 $@"Variable is of type ""double"", but you requested it as type ""{variableTypeBool}""."));
