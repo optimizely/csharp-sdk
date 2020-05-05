@@ -17,11 +17,12 @@
 
 using Moq;
 using NUnit.Framework;
-using OptimizelySDK.Entity;
+using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Logger;
+using System;
 using System.Collections.Generic;
 
-namespace OptimizelySDK.Tests.EntityTests
+namespace OptimizelySDK.Tests
 {
     [TestFixture]
     public class OptimizelyJsonTest
@@ -29,10 +30,14 @@ namespace OptimizelySDK.Tests.EntityTests
         private string Payload;
         private Dictionary<string, object> Map;
         private Mock<ILogger> LoggerMock;
+        private Mock<IErrorHandler> ErrorHandlerMock;
 
         [SetUp]
         public void Initialize()
         {
+            ErrorHandlerMock = new Mock<IErrorHandler>();
+            ErrorHandlerMock.Setup(e => e.HandleError(It.IsAny<Exception>()));
+
             LoggerMock = new Mock<ILogger>();
             LoggerMock.Setup(i => i.Log(It.IsAny<LogLevel>(), It.IsAny<string>()));
 
@@ -56,8 +61,8 @@ namespace OptimizelySDK.Tests.EntityTests
         [Test]
         public void TestOptimizelyJsonObjectIsValid()
         {
-            OptimizelyJson OptimizelyJSONUsingMap = new OptimizelyJson(Map, LoggerMock.Object);
-            OptimizelyJson OptimizelyJSONUsingString = new OptimizelyJson(Payload, LoggerMock.Object);
+            OptimizelyJson OptimizelyJSONUsingMap = new OptimizelyJson(Map, ErrorHandlerMock.Object, LoggerMock.Object);
+            OptimizelyJson OptimizelyJSONUsingString = new OptimizelyJson(Payload, ErrorHandlerMock.Object, LoggerMock.Object);
 
             Assert.IsNotNull(OptimizelyJSONUsingMap);
             Assert.IsNotNull(OptimizelyJSONUsingString);
@@ -73,7 +78,7 @@ namespace OptimizelySDK.Tests.EntityTests
                     }
                 }
             };
-            OptimizelyJson OptimizelyJSONUsingMap = new OptimizelyJson(map, LoggerMock.Object);
+            OptimizelyJson OptimizelyJSONUsingMap = new OptimizelyJson(map, ErrorHandlerMock.Object, LoggerMock.Object);
             string str = OptimizelyJSONUsingMap.ToString();
             string expectedStringObj = "{\"strField\":\"john doe\",\"intField\":12,\"objectField\":{\"inner_field_int\":3}}";
             Assert.AreEqual(expectedStringObj, str);
@@ -82,21 +87,21 @@ namespace OptimizelySDK.Tests.EntityTests
         [Test]
         public void TestGettingErrorUponInvalidJsonString()
         {
-            OptimizelyJson OptimizelyJSONUsingString = new OptimizelyJson("{\"invalid\":}", LoggerMock.Object);
+            OptimizelyJson OptimizelyJSONUsingString = new OptimizelyJson("{\"invalid\":}", ErrorHandlerMock.Object, LoggerMock.Object);
             LoggerMock.Verify(log => log.Log(LogLevel.ERROR, "Provided string could not be converted to map."), Times.Once);
         }
 
         [Test]
         public void TestGettingErrorUponNotFindingValuePath()
         {
-            OptimizelyJson OptimizelyJSONUsingString = new OptimizelyJson("{\"invalid\":}", LoggerMock.Object);
+            OptimizelyJson OptimizelyJSONUsingString = new OptimizelyJson("{\"invalid\":}", ErrorHandlerMock.Object, LoggerMock.Object);
             LoggerMock.Verify(log => log.Log(LogLevel.ERROR, "Provided string could not be converted to map."), Times.Once);
         }
 
         [Test]
         public void TestOptimizelyJsonGetVariablesWhenSetUsingMap()
         {
-            OptimizelyJson OptimizelyJSONUsingMap = new OptimizelyJson(Map, LoggerMock.Object);
+            OptimizelyJson OptimizelyJSONUsingMap = new OptimizelyJson(Map, ErrorHandlerMock.Object, LoggerMock.Object);
 
             Assert.AreEqual(OptimizelyJSONUsingMap.GetValue<string>("strField"), "john doe");
             Assert.AreEqual(OptimizelyJSONUsingMap.GetValue<int>("intField"), 12);
@@ -112,7 +117,7 @@ namespace OptimizelySDK.Tests.EntityTests
         [Test]
         public void TestOptimizelyJsonGetVariablesWhenSetUsingString()
         {
-            OptimizelyJson OptimizelyJSONUsingString = new OptimizelyJson(Payload, LoggerMock.Object);
+            OptimizelyJson OptimizelyJSONUsingString = new OptimizelyJson(Payload, ErrorHandlerMock.Object, LoggerMock.Object);
 
             Assert.AreEqual(OptimizelyJSONUsingString.GetValue<long>("field1"), 1);
             Assert.AreEqual(OptimizelyJSONUsingString.GetValue<double>("field2"), 2.5);

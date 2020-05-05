@@ -18,47 +18,54 @@ using OptimizelySDK.Logger;
 using System;
 using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
+using OptimizelySDK.ErrorHandler;
 
-namespace OptimizelySDK.Entity
+namespace OptimizelySDK
 {
     public class OptimizelyJson
     {
         private ILogger Logger;
+        private IErrorHandler ErrorHandler;
+
         private string Payload { get; set; }
         private Dictionary<string, object> Dict { get; set; }
 
-        public OptimizelyJson(string payload, ILogger logger)
+        public OptimizelyJson(string payload, IErrorHandler errorHandler, ILogger logger)
         {
             try
             {
+                ErrorHandler = errorHandler;
+                Logger = logger;
                 Dict = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, object>>(payload);
                 Payload = payload;
-                Logger = logger;
             }
-            catch (Exception ex)
+            catch (Exception exception)
             {
                 logger.Log(LogLevel.ERROR, "Provided string could not be converted to map.");
-                logger.Log(LogLevel.ERROR, ex.Message);
+                ErrorHandler.HandleError(new Exceptions.OptimizelyRuntimeException(exception.Message));
             }
         }
-        public OptimizelyJson(Dictionary<string, object> payload, ILogger logger)
+        public OptimizelyJson(Dictionary<string, object> dict, IErrorHandler errorHandler, ILogger logger)
         {
             try
             {
-                Payload = Newtonsoft.Json.JsonConvert.SerializeObject(payload);
-                Dict = payload;
+                ErrorHandler = errorHandler;
                 Logger = logger;
+                Payload = Newtonsoft.Json.JsonConvert.SerializeObject(dict);
+                Dict = dict;
             }
-            catch (Exception ex)
+            catch (Exception exception)
             {
                 logger.Log(LogLevel.ERROR, "Provided map could not be converted to string.");
-                logger.Log(LogLevel.ERROR, ex.Message);
+                ErrorHandler.HandleError(new Exceptions.OptimizelyRuntimeException(exception.Message));
             }
         }
 
         override
         public string ToString()
-        { return Payload; }
+        { 
+            return Payload;
+        }
 
         public Dictionary<string, object> ToDictionary()
         {
@@ -92,10 +99,10 @@ namespace OptimizelySDK.Entity
                 }
                 return (T)currentObject[path[path.Length - 1]];
             }
-            catch (Exception ex)
+            catch (Exception exception)
             {
                 Logger.Log(LogLevel.ERROR, "Value for path could not be assigned to provided type.");
-                Logger.Log(LogLevel.ERROR, ex.Message);
+                ErrorHandler.HandleError(new Exceptions.OptimizelyRuntimeException(exception.Message));
             }
             return default(T);
         }
