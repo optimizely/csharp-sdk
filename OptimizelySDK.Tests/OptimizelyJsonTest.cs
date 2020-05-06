@@ -41,7 +41,7 @@ namespace OptimizelySDK.Tests
             LoggerMock = new Mock<ILogger>();
             LoggerMock.Setup(i => i.Log(It.IsAny<LogLevel>(), It.IsAny<string>()));
 
-            Payload = "{ \"field1\": 1, \"field2\": 2.5, \"field3\": \"three\", \"field4\": {\"inner_field1\":3,\"inner_field2\":[\"1\",\"2\", 3.01, 4.23, true]}, \"field5\": true, }";
+            Payload = "{ \"field1\": 1, \"field2\": 2.5, \"field3\": \"three\", \"field4\": {\"inner_field1\":3,\"inner_field2\":[\"1\",\"2\", 3, 4.23, true]}, \"field5\": true, }";
 
             Map = new Dictionary<string, object>() {
                 { "strField", "john doe" },
@@ -123,8 +123,7 @@ namespace OptimizelySDK.Tests
             Assert.AreEqual(OptimizelyJSONUsingString.GetValue<double>("field2"), 2.5);
             Assert.AreEqual(OptimizelyJSONUsingString.GetValue<string>("field3"), "three");
             Assert.AreEqual(OptimizelyJSONUsingString.GetValue<long>("field4.inner_field1"), 3);
-            // TO-DO: uncomment the line once the issue of converting double and int gets resolved.
-            //Assert.AreEqual(OptimizelyJSONUsingString.GetValue<object[]>("field4.inner_field2"), new object[] { "1", "2", 3.01, 4.23, true });
+            Assert.AreEqual(OptimizelyJSONUsingString.GetValue<List<object>>("field4.inner_field2"), new List<object>() { "1", "2", 3, 4.23, true });
         }
     }
 }

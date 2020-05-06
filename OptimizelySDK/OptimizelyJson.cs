@@ -19,6 +19,8 @@ using System;
 using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
 using OptimizelySDK.ErrorHandler;
+using System.Linq;
+using Newtonsoft.Json;
 
 namespace OptimizelySDK
 {
@@ -36,7 +38,7 @@ namespace OptimizelySDK
             {
                 ErrorHandler = errorHandler;
                 Logger = logger;
-                Dict = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, object>>(payload);
+                Dict = (Dictionary<string, object>)ToCollections(JObject.Parse(payload));
                 Payload = payload;
             }
             catch (Exception exception)
@@ -51,7 +53,7 @@ namespace OptimizelySDK
             {
                 ErrorHandler = errorHandler;
                 Logger = logger;
-                Payload = Newtonsoft.Json.JsonConvert.SerializeObject(dict);
+                Payload = JsonConvert.SerializeObject(dict);
                 Dict = dict;
             }
             catch (Exception exception)
@@ -59,6 +61,12 @@ namespace OptimizelySDK
                 logger.Log(LogLevel.ERROR, "Provided map could not be converted to string.");
                 ErrorHandler.HandleError(new Exceptions.OptimizelyRuntimeException(exception.Message));
             }
+        }
+        public static object ToCollections(object o)
+        {
+            if (o is JObject jo) return jo.ToObject<IDictionary<string, object>>().ToDictionary(k => k.Key, v => ToCollections(v.Value));
+            if (o is JArray ja) return ja.ToObject<List<object>>().Select(ToCollections).ToList();
+            return o;
         }
 
         override
@@ -88,14 +96,7 @@ namespace OptimizelySDK
                 Dictionary<string, object> currentObject = Dict;
                 for (int i = 0; i < path.Length - 1; i++)
                 {
-                    if (currentObject[path[i]] is JObject)
-                    {
-                        currentObject = ((JObject)currentObject[path[i]]).ToObject<Dictionary<string, object>>();
-                    }
-                    else
-                    {
-                        currentObject = currentObject[path[i]] as Dictionary<string, object>;
-                    }
+                   currentObject = currentObject[path[i]] as Dictionary<string, object>;
                 }
                 return (T)currentObject[path[path.Length - 1]];
             }
