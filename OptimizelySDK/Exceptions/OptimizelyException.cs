@@ -33,6 +33,14 @@ namespace OptimizelySDK.Exceptions
         {
         }
     }
+    
+    public class InvalidCastException : OptimizelyException
+    {
+        public InvalidCastException(string message)
+            : base(message)
+        {
+        }
+    }
 
     public class InvalidAttributeException : OptimizelyException
     {

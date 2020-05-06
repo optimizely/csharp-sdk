@@ -103,7 +103,7 @@ namespace OptimizelySDK
             catch (Exception exception)
             {
                 Logger.Log(LogLevel.ERROR, "Value for path could not be assigned to provided type.");
-                ErrorHandler.HandleError(new Exceptions.OptimizelyRuntimeException(exception.Message));
+                ErrorHandler.HandleError(new Exceptions.InvalidCastException(exception.Message));
             }
             return default(T);
         }
