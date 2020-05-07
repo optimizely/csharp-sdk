@@ -85,7 +85,7 @@ namespace OptimizelySDK
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(jsonPath))
+                if (string.IsNullOrEmpty(jsonPath))
                 {
                     return (T)(object)Dict;
                 }
