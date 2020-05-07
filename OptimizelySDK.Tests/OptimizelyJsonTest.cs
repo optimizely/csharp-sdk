@@ -85,16 +85,16 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestOptimizelyJsonObjectIsValid()
         {
-            OptimizelyJson OptimizelyJSONUsingMap = new OptimizelyJson(Map, ErrorHandlerMock.Object, LoggerMock.Object);
-            OptimizelyJson OptimizelyJSONUsingString = new OptimizelyJson(Payload, ErrorHandlerMock.Object, LoggerMock.Object);
+            var optimizelyJSONUsingMap = new OptimizelyJson(Map, ErrorHandlerMock.Object, LoggerMock.Object);
+            var optimizelyJSONUsingString = new OptimizelyJson(Payload, ErrorHandlerMock.Object, LoggerMock.Object);
 
-            Assert.IsNotNull(OptimizelyJSONUsingMap);
-            Assert.IsNotNull(OptimizelyJSONUsingString);
+            Assert.IsNotNull(optimizelyJSONUsingMap);
+            Assert.IsNotNull(optimizelyJSONUsingString);
         }
         [Test]
         public void TestToStringReturnValidString()
         {
-            Dictionary<string, object> map = new Dictionary<string, object>() {
+            var map = new Dictionary<string, object>() {
                 { "strField", "john doe" },
                 { "intField", 12 },
                 { "objectField", new Dictionary<string, object> () {
@@ -102,8 +102,8 @@ namespace OptimizelySDK.Tests
                     }
                 }
             };
-            OptimizelyJson OptimizelyJSONUsingMap = new OptimizelyJson(map, ErrorHandlerMock.Object, LoggerMock.Object);
-            string str = OptimizelyJSONUsingMap.ToString();
+            var optimizelyJSONUsingMap = new OptimizelyJson(map, ErrorHandlerMock.Object, LoggerMock.Object);
+            string str = optimizelyJSONUsingMap.ToString();
             string expectedStringObj = "{\"strField\":\"john doe\",\"intField\":12,\"objectField\":{\"inner_field_int\":3}}";
             Assert.AreEqual(expectedStringObj, str);
         }
@@ -111,71 +111,68 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestGettingErrorUponNotSupportedJsonDictionaryType()
         {
-            OptimizelyJson OptimizelyJSONUsingString = new OptimizelyJson("{\"invalid\":}", ErrorHandlerMock.Object, LoggerMock.Object);
+            var optimizelyJSONUsingString = new OptimizelyJson("{\"invalid\":}", ErrorHandlerMock.Object, LoggerMock.Object);
             LoggerMock.Verify(log => log.Log(LogLevel.ERROR, "Provided string could not be converted to map."), Times.Once);
         }
 
         [Test]
         public void TestGettingErrorUponInvalidJsonString()
         {
-            OptimizelyJson OptimizelyJSONUsingString = new OptimizelyJson("{\"invalid\":}", ErrorHandlerMock.Object, LoggerMock.Object);
+            var optimizelyJSONUsingString = new OptimizelyJson("{\"invalid\":}", ErrorHandlerMock.Object, LoggerMock.Object);
             LoggerMock.Verify(log => log.Log(LogLevel.ERROR, "Provided string could not be converted to map."), Times.Once);
         }
 
         [Test]
         public void TestGettingErrorUponNotFindingValuePath()
         {
-            OptimizelyJson OptimizelyJSONUsingString = new OptimizelyJson("{\"invalid\":}", ErrorHandlerMock.Object, LoggerMock.Object);
+            var optimizelyJSONUsingString = new OptimizelyJson("{\"invalid\":}", ErrorHandlerMock.Object, LoggerMock.Object);
             LoggerMock.Verify(log => log.Log(LogLevel.ERROR, "Provided string could not be converted to map."), Times.Once);
         }
 
         [Test]
         public void TestOptimizelyJsonGetVariablesWhenSetUsingMap()
         {
-            OptimizelyJson OptimizelyJSONUsingMap = new OptimizelyJson(Map, ErrorHandlerMock.Object, LoggerMock.Object);
+            var optimizelyJSONUsingMap = new OptimizelyJson(Map, ErrorHandlerMock.Object, LoggerMock.Object);
 
-            Assert.AreEqual(OptimizelyJSONUsingMap.GetValue<string>("strField"), "john doe");
-            Assert.AreEqual(OptimizelyJSONUsingMap.GetValue<int>("intField"), 12);
-            Assert.AreEqual(OptimizelyJSONUsingMap.GetValue<double>("doubleField"), 2.23);
-            Assert.AreEqual(OptimizelyJSONUsingMap.GetValue<bool>("boolField"), true);
-            Assert.AreEqual(OptimizelyJSONUsingMap.GetValue<int>("objectField.inner_field_int"), 3);
-            Assert.AreEqual(OptimizelyJSONUsingMap.GetValue<double>("objectField.inner_field_double"), 13.21);
-            Assert.AreEqual(OptimizelyJSONUsingMap.GetValue<string>("objectField.inner_field_string"), "john");
-            Assert.AreEqual(OptimizelyJSONUsingMap.GetValue<bool>("objectField.inner_field_boolean"), true);
-            Assert.IsTrue(OptimizelyJSONUsingMap.GetValue<Dictionary<string, object>>("objectField") is Dictionary<string, object>);
+            Assert.AreEqual(optimizelyJSONUsingMap.GetValue<string>("strField"), "john doe");
+            Assert.AreEqual(optimizelyJSONUsingMap.GetValue<int>("intField"), 12);
+            Assert.AreEqual(optimizelyJSONUsingMap.GetValue<double>("doubleField"), 2.23);
+            Assert.AreEqual(optimizelyJSONUsingMap.GetValue<bool>("boolField"), true);
+            Assert.AreEqual(optimizelyJSONUsingMap.GetValue<int>("objectField.inner_field_int"), 3);
+            Assert.AreEqual(optimizelyJSONUsingMap.GetValue<double>("objectField.inner_field_double"), 13.21);
+            Assert.AreEqual(optimizelyJSONUsingMap.GetValue<string>("objectField.inner_field_string"), "john");
+            Assert.AreEqual(optimizelyJSONUsingMap.GetValue<bool>("objectField.inner_field_boolean"), true);
+            Assert.IsTrue(optimizelyJSONUsingMap.GetValue<Dictionary<string, object>>("objectField") is Dictionary<string, object>);
         }
 
         [Test]
         public void TestOptimizelyJsonGetVariablesWhenSetUsingString()
         {
-            OptimizelyJson OptimizelyJSONUsingString = new OptimizelyJson(Payload, ErrorHandlerMock.Object, LoggerMock.Object);
+            var optimizelyJSONUsingString = new OptimizelyJson(Payload, ErrorHandlerMock.Object, LoggerMock.Object);
 
-            Assert.AreEqual(OptimizelyJSONUsingString.GetValue<long>("field1"), 1);
-            Assert.AreEqual(OptimizelyJSONUsingString.GetValue<double>("field2"), 2.5);
-            Assert.AreEqual(OptimizelyJSONUsingString.GetValue<string>("field3"), "three");
-            Assert.AreEqual(OptimizelyJSONUsingString.GetValue<long>("field4.inner_field1"), 3);
-            Assert.AreEqual(OptimizelyJSONUsingString.GetValue<List<object>>("field4.inner_field2"), new List<object>() { "1", "2", 3, 4.23, true });
+            Assert.AreEqual(optimizelyJSONUsingString.GetValue<long>("field1"), 1);
+            Assert.AreEqual(optimizelyJSONUsingString.GetValue<double>("field2"), 2.5);
+            Assert.AreEqual(optimizelyJSONUsingString.GetValue<string>("field3"), "three");
+            Assert.AreEqual(optimizelyJSONUsingString.GetValue<long>("field4.inner_field1"), 3);
+            Assert.True(TestData.CompareObjects(optimizelyJSONUsingString.GetValue<List<object>>("field4.inner_field2"), new List<object>() { "1", "2", 3, 4.23, true }));
         }
 
         [Test]
         public void TestGetValueReturnsEntireDictWhenJsonPathIsEmptyAndTypeIsValid()
         {
-            OptimizelyJson OptimizelyJSONUsingString = new OptimizelyJson(Payload, ErrorHandlerMock.Object, LoggerMock.Object);
-            var expectedValue = OptimizelyJSONUsingString.GetValue<Dictionary<string, object>>("");
+            var optimizelyJSONUsingString = new OptimizelyJson(Payload, ErrorHandlerMock.Object, LoggerMock.Object);
+            var actualDict = optimizelyJSONUsingString.ToDictionary();
+            var expectedValue = optimizelyJSONUsingString.GetValue<Dictionary<string, object>>("");
             Assert.NotNull(expectedValue);
-            Assert.AreEqual(expectedValue["field1"], 1);
-            Assert.AreEqual(expectedValue["field2"], 2.5);
-            Assert.AreEqual(expectedValue["field3"], "three");
-            Assert.AreEqual(((Dictionary<string, object>)expectedValue["field4"])["inner_field1"], 3);
-            Assert.AreEqual(((Dictionary<string, object>)expectedValue["field4"])["inner_field2"], new List<object>() { "1", "2", 3, 4.23, true });
+            Assert.True(TestData.CompareObjects(expectedValue, actualDict));
         }
 
         [Test]
         public void TestGetValueReturnsDefaultValueWhenJsonIsInvalid()
         {
-            string payload = "{ \"field1\" : {1:\"Csharp\", 2:\"Java\"} }";
-            OptimizelyJson OptimizelyJSONUsingString = new OptimizelyJson(payload, ErrorHandlerMock.Object, LoggerMock.Object);
-            var expectedValue = OptimizelyJSONUsingString.GetValue<Dictionary<float, string>>("field1");
+            var payload = "{ \"field1\" : {1:\"Csharp\", 2:\"Java\"} }";
+            var optimizelyJSONUsingString = new OptimizelyJson(payload, ErrorHandlerMock.Object, LoggerMock.Object);
+            var expectedValue = optimizelyJSONUsingString.GetValue<Dictionary<float, string>>("field1");
             // Even though above given JSON is not valid, newtonsoft is parsing it so
             Assert.IsNotNull(expectedValue);
         }
@@ -183,25 +180,25 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestGetValueReturnsDefaultValueWhenTypeIsInvalid()
         {
-            string payload = "{ \"field1\" : {\"1\":\"Csharp\",\"2\":\"Java\"} }";
-            OptimizelyJson OptimizelyJSONUsingString = new OptimizelyJson(payload, ErrorHandlerMock.Object, LoggerMock.Object);
-            var expectedValue = OptimizelyJSONUsingString.GetValue<Dictionary<float, string>>("field1");
+            var payload = "{ \"field1\" : {\"1\":\"Csharp\",\"2\":\"Java\"} }";
+            var optimizelyJSONUsingString = new OptimizelyJson(payload, ErrorHandlerMock.Object, LoggerMock.Object);
+            var expectedValue = optimizelyJSONUsingString.GetValue<Dictionary<float, string>>("field1");
             Assert.IsNotNull(expectedValue);
         }
 
         [Test]
         public void TestGetValueReturnsNullWhenJsonPathIsEmptyAndTypeIsOfObject()
         {
-            OptimizelyJson OptimizelyJSONUsingString = new OptimizelyJson(Payload, ErrorHandlerMock.Object, LoggerMock.Object);
-            var expectedValue = OptimizelyJSONUsingString.GetValue<object>("");
+            var optimizelyJSONUsingString = new OptimizelyJson(Payload, ErrorHandlerMock.Object, LoggerMock.Object);
+            var expectedValue = optimizelyJSONUsingString.GetValue<object>("");
             Assert.NotNull(expectedValue);
         }
 
         [Test]
         public void TestGetValueReturnsDefaultValueWhenJsonPathIsEmptyAndTypeIsNotValid()
         {
-            OptimizelyJson OptimizelyJSONUsingString = new OptimizelyJson(Payload, ErrorHandlerMock.Object, LoggerMock.Object);
-            var expectedValue = OptimizelyJSONUsingString.GetValue<string>("");
+            var optimizelyJSONUsingString = new OptimizelyJson(Payload, ErrorHandlerMock.Object, LoggerMock.Object);
+            var expectedValue = optimizelyJSONUsingString.GetValue<string>("");
             Assert.IsNull(expectedValue);
             LoggerMock.Verify(log => log.Log(LogLevel.ERROR, "Value for path could not be assigned to provided type."), Times.Once);
         }
@@ -209,8 +206,8 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestGetValueReturnsDefaultValueWhenJsonPathIsInvalid()
         {
-            OptimizelyJson OptimizelyJSONUsingString = new OptimizelyJson(Payload, ErrorHandlerMock.Object, LoggerMock.Object);
-            var expectedValue = OptimizelyJSONUsingString.GetValue<string>("field11");
+            var optimizelyJSONUsingString = new OptimizelyJson(Payload, ErrorHandlerMock.Object, LoggerMock.Object);
+            var expectedValue = optimizelyJSONUsingString.GetValue<string>("field11");
             Assert.IsNull(expectedValue);
             LoggerMock.Verify(log => log.Log(LogLevel.ERROR, "Value for JSON key not found."), Times.Once);
         }
@@ -220,8 +217,9 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestGetValueReturnsUsingGivenClassType()
         {
-            OptimizelyJson OptimizelyJSONUsingString = new OptimizelyJson(Payload, ErrorHandlerMock.Object, LoggerMock.Object);
-            var expectedValue = OptimizelyJSONUsingString.GetValue<Field4>("field4");
+            var optimizelyJSONUsingString = new OptimizelyJson(Payload, ErrorHandlerMock.Object, LoggerMock.Object);
+            var expectedValue = optimizelyJSONUsingString.GetValue<Field4>("field4");
+            
             Assert.AreEqual(expectedValue.inner_field1, 3);
             Assert.AreEqual(expectedValue.inner_field2, new List<object>() { "1", "2", 3, 4.23, true });
         }
@@ -229,13 +227,11 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestGetValueReturnsCastedObject()
         {
-            var optimizelyJson = new OptimizelyJson(Payload, ErrorHandlerMock.Object, LoggerMock.Object);
-            // TODO: All values must be same as payload.
-            var expectedValue = new ParentJson();
-
+            var optimizelyJson = new OptimizelyJson(Map, ErrorHandlerMock.Object, LoggerMock.Object);
+            var expectedValue = optimizelyJson.ToDictionary();
             var actualValue = optimizelyJson.GetValue<ParentJson>(null);
+            
             Assert.IsTrue(TestData.CompareObjects(actualValue, expectedValue));
-
         }
     }
 }

@@ -87,11 +87,11 @@ namespace OptimizelySDK
             {
                 if (string.IsNullOrEmpty(jsonPath))
                 {
-                    return (T)(object)Dict;
+                    return GetObject<T>(Dict);
                 }
-                string[] path = jsonPath.Split('.');
+                var path = jsonPath.Split('.');
 
-                Dictionary<string, object> currentObject = Dict;
+                var currentObject = Dict;
                 for (int i = 0; i < path.Length - 1; i++)
                 {
                     currentObject = currentObject[path[i]] as Dictionary<string, object>;
@@ -113,15 +113,10 @@ namespace OptimizelySDK
 
         private T GetObject<T>(object o)
         {
-            try
+            if (!(o is T deserializedObj))
             {
-                return (T)o;
+                deserializedObj = JsonConvert.DeserializeObject<T>(JsonConvert.SerializeObject(o));
             }
-            catch
-            {
-            }
-
-            var deserializedObj = JsonConvert.DeserializeObject<T>(JsonConvert.SerializeObject(o));
             return deserializedObj;
         }
 
