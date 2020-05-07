@@ -743,6 +743,105 @@ namespace OptimizelySDK
         }
 
         /// <summary>
+        /// Get the values of all variables in the feature.
+        /// </summary>
+        /// <param name="featureKey">The feature flag key</param>
+        /// <param name="userId">The user ID</param>
+        /// <param name="userAttributes">The user's attributes</param>
+        /// <returns>string | null An OptimizelyJSON instance for all variable values.</returns>
+        public OptimizelyJson GetAllFeatureVariables(string featureKey, string userId,
+                                                 UserAttributes userAttributes = null)
+        {
+            if (featureKey == null)
+            {
+                Logger.Log(LogLevel.WARN, "The featureKey parameter must be nonnull.");
+                return null;
+            }
+            else if (userId == null)
+            {
+                Logger.Log(LogLevel.WARN, "The userId parameter must be nonnull.");
+                return null;
+            }
+
+            var config = ProjectConfigManager?.GetConfig();
+
+            if (config == null)
+            {
+                Logger.Log(LogLevel.ERROR, "Optimizely instance is not valid, failing getAllFeatureVariableValues call. type");
+                return null;
+            }
+
+            var featureFlag = config.GetFeatureFlagFromKey(featureKey);
+            if (string.IsNullOrEmpty(featureFlag.Key))
+            {
+                Logger.Log(LogLevel.INFO, "No feature flag was found for key \""+ featureKey + "\".");
+                return null;
+            }
+
+            if (!Validator.IsFeatureFlagValid(config, featureFlag))
+                return null;
+
+            var featureEnabled = false;
+            var decision = DecisionService.GetVariationForFeature(featureFlag, userId, config, userAttributes);
+            var variation = decision.Variation;
+
+            if (variation != null)
+            {
+                featureEnabled = variation.FeatureEnabled.GetValueOrDefault();
+            }
+            else
+            {
+                Logger.Log(LogLevel.INFO, "User \""+ userId + "\" was not bucketed into any variation for feature flag \""+ featureKey + "\". " +
+                        "The default values are being returned.");
+            }
+
+            var valuesMap = new Dictionary<string, object>();
+            foreach (var featureVariable in featureFlag.Variables)
+            {
+                string variableValue = featureVariable.DefaultValue;
+                if (featureEnabled)
+                {
+                    var featureVariableUsageInstance = variation.GetFeatureVariableUsageFromId(featureVariable.Id);
+                    if (featureVariableUsageInstance != null)
+                    {
+                        variableValue = featureVariableUsageInstance.Value;
+                    }
+                }
+                object typeCastedValue;
+                if (featureVariable.Type == FeatureVariable.STRING_TYPE && FeatureVariable.JSON_TYPE.Equals(featureVariable.SubType))
+                {
+                    typeCastedValue = GetTypeCastedVariableValue(variableValue, featureVariable.SubType);
+                    typeCastedValue = ((OptimizelyJson)typeCastedValue).ToDictionary();
+                }
+                else
+                {
+                    typeCastedValue = GetTypeCastedVariableValue(variableValue, featureVariable.Type);
+                }
+                valuesMap.Add(featureVariable.Key, typeCastedValue);
+            }
+            var sourceInfo = new Dictionary<string, string>();
+            if (decision?.Source == FeatureDecision.DECISION_SOURCE_FEATURE_TEST)
+            {
+                sourceInfo["experimentKey"] = decision.Experiment.Key;
+                sourceInfo["variationKey"] = decision.Variation.Key;
+            }
+
+            var decisionInfo = new Dictionary<string, object>
+            {
+                { "featureKey", featureKey },
+                { "featureEnabled", featureEnabled },
+                { "variableValues", valuesMap },
+                { "source", decision?.Source },
+                { "sourceInfo", sourceInfo },
+            };
+
+            NotificationCenter.SendNotifications(NotificationCenter.NotificationType.Decision, DecisionNotificationTypes.ALL_FEATURE_VARIABLE, userId,
+                userAttributes ?? new UserAttributes(), decisionInfo);
+            
+            return new OptimizelyJson(valuesMap, ErrorHandler, Logger);
+        }
+
+        /// <summary>
         /// Get OptimizelyConfig containing experiments and features map
         /// </summary>
         /// <returns>OptimizelyConfig Object</returns>
