@@ -34,9 +34,9 @@ namespace OptimizelySDK.Exceptions
         }
     }
     
-    public class InvalidCastException : OptimizelyException
+    public class InvalidJsonException : OptimizelyException
     {
-        public InvalidCastException(string message)
+        public InvalidJsonException(string message)
             : base(message)
         {
         }

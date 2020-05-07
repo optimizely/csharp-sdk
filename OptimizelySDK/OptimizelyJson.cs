@@ -38,13 +38,13 @@ namespace OptimizelySDK
             {
                 ErrorHandler = errorHandler;
                 Logger = logger;
-                Dict = (Dictionary<string, object>)ToCollections(JObject.Parse(payload));
+                Dict = (Dictionary<string, object>)ConvertIntoCollection(JObject.Parse(payload));
                 Payload = payload;
             }
             catch (Exception exception)
             {
                 logger.Log(LogLevel.ERROR, "Provided string could not be converted to map.");
-                ErrorHandler.HandleError(new Exceptions.OptimizelyRuntimeException(exception.Message));
+                ErrorHandler.HandleError(new Exceptions.InvalidJsonException(exception.Message));
             }
         }
         public OptimizelyJson(Dictionary<string, object> dict, IErrorHandler errorHandler, ILogger logger)
@@ -59,16 +59,10 @@ namespace OptimizelySDK
             catch (Exception exception)
             {
                 logger.Log(LogLevel.ERROR, "Provided map could not be converted to string.");
-                ErrorHandler.HandleError(new Exceptions.OptimizelyRuntimeException(exception.Message));
+                ErrorHandler.HandleError(new Exceptions.InvalidJsonException(exception.Message));
             }
         }
-        public static object ToCollections(object o)
-        {
-            if (o is JObject jo) return jo.ToObject<IDictionary<string, object>>().ToDictionary(k => k.Key, v => ToCollections(v.Value));
-            if (o is JArray ja) return ja.ToObject<List<object>>().Select(ToCollections).ToList();
-            return o;
-        }
-
+        
         override
         public string ToString()
         { 
@@ -84,7 +78,7 @@ namespace OptimizelySDK
         /// If JSON Data is {"k1":true, "k2":{"k3":"v3"}}
         ///
         /// Set jsonPath to "k2" to access {"k3":"v3"} or set it to "k2.k3" to access "v3"
-        /// Set it to nil or empty to access the entire JSON data.
+        /// Set it to null or empty to access the entire JSON data but type must be Dictionary<string, object> as generic type.
         /// </summary>
         /// <param name="jsonPath">Key path for the value.</param>
         /// <returns>Value if decoded successfully</returns>
@@ -92,20 +86,58 @@ namespace OptimizelySDK
         {
             try
             {
+                if (string.IsNullOrWhiteSpace(jsonPath))
+                {
+                    return (T)(object)Dict;
+                }
                 string[] path = jsonPath.Split('.');
+
                 Dictionary<string, object> currentObject = Dict;
                 for (int i = 0; i < path.Length - 1; i++)
                 {
-                   currentObject = currentObject[path[i]] as Dictionary<string, object>;
+                    currentObject = currentObject[path[i]] as Dictionary<string, object>;
                 }
-                return (T)currentObject[path[path.Length - 1]];
+                return GetObject<T>(currentObject[path[path.Length - 1]]);
+            }
+            catch (KeyNotFoundException exception)
+            {
+                Logger.Log(LogLevel.ERROR, "Value for JSON key not found.");
+                ErrorHandler.HandleError(new Exceptions.OptimizelyRuntimeException(exception.Message));
             }
             catch (Exception exception)
             {
                 Logger.Log(LogLevel.ERROR, "Value for path could not be assigned to provided type.");
-                ErrorHandler.HandleError(new Exceptions.InvalidCastException(exception.Message));
+                ErrorHandler.HandleError(new Exceptions.OptimizelyRuntimeException(exception.Message));
             }
             return default(T);
         }
+
+        private T GetObject<T>(object o)
+        {
+            try
+            {
+                return (T)o;
+            }
+            catch 
+            { 
+            }
+
+            var deserializedObj = JsonConvert.DeserializeObject<T>(JsonConvert.SerializeObject(o));
+            return deserializedObj;
+        }
+
+        private object ConvertIntoCollection(object o)
+        {
+            if (o is JObject jo)
+            {
+                return jo.ToObject<IDictionary<string, object>>().ToDictionary(k => k.Key, v => ConvertIntoCollection(v.Value));
+            }
+            else if (o is JArray ja)
+            {
+                return ja.ToObject<List<object>>().Select(ConvertIntoCollection).ToList();
+            }
+            return o;
+        }
+
     }
 }
