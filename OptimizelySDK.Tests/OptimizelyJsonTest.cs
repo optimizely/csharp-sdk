@@ -24,6 +24,31 @@ using System.Collections.Generic;
 
 namespace OptimizelySDK.Tests
 {
+    class ParentJson
+    {
+        public string strField { get; set; }
+        public int intField { get; set; }
+        public double doubleField { get; set; }
+        public bool boolField { get; set; }
+        public ObjectJson objectField { get; set; }
+        
+    }
+    class ObjectJson
+    {
+        public int inner_field_int { get; set; }
+        public double inner_field_double { get; set; }
+        public string inner_field_string {get;set;}
+        public bool inner_field_boolean { get; set; }
+    }
+
+    class Field4
+    {
+        public long inner_field1 { get; set; }
+        public InnerField2 inner_field2 { get; set; }
+    }
+    class InnerField2 : List<object> { }
+
+
     [TestFixture]
     public class OptimizelyJsonTest
     {
@@ -190,12 +215,7 @@ namespace OptimizelySDK.Tests
             LoggerMock.Verify(log => log.Log(LogLevel.ERROR, "Value for JSON key not found."), Times.Once);
         }
 
-        class Field4
-        {
-            public long inner_field1 { get; set; }
-            public InnerField2 inner_field2 { get; set; }
-        }
-        class InnerField2 : List<object> { }
+        
 
         [Test]
         public void TestGetValueReturnsUsingGivenClassType()
@@ -204,6 +224,18 @@ namespace OptimizelySDK.Tests
             var expectedValue = OptimizelyJSONUsingString.GetValue<Field4>("field4");
             Assert.AreEqual(expectedValue.inner_field1, 3);
             Assert.AreEqual(expectedValue.inner_field2, new List<object>() { "1", "2", 3, 4.23, true });
+        }
+
+        [Test]
+        public void TestGetValueReturnsCastedObject()
+        {
+            var optimizelyJson = new OptimizelyJson(Payload, ErrorHandlerMock.Object, LoggerMock.Object);
+            // TODO: All values must be same as payload.
+            var expectedValue = new ParentJson();
+
+            var actualValue = optimizelyJson.GetValue<ParentJson>(null);
+            Assert.IsTrue(TestData.CompareObjects(actualValue, expectedValue));
+
         }
     }
 }
