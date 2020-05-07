@@ -62,10 +62,9 @@ namespace OptimizelySDK
                 ErrorHandler.HandleError(new Exceptions.InvalidJsonException(exception.Message));
             }
         }
-        
-        override
-        public string ToString()
-        { 
+
+        override public string ToString()
+        {
             return Payload;
         }
 
@@ -118,8 +117,8 @@ namespace OptimizelySDK
             {
                 return (T)o;
             }
-            catch 
-            { 
+            catch
+            {
             }
 
             var deserializedObj = JsonConvert.DeserializeObject<T>(JsonConvert.SerializeObject(o));

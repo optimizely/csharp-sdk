@@ -144,7 +144,7 @@ namespace OptimizelySDK.Tests
             Assert.AreEqual(((Dictionary<string, object>)expectedValue["field4"])["inner_field1"], 3);
             Assert.AreEqual(((Dictionary<string, object>)expectedValue["field4"])["inner_field2"], new List<object>() { "1", "2", 3, 4.23, true });
         }
-        
+
         [Test]
         public void TestGetValueReturnsDefaultValueWhenJsonIsInvalid()
         {
@@ -190,7 +190,8 @@ namespace OptimizelySDK.Tests
             LoggerMock.Verify(log => log.Log(LogLevel.ERROR, "Value for JSON key not found."), Times.Once);
         }
 
-        class Field4 {
+        class Field4
+        {
             public long inner_field1 { get; set; }
             public InnerField2 inner_field2 { get; set; }
         }
