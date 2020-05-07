@@ -33,6 +33,14 @@ namespace OptimizelySDK.Exceptions
         {
         }
     }
+    
+    public class InvalidJsonException : OptimizelyException
+    {
+        public InvalidJsonException(string message)
+            : base(message)
+        {
+        }
+    }
 
     public class InvalidAttributeException : OptimizelyException
     {

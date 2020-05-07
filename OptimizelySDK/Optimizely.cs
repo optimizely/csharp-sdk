@@ -824,7 +824,7 @@ namespace OptimizelySDK
                     result = value;
                     break;
                 case FeatureVariable.JSON_TYPE:
-                    result = new OptimizelyJson(value, Logger);
+                    result = new OptimizelyJson(value, ErrorHandler, Logger);
                     break;
             }
 
