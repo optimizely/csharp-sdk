@@ -603,7 +603,7 @@ namespace OptimizelySDK
                 { "featureKey", featureKey },
                 { "featureEnabled", featureEnabled },
                 { "variableKey", variableKey },
-                { "variableValue", typeCastedValue },
+                { "variableValue", typeCastedValue is OptimizelyJson? ((OptimizelyJson)typeCastedValue).ToDictionary() : typeCastedValue },
                 { "variableType", variableType.ToString().ToLower() },
                 { "source", decision?.Source },
                 { "sourceInfo", sourceInfo },
