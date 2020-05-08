@@ -548,13 +548,10 @@ namespace OptimizelySDK
                 return default(T);
             }
             else if (featureVariable.Type != variableType)
-            {
-                if (featureVariable.SubType != variableType || featureVariable.Type != FeatureVariable.STRING_TYPE)
-                { 
-                    Logger.Log(LogLevel.ERROR,
-                        $@"Variable is of type ""{featureVariable.Type}"", but you requested it as type ""{variableType}"".");
-                    return default(T);
-                }
+            {    
+                Logger.Log(LogLevel.ERROR,
+                    $@"Variable is of type ""{featureVariable.Type}"", but you requested it as type ""{variableType}"".");
+                return default(T);
             }
 
             var featureEnabled = false;

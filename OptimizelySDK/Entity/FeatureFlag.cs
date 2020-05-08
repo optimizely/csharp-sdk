@@ -34,6 +34,13 @@ namespace OptimizelySDK.Entity
             }
             set
             {
+                foreach (FeatureVariable variable in value) 
+                {
+                    if (variable.SubType == FeatureVariable.JSON_TYPE && variable.Type == FeatureVariable.STRING_TYPE)
+                    {
+                        variable.Type = variable.SubType;
+                    }
+                }
                 _Variables = value;
 
                 // Generating Feature Variable key map.

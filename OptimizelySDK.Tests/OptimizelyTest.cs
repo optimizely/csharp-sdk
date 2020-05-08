@@ -1704,7 +1704,7 @@ namespace OptimizelySDK.Tests
             Assert.IsNull(featureVariableStringRandomType);
 
             var featureVariableStringJsonType = Optimizely.GetFeatureVariableString("unsupported_variabletype", "string_json_key", TestUserId);
-            Assert.AreEqual(featureVariableStringJsonType, "{\"myvalue\": \"jsonValue\"}");            
+            Assert.IsNull(featureVariableStringJsonType);            
         }
 
         // Should return default value and log message when feature is not enabled for the user.
