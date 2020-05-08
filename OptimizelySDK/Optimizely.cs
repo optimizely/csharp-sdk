@@ -548,13 +548,10 @@ namespace OptimizelySDK
                 return default(T);
             }
             else if (featureVariable.Type != variableType)
-            {
-                if (featureVariable.SubType != variableType || featureVariable.Type != FeatureVariable.STRING_TYPE)
-                { 
-                    Logger.Log(LogLevel.ERROR,
-                        $@"Variable is of type ""{featureVariable.Type}"", but you requested it as type ""{variableType}"".");
-                    return default(T);
-                }
+            {    
+                Logger.Log(LogLevel.ERROR,
+                    $@"Variable is of type ""{featureVariable.Type}"", but you requested it as type ""{variableType}"".");
+                return default(T);
             }
 
             var featureEnabled = false;
@@ -807,16 +804,12 @@ namespace OptimizelySDK
                         variableValue = featureVariableUsageInstance.Value;
                     }
                 }
-                object typeCastedValue;
-                if (featureVariable.Type == FeatureVariable.STRING_TYPE && FeatureVariable.JSON_TYPE.Equals(featureVariable.SubType))
-                {
-                    typeCastedValue = GetTypeCastedVariableValue(variableValue, featureVariable.SubType);
+                
+                var typeCastedValue = GetTypeCastedVariableValue(variableValue, featureVariable.Type);
+                
+                if (typeCastedValue is OptimizelyJson)
                     typeCastedValue = ((OptimizelyJson)typeCastedValue).ToDictionary();
-                }
-                else
-                {
-                    typeCastedValue = GetTypeCastedVariableValue(variableValue, featureVariable.Type);
-                }
+
                 valuesMap.Add(featureVariable.Key, typeCastedValue);
             }
             var sourceInfo = new Dictionary<string, string>();

@@ -18,6 +18,7 @@
 using Moq;
 using NUnit.Framework;
 using OptimizelySDK.ErrorHandler;
+using OptimizelySDK.Exceptions;
 using OptimizelySDK.Logger;
 using System;
 using System.Collections.Generic;
@@ -109,24 +110,11 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
-        public void TestGettingErrorUponNotSupportedJsonDictionaryType()
-        {
-            var optimizelyJSONUsingString = new OptimizelyJson("{\"invalid\":}", ErrorHandlerMock.Object, LoggerMock.Object);
-            LoggerMock.Verify(log => log.Log(LogLevel.ERROR, "Provided string could not be converted to map."), Times.Once);
-        }
-
-        [Test]
         public void TestGettingErrorUponInvalidJsonString()
         {
             var optimizelyJSONUsingString = new OptimizelyJson("{\"invalid\":}", ErrorHandlerMock.Object, LoggerMock.Object);
             LoggerMock.Verify(log => log.Log(LogLevel.ERROR, "Provided string could not be converted to map."), Times.Once);
-        }
-
-        [Test]
-        public void TestGettingErrorUponNotFindingValuePath()
-        {
-            var optimizelyJSONUsingString = new OptimizelyJson("{\"invalid\":}", ErrorHandlerMock.Object, LoggerMock.Object);
-            LoggerMock.Verify(log => log.Log(LogLevel.ERROR, "Provided string could not be converted to map."), Times.Once);
+            ErrorHandlerMock.Verify(er => er.HandleError(It.IsAny<InvalidJsonException>()), Times.Once);
         }
 
         [Test]
@@ -201,6 +189,7 @@ namespace OptimizelySDK.Tests
             var expectedValue = optimizelyJSONUsingString.GetValue<string>("");
             Assert.IsNull(expectedValue);
             LoggerMock.Verify(log => log.Log(LogLevel.ERROR, "Value for path could not be assigned to provided type."), Times.Once);
+            ErrorHandlerMock.Verify(er => er.HandleError(It.IsAny<OptimizelyRuntimeException>()), Times.Once);
         }
 
         [Test]
@@ -210,9 +199,8 @@ namespace OptimizelySDK.Tests
             var expectedValue = optimizelyJSONUsingString.GetValue<string>("field11");
             Assert.IsNull(expectedValue);
             LoggerMock.Verify(log => log.Log(LogLevel.ERROR, "Value for JSON key not found."), Times.Once);
+            ErrorHandlerMock.Verify(er => er.HandleError(It.IsAny<OptimizelyRuntimeException>()), Times.Once);
         }
-
-        
 
         [Test]
         public void TestGetValueReturnsUsingGivenClassType()
