@@ -203,6 +203,36 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
+        public void TestGetValueReturnsDefaultValueWhenJsonPath1IsInvalid()
+        {
+            var optimizelyJSONUsingString = new OptimizelyJson(Payload, ErrorHandlerMock.Object, LoggerMock.Object);
+            var expectedValue = optimizelyJSONUsingString.GetValue<string>("field4.");
+            Assert.IsNull(expectedValue);
+            LoggerMock.Verify(log => log.Log(LogLevel.ERROR, "Value for JSON key not found."), Times.Once);
+            ErrorHandlerMock.Verify(er => er.HandleError(It.IsAny<OptimizelyRuntimeException>()), Times.Once);
+        }
+
+        [Test]
+        public void TestGetValueReturnsDefaultValueWhenJsonPath2IsInvalid()
+        {
+            var optimizelyJSONUsingString = new OptimizelyJson(Payload, ErrorHandlerMock.Object, LoggerMock.Object);
+            var expectedValue = optimizelyJSONUsingString.GetValue<string>("field4..inner_field1");
+            Assert.IsNull(expectedValue);
+            LoggerMock.Verify(log => log.Log(LogLevel.ERROR, "Value for JSON key not found."), Times.Once);
+            ErrorHandlerMock.Verify(er => er.HandleError(It.IsAny<OptimizelyRuntimeException>()), Times.Once);
+        } 
+        
+        [Test]
+        public void TestGetValueObjectNotModifiedIfCalledTwice()
+        {
+            var optimizelyJSONUsingString = new OptimizelyJson(Payload, ErrorHandlerMock.Object, LoggerMock.Object);
+            var expectedValue = optimizelyJSONUsingString.GetValue<string>("field4.inner_field1");
+            var expectedValue2 = optimizelyJSONUsingString.GetValue<string>("field4.inner_field1");
+
+            Assert.AreEqual(expectedValue, expectedValue2);
+        }
+
+        [Test]
         public void TestGetValueReturnsUsingGivenClassType()
         {
             var optimizelyJSONUsingString = new OptimizelyJson(Payload, ErrorHandlerMock.Object, LoggerMock.Object);
