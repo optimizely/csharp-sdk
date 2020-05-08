@@ -47,6 +47,7 @@ namespace OptimizelySDK
                 ErrorHandler.HandleError(new Exceptions.InvalidJsonException(exception.Message));
             }
         }
+
         public OptimizelyJson(Dictionary<string, object> dict, IErrorHandler errorHandler, ILogger logger)
         {
             try
@@ -74,6 +75,9 @@ namespace OptimizelySDK
         }
 
         /// <summary>
+        /// Returns the value from dictionary of given jsonPath (Seperated by ".") in the provided type T. 
+        /// 
+        /// Example:
         /// If JSON Data is {"k1":true, "k2":{"k3":"v3"}}
         ///
         /// Set jsonPath to "k2" to access {"k3":"v3"} or set it to "k2.k3" to access "v3"
@@ -120,6 +124,11 @@ namespace OptimizelySDK
             return deserializedObj;
         }
 
+        /// <summary>
+        /// This will convert all the given JObjects datatype variables into Dictionaries and JArray objects into List.
+        /// </summary>
+        /// <param name="o">object containing JObject and JArray datatype objects</param>
+        /// <returns>Dictionary object</returns>
         private object ConvertIntoCollection(object o)
         {
             if (o is JObject jo)
@@ -132,6 +141,5 @@ namespace OptimizelySDK
             }
             return o;
         }
-
     }
 }
