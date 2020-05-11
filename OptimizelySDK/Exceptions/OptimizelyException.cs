@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2017, Optimizely
+ * Copyright 2017, 2020, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,14 @@ namespace OptimizelySDK.Exceptions
     public class OptimizelyRuntimeException : OptimizelyException
     {
         public OptimizelyRuntimeException(string message)
+            : base(message)
+        {
+        }
+    }
+    
+    public class InvalidJsonException : OptimizelyException
+    {
+        public InvalidJsonException(string message)
             : base(message)
         {
         }
