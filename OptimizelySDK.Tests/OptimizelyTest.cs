@@ -3055,8 +3055,185 @@ namespace OptimizelySDK.Tests
             NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionNotificationTypes.FEATURE_VARIABLE, TestUserId, new UserAttributes(), It.Is<Dictionary<string, object>>(info => TestData.CompareObjects(info, decisionInfo))), Times.Once);
         }
 
+        [Test]
+        public void TestGetAllFeatureVariablesSendsNotificationWhenUserBuckedIntoRolloutAndVariationIsToggleOn()
+        {
+            var featureKey = "string_single_variable_feature";
+            var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
+            var expectedValue = new Dictionary<string, object>() {
+                { "string_variable", "cta_4" },
+                { "json_var", new Dictionary<string, object>()
+                    {
+                        { "int_var", 4 },
+                        { "string_var", "cta_4" }
+                    }
+                }
+            };
+            var experiment = Config.GetRolloutFromId("166661").Experiments[0];
+            var variation = Config.GetVariationFromKey(experiment.Key, "177775");
+            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT);
+            var userAttributes = new UserAttributes
+            {
+               { "device_type", "iPhone" },
+               { "company", "Optimizely" },
+               { "location", "San Francisco" }
+            };
+
+            DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, Config, userAttributes)).Returns(decision);
+            NotificationCallbackMock.Setup(nc => nc.TestDecisionCallback(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<UserAttributes>(),
+                It.IsAny<Dictionary<string, object>>()));
+
+            var optly = Helper.CreatePrivateOptimizely();
+
+            optly.SetFieldOrProperty("ProjectConfigManager", ConfigManager);
+            var optStronglyTyped = optly.GetObject() as Optimizely;
+
+            optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
+            optStronglyTyped.NotificationCenter.AddNotification(NotificationCenter.NotificationType.Decision, NotificationCallbackMock.Object.TestDecisionCallback);
+
+            var variableValues = (OptimizelyJson)optly.Invoke("GetAllFeatureVariables", featureKey, TestUserId, userAttributes);
+            Assert.IsTrue(TestData.CompareObjects(variableValues.ToDictionary(), expectedValue));
+            var decisionInfo = new Dictionary<string, object>
+            {
+                { "featureKey", featureKey },
+                { "featureEnabled", true },
+                { "variableValues", expectedValue },
+                { "source", FeatureDecision.DECISION_SOURCE_ROLLOUT },
+                { "sourceInfo", new Dictionary<string, string>() },
+            };
+
+            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionNotificationTypes.ALL_FEATURE_VARIABLE, TestUserId, userAttributes, It.Is<Dictionary<string, object>>(info => TestData.CompareObjects(info, decisionInfo))), Times.Once);
+        }
+
         #endregion // Decision Listener
 
+        #region Test GetAllFeatureVariables
+
+        [Test]
+        public void TestGetAllFeatureVariablesNullFeatureKey()
+        {
+            var userAttributes = new UserAttributes
+            {
+               { "device_type", "iPhone" },
+               { "company", "Optimizely" },
+               { "location", "San Francisco" }
+            };
+            var optly = Helper.CreatePrivateOptimizely();
+
+            var result = (OptimizelyJson)optly.Invoke("GetAllFeatureVariables", null, TestUserId, userAttributes);
+            Assert.Null(result);
+
+            LoggerMock.Verify(log => log.Log(LogLevel.WARN, "The featureKey parameter must be nonnull."), Times.Once);
+        }
+
+        [Test]
+        public void TestGetAllFeatureVariablesNullUserID()
+        {
+            var userAttributes = new UserAttributes
+            {
+               { "device_type", "iPhone" },
+               { "company", "Optimizely" },
+               { "location", "San Francisco" }
+            };
+            var optly = Helper.CreatePrivateOptimizely();
+
+            var result = (OptimizelyJson)optly.Invoke("GetAllFeatureVariables", "string_single_variable_feature", null, userAttributes);
+            Assert.Null(result);
+
+            LoggerMock.Verify(log => log.Log(LogLevel.WARN, "The userId parameter must be nonnull."), Times.Once);
+        }
+        
+        [Test]
+        public void TestGetAllFeatureVariablesEmptyOrNullFeatureFlag()
+        {
+            var featureKey = "InvalidFeatureKey";
+            var userAttributes = new UserAttributes
+            {
+               { "device_type", "iPhone" },
+               { "company", "Optimizely" },
+               { "location", "San Francisco" }
+            };
+            var optly = Helper.CreatePrivateOptimizely();
+
+            var result = (OptimizelyJson)optly.Invoke("GetAllFeatureVariables", featureKey, TestUserId, userAttributes);
+            Assert.Null(result);
+
+            LoggerMock.Verify(log => log.Log(LogLevel.INFO, "No feature flag was found for key \"" + featureKey + "\"."), Times.Once);
+        }
+        
+        [Test]
+        public void TestGetAllFeatureVariablesInvalidDatafile()
+        {
+            var userAttributes = new UserAttributes
+            {
+               { "device_type", "iPhone" },
+               { "company", "Optimizely" },
+               { "location", "San Francisco" }
+            };
+            var optly = new Optimizely("Random datafile", null, LoggerMock.Object);
+
+            var result = optly.GetAllFeatureVariables("validFeatureKey", TestUserId, userAttributes);
+            
+            Assert.Null(result);
+
+            LoggerMock.Verify(log => log.Log(LogLevel.ERROR, "Optimizely instance is not valid, failing getAllFeatureVariableValues call. type"), Times.Once);
+        }
+
+        [Test]
+        public void TestGetAllFeatureVariablesRollout()
+        {
+            var featureKey = "string_single_variable_feature";
+            var experiment = Config.GetRolloutFromId("166661").Experiments[0];
+
+            var userAttributes = new UserAttributes
+            {
+               { "device_type", "iPhone" },
+               { "company", "Optimizely" },
+               { "location", "San Francisco" }
+            };
+
+            var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
+
+            var decision = new FeatureDecision(experiment, null, FeatureDecision.DECISION_SOURCE_ROLLOUT);
+
+            DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, Config, userAttributes)).Returns(decision);
+
+            var optly = Helper.CreatePrivateOptimizely();
+            optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
+            optly.SetFieldOrProperty("ProjectConfigManager", ConfigManager);
+
+            var result = (OptimizelyJson)optly.Invoke("GetAllFeatureVariables", featureKey, TestUserId, userAttributes);
+            Assert.NotNull(result);
+
+            LoggerMock.Verify(log => log.Log(LogLevel.INFO, "User \"" + TestUserId + "\" was not bucketed into any variation for feature flag \"" + featureKey + "\". " +
+                        "The default values are being returned."), Times.Once);
+        }
+
+        [Test]
+        public void TestGetAllFeatureVariablesValid()
+        {
+            var featureKey = "double_single_variable_feature";
+            var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
+            var expectedValue = new Dictionary<string, object>() {
+                { "double_variable", 42.42}
+            };
+            var experiment = Config.GetExperimentFromKey("test_experiment_double_feature");
+            var variation = Config.GetVariationFromKey("test_experiment_double_feature", "control");
+            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_FEATURE_TEST);
+            
+            DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, Config, null)).Returns(decision);
+           
+            var optly = Helper.CreatePrivateOptimizely();
+
+            optly.SetFieldOrProperty("ProjectConfigManager", ConfigManager);
+            
+            optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
+            
+            var variableValues = (OptimizelyJson)optly.Invoke("GetAllFeatureVariables", featureKey, TestUserId, null);
+            Assert.IsTrue(TestData.CompareObjects(variableValues.ToDictionary(), expectedValue));
+        }
+
+        #endregion
         #region DFM Notification
         [Test]
         public void TestDFMNotificationWhenProjectConfigIsUpdated()
