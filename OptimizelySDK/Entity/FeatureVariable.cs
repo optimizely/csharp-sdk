@@ -32,8 +32,38 @@ namespace OptimizelySDK.Entity
 
 
         public string DefaultValue { get; set; }
-        public string Type { get; set; }
-        public string SubType { get; set; }
+
+        private string _subType;
+
+        public string SubType
+        {
+            get
+            {
+                return _subType;
+            }
+            set
+            {
+                _subType = value;
+            }
+        }
+
+        private string _type;
+        public string Type
+        {
+            get
+            {
+                if (_type == STRING_TYPE && _subType == JSON_TYPE)
+                {
+                    return JSON_TYPE;
+                }
+                return _type;
+            }
+            set
+            {
+                _type = value;
+            }
+        }
+
         public VariableStatus Status { get; set; }
 
         /// <summary>
