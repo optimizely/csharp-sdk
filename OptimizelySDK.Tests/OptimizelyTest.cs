@@ -62,6 +62,7 @@ namespace OptimizelySDK.Tests
         const string FEATUREVARIABLE_INTEGERTYPE = "integer";
         const string FEATUREVARIABLE_DOUBLETYPE = "double";
         const string FEATUREVARIABLE_STRINGTYPE = "string";
+        const string FEATUREVARIABLE_JSONTYPE = "json";
 
         #region Test Life Cycle
         [SetUp]
@@ -2763,6 +2764,55 @@ namespace OptimizelySDK.Tests
             };
 
             NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionNotificationTypes.FEATURE_VARIABLE, TestUserId, new UserAttributes(), It.Is<Dictionary<string, object>>(info => TestData.CompareObjects(info, decisionInfo))), Times.Once);
+        }
+
+        [Test]
+        public void TestGetFeatureVariableJsonSendsNotificationWhenUserBuckedIntoFeatureExperimentAndVariationIsToggleOn()
+        {
+            var featureKey = "string_single_variable_feature";
+            var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
+            var variableKey = "json_var";
+            var expectedDict = new Dictionary<string, object>()
+            {
+                { "int_var", 4 },
+                { "string_var", "cta_4"}
+            };
+            var experiment = Config.GetRolloutFromId("166661").Experiments[0];
+            var variation = Config.GetVariationFromKey(experiment.Key, "177775");
+            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT);
+            var userAttributes = new UserAttributes
+            {
+               { "device_type", "iPhone" },
+               { "company", "Optimizely" },
+               { "location", "San Francisco" }
+            };
+
+            DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, Config, userAttributes)).Returns(decision);
+            NotificationCallbackMock.Setup(nc => nc.TestDecisionCallback(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<UserAttributes>(),
+                It.IsAny<Dictionary<string, object>>()));
+
+            var optly = Helper.CreatePrivateOptimizely();
+
+            optly.SetFieldOrProperty("ProjectConfigManager", ConfigManager);
+            var optStronglyTyped = optly.GetObject() as Optimizely;
+
+            optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
+            optStronglyTyped.NotificationCenter.AddNotification(NotificationCenter.NotificationType.Decision, NotificationCallbackMock.Object.TestDecisionCallback);
+
+            var variableValue = (OptimizelyJson)optly.Invoke("GetFeatureVariableJSON", featureKey, variableKey, TestUserId, userAttributes);
+            Assert.IsTrue(TestData.CompareObjects(expectedDict, variableValue.ToDictionary()));
+            var decisionInfo = new Dictionary<string, object>
+            {
+                { "featureKey", featureKey },
+                { "featureEnabled", true },
+                { "variableKey", variableKey },
+                { "variableValue", expectedDict },
+                { "variableType", FEATUREVARIABLE_JSONTYPE },
+                { "source", FeatureDecision.DECISION_SOURCE_ROLLOUT },
+                { "sourceInfo", new Dictionary<string, string>() },
+            };
+
+            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionNotificationTypes.FEATURE_VARIABLE, TestUserId, userAttributes, It.Is<Dictionary<string, object>>(info => TestData.CompareObjects(info, decisionInfo))), Times.Once);
         }
 
         [Test]
