@@ -1757,8 +1757,9 @@ namespace OptimizelySDK.Tests
             var featureVariableStringRandomType = Optimizely.GetFeatureVariableString("", "any_key", TestUserId);
             Assert.IsNull(featureVariableStringRandomType);
 
-            var featureVariableStringJsonType = Optimizely.GetFeatureVariableString("unsupported_variabletype", "string_json_key", TestUserId);
-            Assert.IsNull(featureVariableStringJsonType);            
+            // This is to test that only json subtype is parsing and all other will subtype will be stringify
+            var featureVariableStringRegexSubType = Optimizely.GetFeatureVariableString("unsupported_variabletype", "string_regex_key", TestUserId);
+            Assert.AreEqual(featureVariableStringRegexSubType, "^\\d+(\\.\\d+)?");            
         }
 
         // Should return default value and log message when feature is not enabled for the user.

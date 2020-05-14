@@ -665,10 +665,10 @@
 				},
 				{
 					"id": "255555",
-					"key": "string_json_key",
+					"key": "string_regex_key",
 					"type": "string",
-					"defaultValue": "{\"myvalue\": \"jsonValue\"}",
-					"subType": "json"
+					"defaultValue": "^\\d+(\\.\\d+)?",
+					"subType": "regex"
 				}
 			]
 
