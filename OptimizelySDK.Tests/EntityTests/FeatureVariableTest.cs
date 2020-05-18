@@ -30,6 +30,7 @@ namespace OptimizelySDK.Tests.EntityTests
             Assert.AreEqual(FeatureVariable.GetFeatureVariableTypeName(FeatureVariable.DOUBLE_TYPE), "GetFeatureVariableDouble");
             Assert.AreEqual(FeatureVariable.GetFeatureVariableTypeName(FeatureVariable.INTEGER_TYPE), "GetFeatureVariableInteger");
             Assert.AreEqual(FeatureVariable.GetFeatureVariableTypeName(FeatureVariable.STRING_TYPE), "GetFeatureVariableString");
+            Assert.AreEqual(FeatureVariable.GetFeatureVariableTypeName(FeatureVariable.JSON_TYPE), "GetFeatureVariableJSON");
         }
 
         [Test]
@@ -39,6 +40,7 @@ namespace OptimizelySDK.Tests.EntityTests
             Assert.AreEqual(FeatureVariable.DOUBLE_TYPE, "double");
             Assert.AreEqual(FeatureVariable.INTEGER_TYPE, "integer");
             Assert.AreEqual(FeatureVariable.STRING_TYPE, "string");
+            Assert.AreEqual(FeatureVariable.JSON_TYPE, "json");
         }
     }
 }

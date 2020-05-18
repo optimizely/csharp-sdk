@@ -22,6 +22,7 @@ namespace OptimizelySDK.Entity
         public const string INTEGER_TYPE = "integer";
         public const string DOUBLE_TYPE = "double";
         public const string BOOLEAN_TYPE = "boolean";
+        public const string JSON_TYPE = "json";
         
         public enum VariableStatus
         {
@@ -31,7 +32,38 @@ namespace OptimizelySDK.Entity
 
 
         public string DefaultValue { get; set; }
-        public string Type { get; set; }
+
+        private string _subType;
+
+        public string SubType
+        {
+            get
+            {
+                return _subType;
+            }
+            set
+            {
+                _subType = value;
+            }
+        }
+
+        private string _type;
+        public string Type
+        {
+            get
+            {
+                if (_type == STRING_TYPE && _subType == JSON_TYPE)
+                {
+                    return JSON_TYPE;
+                }
+                return _type;
+            }
+            set
+            {
+                _type = value;
+            }
+        }
+
         public VariableStatus Status { get; set; }
 
         /// <summary>
@@ -50,6 +82,8 @@ namespace OptimizelySDK.Entity
                     return "GetFeatureVariableInteger";
                 case STRING_TYPE:
                     return "GetFeatureVariableString";
+                case JSON_TYPE:
+                    return "GetFeatureVariableJSON";
                 default:
                     return null;
             }
