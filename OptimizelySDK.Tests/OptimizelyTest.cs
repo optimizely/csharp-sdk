@@ -1546,13 +1546,45 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
-        public void TestGetFeatureVariableJSONReturnsRightValueWhenUserBuckedIntoRolloutAndVariationIsToggleOn()
+        public void TestGetFeatureVariableJSONReturnsRightValueWhenUserBucketIntoRolloutAndVariationIsToggleOn()
         {
             var featureKey = "string_single_variable_feature";
             var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
             var variableKey = "json_var";
             var expectedStringValue = "cta_4";
             var expectedIntValue = 4;
+            var experiment = Config.GetRolloutFromId("166661").Experiments[0];
+            var variation = Config.GetVariationFromKey(experiment.Key, "177775");
+            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT);
+            var userAttributes = new UserAttributes
+            {
+               { "device_type", "iPhone" },
+               { "company", "Optimizely" },
+               { "location", "San Francisco" }
+            };
+
+            DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, Config, userAttributes)).Returns(decision);
+
+            var optly = Helper.CreatePrivateOptimizely();
+
+            optly.SetFieldOrProperty("ProjectConfigManager", ConfigManager);
+            optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
+
+            var variableValue = (OptimizelyJson)optly.Invoke("GetFeatureVariableJSON", featureKey, variableKey, TestUserId, userAttributes);
+            Assert.AreEqual(expectedIntValue, variableValue.GetValue<long>("int_var"));
+            Assert.AreEqual(expectedStringValue, variableValue.GetValue<string>("string_var"));
+
+            LoggerMock.Verify(l => l.Log(LogLevel.INFO, $@"Returning variable value ""{variableValue}"" for variation ""{variation.Key}"" of feature flag ""{featureKey}""."));
+        }
+
+        [Test]
+        public void TestGetFeatureVariableJSONReturnsRightValueWhenUserBucketIntoRolloutAndVariationIsToggleOnTypeIsJson()
+        {
+            var featureKey = "string_single_variable_feature";
+            var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
+            var variableKey = "true_json_var";
+            var expectedStringValue = "cta_5";
+            var expectedIntValue = 5;
             var experiment = Config.GetRolloutFromId("166661").Experiments[0];
             var variation = Config.GetVariationFromKey(experiment.Key, "177775");
             var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT);
@@ -1758,7 +1790,11 @@ namespace OptimizelySDK.Tests
             Assert.IsNull(featureVariableStringRandomType);
 
             var featureVariableStringJsonType = Optimizely.GetFeatureVariableString("unsupported_variabletype", "string_json_key", TestUserId);
-            Assert.IsNull(featureVariableStringJsonType);            
+            Assert.IsNull(featureVariableStringJsonType);
+          
+            // This is to test that only json subtype is parsing and all other will subtype will be stringify
+            var featureVariableStringRegexSubType = Optimizely.GetFeatureVariableString("unsupported_variabletype", "string_regex_key", TestUserId);
+            Assert.AreEqual(featureVariableStringRegexSubType, "^\\d+(\\.\\d+)?");            
         }
 
         // Should return default value and log message when feature is not enabled for the user.
