@@ -1788,10 +1788,7 @@ namespace OptimizelySDK.Tests
         {
             var featureVariableStringRandomType = Optimizely.GetFeatureVariableString("", "any_key", TestUserId);
             Assert.IsNull(featureVariableStringRandomType);
-
-            var featureVariableStringJsonType = Optimizely.GetFeatureVariableString("unsupported_variabletype", "string_json_key", TestUserId);
-            Assert.IsNull(featureVariableStringJsonType);
-          
+            
             // This is to test that only json subtype is parsing and all other will subtype will be stringify
             var featureVariableStringRegexSubType = Optimizely.GetFeatureVariableString("unsupported_variabletype", "string_regex_key", TestUserId);
             Assert.AreEqual(featureVariableStringRegexSubType, "^\\d+(\\.\\d+)?");            
@@ -3195,7 +3192,7 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
-        public void TestGetAllFeatureVariablesSendsNotificationWhenUserBuckedIntoRolloutAndVariationIsToggleOn()
+        public void TestGetAllFeatureVariablesSendsNotificationWhenUserBucketIntoRolloutAndVariationIsToggleOn()
         {
             var featureKey = "string_single_variable_feature";
             var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
@@ -3205,6 +3202,12 @@ namespace OptimizelySDK.Tests
                     {
                         { "int_var", 4 },
                         { "string_var", "cta_4" }
+                    }
+                },
+                { "true_json_var", new Dictionary<string, object>()
+                    {
+                        { "int_var", 5 },
+                        { "string_var", "cta_5" }
                     }
                 }
             };
@@ -3257,63 +3260,34 @@ namespace OptimizelySDK.Tests
                { "company", "Optimizely" },
                { "location", "San Francisco" }
             };
-            var optly = Helper.CreatePrivateOptimizely();
+            var optimizely = new Optimizely(TestData.Datafile, EventDispatcherMock.Object, LoggerMock.Object, ErrorHandlerMock.Object);
 
-            var result = (OptimizelyJson)optly.Invoke("GetAllFeatureVariables", null, TestUserId, userAttributes);
+            // Null Feature flag key
+            var result = optimizely.GetAllFeatureVariables(null, TestUserId, userAttributes);
             Assert.Null(result);
 
             LoggerMock.Verify(log => log.Log(LogLevel.WARN, "The featureKey parameter must be nonnull."), Times.Once);
-        }
 
-        [Test]
-        public void TestGetAllFeatureVariablesNullUserID()
-        {
-            var userAttributes = new UserAttributes
-            {
-               { "device_type", "iPhone" },
-               { "company", "Optimizely" },
-               { "location", "San Francisco" }
-            };
-            var optly = Helper.CreatePrivateOptimizely();
-
-            var result = (OptimizelyJson)optly.Invoke("GetAllFeatureVariables", "string_single_variable_feature", null, userAttributes);
-            Assert.Null(result);
+            // Null User ID
+            var result2 = optimizely.GetAllFeatureVariables("string_single_variable_feature", null, userAttributes);
+            Assert.Null(result2);
 
             LoggerMock.Verify(log => log.Log(LogLevel.WARN, "The userId parameter must be nonnull."), Times.Once);
-        }
-        
-        [Test]
-        public void TestGetAllFeatureVariablesEmptyOrNullFeatureFlag()
-        {
-            var featureKey = "InvalidFeatureKey";
-            var userAttributes = new UserAttributes
-            {
-               { "device_type", "iPhone" },
-               { "company", "Optimizely" },
-               { "location", "San Francisco" }
-            };
-            var optly = Helper.CreatePrivateOptimizely();
 
-            var result = (OptimizelyJson)optly.Invoke("GetAllFeatureVariables", featureKey, TestUserId, userAttributes);
-            Assert.Null(result);
+            // Invalid featureKey
+            var featureKey = "InvalidFeatureKey";
+
+            var result3 = optimizely.GetAllFeatureVariables(featureKey, TestUserId, userAttributes);
+            Assert.Null(result3);
 
             LoggerMock.Verify(log => log.Log(LogLevel.INFO, "No feature flag was found for key \"" + featureKey + "\"."), Times.Once);
-        }
-        
-        [Test]
-        public void TestGetAllFeatureVariablesInvalidDatafile()
-        {
-            var userAttributes = new UserAttributes
-            {
-               { "device_type", "iPhone" },
-               { "company", "Optimizely" },
-               { "location", "San Francisco" }
-            };
-            var optly = new Optimizely("Random datafile", null, LoggerMock.Object);
 
-            var result = optly.GetAllFeatureVariables("validFeatureKey", TestUserId, userAttributes);
-            
-            Assert.Null(result);
+            // Null Optimizely config 
+            var invalidOptly = new Optimizely("Random datafile", null, LoggerMock.Object);
+
+            var result4 = invalidOptly.GetAllFeatureVariables("validFeatureKey", TestUserId, userAttributes);
+
+            Assert.Null(result4);
 
             LoggerMock.Verify(log => log.Log(LogLevel.ERROR, "Optimizely instance is not valid, failing getAllFeatureVariableValues call. type"), Times.Once);
         }
@@ -3349,27 +3323,20 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
-        public void TestGetAllFeatureVariablesValid()
+        public void TestGetAllFeatureVariablesSourceFeatureTest()
         {
             var featureKey = "double_single_variable_feature";
-            var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
             var expectedValue = new Dictionary<string, object>() {
                 { "double_variable", 42.42}
             };
-            var experiment = Config.GetExperimentFromKey("test_experiment_double_feature");
-            var variation = Config.GetVariationFromKey("test_experiment_double_feature", "control");
-            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_FEATURE_TEST);
-            
-            DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, Config, null)).Returns(decision);
-           
-            var optly = Helper.CreatePrivateOptimizely();
 
-            optly.SetFieldOrProperty("ProjectConfigManager", ConfigManager);
-            
-            optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
-            
-            var variableValues = (OptimizelyJson)optly.Invoke("GetAllFeatureVariables", featureKey, TestUserId, null);
+            var optimizely = new Optimizely(TestData.Datafile, EventDispatcherMock.Object, LoggerMock.Object, ErrorHandlerMock.Object);
+
+            var variableValues = optimizely.GetAllFeatureVariables(featureKey, TestUserId, null);
             Assert.IsTrue(TestData.CompareObjects(variableValues.ToDictionary(), expectedValue));
+
+            LoggerMock.Verify(log => log.Log(LogLevel.INFO, "User \"" + TestUserId + "\" was not bucketed into any variation for feature flag \"" + featureKey + "\". " +
+                        "The default values are being returned."), Times.Never);
         }
 
         #endregion

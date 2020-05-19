@@ -749,6 +749,13 @@ namespace OptimizelySDK
         public OptimizelyJson GetAllFeatureVariables(string featureKey, string userId,
                                                  UserAttributes userAttributes = null)
         {
+            var config = ProjectConfigManager?.GetConfig();
+            if (config == null)
+            {
+                Logger.Log(LogLevel.ERROR, "Optimizely instance is not valid, failing getAllFeatureVariableValues call. type");
+                return null;
+            }
+
             if (featureKey == null)
             {
                 Logger.Log(LogLevel.WARN, "The featureKey parameter must be nonnull.");
@@ -757,14 +764,6 @@ namespace OptimizelySDK
             else if (userId == null)
             {
                 Logger.Log(LogLevel.WARN, "The userId parameter must be nonnull.");
-                return null;
-            }
-
-            var config = ProjectConfigManager?.GetConfig();
-
-            if (config == null)
-            {
-                Logger.Log(LogLevel.ERROR, "Optimizely instance is not valid, failing getAllFeatureVariableValues call. type");
                 return null;
             }
 
