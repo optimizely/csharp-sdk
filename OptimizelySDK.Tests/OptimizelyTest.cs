@@ -3252,7 +3252,7 @@ namespace OptimizelySDK.Tests
         #region Test GetAllFeatureVariables
 
         [Test]
-        public void TestGetAllFeatureVariablesNullFeatureKey()
+        public void TestGetAllFeatureVariablesReturnsNullScenarios()
         {
             var userAttributes = new UserAttributes
             {
