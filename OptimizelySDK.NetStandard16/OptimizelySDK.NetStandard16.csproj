@@ -31,6 +31,7 @@
         <Compile Include="..\OptimizelySDK\Entity\ForcedVariation.cs" />
         <Compile Include="..\OptimizelySDK\Entity\Group.cs" />
         <Compile Include="..\OptimizelySDK\Entity\IdKeyEntity.cs" />
+        <Compile Include="..\OptimizelySDK\OptimizelyJson.cs" />
         <Compile Include="..\OptimizelySDK\Entity\TrafficAllocation.cs" />
         <Compile Include="..\OptimizelySDK\Entity\UserAttributes.cs" />
         <Compile Include="..\OptimizelySDK\Entity\Variation.cs" />
