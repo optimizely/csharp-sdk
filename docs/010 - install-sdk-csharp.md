@@ -5,6 +5,8 @@ hidden: false
 createdAt: "2019-09-11T13:55:51.015Z"
 updatedAt: "2019-09-11T13:58:07.201Z"
 ---
+TEST CHANGE
+
 The C# SDK is distributed through NuGet.
 
 For Windows, to install, run the command `Install-Package Optimizely.SDK` in the Package Manager Console:
