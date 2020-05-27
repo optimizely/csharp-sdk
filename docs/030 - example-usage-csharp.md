@@ -1,7 +1,7 @@
 ---
 title: "Example usage"
 slug: "example-usage-csharp"
-hidden: true
+hidden: false
 createdAt: "2019-09-11T22:26:38.446Z"
 updatedAt: "2019-09-12T20:28:26.570Z"
 ---

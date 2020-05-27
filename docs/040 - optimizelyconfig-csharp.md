@@ -1,7 +1,7 @@
 ---
 title: "OptimizelyConfig"
 slug: "optimizelyconfig-csharp"
-hidden: true
+hidden: false
 createdAt: "2020-01-17T11:52:50.547Z"
 updatedAt: "2020-01-28T21:53:11.290Z"
 ---

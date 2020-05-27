@@ -1,7 +1,7 @@
 ---
 title: "Get Forced Variation"
 slug: "get-forced-variation-csharp"
-hidden: true
+hidden: false
 createdAt: "2019-09-12T13:51:51.169Z"
 updatedAt: "2019-09-12T20:34:30.074Z"
 ---

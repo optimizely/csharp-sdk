@@ -1,7 +1,7 @@
 ---
 title: "Get Feature Variable"
 slug: "get-feature-variable-csharp"
-hidden: true
+hidden: false
 createdAt: "2019-09-12T13:51:45.265Z"
 updatedAt: "2019-09-16T23:48:13.270Z"
 ---

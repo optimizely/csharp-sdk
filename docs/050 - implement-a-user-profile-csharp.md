@@ -1,7 +1,7 @@
 ---
 title: "Implement a user profile service"
 slug: "implement-a-user-profile-csharp"
-hidden: true
+hidden: false
 createdAt: "2019-09-12T13:43:49.170Z"
 updatedAt: "2019-09-12T13:45:24.114Z"
 ---

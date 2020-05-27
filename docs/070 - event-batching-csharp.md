@@ -1,7 +1,7 @@
 ---
 title: "Event batching"
 slug: "event-batching-csharp"
-hidden: true
+hidden: false
 createdAt: "2019-09-12T13:44:04.059Z"
 updatedAt: "2019-12-13T00:25:39.892Z"
 ---

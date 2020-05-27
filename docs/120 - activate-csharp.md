@@ -1,7 +1,7 @@
 ---
 title: "Activate"
 slug: "activate-csharp"
-hidden: true
+hidden: false
 createdAt: "2019-09-12T13:51:40.641Z"
 updatedAt: "2019-09-12T20:31:54.396Z"
 ---

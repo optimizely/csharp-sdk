@@ -1,7 +1,7 @@
 ---
 title: "Configure event dispatcher"
 slug: "configure-event-dispatcher-csharp"
-hidden: true
+hidden: false
 createdAt: "2019-09-12T13:43:55.726Z"
 updatedAt: "2019-09-12T13:45:58.817Z"
 ---

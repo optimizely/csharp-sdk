@@ -1,7 +1,7 @@
 ---
 title: "Get Variation"
 slug: "get-variation-csharp"
-hidden: true
+hidden: false
 createdAt: "2019-09-12T13:51:54.916Z"
 updatedAt: "2019-09-12T20:35:30.799Z"
 ---
