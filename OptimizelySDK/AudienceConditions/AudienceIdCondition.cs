@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2019, Optimizely
+ * Copyright 2019-2020, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ namespace OptimizelySDK.AudienceConditions
             logger.Log(LogLevel.DEBUG, $@"Starting to evaluate audience ""{AudienceId}"" with conditions: {audience.ConditionsString}");
             var result = audience.ConditionList.Evaluate(config, attributes, logger);
             var resultText = result?.ToString().ToUpper() ?? "UNKNOWN";
-            logger.Log(LogLevel.INFO, $@"Audience ""{AudienceId}"" evaluated to {resultText}");
+            logger.Log(LogLevel.DEBUG, $@"Audience ""{AudienceId}"" evaluated to {resultText}");
 
             return result;
         }
