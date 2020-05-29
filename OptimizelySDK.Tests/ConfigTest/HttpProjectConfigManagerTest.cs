@@ -18,7 +18,6 @@ using Moq;
 using NUnit.Framework;
 using OptimizelySDK.Config;
 using OptimizelySDK.Logger;
-using OptimizelySDK.Notifications;
 using OptimizelySDK.Tests.NotificationTests;
 using System;
 using System.Diagnostics;
@@ -53,6 +52,13 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
 
             httpManager.OnReady().Wait(System.Threading.Timeout.Infinite);
             Assert.NotNull(httpManager.GetConfig());
+        }
+
+        [Test]
+        public void TestHttpClientHandler()
+        {
+            var httpConfigHandler = HttpProjectConfigManager.GetHttpClientHandler();
+            Assert.IsTrue(httpConfigHandler.AutomaticDecompression == (System.Net.DecompressionMethods.Deflate | System.Net.DecompressionMethods.GZip));
         }
 
         [Test]

@@ -44,10 +44,16 @@ namespace OptimizelySDK.Config
         private static System.Net.Http.HttpClient Client;
         static HttpProjectConfigManager()
         {
+            Client = new System.Net.Http.HttpClient(GetHttpClientHandler());
+        }
+
+        public static System.Net.Http.HttpClientHandler GetHttpClientHandler()
+        {
             var handler = new System.Net.Http.HttpClientHandler() {
                 AutomaticDecompression = System.Net.DecompressionMethods.GZip | System.Net.DecompressionMethods.Deflate
             };
-            Client = new System.Net.Http.HttpClient(handler);
+
+            return handler;
         }
 
         private string GetRemoteDatafileResponse()
