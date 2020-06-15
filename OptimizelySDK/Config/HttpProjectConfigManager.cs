@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2019, Optimizely
+ * Copyright 2019-2020, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,11 +28,17 @@ namespace OptimizelySDK.Config
     {
         private string Url;
         private string LastModifiedSince = string.Empty;
-
+        private string AuthDatafileToken = string.Empty;
         private HttpProjectConfigManager(TimeSpan period, string url, TimeSpan blockingTimeout, bool autoUpdate, ILogger logger, IErrorHandler errorHandler) 
             : base(period, blockingTimeout, autoUpdate, logger, errorHandler)
         {
             Url = url;
+        }
+
+        private HttpProjectConfigManager(TimeSpan period, string url, TimeSpan blockingTimeout, bool autoUpdate, ILogger logger, IErrorHandler errorHandler, string authDatafileToken)
+            : this(period, url, blockingTimeout, autoUpdate, logger, errorHandler)
+        {
+            AuthDatafileToken = authDatafileToken;
         }
 
         public Task OnReady()
@@ -40,21 +46,37 @@ namespace OptimizelySDK.Config
             return CompletableConfigManager.Task;
         }
 
-#if !NET40 && !NET35
-        private static System.Net.Http.HttpClient Client;
+#if !NET40 && !NET35        
+        public class HttpClient
+        {
+            private System.Net.Http.HttpClient Client;
+
+            public HttpClient()
+            {
+                Client = new System.Net.Http.HttpClient(GetHttpClientHandler());
+            }
+
+            public static System.Net.Http.HttpClientHandler GetHttpClientHandler()
+            {
+                var handler = new System.Net.Http.HttpClientHandler() {
+                    AutomaticDecompression = System.Net.DecompressionMethods.GZip | System.Net.DecompressionMethods.Deflate
+                };
+
+                return handler;
+            }
+
+            public virtual Task<System.Net.Http.HttpResponseMessage> SendAsync(System.Net.Http.HttpRequestMessage httpRequestMessage)
+            {
+                return Client.SendAsync(httpRequestMessage);
+            }
+        }
+
+        private static HttpClient Client;
+
         static HttpProjectConfigManager()
         {
-            Client = new System.Net.Http.HttpClient(GetHttpClientHandler());
-        }
-
-        public static System.Net.Http.HttpClientHandler GetHttpClientHandler()
-        {
-            var handler = new System.Net.Http.HttpClientHandler() {
-                AutomaticDecompression = System.Net.DecompressionMethods.GZip | System.Net.DecompressionMethods.Deflate
-            };
-
-            return handler;
-        }
+            Client = new HttpClient();
+        }        
 
         private string GetRemoteDatafileResponse()
         {
@@ -66,6 +88,10 @@ namespace OptimizelySDK.Config
             // Send If-Modified-Since header if Last-Modified-Since header contains any value.
             if (!string.IsNullOrEmpty(LastModifiedSince))
                 request.Headers.Add("If-Modified-Since", LastModifiedSince);
+
+            if (!string.IsNullOrEmpty(AuthDatafileToken)) {
+                request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", AuthDatafileToken);
+            }
 
             var httpResponse =  Client.SendAsync(request);
             httpResponse.Wait();
@@ -136,11 +162,12 @@ namespace OptimizelySDK.Config
             private readonly TimeSpan DEFAULT_PERIOD = TimeSpan.FromMinutes(5);
             private readonly TimeSpan DEFAULT_BLOCKINGOUT_PERIOD = TimeSpan.FromSeconds(15);
             private readonly string DEFAULT_FORMAT = "https://cdn.optimizely.com/datafiles/{0}.json";
-
+            private readonly string DEFAULT_AUTH_FORMAT = "https://config.optimizely.com/datafiles/auth/{0}.json";
             private string Datafile;
+            private string AuthDatafileToken;            
             private string SdkKey;
             private string Url;
-            private string Format;
+            private string Format;            
             private ILogger Logger;
             private IErrorHandler ErrorHandler;
             private TimeSpan Period;
@@ -171,6 +198,13 @@ namespace OptimizelySDK.Config
             public Builder WithSdkKey(string sdkKey)
             {
                 SdkKey = sdkKey;
+
+                return this;
+            }
+
+            public Builder WithAuthToken(string authToken)
+            {
+                this.AuthDatafileToken = authToken;
 
                 return this;
             }
@@ -260,15 +294,18 @@ namespace OptimizelySDK.Config
                     ErrorHandler = new DefaultErrorHandler();
 
                 if (string.IsNullOrEmpty(Format)) {
-                    Format = DEFAULT_FORMAT;
+
+                    if (string.IsNullOrEmpty(AuthDatafileToken)) {
+                        Format = DEFAULT_FORMAT;
+                    } else {
+                        Format = DEFAULT_AUTH_FORMAT;
+                    }
                 }
 
-                if (string.IsNullOrEmpty(Url) && string.IsNullOrEmpty(SdkKey))
-                {
-                    ErrorHandler.HandleError(new Exception("SdkKey cannot be null"));                    
-                }
-                else if (!string.IsNullOrEmpty(SdkKey))
-                {
+                if (string.IsNullOrEmpty(Url)) {
+                    if (string.IsNullOrEmpty(SdkKey)) {
+                        ErrorHandler.HandleError(new Exception("SdkKey cannot be null"));
+                    }
                     Url = string.Format(Format, SdkKey);
                 }
 
@@ -290,7 +327,7 @@ namespace OptimizelySDK.Config
                 }
                     
 
-                configManager = new HttpProjectConfigManager(Period, Url, BlockingTimeoutSpan, AutoUpdate, Logger, ErrorHandler);
+                configManager = new HttpProjectConfigManager(Period, Url, BlockingTimeoutSpan, AutoUpdate, Logger, ErrorHandler, AuthDatafileToken);
 
                 if (Datafile != null)
                 {
