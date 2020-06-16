@@ -333,13 +333,14 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         [Test]
         public void TestDefaultUrlWhenTokenNotProvided()
         {
-            HttpClientMock.Setup(_ => _.SendAsync(It.IsAny<System.Net.Http.HttpRequestMessage>())).Returns(() => null);
+            HttpClientMock.Setup(_ => _.SendAsync(It.IsAny<System.Net.Http.HttpRequestMessage>()))
+                .Returns(System.Threading.Tasks.Task.FromResult<HttpResponseMessage>(new HttpResponseMessage { StatusCode = System.Net.HttpStatusCode.OK, Content = new StringContent(string.Empty) }));
 
             var httpManager = new HttpProjectConfigManager.Builder()
                 .WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z")
                 .WithLogger(LoggerMock.Object)                
-                .WithStartByDefault(false)
-                .Build(true);
+                .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(50))
+                .Build(false);
 
             httpManager.Start();
             HttpClientMock.Verify(_ => _.SendAsync(
@@ -370,14 +371,15 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         [Test]
         public void TestFormatUrlHigherPriorityThanDefaultUrl()
         {
-            HttpClientMock.Setup(_ => _.SendAsync(It.IsAny<System.Net.Http.HttpRequestMessage>()));
+            HttpClientMock.Setup(_ => _.SendAsync(It.IsAny<System.Net.Http.HttpRequestMessage>()))
+                .Returns(System.Threading.Tasks.Task.FromResult<HttpResponseMessage>(new HttpResponseMessage { StatusCode = System.Net.HttpStatusCode.OK, Content = new StringContent(string.Empty) }));
             var httpManager = new HttpProjectConfigManager.Builder()
                 .WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z")
                 .WithLogger(LoggerMock.Object)
                 .WithFormat("http://customformat/{0}.json")
                 .WithAuthToken("datafile1")
-                .WithStartByDefault(false)
-                .Build(true);
+                .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(50))
+                .Build(false);
 
             httpManager.Start();
             HttpClientMock.Verify(_ => _.SendAsync(
