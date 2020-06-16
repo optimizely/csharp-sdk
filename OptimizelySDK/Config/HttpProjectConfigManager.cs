@@ -56,6 +56,13 @@ namespace OptimizelySDK.Config
                 Client = new System.Net.Http.HttpClient(GetHttpClientHandler());
             }
 
+            public HttpClient(System.Net.Http.HttpClient httpClient) : this()
+            {
+                if (httpClient != null) {
+                    Client = httpClient;
+                }
+            }
+
             public static System.Net.Http.HttpClientHandler GetHttpClientHandler()
             {
                 var handler = new System.Net.Http.HttpClientHandler() {
