@@ -321,7 +321,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
                 .WithLogger(LoggerMock.Object)
                 .WithAuthToken("datafile1")
                 .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(50))
-                .Build(false);
+                .Build(true);
 
             httpManager.GetConfig();
             HttpClientMock.Verify(_ => _.SendAsync(
@@ -340,9 +340,9 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
                 .WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z")
                 .WithLogger(LoggerMock.Object)                
                 .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(50))
-                .Build(false);
-
-            httpManager.Start();
+                .Build(true);
+            httpManager.GetConfig();
+            
             HttpClientMock.Verify(_ => _.SendAsync(
                 It.Is<System.Net.Http.HttpRequestMessage>(requestMessage =>
                 requestMessage.RequestUri.ToString() == "https://cdn.optimizely.com/datafiles/QBw9gFM8oTn7ogY9ANCC1z.json"
@@ -381,7 +381,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
                 .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(50))
                 .Build(false);
 
-            httpManager.Start();
+            httpManager.GetConfig();
             HttpClientMock.Verify(_ => _.SendAsync(
                 It.Is<System.Net.Http.HttpRequestMessage>(requestMessage =>
                 requestMessage.RequestUri.ToString() == "http://customformat/QBw9gFM8oTn7ogY9ANCC1z.json"
