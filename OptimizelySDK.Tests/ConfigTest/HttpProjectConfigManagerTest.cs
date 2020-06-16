@@ -21,6 +21,7 @@ using OptimizelySDK.Logger;
 using OptimizelySDK.Tests.NotificationTests;
 using System;
 using System.Diagnostics;
+using System.Net.Http;
 
 namespace OptimizelySDK.Tests.DatafileManagement_Tests
 {
@@ -35,8 +36,8 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         public void Setup()
         {
             LoggerMock = new Mock<ILogger>();
-            HttpClientMock = new Mock<HttpProjectConfigManager.HttpClient>();
-
+            HttpClientMock = new Mock<HttpProjectConfigManager.HttpClient> { CallBase = true };
+            HttpClientMock.Reset();
             var field = typeof(HttpProjectConfigManager).GetField("Client",
                             System.Reflection.BindingFlags.Static |
                             System.Reflection.BindingFlags.NonPublic);
@@ -311,17 +312,18 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
 
         [Test]
         public void TestAuthUrlWhenTokenProvided()
-        {            
-            HttpClientMock.Setup(_ => _.SendAsync(It.IsAny<System.Net.Http.HttpRequestMessage>())).Returns(() => null);
+        {
+            HttpClientMock.Setup(_ => _.SendAsync(It.IsAny<System.Net.Http.HttpRequestMessage>()))
+                .Returns(System.Threading.Tasks.Task.FromResult<HttpResponseMessage>(new HttpResponseMessage { StatusCode = System.Net.HttpStatusCode.OK, Content = new StringContent(string.Empty) }));
 
             var httpManager = new HttpProjectConfigManager.Builder()
                 .WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z")                
                 .WithLogger(LoggerMock.Object)
                 .WithAuthToken("datafile1")
-                .WithStartByDefault(false)
-                .Build(true);
+                .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(50))
+                .Build(false);
 
-            httpManager.Start();
+            httpManager.GetConfig();
             HttpClientMock.Verify(_ => _.SendAsync(
                 It.Is<System.Net.Http.HttpRequestMessage>(requestMessage =>
                 requestMessage.RequestUri.ToString() == "https://config.optimizely.com/datafiles/auth/QBw9gFM8oTn7ogY9ANCC1z.json"
@@ -335,30 +337,30 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
 
             var httpManager = new HttpProjectConfigManager.Builder()
                 .WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z")
-                .WithLogger(LoggerMock.Object)
-                .WithAuthToken("datafile1")
+                .WithLogger(LoggerMock.Object)                
                 .WithStartByDefault(false)
                 .Build(true);
 
             httpManager.Start();
             HttpClientMock.Verify(_ => _.SendAsync(
                 It.Is<System.Net.Http.HttpRequestMessage>(requestMessage =>
-                requestMessage.RequestUri.ToString() == "https://cdn.optimizely.com/datafiles/auth/QBw9gFM8oTn7ogY9ANCC1z.json"
+                requestMessage.RequestUri.ToString() == "https://cdn.optimizely.com/datafiles/QBw9gFM8oTn7ogY9ANCC1z.json"
                 )));
         }
 
         [Test]
         public void TestAuthenticationHeaderWhenTokenProvided()
         {
-            HttpClientMock.Setup(_ => _.SendAsync(It.IsAny<System.Net.Http.HttpRequestMessage>())).Returns(() => null);
+            
+            HttpClientMock.Setup(_ => _.SendAsync(It.IsAny<System.Net.Http.HttpRequestMessage>()))
+                .Returns(System.Threading.Tasks.Task.FromResult<HttpResponseMessage>(new HttpResponseMessage { StatusCode = System.Net.HttpStatusCode.OK, Content=new StringContent(string.Empty) }));
             var httpManager = new HttpProjectConfigManager.Builder()
                 .WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z")
                 .WithLogger(LoggerMock.Object)
-                .WithAuthToken("datafile1")
-                .WithStartByDefault(false)
-                .Build(true);
-
-            httpManager.Start();
+                .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(50))
+                .WithAuthToken("datafile1")                
+                .Build(false);
+            
             HttpClientMock.Verify(_ => _.SendAsync(
                 It.Is<System.Net.Http.HttpRequestMessage>(requestMessage =>
                 requestMessage.Headers.Authorization.ToString() == "Bearer datafile1"
@@ -368,7 +370,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         [Test]
         public void TestFormatUrlHigherPriorityThanDefaultUrl()
         {
-            HttpClientMock.Setup(_ => _.SendAsync(It.IsAny<System.Net.Http.HttpRequestMessage>())).Returns(() => null);
+            HttpClientMock.Setup(_ => _.SendAsync(It.IsAny<System.Net.Http.HttpRequestMessage>()));
             var httpManager = new HttpProjectConfigManager.Builder()
                 .WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z")
                 .WithLogger(LoggerMock.Object)

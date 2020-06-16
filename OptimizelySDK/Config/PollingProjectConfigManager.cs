@@ -127,9 +127,15 @@ namespace OptimizelySDK.Config
 
                 return CurrentProjectConfig;
             }
-
-            var projectConfig = Poll();
-            return projectConfig ?? CurrentProjectConfig;
+            
+            try {
+                var projectConfig = Poll();
+                return projectConfig ?? CurrentProjectConfig;
+            }            
+            catch (Exception ex) {
+                Logger.Log(LogLevel.WARN, "Interrupted waiting for valid ProjectConfig. Error: " + ex.GetAllMessages());
+                throw ex;
+            }
         }
 
         /// <summary>
