@@ -375,17 +375,24 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         [Test]
         public void TestFormatUrlHigherPriorityThanDefaultUrl()
         {
+            var t = new System.Threading.Tasks.TaskCompletionSource<bool>();
+
             HttpClientMock.Setup(_ => _.SendAsync(It.IsAny<System.Net.Http.HttpRequestMessage>()))
-                .Returns(System.Threading.Tasks.Task.FromResult<HttpResponseMessage>(new HttpResponseMessage { StatusCode = System.Net.HttpStatusCode.OK, Content = new StringContent(string.Empty) }));
+                .Returns(System.Threading.Tasks.Task.FromResult<HttpResponseMessage>(new HttpResponseMessage { StatusCode = System.Net.HttpStatusCode.OK, Content = new StringContent(string.Empty) }))
+                .Callback(()
+                => {
+                    t.SetResult(true);
+                });
+
             var httpManager = new HttpProjectConfigManager.Builder()
                 .WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z")
                 .WithLogger(LoggerMock.Object)
                 .WithFormat("http://customformat/{0}.json")
                 .WithAuthToken("datafile1")
                 .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(50))
-                .Build(false);
+                .Build(true);
 
-            httpManager.GetConfig();
+            t.Task.Wait(2000);
             HttpClientMock.Verify(_ => _.SendAsync(
                 It.Is<System.Net.Http.HttpRequestMessage>(requestMessage =>
                 requestMessage.RequestUri.ToString() == "http://customformat/QBw9gFM8oTn7ogY9ANCC1z.json"
