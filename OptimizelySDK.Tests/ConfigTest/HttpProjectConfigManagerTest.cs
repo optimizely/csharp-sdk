@@ -313,8 +313,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         [Test]
         public void TestAuthUrlWhenTokenProvided()
         {
-            HttpClientMock.Setup(_ => _.SendAsync(It.IsAny<System.Net.Http.HttpRequestMessage>()))
-                .Returns(System.Threading.Tasks.Task.FromResult<HttpResponseMessage>(new HttpResponseMessage { StatusCode = System.Net.HttpStatusCode.OK, Content = new StringContent(string.Empty) }));
+            var t = MockSendAsync();
 
             var httpManager = new HttpProjectConfigManager.Builder()
                 .WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z")                
@@ -323,7 +322,9 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
                 .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(50))
                 .Build(true);
 
-            httpManager.GetConfig();
+            // it's to wait if SendAsync is not triggered.
+            t.Wait(2000);
+
             HttpClientMock.Verify(_ => _.SendAsync(
                 It.Is<System.Net.Http.HttpRequestMessage>(requestMessage =>
                 requestMessage.RequestUri.ToString() == "https://config.optimizely.com/datafiles/auth/QBw9gFM8oTn7ogY9ANCC1z.json"
@@ -333,20 +334,16 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         [Test]
         public void TestDefaultUrlWhenTokenNotProvided()
         {
-            var t = new System.Threading.Tasks.TaskCompletionSource<bool>();
-            HttpClientMock.Setup(_ => _.SendAsync(It.IsAny<System.Net.Http.HttpRequestMessage>()))
-                .Returns(System.Threading.Tasks.Task.FromResult<HttpResponseMessage>(new HttpResponseMessage { StatusCode = System.Net.HttpStatusCode.OK, Content = new StringContent(string.Empty) }))
-                .Callback(()
-                => {
-                    t.SetResult(true);
-                });
+            var t = MockSendAsync();
 
             var httpManager = new HttpProjectConfigManager.Builder()
                 .WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z")
                 .WithLogger(LoggerMock.Object)                
                 .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(50))
                 .Build(true);
-            t.Task.Wait(2000);            
+
+            // it's to wait if SendAsync is not triggered.
+            t.Wait(2000);            
             HttpClientMock.Verify(_ => _.SendAsync(
                 It.Is<System.Net.Http.HttpRequestMessage>(requestMessage =>
                 requestMessage.RequestUri.ToString() == "https://cdn.optimizely.com/datafiles/QBw9gFM8oTn7ogY9ANCC1z.json"
@@ -356,16 +353,18 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         [Test]
         public void TestAuthenticationHeaderWhenTokenProvided()
         {
-            
-            HttpClientMock.Setup(_ => _.SendAsync(It.IsAny<System.Net.Http.HttpRequestMessage>()))
-                .Returns(System.Threading.Tasks.Task.FromResult<HttpResponseMessage>(new HttpResponseMessage { StatusCode = System.Net.HttpStatusCode.OK, Content=new StringContent(string.Empty) }));
+            var t = MockSendAsync();
+
             var httpManager = new HttpProjectConfigManager.Builder()
                 .WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z")
                 .WithLogger(LoggerMock.Object)
                 .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(50))
                 .WithAuthToken("datafile1")                
-                .Build(false);
-            
+                .Build(true);
+
+            // it's to wait if SendAsync is not triggered.
+            t.Wait(2000);
+
             HttpClientMock.Verify(_ => _.SendAsync(
                 It.Is<System.Net.Http.HttpRequestMessage>(requestMessage =>
                 requestMessage.Headers.Authorization.ToString() == "Bearer datafile1"
@@ -374,6 +373,26 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
 
         [Test]
         public void TestFormatUrlHigherPriorityThanDefaultUrl()
+        {
+
+            var t = MockSendAsync();
+            var httpManager = new HttpProjectConfigManager.Builder()
+                .WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z")
+                .WithLogger(LoggerMock.Object)
+                .WithFormat("http://customformat/{0}.json")
+                .WithAuthToken("datafile1")
+                .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(50))
+                .Build(true);
+            // it's to wait if SendAsync is not triggered.
+            t.Wait(2000);
+            HttpClientMock.Verify(_ => _.SendAsync(
+                It.Is<System.Net.Http.HttpRequestMessage>(requestMessage =>
+                requestMessage.RequestUri.ToString() == "http://customformat/QBw9gFM8oTn7ogY9ANCC1z.json"
+                )));
+
+        }
+
+        public System.Threading.Tasks.Task MockSendAsync()
         {
             var t = new System.Threading.Tasks.TaskCompletionSource<bool>();
 
@@ -384,20 +403,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
                     t.SetResult(true);
                 });
 
-            var httpManager = new HttpProjectConfigManager.Builder()
-                .WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z")
-                .WithLogger(LoggerMock.Object)
-                .WithFormat("http://customformat/{0}.json")
-                .WithAuthToken("datafile1")
-                .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(50))
-                .Build(true);
-
-            t.Task.Wait(2000);
-            HttpClientMock.Verify(_ => _.SendAsync(
-                It.Is<System.Net.Http.HttpRequestMessage>(requestMessage =>
-                requestMessage.RequestUri.ToString() == "http://customformat/QBw9gFM8oTn7ogY9ANCC1z.json"
-                )));
-
+            return t.Task;
         }
 
         #endregion

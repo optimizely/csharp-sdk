@@ -112,7 +112,39 @@ namespace OptimizelySDK
         {
             return NewDefaultInstance(sdkKey, null);
         }
+#if !NET40 && !NET35
+        public static Optimizely NewDefaultInstance(string sdkKey, string fallback, string datafileAuthToken)
+        {
+            var logger = OptimizelyLogger ?? new DefaultLogger();
+            var errorHandler = new DefaultErrorHandler();
+            var eventDispatcher = new DefaultEventDispatcher(logger);
+            var builder = new HttpProjectConfigManager.Builder();
+            var notificationCenter = new NotificationCenter();
 
+            var configManager = builder
+                .WithSdkKey(sdkKey)
+                .WithDatafile(fallback)
+                .WithLogger(logger)
+                .WithErrorHandler(errorHandler)
+                .WithAuthToken(datafileAuthToken)
+                .WithNotificationCenter(notificationCenter)
+                .Build(true);
+
+            EventProcessor eventProcessor = null;
+
+#if !NETSTANDARD1_6 && !NET35
+            eventProcessor = new BatchEventProcessor.Builder()
+                .WithLogger(logger)
+                .WithMaxBatchSize(MaxEventBatchSize)
+                .WithFlushInterval(MaxEventFlushInterval)
+                .WithEventDispatcher(eventDispatcher)
+                .WithNotificationCenter(notificationCenter)
+                .Build();
+#endif
+
+            return NewDefaultInstance(configManager, notificationCenter, eventDispatcher, errorHandler, logger, eventProcessor: eventProcessor);
+        }
+#endif
         public static Optimizely NewDefaultInstance(string sdkKey, string fallback)
         {
             var logger = OptimizelyLogger ?? new DefaultLogger();

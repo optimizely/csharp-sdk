@@ -28,7 +28,7 @@ namespace OptimizelySDK.Config
     {
         private string Url;
         private string LastModifiedSince = string.Empty;
-        private string AuthDatafileToken = string.Empty;
+        private string AuthenticatedDatafileToken = string.Empty;
         private HttpProjectConfigManager(TimeSpan period, string url, TimeSpan blockingTimeout, bool autoUpdate, ILogger logger, IErrorHandler errorHandler) 
             : base(period, blockingTimeout, autoUpdate, logger, errorHandler)
         {
@@ -38,7 +38,7 @@ namespace OptimizelySDK.Config
         private HttpProjectConfigManager(TimeSpan period, string url, TimeSpan blockingTimeout, bool autoUpdate, ILogger logger, IErrorHandler errorHandler, string authDatafileToken)
             : this(period, url, blockingTimeout, autoUpdate, logger, errorHandler)
         {
-            AuthDatafileToken = authDatafileToken;
+            AuthenticatedDatafileToken = authDatafileToken;
         }
 
         public Task OnReady()
@@ -46,7 +46,8 @@ namespace OptimizelySDK.Config
             return CompletableConfigManager.Task;
         }
 
-#if !NET40 && !NET35        
+#if !NET40 && !NET35
+        // HttpClient wrapper class which can be used to mock HttpClient for unit testing.
         public class HttpClient
         {
             private System.Net.Http.HttpClient Client;
@@ -96,8 +97,8 @@ namespace OptimizelySDK.Config
             if (!string.IsNullOrEmpty(LastModifiedSince))
                 request.Headers.Add("If-Modified-Since", LastModifiedSince);
 
-            if (!string.IsNullOrEmpty(AuthDatafileToken)) {
-                request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", AuthDatafileToken);
+            if (!string.IsNullOrEmpty(AuthenticatedDatafileToken)) {
+                request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", AuthenticatedDatafileToken);
             }
 
             var httpResponse =  Client.SendAsync(request);
@@ -169,9 +170,9 @@ namespace OptimizelySDK.Config
             private readonly TimeSpan DEFAULT_PERIOD = TimeSpan.FromMinutes(5);
             private readonly TimeSpan DEFAULT_BLOCKINGOUT_PERIOD = TimeSpan.FromSeconds(15);
             private readonly string DEFAULT_FORMAT = "https://cdn.optimizely.com/datafiles/{0}.json";
-            private readonly string DEFAULT_AUTH_FORMAT = "https://config.optimizely.com/datafiles/auth/{0}.json";
+            private readonly string DEFAULT_AUTHENTICATED_DATAFILE_FORMAT = "https://config.optimizely.com/datafiles/auth/{0}.json";
             private string Datafile;
-            private string AuthDatafileToken;            
+            private string AuthenticatedDatafileToken;            
             private string SdkKey;
             private string Url;
             private string Format;            
@@ -208,13 +209,14 @@ namespace OptimizelySDK.Config
 
                 return this;
             }
-
+#if !NET40 && !NET35
             public Builder WithAuthToken(string authToken)
             {
-                this.AuthDatafileToken = authToken;
+                this.AuthenticatedDatafileToken = authToken;
 
                 return this;
             }
+#endif
 
             public Builder WithUrl(string url)
             {
@@ -302,10 +304,10 @@ namespace OptimizelySDK.Config
 
                 if (string.IsNullOrEmpty(Format)) {
 
-                    if (string.IsNullOrEmpty(AuthDatafileToken)) {
+                    if (string.IsNullOrEmpty(AuthenticatedDatafileToken)) {
                         Format = DEFAULT_FORMAT;
                     } else {
-                        Format = DEFAULT_AUTH_FORMAT;
+                        Format = DEFAULT_AUTHENTICATED_DATAFILE_FORMAT;
                     }
                 }
 
@@ -334,7 +336,7 @@ namespace OptimizelySDK.Config
                 }
                     
 
-                configManager = new HttpProjectConfigManager(Period, Url, BlockingTimeoutSpan, AutoUpdate, Logger, ErrorHandler, AuthDatafileToken);
+                configManager = new HttpProjectConfigManager(Period, Url, BlockingTimeoutSpan, AutoUpdate, Logger, ErrorHandler, AuthenticatedDatafileToken);
 
                 if (Datafile != null)
                 {
