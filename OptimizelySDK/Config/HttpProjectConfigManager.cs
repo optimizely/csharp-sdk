@@ -28,7 +28,7 @@ namespace OptimizelySDK.Config
     {
         private string Url;
         private string LastModifiedSince = string.Empty;
-        private string AuthenticatedDatafileToken = string.Empty;
+        private string DatafileAuthToken = string.Empty;
         private HttpProjectConfigManager(TimeSpan period, string url, TimeSpan blockingTimeout, bool autoUpdate, ILogger logger, IErrorHandler errorHandler) 
             : base(period, blockingTimeout, autoUpdate, logger, errorHandler)
         {
@@ -38,7 +38,7 @@ namespace OptimizelySDK.Config
         private HttpProjectConfigManager(TimeSpan period, string url, TimeSpan blockingTimeout, bool autoUpdate, ILogger logger, IErrorHandler errorHandler, string authDatafileToken)
             : this(period, url, blockingTimeout, autoUpdate, logger, errorHandler)
         {
-            AuthenticatedDatafileToken = authDatafileToken;
+            DatafileAuthToken = authDatafileToken;
         }
 
         public Task OnReady()
@@ -97,8 +97,8 @@ namespace OptimizelySDK.Config
             if (!string.IsNullOrEmpty(LastModifiedSince))
                 request.Headers.Add("If-Modified-Since", LastModifiedSince);
 
-            if (!string.IsNullOrEmpty(AuthenticatedDatafileToken)) {
-                request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", AuthenticatedDatafileToken);
+            if (!string.IsNullOrEmpty(DatafileAuthToken)) {
+                request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", DatafileAuthToken);
             }
 
             var httpResponse =  Client.SendAsync(request);
