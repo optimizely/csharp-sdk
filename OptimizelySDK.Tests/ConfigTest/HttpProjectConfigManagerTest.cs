@@ -318,7 +318,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
             var httpManager = new HttpProjectConfigManager.Builder()
                 .WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z")                
                 .WithLogger(LoggerMock.Object)
-                .WithAuthToken("datafile1")
+                .WithAccessToken("datafile1")
                 .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(50))
                 .Build(true);
 
@@ -359,7 +359,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
                 .WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z")
                 .WithLogger(LoggerMock.Object)
                 .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(50))
-                .WithAuthToken("datafile1")                
+                .WithAccessToken("datafile1")                
                 .Build(true);
 
             // it's to wait if SendAsync is not triggered.
@@ -380,7 +380,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
                 .WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z")
                 .WithLogger(LoggerMock.Object)
                 .WithFormat("http://customformat/{0}.json")
-                .WithAuthToken("datafile1")
+                .WithAccessToken("datafile1")
                 .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(50))
                 .Build(true);
             // it's to wait if SendAsync is not triggered.

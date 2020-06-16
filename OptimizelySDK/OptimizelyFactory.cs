@@ -126,7 +126,7 @@ namespace OptimizelySDK
                 .WithDatafile(fallback)
                 .WithLogger(logger)
                 .WithErrorHandler(errorHandler)
-                .WithAuthToken(datafileAuthToken)
+                .WithAccessToken(datafileAuthToken)
                 .WithNotificationCenter(notificationCenter)
                 .Build(true);
 

@@ -28,17 +28,17 @@ namespace OptimizelySDK.Config
     {
         private string Url;
         private string LastModifiedSince = string.Empty;
-        private string DatafileAuthToken = string.Empty;
+        private string DatafileAccessToken = string.Empty;
         private HttpProjectConfigManager(TimeSpan period, string url, TimeSpan blockingTimeout, bool autoUpdate, ILogger logger, IErrorHandler errorHandler) 
             : base(period, blockingTimeout, autoUpdate, logger, errorHandler)
         {
             Url = url;
         }
 
-        private HttpProjectConfigManager(TimeSpan period, string url, TimeSpan blockingTimeout, bool autoUpdate, ILogger logger, IErrorHandler errorHandler, string authDatafileToken)
+        private HttpProjectConfigManager(TimeSpan period, string url, TimeSpan blockingTimeout, bool autoUpdate, ILogger logger, IErrorHandler errorHandler, string datafileAccessToken)
             : this(period, url, blockingTimeout, autoUpdate, logger, errorHandler)
         {
-            DatafileAuthToken = authDatafileToken;
+            DatafileAccessToken = datafileAccessToken;
         }
 
         public Task OnReady()
@@ -97,8 +97,8 @@ namespace OptimizelySDK.Config
             if (!string.IsNullOrEmpty(LastModifiedSince))
                 request.Headers.Add("If-Modified-Since", LastModifiedSince);
 
-            if (!string.IsNullOrEmpty(DatafileAuthToken)) {
-                request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", DatafileAuthToken);
+            if (!string.IsNullOrEmpty(DatafileAccessToken)) {
+                request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", DatafileAccessToken);
             }
 
             var httpResponse =  Client.SendAsync(request);
@@ -172,7 +172,7 @@ namespace OptimizelySDK.Config
             private readonly string DEFAULT_FORMAT = "https://cdn.optimizely.com/datafiles/{0}.json";
             private readonly string DEFAULT_AUTHENTICATED_DATAFILE_FORMAT = "https://config.optimizely.com/datafiles/auth/{0}.json";
             private string Datafile;
-            private string AuthenticatedDatafileToken;            
+            private string DatafileAccessToken;            
             private string SdkKey;
             private string Url;
             private string Format;            
@@ -210,9 +210,9 @@ namespace OptimizelySDK.Config
                 return this;
             }
 #if !NET40 && !NET35
-            public Builder WithAuthToken(string authToken)
+            public Builder WithAccessToken(string accessToken)
             {
-                this.AuthenticatedDatafileToken = authToken;
+                this.DatafileAccessToken = accessToken;
 
                 return this;
             }
@@ -304,7 +304,7 @@ namespace OptimizelySDK.Config
 
                 if (string.IsNullOrEmpty(Format)) {
 
-                    if (string.IsNullOrEmpty(AuthenticatedDatafileToken)) {
+                    if (string.IsNullOrEmpty(DatafileAccessToken)) {
                         Format = DEFAULT_FORMAT;
                     } else {
                         Format = DEFAULT_AUTHENTICATED_DATAFILE_FORMAT;
@@ -336,7 +336,7 @@ namespace OptimizelySDK.Config
                 }
                     
 
-                configManager = new HttpProjectConfigManager(Period, Url, BlockingTimeoutSpan, AutoUpdate, Logger, ErrorHandler, AuthenticatedDatafileToken);
+                configManager = new HttpProjectConfigManager(Period, Url, BlockingTimeoutSpan, AutoUpdate, Logger, ErrorHandler, DatafileAccessToken);
 
                 if (Datafile != null)
                 {
