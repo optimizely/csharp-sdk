@@ -1,4 +1,9 @@
 # Optimizely C# SDK Changelog
+## [Unreleased]
+
+### New Features
+- Adds support for DatafileAuthToken in HttpProjectConfigManager and in it's Builder class.
+- Added Gzip format for datafile download
 
 ## 3.4.1
 April 29th, 2020

@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2019, Optimizely
+ * Copyright 2019-2020, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ using OptimizelySDK.Logger;
 using OptimizelySDK.Tests.NotificationTests;
 using System;
 using System.Diagnostics;
+using System.Net.Http;
 
 namespace OptimizelySDK.Tests.DatafileManagement_Tests
 {
@@ -28,12 +29,19 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
     public class HttpProjectConfigManagerTest
     {
         private Mock<ILogger> LoggerMock;
+        private Mock<HttpProjectConfigManager.HttpClient> HttpClientMock;
         private Mock<TestNotificationCallbacks> NotificationCallbackMock = new Mock<TestNotificationCallbacks>();
 
         [SetUp]
         public void Setup()
         {
             LoggerMock = new Mock<ILogger>();
+            HttpClientMock = new Mock<HttpProjectConfigManager.HttpClient> { CallBase = true };
+            HttpClientMock.Reset();
+            var field = typeof(HttpProjectConfigManager).GetField("Client",
+                            System.Reflection.BindingFlags.Static |
+                            System.Reflection.BindingFlags.NonPublic);
+            field.SetValue(field, HttpClientMock.Object);
             LoggerMock.Setup(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()));
             NotificationCallbackMock.Setup(nc => nc.TestConfigUpdateCallback());
 
@@ -57,7 +65,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         [Test]
         public void TestHttpClientHandler()
         {
-            var httpConfigHandler = HttpProjectConfigManager.GetHttpClientHandler();
+            var httpConfigHandler = HttpProjectConfigManager.HttpClient.GetHttpClientHandler();
             Assert.IsTrue(httpConfigHandler.AutomaticDecompression == (System.Net.DecompressionMethods.Deflate | System.Net.DecompressionMethods.GZip));
         }
 
@@ -300,6 +308,102 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
 
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, $"No polling interval provided, using default period {TimeSpan.FromMinutes(5).TotalMilliseconds}ms"));
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, $"No Blocking timeout provided, using default blocking timeout {TimeSpan.FromSeconds(15).TotalMilliseconds}ms"));
+        }        
+
+        [Test]
+        public void TestAuthUrlWhenTokenProvided()
+        {
+            var t = MockSendAsync();
+
+            var httpManager = new HttpProjectConfigManager.Builder()
+                .WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z")                
+                .WithLogger(LoggerMock.Object)
+                .WithAccessToken("datafile1")
+                .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(50))
+                .Build(true);
+
+            // it's to wait if SendAsync is not triggered.
+            t.Wait(2000);
+
+            HttpClientMock.Verify(_ => _.SendAsync(
+                It.Is<System.Net.Http.HttpRequestMessage>(requestMessage =>
+                requestMessage.RequestUri.ToString() == "https://config.optimizely.com/datafiles/auth/QBw9gFM8oTn7ogY9ANCC1z.json"
+                )));
+        }
+
+        [Test]
+        public void TestDefaultUrlWhenTokenNotProvided()
+        {
+            var t = MockSendAsync();
+
+            var httpManager = new HttpProjectConfigManager.Builder()
+                .WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z")
+                .WithLogger(LoggerMock.Object)                
+                .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(50))
+                .Build(true);
+
+            // it's to wait if SendAsync is not triggered.
+            t.Wait(2000);            
+            HttpClientMock.Verify(_ => _.SendAsync(
+                It.Is<System.Net.Http.HttpRequestMessage>(requestMessage =>
+                requestMessage.RequestUri.ToString() == "https://cdn.optimizely.com/datafiles/QBw9gFM8oTn7ogY9ANCC1z.json"
+                )));
+        }
+
+        [Test]
+        public void TestAuthenticationHeaderWhenTokenProvided()
+        {
+            var t = MockSendAsync();
+
+            var httpManager = new HttpProjectConfigManager.Builder()
+                .WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z")
+                .WithLogger(LoggerMock.Object)
+                .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(50))
+                .WithAccessToken("datafile1")                
+                .Build(true);
+
+            // it's to wait if SendAsync is not triggered.
+            t.Wait(2000);
+
+            HttpClientMock.Verify(_ => _.SendAsync(
+                It.Is<System.Net.Http.HttpRequestMessage>(requestMessage =>
+                requestMessage.Headers.Authorization.ToString() == "Bearer datafile1"
+                )));
+        }
+
+        [Test]
+        public void TestFormatUrlHigherPriorityThanDefaultUrl()
+        {
+
+            var t = MockSendAsync();
+            var httpManager = new HttpProjectConfigManager.Builder()
+                .WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z")
+                .WithLogger(LoggerMock.Object)
+                .WithFormat("http://customformat/{0}.json")
+                .WithAccessToken("datafile1")
+                .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(50))
+                .Build(true);
+            // it's to wait if SendAsync is not triggered.
+            t.Wait(2000);
+            HttpClientMock.Verify(_ => _.SendAsync(
+                It.Is<System.Net.Http.HttpRequestMessage>(requestMessage =>
+                requestMessage.RequestUri.ToString() == "http://customformat/QBw9gFM8oTn7ogY9ANCC1z.json"
+                )));
+
+        }
+
+        public System.Threading.Tasks.Task MockSendAsync()
+        {
+            var t = new System.Threading.Tasks.TaskCompletionSource<bool>();
+
+            HttpClientMock.Setup(_ => _.SendAsync(It.IsAny<System.Net.Http.HttpRequestMessage>()))
+                .Returns(System.Threading.Tasks.Task.FromResult<HttpResponseMessage>(new HttpResponseMessage { StatusCode = System.Net.HttpStatusCode.OK, Content = new StringContent(string.Empty) }))
+                .Callback(()
+                => {
+                    t.SetResult(true);
+                });
+
+            return t.Task;
         }
 
         #endregion
