@@ -19,9 +19,11 @@ using Moq;
 using NUnit.Framework;
 using OptimizelySDK.Config;
 using OptimizelySDK.ErrorHandler;
+using OptimizelySDK.Event;
 using OptimizelySDK.Exceptions;
 using OptimizelySDK.Logger;
 using OptimizelySDK.Tests.ConfigTest;
+using OptimizelySDK.Tests.Utils;
 using System;
 using System.Collections.Generic;
 namespace OptimizelySDK.Tests
@@ -47,8 +49,9 @@ namespace OptimizelySDK.Tests
             optimizely.Dispose();
         }
 
+
         [Test]
-        public void TestOptimizelyInstanceUsingSDKKey()
+        public void TestProjectConfigManagerUsingSDKKey()
         {
             var optimizely = OptimizelyFactory.NewDefaultInstance("my-sdk-key");
 
@@ -66,14 +69,14 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
-        public void TestOptimizelyInstanceWithDatafileAccessToken()
+        public void TestProjectConfigManagerWithDatafileAccessToken()
         {
             var optimizely = OptimizelyFactory.NewDefaultInstance("my-sdk-key", null, "access-token");
             optimizely.Dispose();
         }
 
         [Test]
-        public void TestOptimizelyWithProjectConfigManager()
+        public void TestProjectConfigManagerWithProjectConfigManager()
         {
             var projectConfigManager = new HttpProjectConfigManager.Builder()
                 .WithSdkKey("my-sdk-key")
@@ -86,8 +89,22 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
-        public void TestOptimizelyWithEventBatching()
+        public void TestEventProcessorWithDefaultEventBatching()
         {
+
+        }
+
+        [Test]
+        public void TestEventProcessorWithEventBatchingBatchSizeAndDefaultInterval()
+        {
+            // TODO: Set batch event processor size/value
+            var optimizely = OptimizelyFactory.NewDefaultInstance("sdk-key");
+            
+            var batchEventProcessor = Reflection.GetFieldValue<BatchEventProcessor, Optimizely>(optimizely, "EventProcessor");
+            var batchEventProcessorType = typeof(BatchEventProcessor);
+
+            var actualBatchSize = Reflection.GetFieldValue<int, BatchEventProcessor>(batchEventProcessorType, batchEventProcessor, "BatchSize");            
+            var actualFlushInterval = Reflection.GetFieldValue<TimeSpan, BatchEventProcessor>(batchEventProcessorType, batchEventProcessor, "FlushInterval");
 
         }
 

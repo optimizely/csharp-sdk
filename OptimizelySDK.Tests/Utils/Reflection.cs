@@ -18,7 +18,7 @@ namespace OptimizelySDK.Tests.Utils
             return (T)fieldInfo.GetValue(obj);
         }
 
-        public static T GetFieldValue<T, U>(Type t,U obj, string fieldName)
+        public static T GetFieldValue<T, U>(Type t, U obj, string fieldName)
         {
             var fieldInfo = GetFieldInfo(t, fieldName);
             return (T)fieldInfo.GetValue(obj);
