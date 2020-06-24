@@ -192,14 +192,14 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         [Test]
         public void TestHttpConfigManagerDoesNotWaitForTheConfigWhenDeferIsTrue()
         {
-            var t = MockSendAsync(TestData.Datafile, TimeSpan.FromMilliseconds(50));
+            var t = MockSendAsync(TestData.Datafile, TimeSpan.FromMilliseconds(150));
 
             var httpManager = new HttpProjectConfigManager.Builder()
                 .WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z")
                 .WithLogger(LoggerMock.Object)
                 .WithPollingInterval(TimeSpan.FromSeconds(2))
                 // negligible timeout
-                .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(150))
+                .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(50))
                 .WithStartByDefault()
                 .Build(false);
 
@@ -209,7 +209,11 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
             // wait until config is retrieved.
             t.Wait();
             // in case deadlock, it will release after 3sec.
-            httpManager.OnReady().Wait(3000);
+            if (httpManager.OnReady().Wait(3000)) {
+                Console.WriteLine("Task execution completed");
+            } else {
+                Console.WriteLine("Task execution not completed");
+            }
 
             Assert.NotNull(httpManager.GetConfig());
 
@@ -489,7 +493,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
 
             HttpClientMock.Setup(_ => _.SendAsync(It.IsAny<System.Net.Http.HttpRequestMessage>()))
                 .Returns(() => {
-                    Thread.Sleep(delay);
+                    Task.Delay(delay).Wait();
                     return System.Threading.Tasks.Task.FromResult<HttpResponseMessage>(new HttpResponseMessage { StatusCode = System.Net.HttpStatusCode.OK, Content = new StringContent(datafile) });
                 })
                 .Callback(()
