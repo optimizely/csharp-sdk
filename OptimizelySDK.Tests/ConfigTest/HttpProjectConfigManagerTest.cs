@@ -66,6 +66,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
                 It.Is<System.Net.Http.HttpRequestMessage>(requestMessage =>
                 requestMessage.RequestUri.ToString() == "https://cdn.optimizely.com/datafiles/QBw9gFM8oTn7ogY9ANCC1z.json"
                 )));
+            httpManager.Dispose();
         }
 
         [Test]
@@ -94,6 +95,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
                 It.Is<System.Net.Http.HttpRequestMessage>(requestMessage =>
                 requestMessage.RequestUri.ToString() == "https://cdn.optimizely.com/datafiles/QBw9gFM8oTn7ogY9ANCC1z.json"
                 )));
+            httpManager.Dispose();
         }
 
         [Test]
@@ -115,6 +117,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
                 requestMessage.RequestUri.ToString() == "https://cdn.optimizely.com/datafiles/QBw9gFM8oTn7ogY9ANCC1z.json"
                 )));
             Assert.IsNotNull(httpManager.GetConfig());
+            httpManager.Dispose();
         }
 
         [Test]
@@ -137,6 +140,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
                 requestMessage.RequestUri.ToString() == "https://cdn.optimizely.com/json/10192104166.json"
                 )));
             Assert.IsNotNull(httpManager.GetConfig());
+            httpManager.Dispose();
         }
 
         [Test]
@@ -163,6 +167,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
             t.Wait();
             Task.Delay(200).Wait();
             Assert.AreEqual("42", httpManager.GetConfig().Revision);
+            httpManager.Dispose();
         }
 
         [Test]
@@ -181,25 +186,32 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
 
             httpManager.OnReady().Wait();
             Assert.NotNull(httpManager.GetConfig());
+            httpManager.Dispose();
         }
 
         [Test]
         public void TestHttpConfigManagerDoesNotWaitForTheConfigWhenDeferIsTrue()
         {
-            var t = MockSendAsync(TestData.SimpleABExperimentsDatafile, TimeSpan.FromMilliseconds(1000));
+            var t = MockSendAsync(TestData.SimpleABExperimentsDatafile, TimeSpan.FromMilliseconds(300));
 
             var httpManager = new HttpProjectConfigManager.Builder()
                 .WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z")
                 .WithLogger(LoggerMock.Object)
                 .WithPollingInterval(TimeSpan.FromSeconds(2))
                 // negligible timeout
-                .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(50))
+                .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(150))
                 .WithStartByDefault()
                 .Build(false);
 
             // When blocking timeout is 0 and defer is false and getconfig immediately called
             // should return null
             Assert.IsNull(httpManager.GetConfig());
+            // wait until config is retrieved.
+            t.Wait();
+            Task.Delay(300).Wait();
+            Assert.NotNull(httpManager.GetConfig());
+
+            httpManager.Dispose();
         }
 
         #region Notification
@@ -222,6 +234,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
             Assert.NotNull(httpManager.GetConfig());
             Task.Delay(200).Wait();
             NotificationCallbackMock.Verify(nc => nc.TestConfigUpdateCallback(), Times.AtLeastOnce);
+            httpManager.Dispose();
         }
 
         [Test]
@@ -242,6 +255,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
 
             NotificationCallbackMock.Verify(nc => nc.TestConfigUpdateCallback(), Times.Never);
             Assert.NotNull(httpManager.GetConfig()); Assert.NotNull(httpManager.GetConfig());
+            httpManager.Dispose();
         }
 
         [Test]
@@ -261,6 +275,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
             Assert.AreNotEqual(expectedBlockingTimeout.TotalSeconds, TimeSpan.Zero.TotalSeconds);
 
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, $"Blocking timeout is not valid, using default blocking timeout {TimeSpan.FromSeconds(15).TotalMilliseconds}ms"));
+            httpManager.Dispose();
         }
 
         [Test]
@@ -280,6 +295,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
             Assert.AreNotEqual(expectedPollingInterval.TotalSeconds, TimeSpan.Zero.TotalSeconds);
 
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, $"Polling interval is not valid for periodic calls, using default period {TimeSpan.FromMinutes(5).TotalMilliseconds}ms"));
+            httpManager.Dispose();
         }
 
         [Test]
@@ -299,6 +315,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
             Assert.AreNotEqual(expectedPollingInterval.TotalSeconds, TimeSpan.Zero.TotalSeconds);
 
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, $"Polling interval is not valid for periodic calls, using default period {TimeSpan.FromMinutes(5).TotalMilliseconds}ms"));
+            httpManager.Dispose();
         }
 
         [Test]
@@ -315,6 +332,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
             Assert.AreNotEqual(expectedPollingInterval.TotalSeconds, TimeSpan.Zero.TotalSeconds);
 
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, $"No polling interval provided, using default period {TimeSpan.FromMinutes(5).TotalMilliseconds}ms"));
+            httpManager.Dispose();
         }
 
         [Test]
@@ -331,6 +349,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
             Assert.AreNotEqual(expectedBlockingTimeout.TotalSeconds, TimeSpan.Zero.TotalSeconds);
 
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, $"No Blocking timeout provided, using default blocking timeout {TimeSpan.FromSeconds(15).TotalMilliseconds}ms"));
+            httpManager.Dispose();
         }
 
         [Test]
@@ -344,6 +363,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
 
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, $"No polling interval provided, using default period {TimeSpan.FromMinutes(5).TotalMilliseconds}ms"));
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, $"No Blocking timeout provided, using default blocking timeout {TimeSpan.FromSeconds(15).TotalMilliseconds}ms"));
+            httpManager.Dispose();
         }
 
         [Test]
@@ -365,6 +385,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
                 It.Is<System.Net.Http.HttpRequestMessage>(requestMessage =>
                 requestMessage.RequestUri.ToString() == "https://config.optimizely.com/datafiles/auth/QBw9gFM8oTn7ogY9ANCC1z.json"
                 )));
+            httpManager.Dispose();
         }
 
         [Test]
@@ -384,6 +405,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
                 It.Is<System.Net.Http.HttpRequestMessage>(requestMessage =>
                 requestMessage.RequestUri.ToString() == "https://cdn.optimizely.com/datafiles/QBw9gFM8oTn7ogY9ANCC1z.json"
                 )));
+            httpManager.Dispose();
         }
 
         [Test]
@@ -405,6 +427,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
                 It.Is<System.Net.Http.HttpRequestMessage>(requestMessage =>
                 requestMessage.Headers.Authorization.ToString() == "Bearer datafile1"
                 )));
+            httpManager.Dispose();
         }
 
         [Test]
@@ -425,6 +448,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
                 It.Is<System.Net.Http.HttpRequestMessage>(requestMessage =>
                 requestMessage.RequestUri.ToString() == "http://customformat/QBw9gFM8oTn7ogY9ANCC1z.json"
                 )));
+            httpManager.Dispose();
 
         }
 
