@@ -209,12 +209,12 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
             // wait until config is retrieved.
             t.Wait();
             // in case deadlock, it will release after 3sec.
-            if (httpManager.OnReady().Wait(3000)) {
+            if (httpManager.OnReady().Wait(8000)) {
                 Console.WriteLine("Task execution completed");
             } else {
                 Console.WriteLine("Task execution not completed");
             }
-
+            HttpClientMock.Verify(_ => _.SendAsync(It.IsAny<HttpRequestMessage>()));
             Assert.NotNull(httpManager.GetConfig());
 
             httpManager.Dispose();
