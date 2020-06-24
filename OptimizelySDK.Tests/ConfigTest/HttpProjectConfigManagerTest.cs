@@ -208,7 +208,8 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
             Assert.IsNull(httpManager.GetConfig());
             // wait until config is retrieved.
             t.Wait();
-            Task.Delay(300).Wait();
+            // in case dead, it will release after 3sec.
+            httpManager.OnReady().Wait(3000);
             Assert.NotNull(httpManager.GetConfig());
 
             httpManager.Dispose();
