@@ -192,7 +192,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         [Test]
         public void TestHttpConfigManagerDoesNotWaitForTheConfigWhenDeferIsTrue()
         {
-            var t = MockSendAsync(TestData.SimpleABExperimentsDatafile, TimeSpan.FromMilliseconds(300));
+            var t = MockSendAsync(TestData.Datafile, TimeSpan.FromMilliseconds(50));
 
             var httpManager = new HttpProjectConfigManager.Builder()
                 .WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z")
@@ -208,8 +208,9 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
             Assert.IsNull(httpManager.GetConfig());
             // wait until config is retrieved.
             t.Wait();
-            // in case dead, it will release after 3sec.
+            // in case deadlock, it will release after 3sec.
             httpManager.OnReady().Wait(3000);
+
             Assert.NotNull(httpManager.GetConfig());
 
             httpManager.Dispose();
