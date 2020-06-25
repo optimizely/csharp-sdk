@@ -38,7 +38,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         public void Setup()
         {
             LoggerMock = new Mock<ILogger>();
-            HttpClientMock = new Mock<HttpProjectConfigManager.HttpClient> { CallBase = true };
+            HttpClientMock = new Mock<HttpProjectConfigManager.HttpClient> { CallBase = false };
             HttpClientMock.Reset();
             var field = typeof(HttpProjectConfigManager).GetField("Client",
                             System.Reflection.BindingFlags.Static |
@@ -183,7 +183,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
                 .WithBlockingTimeoutPeriod(TimeSpan.FromSeconds(1))
                 .WithStartByDefault(true)
                 .Build();
-
+            t.Wait();
             httpManager.OnReady().Wait();
             Assert.NotNull(httpManager.GetConfig());
             httpManager.Dispose();
