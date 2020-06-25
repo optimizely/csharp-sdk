@@ -34,6 +34,7 @@ using OptimizelySDK.Event.Entity;
 using OptimizelySDK.OptlyConfig;
 using System.Globalization;
 using System.Threading;
+using OptimizelySDK.Tests.Utils;
 
 namespace OptimizelySDK.Tests
 {
@@ -3344,12 +3345,9 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestDFMNotificationWhenProjectConfigIsUpdated()
         {
-            var httpClientMock = new Mock<HttpProjectConfigManager.HttpClient> { CallBase = true };
-
-            var field = typeof(HttpProjectConfigManager).GetField("Client",
-                            System.Reflection.BindingFlags.Static |
-                            System.Reflection.BindingFlags.NonPublic);
-            field.SetValue(field, httpClientMock.Object);
+            var httpClientMock = new Mock<HttpProjectConfigManager.HttpClient>();
+            var t = TestHttpProjectConfigManagerUtil.MockSendAsync(httpClientMock, TestData.Datafile, TimeSpan.FromMilliseconds(300));
+            TestHttpProjectConfigManagerUtil.SetClientFieldValue(httpClientMock.Object);
 
             NotificationCenter notificationCenter = new NotificationCenter();
             NotificationCallbackMock.Setup(notification => notification.TestConfigUpdateCallback());
@@ -3362,13 +3360,14 @@ namespace OptimizelySDK.Tests
                                                           .WithStartByDefault(false)
                                                           .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(500))
                                                           .WithNotificationCenter(notificationCenter)
-                                                          .Build();
+                                                          .Build(true);
 
             var optimizely = new Optimizely(httpManager, notificationCenter);
-            httpManager.Start();
             optimizely.NotificationCenter.AddNotification(NotificationCenter.NotificationType.OptimizelyConfigUpdate, NotificationCallbackMock.Object.TestConfigUpdateCallback);
+            httpManager.Start();
+            
             httpManager.OnReady().Wait(-1);
-
+            t.Wait();
             NotificationCallbackMock.Verify(nc => nc.TestConfigUpdateCallback(), Times.Once);
             httpManager.Dispose();
         }
@@ -3376,12 +3375,8 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestDFMWhenDatafileProvidedDoesNotNotifyWithoutStart()
         {
-            var httpClientMock = new Mock<HttpProjectConfigManager.HttpClient> { CallBase = true };
-            httpClientMock.Reset();
-            var field = typeof(HttpProjectConfigManager).GetField("Client",
-                            System.Reflection.BindingFlags.Static |
-                            System.Reflection.BindingFlags.NonPublic);
-            field.SetValue(field, httpClientMock.Object);
+            var httpClientMock = new Mock<HttpProjectConfigManager.HttpClient>();            
+            TestHttpProjectConfigManagerUtil.SetClientFieldValue(httpClientMock.Object);
 
             var httpManager = new HttpProjectConfigManager.Builder()
                 .WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z")

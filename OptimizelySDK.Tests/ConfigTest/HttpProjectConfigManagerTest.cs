@@ -19,6 +19,7 @@ using NUnit.Framework;
 using OptimizelySDK.Config;
 using OptimizelySDK.Logger;
 using OptimizelySDK.Tests.NotificationTests;
+using OptimizelySDK.Tests.Utils;
 using System;
 using System.Diagnostics;
 using System.Net.Http;
@@ -38,12 +39,9 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         public void Setup()
         {
             LoggerMock = new Mock<ILogger>();
-            HttpClientMock = new Mock<HttpProjectConfigManager.HttpClient> { CallBase = false };
+            HttpClientMock = new Mock<HttpProjectConfigManager.HttpClient>();
             HttpClientMock.Reset();
-            var field = typeof(HttpProjectConfigManager).GetField("Client",
-                            System.Reflection.BindingFlags.Static |
-                            System.Reflection.BindingFlags.NonPublic);
-            field.SetValue(field, HttpClientMock.Object);
+            TestHttpProjectConfigManagerUtil.SetClientFieldValue(HttpClientMock.Object);
             LoggerMock.Setup(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()));
             NotificationCallbackMock.Setup(nc => nc.TestConfigUpdateCallback());
 
@@ -458,50 +456,9 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
 
         }
 
-        public System.Threading.Tasks.Task MockSendAsync()
+        public Task MockSendAsync(string datafile = null, TimeSpan? delay = null)
         {
-            var t = new System.Threading.Tasks.TaskCompletionSource<bool>();
-
-            HttpClientMock.Setup(_ => _.SendAsync(It.IsAny<System.Net.Http.HttpRequestMessage>()))
-                .Returns(System.Threading.Tasks.Task.FromResult<HttpResponseMessage>(new HttpResponseMessage { StatusCode = System.Net.HttpStatusCode.OK, Content = new StringContent(string.Empty) }))
-                .Callback(()
-                => {
-                    t.SetResult(true);
-                });
-
-            return t.Task;
-        }
-
-
-        public System.Threading.Tasks.Task MockSendAsync(string datafile)
-        {
-            var t = new System.Threading.Tasks.TaskCompletionSource<bool>();
-
-            HttpClientMock.Setup(_ => _.SendAsync(It.IsAny<System.Net.Http.HttpRequestMessage>()))
-                .Returns(System.Threading.Tasks.Task.FromResult<HttpResponseMessage>(new HttpResponseMessage { StatusCode = System.Net.HttpStatusCode.OK, Content = new StringContent(datafile) }))
-                .Callback(()
-                => {
-                    t.SetResult(true);
-                });
-
-            return t.Task;
-        }
-
-        public System.Threading.Tasks.Task MockSendAsync(string datafile, TimeSpan delay)
-        {
-            var t = new System.Threading.Tasks.TaskCompletionSource<bool>();
-
-            HttpClientMock.Setup(_ => _.SendAsync(It.IsAny<System.Net.Http.HttpRequestMessage>()))
-                .Returns(() => {
-                    Task.Delay(delay).Wait();
-                    return System.Threading.Tasks.Task.FromResult<HttpResponseMessage>(new HttpResponseMessage { StatusCode = System.Net.HttpStatusCode.OK, Content = new StringContent(datafile) });
-                })
-                .Callback(()
-                => {
-                    t.SetResult(true);
-                });
-
-            return t.Task;
+            return TestHttpProjectConfigManagerUtil.MockSendAsync(HttpClientMock, datafile, delay);
         }
 
         #endregion

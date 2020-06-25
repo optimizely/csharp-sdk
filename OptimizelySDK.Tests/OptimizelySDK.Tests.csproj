@@ -91,7 +91,6 @@
     <Compile Include="OptimizelyTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestBucketer.cs" />
-    <Compile Include="TestData.cs" />
     <Compile Include="BucketerTest.cs" />
     <Compile Include="ProjectConfigTest.cs" />
     <Compile Include="UtilsTests\ConditionParserTest.cs" />
@@ -107,6 +106,8 @@
     <Compile Include="EventTests\UserEventFactoryTest.cs" />
     <Compile Include="EventTests\EventFactoryTest.cs" />
     <Compile Include="EventTests\CanonicalEvent.cs" />
+    <Compile Include="Utils\TestHttpProjectConfigManagerUtil.cs" />
+    <Compile Include="Utils\TestData.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="App.config" />
@@ -130,6 +131,9 @@
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
   <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Utils\" />
+  </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.
