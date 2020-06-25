@@ -15,17 +15,13 @@
  *    limitations under the License.
  */
 
-using Moq;
 using NUnit.Framework;
 using OptimizelySDK.Config;
-using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Event;
-using OptimizelySDK.Exceptions;
-using OptimizelySDK.Logger;
 using OptimizelySDK.Tests.ConfigTest;
+using OptimizelySDK.Tests.EventTest;
 using OptimizelySDK.Tests.Utils;
 using System;
-using System.Collections.Generic;
 namespace OptimizelySDK.Tests
 {
     [TestFixture]
@@ -42,7 +38,9 @@ namespace OptimizelySDK.Tests
             var actualConfigManagerProps = new ProjectConfigManagerProps(projectConfigManager);
             var expectedConfigManagerProps = new ProjectConfigManagerProps {
                 //TODO: Add more properties and then assert.
-                AutoUpdate = true,
+                Url = "www.testurl.com",
+                LastModified = "",
+                AutoUpdate = false,
             };
 
             Assert.IsTrue(TestData.CompareObjects(actualConfigManagerProps, expectedConfigManagerProps));
@@ -62,9 +60,11 @@ namespace OptimizelySDK.Tests
             var actualConfigManagerProps = new ProjectConfigManagerProps(projectConfigManager);
             var expectedConfigManagerProps = new ProjectConfigManagerProps {
                 //TODO: Add more properties and then assert.
-                AutoUpdate = true,
+                Url = "https://cdn.optimizely.com/datafiles/my-sdk-key.json",
+                LastModified = "",
+                AutoUpdate = false,
             };
-
+            Assert.IsTrue(TestData.CompareObjects(actualConfigManagerProps, expectedConfigManagerProps));
             optimizely.Dispose();
         }
 
@@ -72,42 +72,88 @@ namespace OptimizelySDK.Tests
         public void TestProjectConfigManagerWithDatafileAccessToken()
         {
             var optimizely = OptimizelyFactory.NewDefaultInstance("my-sdk-key", null, "access-token");
+
+            // Check values are loaded from app.config or not.
+            var projectConfigManager = optimizely.ProjectConfigManager as HttpProjectConfigManager;
+            Assert.NotNull(projectConfigManager);
+
+            var actualConfigManagerProps = new ProjectConfigManagerProps(projectConfigManager);
+            var expectedConfigManagerProps = new ProjectConfigManagerProps
+            {
+                //TODO: Add more properties and then assert.
+                Url = "https://config.optimizely.com/datafiles/auth/my-sdk-key.json",
+                DatafileAccessToken = "access-token",
+                LastModified = "",
+                AutoUpdate = false,
+            };
+            Assert.IsTrue(TestData.CompareObjects(actualConfigManagerProps, expectedConfigManagerProps));
+
             optimizely.Dispose();
         }
 
         [Test]
-        public void TestProjectConfigManagerWithProjectConfigManager()
+        public void TestProjectConfigManagerWithCustomProjectConfigManager()
         {
             var projectConfigManager = new HttpProjectConfigManager.Builder()
-                .WithSdkKey("my-sdk-key")
-                // TODO: Add more
+                .WithSdkKey("10192104166")
+                .WithFormat("https://optimizely.com/json/{0}.json")
+                .WithPollingInterval(TimeSpan.FromMilliseconds(1000))
+                .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(500))
+                .WithStartByDefault()
                 .WithAccessToken("access-token")
                 .Build();
 
             var optimizely = OptimizelyFactory.NewDefaultInstance(projectConfigManager);
+            var expectedProjectConfigManager = optimizely.ProjectConfigManager as HttpProjectConfigManager;
+            var actualConfigManagerProps = new ProjectConfigManagerProps(expectedProjectConfigManager);
+            var expectedConfigManagerProps = new ProjectConfigManagerProps
+            {
+                //TODO: Add more properties and then assert.
+                Url = "https://optimizely.com/json/10192104166.json",
+                DatafileAccessToken = "access-token",
+                LastModified = "",
+                AutoUpdate = false,
+            };
+            Assert.IsTrue(TestData.CompareObjects(actualConfigManagerProps, expectedConfigManagerProps));
             optimizely.Dispose();
         }
 
         [Test]
         public void TestEventProcessorWithDefaultEventBatching()
         {
-
+            var optimizely = OptimizelyFactory.NewDefaultInstance();
+          
+            var batchEventProcessor = Reflection.GetFieldValue<BatchEventProcessor, Optimizely>(optimizely, "EventProcessor");
+            var actualEventProcessorProps = new EventProcessorProps(batchEventProcessor);
+            var expectedEventProcessorProps = new EventProcessorProps
+            {
+                BatchSize = 10,
+                FlushInterval = TimeSpan.FromSeconds(2),
+                TimeoutInterval = TimeSpan.FromSeconds(10)
+            };
+            Assert.IsTrue(TestData.CompareObjects(actualEventProcessorProps, expectedEventProcessorProps));
+            optimizely.Dispose();
         }
 
         [Test]
-        public void TestEventProcessorWithEventBatchingBatchSizeAndDefaultInterval()
+        public void TestEventProcessorWithEventBatchingBatchSizeAndInterval()
         {
-            // TODO: Set batch event processor size/value
-            var optimizely = OptimizelyFactory.NewDefaultInstance("sdk-key");
-            
+            OptimizelyFactory.SetBatchSize(2);
+            OptimizelyFactory.SetFlushInterval(TimeSpan.FromSeconds(4));
+
+            var optimizely = OptimizelyFactory.NewDefaultInstance("sdk-Key");
+
             var batchEventProcessor = Reflection.GetFieldValue<BatchEventProcessor, Optimizely>(optimizely, "EventProcessor");
-            var batchEventProcessorType = typeof(BatchEventProcessor);
-
-            var actualBatchSize = Reflection.GetFieldValue<int, BatchEventProcessor>(batchEventProcessorType, batchEventProcessor, "BatchSize");            
-            var actualFlushInterval = Reflection.GetFieldValue<TimeSpan, BatchEventProcessor>(batchEventProcessorType, batchEventProcessor, "FlushInterval");
-
+            var actualEventProcessorProps = new EventProcessorProps(batchEventProcessor);
+            var expectedEventProcessorProps = new EventProcessorProps
+            {
+                BatchSize = 2,
+                FlushInterval = TimeSpan.FromSeconds(4),
+                TimeoutInterval = TimeSpan.FromMinutes(5)
+            };
+            Assert.IsTrue(TestData.CompareObjects(actualEventProcessorProps, expectedEventProcessorProps));
+            optimizely.Dispose();
         }
-
     }
 
 }

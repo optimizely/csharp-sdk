@@ -14,8 +14,8 @@ namespace OptimizelySDK.Tests.Utils
         /// <returns></returns>
         public static T GetFieldValue<T, U>(U obj, string fieldName)
         {
-            var fieldInfo = Reflection.GetFieldInfo(typeof(U), fieldName);
-            return (T)fieldInfo.GetValue(obj);
+            FieldInfo fieldInfo = GetFieldInfo(typeof(U), fieldName);
+            return (T)fieldInfo?.GetValue(obj);
         }
 
         public static T GetFieldValue<T, U>(Type t, U obj, string fieldName)
@@ -26,8 +26,7 @@ namespace OptimizelySDK.Tests.Utils
 
         public static FieldInfo GetFieldInfo(Type t, string fieldName)
         {
-            return t.GetField(fieldName, System.Reflection.BindingFlags.Static
-                | System.Reflection.BindingFlags.NonPublic);
+            return t.GetField(fieldName, BindingFlags.Instance | BindingFlags.NonPublic);
         }
     }
 }
