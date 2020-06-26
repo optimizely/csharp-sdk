@@ -25,8 +25,8 @@ namespace OptimizelySDK.Tests.EventTest
     {
         public int BatchSize { get; set; }
         public TimeSpan FlushInterval { get; set; }
-        public TimeSpan TimeoutInterval { get; set;}
-        
+        public TimeSpan TimeoutInterval { get; set; }
+
         public EventProcessorProps(BatchEventProcessor eventProcessor)
         {
             BatchSize = Reflection.GetFieldValue<int, BatchEventProcessor>(eventProcessor, "BatchSize");

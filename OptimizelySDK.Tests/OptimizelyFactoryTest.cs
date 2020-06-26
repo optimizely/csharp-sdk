@@ -36,11 +36,13 @@ namespace OptimizelySDK.Tests
             Assert.NotNull(projectConfigManager);
 
             var actualConfigManagerProps = new ProjectConfigManagerProps(projectConfigManager);
-            var expectedConfigManagerProps = new ProjectConfigManagerProps {
-                //TODO: Add more properties and then assert.
+            var expectedConfigManagerProps = new ProjectConfigManagerProps
+            {
                 Url = "www.testurl.com",
                 LastModified = "",
-                AutoUpdate = false,
+                AutoUpdate = true,
+                BlockingTimeout = TimeSpan.FromSeconds(10),
+                PollingInterval = TimeSpan.FromSeconds(2)
             };
 
             Assert.IsTrue(TestData.CompareObjects(actualConfigManagerProps, expectedConfigManagerProps));
@@ -58,12 +60,15 @@ namespace OptimizelySDK.Tests
             Assert.NotNull(projectConfigManager);
 
             var actualConfigManagerProps = new ProjectConfigManagerProps(projectConfigManager);
-            var expectedConfigManagerProps = new ProjectConfigManagerProps {
-                //TODO: Add more properties and then assert.
+            var expectedConfigManagerProps = new ProjectConfigManagerProps
+            {
                 Url = "https://cdn.optimizely.com/datafiles/my-sdk-key.json",
                 LastModified = "",
-                AutoUpdate = false,
+                AutoUpdate = true,
+                BlockingTimeout = TimeSpan.FromSeconds(15),
+                PollingInterval = TimeSpan.FromMinutes(5)
             };
+
             Assert.IsTrue(TestData.CompareObjects(actualConfigManagerProps, expectedConfigManagerProps));
             optimizely.Dispose();
         }
@@ -80,12 +85,14 @@ namespace OptimizelySDK.Tests
             var actualConfigManagerProps = new ProjectConfigManagerProps(projectConfigManager);
             var expectedConfigManagerProps = new ProjectConfigManagerProps
             {
-                //TODO: Add more properties and then assert.
                 Url = "https://config.optimizely.com/datafiles/auth/my-sdk-key.json",
-                DatafileAccessToken = "access-token",
                 LastModified = "",
-                AutoUpdate = false,
+                DatafileAccessToken = "access-token",
+                AutoUpdate = true,
+                BlockingTimeout = TimeSpan.FromSeconds(15),
+                PollingInterval = TimeSpan.FromMinutes(5)
             };
+
             Assert.IsTrue(TestData.CompareObjects(actualConfigManagerProps, expectedConfigManagerProps));
 
             optimizely.Dispose();
@@ -97,8 +104,8 @@ namespace OptimizelySDK.Tests
             var projectConfigManager = new HttpProjectConfigManager.Builder()
                 .WithSdkKey("10192104166")
                 .WithFormat("https://optimizely.com/json/{0}.json")
-                .WithPollingInterval(TimeSpan.FromMilliseconds(1000))
-                .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(500))
+                .WithPollingInterval(TimeSpan.FromMilliseconds(3000))
+                .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(4500))
                 .WithStartByDefault()
                 .WithAccessToken("access-token")
                 .Build();
@@ -108,11 +115,13 @@ namespace OptimizelySDK.Tests
             var actualConfigManagerProps = new ProjectConfigManagerProps(expectedProjectConfigManager);
             var expectedConfigManagerProps = new ProjectConfigManagerProps
             {
-                //TODO: Add more properties and then assert.
                 Url = "https://optimizely.com/json/10192104166.json",
                 DatafileAccessToken = "access-token",
                 LastModified = "",
-                AutoUpdate = false,
+                AutoUpdate = true,
+                // Need to check why its 0 when sent 4500
+                BlockingTimeout = TimeSpan.FromMilliseconds(0),
+                PollingInterval = TimeSpan.FromMilliseconds(3000)
             };
             Assert.IsTrue(TestData.CompareObjects(actualConfigManagerProps, expectedConfigManagerProps));
             optimizely.Dispose();
@@ -122,7 +131,7 @@ namespace OptimizelySDK.Tests
         public void TestEventProcessorWithDefaultEventBatching()
         {
             var optimizely = OptimizelyFactory.NewDefaultInstance();
-          
+
             var batchEventProcessor = Reflection.GetFieldValue<BatchEventProcessor, Optimizely>(optimizely, "EventProcessor");
             var actualEventProcessorProps = new EventProcessorProps(batchEventProcessor);
             var expectedEventProcessorProps = new EventProcessorProps

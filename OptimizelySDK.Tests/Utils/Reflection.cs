@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 
 namespace OptimizelySDK.Tests.Utils
@@ -14,19 +16,48 @@ namespace OptimizelySDK.Tests.Utils
         /// <returns></returns>
         public static T GetFieldValue<T, U>(U obj, string fieldName)
         {
-            FieldInfo fieldInfo = GetFieldInfo(typeof(U), fieldName);
-            return (T)fieldInfo?.GetValue(obj);
+            var fieldsInfo = GetAllFields(typeof(U));
+            foreach (var fieldInfo in fieldsInfo)
+            {
+                if (fieldInfo.Name == fieldName)
+                {
+                    return (T)fieldInfo.GetValue(obj);
+                }
+            }
+            return (T)default(T);
         }
 
-        public static T GetFieldValue<T, U>(Type t, U obj, string fieldName)
+        public static T GetPropertyValue<T, U>(U obj, string fieldName)
         {
-            var fieldInfo = GetFieldInfo(t, fieldName);
-            return (T)fieldInfo.GetValue(obj);
+            var propertyInfo = GetAllProperties(typeof(U));
+            foreach (var popertyInfo in propertyInfo)
+            {
+                if (popertyInfo.Name == fieldName)
+                {
+                    return (T)popertyInfo.GetValue(obj);
+                }
+            }
+            return (T)default(T);
         }
 
-        public static FieldInfo GetFieldInfo(Type t, string fieldName)
+        public static IEnumerable<PropertyInfo> GetAllProperties(Type t)
         {
-            return t.GetField(fieldName, BindingFlags.Instance | BindingFlags.NonPublic);
+            if (t == null)
+                return Enumerable.Empty<PropertyInfo>();
+            BindingFlags flags = BindingFlags.Public | BindingFlags.NonPublic |
+                                 BindingFlags.Static | BindingFlags.Instance |
+                                 BindingFlags.DeclaredOnly;
+            return t.GetProperties(flags).Concat(GetAllProperties(t.BaseType));
+        }
+
+        public static IEnumerable<FieldInfo> GetAllFields(Type t)
+        {
+            if (t == null)
+                return Enumerable.Empty<FieldInfo>();
+            BindingFlags flags = BindingFlags.Public | BindingFlags.NonPublic |
+                                 BindingFlags.Static | BindingFlags.Instance |
+                                 BindingFlags.DeclaredOnly;
+            return t.GetFields(flags).Concat(GetAllFields(t.BaseType));
         }
     }
 }
