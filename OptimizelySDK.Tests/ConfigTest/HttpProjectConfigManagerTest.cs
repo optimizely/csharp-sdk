@@ -58,6 +58,9 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
                 .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(500))
                 .WithStartByDefault()
                 .Build();
+
+            // This method waits until SendAsync is not triggered.
+            // Time is given here to avoid hanging-up in any worst case.
             t.Wait(1000);
 
             HttpClientMock.Verify(_ => _.SendAsync(
@@ -88,6 +91,8 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
                  .WithStartByDefault()
                  .Build();
 
+            // This "Wait" notifies When SendAsync is triggered.
+            // Time is given here to avoid hanging-up in any worst case.
             t.Wait(1000);
             HttpClientMock.Verify(_ => _.SendAsync(
                 It.Is<System.Net.Http.HttpRequestMessage>(requestMessage =>
@@ -162,6 +167,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
             Assert.AreEqual("15", httpManager.GetConfig().Revision);
 
             // loaded datafile from config manager after a second.
+            // This wait triggers when SendAsync is triggered, OnReadyPromise is already resolved because of hardcoded datafile.
             t.Wait();
             Task.Delay(200).Wait();
             Assert.AreEqual("42", httpManager.GetConfig().Revision);

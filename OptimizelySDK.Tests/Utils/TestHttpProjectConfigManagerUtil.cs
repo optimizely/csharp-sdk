@@ -35,6 +35,7 @@ namespace OptimizelySDK.Tests.Utils
             HttpClientMock.Setup(_ => _.SendAsync(It.IsAny<System.Net.Http.HttpRequestMessage>()))
                 .Returns(() => {
                     if (delay != null) {
+                        // This delay mocks the networking delay. And help to see the behavior when get a datafile with some delay.
                         Task.Delay(delay.Value).Wait();
                     }
                     
