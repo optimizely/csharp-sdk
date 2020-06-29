@@ -46,7 +46,12 @@ namespace OptimizelySDK.Bucketing
         /// set by the user by calling setForcedVariation (it is not the same as the    
         /// whitelisting forcedVariations data structure in the Experiments class). 
         /// </summary>
-        private Dictionary<string, Dictionary<string, string>> ForcedVariationMap;
+#if NET35
+private Dictionary<string, Dictionary<string, string>> ForcedVariationMap;
+#else
+private System.Collections.Concurrent.ConcurrentDictionary<string, Dictionary<string, string>> ForcedVariationMap;
+#endif
+
 
         /// <summary>
         ///  Initialize a decision service for the Optimizely client.
@@ -61,7 +66,11 @@ namespace OptimizelySDK.Bucketing
             ErrorHandler = errorHandler;
             UserProfileService = userProfileService;
             Logger = logger;
-            ForcedVariationMap = new Dictionary<string, Dictionary<string, string>>();
+#if NET35
+ForcedVariationMap = new Dictionary<string, Dictionary<string, string>>();
+#else
+ForcedVariationMap = new System.Collections.Concurrent.ConcurrentDictionary<string, Dictionary<string, string>>();
+#endif
         }
 
         /// <summary>
