@@ -108,20 +108,20 @@ namespace OptimizelySDK.Utils
             {
                 if (!float.TryParse(eventTags[VALUE_EVENT_METRIC_NAME].ToString(), out refVar))
                 {
-                    logMessage = string.Format("Provided numeric value {0} is in an invalid format.", eventTags[VALUE_EVENT_METRIC_NAME]);
+                    logMessage = $"Provided numeric value {eventTags[VALUE_EVENT_METRIC_NAME]} is in an invalid format.";
                     logLevel = LogLevel.ERROR;
                 }
                 else
                 {
                     if (float.IsInfinity(refVar))
                     {
-                        logMessage = string.Format("Provided numeric value {0} is in an invalid format.", eventTags[VALUE_EVENT_METRIC_NAME]);
+                        logMessage = $"Provided numeric value {eventTags[VALUE_EVENT_METRIC_NAME]} is in an invalid format.";
                         logLevel = LogLevel.ERROR;
                     }
                     else
                     {
                         isCasted = true;
-                        logMessage = string.Format("The numeric metric value {0} will be sent to results.", refVar);
+                        logMessage = $"The numeric metric value {refVar} will be sent to results.";
                     }
                 }
             }

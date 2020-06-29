@@ -420,7 +420,7 @@ namespace OptimizelySDK.Config
             if (_AudienceIdMap.ContainsKey(audienceId))
                 return _AudienceIdMap[audienceId];
 
-            string message = string.Format(@"Audience ID ""{0}"" is not in datafile.", audienceId);
+            string message = $@"Audience ID ""{audienceId}"" is not in datafile.";
             Logger.Log(LogLevel.ERROR, message);
             ErrorHandler.HandleError(new Exceptions.InvalidAudienceException("Provided audience is not in datafile."));
             return new Audience();
