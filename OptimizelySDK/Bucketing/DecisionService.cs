@@ -132,7 +132,7 @@ namespace OptimizelySDK.Bucketing
 
                 return variation;
             }
-            Logger.Log(LogLevel.INFO, string.Format("User \"{0}\" does not meet conditions to be in experiment \"{1}\".", userId, experiment.Key));
+            Logger.Log(LogLevel.INFO, $"User \"{userId}\" does not meet conditions to be in experiment \"{experiment.Key}\".");
 
             return null;
         }
@@ -148,7 +148,7 @@ namespace OptimizelySDK.Bucketing
         {
             if (ForcedVariationMap.ContainsKey(userId) == false)
             {
-                Logger.Log(LogLevel.DEBUG, string.Format(@"User ""{0}"" is not in the forced variation map.", userId));
+                Logger.Log(LogLevel.DEBUG, $@"User ""{userId}"" is not in the forced variation map.");
                 return null;
             }
 
@@ -162,7 +162,7 @@ namespace OptimizelySDK.Bucketing
 
             if (experimentToVariationMap.ContainsKey(experimentId) == false)
             {
-                Logger.Log(LogLevel.DEBUG, string.Format(@"No experiment ""{0}"" mapped to user ""{1}"" in the forced variation map.", experimentKey, userId));
+                Logger.Log(LogLevel.DEBUG, $@"No experiment ""{experimentKey}"" mapped to user ""{userId}"" in the forced variation map.");
                 return null;
             }
 
@@ -170,7 +170,7 @@ namespace OptimizelySDK.Bucketing
 
             if (string.IsNullOrEmpty(variationId))
             {
-                Logger.Log(LogLevel.DEBUG, string.Format(@"No variation mapped to experiment ""{0}"" in the forced variation map.", experimentKey));
+                Logger.Log(LogLevel.DEBUG, $@"No variation mapped to experiment ""{experimentKey}"" in the forced variation map.");
                 return null;
             }
 
@@ -180,7 +180,7 @@ namespace OptimizelySDK.Bucketing
             if (string.IsNullOrEmpty(variationKey))
                 return null;
 
-            Logger.Log(LogLevel.DEBUG, string.Format(@"Variation ""{0}"" is mapped to experiment ""{1}"" and user ""{2}"" in the forced variation map", variationKey, experimentKey, userId));
+            Logger.Log(LogLevel.DEBUG, $@"Variation ""{variationKey}"" is mapped to experiment ""{experimentKey}"" and user ""{userId}"" in the forced variation map");
 
             Variation variation = config.GetVariationFromKey(experimentKey, variationKey);
 
@@ -216,7 +216,7 @@ namespace OptimizelySDK.Bucketing
                 if (ForcedVariationMap.ContainsKey(userId) && ForcedVariationMap[userId].ContainsKey(experimentId))
                     ForcedVariationMap[userId].Remove(experimentId);
 
-                Logger.Log(LogLevel.DEBUG, string.Format(@"Variation mapped to experiment ""{0}"" has been removed for user ""{1}"".", experimentKey, userId));
+                Logger.Log(LogLevel.DEBUG, $@"Variation mapped to experiment ""{experimentKey}"" has been removed for user ""{userId}"".");
                 return true;
             }
 
@@ -233,7 +233,7 @@ namespace OptimizelySDK.Bucketing
             // Add/Replace Experiment to Variation ID map.  
             ForcedVariationMap[userId][experimentId] = variationId;
 
-            Logger.Log(LogLevel.DEBUG, string.Format(@"Set variation ""{0}"" for experiment ""{1}"" and user ""{2}"" in the forced variation map.", variationId, experimentId, userId));
+            Logger.Log(LogLevel.DEBUG, $@"Set variation ""{variationId}"" for experiment ""{experimentId}"" and user ""{userId}"" in the forced variation map.");
             return true;
         }
 
@@ -259,9 +259,9 @@ namespace OptimizelySDK.Bucketing
                 : null;
 
             if (forcedVariation != null)
-                Logger.Log(LogLevel.INFO, string.Format("User \"{0}\" is forced in variation \"{1}\".", userId, forcedVariationKey));
+                Logger.Log(LogLevel.INFO, $"User \"{userId}\" is forced in variation \"{forcedVariationKey}\".");
             else
-                Logger.Log(LogLevel.ERROR, string.Format("Variation \"{0}\" is not in the datafile. Not activating user \"{1}\".", forcedVariationKey, userId));
+                Logger.Log(LogLevel.ERROR, $"Variation \"{forcedVariationKey}\" is not in the datafile. Not activating user \"{userId}\".");
 
             return forcedVariation;
         }
@@ -284,7 +284,7 @@ namespace OptimizelySDK.Bucketing
 
             if (decision == null)
             {
-                Logger.Log(LogLevel.INFO, string.Format("No previously activated variation of experiment \"{0}\" for user \"{1}\" found in user profile.", experimentKey, userProfile.UserId));
+                Logger.Log(LogLevel.INFO, $"No previously activated variation of experiment \"{experimentKey}\" for user \"{userProfile.UserId}\" found in user profile.");
                 return null;
             }
 
@@ -298,13 +298,11 @@ namespace OptimizelySDK.Bucketing
 
                 if (savedVariation == null)
                 {
-                    Logger.Log(LogLevel.INFO, string.Format("User \"{0}\" was previously bucketed into variation with ID \"{1}\" for experiment \"{2}\", but no matching variation was found for that user. We will re-bucket the user.",
-                    userProfile.UserId, variationId, experimentId));
+                    Logger.Log(LogLevel.INFO, $"User \"{userProfile.UserId}\" was previously bucketed into variation with ID \"{variationId}\" for experiment \"{experimentId}\", but no matching variation was found for that user. We will re-bucket the user.");
                     return null;
                 }
 
-                Logger.Log(LogLevel.INFO, string.Format("Returning previously activated variation \"{0}\" of experiment \"{1}\" for user \"{2}\" from user profile.",
-                savedVariation.Key, experimentKey, userProfile.UserId));
+                Logger.Log(LogLevel.INFO, $"Returning previously activated variation \"{savedVariation.Key}\" of experiment \"{experimentKey}\" for user \"{userProfile.UserId}\" from user profile.");
                 return savedVariation;
             }
             catch (Exception)
@@ -341,13 +339,11 @@ namespace OptimizelySDK.Bucketing
             try
             {
                 UserProfileService.Save(userProfile.ToMap());
-                Logger.Log(LogLevel.INFO, string.Format("Saved variation \"{0}\" of experiment \"{1}\" for user \"{2}\".",
-                    variation.Id, experiment.Id, userProfile.UserId));
+                Logger.Log(LogLevel.INFO, $"Saved variation \"{variation.Id}\" of experiment \"{experiment.Id}\" for user \"{userProfile.UserId}\".");
             }
             catch (Exception exception)
             {
-                Logger.Log(LogLevel.ERROR, string.Format("Failed to save variation \"{0}\" of experiment \"{1}\" for user \"{2}\".",
-                    variation.Id, experiment.Id, userProfile.UserId));
+                Logger.Log(LogLevel.ERROR, $"Failed to save variation \"{variation.Id}\" of experiment \"{experiment.Id}\" for user \"{userProfile.UserId}\".");
                 ErrorHandler.HandleError(new Exceptions.OptimizelyRuntimeException(exception.Message));
             }
         }

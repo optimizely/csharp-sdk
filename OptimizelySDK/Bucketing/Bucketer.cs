@@ -86,8 +86,7 @@ namespace OptimizelySDK.Bucketing
             string bucketingKey = bucketingId + parentId;
             int bucketingNumber = GenerateBucketValue(bucketingKey);
 
-            Logger.Log(LogLevel.DEBUG, string.Format("Assigned bucket [{0}] to user [{1}] with bucketing ID [{2}].", 
-                bucketingNumber, userId, bucketingId));
+            Logger.Log(LogLevel.DEBUG, $"Assigned bucket [{bucketingNumber}] to user [{userId}] with bucketing ID [{bucketingId}].");
 
             foreach (var ta in trafficAllocations)
                 if (bucketingNumber < ta.EndOfRange)
@@ -122,21 +121,19 @@ namespace OptimizelySDK.Bucketing
                 string userExperimentId = FindBucket(bucketingId, userId, group.Id, group.TrafficAllocation);
                 if (string.IsNullOrEmpty(userExperimentId))
                 {
-                    message = string.Format("User [{0}] is in no experiment.", userId);
+                    message = $"User [{userId}] is in no experiment.";
                     Logger.Log(LogLevel.INFO, message);
                     return new Variation();
                 }
 
                 if (userExperimentId != experiment.Id)
                 {
-                    message = string.Format("User [{0}] is not in experiment [{1}] of group [{2}].", 
-                        userId, experiment.Key, experiment.GroupId);
+                    message = $"User [{userId}] is not in experiment [{experiment.Key}] of group [{experiment.GroupId}].";
                     Logger.Log(LogLevel.INFO, message);
                     return new Variation();
                 }
 
-                message = string.Format("User [{0}] is in experiment [{1}] of group [{2}].",
-                    userId, experiment.Key, experiment.GroupId);
+                message = $"User [{userId}] is in experiment [{experiment.Key}] of group [{experiment.GroupId}].";
                 Logger.Log(LogLevel.INFO, message);
             }
 
@@ -144,14 +141,14 @@ namespace OptimizelySDK.Bucketing
             string variationId = FindBucket(bucketingId, userId, experiment.Id, experiment.TrafficAllocation);
             if (string.IsNullOrEmpty(variationId))
             {
-                Logger.Log(LogLevel.INFO, string.Format("User [{0}] is in no variation.", userId));
+                Logger.Log(LogLevel.INFO, $"User [{userId}] is in no variation.");
                 return new Variation();
 
             }
 
             // success!
             variation = config.GetVariationFromId(experiment.Key, variationId);
-            message = string.Format("User [{0}] is in variation [{1}] of experiment [{2}].", userId, variation.Key, experiment.Key);
+            message = $"User [{userId}] is in variation [{variation.Key}] of experiment [{experiment.Key}].";
             Logger.Log(LogLevel.INFO, message);
             return variation;
         }

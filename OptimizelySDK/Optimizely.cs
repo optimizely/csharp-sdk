@@ -690,7 +690,7 @@ namespace OptimizelySDK
             {
                 var userEvent = UserEventFactory.CreateImpressionEvent(config, experiment, variation.Id, userId, userAttributes);
                 EventProcessor.Process(userEvent);
-                Logger.Log(LogLevel.INFO, string.Format("Activating user {0} in experiment {1}.", userId, experiment.Key));
+                Logger.Log(LogLevel.INFO, $"Activating user {userId} in experiment {experiment.Key}.");
 
                 // Kept For backwards compatibility.
                 // This notification is deprecated and the new DecisionNotifications
