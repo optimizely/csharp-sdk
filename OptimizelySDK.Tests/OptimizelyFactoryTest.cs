@@ -15,9 +15,13 @@
  *    limitations under the License.
  */
 
+using Moq;
 using NUnit.Framework;
 using OptimizelySDK.Config;
 using OptimizelySDK.Event;
+using OptimizelySDK.Event.Dispatcher;
+using OptimizelySDK.Logger;
+using OptimizelySDK.Notifications;
 using OptimizelySDK.Tests.ConfigTest;
 using OptimizelySDK.Tests.EventTest;
 using OptimizelySDK.Tests.Utils;
@@ -27,6 +31,14 @@ namespace OptimizelySDK.Tests
     [TestFixture]
     public class OptimizelyFactoryTest
     {
+        private Mock<ILogger> LoggerMock;
+        [SetUp]
+        public void Initialize()
+        {
+            LoggerMock = new Mock<ILogger>();
+            LoggerMock.Setup(i => i.Log(It.IsAny<LogLevel>(), It.IsAny<string>()));
+        }
+
         [Test]
         public void TestOptimizelyInstanceUsingConfigFile()
         {
@@ -45,7 +57,7 @@ namespace OptimizelySDK.Tests
                 PollingInterval = TimeSpan.FromSeconds(2)
             };
 
-            Assert.IsTrue(TestData.CompareObjects(actualConfigManagerProps, expectedConfigManagerProps));
+            Assert.AreEqual(actualConfigManagerProps, expectedConfigManagerProps);
             optimizely.Dispose();
         }
 
@@ -69,7 +81,7 @@ namespace OptimizelySDK.Tests
                 PollingInterval = TimeSpan.FromMinutes(5)
             };
 
-            Assert.IsTrue(TestData.CompareObjects(actualConfigManagerProps, expectedConfigManagerProps));
+            Assert.AreEqual(actualConfigManagerProps, expectedConfigManagerProps);
             optimizely.Dispose();
         }
 
@@ -93,7 +105,7 @@ namespace OptimizelySDK.Tests
                 PollingInterval = TimeSpan.FromMinutes(5)
             };
 
-            Assert.IsTrue(TestData.CompareObjects(actualConfigManagerProps, expectedConfigManagerProps));
+            Assert.AreEqual(actualConfigManagerProps, expectedConfigManagerProps);
 
             optimizely.Dispose();
         }
@@ -108,11 +120,11 @@ namespace OptimizelySDK.Tests
                 .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(4500))
                 .WithStartByDefault()
                 .WithAccessToken("access-token")
-                .Build();
+                .Build(true);
 
             var optimizely = OptimizelyFactory.NewDefaultInstance(projectConfigManager);
-            var expectedProjectConfigManager = optimizely.ProjectConfigManager as HttpProjectConfigManager;
-            var actualConfigManagerProps = new ProjectConfigManagerProps(expectedProjectConfigManager);
+            var actualProjectConfigManager = optimizely.ProjectConfigManager as HttpProjectConfigManager;
+            var actualConfigManagerProps = new ProjectConfigManagerProps(actualProjectConfigManager);
             var expectedConfigManagerProps = new ProjectConfigManagerProps
             {
                 Url = "https://optimizely.com/json/10192104166.json",
@@ -123,7 +135,7 @@ namespace OptimizelySDK.Tests
                 BlockingTimeout = TimeSpan.FromMilliseconds(0),
                 PollingInterval = TimeSpan.FromMilliseconds(3000)
             };
-            Assert.IsTrue(TestData.CompareObjects(actualConfigManagerProps, expectedConfigManagerProps));
+            Assert.AreEqual(actualConfigManagerProps, expectedConfigManagerProps);
             optimizely.Dispose();
         }
 
@@ -140,7 +152,7 @@ namespace OptimizelySDK.Tests
                 FlushInterval = TimeSpan.FromSeconds(2),
                 TimeoutInterval = TimeSpan.FromSeconds(10)
             };
-            Assert.IsTrue(TestData.CompareObjects(actualEventProcessorProps, expectedEventProcessorProps));
+            Assert.AreEqual(actualEventProcessorProps, expectedEventProcessorProps);
             optimizely.Dispose();
         }
 
@@ -160,7 +172,33 @@ namespace OptimizelySDK.Tests
                 FlushInterval = TimeSpan.FromSeconds(4),
                 TimeoutInterval = TimeSpan.FromMinutes(5)
             };
-            Assert.IsTrue(TestData.CompareObjects(actualEventProcessorProps, expectedEventProcessorProps));
+            Assert.AreEqual(actualEventProcessorProps, expectedEventProcessorProps);
+            optimizely.Dispose();
+        }
+
+        [Test]
+        public void TestEventProcessorWithBatchEventProcessorObj()
+        {
+            var eventDispatcher = new DefaultEventDispatcher(LoggerMock.Object);
+            var notificationCenter = new NotificationCenter();
+            var projectConfigManager = new HttpProjectConfigManager.Builder()
+                .WithSdkKey("10192104166")
+                .Build(true);
+
+            var batchEventProcessor = new BatchEventProcessor.Builder()
+                .WithLogger(LoggerMock.Object)
+                .WithMaxBatchSize(20)
+                .WithFlushInterval(TimeSpan.FromSeconds(3))
+                .WithEventDispatcher(eventDispatcher)
+                .WithNotificationCenter(notificationCenter)
+                .Build();
+
+            var optimizely = OptimizelyFactory.NewDefaultInstance(projectConfigManager, notificationCenter, eventProcessor: batchEventProcessor);
+
+            var actualbatchEventProcessor = Reflection.GetFieldValue<BatchEventProcessor, Optimizely>(optimizely, "EventProcessor");
+            var actualEventProcessorProps = new EventProcessorProps(actualbatchEventProcessor);
+            var expectedEventProcessorProps = new EventProcessorProps(batchEventProcessor);
+            Assert.AreEqual(actualEventProcessorProps, expectedEventProcessorProps);
             optimizely.Dispose();
         }
     }

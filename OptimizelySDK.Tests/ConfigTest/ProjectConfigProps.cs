@@ -20,6 +20,9 @@ using OptimizelySDK.Tests.Utils;
 
 namespace OptimizelySDK.Tests.ConfigTest
 {
+    /// <summary>
+    /// This is a helper class for optimizely factory unit testing and is only to expose private properties of HttpProjectConfigManager and its super classes.
+    /// </summary>
     public class ProjectConfigManagerProps
     {
         public string LastModified { get; set; }
@@ -39,9 +42,37 @@ namespace OptimizelySDK.Tests.ConfigTest
             PollingInterval = Reflection.GetFieldValue<TimeSpan, HttpProjectConfigManager>(projectConfigManager, "PollingInterval");
             BlockingTimeout = Reflection.GetFieldValue<TimeSpan, HttpProjectConfigManager>(projectConfigManager, "BlockingTimeout");
         }
+
+        /// <summary>
+        /// To create default instance of expected values.
+        /// </summary>
         public ProjectConfigManagerProps()
         {
 
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj == null)
+                return false;
+
+            var projectConfigManager = obj as ProjectConfigManagerProps;
+            if (projectConfigManager == null)
+            {
+                return false;
+            }
+
+            if (LastModified != projectConfigManager.LastModified ||
+                Url != projectConfigManager.Url ||
+                DatafileAccessToken != projectConfigManager.DatafileAccessToken ||
+                BlockingTimeout != projectConfigManager.BlockingTimeout ||
+                AutoUpdate != projectConfigManager.AutoUpdate ||
+                PollingInterval != projectConfigManager.PollingInterval)
+            {
+                return false;
+            }
+
+            return true;
         }
     }
 }

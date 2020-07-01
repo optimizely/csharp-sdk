@@ -21,6 +21,9 @@ using OptimizelySDK.Tests.Utils;
 
 namespace OptimizelySDK.Tests.EventTest
 {
+    /// <summary>
+    /// Helper class for optimizely factory unit testing to expose private properties of BatchEventProcessor and its super classes.
+    /// </summary>
     public class EventProcessorProps
     {
         public int BatchSize { get; set; }
@@ -29,13 +32,39 @@ namespace OptimizelySDK.Tests.EventTest
 
         public EventProcessorProps(BatchEventProcessor eventProcessor)
         {
-            BatchSize = Reflection.GetFieldValue<int, BatchEventProcessor>(eventProcessor, "BatchSize");
-            FlushInterval = Reflection.GetFieldValue<TimeSpan, BatchEventProcessor>(eventProcessor, "FlushInterval");
-            TimeoutInterval = Reflection.GetFieldValue<TimeSpan, BatchEventProcessor>(eventProcessor, "TimeoutInterval");
+            var fieldsInfo = Reflection.GetAllFields(eventProcessor.GetType());
+            BatchSize = Reflection.GetFieldValue<int, BatchEventProcessor>(eventProcessor, "BatchSize", fieldsInfo);
+            FlushInterval = Reflection.GetFieldValue<TimeSpan, BatchEventProcessor>(eventProcessor, "FlushInterval", fieldsInfo);
+            TimeoutInterval = Reflection.GetFieldValue<TimeSpan, BatchEventProcessor>(eventProcessor, "TimeoutInterval", fieldsInfo);
         }
+
+        /// <summary>
+        /// To create default instance of expected values.
+        /// </summary>
         public EventProcessorProps()
         {
 
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj == null)
+                return false;
+
+            var eventProcessor = obj as EventProcessorProps;
+            if (eventProcessor == null)
+            {
+                return false;
+            }
+
+            if (BatchSize != eventProcessor.BatchSize ||
+                FlushInterval.TotalMilliseconds != eventProcessor.FlushInterval.TotalMilliseconds ||
+                TimeoutInterval.TotalMilliseconds != eventProcessor.TimeoutInterval.TotalMilliseconds)
+            {
+                return false;
+            }
+
+            return true;
         }
     }
 }

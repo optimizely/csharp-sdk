@@ -28,6 +28,26 @@ namespace OptimizelySDK.Tests.Utils
         }
 
         /// <summary>
+        /// Returns field value.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="obj">Object from which you want to get variable</param>
+        /// <param name="fieldName">Name of the field</param>
+        /// <returns></returns>
+        public static T GetFieldValue<T, U>(U obj, string fieldName, IEnumerable<FieldInfo> fieldsInfo)
+        {
+            foreach (var fieldInfo in fieldsInfo)
+            {
+                if (fieldInfo.Name == fieldName)
+                {
+                    return (T)fieldInfo.GetValue(obj);
+                }
+            }
+            return (T)default(T);
+        }
+
+
+        /// <summary>
         /// Returns property value.
         /// </summary>
         /// <typeparam name="T"></typeparam>
