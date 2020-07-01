@@ -24,7 +24,7 @@ using Newtonsoft.Json;
 
 namespace OptimizelySDK
 {
-    public class OptimizelyJson
+    public class OptimizelyJSON
     {
         private ILogger Logger;
         private IErrorHandler ErrorHandler;
@@ -32,7 +32,7 @@ namespace OptimizelySDK
         private string Payload { get; set; }
         private Dictionary<string, object> Dict { get; set; }
 
-        public OptimizelyJson(string payload, IErrorHandler errorHandler, ILogger logger)
+        public OptimizelyJSON(string payload, IErrorHandler errorHandler, ILogger logger)
         {
             try
             {
@@ -48,7 +48,7 @@ namespace OptimizelySDK
             }
         }
 
-        public OptimizelyJson(Dictionary<string, object> dict, IErrorHandler errorHandler, ILogger logger)
+        public OptimizelyJSON(Dictionary<string, object> dict, IErrorHandler errorHandler, ILogger logger)
         {
             try
             {

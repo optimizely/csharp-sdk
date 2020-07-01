@@ -1360,20 +1360,20 @@ namespace OptimizelySDK.Tests
             var variableKeyNull = "varNull";
             var featureVariableType = "json";
 
-            OptimizelyMock.Setup(om => om.GetFeatureVariableValueForType<OptimizelyJson>(It.IsAny<string>(), variableKeyString, It.IsAny<string>(),
-                It.IsAny<UserAttributes>(), featureVariableType)).Returns(new OptimizelyJson("{\"string\": \"Test String\"}", ErrorHandlerMock.Object, LoggerMock.Object));
+            OptimizelyMock.Setup(om => om.GetFeatureVariableValueForType<OptimizelyJSON>(It.IsAny<string>(), variableKeyString, It.IsAny<string>(),
+                It.IsAny<UserAttributes>(), featureVariableType)).Returns(new OptimizelyJSON("{\"string\": \"Test String\"}", ErrorHandlerMock.Object, LoggerMock.Object));
             Assert.AreEqual("Test String", OptimizelyMock.Object.GetFeatureVariableJSON(featureKey, variableKeyString, TestUserId, null).GetValue<string>("string"));
 
-            OptimizelyMock.Setup(om => om.GetFeatureVariableValueForType<OptimizelyJson>(It.IsAny<string>(), variableKeyIntString, It.IsAny<string>(),
-                It.IsAny<UserAttributes>(), featureVariableType)).Returns(new OptimizelyJson("{ \"integer\": 123 }", ErrorHandlerMock.Object, LoggerMock.Object));
+            OptimizelyMock.Setup(om => om.GetFeatureVariableValueForType<OptimizelyJSON>(It.IsAny<string>(), variableKeyIntString, It.IsAny<string>(),
+                It.IsAny<UserAttributes>(), featureVariableType)).Returns(new OptimizelyJSON("{ \"integer\": 123 }", ErrorHandlerMock.Object, LoggerMock.Object));
             Assert.AreEqual(123, OptimizelyMock.Object.GetFeatureVariableJSON(featureKey, variableKeyIntString, TestUserId, null).GetValue<long>("integer"));
 
-            OptimizelyMock.Setup(om => om.GetFeatureVariableValueForType<OptimizelyJson>(It.IsAny<string>(), variableKeyDouble, It.IsAny<string>(),
-                It.IsAny<UserAttributes>(), featureVariableType)).Returns(new OptimizelyJson("{ \"double\": 123.28 }", ErrorHandlerMock.Object, LoggerMock.Object));
+            OptimizelyMock.Setup(om => om.GetFeatureVariableValueForType<OptimizelyJSON>(It.IsAny<string>(), variableKeyDouble, It.IsAny<string>(),
+                It.IsAny<UserAttributes>(), featureVariableType)).Returns(new OptimizelyJSON("{ \"double\": 123.28 }", ErrorHandlerMock.Object, LoggerMock.Object));
             Assert.AreEqual(123.28, OptimizelyMock.Object.GetFeatureVariableJSON(featureKey, variableKeyDouble, TestUserId, null).GetValue<double>("double"));
 
-            OptimizelyMock.Setup(om => om.GetFeatureVariableValueForType<OptimizelyJson>(It.IsAny<string>(), variableKeyNull, It.IsAny<string>(),
-                It.IsAny<UserAttributes>(), featureVariableType)).Returns<OptimizelyJson>(null);
+            OptimizelyMock.Setup(om => om.GetFeatureVariableValueForType<OptimizelyJSON>(It.IsAny<string>(), variableKeyNull, It.IsAny<string>(),
+                It.IsAny<UserAttributes>(), featureVariableType)).Returns<OptimizelyJSON>(null);
             Assert.Null(OptimizelyMock.Object.GetFeatureVariableJSON(featureKey, variableKeyNull, TestUserId, null));
         }
 
@@ -1393,28 +1393,28 @@ namespace OptimizelySDK.Tests
             var expectedDoubleDict = new Dictionary<string, object>() { { "double", 123.28 } };
             var expectedBooleanDict = new Dictionary<string, object>() { { "boolean", true } };
             
-            OptimizelyMock.Setup(om => om.GetFeatureVariableValueForType<OptimizelyJson>(It.IsAny<string>(), variableKeyString, It.IsAny<string>(),
-                It.IsAny<UserAttributes>(), featureVariableType)).Returns(new OptimizelyJson(expectedStringDict, ErrorHandlerMock.Object, LoggerMock.Object));
+            OptimizelyMock.Setup(om => om.GetFeatureVariableValueForType<OptimizelyJSON>(It.IsAny<string>(), variableKeyString, It.IsAny<string>(),
+                It.IsAny<UserAttributes>(), featureVariableType)).Returns(new OptimizelyJSON(expectedStringDict, ErrorHandlerMock.Object, LoggerMock.Object));
             Assert.IsTrue(TestData.CompareObjects(expectedStringDict, OptimizelyMock.Object.GetFeatureVariableJSON(featureKey, variableKeyString, TestUserId, null).ToDictionary()));
             Assert.AreEqual("Test String", OptimizelyMock.Object.GetFeatureVariableJSON(featureKey, variableKeyString, TestUserId, null).GetValue<string>("string"));
 
-            OptimizelyMock.Setup(om => om.GetFeatureVariableValueForType<OptimizelyJson>(It.IsAny<string>(), variableKeyIntString, It.IsAny<string>(),
-                It.IsAny<UserAttributes>(), featureVariableType)).Returns(new OptimizelyJson(expectedIntegerDict, ErrorHandlerMock.Object, LoggerMock.Object));
+            OptimizelyMock.Setup(om => om.GetFeatureVariableValueForType<OptimizelyJSON>(It.IsAny<string>(), variableKeyIntString, It.IsAny<string>(),
+                It.IsAny<UserAttributes>(), featureVariableType)).Returns(new OptimizelyJSON(expectedIntegerDict, ErrorHandlerMock.Object, LoggerMock.Object));
             Assert.IsTrue(TestData.CompareObjects(expectedIntegerDict, OptimizelyMock.Object.GetFeatureVariableJSON(featureKey, variableKeyIntString, TestUserId, null).ToDictionary()));
             Assert.AreEqual(123, OptimizelyMock.Object.GetFeatureVariableJSON(featureKey, variableKeyIntString, TestUserId, null).GetValue<long>("integer"));
 
-            OptimizelyMock.Setup(om => om.GetFeatureVariableValueForType<OptimizelyJson>(It.IsAny<string>(), variableKeyDouble, It.IsAny<string>(),
-                It.IsAny<UserAttributes>(), featureVariableType)).Returns(new OptimizelyJson(expectedDoubleDict, ErrorHandlerMock.Object, LoggerMock.Object));
+            OptimizelyMock.Setup(om => om.GetFeatureVariableValueForType<OptimizelyJSON>(It.IsAny<string>(), variableKeyDouble, It.IsAny<string>(),
+                It.IsAny<UserAttributes>(), featureVariableType)).Returns(new OptimizelyJSON(expectedDoubleDict, ErrorHandlerMock.Object, LoggerMock.Object));
             Assert.IsTrue(TestData.CompareObjects(expectedDoubleDict, OptimizelyMock.Object.GetFeatureVariableJSON(featureKey, variableKeyDouble, TestUserId, null).ToDictionary()));
             Assert.AreEqual(123.28, OptimizelyMock.Object.GetFeatureVariableJSON(featureKey, variableKeyDouble, TestUserId, null).GetValue<double>("double"));
 
-            OptimizelyMock.Setup(om => om.GetFeatureVariableValueForType<OptimizelyJson>(It.IsAny<string>(), variableKeyBoolean, It.IsAny<string>(),
-                It.IsAny<UserAttributes>(), featureVariableType)).Returns(new OptimizelyJson(expectedBooleanDict, ErrorHandlerMock.Object, LoggerMock.Object));
+            OptimizelyMock.Setup(om => om.GetFeatureVariableValueForType<OptimizelyJSON>(It.IsAny<string>(), variableKeyBoolean, It.IsAny<string>(),
+                It.IsAny<UserAttributes>(), featureVariableType)).Returns(new OptimizelyJSON(expectedBooleanDict, ErrorHandlerMock.Object, LoggerMock.Object));
             Assert.IsTrue(TestData.CompareObjects(expectedBooleanDict, OptimizelyMock.Object.GetFeatureVariableJSON(featureKey, variableKeyBoolean, TestUserId, null).ToDictionary()));
             Assert.AreEqual(true, OptimizelyMock.Object.GetFeatureVariableJSON(featureKey, variableKeyBoolean, TestUserId, null).GetValue<bool>("boolean"));
 
-            OptimizelyMock.Setup(om => om.GetFeatureVariableValueForType<OptimizelyJson>(It.IsAny<string>(), variableKeyNull, It.IsAny<string>(),
-                It.IsAny<UserAttributes>(), featureVariableType)).Returns<OptimizelyJson>(null);
+            OptimizelyMock.Setup(om => om.GetFeatureVariableValueForType<OptimizelyJSON>(It.IsAny<string>(), variableKeyNull, It.IsAny<string>(),
+                It.IsAny<UserAttributes>(), featureVariableType)).Returns<OptimizelyJSON>(null);
             Assert.Null(OptimizelyMock.Object.GetFeatureVariableJSON(featureKey, variableKeyNull, TestUserId, null));
         }
 
@@ -1571,7 +1571,7 @@ namespace OptimizelySDK.Tests
             optly.SetFieldOrProperty("ProjectConfigManager", ConfigManager);
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
 
-            var variableValue = (OptimizelyJson)optly.Invoke("GetFeatureVariableJSON", featureKey, variableKey, TestUserId, userAttributes);
+            var variableValue = (OptimizelyJSON)optly.Invoke("GetFeatureVariableJSON", featureKey, variableKey, TestUserId, userAttributes);
             Assert.AreEqual(expectedIntValue, variableValue.GetValue<long>("int_var"));
             Assert.AreEqual(expectedStringValue, variableValue.GetValue<string>("string_var"));
 
@@ -1603,7 +1603,7 @@ namespace OptimizelySDK.Tests
             optly.SetFieldOrProperty("ProjectConfigManager", ConfigManager);
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
 
-            var variableValue = (OptimizelyJson)optly.Invoke("GetFeatureVariableJSON", featureKey, variableKey, TestUserId, userAttributes);
+            var variableValue = (OptimizelyJSON)optly.Invoke("GetFeatureVariableJSON", featureKey, variableKey, TestUserId, userAttributes);
             Assert.AreEqual(expectedIntValue, variableValue.GetValue<long>("int_var"));
             Assert.AreEqual(expectedStringValue, variableValue.GetValue<string>("string_var"));
 
@@ -1772,7 +1772,7 @@ namespace OptimizelySDK.Tests
             Assert.IsNull(Optimizely.GetFeatureVariableValueForType<bool?>("boolean_single_variable_feature", "boolean_variable", TestUserId, null, variableTypeDouble));
             Assert.IsNull(Optimizely.GetFeatureVariableValueForType<int?>("integer_single_variable_feature", "integer_variable", TestUserId, null, variableTypeString));
             Assert.IsNull(Optimizely.GetFeatureVariableValueForType<string>("string_single_variable_feature", "string_variable", TestUserId, null, variableTypeInt));
-            Assert.IsNull(Optimizely.GetFeatureVariableValueForType<OptimizelyJson>("string_single_variable_feature", "json_var", TestUserId, null, variableTypeInt));
+            Assert.IsNull(Optimizely.GetFeatureVariableValueForType<OptimizelyJSON>("string_single_variable_feature", "json_var", TestUserId, null, variableTypeInt));
 
             LoggerMock.Verify(l => l.Log(LogLevel.ERROR,
                 $@"Variable is of type ""double"", but you requested it as type ""{variableTypeBool}""."));
@@ -2833,7 +2833,7 @@ namespace OptimizelySDK.Tests
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
             optStronglyTyped.NotificationCenter.AddNotification(NotificationCenter.NotificationType.Decision, NotificationCallbackMock.Object.TestDecisionCallback);
 
-            var variableValue = (OptimizelyJson)optly.Invoke("GetFeatureVariableJSON", featureKey, variableKey, TestUserId, userAttributes);
+            var variableValue = (OptimizelyJSON)optly.Invoke("GetFeatureVariableJSON", featureKey, variableKey, TestUserId, userAttributes);
             Assert.IsTrue(TestData.CompareObjects(expectedDict, variableValue.ToDictionary()));
             var decisionInfo = new Dictionary<string, object>
             {
@@ -3234,7 +3234,7 @@ namespace OptimizelySDK.Tests
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
             optStronglyTyped.NotificationCenter.AddNotification(NotificationCenter.NotificationType.Decision, NotificationCallbackMock.Object.TestDecisionCallback);
 
-            var variableValues = (OptimizelyJson)optly.Invoke("GetAllFeatureVariables", featureKey, TestUserId, userAttributes);
+            var variableValues = (OptimizelyJSON)optly.Invoke("GetAllFeatureVariables", featureKey, TestUserId, userAttributes);
             Assert.IsTrue(TestData.CompareObjects(variableValues.ToDictionary(), expectedValue));
             var decisionInfo = new Dictionary<string, object>
             {
@@ -3316,7 +3316,7 @@ namespace OptimizelySDK.Tests
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
             optly.SetFieldOrProperty("ProjectConfigManager", ConfigManager);
 
-            var result = (OptimizelyJson)optly.Invoke("GetAllFeatureVariables", featureKey, TestUserId, userAttributes);
+            var result = (OptimizelyJSON)optly.Invoke("GetAllFeatureVariables", featureKey, TestUserId, userAttributes);
             Assert.NotNull(result);
 
             LoggerMock.Verify(log => log.Log(LogLevel.INFO, "User \"" + TestUserId + "\" was not bucketed into any variation for feature flag \"" + featureKey + "\". " +
