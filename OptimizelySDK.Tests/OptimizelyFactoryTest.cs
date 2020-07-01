@@ -131,8 +131,7 @@ namespace OptimizelySDK.Tests
                 DatafileAccessToken = "access-token",
                 LastModified = "",
                 AutoUpdate = true,
-                // Need to check why its 0 when sent 4500
-                BlockingTimeout = TimeSpan.FromMilliseconds(0),
+                BlockingTimeout = TimeSpan.FromMilliseconds(4500),
                 PollingInterval = TimeSpan.FromMilliseconds(3000)
             };
             Assert.AreEqual(actualConfigManagerProps, expectedConfigManagerProps);
