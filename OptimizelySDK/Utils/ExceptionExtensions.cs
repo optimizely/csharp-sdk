@@ -25,7 +25,7 @@ namespace OptimizelySDK.Utils
             if (exception.InnerException == null)
                 return exception.Message;
 
-            return (string.IsNullOrEmpty(exception.Message) ? "" : $"{exception.Message} {separator} {GetAllMessages(exception.InnerException, separator)}");
+            return (string.IsNullOrEmpty(exception.Message) ? "" : $"{exception.Message}{separator}{GetAllMessages(exception.InnerException, separator)}");
         }
     }
 }
