@@ -125,15 +125,7 @@ namespace OptimizelySDK.Tests
             var optimizely = OptimizelyFactory.NewDefaultInstance(projectConfigManager);
             var actualProjectConfigManager = optimizely.ProjectConfigManager as HttpProjectConfigManager;
             var actualConfigManagerProps = new ProjectConfigManagerProps(actualProjectConfigManager);
-            var expectedConfigManagerProps = new ProjectConfigManagerProps
-            {
-                Url = "https://optimizely.com/json/10192104166.json",
-                DatafileAccessToken = "access-token",
-                LastModified = "",
-                AutoUpdate = true,
-                BlockingTimeout = TimeSpan.FromMilliseconds(4500),
-                PollingInterval = TimeSpan.FromMilliseconds(3000)
-            };
+            var expectedConfigManagerProps = new ProjectConfigManagerProps(projectConfigManager);
             Assert.AreEqual(actualConfigManagerProps, expectedConfigManagerProps);
             optimizely.Dispose();
         }
