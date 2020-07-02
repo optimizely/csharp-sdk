@@ -600,7 +600,7 @@ namespace OptimizelySDK
                 { "featureKey", featureKey },
                 { "featureEnabled", featureEnabled },
                 { "variableKey", variableKey },
-                { "variableValue", typeCastedValue is OptimizelyJson? ((OptimizelyJson)typeCastedValue).ToDictionary() : typeCastedValue },
+                { "variableValue", typeCastedValue is OptimizelyJSON? ((OptimizelyJSON)typeCastedValue).ToDictionary() : typeCastedValue },
                 { "variableType", variableType.ToString().ToLower() },
                 { "source", decision?.Source },
                 { "sourceInfo", sourceInfo },
@@ -671,9 +671,9 @@ namespace OptimizelySDK
         /// <param name="userId">The user ID</param>
         /// <param name="userAttributes">The user's attributes</param>
         /// <returns>OptimizelyJson | Feature variable value or null</returns>
-        public OptimizelyJson GetFeatureVariableJSON(string featureKey, string variableKey, string userId, UserAttributes userAttributes = null)
+        public OptimizelyJSON GetFeatureVariableJSON(string featureKey, string variableKey, string userId, UserAttributes userAttributes = null)
         {
-            return GetFeatureVariableValueForType<OptimizelyJson>(featureKey, variableKey, userId, userAttributes, FeatureVariable.JSON_TYPE);
+            return GetFeatureVariableValueForType<OptimizelyJSON>(featureKey, variableKey, userId, userAttributes, FeatureVariable.JSON_TYPE);
         }
 
         /// <summary>
@@ -746,7 +746,7 @@ namespace OptimizelySDK
         /// <param name="userId">The user ID</param>
         /// <param name="userAttributes">The user's attributes</param>
         /// <returns>string | null An OptimizelyJSON instance for all variable values.</returns>
-        public OptimizelyJson GetAllFeatureVariables(string featureKey, string userId,
+        public OptimizelyJSON GetAllFeatureVariables(string featureKey, string userId,
                                                  UserAttributes userAttributes = null)
         {
             var config = ProjectConfigManager?.GetConfig();
@@ -806,8 +806,8 @@ namespace OptimizelySDK
                 
                 var typeCastedValue = GetTypeCastedVariableValue(variableValue, featureVariable.Type);
                 
-                if (typeCastedValue is OptimizelyJson)
-                    typeCastedValue = ((OptimizelyJson)typeCastedValue).ToDictionary();
+                if (typeCastedValue is OptimizelyJSON)
+                    typeCastedValue = ((OptimizelyJSON)typeCastedValue).ToDictionary();
 
                 valuesMap.Add(featureVariable.Key, typeCastedValue);
             }
@@ -830,7 +830,7 @@ namespace OptimizelySDK
             NotificationCenter.SendNotifications(NotificationCenter.NotificationType.Decision, DecisionNotificationTypes.ALL_FEATURE_VARIABLE, userId,
                 userAttributes ?? new UserAttributes(), decisionInfo);
             
-            return new OptimizelyJson(valuesMap, ErrorHandler, Logger);
+            return new OptimizelyJSON(valuesMap, ErrorHandler, Logger);
         }
 
         /// <summary>
@@ -915,7 +915,7 @@ namespace OptimizelySDK
                     result = value;
                     break;
                 case FeatureVariable.JSON_TYPE:
-                    result = new OptimizelyJson(value, ErrorHandler, Logger);
+                    result = new OptimizelyJSON(value, ErrorHandler, Logger);
                     break;
             }
 

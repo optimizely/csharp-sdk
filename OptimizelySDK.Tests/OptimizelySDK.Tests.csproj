@@ -77,7 +77,7 @@
     <Compile Include="ConfigTest\FallbackProjectConfigManagerTest.cs" />
     <Compile Include="DecisionServiceTest.cs" />
     <Compile Include="DefaultErrorHandlerTest.cs" />
-    <Compile Include="OptimizelyJsonTest.cs" />
+    <Compile Include="OptimizelyJSONTest.cs" />
     <Compile Include="EventTests\BatchEventProcessorTest.cs" />
     <Compile Include="EventTests\DefaultEventDispatcherTest.cs" />
     <Compile Include="EventTests\EventBuilderTest.cs" />
