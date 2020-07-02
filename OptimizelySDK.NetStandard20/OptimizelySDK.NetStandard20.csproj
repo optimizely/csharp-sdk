@@ -115,8 +115,8 @@
     <Compile Include="..\OptimizelySDK\Entity\IdKeyEntity.cs">
       <Link>Entity\IdKeyEntity.cs</Link>
     </Compile>
-	<Compile Include="..\OptimizelySDK\OptimizelyJson.cs">
-      <Link>Entity\OptimizelyJson.cs</Link>
+	<Compile Include="..\OptimizelySDK\OptimizelyJSON.cs">
+      <Link>OptimizelyJSON.cs</Link>
     </Compile>
     <Compile Include="..\OptimizelySDK\Entity\Rollout.cs">
       <Link>Entity\Rollout.cs</Link>
