@@ -77,6 +77,7 @@
     <Compile Include="ConfigTest\FallbackProjectConfigManagerTest.cs" />
     <Compile Include="DecisionServiceTest.cs" />
     <Compile Include="DefaultErrorHandlerTest.cs" />
+    <Compile Include="EventTests\EventProcessorProps.cs" />
     <Compile Include="OptimizelyJSONTest.cs" />
     <Compile Include="EventTests\BatchEventProcessorTest.cs" />
     <Compile Include="EventTests\DefaultEventDispatcherTest.cs" />
@@ -106,8 +107,11 @@
     <Compile Include="EventTests\UserEventFactoryTest.cs" />
     <Compile Include="EventTests\EventFactoryTest.cs" />
     <Compile Include="EventTests\CanonicalEvent.cs" />
-    <Compile Include="Utils\TestHttpProjectConfigManagerUtil.cs" />
+    <Compile Include="OptimizelyFactoryTest.cs" />
     <Compile Include="Utils\TestData.cs" />
+    <Compile Include="Utils\Reflection.cs" />
+    <Compile Include="ConfigTest\ProjectConfigProps.cs" />
+    <Compile Include="Utils\TestHttpProjectConfigManagerUtil.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="App.config" />
