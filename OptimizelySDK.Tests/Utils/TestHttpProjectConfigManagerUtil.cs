@@ -16,6 +16,7 @@
  */
 
 using System;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Moq;
@@ -28,7 +29,7 @@ namespace OptimizelySDK.Tests.Utils
     /// </summary>
     public static class TestHttpProjectConfigManagerUtil
     {
-        public static Task MockSendAsync(Mock<HttpProjectConfigManager.HttpClient> HttpClientMock, string datafile = null, TimeSpan? delay=null)
+        public static Task MockSendAsync(Mock<HttpProjectConfigManager.HttpClient> HttpClientMock, string datafile = null, TimeSpan? delay=null, HttpStatusCode statusCode = HttpStatusCode.OK)
         {
             var t = new System.Threading.Tasks.TaskCompletionSource<bool>();
 
@@ -39,7 +40,7 @@ namespace OptimizelySDK.Tests.Utils
                         Task.Delay(delay.Value).Wait();
                     }
                     
-                    return System.Threading.Tasks.Task.FromResult<HttpResponseMessage>(new HttpResponseMessage { StatusCode = System.Net.HttpStatusCode.OK, Content = new StringContent(datafile ?? string.Empty) });
+                    return System.Threading.Tasks.Task.FromResult<HttpResponseMessage>(new HttpResponseMessage { StatusCode = statusCode, Content = new StringContent(datafile ?? string.Empty) });
                 })
                 .Callback(()
                 => {
