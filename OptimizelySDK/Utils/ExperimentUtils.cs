@@ -27,7 +27,7 @@ namespace OptimizelySDK.Utils
 
             if (!experiment.IsExperimentRunning)
             {
-                logger.Log(LogLevel.INFO, string.Format("Experiment \"{0}\" is not running.", experiment.Key));
+                logger.Log(LogLevel.INFO, $"Experiment \"{experiment.Key}\" is not running.");
 
                 return false;
             }

@@ -24,7 +24,7 @@ namespace OptimizelySDK.Logger
     {
         public void Log(LogLevel level, string message)
         {
-            string line = string.Format("[{0}] : {1}", level, message);
+            string line = $"[{level}] : {message}";
             Debug.WriteLine(line);
         }
     }
