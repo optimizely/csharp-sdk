@@ -1,5 +1,5 @@
 /* 
- * Copyright 2017-2019, Optimizely
+ * Copyright 2017-2020, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,12 @@ namespace OptimizelySDK.Utils
         /// <param name="experiment">Experiment Entity representing the experiment</param>
         /// <param name="userAttributes">Attributes of the user. Defaults to empty attributes array if not provided</param>
         /// <returns>true if the user meets audience conditions to be in experiment, false otherwise.</returns>
-        public static bool IsUserInExperiment(ProjectConfig config, Experiment experiment, UserAttributes userAttributes, ILogger logger)
+        public static bool IsUserInExperiment(ProjectConfig config,
+            Experiment experiment,
+            UserAttributes userAttributes,
+            string audienceFor,
+            string loggingKey,
+            ILogger logger)
         {
             if (userAttributes == null)
                 userAttributes = new UserAttributes();
@@ -52,12 +57,12 @@ namespace OptimizelySDK.Utils
             if (experiment.AudienceConditionsList != null)
             {
                 expConditions = experiment.AudienceConditionsList;
-                logger.Log(LogLevel.DEBUG, $@"Evaluating audiences for experiment ""{experiment.Key}"": {experiment.AudienceConditionsString}");
+                logger.Log(LogLevel.DEBUG, $@"Evaluating audiences for {audienceFor} ""{loggingKey}"": {experiment.AudienceConditionsString}");
             }
             else
             {
                 expConditions = experiment.AudienceIdsList;
-                logger.Log(LogLevel.DEBUG, $@"Evaluating audiences for experiment ""{experiment.Key}"": {experiment.AudienceIdsString}");
+                logger.Log(LogLevel.DEBUG, $@"Evaluating audiences for {audienceFor} ""{loggingKey}"": {experiment.AudienceIdsString}");
             }
 
             // If there are no audiences, return true because that means ALL users are included in the experiment.
@@ -66,7 +71,7 @@ namespace OptimizelySDK.Utils
 
             var result = expConditions.Evaluate(config, userAttributes, logger).GetValueOrDefault();
             var resultText = result.ToString().ToUpper();
-            logger.Log(LogLevel.INFO, $@"Audiences for experiment ""{experiment.Key}"" collectively evaluated to {resultText}");
+            logger.Log(LogLevel.INFO, $@"Audiences for {audienceFor} ""{loggingKey}"" collectively evaluated to {resultText}");
             return result;
         }
     }

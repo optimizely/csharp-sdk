@@ -1,5 +1,5 @@
 ﻿/* 
-* Copyright 2017-2019, Optimizely
+* Copyright 2017-2020, Optimizely
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -111,7 +111,7 @@ namespace OptimizelySDK.Bucketing
                 }
             }
 
-            if (ExperimentUtils.IsUserInExperiment(config, experiment, filteredAttributes, Logger))
+            if (ExperimentUtils.IsUserInExperiment(config, experiment, filteredAttributes, "experiment", experiment.Key, Logger))
             {
                 // Get Bucketing ID from user attributes.
                 string bucketingId = GetBucketingId(userId, filteredAttributes);
@@ -393,8 +393,9 @@ namespace OptimizelySDK.Bucketing
             // For all rules before the everyone else rule
             for (int i = 0; i < rolloutRulesLength - 1; i++)
             {
+                string loggingKey = (i + 1).ToString(); 
                 var rolloutRule = rollout.Experiments[i];
-                if (ExperimentUtils.IsUserInExperiment(config, rolloutRule, filteredAttributes, Logger))
+                if (ExperimentUtils.IsUserInExperiment(config, rolloutRule, filteredAttributes, "rule" ,loggingKey, Logger))
                 {
                     variation = Bucketer.Bucket(config, rolloutRule, bucketingId, userId);
                     if (variation == null || string.IsNullOrEmpty(variation.Id))
@@ -405,17 +406,20 @@ namespace OptimizelySDK.Bucketing
                 else
                 {
                     var audience = config.GetAudience(rolloutRule.AudienceIds[0]);
-                    Logger.Log(LogLevel.DEBUG, $"User \"{userId}\" does not meet the conditions to be in rollout rule for audience \"{audience.Name}\".");
+                    Logger.Log(LogLevel.DEBUG, $"User \"{userId}\" does not meet the conditions for targeting rule \"{loggingKey}\".");
                 }
             }
 
             // Get the last rule which is everyone else rule.
             var everyoneElseRolloutRule = rollout.Experiments[rolloutRulesLength - 1];
-            if (ExperimentUtils.IsUserInExperiment(config, everyoneElseRolloutRule, filteredAttributes, Logger))
+            if (ExperimentUtils.IsUserInExperiment(config, everyoneElseRolloutRule, filteredAttributes, "rule", "Everyone Else", Logger))
             {
                 variation = Bucketer.Bucket(config, everyoneElseRolloutRule, bucketingId, userId);
                 if (variation != null && !string.IsNullOrEmpty(variation.Id))
+                {
+                    Logger.Log(LogLevel.DEBUG, $"User \"{userId}\" meets conditions for targeting rule \"Everyone Else\".");
                     return new FeatureDecision(everyoneElseRolloutRule, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT);
+                }
             }
             else
             {
