@@ -64,7 +64,7 @@ namespace OptimizelySDK.Event.Dispatcher
             }
             catch (Exception ex)
             {
-                Logger.Log(LogLevel.ERROR, string.Format("Error Dispatching Event: {0}", ex.GetAllMessages()));
+                Logger.Log(LogLevel.ERROR, $"Error Dispatching Event: {ex.GetAllMessages()}");
             }
         }
 
