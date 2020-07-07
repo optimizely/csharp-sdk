@@ -39,6 +39,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         [SetUp]
         public void Setup()
         {
+            Console.WriteLine("In Setup");
             LoggerMock = new Mock<ILogger>();
             HttpClientMock = new Mock<HttpProjectConfigManager.HttpClient>();
             HttpClientMock.Reset();
@@ -51,6 +52,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         [Test]
         public void TestHttpConfigManagerRetreiveProjectConfigByURL()
         {
+            Console.WriteLine("In TestHttpConfigManagerRetreiveProjectConfigByURL");
             var t = MockSendAsync(TestData.Datafile);
             HttpProjectConfigManager httpManager = new HttpProjectConfigManager.Builder()
                 .WithUrl("https://cdn.optimizely.com/datafiles/QBw9gFM8oTn7ogY9ANCC1z.json")
@@ -74,6 +76,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         [Test]
         public void TestHttpConfigManagerWithInvalidStatus()
         {
+            Console.WriteLine("In TestHttpConfigManagerWithInvalidStatus");
             var t = MockSendAsync(statusCode: HttpStatusCode.Forbidden);
 
             HttpProjectConfigManager httpManager = new HttpProjectConfigManager.Builder()
@@ -92,6 +95,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         [Test]
         public void TestHttpClientHandler()
         {
+            Console.WriteLine("In TestHttpClientHandler");
             var httpConfigHandler = HttpProjectConfigManager.HttpClient.GetHttpClientHandler();
             Assert.IsTrue(httpConfigHandler.AutomaticDecompression == (System.Net.DecompressionMethods.Deflate | System.Net.DecompressionMethods.GZip));
         }
@@ -99,6 +103,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         [Test]
         public void TestHttpConfigManagerRetreiveProjectConfigGivenEmptyFormatUseDefaultFormat()
         {
+            Console.WriteLine("In TestHttpConfigManagerRetreiveProjectConfigGivenEmptyFormatUseDefaultFormat");
             var t = MockSendAsync(TestData.Datafile);
 
             HttpProjectConfigManager httpManager = new HttpProjectConfigManager.Builder()
@@ -123,6 +128,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         [Test]
         public void TestHttpConfigManagerRetreiveProjectConfigBySDKKey()
         {
+            Console.WriteLine("In TestHttpConfigManagerRetreiveProjectConfigBySDKKey");
             var t = MockSendAsync(TestData.Datafile);
 
             HttpProjectConfigManager httpManager = new HttpProjectConfigManager.Builder()
@@ -145,6 +151,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         [Test]
         public void TestHttpConfigManagerRetreiveProjectConfigByFormat()
         {
+            Console.WriteLine("In TestHttpConfigManagerRetreiveProjectConfigByFormat");
             var t = MockSendAsync(TestData.Datafile);
 
             HttpProjectConfigManager httpManager = new HttpProjectConfigManager.Builder()
@@ -169,6 +176,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         [Test]
         public void TestOnReadyPromiseResolvedImmediatelyWhenDatafileIsProvided()
         {
+            Console.WriteLine("In TestOnReadyPromiseResolvedImmediatelyWhenDatafileIsProvided");
             // Revision - 42
             var t = MockSendAsync(TestData.SimpleABExperimentsDatafile, TimeSpan.FromMilliseconds(100));
 
@@ -199,6 +207,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         [Test]
         public void TestOnReadyPromiseWaitsForProjectConfigRetrievalWhenDatafileIsNotProvided()
         {
+            Console.WriteLine("In TestOnReadyPromiseWaitsForProjectConfigRetrievalWhenDatafileIsNotProvided");
             // Revision - 42
             var t = MockSendAsync(TestData.SimpleABExperimentsDatafile, TimeSpan.FromMilliseconds(1000));
 
@@ -221,6 +230,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         [Test]
         public void TestHttpConfigManagerDoesNotWaitForTheConfigWhenDeferIsTrue()
         {
+            Console.WriteLine("In TestHttpConfigManagerDoesNotWaitForTheConfigWhenDeferIsTrue");
             var t = MockSendAsync(TestData.Datafile, TimeSpan.FromMilliseconds(150));
 
             var httpManager = new HttpProjectConfigManager.Builder()
@@ -250,6 +260,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         [Test]
         public void TestHttpConfigManagerSendConfigUpdateNotificationWhenProjectConfigGetsUpdated()
         {
+            Console.WriteLine("In TestHttpConfigManagerSendConfigUpdateNotificationWhenProjectConfigGetsUpdated");
             var t = MockSendAsync(TestData.Datafile);
 
             var httpManager = new HttpProjectConfigManager.Builder()
@@ -272,6 +283,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         [Test]
         public void TestHttpConfigManagerDoesNotSendConfigUpdateNotificationWhenDatafileIsProvided()
         {
+            Console.WriteLine("In TestHttpConfigManagerDoesNotSendConfigUpdateNotificationWhenDatafileIsProvided");
             var t = MockSendAsync(TestData.Datafile, TimeSpan.FromMilliseconds(100));
 
             var httpManager = new HttpProjectConfigManager.Builder()
@@ -293,6 +305,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         [Test]
         public void TestDefaultBlockingTimeoutWhileProvidingZero()
         {
+            Console.WriteLine("In TestDefaultBlockingTimeoutWhileProvidingZero");
             var httpManager = new HttpProjectConfigManager.Builder()
                 .WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z")
                 .WithDatafile(TestData.Datafile)
@@ -313,6 +326,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         [Test]
         public void TestDefaultPeriodWhileProvidingZero()
         {
+            Console.WriteLine("In TestDefaultPeriodWhileProvidingZero");
             var httpManager = new HttpProjectConfigManager.Builder()
                 .WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z")
                 .WithDatafile(TestData.Datafile)
@@ -333,6 +347,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         [Test]
         public void TestDefaultPeriodWhileProvidingNegative()
         {
+            Console.WriteLine("In TestDefaultPeriodWhileProvidingNegative");
             var httpManager = new HttpProjectConfigManager.Builder()
                 .WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z")
                 .WithDatafile(TestData.Datafile)
@@ -353,6 +368,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         [Test]
         public void TestDefaultPeriodWhileNotProvidingValue()
         {
+            Console.WriteLine("In TestDefaultPeriodWhileNotProvidingValue");
             var httpManager = new HttpProjectConfigManager.Builder()
                 .WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z")
                 .WithDatafile(TestData.Datafile)
@@ -370,6 +386,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         [Test]
         public void TestDefaultBlockingTimeoutWhileNotProvidingValue()
         {
+            Console.WriteLine("In TestDefaultBlockingTimeoutWhileNotProvidingValue");
             var httpManager = new HttpProjectConfigManager.Builder()
                 .WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z")
                 .WithDatafile(TestData.Datafile)
@@ -387,6 +404,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         [Test]
         public void TestDefaultValuesWhenNotProvided()
         {
+            Console.WriteLine("In TestDefaultValuesWhenNotProvided");
             var httpManager = new HttpProjectConfigManager.Builder()
                 .WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z")
                 .WithDatafile(TestData.Datafile)
@@ -401,6 +419,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         [Test]
         public void TestAuthUrlWhenTokenProvided()
         {
+            Console.WriteLine("In TestAuthUrlWhenTokenProvided");
             var t = MockSendAsync();
 
             var httpManager = new HttpProjectConfigManager.Builder()
@@ -423,6 +442,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         [Test]
         public void TestDefaultUrlWhenTokenNotProvided()
         {
+            Console.WriteLine("In TestDefaultUrlWhenTokenNotProvided");
             var t = MockSendAsync();
 
             var httpManager = new HttpProjectConfigManager.Builder()
@@ -443,6 +463,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         [Test]
         public void TestAuthenticationHeaderWhenTokenProvided()
         {
+            Console.WriteLine("In TestAuthenticationHeaderWhenTokenProvided");
             var t = MockSendAsync();
 
             var httpManager = new HttpProjectConfigManager.Builder()
@@ -465,6 +486,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         [Test]
         public void TestFormatUrlHigherPriorityThanDefaultUrl()
         {
+            Console.WriteLine("In TestFormatUrlHigherPriorityThanDefaultUrl");
 
             var t = MockSendAsync();
             var httpManager = new HttpProjectConfigManager.Builder()
@@ -486,6 +508,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
 
         public Task MockSendAsync(string datafile = null, TimeSpan? delay = null, HttpStatusCode statusCode = HttpStatusCode.OK)
         {
+            Console.WriteLine("In Mocksendasync");
             return TestHttpProjectConfigManagerUtil.MockSendAsync(HttpClientMock, datafile, delay, statusCode);
         }
 
