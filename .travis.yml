@@ -8,6 +8,7 @@ env:
 stages:
   - name: 'Lint markdown files'
   - name: 'Integration tests'
+  - name: 'Production tests'
   - name: 'Unit Tests'
   - name: 'NetStandard16'
 
@@ -32,7 +33,9 @@ jobs:
 #      script:
 #        - mdspell -a -n -r --en-us '**/*.md'
 #      after_success: skip
-    - stage: 'Integration tests'
+
+    - &integrationtest
+      stage: 'Integration tests'
       env: SDK=csharp SDK_BRANCH=$TRAVIS_PULL_REQUEST_BRANCH
       cache: false
       language: minimal
@@ -43,6 +46,13 @@ jobs:
       script:
         - $HOME/travisci-tools/trigger-script-with-status-update.sh
       after_success: travis_terminate 0
+
+    - <<: *integrationtest
+      stage: 'Production tests'
+      env:
+        SDK=csharp
+        SDK_BRANCH=$TRAVIS_PULL_REQUEST_BRANCH
+        FULLSTACK_TEST_REPO=ProdTesting
 
     - stage: 'Unit Tests'
       language: csharp
