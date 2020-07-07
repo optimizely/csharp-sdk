@@ -512,6 +512,11 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
             return TestHttpProjectConfigManagerUtil.MockSendAsync(HttpClientMock, datafile, delay, statusCode);
         }
 
+        [TearDown]
+        public void TearDown()
+        {
+
+        }
         #endregion
     }
 }
