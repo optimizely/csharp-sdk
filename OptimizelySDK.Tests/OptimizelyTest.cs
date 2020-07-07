@@ -3843,6 +3843,7 @@ namespace OptimizelySDK.Tests
             var activateAfterDispose = optimizely.Activate("test_experiment", TestUserId, new UserAttributes() {
                 { "device_type", "iPhone" }, { "location", "San Francisco" } });
             Assert.Null(activateAfterDispose);
+            httpManager.Dispose();
         }
 
         [Test]
