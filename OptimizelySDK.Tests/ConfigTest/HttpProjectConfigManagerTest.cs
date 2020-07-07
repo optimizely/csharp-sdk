@@ -181,8 +181,10 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
                 .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(500))
                 .WithStartByDefault()
                 .Build();
-
-            httpManager.OnReady().Wait();
+            // wait till 10 seconds.
+            if (!httpManager.OnReady().Wait(10000)) {
+                Console.WriteLine(@"Stuck in ""TestOnReadyPromiseResolvedImmediatelyWhenDatafileIsProvided""");
+            };
 
             Assert.AreEqual("15", httpManager.GetConfig().Revision);
 
@@ -208,7 +210,10 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
                 .WithStartByDefault(true)
                 .Build();
             t.Wait();
-            httpManager.OnReady().Wait();
+            // wait till 10 seconds.
+            if (!httpManager.OnReady().Wait(10000)) {
+                Console.WriteLine(@"Stuck in ""TestOnReadyPromiseWaitsForProjectConfigRetrievalWhenDatafileIsNotProvided""");
+            };
             Assert.NotNull(httpManager.GetConfig());
             httpManager.Dispose();
         }

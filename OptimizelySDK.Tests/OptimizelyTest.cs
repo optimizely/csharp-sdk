@@ -3365,8 +3365,11 @@ namespace OptimizelySDK.Tests
             var optimizely = new Optimizely(httpManager, notificationCenter);
             optimizely.NotificationCenter.AddNotification(NotificationCenter.NotificationType.OptimizelyConfigUpdate, NotificationCallbackMock.Object.TestConfigUpdateCallback);
             httpManager.Start();
-            
-            httpManager.OnReady().Wait(-1);
+
+            // wait till 10 seconds.
+            if (!httpManager.OnReady().Wait(10000)) {
+                Console.WriteLine(@"Stuck in ""TestDFMNotificationWhenProjectConfigIsUpdated""");
+            };
             t.Wait();
             NotificationCallbackMock.Verify(nc => nc.TestConfigUpdateCallback(), Times.Once);
             httpManager.Dispose();
