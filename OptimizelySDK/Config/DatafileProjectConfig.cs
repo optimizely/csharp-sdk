@@ -339,7 +339,7 @@ namespace OptimizelySDK.Config
             var config = JsonConvert.DeserializeObject<DatafileProjectConfig>(configData);
 
             if (SupportedVersions.TrueForAll((supportedVersion) => !(((int)supportedVersion).ToString() == config.Version)))
-                throw new ConfigParseException(string.Format(@"This version of the C# SDK does not support the given datafile version: {0}", config.Version));
+                throw new ConfigParseException($@"This version of the C# SDK does not support the given datafile version: {config.Version}");
 
             return config;
         }
@@ -356,7 +356,7 @@ namespace OptimizelySDK.Config
             if (_GroupIdMap.ContainsKey(groupId))
                 return _GroupIdMap[groupId];
 
-            string message = string.Format(@"Group ID ""{0}"" is not in datafile.", groupId);
+            string message = $@"Group ID ""{groupId}"" is not in datafile.";
             Logger.Log(LogLevel.ERROR, message);
             ErrorHandler.HandleError(new Exceptions.InvalidGroupException("Provided group is not in datafile."));
             return new Group();
@@ -372,7 +372,7 @@ namespace OptimizelySDK.Config
             if (_ExperimentKeyMap.ContainsKey(experimentKey))
                 return _ExperimentKeyMap[experimentKey];
 
-            string message = string.Format(@"Experiment key ""{0}"" is not in datafile.", experimentKey);
+            string message = $@"Experiment key ""{experimentKey}"" is not in datafile.";
             Logger.Log(LogLevel.ERROR, message);
             ErrorHandler.HandleError(new Exceptions.InvalidExperimentException("Provided experiment is not in datafile."));
             return new Experiment();
@@ -388,7 +388,7 @@ namespace OptimizelySDK.Config
             if (_ExperimentIdMap.ContainsKey(experimentId))
                 return _ExperimentIdMap[experimentId];
 
-            string message = string.Format(@"Experiment ID ""{0}"" is not in datafile.", experimentId);
+            string message = $@"Experiment ID ""{experimentId}"" is not in datafile.";
             Logger.Log(LogLevel.ERROR, message);
             ErrorHandler.HandleError(new Exceptions.InvalidExperimentException("Provided experiment is not in datafile."));
             return new Experiment();
@@ -404,7 +404,7 @@ namespace OptimizelySDK.Config
             if (_EventKeyMap.ContainsKey(eventKey))
                 return _EventKeyMap[eventKey];
 
-            string message = string.Format(@"Event key ""{0}"" is not in datafile.", eventKey);
+            string message = $@"Event key ""{eventKey}"" is not in datafile.";
             Logger.Log(LogLevel.ERROR, message);
             ErrorHandler.HandleError(new Exceptions.InvalidEventException("Provided event is not in datafile."));
             return new Entity.Event();
@@ -420,7 +420,7 @@ namespace OptimizelySDK.Config
             if (_AudienceIdMap.ContainsKey(audienceId))
                 return _AudienceIdMap[audienceId];
 
-            string message = string.Format(@"Audience ID ""{0}"" is not in datafile.", audienceId);
+            string message = $@"Audience ID ""{audienceId}"" is not in datafile.";
             Logger.Log(LogLevel.ERROR, message);
             ErrorHandler.HandleError(new Exceptions.InvalidAudienceException("Provided audience is not in datafile."));
             return new Audience();
@@ -436,7 +436,7 @@ namespace OptimizelySDK.Config
             if (_AttributeKeyMap.ContainsKey(attributeKey))
                 return _AttributeKeyMap[attributeKey];
 
-            string message = string.Format(@"Attribute key ""{0}"" is not in datafile.", attributeKey);
+            string message = $@"Attribute key ""{attributeKey}"" is not in datafile.";
             Logger.Log(LogLevel.ERROR, message);
             ErrorHandler.HandleError(new Exceptions.InvalidAttributeException("Provided attribute is not in datafile."));
             return new Attribute();
@@ -455,8 +455,7 @@ namespace OptimizelySDK.Config
                 _VariationKeyMap[experimentKey].ContainsKey(variationKey))
                 return _VariationKeyMap[experimentKey][variationKey];
 
-            string message = string.Format(@"No variation key ""{0}"" defined in datafile for experiment ""{1}"".",
-                variationKey, experimentKey);
+            string message = $@"No variation key ""{variationKey}"" defined in datafile for experiment ""{experimentKey}"".";
             Logger.Log(LogLevel.ERROR, message);
             ErrorHandler.HandleError(new Exceptions.InvalidVariationException("Provided variation is not in datafile."));
             return new Variation();
@@ -475,8 +474,7 @@ namespace OptimizelySDK.Config
                 _VariationIdMap[experimentKey].ContainsKey(variationId))
                 return _VariationIdMap[experimentKey][variationId];
 
-            string message = string.Format(@"No variation ID ""{0}"" defined in datafile for experiment ""{1}"".",
-                variationId, experimentKey);
+            string message = $@"No variation ID ""{variationId}"" defined in datafile for experiment ""{experimentKey}"".";
             Logger.Log(LogLevel.ERROR, message);
             ErrorHandler.HandleError(new Exceptions.InvalidVariationException("Provided variation is not in datafile."));
             return new Variation();
@@ -492,7 +490,7 @@ namespace OptimizelySDK.Config
             if (_FeatureKeyMap.ContainsKey(featureKey))
                 return _FeatureKeyMap[featureKey];
 
-            string message = string.Format(@"Feature key ""{0}"" is not in datafile.", featureKey);
+            string message = $@"Feature key ""{featureKey}"" is not in datafile.";
             Logger.Log(LogLevel.ERROR, message);
             ErrorHandler.HandleError(new Exceptions.InvalidFeatureException("Provided feature is not in datafile."));
             return new FeatureFlag();
@@ -508,7 +506,7 @@ namespace OptimizelySDK.Config
             if (_RolloutIdMap.ContainsKey(rolloutId))
                 return _RolloutIdMap[rolloutId];
 
-            string message = string.Format(@"Rollout ID ""{0}"" is not in datafile.", rolloutId);
+            string message = $@"Rollout ID ""{rolloutId}"" is not in datafile.";
             Logger.Log(LogLevel.ERROR, message);
             ErrorHandler.HandleError(new Exceptions.InvalidRolloutException("Provided rollout is not in datafile."));
             return new Rollout();
