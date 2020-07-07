@@ -3365,8 +3365,10 @@ namespace OptimizelySDK.Tests
             var optimizely = new Optimizely(httpManager, notificationCenter);
             optimizely.NotificationCenter.AddNotification(NotificationCenter.NotificationType.OptimizelyConfigUpdate, NotificationCallbackMock.Object.TestConfigUpdateCallback);
             httpManager.Start();
+
+            // wait till 10 seconds max, to avoid stale state in worst case.
+            httpManager.OnReady().Wait(10000);
             
-            httpManager.OnReady().Wait(-1);
             t.Wait();
             NotificationCallbackMock.Verify(nc => nc.TestConfigUpdateCallback(), Times.Once);
             httpManager.Dispose();
@@ -3389,7 +3391,9 @@ namespace OptimizelySDK.Tests
 
             var optimizely = new Optimizely(httpManager);
             optimizely.NotificationCenter.AddNotification(NotificationCenter.NotificationType.OptimizelyConfigUpdate, NotificationCallbackMock.Object.TestConfigUpdateCallback);
-            httpManager.OnReady().Wait(-1);
+
+            // added 10 secs max wait to avoid stale state.
+            httpManager.OnReady().Wait(10000);
 
             NotificationCallbackMock.Verify(nc => nc.TestConfigUpdateCallback(), Times.Never);
             httpManager.Dispose();
@@ -3833,6 +3837,7 @@ namespace OptimizelySDK.Tests
             var activateAfterDispose = optimizely.Activate("test_experiment", TestUserId, new UserAttributes() {
                 { "device_type", "iPhone" }, { "location", "San Francisco" } });
             Assert.Null(activateAfterDispose);
+            httpManager.Dispose();
         }
 
         [Test]
