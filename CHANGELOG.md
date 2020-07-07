@@ -1,8 +1,6 @@
 # Optimizely C# SDK Changelog
 ## [Unreleased]
 
-### New Features
-
 
 ## 3.5.0
 July 7th, 2020
