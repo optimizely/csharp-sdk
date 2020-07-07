@@ -35,10 +35,12 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         [SetUp]
         public void Setup()
         {
+            Console.WriteLine("In Polling Project");
             LoggerMock = new Mock<ILogger>();
             LoggerMock.Setup(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()));
             ProjectConfig = DatafileProjectConfig.Create(TestData.Datafile, LoggerMock.Object, null);
         }
+        
 
         [Test]
         public void TestPollingConfigManagerDoesNotBlockWhenProjectConfigIsAlreadyProvided()
@@ -53,6 +55,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
 
             Assert.True(stopwatch.Elapsed.Seconds == 0);
             Assert.NotNull(config);
+            configManager.Dispose();
         }
 
         [Test]
@@ -66,6 +69,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
             stopwatch.Stop();
 
             Assert.True(stopwatch.Elapsed.TotalMilliseconds >= 500);
+            configManager.Dispose();
         }
 
         [Test]
@@ -86,6 +90,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
             // Should be called immediately after 1200 seconds. Here checking after 1300 secs.
             //Thread.Sleep(200);
             Assert.AreEqual(2, configManager.Counter);
+            configManager.Dispose();
 
         }
 
@@ -99,7 +104,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
             configManager.Start();
             var config = configManager.GetConfig();
             LoggerMock.Verify(l => l.Log(LogLevel.WARN, "Timeout exceeded waiting for ProjectConfig to be set, returning null."));
-
+            configManager.Dispose();
         }
 
         [Test]
@@ -113,6 +118,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
             var config = configManager.GetConfig();
             sw.Stop();
             Assert.GreaterOrEqual(sw.Elapsed.TotalMilliseconds, 950);
+            configManager.Dispose();
         }
 
         [Test]
@@ -126,6 +132,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
             var config = configManager.GetConfig();
             sw.Stop();
             Assert.GreaterOrEqual(sw.Elapsed.TotalMilliseconds, 1000);
+            configManager.Dispose();
         }
 
         [Test]
@@ -142,6 +149,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
             var config = configManager.GetConfig();
             Assert.NotNull(config);
             Assert.AreEqual(1, configManager.Counter);
+            configManager.Dispose();
         }
 
         [Test]
@@ -168,6 +176,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
             var config = configManager.GetConfig();
             //Assert.NotNull(config);
             Assert.AreEqual(3, configManager.Counter);
+            configManager.Dispose();
         }
 
 
@@ -186,6 +195,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
             var config = configManager.GetConfig();
             Assert.Null(config);
             Assert.AreEqual(3, configManager.Counter);
+            configManager.Dispose();
         }
     }
 }
