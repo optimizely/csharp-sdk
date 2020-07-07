@@ -69,6 +69,7 @@ namespace OptimizelySDK.Tests
         [SetUp]
         public void Initialize()
         {
+            Console.WriteLine("In Optimizely unit tests");
             LoggerMock = new Mock<ILogger>();
             LoggerMock.Setup(i => i.Log(It.IsAny<LogLevel>(), It.IsAny<string>()));
 
@@ -119,6 +120,12 @@ namespace OptimizelySDK.Tests
         {
             LoggerMock = null;
             Config = null;            
+        }
+        [TearDown]
+        public void TearDown()
+        {
+            Console.WriteLine("In teardown optimizely");
+
         }
         #endregion
         

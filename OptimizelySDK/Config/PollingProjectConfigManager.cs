@@ -197,6 +197,7 @@ namespace OptimizelySDK.Config
         {
             if (Interlocked.Exchange(ref resourceInUse, 1) == 0){
                 try {
+                    Console.WriteLine("Triggering now");
                     var config = Poll();
 
                     // during in-flight, if PollingProjectConfigManagerStopped, then don't need to set.
@@ -212,6 +213,7 @@ namespace OptimizelySDK.Config
                     if (scheduleWhenFinished && IsStarted) {                        
                         // Call immediately, because it's due now.
                         scheduleWhenFinished = false;
+                        Console.WriteLine("Triggering from final");
                         SchedulerService.Change(TimeSpan.FromSeconds(0), PollingInterval);
                     }
                 }
