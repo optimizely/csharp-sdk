@@ -57,12 +57,12 @@ namespace OptimizelySDK.Utils
             if (experiment.AudienceConditionsList != null)
             {
                 expConditions = experiment.AudienceConditionsList;
-                logger.Log(LogLevel.DEBUG, $@"Evaluating audiences for {audienceFor} ""{loggingKey}"": {experiment.AudienceConditionsString}");
+                logger.Log(LogLevel.DEBUG, $@"Evaluating audiences for {audienceFor} ""{loggingKey}"": {experiment.AudienceConditionsString}.");
             }
             else
             {
                 expConditions = experiment.AudienceIdsList;
-                logger.Log(LogLevel.DEBUG, $@"Evaluating audiences for {audienceFor} ""{loggingKey}"": {experiment.AudienceIdsString}");
+                logger.Log(LogLevel.DEBUG, $@"Evaluating audiences for {audienceFor} ""{loggingKey}"": {experiment.AudienceIdsString}.");
             }
 
             // If there are no audiences, return true because that means ALL users are included in the experiment.
