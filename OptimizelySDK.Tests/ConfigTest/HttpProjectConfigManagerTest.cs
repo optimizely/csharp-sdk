@@ -515,7 +515,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         [TearDown]
         public void TearDown()
         {
-
+            Console.WriteLine("Teardown");
         }
         #endregion
     }
