@@ -2,8 +2,18 @@
 ## [Unreleased]
 
 ### New Features
-- Adds support for DatafileAuthToken in HttpProjectConfigManager and in it's Builder class.
-- Added Gzip format for datafile download
+
+
+## 3.5.0
+July 7th, 2020
+
+### New Features
+- Add support for JSON feature variables. ([#214](https://github.com/optimizely/csharp-sdk/pull/214), [#216](https://github.com/optimizely/csharp-sdk/pull/216), [#217](https://github.com/optimizely/csharp-sdk/pull/217))
+- Add support for authenticated datafiles. ([#222](https://github.com/optimizely/csharp-sdk/pull/222))
+- Add gzip support for framework 4.5 or above. ([#218](https://github.com/optimizely/csharp-sdk/pull/218))
+
+### Bug Fixes:
+- Adjust audience evaluation log level to debug. ([#221](https://github.com/optimizely/csharp-sdk/pull/221))
 
 ## 3.4.1
 April 29th, 2020
