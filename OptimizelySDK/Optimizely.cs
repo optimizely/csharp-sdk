@@ -489,9 +489,9 @@ namespace OptimizelySDK
             }
 
             if (featureEnabled == true)
-                Logger.Log(LogLevel.INFO, $@"Feature flag ""{featureKey}"" is enabled for user ""{userId}"".");
+                Logger.Log(LogLevel.INFO, $@"Feature ""{featureKey}"" is enabled for user ""{userId}"".");
             else
-                Logger.Log(LogLevel.INFO, $@"Feature flag ""{featureKey}"" is not enabled for user ""{userId}"".");
+                Logger.Log(LogLevel.INFO, $@"Feature ""{featureKey}"" is not enabled for user ""{userId}"".");
 
             var decisionInfo = new Dictionary<string, object>
             {
@@ -569,11 +569,11 @@ namespace OptimizelySDK
                     if (variation.FeatureEnabled == true)
                     {
                         variableValue = featureVariableUsageInstance.Value;
-                        Logger.Log(LogLevel.INFO, $@"Returning variable value ""{variableValue}"" for variation ""{variation.Key}"" of feature flag ""{featureKey}"".");
+                        Logger.Log(LogLevel.INFO, $@"Feature ""{featureKey}"" is enabled for user ""{userId}"".");
                     }
                     else
                     {
-                        Logger.Log(LogLevel.INFO, $@"Feature ""{featureKey}"" is not enabled for user {userId}. Returning default value for variable ""{variableKey}"".");
+                        Logger.Log(LogLevel.INFO, $@"Feature ""{featureKey}"" is not enabled for user {userId}. Returning the default variable value ""{variableValue}"".");
                     }
                 }
                 else
