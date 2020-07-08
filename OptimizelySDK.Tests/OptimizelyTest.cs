@@ -1658,8 +1658,7 @@ namespace OptimizelySDK.Tests
             optly.SetFieldOrProperty("ProjectConfigManager", ConfigManager);
             var variableValue = (bool)optly.Invoke("GetFeatureVariableBoolean", featureKey, variableKey, TestUserId, null);
             Assert.AreEqual(expectedValue, variableValue);
-            // Its getting failed need to find a reason
-            //LoggerMock.Verify(l => l.Log(LogLevel.INFO, $@"Feature ""{featureKey}"" is not enabled for user {TestUserId}. Returning the default variable value ""{variableValue}""."));
+            LoggerMock.Verify(l => l.Log(LogLevel.INFO, $@"Feature ""{featureKey}"" is not enabled for user {TestUserId}. Returning the default variable value ""true""."));
         }
 
         [Test]
