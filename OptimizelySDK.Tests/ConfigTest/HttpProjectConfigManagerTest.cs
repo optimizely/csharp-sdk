@@ -22,6 +22,7 @@ using OptimizelySDK.Tests.NotificationTests;
 using OptimizelySDK.Tests.Utils;
 using System;
 using System.Diagnostics;
+using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -67,6 +68,24 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
                 It.Is<System.Net.Http.HttpRequestMessage>(requestMessage =>
                 requestMessage.RequestUri.ToString() == "https://cdn.optimizely.com/datafiles/QBw9gFM8oTn7ogY9ANCC1z.json"
                 )));
+            httpManager.Dispose();
+        }
+
+        [Test]
+        public void TestHttpConfigManagerWithInvalidStatus()
+        {
+            var t = MockSendAsync(statusCode: HttpStatusCode.Forbidden);
+
+            HttpProjectConfigManager httpManager = new HttpProjectConfigManager.Builder()
+                .WithUrl("https://cdn.optimizely.com/datafiles/QBw9gFM8oTn7ogY9ANCC1z.json")
+                .WithLogger(LoggerMock.Object)
+                .WithPollingInterval(TimeSpan.FromMilliseconds(1000))
+                .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(500))
+                .WithStartByDefault()
+                .Build();
+
+            LoggerMock.Verify(_ => _.Log(LogLevel.ERROR, $"Error fetching datafile \"{HttpStatusCode.Forbidden}\""), Times.AtLeastOnce);
+
             httpManager.Dispose();
         }
 
@@ -143,6 +162,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
                 requestMessage.RequestUri.ToString() == "https://cdn.optimizely.com/json/10192104166.json"
                 )));
             Assert.IsNotNull(httpManager.GetConfig());
+            LoggerMock.Verify(_ => _.Log(LogLevel.DEBUG, "Making datafile request to url \"https://cdn.optimizely.com/json/10192104166.json\""));
             httpManager.Dispose();
         }
 
@@ -162,7 +182,8 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
                 .WithStartByDefault()
                 .Build();
 
-            httpManager.OnReady().Wait();
+            // OnReady waits until is resolved, need to add time in case of deadlock.
+            httpManager.OnReady().Wait(10000);
 
             Assert.AreEqual("15", httpManager.GetConfig().Revision);
 
@@ -188,7 +209,9 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
                 .WithStartByDefault(true)
                 .Build();
             t.Wait();
-            httpManager.OnReady().Wait();
+
+            // OnReady waits until is resolved, need to add time in case of deadlock.
+            httpManager.OnReady().Wait(10000);
             Assert.NotNull(httpManager.GetConfig());
             httpManager.Dispose();
         }
@@ -224,7 +247,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         #region Notification
         [Test]
         public void TestHttpConfigManagerSendConfigUpdateNotificationWhenProjectConfigGetsUpdated()
-        {
+        {            
             var t = MockSendAsync(TestData.Datafile);
 
             var httpManager = new HttpProjectConfigManager.Builder()
@@ -246,7 +269,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
 
         [Test]
         public void TestHttpConfigManagerDoesNotSendConfigUpdateNotificationWhenDatafileIsProvided()
-        {
+        {            
             var t = MockSendAsync(TestData.Datafile, TimeSpan.FromMilliseconds(100));
 
             var httpManager = new HttpProjectConfigManager.Builder()
@@ -440,7 +463,6 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         [Test]
         public void TestFormatUrlHigherPriorityThanDefaultUrl()
         {
-
             var t = MockSendAsync();
             var httpManager = new HttpProjectConfigManager.Builder()
                 .WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z")
@@ -459,11 +481,10 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
 
         }
 
-        public Task MockSendAsync(string datafile = null, TimeSpan? delay = null)
+        public Task MockSendAsync(string datafile = null, TimeSpan? delay = null, HttpStatusCode statusCode = HttpStatusCode.OK)
         {
-            return TestHttpProjectConfigManagerUtil.MockSendAsync(HttpClientMock, datafile, delay);
+            return TestHttpProjectConfigManagerUtil.MockSendAsync(HttpClientMock, datafile, delay, statusCode);
         }
-
         #endregion
     }
 }
