@@ -791,6 +791,14 @@ namespace OptimizelySDK
                         "The default values are being returned.");
             }
 
+            if (featureEnabled)
+            {
+                Logger.Log(LogLevel.INFO, "Feature \"" + featureKey + "\" is enabled for user \"" + userId + "\"");
+            }
+            else
+            { 
+                Logger.Log(LogLevel.INFO, "Feature \"" + featureKey + "\" is not enabled for user \"" + userId + "\"");
+            }
             var valuesMap = new Dictionary<string, object>();
             foreach (var featureVariable in featureFlag.Variables)
             {

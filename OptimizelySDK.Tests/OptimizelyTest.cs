@@ -3316,6 +3316,7 @@ namespace OptimizelySDK.Tests
 
             var result = (OptimizelyJSON)optly.Invoke("GetAllFeatureVariables", featureKey, TestUserId, userAttributes);
             Assert.NotNull(result);
+            LoggerMock.Verify(log => log.Log(LogLevel.INFO, "Feature \"" + featureKey + "\" is not enabled for user \"" + TestUserId + "\""), Times.Once);
 
             LoggerMock.Verify(log => log.Log(LogLevel.INFO, "User \"" + TestUserId + "\" was not bucketed into any variation for feature flag \"" + featureKey + "\". " +
                         "The default values are being returned."), Times.Once);
@@ -3333,6 +3334,7 @@ namespace OptimizelySDK.Tests
 
             var variableValues = optimizely.GetAllFeatureVariables(featureKey, TestUserId, null);
             Assert.IsTrue(TestData.CompareObjects(variableValues.ToDictionary(), expectedValue));
+            LoggerMock.Verify(log => log.Log(LogLevel.INFO, "Feature \"" + featureKey + "\" is enabled for user \"" + TestUserId + "\""), Times.Once);
 
             LoggerMock.Verify(log => log.Log(LogLevel.INFO, "User \"" + TestUserId + "\" was not bucketed into any variation for feature flag \"" + featureKey + "\". " +
                         "The default values are being returned."), Times.Never);
