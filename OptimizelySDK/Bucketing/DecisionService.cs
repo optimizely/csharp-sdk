@@ -35,6 +35,12 @@ namespace OptimizelySDK.Bucketing
     /// </summary>
     public class DecisionService
     {
+        /// <summary>
+        /// String constant representing audience for log.
+        /// </summary>
+        public const string AUDIENCE_FOR_EXPERIMENT = "experiment";
+        public const string AUDIENCE_FOR_RULE = "rule";
+
         private Bucketer Bucketer;
         private IErrorHandler ErrorHandler;
         private UserProfileService UserProfileService;
@@ -120,7 +126,7 @@ namespace OptimizelySDK.Bucketing
                 }
             }
 
-            if (ExperimentUtils.IsUserInExperiment(config, experiment, filteredAttributes, "experiment", experiment.Key, Logger))
+            if (ExperimentUtils.DoesUserMeetAudienceConditions(config, experiment, filteredAttributes, AUDIENCE_FOR_EXPERIMENT, experiment.Key, Logger))
             {
                 // Get Bucketing ID from user attributes.
                 string bucketingId = GetBucketingId(userId, filteredAttributes);
@@ -400,7 +406,7 @@ namespace OptimizelySDK.Bucketing
             {
                 string loggingKey = (i + 1).ToString(); 
                 var rolloutRule = rollout.Experiments[i];
-                if (ExperimentUtils.IsUserInExperiment(config, rolloutRule, filteredAttributes, "rule" ,loggingKey, Logger))
+                if (ExperimentUtils.DoesUserMeetAudienceConditions(config, rolloutRule, filteredAttributes, AUDIENCE_FOR_RULE, loggingKey, Logger))
                 {
                     variation = Bucketer.Bucket(config, rolloutRule, bucketingId, userId);
                     if (variation == null || string.IsNullOrEmpty(variation.Id))
@@ -417,7 +423,7 @@ namespace OptimizelySDK.Bucketing
 
             // Get the last rule which is everyone else rule.
             var everyoneElseRolloutRule = rollout.Experiments[rolloutRulesLength - 1];
-            if (ExperimentUtils.IsUserInExperiment(config, everyoneElseRolloutRule, filteredAttributes, "rule", "Everyone Else", Logger))
+            if (ExperimentUtils.DoesUserMeetAudienceConditions(config, everyoneElseRolloutRule, filteredAttributes, AUDIENCE_FOR_RULE, "Everyone Else", Logger))
             {
                 variation = Bucketer.Bucket(config, everyoneElseRolloutRule, bucketingId, userId);
                 if (variation != null && !string.IsNullOrEmpty(variation.Id))

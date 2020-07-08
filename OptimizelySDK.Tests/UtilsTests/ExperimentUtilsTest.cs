@@ -48,7 +48,7 @@ namespace OptimizelySDK.Tests.UtilsTests
             experiment.AudienceIds = new string[] { };
             experiment.AudienceConditions = null;
 
-            Assert.True(ExperimentUtils.IsUserInExperiment(Config, experiment, null, "experiment", experiment.Key, Logger));
+            Assert.True(ExperimentUtils.DoesUserMeetAudienceConditions(Config, experiment, null, "experiment", experiment.Key, Logger));
 
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, @"Evaluating audiences for experiment ""feat_with_var_test"": []."), Times.Once);
         }
@@ -59,8 +59,8 @@ namespace OptimizelySDK.Tests.UtilsTests
             var experiment = Config.GetExperimentFromKey("feat_with_var_test");
             experiment.AudienceIds = new string[] { "3468206648" };
             
-            Assert.True(ExperimentUtils.IsUserInExperiment(Config, experiment, null , "experiment", experiment.Key, Logger));;
-            Assert.True(ExperimentUtils.IsUserInExperiment(Config, experiment, new UserAttributes { }, "experiment", experiment.Key, Logger));
+            Assert.True(ExperimentUtils.DoesUserMeetAudienceConditions(Config, experiment, null , "experiment", experiment.Key, Logger));;
+            Assert.True(ExperimentUtils.DoesUserMeetAudienceConditions(Config, experiment, new UserAttributes { }, "experiment", experiment.Key, Logger));
 
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, @"Evaluating audiences for experiment ""feat_with_var_test"": [""3468206648""]."), Times.Exactly(2));
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, @"Starting to evaluate audience ""3468206648"" with conditions: [""not"",{""name"":""input_value"",""type"":""custom_attribute"",""match"":""exists""}]"), Times.Exactly(2));
@@ -79,7 +79,7 @@ namespace OptimizelySDK.Tests.UtilsTests
                 { "should_do_it", false }
             };
 
-            Assert.False(ExperimentUtils.IsUserInExperiment(Config, experiment, userAttributes, "experiment", experiment.Key, Logger));
+            Assert.False(ExperimentUtils.DoesUserMeetAudienceConditions(Config, experiment, userAttributes, "experiment", experiment.Key, Logger));
 
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, @"Evaluating audiences for experiment ""feat_with_var_test"": [""3468206642"",""3988293898"",""3988293899"",""3468206646"",""3468206647"",""3468206644"",""3468206643""]."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, @"Starting to evaluate audience ""3468206642"" with conditions: [""and"", [""or"", [""or"", {""name"": ""house"", ""type"": ""custom_attribute"", ""value"": ""Gryffindor""}]]]"), Times.Once);
@@ -108,7 +108,7 @@ namespace OptimizelySDK.Tests.UtilsTests
                 { "should_do_it", false }
             };
 
-            Assert.True(ExperimentUtils.IsUserInExperiment(Config, experiment, userAttributes, "experiment", experiment.Key, Logger));
+            Assert.True(ExperimentUtils.DoesUserMeetAudienceConditions(Config, experiment, userAttributes, "experiment", experiment.Key, Logger));
 
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, @"Evaluating audiences for experiment ""feat_with_var_test"": [""3468206642"",""3988293898"",""3988293899"",""3468206646"",""3468206647"",""3468206644"",""3468206643""]."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, @"Starting to evaluate audience ""3468206642"" with conditions: [""and"", [""or"", [""or"", {""name"": ""house"", ""type"": ""custom_attribute"", ""value"": ""Gryffindor""}]]]"), Times.Once);
@@ -126,7 +126,7 @@ namespace OptimizelySDK.Tests.UtilsTests
                 { "favorite_ice_cream", "walls" }
             };
 
-            Assert.True(ExperimentUtils.IsUserInExperiment(Config, experiment, userAttributes, "experiment", experiment.Key, Logger));
+            Assert.True(ExperimentUtils.DoesUserMeetAudienceConditions(Config, experiment, userAttributes, "experiment", experiment.Key, Logger));
         }
 
         [Test]
@@ -139,7 +139,7 @@ namespace OptimizelySDK.Tests.UtilsTests
                 { "lasers", 50 }
             };
 
-            Assert.False(ExperimentUtils.IsUserInExperiment(Config, experiment, userAttributes, "experiment", experiment.Key, Logger));
+            Assert.False(ExperimentUtils.DoesUserMeetAudienceConditions(Config, experiment, userAttributes, "experiment", experiment.Key, Logger));
 
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, @"Evaluating audiences for experiment ""audience_combinations_experiment"": [""and"",[""or"",""3468206642"",""3988293898""],[""or"",""3988293899"",""3468206646"",""3468206647"",""3468206644"",""3468206643""]]."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, @"Starting to evaluate audience ""3468206642"" with conditions: [""and"", [""or"", [""or"", {""name"": ""house"", ""type"": ""custom_attribute"", ""value"": ""Gryffindor""}]]]"), Times.Once);
@@ -168,7 +168,7 @@ namespace OptimizelySDK.Tests.UtilsTests
                 { "browser_type", "Safari" }
             };
 
-            Assert.True(ExperimentUtils.IsUserInExperiment(Config, experiment, userAttributes, "experiment", experiment.Key, Logger));
+            Assert.True(ExperimentUtils.DoesUserMeetAudienceConditions(Config, experiment, userAttributes, "experiment", experiment.Key, Logger));
         }
 
         [Test]
@@ -181,9 +181,9 @@ namespace OptimizelySDK.Tests.UtilsTests
                 { "browser_type", "Chrome" }
             };
 
-            Assert.False(ExperimentUtils.IsUserInExperiment(Config, experiment, userAttributes, "experiment", experiment.Key, Logger));
+            Assert.False(ExperimentUtils.DoesUserMeetAudienceConditions(Config, experiment, userAttributes, "experiment", experiment.Key, Logger));
         }
 
-        #endregion // IsUserInExperiment Tests
+        #endregion // DoesUserMeetAudienceConditions Tests
     }
 }
