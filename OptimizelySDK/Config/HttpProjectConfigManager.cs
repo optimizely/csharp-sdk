@@ -88,6 +88,7 @@ namespace OptimizelySDK.Config
 
         private string GetRemoteDatafileResponse()
         {
+            Logger.Log(LogLevel.DEBUG, $"Making datafile request to url \"{Url}\"");
             var request = new System.Net.Http.HttpRequestMessage {
                 RequestUri = new Uri(Url),
                 Method = System.Net.Http.HttpMethod.Get,
@@ -107,7 +108,7 @@ namespace OptimizelySDK.Config
             // Return from here if datafile is not modified.
             var result = httpResponse.Result;
             if (!result.IsSuccessStatusCode) {
-                Logger.Log(LogLevel.ERROR, "Unexpected response from event endpoint, status: " + result.StatusCode);
+                Logger.Log(LogLevel.ERROR, $"Error fetching datafile \"{result.StatusCode}\"");
                 return null;
             }
 
@@ -134,7 +135,7 @@ namespace OptimizelySDK.Config
             var result = (System.Net.HttpWebResponse)request.GetResponse();
             
             if (result.StatusCode != System.Net.HttpStatusCode.OK) {
-                Logger.Log(LogLevel.ERROR, "Unexpected response from event endpoint, status: " + result.StatusCode);
+                Logger.Log(LogLevel.ERROR, $"Error fetching datafile \"{result.StatusCode}\"");
             }
             var lastModified = result.Headers.GetValues("Last-Modified");
             if(!string.IsNullOrEmpty(lastModified.First()))
