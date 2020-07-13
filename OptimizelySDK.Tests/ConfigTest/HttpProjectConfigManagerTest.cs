@@ -182,7 +182,8 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
                 .WithStartByDefault()
                 .Build();
 
-            httpManager.OnReady().Wait();
+            // OnReady waits until is resolved, need to add time in case of deadlock.
+            httpManager.OnReady().Wait(10000);
 
             Assert.AreEqual("15", httpManager.GetConfig().Revision);
 
@@ -208,7 +209,9 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
                 .WithStartByDefault(true)
                 .Build();
             t.Wait();
-            httpManager.OnReady().Wait();
+
+            // OnReady waits until is resolved, need to add time in case of deadlock.
+            httpManager.OnReady().Wait(10000);
             Assert.NotNull(httpManager.GetConfig());
             httpManager.Dispose();
         }
@@ -244,7 +247,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         #region Notification
         [Test]
         public void TestHttpConfigManagerSendConfigUpdateNotificationWhenProjectConfigGetsUpdated()
-        {
+        {            
             var t = MockSendAsync(TestData.Datafile);
 
             var httpManager = new HttpProjectConfigManager.Builder()
@@ -266,7 +269,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
 
         [Test]
         public void TestHttpConfigManagerDoesNotSendConfigUpdateNotificationWhenDatafileIsProvided()
-        {
+        {            
             var t = MockSendAsync(TestData.Datafile, TimeSpan.FromMilliseconds(100));
 
             var httpManager = new HttpProjectConfigManager.Builder()
@@ -460,7 +463,6 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         [Test]
         public void TestFormatUrlHigherPriorityThanDefaultUrl()
         {
-
             var t = MockSendAsync();
             var httpManager = new HttpProjectConfigManager.Builder()
                 .WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z")
@@ -483,7 +485,6 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         {
             return TestHttpProjectConfigManagerUtil.MockSendAsync(HttpClientMock, datafile, delay, statusCode);
         }
-
         #endregion
     }
 }
