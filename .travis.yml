@@ -11,6 +11,8 @@ stages:
   - name: 'Production tests'
   - name: 'Unit Tests'
   - name: 'NetStandard16'
+  - name: 'NetStandard20'
+  - name: 'Source Clear'
 
 jobs:
   include:
@@ -70,8 +72,6 @@ jobs:
       dotnet: 2.1.502
       install:
         - dotnet restore OptimizelySDK.NetStandard16/OptimizelySDK.NetStandard16.csproj
-      addons:
-        srcclr: true
       script:
         # strongname signing is taken care of in build step
         - dotnet build OptimizelySDK.NetStandard16/OptimizelySDK.NetStandard16.csproj /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=$TRAVIS_BUILD_DIR/keypair.snk -c Release
@@ -89,8 +89,6 @@ jobs:
       dotnet: 2.1.502
       install:
         - dotnet restore OptimizelySDK.NetStandard20/OptimizelySDK.NetStandard20.csproj
-      addons:
-        srcclr: true
       script:
         # strongname signing is taken care of in build step
         - dotnet build OptimizelySDK.NetStandard20/OptimizelySDK.NetStandard20.csproj /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=$TRAVIS_BUILD_DIR/keypair.snk -c Release
@@ -99,3 +97,14 @@ jobs:
         - pip install --user awscli
         # upload dll build artifacts to s3 with -unsigned suffix
         - ([ ${TRAVIS_BRANCH} = "$RELEASE_BRANCH" ] && [ ${TRAVIS_EVENT_TYPE} = "push" ]) && (AWS_ACCESS_KEY_ID=$OFTA_KEY AWS_SECRET_ACCESS_KEY=$OFTA_SECRET AWS_DEFAULT_REGION=$OFTA_REGION aws s3 cp ./OptimizelySDK.NetStandard20/bin/Release/netstandard2.0/OptimizelySDK.NetStandard20.dll s3://optly-fs-travisci-artifacts/${TRAVIS_REPO_SLUG}/${TRAVIS_BUILD_NUMBER}/${TRAVIS_JOB_NUMBER}/OptimizelySDK.NetStandard20.dll-unsigned)        
+
+    - stage: 'Source Clear'
+      if: type = cron
+      addons:
+        srcclr: true
+      before_install: skip
+      install: skip
+      before_script: skip
+      script: skip
+      after_script: skip
+      after_success: skip
