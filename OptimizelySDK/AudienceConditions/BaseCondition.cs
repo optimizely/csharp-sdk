@@ -425,14 +425,14 @@ namespace OptimizelySDK.AudienceConditions
             string[] targetVersionParts = targetedVersion.Split('.');
 
             // Check only till the precision point of targetVersionParts
-            for (int targetIndex = 0; targetIndex < targetVersionParts.Length; targetIndex++)
+            for (var targetIndex = 0; targetIndex < targetVersionParts.Length; targetIndex++)
             {
                 if ((versionParts.Length - 1) < targetIndex)
                 {
                     return -1;
                 }
-                double? part = ParseNumeric(versionParts[targetIndex]);
-                double? target = ParseNumeric(targetVersionParts[targetIndex]);
+                var part = ParseNumeric(versionParts[targetIndex]);
+                var target = ParseNumeric(targetVersionParts[targetIndex]);
 
                 if (part == null)
                 {
@@ -454,6 +454,7 @@ namespace OptimizelySDK.AudienceConditions
                     }
                 }
             }
+
             return 0;
         }
 
