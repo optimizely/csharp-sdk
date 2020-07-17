@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2019, Optimizely
+ * Copyright 2019-2020, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use file except in compliance with the License.
@@ -83,6 +83,7 @@ namespace OptimizelySDK
                 .WithFormat(httpProjectConfigElement.Format)
                 .WithPollingInterval(TimeSpan.FromMilliseconds(httpProjectConfigElement.PollingInterval))
                 .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(httpProjectConfigElement.BlockingTimeOutPeriod))
+                .WithAccessToken(httpProjectConfigElement.DatafileAccessToken)
                 .WithLogger(logger)
                 .WithErrorHandler(errorHandler)
                 .WithNotificationCenter(notificationCenter)

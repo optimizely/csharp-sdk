@@ -110,6 +110,7 @@ User can provide variables using following procedure:
                        format="https://cdn.optimizely.com/data/{0}.json" 
                        pollingInterval="2000" 
                        blockingTimeOutPeriod="10000" 
+                       datafileAccessToken="testingtoken123"
                        autoUpdate="true" 
                        defaultStart="true">
     </HttpProjectConfig>
