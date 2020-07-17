@@ -570,6 +570,24 @@ namespace OptimizelySDK.Tests
 
         // Should return null when rollout doesn't exist for the feature.
         [Test]
+        public void TestGetVariationForFeatureRolloutWhenNoRuleInRollouts()
+        {
+            var projectConfig = DatafileProjectConfig.Create(TestData.EmptyRolloutDatafile, new NoOpLogger(), new NoOpErrorHandler());
+
+            Assert.IsNotNull(projectConfig);
+            var featureFlag = projectConfig.FeatureKeyMap["empty_rollout"];
+            var rollout = projectConfig.GetRolloutFromId(featureFlag.RolloutId);
+
+            Assert.AreEqual(rollout.Experiments.Count, 0);
+
+            var decisionService = new DecisionService(new Bucketer(new NoOpLogger()), new NoOpErrorHandler(), null, new NoOpLogger());
+
+            var variation = decisionService.GetVariationForFeatureRollout(featureFlag, "userId1", null, projectConfig);
+
+            Assert.IsNull(variation);
+        }
+
+        [Test]
         public void TestGetVariationForFeatureRolloutWhenRolloutIsNotInDataFile()
         {
             var featureFlag = ProjectConfig.GetFeatureFlagFromKey("boolean_feature");

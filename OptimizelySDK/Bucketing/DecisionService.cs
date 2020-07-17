@@ -395,6 +395,10 @@ namespace OptimizelySDK.Bucketing
                 return null;
             }
 
+            if (rollout.Experiments == null ||  rollout.Experiments.Count == 0) {
+                return null;
+            }
+
             Variation variation = null;
             var rolloutRulesLength = rollout.Experiments.Count;
 
