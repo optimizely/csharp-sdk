@@ -206,6 +206,10 @@ This option enables user to provide a custom URL format to fetch the datafile.
 
 This option is used to specify whether to start the config manager on initialization or not. If no value is provided, by default it is true and will start polling datafile from remote immediately.
 
+##### Datafile access token
+
+This option is used to provide token for authenticated datafile access.
+
 ## Development
 
 ### Unit tests
