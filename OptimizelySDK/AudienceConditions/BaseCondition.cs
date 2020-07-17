@@ -412,7 +412,17 @@ namespace OptimizelySDK.AudienceConditions
             return false;
         }
 
-        private int CompareVersion(string version, string targetedVersion)
+        /// <summary>
+        /// Compare an actual userVersion against a targetedVersion; return -1 if the actual userVersion is "semantically less"
+        /// than the targetedVersion, 1 if it is "semantically greater", and 0 if they are "semantically identical".
+        ///
+        /// "Semantically" means the following: given both userVersion numbers expressed in x.y.z... format, to the level of
+        /// precision of the targetedVersion, compare the corresponding userVersion parts (e.g. major to major, minor to minor).
+        /// </summary>
+        /// <param name="userVersion">expressed as a string x.y.z...</param>
+        /// <param name="targetedVersion">expressed as a string x.y.z...</param>
+        /// <returns> -1 if userVersion is smaller than targetedVersion, 1 if userVersion is greater than targetedVersion, 0 if they are approx. equal</returns>
+        private int CompareVersion(string userVersion, string targetedVersion)
         {
             if (string.IsNullOrEmpty(targetedVersion))
             {
@@ -421,28 +431,27 @@ namespace OptimizelySDK.AudienceConditions
             }
 
             // Expect a version string of the form x.y.z
-            string[] versionParts = version.Split('.');
-            string[] targetVersionParts = targetedVersion.Split('.');
+            var userVersionParts = userVersion.Split('.');
+            var targetVersionParts = targetedVersion.Split('.');
 
             // Check only till the precision point of targetVersionParts
             for (var targetIndex = 0; targetIndex < targetVersionParts.Length; targetIndex++)
             {
-                if ((versionParts.Length - 1) < targetIndex)
+                if (userVersionParts.Length <= targetIndex)
                 {
                     return -1;
                 }
-                var part = ParseNumeric(versionParts[targetIndex]);
-                var target = ParseNumeric(targetVersionParts[targetIndex]);
+                int part, target;
 
-                if (part == null)
+                if (!int.TryParse(userVersionParts[targetIndex], out part))
                 {
                     //Compare strings
-                    if (!versionParts[targetIndex].Equals(targetVersionParts[targetIndex]))
+                    if (!userVersionParts[targetIndex].Equals(targetVersionParts[targetIndex]))
                     {
                         return -1;
                     }
                 }
-                else if (target != null)
+                else if (int.TryParse(targetVersionParts[targetIndex], out target))
                 {
                     if (part < target)
                     {
@@ -453,21 +462,13 @@ namespace OptimizelySDK.AudienceConditions
                         return 1;
                     }
                 }
+                else 
+                {
+                    return -1; 
+                }
             }
 
             return 0;
-        }
-
-        private static double? ParseNumeric(string str)
-        {
-            try
-            {
-                return double.Parse(str);
-            }
-            catch (Exception e)
-            {
-                return null;
-            }
         }
 
         public override string ToString()
