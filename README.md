@@ -208,7 +208,7 @@ This option is used to specify whether to start the config manager on initializa
 
 ##### Datafile access token
 
-This option is used to provide token for authenticated datafile access.
+This option is used to provide token for datafile belonging to a secure environment.
 
 ## Development
 
