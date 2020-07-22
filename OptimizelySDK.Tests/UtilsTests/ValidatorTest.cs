@@ -79,13 +79,13 @@ namespace OptimizelySDK.Tests.UtilsTests
 
 
         [Test]
-        public void TestIsUserInExperimentNoAudienceUsedInExperiment()
+        public void TestDoesUserMeetAudienceConditionsNoAudienceUsedInExperiment()
         {
             Assert.IsTrue(ExperimentUtils.DoesUserMeetAudienceConditions(Config, Config.GetExperimentFromKey("paused_experiment"), new UserAttributes(), "experiment", "paused_experiment", Logger));
         }
 
         [Test]
-        public void TestIsUserInExperimentAudienceUsedInExperimentNoAttributesProvided()
+        public void TestDoesUserMeetAudienceConditionsAudienceUsedInExperimentNoAttributesProvided()
         {
             Assert.IsFalse(ExperimentUtils.DoesUserMeetAudienceConditions(Config, Config.GetExperimentFromKey("test_experiment"), new UserAttributes(), "experiment", "test_experiment", Logger));
 
@@ -104,7 +104,7 @@ namespace OptimizelySDK.Tests.UtilsTests
         }
 
         [Test]
-        public void TestIsUserInExperimentAudienceNoMatch()
+        public void TestDoesUserMeetAudienceConditionsAudienceNoMatch()
         {
             var userAttributes = new UserAttributes
             {

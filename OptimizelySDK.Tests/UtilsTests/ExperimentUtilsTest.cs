@@ -38,11 +38,11 @@ namespace OptimizelySDK.Tests.UtilsTests
             LoggerMock.Setup(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()));
             Logger = LoggerMock.Object;
         }
-        
-        #region IsUserInExperiment Tests
+
+        #region DoesUserMeetAudienceConditions Tests
 
         [Test]
-        public void TestIsUserInExperimentReturnsTrueWithNoAudience()
+        public void TestDoesUserMeetAudienceConditionsReturnsTrueWithNoAudience()
         {
             var experiment = Config.GetExperimentFromKey("feat_with_var_test");
             experiment.AudienceIds = new string[] { };
@@ -54,7 +54,7 @@ namespace OptimizelySDK.Tests.UtilsTests
         }
 
         [Test]
-        public void TestIsUserInExperimentReturnsTrueWhenAudienceUsedInExperimentNoAttributesProvided()
+        public void TestDoesUserMeetAudienceConditionsReturnsTrueWhenAudienceUsedInExperimentNoAttributesProvided()
         {
             var experiment = Config.GetExperimentFromKey("feat_with_var_test");
             experiment.AudienceIds = new string[] { "3468206648" };
@@ -69,7 +69,7 @@ namespace OptimizelySDK.Tests.UtilsTests
         }
 
         [Test]
-        public void TestIsUserInExperimentReturnsFalseIfNoAudienceInORConditionPass()
+        public void TestDoesUserMeetAudienceConditionsReturnsFalseIfNoAudienceInORConditionPass()
         {
             var experiment = Config.GetExperimentFromKey("feat_with_var_test");
             var userAttributes = new UserAttributes
@@ -98,7 +98,7 @@ namespace OptimizelySDK.Tests.UtilsTests
         }
 
         [Test]
-        public void TestIsUserInExperimentReturnsTrueIfAnyAudienceInORConditionPass()
+        public void TestDoesUserMeetAudienceConditionsReturnsTrueIfAnyAudienceInORConditionPass()
         {
             var experiment = Config.GetExperimentFromKey("feat_with_var_test");
             var userAttributes = new UserAttributes
@@ -117,7 +117,7 @@ namespace OptimizelySDK.Tests.UtilsTests
         }
 
         [Test]
-        public void TestIsUserInExperimentReturnsTrueIfAllAudiencesInANDConditionPass()
+        public void TestDoesUserMeetAudienceConditionsReturnsTrueIfAllAudiencesInANDConditionPass()
         {
             var experiment = Config.GetExperimentFromKey("audience_combinations_experiment");
             var userAttributes = new UserAttributes
@@ -130,7 +130,7 @@ namespace OptimizelySDK.Tests.UtilsTests
         }
 
         [Test]
-        public void TestIsUserInExperimentReturnsFalseIfAnyAudienceInANDConditionDoesNotPass()
+        public void TestDoesUserMeetAudienceConditionsReturnsFalseIfAnyAudienceInANDConditionDoesNotPass()
         {
             var experiment = Config.GetExperimentFromKey("audience_combinations_experiment");
             var userAttributes = new UserAttributes
@@ -159,7 +159,7 @@ namespace OptimizelySDK.Tests.UtilsTests
         }
 
         [Test]
-        public void TestIsUserInExperimentReturnsTrueIfAudienceInNOTConditionDoesNotPass()
+        public void TestDoesUserMeetAudienceConditionsReturnsTrueIfAudienceInNOTConditionDoesNotPass()
         {
             var experiment = Config.GetExperimentFromKey("feat_with_var_test");
             experiment.AudienceIds = new string[] { "3468206645" };
@@ -172,7 +172,7 @@ namespace OptimizelySDK.Tests.UtilsTests
         }
 
         [Test]
-        public void TestIsUserInExperimentReturnsFalseIfAudienceInNOTConditionGetsPassed()
+        public void TestDoesUserMeetAudienceConditionsReturnsFalseIfAudienceInNOTConditionGetsPassed()
         {
             var experiment = Config.GetExperimentFromKey("feat_with_var_test");
             experiment.AudienceIds = new string[] { "3468206645" };
