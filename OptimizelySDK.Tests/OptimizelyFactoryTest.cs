@@ -53,6 +53,7 @@ namespace OptimizelySDK.Tests
                 Url = "www.testurl.com",
                 LastModified = "",
                 AutoUpdate = true,
+                DatafileAccessToken = "testingtoken123",
                 BlockingTimeout = TimeSpan.FromSeconds(10),
                 PollingInterval = TimeSpan.FromSeconds(2)
             };
