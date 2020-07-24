@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2019, Optimizely
+ * Copyright 2019-2020, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,6 +60,12 @@ namespace OptimizelySDK
         public bool DefaultStart
         {
             get { return (bool)base["defaultStart"]; }
+        }
+
+        [ConfigurationProperty("datafileAccessToken")]
+        public string DatafileAccessToken
+        {
+            get { return (string)base["datafileAccessToken"]; }
         }
     }
 

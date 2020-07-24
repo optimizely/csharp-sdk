@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2019, Optimizely
+ * Copyright 2019-2020, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ namespace OptimizelySDK.Tests
             Assert.AreEqual(httpSetting.PollingInterval, 2000);
             Assert.AreEqual(httpSetting.SDKKey, "43214321");
             Assert.AreEqual(httpSetting.Url, "www.testurl.com");
+            Assert.AreEqual(httpSetting.DatafileAccessToken, "testingtoken123");
         }
 
         [Test]
