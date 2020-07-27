@@ -43,7 +43,7 @@ namespace OptimizelySDK.Utils
         /// <param name="experiment">Experiment Entity representing the experiment</param>
         /// <param name="userAttributes">Attributes of the user. Defaults to empty attributes array if not provided</param>
         /// <param name="loggingKeyType">It can be either experiment or rule.</param>
-        /// <param name="loggingKey">In case of loggingKeyType is experiment it will be experiment key or else it will be rule number.</param>
+        /// <param name="loggingKey">In case loggingKeyType is experiment it will be experiment key or else it will be rule number.</param>
         /// <returns>true if the user meets audience conditions to be in experiment, false otherwise.</returns>
         public static bool DoesUserMeetAudienceConditions(ProjectConfig config,
             Experiment experiment,
