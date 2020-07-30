@@ -200,7 +200,7 @@ namespace OptimizelySDK
                 return true;
             }
 
-            if (!ExperimentUtils.IsUserInExperiment(config, experiment, userAttributes, Logger))
+            if (!ExperimentUtils.DoesUserMeetAudienceConditions(config, experiment, userAttributes, "experiment", experiment.Key, Logger))
             {
                 Logger.Log(LogLevel.INFO, string.Format("User \"{0}\" does not meet conditions to be in experiment \"{1}\".", userId, experiment.Key));
                 return false;
@@ -569,11 +569,11 @@ namespace OptimizelySDK
                     if (variation.FeatureEnabled == true)
                     {
                         variableValue = featureVariableUsageInstance.Value;
-                        Logger.Log(LogLevel.INFO, $@"Returning variable value ""{variableValue}"" for variation ""{variation.Key}"" of feature flag ""{featureKey}"".");
+                        Logger.Log(LogLevel.INFO, $@"Got variable value ""{variableValue}"" for variable ""{variableKey}"" of feature flag ""{featureKey}"".");
                     }
                     else
                     {
-                        Logger.Log(LogLevel.INFO, $@"Feature ""{featureKey}"" is not enabled for user {userId}. Returning default value for variable ""{variableKey}"".");
+                        Logger.Log(LogLevel.INFO, $@"Feature ""{featureKey}"" is not enabled for user {userId}. Returning the default variable value ""{variableValue}"".");
                     }
                 }
                 else
@@ -791,6 +791,14 @@ namespace OptimizelySDK
                         "The default values are being returned.");
             }
 
+            if (featureEnabled)
+            {
+                Logger.Log(LogLevel.INFO, "Feature \"" + featureKey + "\" is enabled for user \"" + userId + "\"");
+            }
+            else
+            { 
+                Logger.Log(LogLevel.INFO, "Feature \"" + featureKey + "\" is not enabled for user \"" + userId + "\"");
+            }
             var valuesMap = new Dictionary<string, object>();
             foreach (var featureVariable in featureFlag.Variables)
             {

@@ -6,13 +6,13 @@ env:
 
 # Integration tests need to run first to reset the PR build status to pending
 stages:
+  - name: 'Source Clear'
   - name: 'Lint markdown files'
   - name: 'Integration tests'
   - name: 'Production tests'
   - name: 'Unit Tests'
   - name: 'NetStandard16'
   - name: 'NetStandard20'
-  - name: 'Source Clear'
 
 jobs:
   include:
@@ -100,6 +100,11 @@ jobs:
 
     - stage: 'Source Clear'
       if: type = cron
+      language: csharp
+      # dotnet only works on trusty https://github.com/travis-ci/travis-ci/issues/5189
+      dist: trusty
+      mono: none
+      dotnet: 2.1.502      
       addons:
         srcclr: true
       before_install: skip

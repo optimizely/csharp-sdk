@@ -110,6 +110,7 @@ User can provide variables using following procedure:
                        format="https://cdn.optimizely.com/data/{0}.json" 
                        pollingInterval="2000" 
                        blockingTimeOutPeriod="10000" 
+                       datafileAccessToken="testingtoken123"
                        autoUpdate="true" 
                        defaultStart="true">
     </HttpProjectConfig>
@@ -204,6 +205,10 @@ This option enables user to provide a custom URL format to fetch the datafile.
 ##### Start by default
 
 This option is used to specify whether to start the config manager on initialization or not. If no value is provided, by default it is true and will start polling datafile from remote immediately.
+
+##### Datafile access token
+
+This option is used to provide token for datafile belonging to a secure environment.
 
 ## Development
 

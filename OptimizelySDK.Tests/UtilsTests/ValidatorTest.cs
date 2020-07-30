@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2017-2019, Optimizely
+ * Copyright 2017-2020, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,17 +79,17 @@ namespace OptimizelySDK.Tests.UtilsTests
 
 
         [Test]
-        public void TestIsUserInExperimentNoAudienceUsedInExperiment()
+        public void TestDoesUserMeetAudienceConditionsNoAudienceUsedInExperiment()
         {
-            Assert.IsTrue(ExperimentUtils.IsUserInExperiment(Config, Config.GetExperimentFromKey("paused_experiment"), new UserAttributes(), Logger));
+            Assert.IsTrue(ExperimentUtils.DoesUserMeetAudienceConditions(Config, Config.GetExperimentFromKey("paused_experiment"), new UserAttributes(), "experiment", "paused_experiment", Logger));
         }
 
         [Test]
-        public void TestIsUserInExperimentAudienceUsedInExperimentNoAttributesProvided()
+        public void TestDoesUserMeetAudienceConditionsAudienceUsedInExperimentNoAttributesProvided()
         {
-            Assert.IsFalse(ExperimentUtils.IsUserInExperiment(Config, Config.GetExperimentFromKey("test_experiment"), new UserAttributes(), Logger));
+            Assert.IsFalse(ExperimentUtils.DoesUserMeetAudienceConditions(Config, Config.GetExperimentFromKey("test_experiment"), new UserAttributes(), "experiment", "test_experiment", Logger));
 
-            Assert.IsFalse(ExperimentUtils.IsUserInExperiment(Config, Config.GetExperimentFromKey("test_experiment"), null, Logger));
+            Assert.IsFalse(ExperimentUtils.DoesUserMeetAudienceConditions(Config, Config.GetExperimentFromKey("test_experiment"), null, "experiment", "test_experiment", Logger));
         }
 
         [Test]
@@ -100,11 +100,11 @@ namespace OptimizelySDK.Tests.UtilsTests
                 {"device_type", "iPhone" },
                 {"location", "San Francisco" }
             };
-            Assert.IsTrue(ExperimentUtils.IsUserInExperiment(Config, Config.GetExperimentFromKey("test_experiment"), userAttributes, Logger));
+            Assert.IsTrue(ExperimentUtils.DoesUserMeetAudienceConditions(Config, Config.GetExperimentFromKey("test_experiment"), userAttributes, "experiment", "test_experiment", Logger));
         }
 
         [Test]
-        public void TestIsUserInExperimentAudienceNoMatch()
+        public void TestDoesUserMeetAudienceConditionsAudienceNoMatch()
         {
             var userAttributes = new UserAttributes
             {
@@ -112,7 +112,7 @@ namespace OptimizelySDK.Tests.UtilsTests
                 {"location", "San Francisco" }
             };
 
-            Assert.IsFalse(ExperimentUtils.IsUserInExperiment(Config, Config.GetExperimentFromKey("test_experiment"), null, Logger));
+            Assert.IsFalse(ExperimentUtils.DoesUserMeetAudienceConditions(Config, Config.GetExperimentFromKey("test_experiment"), null, "experiment", "test_experiment", Logger));
         }
 
         [Test]
