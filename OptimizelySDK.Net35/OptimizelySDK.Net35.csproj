@@ -55,6 +55,9 @@
 	<Compile Include="..\OptimizelySDK\AudienceConditions\BaseCondition.cs">
       <Link>AudienceConditions\BaseCondition.cs</Link>
     </Compile>
+	<Compile Include="..\OptimizelySDK\AudienceConditions\SemanticVersion.cs">
+      <Link>AudienceConditions\SemanticVersion.cs</Link>
+    </Compile>
 	<Compile Include="..\OptimizelySDK\AudienceConditions\EmptyCondition.cs">
       <Link>AudienceConditions\EmptyCondition.cs</Link>
     </Compile>

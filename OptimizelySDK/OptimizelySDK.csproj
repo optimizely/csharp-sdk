@@ -69,6 +69,7 @@
     <Compile Include="AudienceConditions\ICondition.cs" />
     <Compile Include="AudienceConditions\NotCondition.cs" />
     <Compile Include="AudienceConditions\OrCondition.cs" />
+    <Compile Include="AudienceConditions\SemanticVersion.cs" />
     <Compile Include="Bucketing\Bucketer.cs" />
     <Compile Include="Bucketing\Decision.cs" />
     <Compile Include="ClientConfigHandler.cs" />
