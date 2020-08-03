@@ -49,7 +49,7 @@ namespace OptimizelySDK.AudienceConditions
             // Throw exception if version contains empty space
             if (version.Contains(" "))
             {
-                throw new ConfigParseException("Invalid Semantic Version.");
+                throw new ParseException("Invalid Semantic Version.");
             }
 
             VParts = new int?[3];
@@ -58,7 +58,7 @@ namespace OptimizelySDK.AudienceConditions
             Input = version.ToCharArray();
             if (!StateMajor())
             { // Start recursive descend
-                throw new ConfigParseException("Invalid Semantic Version.");
+                throw new ParseException("Invalid Semantic Version.");
             }
             Major = VParts[0];
             Minor = VParts[1];
@@ -195,7 +195,6 @@ namespace OptimizelySDK.AudienceConditions
         private readonly int?[] VParts;
         private readonly List<string> PreParts;
         private readonly List<string> MetaParts;
-        private int errPos;
         private readonly char[] Input;
 
         private bool StateMajor()
@@ -238,12 +237,10 @@ namespace OptimizelySDK.AudienceConditions
             }
             if (pos == index)
             { // Empty String -> Error
-                errPos = index;
                 return false;
             }
             if (Input[0] == '0' && pos - index > 1)
             { // Leading zero
-                errPos = index;
                 return false;
             }
             if (int.TryParse(new string(Input, index, pos - index), out int vPart))
@@ -271,12 +268,10 @@ namespace OptimizelySDK.AudienceConditions
             }
             if (pos == index)
             { // Empty String -> Error
-                errPos = index;
                 return false;
             }
             if (Input[0] == '0' && pos - index > 1)
             { // Leading zero
-                errPos = index;
                 return false;
             }
 
@@ -300,7 +295,7 @@ namespace OptimizelySDK.AudienceConditions
                 return StateRelease(pos + 1);
             }
 
-            errPos = pos; // We have junk
+            // We have junk
             return false;
         }
 
@@ -316,7 +311,6 @@ namespace OptimizelySDK.AudienceConditions
             }
             if (pos == index)
             { // Empty String -> Error
-                errPos = index;
                 return false;
             }
 
@@ -334,7 +328,6 @@ namespace OptimizelySDK.AudienceConditions
                 return StateMeta(pos + 1);
             }
 
-            errPos = pos;
             return false;
         }
 
@@ -350,7 +343,6 @@ namespace OptimizelySDK.AudienceConditions
             }
             if (pos == index)
             { // Empty String -> Error
-                errPos = index;
                 return false;
             }
 
@@ -363,7 +355,6 @@ namespace OptimizelySDK.AudienceConditions
             { // More parts -> descend
                 return StateMeta(pos + 1);
             }
-            errPos = pos;
             return false;
         }
     }

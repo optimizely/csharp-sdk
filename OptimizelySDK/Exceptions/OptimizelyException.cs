@@ -122,4 +122,13 @@ namespace OptimizelySDK.Exceptions
             
         }
     }
+
+    public class ParseException : OptimizelyException
+    {
+        public ParseException(string message)
+            : base(message)
+        {
+
+        }
+    }
 }
