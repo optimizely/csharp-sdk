@@ -69,7 +69,6 @@
     <Compile Include="AudienceConditions\ICondition.cs" />
     <Compile Include="AudienceConditions\NotCondition.cs" />
     <Compile Include="AudienceConditions\OrCondition.cs" />
-    <Compile Include="AudienceConditions\SemanticVersion.cs" />
     <Compile Include="Bucketing\Bucketer.cs" />
     <Compile Include="Bucketing\Decision.cs" />
     <Compile Include="ClientConfigHandler.cs" />
@@ -154,7 +153,7 @@
     <Compile Include="Event\Entity\SnapshotEvent.cs" />
     <Compile Include="Event\Entity\EventBatch.cs" />
     <Compile Include="Event\Entity\EventContext.cs" />
-    <Compile Include="AudienceConditions\SemanticVersioningV2.cs" />
+    <Compile Include="AudienceConditions\SemanticVersion.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Utils\schema.json" />

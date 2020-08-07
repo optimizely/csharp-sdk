@@ -13,349 +13,141 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-using OptimizelySDK.Exceptions;
 using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace OptimizelySDK.AudienceConditions
 {
+    public static class SemanticVersionExtension
+    {
+        public const char BuildSeparator = '+';
+        public const char PreReleaseSeparator = '-';
+
+        public static bool ContainsWhiteSpace(this string semanticVersion)
+        {
+            return semanticVersion.Contains(" ");
+        }
+
+        public static bool IsPreRelease(this string semanticVersion)
+        {
+            return semanticVersion.Contains(PreReleaseSeparator.ToString());
+        }
+
+        public static bool IsBuild(this string semanticVersion)
+        {
+            return semanticVersion.Contains(BuildSeparator.ToString());
+        }
+
+        public static string[] SplitSemanticVersion(this string version)
+        {
+            List<string> versionParts = new List<string>();
+            // pre-release or build.
+            string versionSuffix = string.Empty;
+            string[] preVersionParts;
+            if (version.ContainsWhiteSpace())
+            {
+                // log and throw error
+                throw new Exception("");
+            }
+
+            if (version.IsBuild() || version.IsPreRelease())
+            {
+                var partialVersionParts = version.Split(version.IsPreRelease() ?
+                    PreReleaseSeparator : BuildSeparator);
+                if (partialVersionParts.Length <= 1)
+                {
+                    // throw error
+                    throw new Exception("");
+                }
+                // major.minor.patch
+                var versionPrefix = partialVersionParts[0];
+                versionSuffix = partialVersionParts[1];
+
+                preVersionParts = versionPrefix.Split('.');
+            }
+            else
+            {
+                preVersionParts = version.Split('.');
+            }
+
+            if (preVersionParts.Length > 3)
+            {
+                // Throw error as pre version should only contain major.minor.patch version 
+                throw new Exception("Invalid Semantic Version.");
+            }
+
+            versionParts.AddRange(preVersionParts);
+            if (!string.IsNullOrEmpty(versionSuffix))
+            {
+                versionParts.Add(versionSuffix);
+            }
+
+            return versionParts.ToArray();
+        }
+    }
+
     public class SemanticVersion : IComparable<SemanticVersion>
     {
-        public readonly int? Major;
+        public string Version { get; private set; }
 
-        public readonly int? Minor;
-
-        public readonly int? Patch;
-
-        /// <summary>
-        /// Pre-release tags (potentially empty, but never null). This is private to
-        /// ensure read only access.
-        /// </summary>
-        private readonly string[] PreRelease;
-
-        /// <summary>
-        /// Build meta data tags (potentially empty, but never null). This is private
-        /// to ensure read only access.
-        /// </summary>
-        private readonly string[] BuildMeta;
-
-        /// <summary>
-        /// Construct a version object by parsing a string.
-        /// </summary>
-        /// <param name="version">version in flat string format.</param>
         public SemanticVersion(string version)
         {
-            // Throw exception if version contains empty space
-            if (version.Contains(" "))
+            Version = version;
+        }
+        public int CompareTo(SemanticVersion targetedVersion)
+        {
+
+            if (targetedVersion == null || string.IsNullOrEmpty(targetedVersion.Version))
             {
-                throw new ParseException("Invalid Semantic Version.");
+                throw new Exception("empty");
             }
 
-            VParts = new int?[3];
-            PreParts = new List<string>(5);
-            MetaParts = new List<string>(5);
-            Input = version.ToCharArray();
-            if (!StateMajor())
-            { // Start recursive descend
-                throw new ParseException("Invalid Semantic Version.");
+            if (string.IsNullOrEmpty(Version))
+            {
+                throw new Exception(" Empty ");
             }
-            Major = VParts[0];
-            Minor = VParts[1];
-            Patch = VParts[2];
-            PreRelease = PreParts.ToArray();
-            BuildMeta = MetaParts.ToArray();
-        }
-        public int CompareTo(SemanticVersion targetVersion)
-        {
-            var result = Major - targetVersion.Major;
-            if (result == 0)
-            { // Same Major
-                if (targetVersion.Minor != null)
+
+            var targetedVersionParts = targetedVersion.Version.SplitSemanticVersion();
+            var userVersionParts = Version.SplitSemanticVersion();
+
+            for (var index = 0; index < targetedVersionParts.Length; index++)
+            {
+
+                if (userVersionParts.Length <= index)
                 {
-                    if (Minor != null)
+                    return targetedVersion.Version.IsPreRelease() ? 1 : -1;
+                }
+                else
+                {
+                    if (!int.TryParse(userVersionParts[index], out int userVersionPartInt))
                     {
-                        result = Minor - targetVersion.Minor;
-                        if (result == 0)
-                        { // Same minor
-                            if (targetVersion.Patch != null)
-                            {
-                                if (Patch != null)
-                                {
-                                    result = Patch - targetVersion.Patch;
-                                    if (result == 0)
-                                    { // Same patch
-                                        if (PreRelease.Length == 0 && targetVersion.PreRelease.Length > 0)
-                                        {
-                                            result = 1; // No pre release wins over pre release
-                                        }
-                                        if (targetVersion.PreRelease.Length == 0 && PreRelease.Length > 0)
-                                        {
-                                            result = -1; // No pre release wins over pre release
-                                        }
-                                        if (PreRelease.Length > 0 && targetVersion.PreRelease.Length > 0)
-                                        {
-                                            int len = Math.Min(PreRelease.Length, targetVersion.PreRelease.Length);
-                                            int count;
-                                            for (count = 0; count < len; count++)
-                                            {
-                                                result = ComparePreReleaseTag(count, targetVersion);
-                                                if (result != 0)
-                                                {
-                                                    break;
-                                                }
-                                            }
-                                            if (result == 0 && count == len)
-                                            { // Longer version wins.
-                                                result = PreRelease.Length - targetVersion.PreRelease.Length;
-                                            }
-                                        }
-                                    }
-                                }
-                                else
-                                {
-                                    result = -1;
-                                }
-                            }
+                        // Compare strings
+                        int result = string.Compare(userVersionParts[index], targetedVersionParts[index]);
+                        if (result != 0)
+                        {
+                            return result;
+                        }
+                    }
+                    else if (int.TryParse(targetedVersionParts[index], out int targetVersionPartInt))
+                    {
+                        if (userVersionPartInt != targetVersionPartInt)
+                        {
+                            return userVersionPartInt < targetVersionPartInt ? -1 : 1;
                         }
                     }
                     else
                     {
-                        result = -1;
+                        return -1;
                     }
                 }
             }
-            return result ?? -1;
-        }
 
-        private int ComparePreReleaseTag(int pos, SemanticVersion ov)
-        {
-            var isHereParsed = int.TryParse(PreRelease[pos], out int here);
-            var isThereParsed = int.TryParse(ov.PreRelease[pos], out int there);
-
-            if (isHereParsed && !isThereParsed)
+            if (!targetedVersion.Version.IsPreRelease() && Version.IsPreRelease())
             {
-                return -1; // Strings take precedence over numbers
-            }
-            if (!isHereParsed && isThereParsed)
-            {
-                return 1; // Strings take precedence over numbers
-            }
-            if (!isHereParsed)
-            {
-                return (PreRelease[pos].CompareTo(ov.PreRelease[pos])); // ASCII compare
+                return -1;
             }
 
-            return here.CompareTo(there); // Number compare
-        }
-
-        override public string ToString()
-        {
-            var ret = new StringBuilder();
-            ret.Append(Major);
-            if (Minor != null)
-            {
-                ret.Append('.');
-                ret.Append(Minor);
-            }
-            if (Patch != null)
-            {
-                ret.Append('.');
-                ret.Append(Patch);
-            }
-            if (PreRelease.Length > 0)
-            {
-                ret.Append('-');
-                for (var i = 0; i < PreRelease.Length; i++)
-                {
-                    ret.Append(PreRelease[i]);
-                    if (i < PreRelease.Length - 1)
-                    {
-                        ret.Append('.');
-                    }
-                }
-            }
-            if (BuildMeta.Length > 0)
-            {
-                ret.Append('+');
-                for (int i = 0; i < BuildMeta.Length; i++)
-                {
-                    ret.Append(BuildMeta[i]);
-                    if (i < BuildMeta.Length - 1)
-                    {
-                        ret.Append('.');
-                    }
-                }
-            }
-            return ret.ToString();
-        }
-
-        // Parser implementation below
-
-        private readonly int?[] VParts;
-        private readonly List<string> PreParts;
-        private readonly List<string> MetaParts;
-        private readonly char[] Input;
-
-        private bool StateMajor()
-        {
-            var pos = 0;
-            while (pos < Input.Length && Input[pos] >= '0' && Input[pos] <= '9')
-            {
-                pos++; // match [0..9]+
-            }
-            if (pos == 0)
-            { // Empty String -> Error
-                return false;
-            }
-            if (Input[0] == '0' && pos > 1)
-            { // Leading zero
-                return false;
-            }
-            if (int.TryParse(new string(Input, 0, pos), out int vPart))
-            {
-                VParts[0] = vPart;
-            }
-            if (Input.Length > pos && Input[pos] == '.')
-            {
-                return StateMinor(pos + 1);
-            }
-            else
-            {
-                VParts[1] = null;
-                VParts[2] = null;
-                return true;
-            }
-        }
-
-        private bool StateMinor(int index)
-        {
-            int pos = index;
-            while (pos < Input.Length && Input[pos] >= '0' && Input[pos] <= '9')
-            {
-                pos++;// match [0..9]+
-            }
-            if (pos == index)
-            { // Empty String -> Error
-                return false;
-            }
-            if (Input[0] == '0' && pos - index > 1)
-            { // Leading zero
-                return false;
-            }
-            if (int.TryParse(new string(Input, index, pos - index), out int vPart))
-            {
-                VParts[1] = vPart;
-            }
-
-            if (Input.Length > pos && Input[pos] == '.')
-            {
-                return StatePatch(pos + 1);
-            }
-            else
-            {
-                VParts[2] = null;
-                return true;
-            }
-        }
-
-        private bool StatePatch(int index)
-        {
-            int pos = index;
-            while (pos < Input.Length && Input[pos] >= '0' && Input[pos] <= '9')
-            {
-                pos++; // match [0..9]+
-            }
-            if (pos == index)
-            { // Empty String -> Error
-                return false;
-            }
-            if (Input[0] == '0' && pos - index > 1)
-            { // Leading zero
-                return false;
-            }
-
-            if (int.TryParse(new string(Input, index, pos - index), out int vPart))
-            {
-                VParts[2] = vPart;
-            }
-
-            if (pos >= Input.Length)
-            { // We have a clean version string
-                return true;
-            }
-
-            if (Input[pos] == '+')
-            { // We have build meta tags -> descend
-                return StateMeta(pos + 1);
-            }
-
-            if (Input[pos] == '-')
-            { // We have pre release tags -> descend
-                return StateRelease(pos + 1);
-            }
-
-            // We have junk
-            return false;
-        }
-
-        private bool StateRelease(int index)
-        {
-            int pos = index;
-            while ((pos < Input.Length)
-                && ((Input[pos] >= '0' && Input[pos] <= '9')
-                || (Input[pos] >= 'a' && Input[pos] <= 'z')
-                || (Input[pos] >= 'A' && Input[pos] <= 'Z') || Input[pos] == '-'))
-            {
-                pos++; // match [0..9a-zA-Z-]+
-            }
-            if (pos == index)
-            { // Empty String -> Error
-                return false;
-            }
-
-            PreParts.Add(new string(Input, index, pos - index));
-            if (pos == Input.Length)
-            { // End of input
-                return true;
-            }
-            if (Input[pos] == '.')
-            { // More parts -> descend
-                return StateRelease(pos + 1);
-            }
-            if (Input[pos] == '+')
-            { // Build meta -> descend
-                return StateMeta(pos + 1);
-            }
-
-            return false;
-        }
-
-        private bool StateMeta(int index)
-        {
-            int pos = index;
-            while ((pos < Input.Length)
-                && ((Input[pos] >= '0' && Input[pos] <= '9')
-                || (Input[pos] >= 'a' && Input[pos] <= 'z')
-                || (Input[pos] >= 'A' && Input[pos] <= 'Z') || Input[pos] == '-'))
-            {
-                pos++; // match [0..9a-zA-Z-]+
-            }
-            if (pos == index)
-            { // Empty String -> Error
-                return false;
-            }
-
-            MetaParts.Add(new string(Input, index, pos - index));
-            if (pos == Input.Length)
-            { // End of input
-                return true;
-            }
-            if (Input[pos] == '.')
-            { // More parts -> descend
-                return StateMeta(pos + 1);
-            }
-            return false;
+            return 0;
         }
     }
 }

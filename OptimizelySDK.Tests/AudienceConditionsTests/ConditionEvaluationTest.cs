@@ -485,7 +485,6 @@ namespace OptimizelySDK.Tests.AudienceConditionsTests
         public void TestSemVerEQMatcherReturnsTrueWhenAttributeValueIsEqualToConditionValueMajorOnly()
         {
             var semverEQCondition = new BaseCondition { Name = "semversion_eq", Value = "3", Match = "semver_eq", Type = "custom_attribute" };
-            Assert.That(semverEQCondition.Evaluate(null, new UserAttributes { { "semversion_eq", "3.7.0-beta.2.4" } }, Logger), Is.True);
             Assert.That(semverEQCondition.Evaluate(null, new UserAttributes { { "semversion_eq", "3.0.0" } }, Logger), Is.True);
             Assert.That(semverEQCondition.Evaluate(null, new UserAttributes { { "semversion_eq", "3.1" } }, Logger), Is.True);
         }
@@ -503,7 +502,6 @@ namespace OptimizelySDK.Tests.AudienceConditionsTests
         {
             var semverEQCondition = new BaseCondition { Name = "semversion_eq", Value = "3.7.0-beta.2.3", Match = "semver_eq", Type = "custom_attribute" };
             Assert.That(semverEQCondition.Evaluate(null, new UserAttributes { { "semversion_eq", "3.7.0-beta.2.3" } }, Logger), Is.True);
-            Assert.That(semverEQCondition.Evaluate(null, new UserAttributes { { "semversion_eq", "3.7.0-beta.2.3+1.2.3" } }, Logger), Is.True);
         }
         #endregion // SemVerEQMatcher Tests
 
@@ -531,7 +529,7 @@ namespace OptimizelySDK.Tests.AudienceConditionsTests
         public void TestSemVerGEMatcherReturnsTrueWhenAttributeValueIsGreaterOrEqualToConditionValueMajorOnly()
         {
             var semverGECondition = new BaseCondition { Name = "semversion_ge", Value = "3", Match = "semver_ge", Type = "custom_attribute" };
-            Assert.That(semverGECondition.Evaluate(null, new UserAttributes { { "semversion_ge", "3.7.0-beta.2.4" } }, Logger), Is.True);
+            Assert.That(semverGECondition.Evaluate(null, new UserAttributes { { "semversion_ge", "3.7.0" } }, Logger), Is.True);
             Assert.That(semverGECondition.Evaluate(null, new UserAttributes { { "semversion_ge", "3.0.0" } }, Logger), Is.True);
             Assert.That(semverGECondition.Evaluate(null, new UserAttributes { { "semversion_ge", "4.0" } }, Logger), Is.True);
         }
@@ -577,6 +575,7 @@ namespace OptimizelySDK.Tests.AudienceConditionsTests
         public void TestSemVerLEMatcherReturnsTrueWhenAttributeValueIsLessOrEqualToConditionValueMajorOnly()
         {
             var semverLECondition = new BaseCondition { Name = "semversion_le", Value = "3", Match = "semver_le", Type = "custom_attribute" };
+            Assert.That(semverLECondition.Evaluate(null, new UserAttributes { { "semversion_le", "3.7.0-beta.2.4" } }, Logger), Is.True);
             Assert.That(semverLECondition.Evaluate(null, new UserAttributes { { "semversion_le", "3.7.1-beta" } }, Logger), Is.True);
             Assert.That(semverLECondition.Evaluate(null, new UserAttributes { { "semversion_le", "3.0.0" } }, Logger), Is.True);
             Assert.That(semverLECondition.Evaluate(null, new UserAttributes { { "semversion_le", "2.0" } }, Logger), Is.True);
