@@ -47,7 +47,7 @@ namespace OptimizelySDK.AudienceConditions
             if (version.ContainsWhiteSpace())
             {
                 // log and throw error
-                throw new Exception("");
+                throw new Exception("Semantic version contains white spaces. Invalid Semantic Version.");
             }
 
             if (version.IsBuild() || version.IsPreRelease())
@@ -57,7 +57,7 @@ namespace OptimizelySDK.AudienceConditions
                 if (partialVersionParts.Length <= 1)
                 {
                     // throw error
-                    throw new Exception("");
+                    throw new Exception("Invalid Semantic Version.");
                 }
                 // major.minor.patch
                 var versionPrefix = partialVersionParts[0];
