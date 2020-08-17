@@ -83,7 +83,9 @@ namespace OptimizelySDK
                 .WithFormat(httpProjectConfigElement.Format)
                 .WithPollingInterval(TimeSpan.FromMilliseconds(httpProjectConfigElement.PollingInterval))
                 .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(httpProjectConfigElement.BlockingTimeOutPeriod))
+#if !NET40 && !NET35
                 .WithAccessToken(httpProjectConfigElement.DatafileAccessToken)
+#endif
                 .WithLogger(logger)
                 .WithErrorHandler(errorHandler)
                 .WithNotificationCenter(notificationCenter)
@@ -109,7 +111,7 @@ namespace OptimizelySDK
         }
 #endif
 
-        public static Optimizely NewDefaultInstance(string sdkKey)
+            public static Optimizely NewDefaultInstance(string sdkKey)
         {
             return NewDefaultInstance(sdkKey, null);
         }
