@@ -54,6 +54,11 @@ namespace OptimizelySDK
         /// </summary>
         bool? BotFiltering { get; set; }
 
+        /// <summary>
+        /// Raw datafile which is used to generate this project config
+        /// </summary>
+        string Datafile { get; set; }
+
         //========================= Mappings ===========================
 
         /// <summary>

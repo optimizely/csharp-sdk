@@ -3884,6 +3884,14 @@ namespace OptimizelySDK.Tests
             Assert.IsNull(optimizelyConfig);
         }
 
+        // Test that OptimizelyConfig.Datafile returns the expected datafile, which was used to generate project config
+        [Test]
+        public void TestGetOptimizelyConfigDatafile()
+        {
+            var optimizelyConfig = Optimizely.GetOptimizelyConfig();
+            Assert.AreEqual(optimizelyConfig.Datafile, TestData.Datafile);
+        }
+
         #endregion
 
 

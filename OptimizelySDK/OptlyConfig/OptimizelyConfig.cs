@@ -23,12 +23,14 @@ namespace OptimizelySDK.OptlyConfig
         public string Revision { get; private set; }
         public IDictionary<string, OptimizelyExperiment> ExperimentsMap { get; private set; }
         public IDictionary<string, OptimizelyFeature> FeaturesMap { get; private set; }
+        public string Datafile { get; private set; }
 
-        public OptimizelyConfig(string revision, IDictionary<string, OptimizelyExperiment> experimentsMap, IDictionary<string, OptimizelyFeature> featuresMap)
+        public OptimizelyConfig(string revision, IDictionary<string, OptimizelyExperiment> experimentsMap, IDictionary<string, OptimizelyFeature> featuresMap, string datafile = null)
         {
             Revision = revision;
             ExperimentsMap = experimentsMap;
             FeaturesMap = featuresMap;
+            Datafile = datafile;
         }
     }
 }
