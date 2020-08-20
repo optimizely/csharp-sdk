@@ -143,27 +143,8 @@ namespace OptimizelySDK.AudienceConditions
 
         public bool? GreaterThanEvaluator(object attributeValue, ILogger logger)
         {
-            if (!Validator.IsValidNumericValue(Value))
+            if (!isValidNumberEval(attributeValue, logger))
             {
-                logger.Log(LogLevel.WARN, $@"Audience condition {this} has an unsupported condition value. You may need to upgrade to a newer release of the Optimizely SDK.");
-                return null;
-            }
-
-            if (attributeValue == null)
-            {
-                logger.Log(LogLevel.DEBUG, $@"Audience condition {this} evaluated to UNKNOWN because a null value was passed for user attribute ""{Name}"".");
-                return null;
-            }
-
-            if (!Validator.IsNumericType(attributeValue))
-            {
-                logger.Log(LogLevel.WARN, $@"Audience condition {this} evaluated to UNKNOWN because a value of type ""{attributeValue.GetType().Name}"" was passed for user attribute ""{Name}"".");
-                return null;
-            }
-
-            if (!Validator.IsValidNumericValue(attributeValue))
-            {
-                logger.Log(LogLevel.WARN, $@"Audience condition {this} evaluated to UNKNOWN because the number value for user attribute ""{Name}"" is not in the range [-2^53, +2^53].");
                 return null;
             }
 
@@ -172,27 +153,8 @@ namespace OptimizelySDK.AudienceConditions
 
         public bool? GreaterOrEqualThanEvaluator(object attributeValue, ILogger logger)
         {
-            if (!Validator.IsValidNumericValue(Value))
+            if (!isValidNumberEval(attributeValue, logger))
             {
-                logger.Log(LogLevel.WARN, $@"Audience condition {this} has an unsupported condition value. You may need to upgrade to a newer release of the Optimizely SDK.");
-                return null;
-            }
-
-            if (attributeValue == null)
-            {
-                logger.Log(LogLevel.DEBUG, $@"Audience condition {this} evaluated to UNKNOWN because a null value was passed for user attribute ""{Name}"".");
-                return null;
-            }
-
-            if (!Validator.IsNumericType(attributeValue))
-            {
-                logger.Log(LogLevel.WARN, $@"Audience condition {this} evaluated to UNKNOWN because a value of type ""{attributeValue.GetType().Name}"" was passed for user attribute ""{Name}"".");
-                return null;
-            }
-
-            if (!Validator.IsValidNumericValue(attributeValue))
-            {
-                logger.Log(LogLevel.WARN, $@"Audience condition {this} evaluated to UNKNOWN because the number value for user attribute ""{Name}"" is not in the range [-2^53, +2^53].");
                 return null;
             }
 
@@ -201,27 +163,8 @@ namespace OptimizelySDK.AudienceConditions
 
         public bool? LessThanEvaluator(object attributeValue, ILogger logger)
         {
-            if (!Validator.IsValidNumericValue(Value))
+            if (!isValidNumberEval(attributeValue, logger))
             {
-                logger.Log(LogLevel.WARN, $@"Audience condition {this} has an unsupported condition value. You may need to upgrade to a newer release of the Optimizely SDK.");
-                return null;
-            }
-
-            if (attributeValue == null)
-            {
-                logger.Log(LogLevel.DEBUG, $@"Audience condition {this} evaluated to UNKNOWN because a null value was passed for user attribute ""{Name}"".");
-                return null;
-            }
-
-            if (!Validator.IsNumericType(attributeValue))
-            {
-                logger.Log(LogLevel.WARN, $@"Audience condition {this} evaluated to UNKNOWN because a value of type ""{attributeValue.GetType().Name}"" was passed for user attribute ""{Name}"".");
-                return null;
-            }
-
-            if (!Validator.IsValidNumericValue(attributeValue))
-            {
-                logger.Log(LogLevel.WARN, $@"Audience condition {this} evaluated to UNKNOWN because the number value for user attribute ""{Name}"" is not in the range [-2^53, +2^53].");
                 return null;
             }
 
@@ -230,27 +173,8 @@ namespace OptimizelySDK.AudienceConditions
 
         public bool? LessOrEqualThanEvaluator(object attributeValue, ILogger logger)
         {
-            if (!Validator.IsValidNumericValue(Value))
+            if (!isValidNumberEval(attributeValue, logger))
             {
-                logger.Log(LogLevel.WARN, $@"Audience condition {this} has an unsupported condition value. You may need to upgrade to a newer release of the Optimizely SDK.");
-                return null;
-            }
-
-            if (attributeValue == null)
-            {
-                logger.Log(LogLevel.DEBUG, $@"Audience condition {this} evaluated to UNKNOWN because a null value was passed for user attribute ""{Name}"".");
-                return null;
-            }
-
-            if (!Validator.IsNumericType(attributeValue))
-            {
-                logger.Log(LogLevel.WARN, $@"Audience condition {this} evaluated to UNKNOWN because a value of type ""{attributeValue.GetType().Name}"" was passed for user attribute ""{Name}"".");
-                return null;
-            }
-
-            if (!Validator.IsValidNumericValue(attributeValue))
-            {
-                logger.Log(LogLevel.WARN, $@"Audience condition {this} evaluated to UNKNOWN because the number value for user attribute ""{Name}"" is not in the range [-2^53, +2^53].");
                 return null;
             }
 
@@ -293,21 +217,8 @@ namespace OptimizelySDK.AudienceConditions
 
         public bool? SemanticVersionEqualEvaluator(object attributeValue, ILogger logger)
         {
-            if (!(Value is string))
+            if (!isValidSemVersionEval(attributeValue, logger))
             {
-                logger.Log(LogLevel.WARN, $@"Audience condition {this} has an unsupported condition value. You may need to upgrade to a newer release of the Optimizely SDK.");
-                return null;
-            }
-
-            if (attributeValue == null)
-            {
-                logger.Log(LogLevel.DEBUG, $@"Audience condition {this} evaluated to UNKNOWN because a null value was passed for user attribute ""{Name}"".");
-                return null;
-            }
-
-            if (!(attributeValue is string))
-            {
-                logger.Log(LogLevel.WARN, $@"Audience condition {this} evaluated to UNKNOWN because a value of type ""{attributeValue.GetType().Name}"" was passed for user attribute ""{Name}"".");
                 return null;
             }
 
@@ -326,21 +237,8 @@ namespace OptimizelySDK.AudienceConditions
 
         public bool? SemanticVersionGreaterEvaluator(object attributeValue, ILogger logger)
         {
-            if (!(Value is string))
+            if (!isValidSemVersionEval(attributeValue, logger))
             {
-                logger.Log(LogLevel.WARN, $@"Audience condition {this} has an unsupported condition value. You may need to upgrade to a newer release of the Optimizely SDK.");
-                return null;
-            }
-
-            if (attributeValue == null)
-            {
-                logger.Log(LogLevel.DEBUG, $@"Audience condition {this} evaluated to UNKNOWN because a null value was passed for user attribute ""{Name}"".");
-                return null;
-            }
-
-            if (!(attributeValue is string))
-            {
-                logger.Log(LogLevel.WARN, $@"Audience condition {this} evaluated to UNKNOWN because a value of type ""{attributeValue.GetType().Name}"" was passed for user attribute ""{Name}"".");
                 return null;
             }
 
@@ -359,21 +257,8 @@ namespace OptimizelySDK.AudienceConditions
 
         public bool? SemanticVersionGreaterOrEqualEvaluator(object attributeValue, ILogger logger)
         {
-            if (!(Value is string))
+            if (!isValidSemVersionEval(attributeValue, logger))
             {
-                logger.Log(LogLevel.WARN, $@"Audience condition {this} has an unsupported condition value. You may need to upgrade to a newer release of the Optimizely SDK.");
-                return null;
-            }
-
-            if (attributeValue == null)
-            {
-                logger.Log(LogLevel.DEBUG, $@"Audience condition {this} evaluated to UNKNOWN because a null value was passed for user attribute ""{Name}"".");
-                return null;
-            }
-
-            if (!(attributeValue is string))
-            {
-                logger.Log(LogLevel.WARN, $@"Audience condition {this} evaluated to UNKNOWN because a value of type ""{attributeValue.GetType().Name}"" was passed for user attribute ""{Name}"".");
                 return null;
             }
 
@@ -392,21 +277,8 @@ namespace OptimizelySDK.AudienceConditions
 
         public bool? SemanticVersionLessEvaluator(object attributeValue, ILogger logger)
         {
-            if (!(Value is string))
+            if (!isValidSemVersionEval(attributeValue, logger))
             {
-                logger.Log(LogLevel.WARN, $@"Audience condition {this} has an unsupported condition value. You may need to upgrade to a newer release of the Optimizely SDK.");
-                return null;
-            }
-
-            if (attributeValue == null)
-            {
-                logger.Log(LogLevel.DEBUG, $@"Audience condition {this} evaluated to UNKNOWN because a null value was passed for user attribute ""{Name}"".");
-                return null;
-            }
-
-            if (!(attributeValue is string))
-            {
-                logger.Log(LogLevel.WARN, $@"Audience condition {this} evaluated to UNKNOWN because a value of type ""{attributeValue.GetType().Name}"" was passed for user attribute ""{Name}"".");
                 return null;
             }
 
@@ -425,24 +297,10 @@ namespace OptimizelySDK.AudienceConditions
 
         public bool? SemanticVersionLessOrEqualEvaluator(object attributeValue, ILogger logger)
         {
-            if (!(Value is string))
+            if (!isValidSemVersionEval(attributeValue, logger)) 
             {
-                logger.Log(LogLevel.WARN, $@"Audience condition {this} has an unsupported condition value. You may need to upgrade to a newer release of the Optimizely SDK.");
                 return null;
             }
-
-            if (attributeValue == null)
-            {
-                logger.Log(LogLevel.DEBUG, $@"Audience condition {this} evaluated to UNKNOWN because a null value was passed for user attribute ""{Name}"".");
-                return null;
-            }
-
-            if (!(attributeValue is string))
-            {
-                logger.Log(LogLevel.WARN, $@"Audience condition {this} evaluated to UNKNOWN because a value of type ""{attributeValue.GetType().Name}"" was passed for user attribute ""{Name}"".");
-                return null;
-            }
-
             try
             {
                 var conditionalVersion = new SemanticVersion(Value.ToString());
@@ -456,6 +314,55 @@ namespace OptimizelySDK.AudienceConditions
             }
         }
 
+        public bool isValidSemVersionEval(object attributeValue, ILogger logger)
+        {
+            if (!(Value is string))
+            {
+                logger.Log(LogLevel.WARN, $@"Audience condition {this} has an unsupported condition value. You may need to upgrade to a newer release of the Optimizely SDK.");
+                return false;
+            }
+
+            if (attributeValue == null)
+            {
+                logger.Log(LogLevel.DEBUG, $@"Audience condition {this} evaluated to UNKNOWN because a null value was passed for user attribute ""{Name}"".");
+                return false;
+            }
+
+            if (!(attributeValue is string))
+            {
+                logger.Log(LogLevel.WARN, $@"Audience condition {this} evaluated to UNKNOWN because a value of type ""{attributeValue.GetType().Name}"" was passed for user attribute ""{Name}"".");
+                return false;
+            }
+            return true;
+        }
+
+        public bool isValidNumberEval(object attributeValue, ILogger logger)
+        {
+            if (!Validator.IsValidNumericValue(Value))
+            {
+                logger.Log(LogLevel.WARN, $@"Audience condition {this} has an unsupported condition value. You may need to upgrade to a newer release of the Optimizely SDK.");
+                return false;
+            }
+
+            if (attributeValue == null)
+            {
+                logger.Log(LogLevel.DEBUG, $@"Audience condition {this} evaluated to UNKNOWN because a null value was passed for user attribute ""{Name}"".");
+                return false;
+            }
+
+            if (!Validator.IsNumericType(attributeValue))
+            {
+                logger.Log(LogLevel.WARN, $@"Audience condition {this} evaluated to UNKNOWN because a value of type ""{attributeValue.GetType().Name}"" was passed for user attribute ""{Name}"".");
+                return false;
+            }
+
+            if (!Validator.IsValidNumericValue(attributeValue))
+            {
+                logger.Log(LogLevel.WARN, $@"Audience condition {this} evaluated to UNKNOWN because the number value for user attribute ""{Name}"" is not in the range [-2^53, +2^53].");
+                return false;
+            }
+            return true;
+        }
         /// <summary>
         /// Validates that the types of first and second value are same.
         /// </summary>
@@ -475,7 +382,7 @@ namespace OptimizelySDK.AudienceConditions
 
             return false;
         }
-
+        
         public override string ToString()
         {
             return JsonConvert.SerializeObject(this, Formatting.None);
