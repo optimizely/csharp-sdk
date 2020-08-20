@@ -18,26 +18,49 @@ using System.Collections.Generic;
 
 namespace OptimizelySDK.AudienceConditions
 {
+    /// <summary>
+    /// Extension class with methods to parse semantic version
+    /// </summary>
     public static class SemanticVersionExtension
     {
         public const char BuildSeparator = '+';
         public const char PreReleaseSeparator = '-';
 
+        /// <summary>
+        /// Helper method to check if semantic version contains white spaces.
+        /// </summary>
+        /// <param name="semanticVersion">Semantic version</param>
+        /// <returns>True if Semantic version contains white space, else false</returns>
         public static bool ContainsWhiteSpace(this string semanticVersion)
         {
             return semanticVersion.Contains(" ");
         }
 
+        /// <summary>
+        /// Helper method to check if semantic version contains prerelease version.
+        /// </summary>
+        /// <param name="semanticVersion">Semantic version</param>
+        /// <returns>True if Semantic version contains '-', else false</returns>
         public static bool IsPreRelease(this string semanticVersion)
         {
             return semanticVersion.Contains(PreReleaseSeparator.ToString());
         }
 
+        /// <summary>
+        /// Helper method to check if semantic version contains build version.
+        /// </summary>
+        /// <param name="semanticVersion">Semantic version</param>
+        /// <returns>True if Semantic version contains '+', else false</returns>
         public static bool IsBuild(this string semanticVersion)
         {
             return semanticVersion.Contains(BuildSeparator.ToString());
         }
 
+        /// <summary>
+        /// Helper method to parse and split semantic version into string array.
+        /// </summary>
+        /// <param name="semanticVersion">Semantic version</param>
+        /// <returns>string array conatining major.minor.patch and prerelease or beta version as last element.</returns>
         public static string[] SplitSemanticVersion(this string version)
         {
             List<string> versionParts = new List<string>();
@@ -86,6 +109,9 @@ namespace OptimizelySDK.AudienceConditions
         }
     }
 
+    /// <summary>
+    /// IComparable class to compare user semantic versions with target semantic version.
+    /// </summary>
     public class SemanticVersion : IComparable<SemanticVersion>
     {
         public string Version { get; private set; }
@@ -94,17 +120,27 @@ namespace OptimizelySDK.AudienceConditions
         {
             Version = version;
         }
+
+        /// <summary>
+        /// Compares user semantic version with targetedVersion.
+        /// </summary>
+        /// <param name="targetedVersion">String Semantic version</param>
+        /// <returns> Integer value with value:
+        /// -1 when targetedVersion is greater than UserVersion
+        /// 0 when targetedVersion is equals to UserVersion
+        /// +1 when targetedVersion is less than UserVersion
+        /// </returns>
         public int CompareTo(SemanticVersion targetedVersion)
         {
-
+            // Valid semantic version should not be null or empty
             if (targetedVersion == null || string.IsNullOrEmpty(targetedVersion.Version))
             {
-                throw new Exception("empty");
+                throw new Exception("Invalid target semantic version.");
             }
 
             if (string.IsNullOrEmpty(Version))
             {
-                throw new Exception(" Empty ");
+                throw new Exception("Invalid user semantic version.");
             }
 
             var targetedVersionParts = targetedVersion.Version.SplitSemanticVersion();
