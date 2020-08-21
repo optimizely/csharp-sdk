@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2019, Optimizely
+ * Copyright 2019-2020, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+using Newtonsoft.Json;
 using System.Collections.Generic;
 
 namespace OptimizelySDK.OptlyConfig
@@ -23,6 +24,8 @@ namespace OptimizelySDK.OptlyConfig
         public string Revision { get; private set; }
         public IDictionary<string, OptimizelyExperiment> ExperimentsMap { get; private set; }
         public IDictionary<string, OptimizelyFeature> FeaturesMap { get; private set; }
+
+        [JsonIgnore]
         public string Datafile { get; private set; }
 
         public OptimizelyConfig(string revision, IDictionary<string, OptimizelyExperiment> experimentsMap, IDictionary<string, OptimizelyFeature> featuresMap, string datafile = null)
