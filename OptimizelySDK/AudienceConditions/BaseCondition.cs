@@ -143,42 +143,26 @@ namespace OptimizelySDK.AudienceConditions
 
         public bool? GreaterThanEvaluator(object attributeValue, ILogger logger)
         {
-            if (!isValidNumberEval(attributeValue, logger))
-            {
-                return null;
-            }
-
-            return Convert.ToDouble(attributeValue) > Convert.ToDouble(Value);
+            int? result = NumberEvaluator(attributeValue, logger);
+            return result == null ? null : (bool?)(result > 0);
         }
 
         public bool? GreaterOrEqualThanEvaluator(object attributeValue, ILogger logger)
         {
-            if (!isValidNumberEval(attributeValue, logger))
-            {
-                return null;
-            }
-
-            return Convert.ToDouble(attributeValue) >= Convert.ToDouble(Value);
+            int? result = NumberEvaluator(attributeValue, logger);
+            return result == null ? null : (bool?)(result >= 0);
         }
 
         public bool? LessThanEvaluator(object attributeValue, ILogger logger)
         {
-            if (!isValidNumberEval(attributeValue, logger))
-            {
-                return null;
-            }
-
-            return Convert.ToDouble(attributeValue) < Convert.ToDouble(Value);
+            int? result = NumberEvaluator(attributeValue, logger);
+            return result == null ? null : (bool?)(result < 0);
         }
 
         public bool? LessOrEqualThanEvaluator(object attributeValue, ILogger logger)
         {
-            if (!isValidNumberEval(attributeValue, logger))
-            {
-                return null;
-            }
-
-            return Convert.ToDouble(attributeValue) <= Convert.ToDouble(Value);
+            int? result = NumberEvaluator(attributeValue, logger);
+            return result == null ? null : (bool?)(result <= 0);
         }
 
         public bool? SubstringEvaluator(object attributeValue, ILogger logger)
@@ -217,152 +201,98 @@ namespace OptimizelySDK.AudienceConditions
 
         public bool? SemanticVersionEqualEvaluator(object attributeValue, ILogger logger)
         {
-            if (!isValidSemVersionEval(attributeValue, logger))
-            {
-                return null;
-            }
-
-            try
-            {
-                var conditionalVersion = new SemanticVersion(Value.ToString());
-                var userSemanticVersion = new SemanticVersion(attributeValue.ToString());
-
-                return userSemanticVersion.CompareTo(conditionalVersion) == 0;
-            }
-            catch
-            {
-                return null;
-            }
+            int? result = SemanticVersionEvaluator(attributeValue, logger);
+            return result == null ? null : (bool?)(result == 0);
         }
 
         public bool? SemanticVersionGreaterEvaluator(object attributeValue, ILogger logger)
         {
-            if (!isValidSemVersionEval(attributeValue, logger))
-            {
-                return null;
-            }
-
-            try
-            {
-                var conditionalVersion = new SemanticVersion(Value.ToString());
-                var userSemanticVersion = new SemanticVersion(attributeValue.ToString());
-
-                return userSemanticVersion.CompareTo(conditionalVersion) > 0;
-            }
-            catch
-            {
-                return null;
-            }
+            int? result = SemanticVersionEvaluator(attributeValue, logger);
+            return result == null ? null : (bool?)(result > 0);
         }
 
         public bool? SemanticVersionGreaterOrEqualEvaluator(object attributeValue, ILogger logger)
         {
-            if (!isValidSemVersionEval(attributeValue, logger))
-            {
-                return null;
-            }
-
-            try
-            {
-                var conditionalVersion = new SemanticVersion(Value.ToString());
-                var userSemanticVersion = new SemanticVersion(attributeValue.ToString());
-
-                return userSemanticVersion.CompareTo(conditionalVersion) >= 0;
-            }
-            catch
-            {
-                return null;
-            }
+            int? result = SemanticVersionEvaluator(attributeValue, logger);
+            return result == null ? null : (bool?)(result >= 0);
         }
 
         public bool? SemanticVersionLessEvaluator(object attributeValue, ILogger logger)
         {
-            if (!isValidSemVersionEval(attributeValue, logger))
-            {
-                return null;
-            }
-
-            try
-            {
-                var conditionalVersion = new SemanticVersion(Value.ToString());
-                var userSemanticVersion = new SemanticVersion(attributeValue.ToString());
-
-                return userSemanticVersion.CompareTo(conditionalVersion) < 0;
-            }
-            catch
-            {
-                return null;
-            }
+            int? result = SemanticVersionEvaluator(attributeValue, logger);
+            return result == null ? null : (bool?)(result < 0);
         }
 
         public bool? SemanticVersionLessOrEqualEvaluator(object attributeValue, ILogger logger)
         {
-            if (!isValidSemVersionEval(attributeValue, logger)) 
-            {
-                return null;
-            }
-            try
-            {
-                var conditionalVersion = new SemanticVersion(Value.ToString());
-                var userSemanticVersion = new SemanticVersion(attributeValue.ToString());
-
-                return userSemanticVersion.CompareTo(conditionalVersion) <= 0;
-            }
-            catch
-            {
-                return null;
-            }
+            int? result = SemanticVersionEvaluator(attributeValue, logger);
+            return result == null ? null : (bool?)(result <= 0);
         }
 
-        public bool isValidSemVersionEval(object attributeValue, ILogger logger)
+        public int? SemanticVersionEvaluator(object attributeValue, ILogger logger)
         {
             if (!(Value is string))
             {
                 logger.Log(LogLevel.WARN, $@"Audience condition {this} has an unsupported condition value. You may need to upgrade to a newer release of the Optimizely SDK.");
-                return false;
+                return null;
             }
 
             if (attributeValue == null)
             {
                 logger.Log(LogLevel.DEBUG, $@"Audience condition {this} evaluated to UNKNOWN because a null value was passed for user attribute ""{Name}"".");
-                return false;
+                return null;
             }
 
             if (!(attributeValue is string))
             {
                 logger.Log(LogLevel.WARN, $@"Audience condition {this} evaluated to UNKNOWN because a value of type ""{attributeValue.GetType().Name}"" was passed for user attribute ""{Name}"".");
-                return false;
+                return null;
             }
-            return true;
+
+            try
+            {
+                var conditionalVersion = new SemanticVersion(Value.ToString());
+                var userSemanticVersion = new SemanticVersion(attributeValue.ToString());
+
+                return userSemanticVersion.CompareTo(conditionalVersion);
+            }
+            catch
+            {
+                return null;
+            }
         }
 
-        public bool isValidNumberEval(object attributeValue, ILogger logger)
+        public int? NumberEvaluator(object attributeValue, ILogger logger)
         {
             if (!Validator.IsValidNumericValue(Value))
             {
                 logger.Log(LogLevel.WARN, $@"Audience condition {this} has an unsupported condition value. You may need to upgrade to a newer release of the Optimizely SDK.");
-                return false;
+                return null;
             }
 
             if (attributeValue == null)
             {
                 logger.Log(LogLevel.DEBUG, $@"Audience condition {this} evaluated to UNKNOWN because a null value was passed for user attribute ""{Name}"".");
-                return false;
+                return null;
             }
 
             if (!Validator.IsNumericType(attributeValue))
             {
                 logger.Log(LogLevel.WARN, $@"Audience condition {this} evaluated to UNKNOWN because a value of type ""{attributeValue.GetType().Name}"" was passed for user attribute ""{Name}"".");
-                return false;
+                return null;
             }
 
             if (!Validator.IsValidNumericValue(attributeValue))
             {
                 logger.Log(LogLevel.WARN, $@"Audience condition {this} evaluated to UNKNOWN because the number value for user attribute ""{Name}"" is not in the range [-2^53, +2^53].");
-                return false;
+                return null;
             }
-            return true;
+            double userValue = Convert.ToDouble(attributeValue);
+            double conditionalValue = Convert.ToDouble(Value);
+
+            return userValue.CompareTo(conditionalValue);
         }
+
         /// <summary>
         /// Validates that the types of first and second value are same.
         /// </summary>
@@ -382,7 +312,7 @@ namespace OptimizelySDK.AudienceConditions
 
             return false;
         }
-        
+
         public override string ToString()
         {
             return JsonConvert.SerializeObject(this, Formatting.None);
