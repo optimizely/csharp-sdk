@@ -650,7 +650,7 @@ namespace OptimizelySDK.Tests
         public void TestProjectConfigDatafileIsSame()
         {
             ProjectConfig config = DatafileProjectConfig.Create(TestData.Datafile, new Mock<ILogger>().Object, new DefaultErrorHandler());
-            Assert.AreEqual(config.Datafile, TestData.Datafile);
+            Assert.AreEqual(config.ToDatafile(), TestData.Datafile);
         }
 
 

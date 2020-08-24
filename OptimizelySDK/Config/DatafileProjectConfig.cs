@@ -29,6 +29,8 @@ namespace OptimizelySDK.Config
     /// </summary>
     public class DatafileProjectConfig : ProjectConfig
     {
+        private string _datafile;
+
         /// <summary>
         /// Datafile versions.
         /// </summary>
@@ -342,7 +344,7 @@ namespace OptimizelySDK.Config
                 throw new ConfigParseException("Unable to parse empty datafile.");
 
             var config = JsonConvert.DeserializeObject<DatafileProjectConfig>(configData);
-            config.Datafile = configData;
+            config._datafile = configData;
 
             if (SupportedVersions.TrueForAll((supportedVersion) => !(((int)supportedVersion).ToString() == config.Version)))
                 throw new ConfigParseException($@"This version of the C# SDK does not support the given datafile version: {config.Version}");
@@ -563,6 +565,15 @@ namespace OptimizelySDK.Config
         public bool IsFeatureExperiment(string experimentId)
         {
             return ExperimentFeatureMap.ContainsKey(experimentId);
+        }
+
+        /// <summary>
+        ///Returns the datafile corresponding to ProjectConfig
+        /// </summary>
+        /// <returns>the datafile string corresponding to ProjectConfig</returns>
+        public string ToDatafile()
+        {
+            return _datafile;
         }
     }
 }

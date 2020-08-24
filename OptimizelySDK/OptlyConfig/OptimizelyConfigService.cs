@@ -36,7 +36,7 @@ namespace OptimizelySDK.OptlyConfig
             OptimizelyConfig = new OptimizelyConfig(projectConfig.Revision,
                 experimentMap,
                 featureMap,
-                projectConfig.Datafile);
+                projectConfig.ToDatafile());
         }
 
         /// <summary>

@@ -25,15 +25,23 @@ namespace OptimizelySDK.OptlyConfig
         public IDictionary<string, OptimizelyExperiment> ExperimentsMap { get; private set; }
         public IDictionary<string, OptimizelyFeature> FeaturesMap { get; private set; }
 
-        [JsonIgnore]
-        public string Datafile { get; private set; }
+        private string _datafile;
 
         public OptimizelyConfig(string revision, IDictionary<string, OptimizelyExperiment> experimentsMap, IDictionary<string, OptimizelyFeature> featuresMap, string datafile = null)
         {
             Revision = revision;
             ExperimentsMap = experimentsMap;
             FeaturesMap = featuresMap;
-            Datafile = datafile;
+            _datafile = datafile;
+        }
+
+        /// <summary>
+        /// Get the datafile associated with OptimizelyConfig.
+        /// </summary>
+        /// <returns>the datafile string associated with OptimizelyConfig.</returns>
+        public string GetDatafile()
+        {
+            return _datafile;
         }
     }
 }

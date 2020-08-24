@@ -54,10 +54,6 @@ namespace OptimizelySDK
         /// </summary>
         bool? BotFiltering { get; set; }
 
-        /// <summary>
-        /// Raw datafile which is used to generate this project config
-        /// </summary>
-        string Datafile { get; set; }
 
         //========================= Mappings ===========================
 
@@ -250,5 +246,11 @@ namespace OptimizelySDK
         /// <param name="experimentId">Experiment Id</param>
         /// <returns>List| Feature flag ids list, null otherwise</returns>
         List<string> GetExperimentFeatureList(string experimentId);
+
+        /// <summary>
+        /// Returns the datafile corresponding to ProjectConfig
+        /// </summary>
+        string ToDatafile();
+
     }
 }

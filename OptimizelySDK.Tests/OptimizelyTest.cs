@@ -3889,7 +3889,7 @@ namespace OptimizelySDK.Tests
         public void TestGetOptimizelyConfigDatafile()
         {
             var optimizelyConfig = Optimizely.GetOptimizelyConfig();
-            Assert.AreEqual(optimizelyConfig.Datafile, TestData.Datafile);
+            Assert.AreEqual(optimizelyConfig.GetDatafile(), TestData.Datafile);
         }
 
         #endregion
