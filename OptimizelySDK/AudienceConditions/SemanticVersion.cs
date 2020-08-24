@@ -75,8 +75,8 @@ namespace OptimizelySDK.AudienceConditions
 
             if (version.IsBuild() || version.IsPreRelease())
             {
-                var partialVersionParts = version.Split(version.IsPreRelease() ?
-                    PreReleaseSeparator : BuildSeparator);
+                var partialVersionParts = version.Split(new char [] { version.IsPreRelease() ?
+                     PreReleaseSeparator : BuildSeparator}, StringSplitOptions.RemoveEmptyEntries);
                 if (partialVersionParts.Length <= 1)
                 {
                     // throw error

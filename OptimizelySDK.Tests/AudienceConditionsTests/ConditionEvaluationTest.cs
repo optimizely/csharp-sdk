@@ -598,5 +598,21 @@ namespace OptimizelySDK.Tests.AudienceConditionsTests
             Assert.IsTrue(semverLECondition.Evaluate(null, new UserAttributes { { "semversion_le", "3.6.1-beta.2.3+1.2" } }, Logger) ?? false);
         }
         #endregion // SemVerLEMatcher Tests
+
+        #region SemVer Invalid Scenarios
+
+        [Test]
+        public void TestInvalidSemVersions()
+        {
+            var semverLECondition = new BaseCondition { Name = "semversion_le", Value = "3", Match = "semver_le", Type = "custom_attribute" };
+            Assert.IsNull(semverLECondition.Evaluate(null, new UserAttributes { { "semversion_le", "3.0-" } }, Logger));
+            Assert.IsNull(semverLECondition.Evaluate(null, new UserAttributes { { "semversion_le", "3.0+-" } }, Logger));
+            Assert.IsNull(semverLECondition.Evaluate(null, new UserAttributes { { "semversion_le", " + " } }, Logger));
+            Assert.IsNull(semverLECondition.Evaluate(null, new UserAttributes { { "semversion_le", "+" } }, Logger));
+            Assert.IsNull(semverLECondition.Evaluate(null, new UserAttributes { { "semversion_le", "-" } }, Logger));
+            Assert.IsNull(semverLECondition.Evaluate(null, new UserAttributes { { "semversion_le", "-build" } }, Logger));
+        }
+
+        #endregion
     }
 }
