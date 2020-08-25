@@ -15,7 +15,7 @@
  */
 using System;
 using System.Collections.Generic;
-
+using System.Linq;
 namespace OptimizelySDK.AudienceConditions
 {
     /// <summary>
@@ -25,7 +25,8 @@ namespace OptimizelySDK.AudienceConditions
     {
         public const char BuildSeparator = '+';
         public const char PreReleaseSeparator = '-';
-
+        public const string NumberExpression = "[0-9]+";
+        public static readonly System.Text.RegularExpressions.Regex NumberRegex = new System.Text.RegularExpressions.Regex(NumberExpression);
         /// <summary>
         /// Helper method to check if semantic version contains white spaces.
         /// </summary>
@@ -57,6 +58,16 @@ namespace OptimizelySDK.AudienceConditions
         }
 
         /// <summary>
+        /// Helper method to check if semantic version contains build version.
+        /// </summary>
+        /// <param name="semanticVersion">Semantic version</param>
+        /// <returns>True if Semantic version contains '+', else false</returns>
+        public static bool IsNumber(this string semanticVersion)
+        {
+            return NumberRegex.IsMatch(semanticVersion);
+        }
+
+        /// <summary>
         /// Helper method to parse and split semantic version into string array.
         /// </summary>
         /// <param name="semanticVersion">Semantic version</param>
@@ -66,6 +77,7 @@ namespace OptimizelySDK.AudienceConditions
             List<string> versionParts = new List<string>();
             // pre-release or build.
             string versionSuffix = string.Empty;
+            string versionPrefix = version;
             string[] preVersionParts;
             if (version.ContainsWhiteSpace())
             {
@@ -83,17 +95,17 @@ namespace OptimizelySDK.AudienceConditions
                     throw new Exception("Invalid Semantic Version.");
                 }
                 // major.minor.patch
-                var versionPrefix = partialVersionParts[0];
+                versionPrefix = partialVersionParts[0];
                 versionSuffix = partialVersionParts[1];
 
-                preVersionParts = versionPrefix.Split('.');
+                preVersionParts = versionPrefix.Split(new char[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
             }
             else
             {
-                preVersionParts = version.Split('.');
+                preVersionParts = version.Split(new char[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
             }
-
-            if (preVersionParts.Length > 3)
+            int dotCount = versionPrefix.Count(c => c == '.');
+            if (preVersionParts.Length != dotCount + 1 || dotCount > 2 || (preVersionParts.Any(part => !part.IsNumber())))
             {
                 // Throw error as pre version should only contain major.minor.patch version 
                 throw new Exception("Invalid Semantic Version.");

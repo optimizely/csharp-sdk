@@ -604,13 +604,12 @@ namespace OptimizelySDK.Tests.AudienceConditionsTests
         [Test]
         public void TestInvalidSemVersions()
         {
+            var invalidValues = new string[] {"-", ".", "..", "+", "+test", " ", "2 .3. 0", "2.",
+                ".2.2", "3.7.2.2", "3.x", ",", "+build-prerelese"};
             var semverLECondition = new BaseCondition { Name = "semversion_le", Value = "3", Match = "semver_le", Type = "custom_attribute" };
-            Assert.IsNull(semverLECondition.Evaluate(null, new UserAttributes { { "semversion_le", "3.0-" } }, Logger));
-            Assert.IsNull(semverLECondition.Evaluate(null, new UserAttributes { { "semversion_le", "3.0+-" } }, Logger));
-            Assert.IsNull(semverLECondition.Evaluate(null, new UserAttributes { { "semversion_le", " + " } }, Logger));
-            Assert.IsNull(semverLECondition.Evaluate(null, new UserAttributes { { "semversion_le", "+" } }, Logger));
-            Assert.IsNull(semverLECondition.Evaluate(null, new UserAttributes { { "semversion_le", "-" } }, Logger));
-            Assert.IsNull(semverLECondition.Evaluate(null, new UserAttributes { { "semversion_le", "-build" } }, Logger));
+            foreach(var invalidValue in invalidValues) {
+                Assert.IsNull(semverLECondition.Evaluate(null, new UserAttributes { { "semversion_le", invalidValue } }, Logger), $"returned for {invalidValue}");
+            }
         }
 
         #endregion
