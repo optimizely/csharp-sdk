@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2017-2019, Optimizely
+ * Copyright 2017-2020, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -644,6 +644,15 @@ namespace OptimizelySDK.Tests
             Assert.IsNotNull(config);
             Assert.AreEqual("1592310167", config.AccountId);
         }
+
+        // Test that getDatafile returns the expected datafile.
+        [Test]
+        public void TestProjectConfigDatafileIsSame()
+        {
+            ProjectConfig config = DatafileProjectConfig.Create(TestData.Datafile, new Mock<ILogger>().Object, new DefaultErrorHandler());
+            Assert.AreEqual(config.ToDatafile(), TestData.Datafile);
+        }
+
 
         // test set/get forced variation for the following cases:
         //      - valid and invalid user ID

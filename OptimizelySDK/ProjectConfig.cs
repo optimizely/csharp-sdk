@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2019, Optimizely
+ * Copyright 2019-2020, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,6 +53,7 @@ namespace OptimizelySDK
         /// Bot filtering flag.
         /// </summary>
         bool? BotFiltering { get; set; }
+
 
         //========================= Mappings ===========================
 
@@ -245,5 +246,11 @@ namespace OptimizelySDK
         /// <param name="experimentId">Experiment Id</param>
         /// <returns>List| Feature flag ids list, null otherwise</returns>
         List<string> GetExperimentFeatureList(string experimentId);
+
+        /// <summary>
+        /// Returns the datafile corresponding to ProjectConfig
+        /// </summary>
+        string ToDatafile();
+
     }
 }
