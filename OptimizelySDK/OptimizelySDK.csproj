@@ -153,6 +153,7 @@
     <Compile Include="Event\Entity\SnapshotEvent.cs" />
     <Compile Include="Event\Entity\EventBatch.cs" />
     <Compile Include="Event\Entity\EventContext.cs" />
+    <Compile Include="AudienceConditions\SemanticVersion.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Utils\schema.json" />

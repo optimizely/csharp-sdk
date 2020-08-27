@@ -17,6 +17,7 @@
 		<Compile Include="..\OptimizelySDK\AudienceConditions\AndCondition.cs" />
 		<Compile Include="..\OptimizelySDK\AudienceConditions\AudienceIdCondition.cs" />
 		<Compile Include="..\OptimizelySDK\AudienceConditions\BaseCondition.cs" />
+		<Compile Include="..\OptimizelySDK\AudienceConditions\SemanticVersion.cs" />
 		<Compile Include="..\OptimizelySDK\AudienceConditions\EmptyCondition.cs" />
 		<Compile Include="..\OptimizelySDK\AudienceConditions\ICondition.cs" />
 		<Compile Include="..\OptimizelySDK\AudienceConditions\NotCondition.cs" />

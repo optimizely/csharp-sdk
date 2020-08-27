@@ -30,12 +30,19 @@ namespace OptimizelySDK.Tests.AudienceConditionsTests
         private BaseCondition ExistsCondition = new BaseCondition { Name = "input_value", Match = "exists", Type = "custom_attribute" };
         private BaseCondition SubstrCondition = new BaseCondition { Name = "location", Value = "USA", Match = "substring", Type = "custom_attribute" };
         private BaseCondition GTCondition = new BaseCondition { Name = "distance_gt", Value = 10, Match = "gt", Type = "custom_attribute" };
+        private BaseCondition GECondition = new BaseCondition { Name = "distance_ge", Value = 10, Match = "ge", Type = "custom_attribute" };
         private BaseCondition LTCondition = new BaseCondition { Name = "distance_lt", Value = 10, Match = "lt", Type = "custom_attribute" };
+        private BaseCondition LECondition = new BaseCondition { Name = "distance_le", Value = 10, Match = "le", Type = "custom_attribute" };
         private BaseCondition ExactStrCondition = new BaseCondition { Name = "browser_type", Value = "firefox", Match = "exact", Type = "custom_attribute" };
         private BaseCondition ExactBoolCondition = new BaseCondition { Name = "is_registered_user", Value = false, Match = "exact", Type = "custom_attribute" };
         private BaseCondition ExactDecimalCondition = new BaseCondition { Name = "pi_value", Value = 3.14, Match = "exact", Type = "custom_attribute" };
         private BaseCondition ExactIntCondition = new BaseCondition { Name = "lasers_count", Value = 9000, Match = "exact", Type = "custom_attribute" };
         private BaseCondition InfinityIntCondition = new BaseCondition { Name = "max_num_value", Value = 9223372036854775807, Match = "exact", Type = "custom_attribute" };
+        private BaseCondition SemVerLTCondition = new BaseCondition { Name = "semversion_lt", Value = "3.7.1", Match = "semver_lt", Type = "custom_attribute" };
+        private BaseCondition SemVerGTCondition = new BaseCondition { Name = "semversion_gt", Value = "3.7.1", Match = "semver_gt", Type = "custom_attribute" };
+        private BaseCondition SemVerEQCondition = new BaseCondition { Name = "semversion_eq", Value = "3.7.1", Match = "semver_eq", Type = "custom_attribute" };
+        private BaseCondition SemVerGECondition = new BaseCondition { Name = "semversion_ge", Value = "3.7.1", Match = "semver_ge", Type = "custom_attribute" };
+        private BaseCondition SemVerLECondition = new BaseCondition { Name = "semversion_le", Value = "3.7.1", Match = "semver_le", Type = "custom_attribute" };
 
         private ILogger Logger;
         private Mock<ILogger> LoggerMock;
@@ -302,6 +309,38 @@ namespace OptimizelySDK.Tests.AudienceConditionsTests
         }
 
         #endregion // GTMatcher Tests
+        
+        #region GEMatcher Tests
+
+        [Test]
+        public void TestGEMatcherReturnsFalseWhenAttributeValueIsLessButTrueForEqualToConditionValue()
+        {
+            Assert.IsFalse(GECondition.Evaluate(null, new UserAttributes { { "distance_ge", 5 } }, Logger)?? true);
+            Assert.IsTrue(GECondition.Evaluate(null, new UserAttributes { { "distance_ge", 10 } }, Logger)?? false);
+        }
+
+        [Test]
+        public void TestGEMatcherReturnsNullWhenAttributeValueIsNotANumericValue()
+        {
+            Assert.IsNull(GECondition.Evaluate(null, new UserAttributes { { "distance_ge", "invalid_type" } }, Logger));
+            LoggerMock.Verify(l => l.Log(LogLevel.WARN, @"Audience condition {""type"":""custom_attribute"",""match"":""ge"",""name"":""distance_ge"",""value"":10} evaluated to UNKNOWN because a value of type ""String"" was passed for user attribute ""distance_ge""."), Times.Once);
+        }
+
+        [Test]
+        public void TestGEMatcherReturnsNullWhenAttributeValueIsOutOfBounds()
+        {
+            Assert.IsNull(GECondition.Evaluate(null, new UserAttributes { { "distance_ge", double.PositiveInfinity } }, Logger));
+            Assert.IsNull(GECondition.Evaluate(null, new UserAttributes { { "distance_ge", Math.Pow(2, 53) + 2 } }, Logger));
+            LoggerMock.Verify(l => l.Log(LogLevel.WARN, @"Audience condition {""type"":""custom_attribute"",""match"":""ge"",""name"":""distance_ge"",""value"":10} evaluated to UNKNOWN because the number value for user attribute ""distance_ge"" is not in the range [-2^53, +2^53]."), Times.Exactly(2));
+        }
+
+        [Test]
+        public void TestGEMatcherReturnsTrueWhenAttributeValueIsGreaterThanConditionValue()
+        {
+            Assert.IsTrue(GECondition.Evaluate(null, new UserAttributes { { "distance_ge", 15 } }, Logger)?? false);
+        }
+
+        #endregion // GEMatcher Tests
 
         #region LTMatcher Tests
 
@@ -334,5 +373,245 @@ namespace OptimizelySDK.Tests.AudienceConditionsTests
         }
 
         #endregion // LTMatcher Tests
+
+        #region LEMatcher Tests
+        [Test]
+        public void TestLEMatcherReturnsFalseWhenAttributeValueIsGreaterAndTrueIfEqualToConditionValue()
+        {
+            Assert.IsFalse(LECondition.Evaluate(null, new UserAttributes { { "distance_le", 15 } }, Logger)  ?? true);
+            Assert.IsTrue(LECondition.Evaluate(null, new UserAttributes { { "distance_le", 10 } }, Logger) ?? false);
+        }
+
+        [Test]
+        public void TestLEMatcherReturnsNullWhenAttributeValueIsNotANumericValue()
+        {
+            Assert.IsNull(LECondition.Evaluate(null, new UserAttributes { { "distance_le", "invalid_type" } }, Logger));
+            LoggerMock.Verify(l => l.Log(LogLevel.WARN, @"Audience condition {""type"":""custom_attribute"",""match"":""le"",""name"":""distance_le"",""value"":10} evaluated to UNKNOWN because a value of type ""String"" was passed for user attribute ""distance_le""."), Times.Once);
+        }
+
+        [Test]
+        public void TestLEMatcherReturnsNullWhenAttributeValueIsOutOfBounds()
+        {
+            Assert.IsNull(LECondition.Evaluate(null, new UserAttributes { { "distance_le", double.NegativeInfinity } }, Logger));
+            Assert.IsNull(LECondition.Evaluate(null, new UserAttributes { { "distance_le", -Math.Pow(2, 53) - 2 } }, Logger));
+            LoggerMock.Verify(l => l.Log(LogLevel.WARN, @"Audience condition {""type"":""custom_attribute"",""match"":""le"",""name"":""distance_le"",""value"":10} evaluated to UNKNOWN because the number value for user attribute ""distance_le"" is not in the range [-2^53, +2^53]."), Times.Exactly(2));
+        }
+
+        [Test]
+        public void TestLEMatcherReturnsTrueWhenAttributeValueIsLessThanConditionValue()
+        {
+            Assert.IsTrue(LECondition.Evaluate(null, new UserAttributes { { "distance_le", 5 } }, Logger) ?? false);
+        }
+
+        #endregion // LEMatcher Tests
+
+        #region SemVerLTMatcher Tests
+        [Test]
+        public void TestSemVerLTMatcherReturnsFalseWhenAttributeValueIsGreaterThanOrEqualToConditionValue()
+        {
+            Assert.IsFalse(SemVerLTCondition.Evaluate(null, new UserAttributes { { "semversion_lt", "3.7.2" } }, Logger) ?? true);
+            Assert.IsFalse(SemVerLTCondition.Evaluate(null, new UserAttributes { { "semversion_lt", "3.7.1" } }, Logger) ?? true);
+            Assert.IsFalse(SemVerLTCondition.Evaluate(null, new UserAttributes { { "semversion_lt", "3.8" } }, Logger) ?? true);
+            Assert.IsFalse(SemVerLTCondition.Evaluate(null, new UserAttributes { { "semversion_lt", "4" } }, Logger) ?? true);
+        }
+
+        [Test]
+        public void TestSemVerLTMatcherReturnsTrueWhenAttributeValueIsLessThanConditionValue()
+        {
+            Assert.IsTrue(SemVerLTCondition.Evaluate(null, new UserAttributes { { "semversion_lt", "3.7.0" } }, Logger) ?? false);
+            Assert.IsTrue(SemVerLTCondition.Evaluate(null, new UserAttributes { { "semversion_lt", "3.7.1-beta" } }, Logger) ?? false);
+            Assert.IsTrue(SemVerLTCondition.Evaluate(null, new UserAttributes { { "semversion_lt", "2.7.1" } }, Logger) ?? false);
+            Assert.IsTrue(SemVerLTCondition.Evaluate(null, new UserAttributes { { "semversion_lt", "3.7" } }, Logger) ?? false);
+            Assert.IsTrue(SemVerLTCondition.Evaluate(null, new UserAttributes { { "semversion_lt", "3" } }, Logger) ?? false);
+        }
+
+        [Test]
+        public void TestSemVerLTMatcherReturnsTrueWhenAttributeValueIsLessThanConditionValueBeta()
+        {
+            var semverLTCondition = new BaseCondition { Name = "semversion_lt", Value = "3.7.0-beta.2.3", Match = "semver_lt", Type = "custom_attribute" };
+            Assert.IsTrue(semverLTCondition.Evaluate(null, new UserAttributes { { "semversion_lt", "3.7.0-beta.2.1" } }, Logger) ?? false);
+            Assert.IsTrue(semverLTCondition.Evaluate(null, new UserAttributes { { "semversion_lt", "3.7.0-beta" } }, Logger) ?? false);
+        }
+        #endregion // SemVerLTMatcher Tests
+
+        #region SemVerGTMatcher Tests
+        [Test]
+        public void TestSemVerGTMatcherReturnsFalseWhenAttributeValueIsLessThanOrEqualToConditionValue()
+        {
+            Assert.IsFalse(SemVerGTCondition.Evaluate(null, new UserAttributes { { "semversion_gt", "3.7.0" } }, Logger)?? true);
+            Assert.IsFalse(SemVerGTCondition.Evaluate(null, new UserAttributes { { "semversion_gt", "3.7.1" } }, Logger)?? true);
+            Assert.IsFalse(SemVerGTCondition.Evaluate(null, new UserAttributes { { "semversion_gt", "3.6" } }, Logger)?? true);
+            Assert.IsFalse(SemVerGTCondition.Evaluate(null, new UserAttributes { { "semversion_gt", "2" } }, Logger)?? true);
+        }
+
+        [Test]
+        public void TestSemVerGTMatcherReturnsTrueWhenAttributeValueIsGreaterThanConditionValue()
+        {
+            Assert.IsTrue(SemVerGTCondition.Evaluate(null, new UserAttributes { { "semversion_gt", "3.7.2" } }, Logger)?? false);
+            Assert.IsTrue(SemVerGTCondition.Evaluate(null, new UserAttributes { { "semversion_gt", "3.7.2-beta" } }, Logger)?? false);
+            Assert.IsTrue(SemVerGTCondition.Evaluate(null, new UserAttributes { { "semversion_gt", "4.7.1" } }, Logger)?? false);
+            Assert.IsTrue(SemVerGTCondition.Evaluate(null, new UserAttributes { { "semversion_gt", "3.8" } }, Logger)?? false);
+            Assert.IsTrue(SemVerGTCondition.Evaluate(null, new UserAttributes { { "semversion_gt", "4" } }, Logger)?? false);
+        }
+
+        [Test]
+        public void TestSemVerGTMatcherReturnsTrueWhenAttributeValueIsGreaterThanConditionValueBeta()
+        {
+            var semverGTCondition = new BaseCondition { Name = "semversion_gt", Value = "3.7.0-beta.2.3", Match = "semver_gt", Type = "custom_attribute" };
+            Assert.IsTrue(semverGTCondition.Evaluate(null, new UserAttributes { { "semversion_gt", "3.7.0-beta.2.4" } }, Logger)?? false);
+            Assert.IsTrue(semverGTCondition.Evaluate(null, new UserAttributes { { "semversion_gt", "3.7.0" } }, Logger)?? false);
+        }
+        #endregion // SemVerGTMatcher Tests
+
+        #region SemVerEQMatcher Tests
+        [Test]
+        public void TestSemVerEQMatcherReturnsFalseWhenAttributeValueIsNotEqualToConditionValue()
+        {
+            Assert.IsFalse(SemVerEQCondition.Evaluate(null, new UserAttributes { { "semversion_eq", "3.7.0" } }, Logger) ?? true);
+            Assert.IsFalse(SemVerEQCondition.Evaluate(null, new UserAttributes { { "semversion_eq", "3.7.2" } }, Logger) ?? true);
+            Assert.IsFalse(SemVerEQCondition.Evaluate(null, new UserAttributes { { "semversion_eq", "3.6" } }, Logger)?? true);
+            Assert.IsFalse(SemVerEQCondition.Evaluate(null, new UserAttributes { { "semversion_eq", "2" } }, Logger)?? true);
+            Assert.IsFalse(SemVerEQCondition.Evaluate(null, new UserAttributes { { "semversion_eq", "4" } }, Logger)?? true);
+            Assert.IsFalse(SemVerEQCondition.Evaluate(null, new UserAttributes { { "semversion_eq", "3" } }, Logger)?? true);
+        }
+
+        [Test]
+        public void TestSemVerEQMatcherReturnsTrueWhenAttributeValueIsEqualToConditionValue()
+        {
+            Assert.IsTrue(SemVerEQCondition.Evaluate(null, new UserAttributes { { "semversion_eq", "3.7.1" } }, Logger) ?? false);
+        }
+
+        [Test]
+        public void TestSemVerEQMatcherReturnsTrueWhenAttributeValueIsEqualToConditionValueMajorOnly()
+        {
+            var semverEQCondition = new BaseCondition { Name = "semversion_eq", Value = "3", Match = "semver_eq", Type = "custom_attribute" };
+            Assert.IsTrue(semverEQCondition.Evaluate(null, new UserAttributes { { "semversion_eq", "3.0.0" } }, Logger) ?? false);
+            Assert.IsTrue(semverEQCondition.Evaluate(null, new UserAttributes { { "semversion_eq", "3.1" } }, Logger) ?? false);
+        }
+
+        [Test]
+        public void TestSemVerEQMatcherReturnsFalseOrFalseWhenAttributeValueIsNotEqualToConditionValueMajorOnly()
+        {
+            var semverEQCondition = new BaseCondition { Name = "semversion_eq", Value = "3", Match = "semver_eq", Type = "custom_attribute" };
+            Assert.IsFalse(semverEQCondition.Evaluate(null, new UserAttributes { { "semversion_eq", "4.0" } }, Logger) ?? true);
+            Assert.IsFalse(semverEQCondition.Evaluate(null, new UserAttributes { { "semversion_eq", "2" } }, Logger) ?? true);
+        }
+
+        [Test]
+        public void TestSemVerEQMatcherReturnsTrueWhenAttributeValueIsEqualToConditionValueBeta()
+        {
+            var semverEQCondition = new BaseCondition { Name = "semversion_eq", Value = "3.7.0-beta.2.3", Match = "semver_eq", Type = "custom_attribute" };
+            Assert.IsTrue(semverEQCondition.Evaluate(null, new UserAttributes { { "semversion_eq", "3.7.0-beta.2.3" } }, Logger) ?? false);
+        }
+        #endregion // SemVerEQMatcher Tests
+
+        #region SemVerGEMatcher Tests
+        [Test]
+        public void TestSemVerGEMatcherReturnsFalseWhenAttributeValueIsNotGreaterOrEqualToConditionValue()
+        {
+            Assert.IsFalse(SemVerGECondition.Evaluate(null, new UserAttributes { { "semversion_ge", "3.7.0" } }, Logger) ?? true);
+            Assert.IsFalse(SemVerGECondition.Evaluate(null, new UserAttributes { { "semversion_ge", "3.7.1-beta" } }, Logger) ?? true);
+            Assert.IsFalse(SemVerGECondition.Evaluate(null, new UserAttributes { { "semversion_ge", "3.6" } }, Logger) ?? true);
+            Assert.IsFalse(SemVerGECondition.Evaluate(null, new UserAttributes { { "semversion_ge", "2" } }, Logger) ?? true);
+            Assert.IsFalse(SemVerGECondition.Evaluate(null, new UserAttributes { { "semversion_ge", "3" } }, Logger) ?? true);
+        }
+
+        [Test]
+        public void TestSemVerGEMatcherReturnsTrueWhenAttributeValueIsGreaterOrEqualToConditionValue()
+        {
+            Assert.IsTrue(SemVerGECondition.Evaluate(null, new UserAttributes { { "semversion_ge", "3.7.1" } }, Logger) ?? false);
+            Assert.IsTrue(SemVerGECondition.Evaluate(null, new UserAttributes { { "semversion_ge", "3.7.2" } }, Logger) ?? false);
+            Assert.IsTrue(SemVerGECondition.Evaluate(null, new UserAttributes { { "semversion_ge", "3.8.1" } }, Logger) ?? false); ;
+            Assert.IsTrue(SemVerGECondition.Evaluate(null, new UserAttributes { { "semversion_ge", "4.7.1" } }, Logger) ?? false);
+        }
+
+        [Test]
+        public void TestSemVerGEMatcherReturnsTrueWhenAttributeValueIsGreaterOrEqualToConditionValueMajorOnly()
+        {
+            var semverGECondition = new BaseCondition { Name = "semversion_ge", Value = "3", Match = "semver_ge", Type = "custom_attribute" };
+            Assert.IsTrue(semverGECondition.Evaluate(null, new UserAttributes { { "semversion_ge", "3.7.0" } }, Logger) ?? false);
+            Assert.IsTrue(semverGECondition.Evaluate(null, new UserAttributes { { "semversion_ge", "3.0.0" } }, Logger) ?? false);
+            Assert.IsTrue(semverGECondition.Evaluate(null, new UserAttributes { { "semversion_ge", "4.0" } }, Logger) ?? false);
+        }
+
+        [Test]
+        public void TestSemVerGEMatcherReturnsFalseWhenAttributeValueIsNotGreaterOrEqualToConditionValueMajorOnly()
+        {
+            var semverGECondition = new BaseCondition { Name = "semversion_ge", Value = "3", Match = "semver_ge", Type = "custom_attribute" };
+            Assert.IsFalse(semverGECondition.Evaluate(null, new UserAttributes { { "semversion_ge", "2" } }, Logger) ?? true);
+        }
+
+        [Test]
+        public void TestSemVerGEMatcherReturnsTrueWhenAttributeValueIsGreaterOrEqualToConditionValueBeta()
+        {
+            var semverGECondition = new BaseCondition { Name = "semversion_ge", Value = "3.7.0-beta.2.3", Match = "semver_ge", Type = "custom_attribute" };
+            Assert.IsTrue(semverGECondition.Evaluate(null, new UserAttributes { { "semversion_ge", "3.7.0-beta.2.3" } }, Logger) ?? false);
+            Assert.IsTrue(semverGECondition.Evaluate(null, new UserAttributes { { "semversion_ge", "3.7.0-beta.2.4" } }, Logger) ?? false);
+            Assert.IsTrue(semverGECondition.Evaluate(null, new UserAttributes { { "semversion_ge", "3.7.0-beta.2.3+1.2.3" } }, Logger) ?? false);
+            Assert.IsTrue(semverGECondition.Evaluate(null, new UserAttributes { { "semversion_ge", "3.7.1-beta.2.3" } }, Logger) ?? false);
+        }
+        #endregion // SemVerGEMatcher Tests
+
+        #region SemVerLEMatcher Tests
+        [Test]
+        public void TestSemVerLEMatcherReturnsFalseWhenAttributeValueIsNotLessOrEqualToConditionValue()
+        {
+            Assert.IsFalse(SemVerLECondition.Evaluate(null, new UserAttributes { { "semversion_le", "3.7.2" } }, Logger) ?? true);
+            Assert.IsFalse(SemVerLECondition.Evaluate(null, new UserAttributes { { "semversion_le", "3.8" } }, Logger) ?? true);
+            Assert.IsFalse(SemVerLECondition.Evaluate(null, new UserAttributes { { "semversion_le", "4" } }, Logger) ?? true);
+        }
+
+        [Test]
+        public void TestSemVerLEMatcherReturnsTrueWhenAttributeValueIsLessOrEqualToConditionValue()
+        {
+            Assert.IsTrue(SemVerLECondition.Evaluate(null, new UserAttributes { { "semversion_le", "3.7.1" } }, Logger) ?? false);
+            Assert.IsTrue(SemVerLECondition.Evaluate(null, new UserAttributes { { "semversion_le", "3.7.0" } }, Logger) ?? false);
+            Assert.IsTrue(SemVerLECondition.Evaluate(null, new UserAttributes { { "semversion_le", "3.6.1" } }, Logger) ?? false);
+            Assert.IsTrue(SemVerLECondition.Evaluate(null, new UserAttributes { { "semversion_le", "2.7.1" } }, Logger) ?? false);
+            Assert.IsTrue(SemVerLECondition.Evaluate(null, new UserAttributes { { "semversion_le", "3.7.1-beta" } }, Logger) ?? false);
+        }
+
+        [Test]
+        public void TestSemVerLEMatcherReturnsTrueWhenAttributeValueIsLessOrEqualToConditionValueMajorOnly()
+        {
+            var semverLECondition = new BaseCondition { Name = "semversion_le", Value = "3", Match = "semver_le", Type = "custom_attribute" };
+            Assert.IsTrue(semverLECondition.Evaluate(null, new UserAttributes { { "semversion_le", "3.7.0-beta.2.4" } }, Logger) ?? false);
+            Assert.IsTrue(semverLECondition.Evaluate(null, new UserAttributes { { "semversion_le", "3.7.1-beta" } }, Logger) ?? false);
+            Assert.IsTrue(semverLECondition.Evaluate(null, new UserAttributes { { "semversion_le", "3.0.0" } }, Logger) ?? false);
+            Assert.IsTrue(semverLECondition.Evaluate(null, new UserAttributes { { "semversion_le", "2.0" } }, Logger) ?? false);
+        }
+
+        [Test]
+        public void TestSemVerLEMatcherReturnsFalseWhenAttributeValueIsNotLessOrEqualToConditionValueMajorOnly()
+        {
+            var semverLECondition = new BaseCondition { Name = "semversion_le", Value = "3", Match = "semver_le", Type = "custom_attribute" };
+            Assert.IsFalse(semverLECondition.Evaluate(null, new UserAttributes { { "semversion_le", "4" } }, Logger) ?? true);
+        }
+
+        [Test]
+        public void TestSemVerLEMatcherReturnsTrueWhenAttributeValueIsLessOrEqualToConditionValueBeta()
+        {
+            var semverLECondition = new BaseCondition { Name = "semversion_le", Value = "3.7.0-beta.2.3", Match = "semver_le", Type = "custom_attribute" };
+            Assert.IsTrue(semverLECondition.Evaluate(null, new UserAttributes { { "semversion_le", "3.7.0-beta.2.2" } }, Logger) ?? false);
+            Assert.IsTrue(semverLECondition.Evaluate(null, new UserAttributes { { "semversion_le", "3.7.0-beta.2.3" } }, Logger) ?? false);
+            Assert.IsTrue(semverLECondition.Evaluate(null, new UserAttributes { { "semversion_le", "3.7.0-beta.2.2+1.2.3" } }, Logger) ?? false);
+            Assert.IsTrue(semverLECondition.Evaluate(null, new UserAttributes { { "semversion_le", "3.6.1-beta.2.3+1.2" } }, Logger) ?? false);
+        }
+        #endregion // SemVerLEMatcher Tests
+
+        #region SemVer Invalid Scenarios
+
+        [Test]
+        public void TestInvalidSemVersions()
+        {
+            var invalidValues = new string[] {"-", ".", "..", "+", "+test", " ", "2 .3. 0", "2.",
+                ".2.2", "3.7.2.2", "3.x", ",", "+build-prerelese"};
+            var semverLECondition = new BaseCondition { Name = "semversion_le", Value = "3", Match = "semver_le", Type = "custom_attribute" };
+            foreach(var invalidValue in invalidValues) {
+                Assert.IsNull(semverLECondition.Evaluate(null, new UserAttributes { { "semversion_le", invalidValue } }, Logger), $"returned for {invalidValue}");
+            }
+        }
+
+        #endregion
     }
 }
