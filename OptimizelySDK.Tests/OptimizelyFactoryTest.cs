@@ -206,6 +206,4 @@ namespace OptimizelySDK.Tests
             optimizely.Dispose();
         }
     }
-
-
 }
