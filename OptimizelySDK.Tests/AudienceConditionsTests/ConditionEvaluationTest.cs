@@ -318,8 +318,8 @@ namespace OptimizelySDK.Tests.AudienceConditionsTests
         [Test]
         public void TestSemVerGTCompareAgainstPreReleaseToPreRelease()
         {
-            var semverGTCondition = new BaseCondition { Name = "semversion_gt", Value = "3.7.0-beta.2-beta3.4-5+2.3.2", Match = "semver_gt", Type = "custom_attribute" };
-            Assert.IsTrue(semverGTCondition.Evaluate(null, new UserAttributes { { "semversion_gt", "3.7.0+a--b" } }, Logger) ?? false);
+            var semverGTCondition = new BaseCondition { Name = "semversion_gt", Value = "3.7.1-prerelease+build", Match = "semver_gt", Type = "custom_attribute" };
+            Assert.IsTrue(semverGTCondition.Evaluate(null, new UserAttributes { { "semversion_gt", "3.7.1-prerelease+rc" } }, Logger) ?? false);
         }
 
         [Test]
