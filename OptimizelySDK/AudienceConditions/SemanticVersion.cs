@@ -44,7 +44,17 @@ namespace OptimizelySDK.AudienceConditions
         /// <returns>True if Semantic version contains '-', else false</returns>
         public static bool IsPreRelease(this string semanticVersion)
         {
-            return semanticVersion.Contains(PreReleaseSeparator.ToString());
+            var buildIndex = semanticVersion.IndexOf(BuildSeparator.ToString());
+            var preReleaseIndex = semanticVersion.IndexOf(PreReleaseSeparator.ToString());
+            if (buildIndex < 0)
+            {
+                return preReleaseIndex > 0;
+            }
+            else if (preReleaseIndex < 0)
+            {
+                return false;
+            }
+            return preReleaseIndex < buildIndex;
         }
 
         /// <summary>
@@ -54,7 +64,17 @@ namespace OptimizelySDK.AudienceConditions
         /// <returns>True if Semantic version contains '+', else false</returns>
         public static bool IsBuild(this string semanticVersion)
         {
-            return semanticVersion.Contains(BuildSeparator.ToString());
+            var buildIndex = semanticVersion.IndexOf(BuildSeparator.ToString());
+            var preReleaseIndex = semanticVersion.IndexOf(PreReleaseSeparator.ToString());
+            if (preReleaseIndex < 0)
+            {
+                return buildIndex > 0;
+            }
+            else if (buildIndex < 0)
+            {
+                return false;
+            }
+            return buildIndex < preReleaseIndex;
         }
 
         /// <summary>
@@ -88,7 +108,7 @@ namespace OptimizelySDK.AudienceConditions
             if (version.IsBuild() || version.IsPreRelease())
             {
                 var partialVersionParts = version.Split(new char [] { version.IsPreRelease() ?
-                     PreReleaseSeparator : BuildSeparator}, StringSplitOptions.RemoveEmptyEntries);
+                     PreReleaseSeparator : BuildSeparator}, 2, StringSplitOptions.RemoveEmptyEntries);
                 if (partialVersionParts.Length <= 1)
                 {
                     // throw error
@@ -170,10 +190,14 @@ namespace OptimizelySDK.AudienceConditions
                     if (!int.TryParse(userVersionParts[index], out int userVersionPartInt))
                     {
                         // Compare strings
-                        int result = string.Compare(userVersionParts[index], targetedVersionParts[index]);
-                        if (result != 0)
+                        var result = string.Compare(userVersionParts[index], targetedVersionParts[index]);
+                        if (result < 0)
                         {
-                            return result;
+                            return targetedVersion.Version.IsPreRelease() && !Version.IsPreRelease() ? 1 : -1;
+                        }
+                        else if (result > 0)
+                        {
+                            return !targetedVersion.Version.IsPreRelease() && Version.IsPreRelease() ? -1 : 1;
                         }
                     }
                     else if (int.TryParse(targetedVersionParts[index], out int targetVersionPartInt))

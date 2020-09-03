@@ -308,8 +308,28 @@ namespace OptimizelySDK.Tests.AudienceConditionsTests
             Assert.That(GTCondition.Evaluate(null, new UserAttributes { { "distance_gt", 15 } }, Logger), Is.True);
         }
 
+        [Test]
+        public void TestSemVerGTTargetBetaComplex()
+        {
+            var semverGTCondition = new BaseCondition { Name = "semversion_gt", Value = "2.1.3-beta+1", Match = "semver_gt", Type = "custom_attribute" };
+            Assert.IsTrue(semverGTCondition.Evaluate(null, new UserAttributes { { "semversion_gt", "2.1.3-beta+1.2.3" } }, Logger) ?? false);
+        }
+
+        [Test]
+        public void TestSemVerGTCompareAgainstPreReleaseToPreRelease()
+        {
+            var semverGTCondition = new BaseCondition { Name = "semversion_gt", Value = "3.7.0-beta.2-beta3.4-5+2.3.2", Match = "semver_gt", Type = "custom_attribute" };
+            Assert.IsTrue(semverGTCondition.Evaluate(null, new UserAttributes { { "semversion_gt", "3.7.0+a--b" } }, Logger) ?? false);
+        }
+
+        [Test]
+        public void TestSemVerGTComparePrereleaseSmallerThanBuild()
+        {
+            var semverGTCondition = new BaseCondition { Name = "semversion_gt", Value = "3.7.1-prerelease", Match = "semver_gt", Type = "custom_attribute" };
+            Assert.IsTrue(semverGTCondition.Evaluate(null, new UserAttributes { { "semversion_gt", "3.7.1+build" } }, Logger) ?? false);
+        }
         #endregion // GTMatcher Tests
-        
+
         #region GEMatcher Tests
 
         [Test]
@@ -370,6 +390,20 @@ namespace OptimizelySDK.Tests.AudienceConditionsTests
         public void TestLTMatcherReturnsTrueWhenAttributeValueIsLessThanConditionValue()
         {
             Assert.That(LTCondition.Evaluate(null, new UserAttributes { { "distance_lt", 5 } }, Logger), Is.True);
+        }
+
+        [Test]
+        public void TestSemVerLTTargetBuildComplex()
+        {
+            var semverLTCondition = new BaseCondition { Name = "semversion_lt", Value = "2.1.3-beta+1.2.3", Match = "semver_lt", Type = "custom_attribute" };
+            Assert.IsTrue(semverLTCondition.Evaluate(null, new UserAttributes { { "semversion_lt", "2.1.3-beta+1" } }, Logger) ?? false);
+        }
+
+        [Test]
+        public void TestSemVerLTCompareMultipleDash()
+        {
+            var semverLTCondition = new BaseCondition { Name = "semversion_lt", Value = "2.1.3-beta-1.2.3", Match = "semver_lt", Type = "custom_attribute" };
+            Assert.IsTrue(semverLTCondition.Evaluate(null, new UserAttributes { { "semversion_lt", "2.1.3-beta-1" } }, Logger) ?? false);
         }
 
         #endregion // LTMatcher Tests
@@ -502,6 +536,13 @@ namespace OptimizelySDK.Tests.AudienceConditionsTests
         {
             var semverEQCondition = new BaseCondition { Name = "semversion_eq", Value = "3.7.0-beta.2.3", Match = "semver_eq", Type = "custom_attribute" };
             Assert.IsTrue(semverEQCondition.Evaluate(null, new UserAttributes { { "semversion_eq", "3.7.0-beta.2.3" } }, Logger) ?? false);
+        }
+
+        [Test]
+        public void TestSemVerEQTargetBuildIgnores()
+        {
+            var semverEQCondition = new BaseCondition { Name = "semversion_eq", Value = "2.1.3", Match = "semver_eq", Type = "custom_attribute" };
+            Assert.IsTrue(semverEQCondition.Evaluate(null, new UserAttributes { { "semversion_eq", "2.1.3+build" } }, Logger) ?? false);
         }
         #endregion // SemVerEQMatcher Tests
 
