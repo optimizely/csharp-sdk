@@ -238,7 +238,7 @@ namespace OptimizelySDK.XUnitTests
             var expectedValue = optimizelyJSONUsingString.GetValue<Field4>("field4");
 
             Assert.Equal(3, expectedValue.inner_field1);
-            Assert.Equal(new InnerField2() { "1", "2", 3, 4.23, true }, expectedValue.inner_field2);
+            Assert.Equal(new InnerField2() { "1", "2", 3L, 4.23, true }, expectedValue.inner_field2);
         }
 
         [Fact]
