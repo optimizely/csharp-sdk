@@ -32,7 +32,7 @@ namespace OptimizelySDK.XUnitTests.UtilsTests
         public static IEnumerable<object[]> NumericMetricInvalidValueTagData =>
         new List<object[]>
         {
-            new object[] { new Dictionary<string, object>() {{ } } },
+            new object[] { new Dictionary<string, object>() },
             new object[] { new Dictionary<string, object>() {{ "non-value", null } } },
             new object[] { new Dictionary<string, object>() {{ "non-value", 0.5 } } },
             new object[] { new Dictionary<string, object>() {{ "non-value", 12345 } } },
@@ -43,6 +43,16 @@ namespace OptimizelySDK.XUnitTests.UtilsTests
             new object[] { new Dictionary<string, object>() {{ "non-value", new object[] { 'a', 'b', 'c' } } } },
         };
         
+        public static IEnumerable<object[]> NumericMetricValueValidTagData =>
+        new List<object[]>
+        {
+            new object[] { new Dictionary<string, object>() {{ "value", 12345 }}, 12345.0f },
+            new object[] { new Dictionary<string, object>() {{ "value", "12345" }}, 12345.0f },
+            new object[] { new Dictionary<string, object>() {{ "value", 1.2345F }}, 1.2345f },
+            new object[] { new Dictionary<string, object>() {{ "value", float.MaxValue } }, float.MaxValue },
+            new object[] { new Dictionary<string, object>() {{ "value", float.MinValue } }, float.MinValue }
+        };
+
         public static IEnumerable<object[]> InvalidTagsKeyNotDefined =>
         new List<object[]>
         {
