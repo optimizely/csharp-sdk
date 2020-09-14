@@ -32,6 +32,7 @@ namespace OptimizelySDK.XUnitTests.UtilsTests
         public static IEnumerable<object[]> NumericMetricInvalidValueTagData =>
         new List<object[]>
         {
+            new object[] { new Dictionary<string, object>() {{ } } },
             new object[] { new Dictionary<string, object>() {{ "non-value", null } } },
             new object[] { new Dictionary<string, object>() {{ "non-value", 0.5 } } },
             new object[] { new Dictionary<string, object>() {{ "non-value", 12345 } } },

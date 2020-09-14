@@ -138,20 +138,6 @@ namespace OptimizelySDK.XUnitTests.UtilsTests
             //Assert.Null(EventTagUtils.GetEventValue(False));
         }
 
-
-        [Fact]
-        public void TestGetNumericMetricNoValueTag()
-        {
-            // Test that numeric value is not returned when there's no numeric event tag.
-            Assert.Null(EventTagUtils.GetNumericValue(new Dictionary<string, object> { }, Logger));
-            Assert.Null(EventTagUtils.GetNumericValue(new Dictionary<string, object> { { "non-value", 42 } }, Logger));
-
-            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "The numeric metric key is not in event tags."), Times.Exactly(2));
-
-            //Errors for all, because it accepts only dictionary// 
-            //Assert.Null(EventTagUtils.GetEventValue(new object[] { }));
-        }
-
         [Theory]
         [MemberData(nameof(NumericMetricInvalidValueTagData))]
         public void TestGetNumericMetricInvalidValueTag(Dictionary<string, object> tag)
