@@ -193,6 +193,17 @@ namespace OptimizelySDK.Tests
             Assert.AreEqual(actualEventProcessorProps, expectedEventProcessorProps);
             optimizely.Dispose();
         }
-    }
 
+        [Test]
+        public void TestGetFeatureVariableJSONEmptyDatafileTest()
+        {
+            var httpClientMock = new Mock<HttpProjectConfigManager.HttpClient>();
+            var task = TestHttpProjectConfigManagerUtil.MockSendAsync(httpClientMock, TestData.EmptyDatafile, TimeSpan.Zero, System.Net.HttpStatusCode.OK);
+            TestHttpProjectConfigManagerUtil.SetClientFieldValue(httpClientMock.Object);
+
+            var optimizely = OptimizelyFactory.NewDefaultInstance("sdk-key");
+            Assert.Null(optimizely.GetFeatureVariableJSON("no-feature-variable", "no-variable-key", "userId"));
+            optimizely.Dispose();
+        }
+    }
 }

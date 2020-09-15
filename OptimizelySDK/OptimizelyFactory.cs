@@ -72,7 +72,7 @@ namespace OptimizelySDK
 
             if (httpProjectConfigElement == null) return null;
 
-            var errorHandler = new DefaultErrorHandler();
+            var errorHandler = new DefaultErrorHandler(logger, false);
             var eventDispatcher = new DefaultEventDispatcher(logger);
             var builder = new HttpProjectConfigManager.Builder();
             var notificationCenter = new NotificationCenter();
@@ -119,7 +119,7 @@ namespace OptimizelySDK
         public static Optimizely NewDefaultInstance(string sdkKey, string fallback, string datafileAuthToken)
         {
             var logger = OptimizelyLogger ?? new DefaultLogger();
-            var errorHandler = new DefaultErrorHandler();
+            var errorHandler = new DefaultErrorHandler(logger, false);
             var eventDispatcher = new DefaultEventDispatcher(logger);
             var builder = new HttpProjectConfigManager.Builder();
             var notificationCenter = new NotificationCenter();
@@ -151,7 +151,7 @@ namespace OptimizelySDK
         public static Optimizely NewDefaultInstance(string sdkKey, string fallback)
         {
             var logger = OptimizelyLogger ?? new DefaultLogger();
-            var errorHandler = new DefaultErrorHandler();
+            var errorHandler = new DefaultErrorHandler(logger, false);
             var eventDispatcher = new DefaultEventDispatcher(logger);
             var builder = new HttpProjectConfigManager.Builder();
             var notificationCenter = new NotificationCenter();
