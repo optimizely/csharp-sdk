@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2017-2019, Optimizely
+ * Copyright 2017-2020, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ namespace OptimizelySDK.Tests
         private static string unsupportedVersionDatafile = null;
         private static string typedAudienceDatafile = null;
         private static string emptyRolloutDatafile = null;
+        private static string emptyDatafile = null;
 
         public static string Datafile
         {
@@ -56,6 +57,12 @@ namespace OptimizelySDK.Tests
         public static string EmptyRolloutDatafile {
             get {
                 return emptyRolloutDatafile ?? (emptyRolloutDatafile = LoadJsonData("EmptyRolloutRule.json"));
+            }
+        }
+
+        public static string EmptyDatafile {
+            get {
+                return emptyDatafile ?? (emptyDatafile = LoadJsonData("emptydatafile.json"));
             }
         }
 

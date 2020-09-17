@@ -120,6 +120,7 @@
     <EmbeddedResource Include="TestData.json" />
     <EmbeddedResource Include="simple_ab_experiments.json" />
     <EmbeddedResource Include="EmptyRolloutRule.json" />
+    <EmbeddedResource Include="emptydatafile.json" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\OptimizelySDK\OptimizelySDK.csproj">
