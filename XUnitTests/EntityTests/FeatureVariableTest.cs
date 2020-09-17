@@ -21,24 +21,26 @@ namespace OptimizelySDK.XUnitTests.EntityTests
 {
     public class FeatureVariableTest
     {
-        [Fact]
-        public void TestFeatureVariableTypeName()
+        [Theory]
+        [InlineData ("GetFeatureVariableBoolean", FeatureVariable.BOOLEAN_TYPE)]
+        [InlineData ("GetFeatureVariableDouble", FeatureVariable.DOUBLE_TYPE)]
+        [InlineData ("GetFeatureVariableInteger", FeatureVariable.INTEGER_TYPE)]
+        [InlineData ("GetFeatureVariableString", FeatureVariable.STRING_TYPE)]
+        [InlineData ("GetFeatureVariableJSON", FeatureVariable.JSON_TYPE)]
+        public void TestFeatureVariableTypeName(string typeNameStr, string typeNameConst)
         {
-            Assert.Equal("GetFeatureVariableBoolean", FeatureVariable.GetFeatureVariableTypeName(FeatureVariable.BOOLEAN_TYPE));
-            Assert.Equal("GetFeatureVariableDouble", FeatureVariable.GetFeatureVariableTypeName(FeatureVariable.DOUBLE_TYPE));
-            Assert.Equal("GetFeatureVariableInteger", FeatureVariable.GetFeatureVariableTypeName(FeatureVariable.INTEGER_TYPE));
-            Assert.Equal("GetFeatureVariableString", FeatureVariable.GetFeatureVariableTypeName(FeatureVariable.STRING_TYPE));
-            Assert.Equal("GetFeatureVariableJSON", FeatureVariable.GetFeatureVariableTypeName(FeatureVariable.JSON_TYPE));
+            Assert.Equal(typeNameStr, FeatureVariable.GetFeatureVariableTypeName(typeNameConst));
         }
 
-        [Fact]
-        public void TestConstantValues()
+        [Theory]
+        [InlineData("boolean", FeatureVariable.BOOLEAN_TYPE)]
+        [InlineData("double", FeatureVariable.DOUBLE_TYPE)]
+        [InlineData("integer", FeatureVariable.INTEGER_TYPE)]
+        [InlineData("string", FeatureVariable.STRING_TYPE)]
+        [InlineData("json", FeatureVariable.JSON_TYPE)]
+        public void TestConstantValues(string typeNameStr, string typeNameConst)
         {
-            Assert.Equal("boolean", FeatureVariable.BOOLEAN_TYPE);
-            Assert.Equal("double", FeatureVariable.DOUBLE_TYPE);
-            Assert.Equal("integer", FeatureVariable.INTEGER_TYPE);
-            Assert.Equal("string", FeatureVariable.STRING_TYPE);
-            Assert.Equal("json", FeatureVariable.JSON_TYPE);
+            Assert.Equal(typeNameStr, typeNameConst);
         }
     }
 }

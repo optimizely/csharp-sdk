@@ -31,7 +31,7 @@ namespace OptimizelySDK.XUnitTests.Utils
     {
         public static Task MockSendAsync(Mock<HttpProjectConfigManager.HttpClient> HttpClientMock, string datafile = null, TimeSpan? delay=null, HttpStatusCode statusCode = HttpStatusCode.OK)
         {
-            var t = new System.Threading.Tasks.TaskCompletionSource<bool>();
+            var t = new TaskCompletionSource<bool>();
 
             HttpClientMock.Setup(_ => _.SendAsync(It.IsAny<System.Net.Http.HttpRequestMessage>()))
                 .Returns(() => {

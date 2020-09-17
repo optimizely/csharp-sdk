@@ -19,7 +19,6 @@ using OptimizelySDK.Config;
 using OptimizelySDK.Entity;
 using OptimizelySDK.Logger;
 using OptimizelySDK.Utils;
-using OptimizelySDK.XUnitTests;
 using Xunit;
 
 namespace OptimizelySDK.XUnitTests.UtilsTests
