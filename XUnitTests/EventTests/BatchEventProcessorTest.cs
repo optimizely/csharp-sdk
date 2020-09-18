@@ -84,7 +84,7 @@ namespace OptimizelySDK.XUnitTests.EventTests
             Thread.Sleep(1500);
             
             Assert.True(eventDispatcher.CompareEvents());
-            Assert.Equal(0, EventProcessor.EventQueue.Count);
+            Assert.Empty(EventProcessor.EventQueue);
         }
 
         [Fact]
@@ -102,7 +102,7 @@ namespace OptimizelySDK.XUnitTests.EventTests
 
             Assert.True(eventDispatcher.CompareEvents());
             Assert.True(countdownEvent.Wait(TimeSpan.FromMilliseconds(MAX_DURATION_MS * 3)), "Exceeded timeout waiting for notification.");
-            Assert.Equal(0, EventProcessor.EventQueue.Count);
+            Assert.Empty(EventProcessor.EventQueue);
         }
 
         [Fact]
@@ -123,7 +123,7 @@ namespace OptimizelySDK.XUnitTests.EventTests
 
             Assert.True(eventDispatcher.CompareEvents());
             countdownEvent.Wait();
-            Assert.Equal(0, EventProcessor.EventQueue.Count);
+            Assert.Empty(EventProcessor.EventQueue);
 
             LoggerMock.Verify(l => l.Log(LogLevel.ERROR, It.IsAny<string>()), Times.Never);
         }
@@ -148,7 +148,7 @@ namespace OptimizelySDK.XUnitTests.EventTests
 
             Assert.True(eventDispatcher.CompareEvents());
             Assert.True(countdownEvent.Wait(TimeSpan.FromMilliseconds(MAX_DURATION_MS / 2)), "Exceeded timeout waiting for notification.");
-            Assert.Equal(0, EventProcessor.EventQueue.Count);
+            Assert.Empty(EventProcessor.EventQueue);
         }
 
         [Fact]
@@ -222,7 +222,7 @@ namespace OptimizelySDK.XUnitTests.EventTests
 
             Assert.True(eventDispatcher.CompareEvents());
             Assert.True(countdownEvent.Wait(TimeSpan.FromMilliseconds(MAX_DURATION_MS * 3)), "Exceeded timeout waiting for notification.");
-            Assert.Equal(0, EventProcessor.EventQueue.Count);
+            Assert.Empty(EventProcessor.EventQueue);
         }
 
         [Fact]
@@ -312,7 +312,6 @@ namespace OptimizelySDK.XUnitTests.EventTests
         public void TestCloseTimeout()
         {
             var countdownEvent = new CountdownEvent(1);
-            var eventDispatcher = new CountdownEventDispatcher { CountdownEvent = countdownEvent };
             SetEventProcessor(EventDispatcherMock.Object);
 
             UserEvent userEvent = BuildConversionEvent(EventName);
