@@ -94,6 +94,12 @@ jobs:
         - dotnet build OptimizelySDK.NetStandard20/OptimizelySDK.NetStandard20.csproj /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=$TRAVIS_BUILD_DIR/keypair.snk -c Release
         # TODO: no dotnet test yet for NetStandard16
       after_success:
+        # Coveralls support
+        - .\packages\OpenCover.4.6.519\tools\OpenCover.Console.exe -register:user -target:xunit.console.clr4.exe "-targetargs:""XUnitTests\bin\Release\netcoreapp3.1\OptimizelySDK.XUnitTests.dll"" /noshadow /travis" -filter:"+[OptimizelySDK*]*" -output:opencoverCoverage.xml
+        - $coveralls = (Resolve-Path "packages/coveralls.net.*/tools/csmacnz.coveralls.exe").ToString()
+        - $coveralls --opencover -i opencoverCoverage.xml --repoToken ${COVERALLS_REPO_TOKEN} --commitId ${TRAVIS_COMMIT} --commitBranch ${TRAVIS_BRANCH} --commitMessage ${TRAVIS_COMMIT_MESSAGE} --jobId ${TRAVIS_BUILD_ID}
+
+
         - pip install --user awscli
         # upload dll build artifacts to s3 with -unsigned suffix
         - ([ ${TRAVIS_BRANCH} = "$RELEASE_BRANCH" ] && [ ${TRAVIS_EVENT_TYPE} = "push" ]) && (AWS_ACCESS_KEY_ID=$OFTA_KEY AWS_SECRET_ACCESS_KEY=$OFTA_SECRET AWS_DEFAULT_REGION=$OFTA_REGION aws s3 cp ./OptimizelySDK.NetStandard20/bin/Release/netstandard2.0/OptimizelySDK.NetStandard20.dll s3://optly-fs-travisci-artifacts/${TRAVIS_REPO_SLUG}/${TRAVIS_BUILD_NUMBER}/${TRAVIS_JOB_NUMBER}/OptimizelySDK.NetStandard20.dll-unsigned)        
