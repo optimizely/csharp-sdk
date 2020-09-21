@@ -82,7 +82,7 @@ jobs:
       after_success:
         # Coveralls support
         - .\packages\OpenCover.4.6.166\tools\OpenCover.Console.exe -register:user -target:xunit.console.clr4.exe "-targetargs:""XUnitTests\bin\Release\netcoreapp3.1\OptimizelySDK.XUnitTests.dll"" /noshadow /travis" -filter:"+[OptimizelySDK*]*" -output:opencoverCoverage.xml
-        - $coveralls = (Resolve-Path "packages/coveralls.net.*/tools/csmacnz.coveralls.exe").ToString()
+        - export coveralls=./packages/coveralls.net.0.7.0/tools/csmacnz.coveralls.exe
         - $coveralls --opencover -i opencoverCoverage.xml --repoToken ${COVERALLS_REPO_TOKEN} --commitId ${TRAVIS_COMMIT} --commitBranch ${TRAVIS_BRANCH} --commitMessage ${TRAVIS_COMMIT_MESSAGE} --jobId ${TRAVIS_BUILD_ID}
         - pip install --user awscli
         # upload dll build artifacts to s3 with -unsigned suffix
