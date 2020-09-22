@@ -12,13 +12,13 @@ jobs:
   include:
     - stage: 'XUnit Tests'
       language: csharp
-      solution: "./OptimizelySDK.sln"
+      solution: "./OptimizelySDK.Travis.sln"
       install:
-        - nuget restore ./OptimizelySDK.sln
+        - nuget restore ./OptimizelySDK.Travis.sln
         - nuget install xunit.runners -Version 1.9.2 -OutputDirectory testrunner
         - nuget install OpenCover -OutputDirectory packages -Version 4.6.166
       script:
-        - xbuild /p:Configuration=Release OptimizelySDK.sln
+        - msbuild /p:Configuration=Release OptimizelySDK.Travis.sln
         - ls ./
         - ls ./XUnitTests
         - ls ./XUnitTests/bin
