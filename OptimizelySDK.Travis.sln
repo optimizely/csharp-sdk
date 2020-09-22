@@ -5,7 +5,7 @@ VisualStudioVersion = 15.0.26403.7
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OptimizelySDK.Tests", "OptimizelySDK.Tests\OptimizelySDK.Tests.csproj", "{DB8A546D-DBB3-441A-8687-A5D90B469027}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OptimizelySDK.XUnitTests", "XUnitTests\OptimizelySDK.XUnitTests.csproj", "{087467A4-81E8-4916-8525-D624B398D5E5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OptimizelySDK.XUnitTests", "XUnitTests\OptimizelySDK.XUnitTests.csproj", "{087467A4-81E8-4916-8525-D624B398D5E5}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OptimizelySDK", "OptimizelySDK\OptimizelySDK.csproj", "{4DDE7FAA-110D-441C-AB3B-3F31B593E8BF}"
 EndProject

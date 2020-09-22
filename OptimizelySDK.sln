@@ -31,7 +31,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OptimizelySDK.Net40", "Opti
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OptimizelySDK.NetStandard20", "OptimizelySDK.NetStandard20\OptimizelySDK.NetStandard20.csproj", "{CFEC91C6-B6E5-45D5-97D6-7081B0DC7453}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OptimizelySDK.XUnitTests", "XUnitTests\OptimizelySDK.XUnitTests.csproj", "{087467A4-81E8-4916-8525-D624B398D5E5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OptimizelySDK.XUnitTests", "XUnitTests\OptimizelySDK.XUnitTests.csproj", "{087467A4-81E8-4916-8525-D624B398D5E5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
