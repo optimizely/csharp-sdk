@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26430.16
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30011.22
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OptimizelySDK.DemoApp", "OptimizelySDK.DemoApp\OptimizelySDK.DemoApp.csproj", "{9394F666-6397-41C0-8867-C3E4DA9156E3}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -16,11 +16,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		CHANGELOG.MD = CHANGELOG.MD
 		CONTRIBUTING.md = CONTRIBUTING.md
+		keypair.snk = keypair.snk
 		OptimizelySDK.Package\OptimizelySDK.nuspec = OptimizelySDK.Package\OptimizelySDK.nuspec
 		OptimizelySDK.Package\pack.ps1 = OptimizelySDK.Package\pack.ps1
 		README.md = README.md
 		OptimizelySDK.Package\verifysn.ps1 = OptimizelySDK.Package\verifysn.ps1
-		keypair.snk = keypair.snk
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OptimizelySDK.NetStandard16", "OptimizelySDK.NetStandard16\OptimizelySDK.NetStandard16.csproj", "{EDCF3773-56E7-416E-A379-B6999A8D8570}"
