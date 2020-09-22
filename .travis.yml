@@ -12,14 +12,12 @@ jobs:
   include:
     - stage: 'XUnit Tests'
       language: csharp
-      dist: xenial
-      mono: 5.2.0
       solution: "./OptimizelySDK.Travis.sln"
       install:
         - nuget restore ./OptimizelySDK.Travis.sln
         - nuget install xunit.runners -Version 1.9.2 -OutputDirectory ./testrunner
       script:
-        - msbuild /p:Configuration=Debug OptimizelySDK.Travis.sln
+        - msbuild /p:Configuration=Release OptimizelySDK.Travis.sln
         - mono ./testrunner/xunit.runners.1.9.2/tools/xunit.console.clr4.exe ./XUnitTests/bin/Debug/netcoreapp3.1/OptimizelySDK.XUnitTests.dll
       after_success:
         # Coveralls support
