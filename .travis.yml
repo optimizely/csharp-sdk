@@ -19,6 +19,7 @@ jobs:
         - nuget install OpenCover -OutputDirectory packages -Version 4.6.166
       script:
         - xbuild /p:Configuration=Release OptimizelySDK.Travis.sln
+        - ls ./
         - ls ./XUnitTests/bin
         - ls ./XUnitTests/bin/Debug
         - mono ./testrunner/xunit.runners.1.9.2/tools/xunit.console.clr4.exe ./XUnitTests/bin/Debug/netcoreapp3.1/OptimizelySDK.XUnitTests.dll
