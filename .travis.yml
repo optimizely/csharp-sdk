@@ -22,8 +22,8 @@ jobs:
         - ls ./
         - ls ./XUnitTests
         - ls ./XUnitTests/bin
-        - ls ./XUnitTests/bin/Debug
-        - mono ./testrunner/xunit.runners.1.9.2/tools/xunit.console.clr4.exe ./XUnitTests/bin/Debug/netcoreapp3.1/OptimizelySDK.XUnitTests.dll
+        - ls ./XUnitTests/bin/Release
+        - mono ./testrunner/xunit.runners.1.9.2/tools/xunit.console.clr4.exe ./XUnitTests/bin/Release/netcoreapp3.1/OptimizelySDK.XUnitTests.dll
       after_success:
         # Coveralls support
         - .\packages\OpenCover.4.6.166\tools\OpenCover.Console.exe -register:user -target:xunit.console.clr4.exe "-targetargs:""XUnitTests\bin\Release\netcoreapp3.1\OptimizelySDK.XUnitTests.dll"" /noshadow /travis" -filter:"+[OptimizelySDK*]*" -output:opencoverCoverage.xml
