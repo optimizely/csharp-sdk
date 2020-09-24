@@ -252,7 +252,7 @@ namespace OptimizelySDK
                 return null;
             }
 
-            SendImpressionEvent(experiment, variation, userId, userAttributes, config);
+            SendImpressionEvent(experiment, variation, userId, userAttributes, config, experimentKey, "experiment");
 
             return variation;
         }
@@ -470,17 +470,18 @@ namespace OptimizelySDK
             bool featureEnabled = false;
             var sourceInfo = new Dictionary<string, string>();
             var decision = DecisionService.GetVariationForFeature(featureFlag, userId, config, userAttributes);
+            var variation = decision.Variation;
 
-            if (decision.Variation != null)
+            SendImpressionEvent(decision.Experiment, variation, userId, userAttributes, config, featureKey, decision.Source);
+
+            if (variation != null)
             {
-                var variation = decision.Variation;
                 featureEnabled = variation.FeatureEnabled.GetValueOrDefault();
 
                 if (decision.Source == FeatureDecision.DECISION_SOURCE_FEATURE_TEST)
                 {
                     sourceInfo["experimentKey"] = decision.Experiment.Key;
                     sourceInfo["variationKey"] = variation.Key;
-                    SendImpressionEvent(decision.Experiment, variation, userId, userAttributes, config);
                 }
                 else
                 {
@@ -684,11 +685,12 @@ namespace OptimizelySDK
         /// <param name="userId">The user ID</param>
         /// <param name="userAttributes">The user's attributes</param>
         private void SendImpressionEvent(Experiment experiment, Variation variation, string userId,
-                                         UserAttributes userAttributes, ProjectConfig config)
+                                         UserAttributes userAttributes, ProjectConfig config,
+                                         string flagKey, string flagType)
         {
             if (experiment.IsExperimentRunning)
             {
-                var userEvent = UserEventFactory.CreateImpressionEvent(config, experiment, variation.Id, userId, userAttributes);
+                var userEvent = UserEventFactory.CreateImpressionEvent(config, experiment, variation.Id, userId, userAttributes, flagKey, flagType);
                 EventProcessor.Process(userEvent);
                 Logger.Log(LogLevel.INFO, $"Activating user {userId} in experiment {experiment.Key}.");
 

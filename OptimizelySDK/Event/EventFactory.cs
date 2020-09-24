@@ -115,7 +115,8 @@ namespace OptimizelySDK.Event
 
             Decision decision = new Decision(impressionEvent.Experiment?.LayerId,
                 impressionEvent.Experiment?.Id,
-                impressionEvent.Variation?.Id);
+                impressionEvent.Variation?.Id,
+                impressionEvent.Metadata);
 
             SnapshotEvent snapshotEvent = new SnapshotEvent.Builder()
                 .WithUUID(impressionEvent.UUID)

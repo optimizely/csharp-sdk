@@ -23,15 +23,17 @@ namespace OptimizelySDK.Event.Entity
         public string CampaignId { get; private set; }
         [JsonProperty("experiment_id")]
         public string ExperimentId { get; private set; }
+        [JsonProperty("metadata")]
+        public DecisionMetadata Metadata { get; private set; }
         [JsonProperty("variation_id")]
         public string VariationId { get; private set; }
-
         public Decision() {}
 
-        public Decision(string campaignId, string experimentId, string variationId)
+        public Decision(string campaignId, string experimentId, string variationId, DecisionMetadata metadata)
         {
             CampaignId = campaignId;
             ExperimentId = experimentId;
+            Metadata = metadata;
             VariationId = variationId;
         }
     }

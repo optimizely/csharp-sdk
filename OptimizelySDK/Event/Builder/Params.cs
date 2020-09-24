@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+using OptimizelySDK.Event.Entity;
 using System;
 
 namespace OptimizelySDK.Event.Builder
@@ -30,6 +31,7 @@ namespace OptimizelySDK.Event.Builder
         public const string ENTITY_ID           = "entity_id";
         public const string EVENTS              = "events";
         public const string EXPERIMENT_ID       = "experiment_id";
+        public const string METADATA            = "metadata";
         public const string PROJECT_ID          = "project_id";
         public const string REVISION            = "revision";
         public const string TIME                = "timestamp";

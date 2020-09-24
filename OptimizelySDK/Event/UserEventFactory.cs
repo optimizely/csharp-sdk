@@ -21,10 +21,12 @@ namespace OptimizelySDK.Event
                                                             Experiment activatedExperiment,
                                                             string variationId,
                                                             string userId,
-                                                            UserAttributes userAttributes)
+                                                            UserAttributes userAttributes,
+                                                            string flagKey,
+                                                            string flagType)
         {
             Variation variation = projectConfig.GetVariationFromId(activatedExperiment?.Key, variationId);
-            return CreateImpressionEvent(projectConfig, activatedExperiment, variation, userId, userAttributes);
+            return CreateImpressionEvent(projectConfig, activatedExperiment, variation, userId, userAttributes, flagKey, flagType);
         }
 
         /// <summary>
@@ -35,12 +37,16 @@ namespace OptimizelySDK.Event
         /// <param name="variation">The variation entity</param>
         /// <param name="userId">The user Id</param>
         /// <param name="userAttributes">The user's attributes</param>
+        /// <param name="flagKey">experiment key or feature key</param>
+        /// <param name="flagType">experiment or featureDecision source </param>
         /// <returns>ImpressionEvent instance</returns>
         public static ImpressionEvent CreateImpressionEvent(ProjectConfig projectConfig,
                                                             Experiment activatedExperiment,
                                                             Variation variation,
                                                             string userId,
-                                                            UserAttributes userAttributes)
+                                                            UserAttributes userAttributes,
+                                                            string flagKey,
+                                                            string flagType)
         {
 
             var eventContext = new EventContext.Builder()
@@ -50,10 +56,14 @@ namespace OptimizelySDK.Event
                 .WithRevision(projectConfig.Revision)                
                 .Build();
 
+            var variationKey = variation?.Key;
+            var metadata = new DecisionMetadata(flagKey, flagType, variationKey);
+
             return new ImpressionEvent.Builder()
                 .WithEventContext(eventContext)
                 .WithBotFilteringEnabled(projectConfig.BotFiltering)
                 .WithExperiment(activatedExperiment)
+                .WithMetadata(metadata)
                 .WithUserId(userId)
                 .WithVariation(variation)
                 .WithVisitorAttributes(EventFactory.BuildAttributeList(userAttributes, projectConfig))

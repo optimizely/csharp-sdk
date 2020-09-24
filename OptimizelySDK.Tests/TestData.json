@@ -565,7 +565,7 @@
 					"key": "integer_variable",
 					"type": "integer",
 					"defaultValue": "7"
-				}				
+				}
 			]
 		},
 		{
@@ -940,5 +940,6 @@
 	],
 	"revision": "15",
 	"anonymizeIP": false,
+	"sendFlagDecisions": true,
 	"botFiltering": true
 }
