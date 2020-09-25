@@ -1,4 +1,5 @@
-﻿using OptimizelySDK.Entity;
+﻿using OptimizelySDK.Bucketing;
+using OptimizelySDK.Entity;
 using OptimizelySDK.Event.Entity;
 
 namespace OptimizelySDK.Event
@@ -48,13 +49,17 @@ namespace OptimizelySDK.Event
                                                             string flagKey,
                                                             string flagType)
         {
-
+            if ((flagType == FeatureDecision.DECISION_SOURCE_ROLLOUT || variation == null) && !projectConfig.SendFlagDecisions)
+            {
+                return null;
+            }
+            
             var eventContext = new EventContext.Builder()
-                .WithProjectId(projectConfig.ProjectId)
-                .WithAccountId(projectConfig.AccountId)
-                .WithAnonymizeIP(projectConfig.AnonymizeIP)
-                .WithRevision(projectConfig.Revision)                
-                .Build();
+            .WithProjectId(projectConfig.ProjectId)
+            .WithAccountId(projectConfig.AccountId)
+            .WithAnonymizeIP(projectConfig.AnonymizeIP)
+            .WithRevision(projectConfig.Revision)                
+            .Build();
 
             var variationKey = variation?.Key;
             var metadata = new DecisionMetadata(flagKey, flagType, variationKey);

@@ -478,6 +478,8 @@ namespace OptimizelySDK
             {
                 featureEnabled = variation.FeatureEnabled.GetValueOrDefault();
 
+                // This information is only necessary for feature tests.
+                // For rollouts experiments and variations are an implementation detail only.
                 if (decision.Source == FeatureDecision.DECISION_SOURCE_FEATURE_TEST)
                 {
                     sourceInfo["experimentKey"] = decision.Experiment.Key;
@@ -691,6 +693,10 @@ namespace OptimizelySDK
             if (experiment.IsExperimentRunning)
             {
                 var userEvent = UserEventFactory.CreateImpressionEvent(config, experiment, variation.Id, userId, userAttributes, flagKey, flagType);
+                if (userEvent == null)
+                {
+                    return;
+                }
                 EventProcessor.Process(userEvent);
                 Logger.Log(LogLevel.INFO, $"Activating user {userId} in experiment {experiment.Key}.");
 
