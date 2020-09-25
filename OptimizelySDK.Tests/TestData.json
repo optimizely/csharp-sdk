@@ -565,7 +565,7 @@
 					"key": "integer_variable",
 					"type": "integer",
 					"defaultValue": "7"
-				}
+				}					
 			]
 		},
 		{
