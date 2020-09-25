@@ -120,7 +120,7 @@ namespace OptimizelySDK.Event
 
             SnapshotEvent snapshotEvent = new SnapshotEvent.Builder()
                 .WithUUID(impressionEvent.UUID)
-                .WithEntityId(impressionEvent.Experiment.LayerId)
+                .WithEntityId(impressionEvent.Experiment?.LayerId)
                 .WithKey(ACTIVATE_EVENT_KEY)
                 .WithTimeStamp(impressionEvent.Timestamp)
                 .Build();

@@ -690,29 +690,27 @@ namespace OptimizelySDK
                                          UserAttributes userAttributes, ProjectConfig config,
                                          string flagKey, string flagType)
         {
-            if (experiment.IsExperimentRunning)
-            {
-                var userEvent = UserEventFactory.CreateImpressionEvent(config, experiment, variation.Id, userId, userAttributes, flagKey, flagType);
-                if (userEvent == null)
-                {
-                    return;
-                }
-                EventProcessor.Process(userEvent);
-                Logger.Log(LogLevel.INFO, $"Activating user {userId} in experiment {experiment.Key}.");
-
-                // Kept For backwards compatibility.
-                // This notification is deprecated and the new DecisionNotifications
-                // are sent via their respective method calls.
-                if (NotificationCenter.GetNotificationCount(NotificationCenter.NotificationType.Activate) > 0)
-                {
-                    var impressionEvent = EventFactory.CreateLogEvent(userEvent, Logger);
-                    NotificationCenter.SendNotifications(NotificationCenter.NotificationType.Activate, experiment, userId,
-                    userAttributes, variation, impressionEvent);
-                }
-            }
-            else
+            if (experiment != null && !experiment.IsExperimentRunning)
             {
                 Logger.Log(LogLevel.ERROR, @"Experiment has ""Launched"" status so not dispatching event during activation.");
+            }
+            
+            var userEvent = UserEventFactory.CreateImpressionEvent(config, experiment, variation, userId, userAttributes, flagKey, flagType);
+            if (userEvent == null)
+            {
+                return;
+            }
+            EventProcessor.Process(userEvent);
+            //Logger.Log(LogLevel.INFO, $"Activating user {userId} in experiment {experiment.Key}.");
+
+            // Kept For backwards compatibility.
+            // This notification is deprecated and the new DecisionNotifications
+            // are sent via their respective method calls.
+            if (NotificationCenter.GetNotificationCount(NotificationCenter.NotificationType.Activate) > 0)
+            {
+                var impressionEvent = EventFactory.CreateLogEvent(userEvent, Logger);
+                NotificationCenter.SendNotifications(NotificationCenter.NotificationType.Activate, experiment, userId,
+                userAttributes, variation, impressionEvent);
             }
         }
 

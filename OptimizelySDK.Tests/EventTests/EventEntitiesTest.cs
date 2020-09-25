@@ -104,7 +104,7 @@ namespace OptimizelySDK.Tests.EventTests
                 .WithTimeStamp(timeStamp)
                 .WithEventTags(null)
                 .Build();
-            
+            var metadata = new DecisionMetadata("experiment", "7716830082");
             var decision = new Decision("7719770039", "7716830082", "77210100090");
             var snapshot = new Snapshot(events: new SnapshotEvent[] { snapshotEvent }, decisions: new Decision[] { decision });
 

@@ -123,16 +123,11 @@ namespace OptimizelySDK.Event.Builder
         }
 
         private Dictionary<string, object> GetImpressionParams(Experiment experiment,
-            string variationId,
-            string flagKey,
-            string flagType)
+            string variationId)
         {
 
             var impressionEvent = new Dictionary<string, object>();
             
-            string variationKey = variationId != null ? experiment.VariationIdToVariationMap[variationId].Key : null;
-            var metadata = new DecisionMetadata(flagKey, flagType, variationKey);
-
             var decisions = new object[]
             {
                     new Dictionary<string, object>
@@ -140,7 +135,6 @@ namespace OptimizelySDK.Event.Builder
                         { Params.CAMPAIGN_ID,   experiment.LayerId },
                         { Params.EXPERIMENT_ID, experiment.Id },
                         { Params.VARIATION_ID,  variationId },
-                        { Params.METADATA,  metadata }
                     }
             };
 
@@ -224,11 +218,11 @@ namespace OptimizelySDK.Event.Builder
         /// <param name="userAttributes">associative array of attributes for the user</param>
         /// <returns>LogEvent object to be sent to dispatcher</returns>
         public virtual LogEvent CreateImpressionEvent(ProjectConfig config, Experiment experiment, string variationId,
-            string userId, UserAttributes userAttributes, string flagKey, string flagType)
+            string userId, UserAttributes userAttributes)
         {
 
             var commonParams = GetCommonParams(config, userId, userAttributes ?? new UserAttributes());
-            var impressionOnlyParams = GetImpressionParams(experiment, variationId, flagKey, flagType);
+            var impressionOnlyParams = GetImpressionParams(experiment, variationId);
 
             var impressionParams = GetImpressionOrConversionParamsWithCommonParams(commonParams, new object[] { impressionOnlyParams });
 

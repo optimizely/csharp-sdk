@@ -32,7 +32,7 @@ namespace OptimizelySDK.Tests.EventTests
             var variation = Config.GetVariationFromId(experiment.Key, "77210100090");
             var userId = TestUserId;
 
-            var impressionEvent = UserEventFactory.CreateImpressionEvent(projectConfig, experiment, variation, userId, null);
+            var impressionEvent = UserEventFactory.CreateImpressionEvent(projectConfig, experiment, variation, userId, null, "test_experiment", "experiment");
 
             Assert.AreEqual(Config.ProjectId, impressionEvent.Context.ProjectId);
             Assert.AreEqual(Config.Revision, impressionEvent.Context.Revision);
@@ -58,7 +58,7 @@ namespace OptimizelySDK.Tests.EventTests
                 { "company", "Optimizely" }
             };
 
-            var impressionEvent = UserEventFactory.CreateImpressionEvent(projectConfig, experiment, variation, userId, userAttributes);
+            var impressionEvent = UserEventFactory.CreateImpressionEvent(projectConfig, experiment, variation, userId, userAttributes, "test_experiment", "experiment");
 
             Assert.AreEqual(Config.ProjectId, impressionEvent.Context.ProjectId);
             Assert.AreEqual(Config.Revision, impressionEvent.Context.Revision);

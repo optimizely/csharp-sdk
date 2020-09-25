@@ -24,6 +24,7 @@
 		<Compile Include="..\OptimizelySDK\AudienceConditions\OrCondition.cs" />
 		<Compile Include="..\OptimizelySDK\Entity\Attribute.cs" />
         <Compile Include="..\OptimizelySDK\Entity\Audience.cs" />
+        <Compile Include="..\OptimizelySDK\Entity\DecisionMetadata.cs" />
         <Compile Include="..\OptimizelySDK\Entity\Entity.cs" />
         <Compile Include="..\OptimizelySDK\Entity\Event.cs" />
         <Compile Include="..\OptimizelySDK\Entity\EventTags.cs" />
@@ -120,6 +121,9 @@
 		</Compile>
 		<Compile Include="..\OptimizelySDK\Event\Entity\VisitorAttribute.cs">
 		  <Link>VisitorAttribute.cs</Link>
+		</Compile>
+		<Compile Include="..\OptimizelySDK\Event\Entity\DecisionMetadata.cs">
+		  <Link>DecisionMetadata.cs</Link>
 		</Compile>
 		<Compile Include="..\OptimizelySDK\Event\Entity\Decision.cs">
 		  <Link>DecisionEvent.cs</Link>

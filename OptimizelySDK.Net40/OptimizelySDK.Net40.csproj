@@ -280,6 +280,9 @@
 	<Compile Include="..\OptimizelySDK\Event\Entity\VisitorAttribute.cs">
 	  <Link>Event\Entity\VisitorAttribute.cs</Link>
 	</Compile>
+	<Compile Include="..\OptimizelySDK\Event\Entity\DecisionMetadata.cs">
+	  <Link>Event\Entity\DecisionMetadata.cs</Link>
+	</Compile>
 	<Compile Include="..\OptimizelySDK\Event\EventFactory.cs">
 	  <Link>Event\EventFactory.cs</Link>
 	</Compile>

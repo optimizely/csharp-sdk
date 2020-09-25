@@ -29,7 +29,7 @@ namespace OptimizelySDK.Event.Entity
         public string VariationId { get; private set; }
         public Decision() {}
 
-        public Decision(string campaignId, string experimentId, string variationId, DecisionMetadata metadata)
+        public Decision(string campaignId, string experimentId, string variationId, DecisionMetadata metadata = null)
         {
             CampaignId = campaignId;
             ExperimentId = experimentId;
