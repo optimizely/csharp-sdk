@@ -57,8 +57,9 @@ namespace OptimizelySDK.Tests.EventTests
         public void TestCreateImpressionEventReturnsNullWhenSendFlagDecisionsIsFalseAndVariationIsNull()
         {
             Config.SendFlagDecisions = false;
+            Variation variation = null;
             var impressionEvent = UserEventFactory.CreateImpressionEvent(
-                Config, Config.GetExperimentFromKey("test_experiment"), variation: null, TestUserId, null, "test_experiment", "experiment");
+                Config, Config.GetExperimentFromKey("test_experiment"), variation, TestUserId, null, "test_experiment", "experiment");
             Assert.IsNull(impressionEvent);
         }
 
@@ -592,7 +593,9 @@ namespace OptimizelySDK.Tests.EventTests
                 { "nan", double.NaN },
                 { "invalid_num_value", Math.Pow(2, 53) + 2 },
             };
-            var impressionEvent = UserEventFactory.CreateImpressionEvent(Config, null, variation: null, TestUserId, userAttributes, "test_feature", "rollout");
+            Variation variation = null;
+
+            var impressionEvent = UserEventFactory.CreateImpressionEvent(Config, null, variation, TestUserId, userAttributes, "test_feature", "rollout");
             var logEvent = EventFactory.CreateLogEvent(impressionEvent, Logger);
             
             TestData.ChangeGUIDAndTimeStamp(expectedLogEvent.Params, impressionEvent.Timestamp, Guid.Parse(impressionEvent.UUID));
