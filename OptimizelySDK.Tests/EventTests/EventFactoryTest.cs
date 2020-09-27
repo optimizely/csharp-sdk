@@ -82,10 +82,11 @@ namespace OptimizelySDK.Tests.EventTests
                                                         { "campaign_id", "7719770039" },
                                                         { "experiment_id", "7716830082" },
                                                         { "variation_id", "7722370027" },
-                                                        { "metadata", new Dictionary<string, object> {
-                                                            { "FlagType", "experiment" },
-                                                            { "FlagKey", "test_experiment" },
-                                                            { "VariationKey", "control" }
+                                                        { "metadata",
+                                                            new Dictionary<string, object> {
+                                                            { "flag_type", "experiment" },
+                                                            { "flag_key", "test_experiment" },
+                                                            { "variation_key", "control" }
                                                         } }
                                                     }
                                                 }
@@ -163,9 +164,9 @@ namespace OptimizelySDK.Tests.EventTests
                                                     {"experiment_id", "7716830082" },
                                                     {"variation_id", "7722370027" },
                                                     { "metadata", new Dictionary<string, object> {
-                                                            { "FlagType", "experiment" },
-                                                            { "FlagKey", "test_experiment" },
-                                                            { "VariationKey", "control" }
+                                                            { "flag_type", "experiment" },
+                                                            { "flag_key", "test_experiment" },
+                                                            { "variation_key", "control" }
                                                         }
                                                     }
                                                 }
@@ -262,9 +263,9 @@ namespace OptimizelySDK.Tests.EventTests
                                                     {"experiment_id", "7716830082" },
                                                     {"variation_id", "7722370027" },
                                                     { "metadata", new Dictionary<string, object> {
-                                                            { "FlagType", "experiment" },
-                                                            { "FlagKey", "test_experiment" },
-                                                            { "VariationKey", "control" }
+                                                            { "flag_type", "experiment" },
+                                                            { "flag_key", "test_experiment" },
+                                                            { "variation_key", "control" }
                                                         }
                                                     }
                                                 }
@@ -383,9 +384,9 @@ namespace OptimizelySDK.Tests.EventTests
                                                     {"experiment_id", "7716830082" },
                                                     {"variation_id", "7722370027" },
                                                     { "metadata", new Dictionary<string, object> {
-                                                            { "FlagType", "experiment" },
-                                                            { "FlagKey", "test_experiment" },
-                                                            { "VariationKey", "control" }
+                                                            { "flag_type", "experiment" },
+                                                            { "flag_key", "test_experiment" },
+                                                            { "variation_key", "control" }
                                                         }
                                                     }
                                                 }
@@ -504,10 +505,10 @@ namespace OptimizelySDK.Tests.EventTests
                                                     {"experiment_id", null },
                                                     {"variation_id", null },
                                                     { "metadata", new Dictionary<string, object> {
-                                                            { "FlagType", "rollout" },
-                                                            { "FlagKey", "test_feature" },
-                                                            { "VariationKey", null }
-                                                        } 
+                                                            { "flag_type", "rollout" },
+                                                            { "flag_key", "test_feature" },
+                                                            { "variation_key", null }
+                                                        }
                                                     }
                                                 }
                                             }
@@ -597,7 +598,7 @@ namespace OptimizelySDK.Tests.EventTests
 
             var impressionEvent = UserEventFactory.CreateImpressionEvent(Config, null, variation, TestUserId, userAttributes, "test_feature", "rollout");
             var logEvent = EventFactory.CreateLogEvent(impressionEvent, Logger);
-            
+
             TestData.ChangeGUIDAndTimeStamp(expectedLogEvent.Params, impressionEvent.Timestamp, Guid.Parse(impressionEvent.UUID));
 
             Assert.IsTrue(TestData.CompareObjects(expectedLogEvent, logEvent));
@@ -1517,9 +1518,9 @@ namespace OptimizelySDK.Tests.EventTests
                                                     {"experiment_id", "7716830082" },
                                                     {"variation_id", "7722370027" },
                                                     { "metadata", new Dictionary<string, object> {
-                                                            { "FlagType", "experiment" },
-                                                            { "FlagKey", "test_experiment" },
-                                                            { "VariationKey", "control" }
+                                                            { "flag_type", "experiment" },
+                                                            { "flag_key", "test_experiment" },
+                                                            { "variation_key", "control" }
                                                         }
                                                     }
                                                 }
@@ -1623,9 +1624,9 @@ namespace OptimizelySDK.Tests.EventTests
                                                     {"experiment_id", "7716830082" },
                                                     {"variation_id", "7722370027" },
                                                     { "metadata", new Dictionary<string, object> {
-                                                            { "FlagType", "experiment" },
-                                                            { "FlagKey", "test_experiment" },
-                                                            { "VariationKey", "control" }
+                                                            { "flag_type", "experiment" },
+                                                            { "flag_key", "test_experiment" },
+                                                            { "variation_key", "control" }
                                                         }
                                                     }
                                                 }
@@ -1695,7 +1696,7 @@ namespace OptimizelySDK.Tests.EventTests
 
             var impressionEvent = UserEventFactory.CreateImpressionEvent(botFilteringEnabledConfig, experiment, "7722370027", TestUserId, userAttributes, "test_experiment", "experiment");
             var logEvent = EventFactory.CreateLogEvent(impressionEvent, Logger);
-            
+
             TestData.ChangeGUIDAndTimeStamp(expectedLogEvent.Params, impressionEvent.Timestamp, Guid.Parse(impressionEvent.UUID));
 
             Assert.IsTrue(TestData.CompareObjects(expectedLogEvent, logEvent));
@@ -1725,9 +1726,9 @@ namespace OptimizelySDK.Tests.EventTests
                                                     {"experiment_id", "7716830082" },
                                                     {"variation_id", "7722370027" },
                                                     { "metadata", new Dictionary<string, object> {
-                                                            { "FlagType", "experiment" },
-                                                            { "FlagKey", "test_experiment" },
-                                                            { "VariationKey", "control" }
+                                                            { "flag_type", "experiment" },
+                                                            { "flag_key", "test_experiment" },
+                                                            { "variation_key", "control" }
                                                         }
                                                     }
                                                 }
@@ -1790,7 +1791,7 @@ namespace OptimizelySDK.Tests.EventTests
 
             var impressionEvent = UserEventFactory.CreateImpressionEvent(botFilteringDisabledConfig, experiment, "7722370027", TestUserId, userAttributes, "test_experiment", "experiment");
             var logEvent = EventFactory.CreateLogEvent(impressionEvent, Logger);
-            
+
             TestData.ChangeGUIDAndTimeStamp(expectedLogEvent.Params, impressionEvent.Timestamp, Guid.Parse(impressionEvent.UUID));
 
             Assert.IsTrue(TestData.CompareObjects(expectedLogEvent, logEvent));
@@ -1880,7 +1881,7 @@ namespace OptimizelySDK.Tests.EventTests
 
             var conversionEvent = UserEventFactory.CreateConversionEvent(botFilteringEnabledConfig, "purchase", TestUserId, userAttributes, null);
             var logEvent = EventFactory.CreateLogEvent(conversionEvent, Logger);
-            
+
             TestData.ChangeGUIDAndTimeStamp(expectedEvent.Params, conversionEvent.Timestamp, Guid.Parse(conversionEvent.UUID));
 
             Assert.IsTrue(TestData.CompareObjects(expectedEvent, logEvent));
@@ -1962,7 +1963,7 @@ namespace OptimizelySDK.Tests.EventTests
             botFilteringDisabledConfig.BotFiltering = null;
 
             var conversionEvent = UserEventFactory.CreateConversionEvent(botFilteringDisabledConfig, "purchase", TestUserId, userAttributes, null);
-            var logEvent = EventFactory.CreateLogEvent(conversionEvent, Logger);            
+            var logEvent = EventFactory.CreateLogEvent(conversionEvent, Logger);
 
             TestData.ChangeGUIDAndTimeStamp(expectedEvent.Params, conversionEvent.Timestamp, Guid.Parse(conversionEvent.UUID));
 
@@ -1986,7 +1987,7 @@ namespace OptimizelySDK.Tests.EventTests
                     "111130", new Variation{Id="111131", Key="variation"}
                 }
             };
-            
+
             var payloadParams = new Dictionary<string, object>
                 {
                 {"client_version", Optimizely.SDK_VERSION},
@@ -2187,7 +2188,7 @@ namespace OptimizelySDK.Tests.EventTests
                 {"7716830082", new Variation{Id="7722370027", Key="control"} }
             };
             var conversionEvent = UserEventFactory.CreateConversionEvent(Config, "purchase", TestUserId, userAttributes, null);
-            var logEvent = EventFactory.CreateLogEvent(conversionEvent, Logger);            
+            var logEvent = EventFactory.CreateLogEvent(conversionEvent, Logger);
 
             TestData.ChangeGUIDAndTimeStamp(expectedEvent.Params, conversionEvent.Timestamp, Guid.Parse(conversionEvent.UUID));
             Assert.IsTrue(TestData.CompareObjects(expectedEvent, logEvent));
