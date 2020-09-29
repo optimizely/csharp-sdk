@@ -417,6 +417,14 @@ namespace OptimizelySDK.Tests
             Assert.IsTrue(TestData.CompareObjects(expectedRolloutIdMap, Config.RolloutIdMap));
         }
 
+
+        [Test]
+        public void TestIfSendFlagDecisionKeyIsMissingItShouldReturnFalse()
+        {
+            var tempConfig = DatafileProjectConfig.Create(TestData.SimpleABExperimentsDatafile, LoggerMock.Object, ErrorHandlerMock.Object);
+            Assert.IsFalse(tempConfig.SendFlagDecisions);
+        }
+
         [Test]
         public void TestGetAccountId()
         {
