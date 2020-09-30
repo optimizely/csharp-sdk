@@ -9,11 +9,11 @@ October 2nd, 2020
 - Add support for version audience condition which follows the semantic version (http://semver.org) ([#236](https://github.com/optimizely/csharp-sdk/pull/236), [#242](https://github.com/optimizely/csharp-sdk/pull/242))
 
 - Add support for datafile accessor [#240](https://github.com/optimizely/csharp-sdk/pull/240).
+- `datafileAccessToken` supported from `App.config` ([#237](https://github.com/optimizely/csharp-sdk/pull/237))
+- Audience evaluation logs revised ([#229](https://github.com/optimizely/csharp-sdk/pull/229))
 
 ### Bug Fixes:
 - No rollout rule in datafile, should return false when `IsFeatureEnabled` is called. ([#235](https://github.com/optimizely/csharp-sdk/pull/235))
-- `datafileAccessToken` supported from `App.config` ([#237](https://github.com/optimizely/csharp-sdk/pull/237))
-- Audience evaluation logs revised ([#229](https://github.com/optimizely/csharp-sdk/pull/229))
 - `NewDefaultInstance` method of `OptimizelyFactory` class, set ErrorHandler not to  raise exception while handling error ([#241](https://github.com/optimizely/csharp-sdk/pull/241))
 
 
