@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2017-2020, Optimizely
+ * Copyright 2017-2019, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
  */
 using OptimizelySDK.Bucketing;
 using OptimizelySDK.Entity;
-using OptimizelySDK.Event.Entity;
 using OptimizelySDK.Logger;
 using OptimizelySDK.Utils;
 using System;
@@ -122,19 +121,18 @@ namespace OptimizelySDK.Event.Builder
             return comonParams;
         }
 
-        private Dictionary<string, object> GetImpressionParams(Experiment experiment,
-            string variationId)
+        private Dictionary<string, object> GetImpressionParams(Experiment experiment, string variationId)
         {
 
             var impressionEvent = new Dictionary<string, object>();
-            
+
             var decisions = new object[]
             {
                     new Dictionary<string, object>
                     {
                         { Params.CAMPAIGN_ID,   experiment.LayerId },
                         { Params.EXPERIMENT_ID, experiment.Id },
-                        { Params.VARIATION_ID,  variationId },
+                        { Params.VARIATION_ID,  variationId }
                     }
             };
 
