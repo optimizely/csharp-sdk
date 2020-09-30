@@ -10,12 +10,12 @@ October 1st, 2020
 
 - Add support for datafile accessor [#240](https://github.com/optimizely/csharp-sdk/pull/240).
 - `datafileAccessToken` supported from `App.config` ([#237](https://github.com/optimizely/csharp-sdk/pull/237))
-- Audience evaluation logs revised ([#229](https://github.com/optimizely/csharp-sdk/pull/229))
+
 
 ### Bug Fixes:
 - No rollout rule in datafile, should return false when `IsFeatureEnabled` is called. ([#235](https://github.com/optimizely/csharp-sdk/pull/235))
 - `NewDefaultInstance` method of `OptimizelyFactory` class, set ErrorHandler not to  raise exception while handling error ([#241](https://github.com/optimizely/csharp-sdk/pull/241))
-
+- Audience evaluation logs revised ([#229](https://github.com/optimizely/csharp-sdk/pull/229))
 
 ## 3.5.0
 July 7th, 2020
