@@ -3,7 +3,7 @@
 
 
 ## 3.6.0
-October 2nd, 2020
+October 1st, 2020
 
 ### New Features
 - Add support for version audience condition which follows the semantic version (http://semver.org) ([#236](https://github.com/optimizely/csharp-sdk/pull/236), [#242](https://github.com/optimizely/csharp-sdk/pull/242))
