@@ -701,8 +701,11 @@ namespace OptimizelySDK
                 return;
             }
             EventProcessor.Process(userEvent);
-            //Logger.Log(LogLevel.INFO, $"Activating user {userId} in experiment {experiment.Key}.");
 
+            if (experiment != null)
+            { 
+                Logger.Log(LogLevel.INFO, $"Activating user {userId} in experiment {experiment.Key}.");
+            }
             // Kept For backwards compatibility.
             // This notification is deprecated and the new DecisionNotifications
             // are sent via their respective method calls.
