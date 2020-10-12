@@ -24,17 +24,20 @@ namespace OptimizelySDK.Event.Entity
     /// </summary>
     public class DecisionMetadata
     {
-        [JsonProperty("flag_type")]
-        public string FlagType { get; private set; }
         [JsonProperty("flag_key")]
         public string FlagKey { get; private set; }
+        [JsonProperty("rule_key")]
+        public string RuleKey { get; private set; }
+        [JsonProperty("rule_type")]
+        public string RuleType { get; private set; }
         [JsonProperty("variation_key")]
         public string VariationKey { get; private set; }
 
-        public DecisionMetadata(string flagKey, string flagType, string variationKey = null) 
+        public DecisionMetadata(string flagKey, string ruleKey, string ruleType, string variationKey = "") 
         {
-            FlagType = flagType;
             FlagKey = flagKey;
+            RuleKey = ruleKey;
+            RuleType = ruleType;
             VariationKey = variationKey;
         }
     }

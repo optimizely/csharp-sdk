@@ -40,10 +40,10 @@ namespace OptimizelySDK.Event
                                                             string userId,
                                                             UserAttributes userAttributes,
                                                             string flagKey,
-                                                            string flagType)
+                                                            string ruleType)
         {
             Variation variation = projectConfig.GetVariationFromId(activatedExperiment?.Key, variationId);
-            return CreateImpressionEvent(projectConfig, activatedExperiment, variation, userId, userAttributes, flagKey, flagType);
+            return CreateImpressionEvent(projectConfig, activatedExperiment, variation, userId, userAttributes, flagKey, ruleType);
         }
 
         /// <summary>
@@ -55,7 +55,7 @@ namespace OptimizelySDK.Event
         /// <param name="userId">The user Id</param>
         /// <param name="userAttributes">The user's attributes</param>
         /// <param name="flagKey">experiment key or feature key</param>
-        /// <param name="flagType">experiment or featureDecision source </param>
+        /// <param name="ruleType">experiment or featureDecision source </param>
         /// <returns>ImpressionEvent instance</returns>
         public static ImpressionEvent CreateImpressionEvent(ProjectConfig projectConfig,
                                                             Experiment activatedExperiment,
@@ -63,13 +63,13 @@ namespace OptimizelySDK.Event
                                                             string userId,
                                                             UserAttributes userAttributes,
                                                             string flagKey,
-                                                            string flagType)
+                                                            string ruleType)
         {
-            if ((flagType == FeatureDecision.DECISION_SOURCE_ROLLOUT || variation == null) && !projectConfig.SendFlagDecisions)
+            if ((ruleType == FeatureDecision.DECISION_SOURCE_ROLLOUT || variation == null) && !projectConfig.SendFlagDecisions)
             {
                 return null;
             }
-            
+
             var eventContext = new EventContext.Builder()
             .WithProjectId(projectConfig.ProjectId)
             .WithAccountId(projectConfig.AccountId)
@@ -77,8 +77,16 @@ namespace OptimizelySDK.Event
             .WithRevision(projectConfig.Revision)                
             .Build();
 
-            var variationKey = variation?.Key;
-            var metadata = new DecisionMetadata(flagKey, flagType, variationKey);
+            var variationKey = ""; 
+            var ruleKey = "";   
+            var finalRuleType = "";   
+            if (variation != null)
+            {
+                variationKey = variation.Key;
+                ruleKey = activatedExperiment.Key;
+                finalRuleType = ruleType;
+            }
+            var metadata = new DecisionMetadata(flagKey, ruleKey, finalRuleType, variationKey);
 
             return new ImpressionEvent.Builder()
                 .WithEventContext(eventContext)

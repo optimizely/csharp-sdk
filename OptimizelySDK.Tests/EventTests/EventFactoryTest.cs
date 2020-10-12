@@ -84,7 +84,8 @@ namespace OptimizelySDK.Tests.EventTests
                                                         { "variation_id", "7722370027" },
                                                         { "metadata",
                                                             new Dictionary<string, object> {
-                                                            { "flag_type", "experiment" },
+                                                            { "rule_type", "experiment" },
+                                                            { "rule_key", "test_experiment" },
                                                             { "flag_key", "test_experiment" },
                                                             { "variation_key", "control" }
                                                         } }
@@ -164,7 +165,8 @@ namespace OptimizelySDK.Tests.EventTests
                                                     {"experiment_id", "7716830082" },
                                                     {"variation_id", "7722370027" },
                                                     { "metadata", new Dictionary<string, object> {
-                                                            { "flag_type", "experiment" },
+                                                            { "rule_type", "experiment" },
+                                                            { "rule_key", "test_experiment" },
                                                             { "flag_key", "test_experiment" },
                                                             { "variation_key", "control" }
                                                         }
@@ -263,7 +265,8 @@ namespace OptimizelySDK.Tests.EventTests
                                                     {"experiment_id", "7716830082" },
                                                     {"variation_id", "7722370027" },
                                                     { "metadata", new Dictionary<string, object> {
-                                                            { "flag_type", "experiment" },
+                                                            { "rule_type", "experiment" },
+                                                            { "rule_key", "test_experiment" },
                                                             { "flag_key", "test_experiment" },
                                                             { "variation_key", "control" }
                                                         }
@@ -384,9 +387,10 @@ namespace OptimizelySDK.Tests.EventTests
                                                     {"experiment_id", "7716830082" },
                                                     {"variation_id", "7722370027" },
                                                     { "metadata", new Dictionary<string, object> {
-                                                            { "flag_type", "experiment" },
-                                                            { "flag_key", "test_experiment" },
-                                                            { "variation_key", "control" }
+                                                           { "rule_type", "experiment" },
+                                                           { "rule_key", "test_experiment" },
+                                                           { "flag_key", "test_experiment" },
+                                                           { "variation_key", "control" }
                                                         }
                                                     }
                                                 }
@@ -505,9 +509,10 @@ namespace OptimizelySDK.Tests.EventTests
                                                     {"experiment_id", null },
                                                     {"variation_id", null },
                                                     { "metadata", new Dictionary<string, object> {
-                                                            { "flag_type", "rollout" },
+                                                            { "rule_type", "" },
+                                                            { "rule_key", "" },
                                                             { "flag_key", "test_feature" },
-                                                            { "variation_key", null }
+                                                            { "variation_key", "" }
                                                         }
                                                     }
                                                 }
@@ -1518,7 +1523,8 @@ namespace OptimizelySDK.Tests.EventTests
                                                     {"experiment_id", "7716830082" },
                                                     {"variation_id", "7722370027" },
                                                     { "metadata", new Dictionary<string, object> {
-                                                            { "flag_type", "experiment" },
+                                                            { "rule_type", "experiment" },
+                                                            { "rule_key", "test_experiment" },
                                                             { "flag_key", "test_experiment" },
                                                             { "variation_key", "control" }
                                                         }
@@ -1624,7 +1630,8 @@ namespace OptimizelySDK.Tests.EventTests
                                                     {"experiment_id", "7716830082" },
                                                     {"variation_id", "7722370027" },
                                                     { "metadata", new Dictionary<string, object> {
-                                                            { "flag_type", "experiment" },
+                                                            { "rule_type", "experiment" },
+                                                            { "rule_key", "test_experiment" },
                                                             { "flag_key", "test_experiment" },
                                                             { "variation_key", "control" }
                                                         }
@@ -1726,7 +1733,8 @@ namespace OptimizelySDK.Tests.EventTests
                                                     {"experiment_id", "7716830082" },
                                                     {"variation_id", "7722370027" },
                                                     { "metadata", new Dictionary<string, object> {
-                                                            { "flag_type", "experiment" },
+                                                            { "rule_type", "experiment" },
+                                                            { "rule_key", "test_experiment" },
                                                             { "flag_key", "test_experiment" },
                                                             { "variation_key", "control" }
                                                         }

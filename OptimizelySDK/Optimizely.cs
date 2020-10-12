@@ -688,14 +688,14 @@ namespace OptimizelySDK
         /// <param name="userAttributes">The user's attributes</param>
         private void SendImpressionEvent(Experiment experiment, Variation variation, string userId,
                                          UserAttributes userAttributes, ProjectConfig config,
-                                         string flagKey, string flagType)
+                                         string flagKey, string ruleType)
         {
             if (experiment != null && !experiment.IsExperimentRunning)
             {
                 Logger.Log(LogLevel.ERROR, @"Experiment has ""Launched"" status so not dispatching event during activation.");
             }
             
-            var userEvent = UserEventFactory.CreateImpressionEvent(config, experiment, variation, userId, userAttributes, flagKey, flagType);
+            var userEvent = UserEventFactory.CreateImpressionEvent(config, experiment, variation, userId, userAttributes, flagKey, ruleType);
             if (userEvent == null)
             {
                 return;
