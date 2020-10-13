@@ -79,14 +79,12 @@ namespace OptimizelySDK.Event
 
             var variationKey = ""; 
             var ruleKey = "";   
-            var finalRuleType = "";   
             if (variation != null)
             {
                 variationKey = variation.Key;
                 ruleKey = activatedExperiment.Key;
-                finalRuleType = ruleType;
             }
-            var metadata = new DecisionMetadata(flagKey, ruleKey, finalRuleType, variationKey);
+            var metadata = new DecisionMetadata(flagKey, ruleKey, ruleType, variationKey);
 
             return new ImpressionEvent.Builder()
                 .WithEventContext(eventContext)
