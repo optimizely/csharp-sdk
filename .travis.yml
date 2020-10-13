@@ -12,24 +12,26 @@ jobs:
   include:
     - stage: 'XUnit Tests'
       language: csharp
+      
       solution: "./OptimizelySDK.Travis.sln"
       install:
-        - nuget restore ./OptimizelySDK.Travis.sln
-        - nuget install xunit.runners -Version 1.9.2 -OutputDirectory testrunner
-        - nuget install OpenCover -OutputDirectory packages -Version 4.6.166
+        - dotnet restore ./OptimizelySDK.Travis.sln
+#        - nuget install xunit.runners -Version 1.9.2 -OutputDirectory testrunner
+#        - nuget install OpenCover -OutputDirectory packages -Version 4.6.166
       script:
-        - msbuild /p:Configuration=Release OptimizelySDK.Travis.sln
+#        - msbuild /p:Configuration=Release OptimizelySDK.Travis.sln
         - ls ./
+        - dotnet test XUnitTests/OptimizelySDK.XUnitTests.csproj -c Release
         - ls ./XUnitTests
         - ls ./XUnitTests/bin
         - ls ./XUnitTests/bin/Release
-        - mono ./testrunner/xunit.runners.1.9.2/tools/xunit.console.clr4.exe ./XUnitTests/bin/Release/netcoreapp3.1/OptimizelySDK.XUnitTests.dll
-      after_success:
-        # Coveralls support
-        - .\packages\OpenCover.4.6.166\tools\OpenCover.Console.exe -register:user -target:xunit.console.clr4.exe "-targetargs:""XUnitTests\bin\Release\netcoreapp3.1\OptimizelySDK.XUnitTests.dll"" /noshadow /travis" -filter:"+[OptimizelySDK*]*" -output:opencoverCoverage.xml
-        - export coveralls=./packages/coveralls.net.0.7.0/tools/csmacnz.coveralls.exe
-        - $coveralls --opencover -i opencoverCoverage.xml --repoToken ${COVERALLS_REPO_TOKEN} --commitId ${TRAVIS_COMMIT} --commitBranch ${TRAVIS_BRANCH} --commitMessage ${TRAVIS_COMMIT_MESSAGE} --jobId ${TRAVIS_BUILD_ID}
-        - pip install --user awscli
-        # upload dll build artifacts to s3 with -unsigned suffix
-        - ([ ${TRAVIS_BRANCH} = "$RELEASE_BRANCH" ] && [ ${TRAVIS_EVENT_TYPE} = "push" ]) && find . -path './OptimizelySDK*bin/Release/OptimizelySDK*.dll' -not -regex '.*Tests.*' -print0 | while IFS= read -r -d '' file; do (AWS_ACCESS_KEY_ID=$OFTA_KEY AWS_SECRET_ACCESS_KEY=$OFTA_SECRET AWS_DEFAULT_REGION=$OFTA_REGION aws s3 cp $file s3://optly-fs-travisci-artifacts/${TRAVIS_REPO_SLUG}/${TRAVIS_BUILD_NUMBER}/${TRAVIS_JOB_NUMBER}/$(basename $file)-unsigned); done
+#        - mono ./testrunner/xunit.runners.1.9.2/tools/xunit.console.clr4.exe ./XUnitTests/bin/Release/netcoreapp3.1/OptimizelySDK.XUnitTests.dll
+#      after_success:
+#        # Coveralls support
+#        - .\packages\OpenCover.4.6.166\tools\OpenCover.Console.exe -register:user -target:xunit.console.clr4.exe "-targetargs:""XUnitTests\bin\Release\netcoreapp3.1\OptimizelySDK.XUnitTests.dll"" /noshadow /travis" -filter:"+[OptimizelySDK*]*" -output:opencoverCoverage.xml
+#        - export coveralls=./packages/coveralls.net.0.7.0/tools/csmacnz.coveralls.exe
+#        - $coveralls --opencover -i opencoverCoverage.xml --repoToken ${COVERALLS_REPO_TOKEN} --commitId ${TRAVIS_COMMIT} --commitBranch ${TRAVIS_BRANCH} --commitMessage ${TRAVIS_COMMIT_MESSAGE} --jobId ${TRAVIS_BUILD_ID}
+#        - pip install --user awscli
+#        # upload dll build artifacts to s3 with -unsigned suffix
+#        - ([ ${TRAVIS_BRANCH} = "$RELEASE_BRANCH" ] && [ ${TRAVIS_EVENT_TYPE} = "push" ]) && find . -path './OptimizelySDK*bin/Release/OptimizelySDK*.dll' -not -regex '.*Tests.*' -print0 | while IFS= read -r -d '' file; do (AWS_ACCESS_KEY_ID=$OFTA_KEY AWS_SECRET_ACCESS_KEY=$OFTA_SECRET AWS_DEFAULT_REGION=$OFTA_REGION aws s3 cp $file s3://optly-fs-travisci-artifacts/${TRAVIS_REPO_SLUG}/${TRAVIS_BUILD_NUMBER}/${TRAVIS_JOB_NUMBER}/$(basename $file)-unsigned); done
 
