@@ -252,7 +252,7 @@ namespace OptimizelySDK
                 return null;
             }
 
-            SendImpressionEvent(experiment, variation, userId, userAttributes, config, experimentKey, "experiment");
+            SendImpressionEvent(experiment, variation, userId, userAttributes, config, "experiment");
 
             return variation;
         }
@@ -471,8 +471,13 @@ namespace OptimizelySDK
             var sourceInfo = new Dictionary<string, string>();
             var decision = DecisionService.GetVariationForFeature(featureFlag, userId, config, userAttributes);
             var variation = decision.Variation;
+            var decisionSource = FeatureDecision.DECISION_SOURCE_ROLLOUT;
+            if (decisionSource != null)
+            {
+                decisionSource = decision.Source;
+            }
 
-            SendImpressionEvent(decision.Experiment, variation, userId, userAttributes, config, featureKey, decision.Source);
+            SendImpressionEvent(decision.Experiment, variation, userId, userAttributes, config, featureKey, decisionSource);
 
             if (variation != null)
             {
@@ -686,6 +691,23 @@ namespace OptimizelySDK
         /// <param name="variation">The variation entity</param>
         /// <param name="userId">The user ID</param>
         /// <param name="userAttributes">The user's attributes</param>
+        /// <param name="ruleType">It can either be experiment in case impression event is sent from activate or it's feature-test or rollout</param>
+        private void SendImpressionEvent(Experiment experiment, Variation variation, string userId,
+                                         UserAttributes userAttributes, ProjectConfig config,
+                                         string ruleType)
+        {
+            SendImpressionEvent(experiment, variation, userId, userAttributes, config, "", ruleType);
+        }
+
+        /// <summary>
+        /// Sends impression event.
+        /// </summary>
+        /// <param name="experiment">The experiment</param>
+        /// <param name="variation">The variation entity</param>
+        /// <param name="userId">The user ID</param>
+        /// <param name="userAttributes">The user's attributes</param>
+        /// <param name="flagKey">It can either be experiment key in case if ruleType is experiment or it's feature key in case ruleType is feature-test or rollout</param>
+        /// <param name="ruleType">It can either be experiment in case impression event is sent from activate or it's feature-test or rollout</param>
         private void SendImpressionEvent(Experiment experiment, Variation variation, string userId,
                                          UserAttributes userAttributes, ProjectConfig config,
                                          string flagKey, string ruleType)
