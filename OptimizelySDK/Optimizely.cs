@@ -100,6 +100,8 @@ namespace OptimizelySDK
         public const string EVENT_KEY = "Event Key";
         public const string FEATURE_KEY = "Feature Key";
         public const string VARIABLE_KEY = "Variable Key";
+        private const string SOURCE_TYPE_EXPERIMENT = "experiment";
+
         public bool Disposed { get; private set; }
 
         /// <summary>
@@ -252,7 +254,7 @@ namespace OptimizelySDK
                 return null;
             }
 
-            SendImpressionEvent(experiment, variation, userId, userAttributes, config, "experiment");
+            SendImpressionEvent(experiment, variation, userId, userAttributes, config, SOURCE_TYPE_EXPERIMENT);
 
             return variation;
         }
@@ -471,11 +473,7 @@ namespace OptimizelySDK
             var sourceInfo = new Dictionary<string, string>();
             var decision = DecisionService.GetVariationForFeature(featureFlag, userId, config, userAttributes);
             var variation = decision.Variation;
-            var decisionSource = FeatureDecision.DECISION_SOURCE_ROLLOUT;
-            if (decisionSource != null)
-            {
-                decisionSource = decision.Source;
-            }
+            var decisionSource = decision?.Source ?? FeatureDecision.DECISION_SOURCE_ROLLOUT;
 
             SendImpressionEvent(decision.Experiment, variation, userId, userAttributes, config, featureKey, decisionSource);
 
