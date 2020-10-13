@@ -509,7 +509,7 @@ namespace OptimizelySDK.Tests.EventTests
                                                     {"experiment_id", null },
                                                     {"variation_id", null },
                                                     { "metadata", new Dictionary<string, object> {
-                                                            { "rule_type", "" },
+                                                            { "rule_type", "rollout" },
                                                             { "rule_key", "" },
                                                             { "flag_key", "test_feature" },
                                                             { "variation_key", "" }
