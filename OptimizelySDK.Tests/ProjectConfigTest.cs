@@ -63,6 +63,8 @@ namespace OptimizelySDK.Tests
             Assert.AreEqual("7720880029", Config.ProjectId);
             // Check Revision 
             Assert.AreEqual("15", Config.Revision);
+            // Check SendFlagDecision
+            Assert.IsTrue(Config.SendFlagDecisions);
 
             // Check Group ID Map
             var expectedGroupId = CreateDictionary("7722400015", Config.GetGroup("7722400015"));
@@ -413,6 +415,14 @@ namespace OptimizelySDK.Tests
             };
 
             Assert.IsTrue(TestData.CompareObjects(expectedRolloutIdMap, Config.RolloutIdMap));
+        }
+
+
+        [Test]
+        public void TestIfSendFlagDecisionKeyIsMissingItShouldReturnFalse()
+        {
+            var tempConfig = DatafileProjectConfig.Create(TestData.SimpleABExperimentsDatafile, LoggerMock.Object, ErrorHandlerMock.Object);
+            Assert.IsFalse(tempConfig.SendFlagDecisions);
         }
 
         [Test]

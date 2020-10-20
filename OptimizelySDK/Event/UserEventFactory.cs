@@ -1,4 +1,21 @@
-﻿using OptimizelySDK.Entity;
+﻿/**
+ *
+ *    Copyright 2019-2020, Optimizely and contributors
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ */
+
+using OptimizelySDK.Entity;
 using OptimizelySDK.Event.Entity;
 
 namespace OptimizelySDK.Event
@@ -21,10 +38,12 @@ namespace OptimizelySDK.Event
                                                             Experiment activatedExperiment,
                                                             string variationId,
                                                             string userId,
-                                                            UserAttributes userAttributes)
+                                                            UserAttributes userAttributes,
+                                                            string flagKey,
+                                                            string ruleType)
         {
             Variation variation = projectConfig.GetVariationFromId(activatedExperiment?.Key, variationId);
-            return CreateImpressionEvent(projectConfig, activatedExperiment, variation, userId, userAttributes);
+            return CreateImpressionEvent(projectConfig, activatedExperiment, variation, userId, userAttributes, flagKey, ruleType);
         }
 
         /// <summary>
@@ -35,25 +54,43 @@ namespace OptimizelySDK.Event
         /// <param name="variation">The variation entity</param>
         /// <param name="userId">The user Id</param>
         /// <param name="userAttributes">The user's attributes</param>
+        /// <param name="flagKey">experiment key or feature key</param>
+        /// <param name="ruleType">experiment or featureDecision source </param>
         /// <returns>ImpressionEvent instance</returns>
         public static ImpressionEvent CreateImpressionEvent(ProjectConfig projectConfig,
                                                             Experiment activatedExperiment,
                                                             Variation variation,
                                                             string userId,
-                                                            UserAttributes userAttributes)
+                                                            UserAttributes userAttributes,
+                                                            string flagKey,
+                                                            string ruleType)
         {
+            if ((ruleType == FeatureDecision.DECISION_SOURCE_ROLLOUT || variation == null) && !projectConfig.SendFlagDecisions)
+            {
+                return null;
+            }
 
             var eventContext = new EventContext.Builder()
-                .WithProjectId(projectConfig.ProjectId)
-                .WithAccountId(projectConfig.AccountId)
-                .WithAnonymizeIP(projectConfig.AnonymizeIP)
-                .WithRevision(projectConfig.Revision)                
-                .Build();
+            .WithProjectId(projectConfig.ProjectId)
+            .WithAccountId(projectConfig.AccountId)
+            .WithAnonymizeIP(projectConfig.AnonymizeIP)
+            .WithRevision(projectConfig.Revision)                
+            .Build();
+
+            var variationKey = ""; 
+            var ruleKey = "";   
+            if (variation != null)
+            {
+                variationKey = variation.Key;
+                ruleKey = activatedExperiment.Key;
+            }
+            var metadata = new DecisionMetadata(flagKey, ruleKey, ruleType, variationKey);
 
             return new ImpressionEvent.Builder()
                 .WithEventContext(eventContext)
                 .WithBotFilteringEnabled(projectConfig.BotFiltering)
                 .WithExperiment(activatedExperiment)
+                .WithMetadata(metadata)
                 .WithUserId(userId)
                 .WithVariation(variation)
                 .WithVisitorAttributes(EventFactory.BuildAttributeList(userAttributes, projectConfig))

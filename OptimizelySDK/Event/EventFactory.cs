@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2019, Optimizely
+ * Copyright 2019-2020, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -115,11 +115,12 @@ namespace OptimizelySDK.Event
 
             Decision decision = new Decision(impressionEvent.Experiment?.LayerId,
                 impressionEvent.Experiment?.Id,
-                impressionEvent.Variation?.Id);
+                impressionEvent.Variation?.Id,
+                impressionEvent.Metadata);
 
             SnapshotEvent snapshotEvent = new SnapshotEvent.Builder()
                 .WithUUID(impressionEvent.UUID)
-                .WithEntityId(impressionEvent.Experiment.LayerId)
+                .WithEntityId(impressionEvent.Experiment?.LayerId)
                 .WithKey(ACTIVATE_EVENT_KEY)
                 .WithTimeStamp(impressionEvent.Timestamp)
                 .Build();

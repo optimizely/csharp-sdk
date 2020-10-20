@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2019, Optimizely
+ * Copyright 2019-2020, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ namespace OptimizelySDK.Event.Entity
         public VisitorAttribute[] VisitorAttributes { get; private set; }
 
         public Experiment Experiment { get; set; }
+        public DecisionMetadata Metadata { get; set; }
         public Variation Variation { get; set; }
         public bool? BotFiltering { get; set; }
 
@@ -42,6 +43,7 @@ namespace OptimizelySDK.Event.Entity
             public VisitorAttribute[] VisitorAttributes;
             private Experiment Experiment;
             private Variation Variation;
+            private DecisionMetadata Metadata;
             private bool? BotFiltering;
 
             public Builder WithUserId(string userId)
@@ -61,6 +63,13 @@ namespace OptimizelySDK.Event.Entity
             public Builder WithExperiment(Experiment experiment)
             {
                 Experiment = experiment;
+
+                return this;
+            }
+
+            public Builder WithMetadata(DecisionMetadata metadata)
+            {
+                Metadata = metadata;
 
                 return this;
             }
@@ -102,6 +111,7 @@ namespace OptimizelySDK.Event.Entity
                 impressionEvent.VisitorAttributes = VisitorAttributes;
                 impressionEvent.UserId = UserId;
                 impressionEvent.Variation = Variation;
+                impressionEvent.Metadata = Metadata;
                 impressionEvent.BotFiltering = BotFiltering;
 
                 return impressionEvent;

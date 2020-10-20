@@ -100,6 +100,8 @@ namespace OptimizelySDK
         public const string EVENT_KEY = "Event Key";
         public const string FEATURE_KEY = "Feature Key";
         public const string VARIABLE_KEY = "Variable Key";
+        private const string SOURCE_TYPE_EXPERIMENT = "experiment";
+
         public bool Disposed { get; private set; }
 
         /// <summary>
@@ -252,7 +254,7 @@ namespace OptimizelySDK
                 return null;
             }
 
-            SendImpressionEvent(experiment, variation, userId, userAttributes, config);
+            SendImpressionEvent(experiment, variation, userId, userAttributes, config, SOURCE_TYPE_EXPERIMENT);
 
             return variation;
         }
@@ -470,17 +472,21 @@ namespace OptimizelySDK
             bool featureEnabled = false;
             var sourceInfo = new Dictionary<string, string>();
             var decision = DecisionService.GetVariationForFeature(featureFlag, userId, config, userAttributes);
+            var variation = decision.Variation;
+            var decisionSource = decision?.Source ?? FeatureDecision.DECISION_SOURCE_ROLLOUT;
 
-            if (decision.Variation != null)
+            SendImpressionEvent(decision.Experiment, variation, userId, userAttributes, config, featureKey, decisionSource);
+
+            if (variation != null)
             {
-                var variation = decision.Variation;
                 featureEnabled = variation.FeatureEnabled.GetValueOrDefault();
 
+                // This information is only necessary for feature tests.
+                // For rollouts experiments and variations are an implementation detail only.
                 if (decision.Source == FeatureDecision.DECISION_SOURCE_FEATURE_TEST)
                 {
                     sourceInfo["experimentKey"] = decision.Experiment.Key;
                     sourceInfo["variationKey"] = variation.Key;
-                    SendImpressionEvent(decision.Experiment, variation, userId, userAttributes, config);
                 }
                 else
                 {
@@ -683,28 +689,51 @@ namespace OptimizelySDK
         /// <param name="variation">The variation entity</param>
         /// <param name="userId">The user ID</param>
         /// <param name="userAttributes">The user's attributes</param>
+        /// <param name="ruleType">It can either be experiment in case impression event is sent from activate or it's feature-test or rollout</param>
         private void SendImpressionEvent(Experiment experiment, Variation variation, string userId,
-                                         UserAttributes userAttributes, ProjectConfig config)
+                                         UserAttributes userAttributes, ProjectConfig config,
+                                         string ruleType)
         {
-            if (experiment.IsExperimentRunning)
-            {
-                var userEvent = UserEventFactory.CreateImpressionEvent(config, experiment, variation.Id, userId, userAttributes);
-                EventProcessor.Process(userEvent);
-                Logger.Log(LogLevel.INFO, $"Activating user {userId} in experiment {experiment.Key}.");
+            SendImpressionEvent(experiment, variation, userId, userAttributes, config, "", ruleType);
+        }
 
-                // Kept For backwards compatibility.
-                // This notification is deprecated and the new DecisionNotifications
-                // are sent via their respective method calls.
-                if (NotificationCenter.GetNotificationCount(NotificationCenter.NotificationType.Activate) > 0)
-                {
-                    var impressionEvent = EventFactory.CreateLogEvent(userEvent, Logger);
-                    NotificationCenter.SendNotifications(NotificationCenter.NotificationType.Activate, experiment, userId,
-                    userAttributes, variation, impressionEvent);
-                }
-            }
-            else
+        /// <summary>
+        /// Sends impression event.
+        /// </summary>
+        /// <param name="experiment">The experiment</param>
+        /// <param name="variation">The variation entity</param>
+        /// <param name="userId">The user ID</param>
+        /// <param name="userAttributes">The user's attributes</param>
+        /// <param name="flagKey">It can either be experiment key in case if ruleType is experiment or it's feature key in case ruleType is feature-test or rollout</param>
+        /// <param name="ruleType">It can either be experiment in case impression event is sent from activate or it's feature-test or rollout</param>
+        private void SendImpressionEvent(Experiment experiment, Variation variation, string userId,
+                                         UserAttributes userAttributes, ProjectConfig config,
+                                         string flagKey, string ruleType)
+        {
+            if (experiment != null && !experiment.IsExperimentRunning)
             {
                 Logger.Log(LogLevel.ERROR, @"Experiment has ""Launched"" status so not dispatching event during activation.");
+            }
+            
+            var userEvent = UserEventFactory.CreateImpressionEvent(config, experiment, variation, userId, userAttributes, flagKey, ruleType);
+            if (userEvent == null)
+            {
+                return;
+            }
+            EventProcessor.Process(userEvent);
+
+            if (experiment != null)
+            { 
+                Logger.Log(LogLevel.INFO, $"Activating user {userId} in experiment {experiment.Key}.");
+            }
+            // Kept For backwards compatibility.
+            // This notification is deprecated and the new DecisionNotifications
+            // are sent via their respective method calls.
+            if (NotificationCenter.GetNotificationCount(NotificationCenter.NotificationType.Activate) > 0)
+            {
+                var impressionEvent = EventFactory.CreateLogEvent(userEvent, Logger);
+                NotificationCenter.SendNotifications(NotificationCenter.NotificationType.Activate, experiment, userId,
+                userAttributes, variation, impressionEvent);
             }
         }
 

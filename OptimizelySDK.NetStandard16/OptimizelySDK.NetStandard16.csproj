@@ -121,6 +121,9 @@
 		<Compile Include="..\OptimizelySDK\Event\Entity\VisitorAttribute.cs">
 		  <Link>VisitorAttribute.cs</Link>
 		</Compile>
+		<Compile Include="..\OptimizelySDK\Event\Entity\DecisionMetadata.cs">
+		  <Link>DecisionMetadata.cs</Link>
+		</Compile>
 		<Compile Include="..\OptimizelySDK\Event\Entity\Decision.cs">
 		  <Link>DecisionEvent.cs</Link>
 		</Compile>

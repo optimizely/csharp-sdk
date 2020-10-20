@@ -44,6 +44,12 @@ namespace OptimizelySDK
         /// </summary>
         string Revision { get; set; }
 
+
+        /// <summary>
+        /// SendFlagDecisions determines whether impressions events are sent for ALL decision types.
+        /// </summary>
+        bool SendFlagDecisions { get; set; }
+
         /// <summary>
         /// Allow Anonymize IP by truncating the last block of visitors' IP address.
         /// </summary>

@@ -175,6 +175,9 @@
     <Compile Include="..\OptimizelySDK\Event\Entity\Decision.cs">
       <Link>Event\Entity\Decision.cs</Link>
     </Compile>
+	<Compile Include="..\OptimizelySDK\Event\Entity\DecisionMetadata.cs">
+      <Link>Event\Entity\DecisionMetadata.cs</Link>
+    </Compile>
     <Compile Include="..\OptimizelySDK\Event\Entity\EventBatch.cs">
       <Link>Event\Entity\EventBatch.cs</Link>
     </Compile>
