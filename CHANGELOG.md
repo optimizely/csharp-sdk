@@ -2,6 +2,12 @@
 ## [Unreleased]
 
 
+## 3.7.0
+November 3rd, 2020
+
+### New Features
+- Add support for sending flag decisions along with decision metadata. ([#244](https://github.com/optimizely/csharp-sdk/pull/244))
+
 ## 3.6.0
 October 1st, 2020
 
