@@ -22,13 +22,13 @@ namespace OptimizelySDK.OptimizelyDecisions
 {
     public class OptimizelyDecision
     {
-        private string VariationKey { get; set; }
-        private bool Enabled { get; set; }
-        private OptimizelyJSON Variables { get; set; }
-        private string RuleKey { get; set; }
-        private string FlagKey { get; set; }
-        private OptimizelyUserContext UserContext { get; set; }
-        private List<string> Reasons { get; set; }
+        public string VariationKey { get; private set; }
+        public bool Enabled { get; private set; }
+        public OptimizelyJSON Variables { get; private set; }
+        public string RuleKey { get; private set; }
+        public string FlagKey { get; private set; }
+        public OptimizelyUserContext UserContext { get; private set; }
+        public List<string> Reasons { get; private set; }
 
         public OptimizelyDecision(string variationKey,
                               bool enabled,
