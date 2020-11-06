@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -23,15 +22,21 @@ namespace OptimizelySDK.OptimizelyDecisions
     public class DefaultDecisionReasons : IDecisionReasons
     {
         private List<string> Errors = new List<string>();
-        private List<String> Logs = new List<string>();
+        private List<string> Logs = new List<string>();
 
         public static IDecisionReasons NewInstance(List<OptimizelyDecideOption> options)
         {
-            if (options != null && options.Contains(OptimizelyDecideOption.INCLUDE_REASONS)) return new DefaultDecisionReasons();
-            else return new ErrorsDecisionReasons();
+            if (options != null && options.Contains(OptimizelyDecideOption.INCLUDE_REASONS))
+            {
+                return new DefaultDecisionReasons();
+            }
+            else
+            {
+                return new ErrorsDecisionReasons();
+            }
         }
 
-        public static IDecisionReasons newInstance()
+        public static IDecisionReasons NewInstance()
         {
             return NewInstance(null);
         }

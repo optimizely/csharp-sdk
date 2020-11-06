@@ -19,14 +19,11 @@ namespace OptimizelySDK.OptimizelyDecisions
     public class DecisionMessage
     {
         public const string SDK_NOT_READY = "Optimizely SDK not configured properly yet.";
-        public const string FLAG_KEY_INVALID = "No flag was found for key \"%s\".";
-        public const string VARIABLE_VALUE_INVALID = "Variable value for key \"%s\" is invalid or wrong type.";
-
-        private string Format { get; set; }
-
-        public string Reason(params object[] args)
+        public const string FLAG_KEY_INVALID = "No flag was found for key \"{0}\".";
+        public const string VARIABLE_VALUE_INVALID = "Variable value for key \"{0}\" is invalid or wrong type.";
+        public static string Reason(string format, params object[] args)
         {
-            return string.Format(Format, args);
+            return string.Format(format, args);
         }
     }
 }
