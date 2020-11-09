@@ -35,6 +35,15 @@ namespace OptimizelySDK
 		Variation Activate(string experimentKey, string userId, UserAttributes userAttributes = null);
 
 		/// <summary>
+		/// Create a context of the user for which decision APIs will be called.
+		/// A user context will be created successfully even when the SDK is not fully configured yet.
+		/// </summary>
+		/// <param name="userId">The user ID to be used for bucketing.</param>
+		/// <param name="userAttributes">The user's attributes</param>
+		/// <returns>OptimizelyUserContext | An OptimizelyUserContext associated with this OptimizelyClient.</returns>
+		OptimizelyUserContext CreateUserContext(string userId, UserAttributes userAttributes = null);
+
+		/// <summary>
 		/// Sends conversion event to Optimizely.
 		/// </summary>
 		/// <param name="eventKey">Event key representing the event which needs to be recorded</param>

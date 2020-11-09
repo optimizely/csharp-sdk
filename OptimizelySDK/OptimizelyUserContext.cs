@@ -26,16 +26,16 @@ namespace OptimizelySDK
     {
         private ILogger Logger;
         private IErrorHandler ErrorHandler;
-        private string UserId { get; set; }
-        private UserAttributes UserAttributes { get; set; }
-        private Optimizely Optimizely { get; set; }
+        public string UserId { get; }
+        public UserAttributes UserAttributes { get; }
+        public Optimizely Optimizely { get; }
 
         public OptimizelyUserContext(Optimizely optimizely, string userId, UserAttributes userAttributes, IErrorHandler errorHandler, ILogger logger)
         {
             ErrorHandler = errorHandler;
             Logger = logger;
             Optimizely = optimizely;
-            UserAttributes = userAttributes;
+            UserAttributes = userAttributes ?? new UserAttributes();
             UserId = userId;
         }
 

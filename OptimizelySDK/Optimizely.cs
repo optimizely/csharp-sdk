@@ -29,6 +29,7 @@ using OptimizelySDK.Config;
 using OptimizelySDK.Event;
 using OptimizelySDK.OptlyConfig;
 using System.Net;
+using OptimizelySDK.OptimizelyDecisions;
 
 namespace OptimizelySDK
 {
@@ -58,6 +59,8 @@ namespace OptimizelySDK
         public ProjectConfigManager ProjectConfigManager;
 
         private EventProcessor EventProcessor;
+
+        private List<OptimizelyDecideOption> DefaultDecideOptions;
 
         /// <summary>
         /// It returns true if the ProjectConfig is valid otherwise false.
@@ -158,11 +161,12 @@ namespace OptimizelySDK
                          ILogger logger = null,
                          IErrorHandler errorHandler = null,
                          UserProfileService userProfileService = null,
-                         EventProcessor eventProcessor = null)
+                         EventProcessor eventProcessor = null,
+                         List<OptimizelyDecideOption> defaultDecideOptions = null)
         {
             ProjectConfigManager = configManager;
 
-            InitializeComponents(eventDispatcher, logger, errorHandler, userProfileService, notificationCenter, eventProcessor);
+            InitializeComponents(eventDispatcher, logger, errorHandler, userProfileService, notificationCenter, eventProcessor, defaultDecideOptions);
         }
 
         private void InitializeComponents(IEventDispatcher eventDispatcher = null,
@@ -170,7 +174,8 @@ namespace OptimizelySDK
                          IErrorHandler errorHandler = null,
                          UserProfileService userProfileService = null,
                          NotificationCenter notificationCenter = null,
-                         EventProcessor eventProcessor = null)
+                         EventProcessor eventProcessor = null, 
+                         List<OptimizelyDecideOption> defaultDecideOptions = null)
         {
             Logger = logger ?? new NoOpLogger();
             EventDispatcher = eventDispatcher ?? new DefaultEventDispatcher(Logger);
@@ -181,6 +186,7 @@ namespace OptimizelySDK
             NotificationCenter = notificationCenter ?? new NotificationCenter(Logger);
             DecisionService = new DecisionService(Bucketer, ErrorHandler, userProfileService, Logger);
             EventProcessor = eventProcessor ?? new ForwardingEventProcessor(EventDispatcher, NotificationCenter, Logger);
+            DefaultDecideOptions = defaultDecideOptions ?? new List<OptimizelyDecideOption>();
         }
 
         /// <summary>
@@ -680,6 +686,30 @@ namespace OptimizelySDK
         public OptimizelyJSON GetFeatureVariableJSON(string featureKey, string variableKey, string userId, UserAttributes userAttributes = null)
         {
             return GetFeatureVariableValueForType<OptimizelyJSON>(featureKey, variableKey, userId, userAttributes, FeatureVariable.JSON_TYPE);
+        }
+
+        //============ decide ============//
+
+        /// <summary>
+        /// Create a context of the user for which decision APIs will be called.
+        /// A user context will be created successfully even when the SDK is not fully configured yet.
+        /// </summary>
+        /// <param name="userId">The user ID to be used for bucketing.</param>
+        /// <param name="userAttributes">The user's attributes</param>
+        /// <returns>OptimizelyUserContext | An OptimizelyUserContext associated with this OptimizelyClient.</returns>
+        public OptimizelyUserContext CreateUserContext(string userId,
+                                                       UserAttributes userAttributes = null)
+        {
+            var inputValues = new Dictionary<string, string>
+            {
+                { USER_ID, userId },
+            };
+
+            if (!ValidateStringInputs(inputValues))
+                return null;
+
+
+            return new OptimizelyUserContext(this, userId, userAttributes, ErrorHandler, Logger);
         }
 
         /// <summary>

@@ -183,6 +183,86 @@ namespace OptimizelySDK.Tests
         }
         #endregion
 
+        #region Test UserContext
+
+        [Test]
+        public void TestCreateUserContext()
+        {
+            var attribute = new UserAttributes
+                {
+                    { "device_type", "iPhone" },
+                    { "location", "San Francisco" }
+                };
+            var optlyUserContext = Optimizely.CreateUserContext(TestUserId, attribute);
+            Assert.AreEqual(TestUserId, optlyUserContext.UserId);
+            Assert.AreEqual(Optimizely, optlyUserContext.Optimizely);
+            Assert.AreEqual(attribute, optlyUserContext.UserAttributes);
+        }
+
+        [Test]
+        public void TestCreateUserContextWithoutAttributes()
+        {
+            var optlyUserContext = Optimizely.CreateUserContext(TestUserId);
+            Assert.AreEqual(TestUserId, optlyUserContext.UserId);
+            Assert.AreEqual(Optimizely, optlyUserContext.Optimizely);
+            Assert.IsTrue(optlyUserContext.UserAttributes.Count == 0);
+        }
+
+        [Test]
+        public void TestCreateUserContextMultipleAttribute()
+        {
+
+            var attribute1 = new UserAttributes
+                {
+                    { "device_type", "iPhone" },
+                    { "location", "San Francisco" }
+                };
+            var optlyUserContext1 = Optimizely.CreateUserContext("userId1", attribute1);
+            
+            var attribute2 = new UserAttributes
+                {
+                    { "device_type2", "Samsung" },
+                    { "location2", "California" }
+                };
+            var optlyUserContext2 = Optimizely.CreateUserContext("userId2", attribute2);
+
+            Assert.AreEqual("userId1", optlyUserContext1.UserId);
+            Assert.AreEqual(Optimizely, optlyUserContext1.Optimizely);
+            Assert.AreEqual(attribute1, optlyUserContext1.UserAttributes);
+
+            Assert.AreEqual("userId2", optlyUserContext2.UserId);
+            Assert.AreEqual(Optimizely, optlyUserContext2.Optimizely);
+            Assert.AreEqual(attribute2, optlyUserContext2.UserAttributes);
+        }
+
+        [Test]
+        public void TestChangeAttributeDoesNotEffectValues()
+        {
+            var userId = "testUserId";
+            var attribute = new UserAttributes
+                {
+                    { "device_type", "iPhone" },
+                    { "location", "San Francisco" }
+                };
+            var optlyUserContext = Optimizely.CreateUserContext(userId, attribute);
+            Assert.AreEqual(TestUserId, optlyUserContext.UserId);
+            Assert.AreEqual(Optimizely, optlyUserContext.Optimizely);
+            Assert.AreEqual(attribute, optlyUserContext.UserAttributes);
+
+            attribute = new UserAttributes
+                {
+                    { "device_type", "iPhone" },
+                    { "level", "low" },
+                    { "location", "San Francisco" }
+                };
+            userId = "InvalidUser";
+            Assert.AreEqual("testUserId", optlyUserContext.UserId);
+            Assert.AreEqual(Optimizely, optlyUserContext.Optimizely);
+            Assert.AreNotEqual(attribute, optlyUserContext.UserAttributes);
+        }
+
+        #endregion
+
         #region Test Validate
         [Test]
         public void TestInvalidInstanceLogMessages()
