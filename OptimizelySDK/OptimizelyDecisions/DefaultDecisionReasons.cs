@@ -57,7 +57,7 @@ namespace OptimizelySDK.OptimizelyDecisions
         public List<string> ToReport()
         {
             List<string> reasons = new List<string>(Errors);
-            reasons.Concat(Logs);
+            reasons.AddRange(Logs);
             return reasons;
         }
     }
