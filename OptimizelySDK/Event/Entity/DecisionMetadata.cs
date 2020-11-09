@@ -32,13 +32,16 @@ namespace OptimizelySDK.Event.Entity
         public string RuleType { get; private set; }
         [JsonProperty("variation_key")]
         public string VariationKey { get; private set; }
+        [JsonProperty("enabled")]
+        public bool Enabled { get; private set; }
 
-        public DecisionMetadata(string flagKey, string ruleKey, string ruleType, string variationKey = "") 
+        public DecisionMetadata(string flagKey, string ruleKey, string ruleType, string variationKey = "", bool enabled = false) 
         {
             FlagKey = flagKey;
             RuleKey = ruleKey;
             RuleType = ruleType;
             VariationKey = variationKey;
+            Enabled = enabled;
         }
     }
 }

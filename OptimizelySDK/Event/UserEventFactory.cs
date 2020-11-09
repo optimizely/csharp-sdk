@@ -40,10 +40,11 @@ namespace OptimizelySDK.Event
                                                             string userId,
                                                             UserAttributes userAttributes,
                                                             string flagKey,
-                                                            string ruleType)
+                                                            string ruleType,
+                                                            bool enabled = false)
         {
             Variation variation = projectConfig.GetVariationFromId(activatedExperiment?.Key, variationId);
-            return CreateImpressionEvent(projectConfig, activatedExperiment, variation, userId, userAttributes, flagKey, ruleType);
+            return CreateImpressionEvent(projectConfig, activatedExperiment, variation, userId, userAttributes, flagKey, ruleType, enabled);
         }
 
         /// <summary>
@@ -63,7 +64,8 @@ namespace OptimizelySDK.Event
                                                             string userId,
                                                             UserAttributes userAttributes,
                                                             string flagKey,
-                                                            string ruleType)
+                                                            string ruleType,
+                                                            bool enabled = false)
         {
             if ((ruleType == FeatureDecision.DECISION_SOURCE_ROLLOUT || variation == null) && !projectConfig.SendFlagDecisions)
             {
@@ -84,7 +86,7 @@ namespace OptimizelySDK.Event
                 variationKey = variation.Key;
                 ruleKey = activatedExperiment.Key;
             }
-            var metadata = new DecisionMetadata(flagKey, ruleKey, ruleType, variationKey);
+            var metadata = new DecisionMetadata(flagKey, ruleKey, ruleType, variationKey, enabled);
 
             return new ImpressionEvent.Builder()
                 .WithEventContext(eventContext)
