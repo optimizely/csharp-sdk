@@ -46,7 +46,7 @@ namespace OptimizelySDK
         /// <param name="value">value An attribute value</param>
         public void SetAttribute(string key, object value)
         {
-            UserAttributes[key] = value;
+            UserAttributes.Add(key, value);
         }
 
         /// <summary>
@@ -74,7 +74,7 @@ namespace OptimizelySDK
         public OptimizelyDecision Decide(string key,
             List<OptimizelyDecideOption> options)
         {
-            return Optimizely.Decide(this, key, options);
+            return null;
         }
  
         /// <summary>

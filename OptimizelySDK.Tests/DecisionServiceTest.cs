@@ -24,7 +24,6 @@ using NUnit.Framework;
 using OptimizelySDK.Bucketing;
 using OptimizelySDK.Utils;
 using OptimizelySDK.Config;
-using OptimizelySDK.OptimizelyDecisions;
 
 namespace OptimizelySDK.Tests
 {
@@ -85,7 +84,7 @@ namespace OptimizelySDK.Tests
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, string.Format("User \"{0}\" is forced in variation \"vtag5\".", WhitelistedUserId)), Times.Once);
             // no attributes provided for a experiment that has an audience
             Assert.IsTrue(TestData.CompareObjects(actualVariation, expectedVariation));
-            BucketerMock.Verify(_ => _.Bucket(It.IsAny<ProjectConfig>(), It.IsAny<Experiment>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IDecisionReasons>()), Times.Never);
+            BucketerMock.Verify(_ => _.Bucket(It.IsAny<ProjectConfig>(), It.IsAny<Experiment>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
         }
 
         [Test]
@@ -112,7 +111,7 @@ namespace OptimizelySDK.Tests
             // ensure that a user with a saved user profile, sees the same variation regardless of audience evaluation
             decisionService.GetVariation(experiment, UserProfileId, ProjectConfig, new UserAttributes());
 
-            BucketerMock.Verify(_ => _.Bucket(It.IsAny<ProjectConfig>(), It.IsAny<Experiment>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IDecisionReasons>()), Times.Never);
+            BucketerMock.Verify(_ => _.Bucket(It.IsAny<ProjectConfig>(), It.IsAny<Experiment>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
         }
 
         [Test]
@@ -124,7 +123,7 @@ namespace OptimizelySDK.Tests
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, string.Format("User \"{0}\" is forced in variation \"{1}\".",
                 WhitelistedUserId, WhitelistedVariation.Key)), Times.Once);
 
-            BucketerMock.Verify(_ => _.Bucket(It.IsAny<ProjectConfig>(), It.IsAny<Experiment>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IDecisionReasons>()), Times.Never);
+            BucketerMock.Verify(_ => _.Bucket(It.IsAny<ProjectConfig>(), It.IsAny<Experiment>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
         }
 
         [Test]
@@ -165,7 +164,7 @@ namespace OptimizelySDK.Tests
                 string.Format("Variation \"{0}\" is not in the datafile. Not activating user \"{1}\".", invalidVariationKey, userId)),
                 Times.Once);
 
-            BucketerMock.Verify(_ => _.Bucket(It.IsAny<ProjectConfig>(), It.IsAny<Experiment>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IDecisionReasons>()), Times.Never);
+            BucketerMock.Verify(_ => _.Bucket(It.IsAny<ProjectConfig>(), It.IsAny<Experiment>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
         }
 
         [Test]
@@ -217,7 +216,7 @@ namespace OptimizelySDK.Tests
             DecisionService decisionService = new DecisionService(bucketer,
                  ErrorHandlerMock.Object, userProfileService, LoggerMock.Object);
 
-            Assert.IsNull(decisionService.GetStoredVariation(experiment, userProfile, ProjectConfig, DefaultDecisionReasons.NewInstance()));
+            Assert.IsNull(decisionService.GetStoredVariation(experiment, userProfile, ProjectConfig));
 
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, string.Format("No previously activated variation of experiment \"{0}\" for user \"{1}\" found in user profile."
                 , experiment.Key, UserProfileId)), Times.Once);
@@ -242,7 +241,7 @@ namespace OptimizelySDK.Tests
 
             DecisionService decisionService = new DecisionService(bucketer, ErrorHandlerMock.Object,
                 UserProfileServiceMock.Object, LoggerMock.Object);
-            Assert.IsNull(decisionService.GetStoredVariation(experiment, storedUserProfile, ProjectConfig, DefaultDecisionReasons.NewInstance()));
+            Assert.IsNull(decisionService.GetStoredVariation(experiment, storedUserProfile, ProjectConfig));
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, string.Format("User \"{0}\" was previously bucketed into variation with ID \"{1}\" for experiment \"{2}\", but no matching variation was found for that user. We will re-bucket the user."
                 , UserProfileId, storedVariationId, experiment.Id)), Times.Once);
         }
@@ -266,7 +265,7 @@ namespace OptimizelySDK.Tests
                 });
 
             var mockBucketer = new Mock<Bucketer>(LoggerMock.Object);
-            mockBucketer.Setup(m => m.Bucket(ProjectConfig, experiment, UserProfileId, UserProfileId, It.IsAny<IDecisionReasons>())).Returns(variation);
+            mockBucketer.Setup(m => m.Bucket(ProjectConfig, experiment, UserProfileId, UserProfileId)).Returns(variation);
 
             DecisionService decisionService = new DecisionService(mockBucketer.Object, ErrorHandlerMock.Object, UserProfileServiceMock.Object, LoggerMock.Object);
 
@@ -318,7 +317,7 @@ namespace OptimizelySDK.Tests
             });
 
             var mockBucketer = new Mock<Bucketer>(LoggerMock.Object);
-            mockBucketer.Setup(m => m.Bucket(ProjectConfig, experiment, UserProfileId, UserProfileId, It.IsAny<IDecisionReasons>())).Returns(variation);
+            mockBucketer.Setup(m => m.Bucket(ProjectConfig, experiment, UserProfileId, UserProfileId)).Returns(variation);
 
             Dictionary<string, object> userProfile = null;
 
@@ -469,7 +468,7 @@ namespace OptimizelySDK.Tests
         public void TestGetVariationForFeatureExperimentGivenNullExperimentIds()
         {
             var featureFlag = ProjectConfig.GetFeatureFlagFromKey("empty_feature");
-            var decision = DecisionService.GetVariationForFeatureExperiment(featureFlag, GenericUserId, new UserAttributes() { }, ProjectConfig, new List<OptimizelyDecideOption>(), DefaultDecisionReasons.NewInstance());
+            var decision = DecisionService.GetVariationForFeatureExperiment(featureFlag, GenericUserId, new UserAttributes() { }, ProjectConfig);
 
             Assert.IsNull(decision);
 
@@ -488,7 +487,7 @@ namespace OptimizelySDK.Tests
                 ExperimentIds = new List<string> { "29039203" }
             };
 
-            var decision = DecisionService.GetVariationForFeatureExperiment(featureFlag, GenericUserId, new UserAttributes() { }, ProjectConfig, new List<OptimizelyDecideOption>(), DefaultDecisionReasons.NewInstance());
+            var decision = DecisionService.GetVariationForFeatureExperiment(featureFlag, GenericUserId, new UserAttributes() { }, ProjectConfig);
             Assert.IsNull(decision);
 
             LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Experiment ID \"29039203\" is not in datafile."));
@@ -503,7 +502,7 @@ namespace OptimizelySDK.Tests
             DecisionServiceMock.Setup(ds => ds.GetVariation(multiVariateExp, "user1", ProjectConfig, null)).Returns<Variation>(null);
             var featureFlag = ProjectConfig.GetFeatureFlagFromKey("multi_variate_feature");
 
-            var decision = DecisionServiceMock.Object.GetVariationForFeatureExperiment(featureFlag, "user1", new UserAttributes(), ProjectConfig, new List<OptimizelyDecideOption>(), DefaultDecisionReasons.NewInstance());
+            var decision = DecisionServiceMock.Object.GetVariationForFeatureExperiment(featureFlag, "user1", new UserAttributes(), ProjectConfig);
             Assert.IsNull(decision);
 
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "The user \"user1\" is not bucketed into any of the experiments on the feature \"multi_variate_feature\"."));
@@ -519,10 +518,10 @@ namespace OptimizelySDK.Tests
             var userAttributes = new UserAttributes();
 
             DecisionServiceMock.Setup(ds => ds.GetVariation(ProjectConfig.GetExperimentFromKey("test_experiment_multivariate"),
-                "user1", ProjectConfig, userAttributes, It.IsAny<List<OptimizelyDecideOption>>(), It.IsAny<IDecisionReasons>())).Returns(variation);
+                "user1", ProjectConfig, userAttributes)).Returns(variation);
 
             var featureFlag = ProjectConfig.GetFeatureFlagFromKey("multi_variate_feature");
-            var decision = DecisionServiceMock.Object.GetVariationForFeatureExperiment(featureFlag, "user1", userAttributes, ProjectConfig, new List<OptimizelyDecideOption>(), DefaultDecisionReasons.NewInstance());
+            var decision = DecisionServiceMock.Object.GetVariationForFeatureExperiment(featureFlag, "user1", userAttributes, ProjectConfig);
 
             Assert.IsTrue(TestData.CompareObjects(expectedDecision, decision));
 
@@ -542,7 +541,7 @@ namespace OptimizelySDK.Tests
                 userAttributes)).Returns(variation);
 
             var featureFlag = ProjectConfig.GetFeatureFlagFromKey("boolean_feature");
-            var actualDecision = DecisionServiceMock.Object.GetVariationForFeatureExperiment(featureFlag, "user1", userAttributes, ProjectConfig, new List<OptimizelyDecideOption>(), DefaultDecisionReasons.NewInstance());
+            var actualDecision = DecisionServiceMock.Object.GetVariationForFeatureExperiment(featureFlag, "user1", userAttributes, ProjectConfig);
 
             Assert.IsTrue(TestData.CompareObjects(expectedDecision, actualDecision));
 
@@ -554,11 +553,11 @@ namespace OptimizelySDK.Tests
         public void TestGetVariationForFeatureExperimentGivenMutexGroupAndUserNotBucketed()
         {
             var mutexExperiment = ProjectConfig.GetExperimentFromKey("group_experiment_1");
-            DecisionServiceMock.Setup(ds => ds.GetVariation(It.IsAny<Experiment>(), It.IsAny<string>(), ProjectConfig, It.IsAny<UserAttributes>(), It.IsAny<List<OptimizelyDecideOption>>(), It.IsAny<IDecisionReasons>())).
+            DecisionServiceMock.Setup(ds => ds.GetVariation(It.IsAny<Experiment>(), It.IsAny<string>(), ProjectConfig, It.IsAny<UserAttributes>())).
                 Returns<Variation>(null);
 
             var featureFlag = ProjectConfig.GetFeatureFlagFromKey("boolean_feature");
-            var actualDecision = DecisionServiceMock.Object.GetVariationForFeatureExperiment(featureFlag, "user1", new UserAttributes(), ProjectConfig, new List<OptimizelyDecideOption>(), DefaultDecisionReasons.NewInstance());
+            var actualDecision = DecisionServiceMock.Object.GetVariationForFeatureExperiment(featureFlag, "user1", new UserAttributes(), ProjectConfig);
 
             Assert.IsNull(actualDecision);
 
@@ -583,7 +582,7 @@ namespace OptimizelySDK.Tests
 
             var decisionService = new DecisionService(new Bucketer(new NoOpLogger()), new NoOpErrorHandler(), null, new NoOpLogger());
 
-            var variation = decisionService.GetVariationForFeatureRollout(featureFlag, "userId1", null, projectConfig, DefaultDecisionReasons.NewInstance());
+            var variation = decisionService.GetVariationForFeatureRollout(featureFlag, "userId1", null, projectConfig);
 
             Assert.IsNull(variation);
         }
@@ -601,9 +600,9 @@ namespace OptimizelySDK.Tests
                 Variables = featureFlag.Variables
             };
 
-            DecisionServiceMock.Setup(ds => ds.GetVariationForFeatureExperiment(It.IsAny<FeatureFlag>(), It.IsAny<string>(), It.IsAny<UserAttributes>(), ProjectConfig, new List<OptimizelyDecideOption>(), DefaultDecisionReasons.NewInstance())).Returns<Variation>(null);
+            DecisionServiceMock.Setup(ds => ds.GetVariationForFeatureExperiment(It.IsAny<FeatureFlag>(), It.IsAny<string>(), It.IsAny<UserAttributes>(), ProjectConfig)).Returns<Variation>(null);
 
-            var actualDecision = DecisionServiceMock.Object.GetVariationForFeatureRollout(featureFlag, "user1", new UserAttributes(), ProjectConfig, DefaultDecisionReasons.NewInstance());
+            var actualDecision = DecisionServiceMock.Object.GetVariationForFeatureRollout(featureFlag, "user1", new UserAttributes(), ProjectConfig);
             Assert.IsNull(actualDecision);
 
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "The feature flag \"boolean_feature\" is not used in a rollout."));
@@ -625,10 +624,10 @@ namespace OptimizelySDK.Tests
             };
 
             BucketerMock.Setup(bm => bm.Bucket(It.IsAny<ProjectConfig>(), It.IsAny<Experiment>(), It.IsAny<string>(),
-                It.IsAny<string>(), It.IsAny<IDecisionReasons>())).Returns(variation);
+                It.IsAny<string>())).Returns(variation);
             var decisionService = new DecisionService(BucketerMock.Object, ErrorHandlerMock.Object, null, LoggerMock.Object);
 
-            var actualDecision = decisionService.GetVariationForFeatureRollout(featureFlag, "user_1", userAttributes, ProjectConfig, DefaultDecisionReasons.NewInstance());
+            var actualDecision = decisionService.GetVariationForFeatureRollout(featureFlag, "user_1", userAttributes, ProjectConfig);
             Assert.IsTrue(TestData.CompareObjects(expectedDecision, actualDecision));
         }
 
@@ -649,11 +648,11 @@ namespace OptimizelySDK.Tests
                 { "browser_type", "chrome" }
             };
 
-            BucketerMock.Setup(bm => bm.Bucket(It.IsAny<ProjectConfig>(), experiment, It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IDecisionReasons>())).Returns<Variation>(null);
-            BucketerMock.Setup(bm => bm.Bucket(It.IsAny<ProjectConfig>(), everyoneElseRule, It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IDecisionReasons>())).Returns(variation);
+            BucketerMock.Setup(bm => bm.Bucket(It.IsAny<ProjectConfig>(), experiment, It.IsAny<string>(), It.IsAny<string>())).Returns<Variation>(null);
+            BucketerMock.Setup(bm => bm.Bucket(It.IsAny<ProjectConfig>(), everyoneElseRule, It.IsAny<string>(), It.IsAny<string>())).Returns(variation);
             var decisionService = new DecisionService(BucketerMock.Object, ErrorHandlerMock.Object, null, LoggerMock.Object);
 
-            var actualDecision = decisionService.GetVariationForFeatureRollout(featureFlag, "user_1", userAttributes, ProjectConfig, DefaultDecisionReasons.NewInstance());
+            var actualDecision = decisionService.GetVariationForFeatureRollout(featureFlag, "user_1", userAttributes, ProjectConfig);
             Assert.IsTrue(TestData.CompareObjects(expectedDecision, actualDecision));
         }
 
@@ -669,10 +668,10 @@ namespace OptimizelySDK.Tests
                 { "browser_type", "chrome" }
             };
 
-            BucketerMock.Setup(bm => bm.Bucket(It.IsAny<ProjectConfig>(), It.IsAny<Experiment>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IDecisionReasons>())).Returns<Variation>(null);
+            BucketerMock.Setup(bm => bm.Bucket(It.IsAny<ProjectConfig>(), It.IsAny<Experiment>(), It.IsAny<string>(), It.IsAny<string>())).Returns<Variation>(null);
             var decisionService = new DecisionService(BucketerMock.Object, ErrorHandlerMock.Object, null, LoggerMock.Object);
 
-            var actualDecision = decisionService.GetVariationForFeatureRollout(featureFlag, "user_1", userAttributes, ProjectConfig, DefaultDecisionReasons.NewInstance());
+            var actualDecision = decisionService.GetVariationForFeatureRollout(featureFlag, "user_1", userAttributes, ProjectConfig);
             Assert.IsNull(actualDecision);
         }
 
@@ -690,11 +689,11 @@ namespace OptimizelySDK.Tests
             var variation = everyoneElseRule.Variations[0];
             var expectedDecision = new FeatureDecision(everyoneElseRule, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT);
 
-            BucketerMock.Setup(bm => bm.Bucket(It.IsAny<ProjectConfig>(), everyoneElseRule, It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IDecisionReasons>())).Returns(variation);
+            BucketerMock.Setup(bm => bm.Bucket(It.IsAny<ProjectConfig>(), everyoneElseRule, It.IsAny<string>(), It.IsAny<string>())).Returns(variation);
             var decisionService = new DecisionService(BucketerMock.Object, ErrorHandlerMock.Object, null, LoggerMock.Object);
 
             // Provide null attributes so that user does not qualify for audience.
-            var actualDecision = decisionService.GetVariationForFeatureRollout(featureFlag, "user_1", null, ProjectConfig, DefaultDecisionReasons.NewInstance());
+            var actualDecision = decisionService.GetVariationForFeatureRollout(featureFlag, "user_1", null, ProjectConfig);
 
             Assert.IsTrue(TestData.CompareObjects(expectedDecision, actualDecision));
 
@@ -724,7 +723,7 @@ namespace OptimizelySDK.Tests
             {
                 { "device_type", "iPhone" },
                 { "location", "San Francisco" }
-            }, ProjectConfig, DefaultDecisionReasons.NewInstance());
+            }, ProjectConfig);
 
             // Returned variation id should be '177773' because of audience 'iPhone users in San Francisco'.
             var expectedDecision = new FeatureDecision(expWithAudienceiPhoneUsers, varWithAudienceiPhoneUsers, FeatureDecision.DECISION_SOURCE_ROLLOUT);
@@ -734,7 +733,7 @@ namespace OptimizelySDK.Tests
             actualDecision = decisionService.GetVariationForFeatureRollout(featureFlag, GenericUserId, new UserAttributes
             {
                 { "browser_type", "chrome" }
-            }, ProjectConfig, DefaultDecisionReasons.NewInstance());
+            }, ProjectConfig);
 
             // Returned variation id should be '177771' because of audience 'Chrome users'.
             expectedDecision = new FeatureDecision(expWithAudienceChromeUsers, varWithAudienceChromeUsers, FeatureDecision.DECISION_SOURCE_ROLLOUT);
@@ -742,7 +741,7 @@ namespace OptimizelySDK.Tests
 
             // Calling with no audience.
             mockBucketer.Setup(bm => bm.GenerateBucketValue(It.IsAny<string>())).Returns(8000);
-            actualDecision = decisionService.GetVariationForFeatureRollout(featureFlag, GenericUserId, new UserAttributes(), ProjectConfig, DefaultDecisionReasons.NewInstance());
+            actualDecision = decisionService.GetVariationForFeatureRollout(featureFlag, GenericUserId, new UserAttributes(), ProjectConfig);
 
             // Returned variation id should be of everyone else rule because of no audience.
             expectedDecision = new FeatureDecision(expWithNoAudience, varWithNoAudience, FeatureDecision.DECISION_SOURCE_ROLLOUT);
@@ -753,7 +752,7 @@ namespace OptimizelySDK.Tests
             actualDecision = decisionService.GetVariationForFeatureRollout(featureFlag, GenericUserId, new UserAttributes
             {
                 { "browser_type", "chrome" }
-            }, ProjectConfig, DefaultDecisionReasons.NewInstance());
+            }, ProjectConfig);
 
             // Returned decision entity should be null because bucket value exceeds traffice allocation of everyone else rule.
             Assert.Null(actualDecision);
@@ -769,21 +768,21 @@ namespace OptimizelySDK.Tests
             var variation = everyoneElseRule.Variations[0];
             var expectedDecision = new FeatureDecision(everyoneElseRule, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT);
 
-            BucketerMock.Setup(bm => bm.Bucket(It.IsAny<ProjectConfig>(), everyoneElseRule, It.IsAny<string>(), WhitelistedUserId, It.IsAny<IDecisionReasons>())).Returns(variation);
-            BucketerMock.Setup(bm => bm.Bucket(It.IsAny<ProjectConfig>(), everyoneElseRule, It.IsAny<string>(), GenericUserId, It.IsAny<IDecisionReasons>())).Returns<Variation>(null);
+            BucketerMock.Setup(bm => bm.Bucket(It.IsAny<ProjectConfig>(), everyoneElseRule, It.IsAny<string>(), WhitelistedUserId)).Returns(variation);
+            BucketerMock.Setup(bm => bm.Bucket(It.IsAny<ProjectConfig>(), everyoneElseRule, It.IsAny<string>(), GenericUserId)).Returns<Variation>(null);
             var decisionService = new DecisionService(BucketerMock.Object, ErrorHandlerMock.Object, null, LoggerMock.Object);
 
             // Returned variation id should be of everyone else rule as it passes audience Id checking.
-            var actualDecision = decisionService.GetVariationForFeatureRollout(featureFlag, WhitelistedUserId, null, ProjectConfig, DefaultDecisionReasons.NewInstance());
+            var actualDecision = decisionService.GetVariationForFeatureRollout(featureFlag, WhitelistedUserId, null, ProjectConfig);
             Assert.True(TestData.CompareObjects(expectedDecision, actualDecision));
 
             // Returned variation id should be null.
-            actualDecision = decisionService.GetVariationForFeatureRollout(featureFlag, GenericUserId, null, ProjectConfig, DefaultDecisionReasons.NewInstance());
+            actualDecision = decisionService.GetVariationForFeatureRollout(featureFlag, GenericUserId, null, ProjectConfig);
             Assert.Null(actualDecision);
 
             // Returned variation id should be null as it fails audience Id checking.
             everyoneElseRule.AudienceIds = new string[] { ProjectConfig.Audiences[0].Id };
-            actualDecision = decisionService.GetVariationForFeatureRollout(featureFlag, GenericUserId, null, ProjectConfig, DefaultDecisionReasons.NewInstance());
+            actualDecision = decisionService.GetVariationForFeatureRollout(featureFlag, GenericUserId, null, ProjectConfig);
             Assert.Null(actualDecision);
 
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "User \"testUser1\" does not meet the conditions for targeting rule \"1\"."), Times.Once);
@@ -808,7 +807,7 @@ namespace OptimizelySDK.Tests
             var expectedDecision = new FeatureDecision(expectedExperiment, variation, FeatureDecision.DECISION_SOURCE_FEATURE_TEST);
 
             DecisionServiceMock.Setup(ds => ds.GetVariationForFeatureExperiment(It.IsAny<FeatureFlag>(), It.IsAny<string>(),
-                It.IsAny<UserAttributes>(), ProjectConfig, It.IsAny<List<OptimizelyDecideOption>>(), It.IsAny<IDecisionReasons>())).Returns(expectedDecision);
+                It.IsAny<UserAttributes>(), ProjectConfig)).Returns(expectedDecision);
 
             var actualDecision = DecisionServiceMock.Object.GetVariationForFeature(featureFlag, "user1", ProjectConfig, new UserAttributes());
             Assert.IsTrue(TestData.CompareObjects(expectedDecision, actualDecision));
@@ -827,9 +826,9 @@ namespace OptimizelySDK.Tests
             var expectedDecision = new FeatureDecision(expectedExperiment, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT);
 
             DecisionServiceMock.Setup(ds => ds.GetVariationForFeatureExperiment(It.IsAny<FeatureFlag>(), It.IsAny<string>(),
-                It.IsAny<UserAttributes>(), ProjectConfig, It.IsAny<List<OptimizelyDecideOption>>(), It.IsAny<IDecisionReasons>())).Returns<Variation>(null);
+                It.IsAny<UserAttributes>(), ProjectConfig)).Returns<Variation>(null);
             DecisionServiceMock.Setup(ds => ds.GetVariationForFeatureRollout(It.IsAny<FeatureFlag>(), It.IsAny<string>(),
-                It.IsAny<UserAttributes>(), ProjectConfig, It.IsAny<IDecisionReasons>())).Returns(expectedDecision);
+                It.IsAny<UserAttributes>(), ProjectConfig)).Returns(expectedDecision);
 
             var actualDecision = DecisionServiceMock.Object.GetVariationForFeature(featureFlag, "user1", ProjectConfig, new UserAttributes());
 
@@ -845,8 +844,8 @@ namespace OptimizelySDK.Tests
             var featureFlag = ProjectConfig.GetFeatureFlagFromKey("string_single_variable_feature");
             var expectedDecision = new FeatureDecision(null, null, FeatureDecision.DECISION_SOURCE_ROLLOUT);
 
-            DecisionServiceMock.Setup(ds => ds.GetVariationForFeatureExperiment(It.IsAny<FeatureFlag>(), It.IsAny<string>(), It.IsAny<UserAttributes>(), ProjectConfig, new List<OptimizelyDecideOption>(), DefaultDecisionReasons.NewInstance())).Returns<Variation>(null);
-            DecisionServiceMock.Setup(ds => ds.GetVariationForFeatureRollout(It.IsAny<FeatureFlag>(), It.IsAny<string>(), It.IsAny<UserAttributes>(), ProjectConfig, DefaultDecisionReasons.NewInstance())).Returns<Variation>(null);
+            DecisionServiceMock.Setup(ds => ds.GetVariationForFeatureExperiment(It.IsAny<FeatureFlag>(), It.IsAny<string>(), It.IsAny<UserAttributes>(), ProjectConfig)).Returns<Variation>(null);
+            DecisionServiceMock.Setup(ds => ds.GetVariationForFeatureRollout(It.IsAny<FeatureFlag>(), It.IsAny<string>(), It.IsAny<UserAttributes>(), ProjectConfig)).Returns<Variation>(null);
 
             var actualDecision = DecisionServiceMock.Object.GetVariationForFeature(featureFlag, "user1", ProjectConfig, new UserAttributes());
             Assert.IsTrue(TestData.CompareObjects(expectedDecision, actualDecision));
@@ -867,8 +866,8 @@ namespace OptimizelySDK.Tests
                 { "browser_type", "chrome" }
             };
 
-            DecisionServiceMock.Setup(ds => ds.GetVariation(experiment, "user1", ProjectConfig, userAttributes, It.IsAny<List<OptimizelyDecideOption>>(), It.IsAny<IDecisionReasons>())).Returns(variation);
-            var actualDecision = DecisionServiceMock.Object.GetVariationForFeatureExperiment(featureFlag, "user1", userAttributes, ProjectConfig, new List<OptimizelyDecideOption>(), DefaultDecisionReasons.NewInstance());
+            DecisionServiceMock.Setup(ds => ds.GetVariation(experiment, "user1", ProjectConfig, userAttributes)).Returns(variation);
+            var actualDecision = DecisionServiceMock.Object.GetVariationForFeatureExperiment(featureFlag, "user1", userAttributes, ProjectConfig);
 
             // The user is bucketed into feature experiment's variation.
             Assert.IsTrue(TestData.CompareObjects(expectedDecision, actualDecision));
@@ -878,8 +877,8 @@ namespace OptimizelySDK.Tests
             var rolloutVariation = rolloutExperiment.Variations[0];
             var expectedRolloutDecision = new FeatureDecision(rolloutExperiment, rolloutVariation, FeatureDecision.DECISION_SOURCE_ROLLOUT);
 
-            BucketerMock.Setup(bm => bm.Bucket(ProjectConfig, rolloutExperiment, It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IDecisionReasons>())).Returns(rolloutVariation);
-            var actualRolloutDecision = DecisionServiceMock.Object.GetVariationForFeatureRollout(featureFlag, "user1", userAttributes, ProjectConfig, DefaultDecisionReasons.NewInstance());
+            BucketerMock.Setup(bm => bm.Bucket(ProjectConfig, rolloutExperiment, It.IsAny<string>(), It.IsAny<string>())).Returns(rolloutVariation);
+            var actualRolloutDecision = DecisionServiceMock.Object.GetVariationForFeatureRollout(featureFlag, "user1", userAttributes, ProjectConfig);
 
             // The user is bucketed into feature rollout's variation.
 

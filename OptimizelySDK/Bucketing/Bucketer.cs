@@ -15,7 +15,6 @@
  */
 using OptimizelySDK.Entity;
 using OptimizelySDK.Logger;
-using OptimizelySDK.OptimizelyDecisions;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -103,9 +102,8 @@ namespace OptimizelySDK.Bucketing
         /// <param name="experiment">Experiment Experiment in which user is to be bucketed</param>
         /// <param name="bucketingId">A customer-assigned value used to create the key for the murmur hash.</param>
         /// <param name="userId">User identifier</param>
-        /// <param name="reasons">Decision log messages.</param>
         /// <returns>Variation which will be shown to the user</returns>
-        public virtual Variation Bucket(ProjectConfig config, Experiment experiment, string bucketingId, string userId, IDecisionReasons reasons)
+        public virtual Variation Bucket(ProjectConfig config, Experiment experiment, string bucketingId, string userId)
         {
             string message;
             Variation variation;
@@ -124,26 +122,26 @@ namespace OptimizelySDK.Bucketing
                 if (string.IsNullOrEmpty(userExperimentId))
                 {
                     message = $"User [{userId}] is in no experiment.";
-                    Logger.Log(LogLevel.INFO, reasons.AddInfo(message));
+                    Logger.Log(LogLevel.INFO, message);
                     return new Variation();
                 }
 
                 if (userExperimentId != experiment.Id)
                 {
                     message = $"User [{userId}] is not in experiment [{experiment.Key}] of group [{experiment.GroupId}].";
-                    Logger.Log(LogLevel.INFO, reasons.AddInfo(message));
+                    Logger.Log(LogLevel.INFO, message);
                     return new Variation();
                 }
 
                 message = $"User [{userId}] is in experiment [{experiment.Key}] of group [{experiment.GroupId}].";
-                Logger.Log(LogLevel.INFO, reasons.AddInfo(message));
+                Logger.Log(LogLevel.INFO, message);
             }
 
             // Bucket user if not in whitelist and in group (if any).
             string variationId = FindBucket(bucketingId, userId, experiment.Id, experiment.TrafficAllocation);
             if (string.IsNullOrEmpty(variationId))
             {
-                Logger.Log(LogLevel.INFO, reasons.AddInfo($"User [{userId}] is in no variation."));
+                Logger.Log(LogLevel.INFO, $"User [{userId}] is in no variation.");
                 return new Variation();
 
             }
@@ -151,7 +149,7 @@ namespace OptimizelySDK.Bucketing
             // success!
             variation = config.GetVariationFromId(experiment.Key, variationId);
             message = $"User [{userId}] is in variation [{variation.Key}] of experiment [{experiment.Key}].";
-            Logger.Log(LogLevel.INFO, reasons.AddInfo(message));
+            Logger.Log(LogLevel.INFO, message);
             return variation;
         }
     }
