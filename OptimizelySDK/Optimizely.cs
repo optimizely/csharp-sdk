@@ -476,45 +476,45 @@ namespace OptimizelySDK
                 return false;
 
             bool featureEnabled = false;
-            var sourceInfo = new Dictionary<string, string>();
-            var decision = DecisionService.GetVariationForFeature(featureFlag, userId, config, userAttributes);
-            var variation = decision.Variation;
-            var decisionSource = decision?.Source ?? FeatureDecision.DECISION_SOURCE_ROLLOUT;
+                var sourceInfo = new Dictionary<string, string>();
+                var decision = DecisionService.GetVariationForFeature(featureFlag, userId, config, userAttributes);
+                var variation = decision.Variation;
+                var decisionSource = decision?.Source ?? FeatureDecision.DECISION_SOURCE_ROLLOUT;
 
-            SendImpressionEvent(decision.Experiment, variation, userId, userAttributes, config, featureKey, decisionSource);
+                SendImpressionEvent(decision.Experiment, variation, userId, userAttributes, config, featureKey, decisionSource);
 
-            if (variation != null)
-            {
-                featureEnabled = variation.FeatureEnabled.GetValueOrDefault();
-
-                // This information is only necessary for feature tests.
-                // For rollouts experiments and variations are an implementation detail only.
-                if (decision.Source == FeatureDecision.DECISION_SOURCE_FEATURE_TEST)
+                if (variation != null)
                 {
-                    sourceInfo["experimentKey"] = decision.Experiment.Key;
-                    sourceInfo["variationKey"] = variation.Key;
+                    featureEnabled = variation.FeatureEnabled.GetValueOrDefault();
+
+                    // This information is only necessary for feature tests.
+                    // For rollouts experiments and variations are an implementation detail only.
+                    if (decision.Source == FeatureDecision.DECISION_SOURCE_FEATURE_TEST)
+                    {
+                        sourceInfo["experimentKey"] = decision.Experiment.Key;
+                        sourceInfo["variationKey"] = variation.Key;
+                    }
+                    else
+                    {
+                        Logger.Log(LogLevel.INFO, $@"The user ""{userId}"" is not being experimented on feature ""{featureKey}"".");
+                    }
                 }
+
+                if (featureEnabled == true)
+                    Logger.Log(LogLevel.INFO, $@"Feature flag ""{featureKey}"" is enabled for user ""{userId}"".");
                 else
+                    Logger.Log(LogLevel.INFO, $@"Feature flag ""{featureKey}"" is not enabled for user ""{userId}"".");
+
+                var decisionInfo = new Dictionary<string, object>
                 {
-                    Logger.Log(LogLevel.INFO, $@"The user ""{userId}"" is not being experimented on feature ""{featureKey}"".");
-                }
-            }
+                    { "featureKey", featureKey },
+                    { "featureEnabled", featureEnabled },
+                    { "source", decision.Source },
+                    { "sourceInfo", sourceInfo },
+                };
 
-            if (featureEnabled == true)
-                Logger.Log(LogLevel.INFO, $@"Feature flag ""{featureKey}"" is enabled for user ""{userId}"".");
-            else
-                Logger.Log(LogLevel.INFO, $@"Feature flag ""{featureKey}"" is not enabled for user ""{userId}"".");
-
-            var decisionInfo = new Dictionary<string, object>
-            {
-                { "featureKey", featureKey },
-                { "featureEnabled", featureEnabled },
-                { "source", decision.Source },
-                { "sourceInfo", sourceInfo },
-            };
-
-            NotificationCenter.SendNotifications(NotificationCenter.NotificationType.Decision, DecisionNotificationTypes.FEATURE, userId,
-               userAttributes ?? new UserAttributes(), decisionInfo);
+                NotificationCenter.SendNotifications(NotificationCenter.NotificationType.Decision, DecisionNotificationTypes.FEATURE, userId,
+                   userAttributes ?? new UserAttributes(), decisionInfo);
             return featureEnabled;
         }
 
@@ -710,6 +710,139 @@ namespace OptimizelySDK
 
 
             return new OptimizelyUserContext(this, userId, userAttributes, ErrorHandler, Logger);
+        }
+
+        public OptimizelyDecision Decide(OptimizelyUserContext user,
+                              string key,
+                              List<OptimizelyDecideOption> options)
+        {
+
+            var config = ProjectConfigManager?.GetConfig();
+            if (config == null)
+            {
+                return OptimizelyDecision.NewErrorDecision(key, user, DecisionMessage.SDK_NOT_READY, ErrorHandler, Logger);
+            }
+            var userId = user.UserId;
+            var inputValues = new Dictionary<string, string>
+            {
+                { USER_ID, userId },
+            };
+
+            if (!ValidateStringInputs(inputValues))
+                return null;
+
+            var flag = config.GetFeatureFlagFromKey(key);
+            if (flag == null)
+            {
+                return OptimizelyDecision.NewErrorDecision(key,
+                    user,
+                    DecisionMessage.Reason(DecisionMessage.FLAG_KEY_INVALID, key),
+                    ErrorHandler, Logger);
+            }
+
+            var userAttributes = user.UserAttributes;
+            var decisionEventDispatched = false;
+            var allOptions = GetAllOptions(options);
+            var decisionReasons = DefaultDecisionReasons.NewInstance(allOptions);
+
+            var flagDecision = DecisionService.GetVariationForFeature(
+                flag,
+                userId,
+                config,
+                userAttributes,
+                allOptions,
+                decisionReasons);
+
+            var featureEnabled = false;
+
+            var variation = flagDecision.Variation;
+
+            if (variation != null)
+            {
+                featureEnabled = variation.FeatureEnabled.GetValueOrDefault();
+            }
+            
+            if (featureEnabled)
+            {
+                Logger.Log(LogLevel.INFO, "Feature \"" + key + "\" is enabled for user \"" + userId + "\"");
+            }
+            else
+            {
+                Logger.Log(LogLevel.INFO, "Feature \"" + key + "\" is not enabled for user \"" + userId + "\"");
+            }
+            var variableMap = new Dictionary<string, object>();
+            if (flag?.Variables != null && !allOptions.Contains(OptimizelyDecideOption.EXCLUDE_VARIABLES))
+            {
+
+                foreach (var featureVariable in flag?.Variables)
+                {
+                    string variableValue = featureVariable.DefaultValue;
+                    if (featureEnabled)
+                    {
+                        var featureVariableUsageInstance = variation.GetFeatureVariableUsageFromId(featureVariable.Id);
+                        if (featureVariableUsageInstance != null)
+                        {
+                            variableValue = featureVariableUsageInstance.Value;
+                        }
+                    }
+
+                    var typeCastedValue = GetTypeCastedVariableValue(variableValue, featureVariable.Type);
+
+                    if (typeCastedValue is OptimizelyJSON)
+                        typeCastedValue = ((OptimizelyJSON)typeCastedValue).ToDictionary();
+
+                    variableMap.Add(featureVariable.Key, typeCastedValue);
+                }
+            }
+            
+            var optimizelyJSON = new OptimizelyJSON(variableMap, ErrorHandler, Logger);
+
+            var decisionSource = flagDecision?.Source ?? FeatureDecision.DECISION_SOURCE_ROLLOUT;
+            if (!allOptions.Contains(OptimizelyDecideOption.DISABLE_DECISION_EVENT))
+            {
+
+                SendImpressionEvent(flagDecision.Experiment, variation, userId, userAttributes, config, key, decisionSource);
+                decisionEventDispatched = true;
+            }
+            var reasonsToReport = decisionReasons.ToReport();
+            var variationKey = flagDecision.Variation?.Key;
+
+            // TODO: add ruleKey values when available later. use a copy of experimentKey until then.
+            var ruleKey = flagDecision.Experiment?.Key;
+
+            var decisionInfo = new Dictionary<string, object>
+            {
+                { "flagKey", key },
+                { "enabled", featureEnabled },
+                { "variables", variableMap },
+                { "variationKey", variationKey },
+                { "ruleKey", ruleKey },
+                { "reasons", decisionReasons },
+                { "decisionEventDispatched", decisionEventDispatched },
+                { "featureEnabled", featureEnabled },
+            };
+
+            NotificationCenter.SendNotifications(NotificationCenter.NotificationType.Decision, DecisionNotificationTypes.FEATURE, userId,
+               userAttributes ?? new UserAttributes(), decisionInfo);
+
+            return new OptimizelyDecision(
+                variationKey,
+                featureEnabled,
+                optimizelyJSON,
+                ruleKey,
+                key,
+                user,
+                reasonsToReport);
+        }
+
+        private List<OptimizelyDecideOption> GetAllOptions(List<OptimizelyDecideOption> options)
+        {
+            var copiedOptions = new List<OptimizelyDecideOption>(DefaultDecideOptions);
+            if (options != null)
+            {
+                copiedOptions.AddRange(options);
+            }
+            return copiedOptions;
         }
 
         /// <summary>

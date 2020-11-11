@@ -19,6 +19,7 @@ using System.Collections.Generic;
 using OptimizelySDK.Entity;
 using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Logger;
+using OptimizelySDK.OptimizelyDecisions;
 using OptimizelySDK.Utils;
 
 namespace OptimizelySDK.Bucketing
@@ -83,20 +84,43 @@ namespace OptimizelySDK.Bucketing
         /// <param name = "userId" > The userId of the user.
         /// <param name = "filteredAttributes" > The user's attributes. This should be filtered to just attributes in the Datafile.</param>
         /// <returns>The Variation the user is allocated into.</returns>
-        public virtual Variation GetVariation(Experiment experiment, string userId, ProjectConfig config, UserAttributes filteredAttributes)
+        public virtual Variation GetVariation(Experiment experiment,
+            string userId,
+            ProjectConfig config,
+            UserAttributes filteredAttributes)
+        {
+            return GetVariation(experiment, userId, config, filteredAttributes, new List<OptimizelyDecideOption>(), DefaultDecisionReasons.NewInstance());
+        }
+
+        /// <summary>
+        /// Get a Variation of an Experiment for a user to be allocated into.
+        /// </summary>
+        /// <param name = "experiment" > The Experiment the user will be bucketed into.</param>
+        /// <param name = "userId" > The userId of the user.
+        /// <param name = "filteredAttributes" > The user's attributes. This should be filtered to just attributes in the Datafile.</param>
+        /// <returns>The Variation the user is allocated into.</returns>
+        public virtual Variation GetVariation(Experiment experiment,
+            string userId,
+            ProjectConfig config,
+            UserAttributes filteredAttributes,
+            List<OptimizelyDecideOption> options,
+            IDecisionReasons reasons)
         {
             if (!ExperimentUtils.IsExperimentActive(experiment, Logger)) return null;
 
             // check if a forced variation is set
-            var forcedVariation = GetForcedVariation(experiment.Key, userId, config);
+            var forcedVariation = GetForcedVariation(experiment.Key, userId, config, reasons);
             if (forcedVariation != null)
                 return forcedVariation;
 
-            var variation = GetWhitelistedVariation(experiment, userId);
+            var variation = GetWhitelistedVariation(experiment, userId, reasons);
 
             if (variation != null) return variation;
+            // fetch the user profile map from the user profile service
+            var ignoreUPS = options.Contains(OptimizelyDecideOption.IGNORE_USER_PROFILE_SERVICE);
+
             UserProfile userProfile = null;
-            if (UserProfileService != null)
+            if (UserProfileService != null && !ignoreUPS)
             {
                 try
                 {
@@ -104,21 +128,21 @@ namespace OptimizelySDK.Bucketing
                     if (userProfileMap != null && UserProfileUtil.IsValidUserProfileMap(userProfileMap))
                     {
                         userProfile = UserProfileUtil.ConvertMapToUserProfile(userProfileMap);
-                        variation = GetStoredVariation(experiment, userProfile, config);
+                        variation = GetStoredVariation(experiment, userProfile, config, reasons);
                         if (variation != null) return variation;
                     }
                     else if (userProfileMap == null)
                     {
-                        Logger.Log(LogLevel.INFO, "We were unable to get a user profile map from the UserProfileService.");
+                        Logger.Log(LogLevel.INFO, reasons.AddInfo("We were unable to get a user profile map from the UserProfileService."));
                     }
                     else
                     {
-                        Logger.Log(LogLevel.ERROR, "The UserProfileService returned an invalid map.");
+                        Logger.Log(LogLevel.ERROR, reasons.AddInfo("The UserProfileService returned an invalid map."));
                     }
                 }
                 catch (Exception exception)
                 {
-                    Logger.Log(LogLevel.ERROR, exception.Message);
+                    Logger.Log(LogLevel.ERROR, reasons.AddInfo(exception.Message));
                     ErrorHandler.HandleError(new Exceptions.OptimizelyRuntimeException(exception.Message));
                 }
             }
@@ -126,16 +150,16 @@ namespace OptimizelySDK.Bucketing
             if (ExperimentUtils.DoesUserMeetAudienceConditions(config, experiment, filteredAttributes, LOGGING_KEY_TYPE_EXPERIMENT, experiment.Key, Logger))
             {
                 // Get Bucketing ID from user attributes.
-                string bucketingId = GetBucketingId(userId, filteredAttributes);
+                string bucketingId = GetBucketingId(userId, filteredAttributes, reasons);
 
-                variation = Bucketer.Bucket(config, experiment, bucketingId, userId);
+                variation = Bucketer.Bucket(config, experiment, bucketingId, userId, reasons);
 
                 if (variation != null && variation.Key != null)
                 {
                     if (UserProfileService != null)
                     {
                         var bucketerUserProfile = userProfile ?? new UserProfile(userId, new Dictionary<string, Decision>());
-                        SaveVariation(experiment, variation, bucketerUserProfile);
+                        SaveVariation(experiment, variation, bucketerUserProfile, reasons);
 
                     }
                     else
@@ -144,7 +168,7 @@ namespace OptimizelySDK.Bucketing
 
                 return variation;
             }
-            Logger.Log(LogLevel.INFO, $"User \"{userId}\" does not meet conditions to be in experiment \"{experiment.Key}\".");
+            Logger.Log(LogLevel.INFO, reasons.AddInfo($"User \"{userId}\" does not meet conditions to be in experiment \"{experiment.Key}\"."));
 
             return null;
         }
@@ -157,6 +181,18 @@ namespace OptimizelySDK.Bucketing
         /// <param name="config">Project Config</param>
         /// <returns>Variation entity which the given user and experiment should be forced into.</returns>
         public Variation GetForcedVariation(string experimentKey, string userId, ProjectConfig config)
+        {
+            return GetForcedVariation(experimentKey, userId, config, DefaultDecisionReasons.NewInstance());
+        }
+
+        /// <summary>
+        /// Gets the forced variation for the given user and experiment.  
+        /// </summary>
+        /// <param name="experimentKey">The experiment key</param>
+        /// <param name="userId">The user ID</param>
+        /// <param name="config">Project Config</param>
+        /// <returns>Variation entity which the given user and experiment should be forced into.</returns>
+        public Variation GetForcedVariation(string experimentKey, string userId, ProjectConfig config, IDecisionReasons reasons)
         {
             if (ForcedVariationMap.ContainsKey(userId) == false)
             {
@@ -191,8 +227,7 @@ namespace OptimizelySDK.Bucketing
             // this case is logged in getVariationFromKey   
             if (string.IsNullOrEmpty(variationKey))
                 return null;
-
-            Logger.Log(LogLevel.DEBUG, $@"Variation ""{variationKey}"" is mapped to experiment ""{experimentKey}"" and user ""{userId}"" in the forced variation map");
+            Logger.Log(LogLevel.DEBUG, reasons.AddInfo($@"Variation ""{variationKey}"" is mapped to experiment ""{experimentKey}"" and user ""{userId}"" in the forced variation map"));
 
             Variation variation = config.GetVariationFromKey(experimentKey, variationKey);
 
@@ -248,8 +283,6 @@ namespace OptimizelySDK.Bucketing
             Logger.Log(LogLevel.DEBUG, $@"Set variation ""{variationId}"" for experiment ""{experimentId}"" and user ""{userId}"" in the forced variation map.");
             return true;
         }
-
-
         /// <summary>
         /// Get the variation the user has been whitelisted into.
         /// </summary>
@@ -258,6 +291,19 @@ namespace OptimizelySDK.Bucketing
         /// <returns>if the user is not whitelisted into any variation {@link Variation}
         /// the user is bucketed into if the user has a specified whitelisted variation.</returns>
         public Variation GetWhitelistedVariation(Experiment experiment, string userId)
+        {
+            return GetWhitelistedVariation(experiment, userId, DefaultDecisionReasons.NewInstance());
+        }
+
+        /// <summary>
+        /// Get the variation the user has been whitelisted into.
+        /// </summary>
+        /// <param name = "experiment" >in which user is to be bucketed.</param>
+        /// <param name = "userId" > User Identifier</param>
+        /// <param name = "reasons" > Decision log messages.</param>
+        /// <returns>if the user is not whitelisted into any variation {@link Variation}
+        /// the user is bucketed into if the user has a specified whitelisted variation.</returns>
+        public Variation GetWhitelistedVariation(Experiment experiment, string userId, IDecisionReasons reasons)
         {
             //if a user has a forced variation mapping, return the respective variation
             Dictionary<string, string> userIdToVariationKeyMap = experiment.UserIdToKeyVariations;
@@ -271,9 +317,9 @@ namespace OptimizelySDK.Bucketing
                 : null;
 
             if (forcedVariation != null)
-                Logger.Log(LogLevel.INFO, $"User \"{userId}\" is forced in variation \"{forcedVariationKey}\".");
+                Logger.Log(LogLevel.INFO, reasons.AddInfo($"User \"{userId}\" is forced in variation \"{forcedVariationKey}\"."));
             else
-                Logger.Log(LogLevel.ERROR, $"Variation \"{forcedVariationKey}\" is not in the datafile. Not activating user \"{userId}\".");
+                Logger.Log(LogLevel.ERROR, reasons.AddInfo($"Variation \"{forcedVariationKey}\" is not in the datafile. Not activating user \"{userId}\"."));
 
             return forcedVariation;
         }
@@ -284,7 +330,7 @@ namespace OptimizelySDK.Bucketing
         /// <param name = "experiment" > which the user was bucketed</param>
         /// <param name = "userProfile" > User profile of the user</param>
         /// <returns>The user was previously bucketed into.</returns>
-        public Variation GetStoredVariation(Experiment experiment, UserProfile userProfile, ProjectConfig config)
+        public Variation GetStoredVariation(Experiment experiment, UserProfile userProfile, ProjectConfig config, IDecisionReasons reasons)
         {
             // ---------- Check User Profile for Sticky Bucketing ----------
             // If a user profile instance is present then check it for a saved variation
@@ -296,7 +342,7 @@ namespace OptimizelySDK.Bucketing
 
             if (decision == null)
             {
-                Logger.Log(LogLevel.INFO, $"No previously activated variation of experiment \"{experimentKey}\" for user \"{userProfile.UserId}\" found in user profile.");
+                Logger.Log(LogLevel.INFO, reasons.AddInfo($"No previously activated variation of experiment \"{experimentKey}\" for user \"{userProfile.UserId}\" found in user profile."));
                 return null;
             }
 
@@ -310,17 +356,27 @@ namespace OptimizelySDK.Bucketing
 
                 if (savedVariation == null)
                 {
-                    Logger.Log(LogLevel.INFO, $"User \"{userProfile.UserId}\" was previously bucketed into variation with ID \"{variationId}\" for experiment \"{experimentId}\", but no matching variation was found for that user. We will re-bucket the user.");
+                    Logger.Log(LogLevel.INFO, reasons.AddInfo($"User \"{userProfile.UserId}\" was previously bucketed into variation with ID \"{variationId}\" for experiment \"{experimentId}\", but no matching variation was found for that user. We will re-bucket the user."));
                     return null;
                 }
 
-                Logger.Log(LogLevel.INFO, $"Returning previously activated variation \"{savedVariation.Key}\" of experiment \"{experimentKey}\" for user \"{userProfile.UserId}\" from user profile.");
+                Logger.Log(LogLevel.INFO, reasons.AddInfo($"Returning previously activated variation \"{savedVariation.Key}\" of experiment \"{experimentKey}\" for user \"{userProfile.UserId}\" from user profile."));
                 return savedVariation;
             }
             catch (Exception)
             {
                 return null;
             }
+        }
+        /// <summary>
+        /// Save a { @link Variation } of an { @link Experiment } for a user in the {@link UserProfileService}.
+        /// </summary>
+        /// <param name = "experiment" > The experiment the user was buck</param>
+        /// <param name = "variation" > The Variation to save.</param>
+        /// <param name = "userProfile" > instance of the user information.</param>
+        public void SaveVariation(Experiment experiment, Variation variation, UserProfile userProfile)
+        {
+            SaveVariation(experiment, variation, userProfile, DefaultDecisionReasons.NewInstance());
         }
 
         /// <summary>
@@ -329,7 +385,7 @@ namespace OptimizelySDK.Bucketing
         /// <param name = "experiment" > The experiment the user was buck</param>
         /// <param name = "variation" > The Variation to save.</param>
         /// <param name = "userProfile" > instance of the user information.</param>
-        public void SaveVariation(Experiment experiment, Variation variation, UserProfile userProfile)
+        public void SaveVariation(Experiment experiment, Variation variation, UserProfile userProfile, IDecisionReasons reasons)
         {
             //only save if the user has implemented a user profile service
             if (UserProfileService == null)
@@ -351,15 +407,15 @@ namespace OptimizelySDK.Bucketing
             try
             {
                 UserProfileService.Save(userProfile.ToMap());
-                Logger.Log(LogLevel.INFO, $"Saved variation \"{variation.Id}\" of experiment \"{experiment.Id}\" for user \"{userProfile.UserId}\".");
+                Logger.Log(LogLevel.INFO, reasons.AddInfo($"Saved variation \"{variation.Id}\" of experiment \"{experiment.Id}\" for user \"{userProfile.UserId}\"."));
             }
             catch (Exception exception)
             {
-                Logger.Log(LogLevel.ERROR, $"Failed to save variation \"{variation.Id}\" of experiment \"{experiment.Id}\" for user \"{userProfile.UserId}\".");
+                Logger.Log(LogLevel.ERROR, reasons.AddInfo($"Failed to save variation \"{variation.Id}\" of experiment \"{experiment.Id}\" for user \"{userProfile.UserId}\"."));
                 ErrorHandler.HandleError(new Exceptions.OptimizelyRuntimeException(exception.Message));
             }
         }
-
+       
         /// <summary>
         /// Try to bucket the user into a rollout rule.
         /// Evaluate the user for rules in priority order by seeing if the user satisfies the audience.
@@ -368,9 +424,14 @@ namespace OptimizelySDK.Bucketing
         /// <param name = "featureFlag" >The feature flag the user wants to access.</param>
         /// <param name = "userId" >User Identifier</param>
         /// <param name = "filteredAttributes" >The user's attributes. This should be filtered to just attributes in the Datafile.</param>
+        /// <param name = "reasons" >Decision log messages.</param>
         /// <returns>null if the user is not bucketed into the rollout or if the feature flag was not attached to a rollout.
         /// otherwise the FeatureDecision entity</returns>
-        public virtual FeatureDecision GetVariationForFeatureRollout(FeatureFlag featureFlag, string userId, UserAttributes filteredAttributes, ProjectConfig config)
+        public virtual FeatureDecision GetVariationForFeatureRollout(FeatureFlag featureFlag,
+            string userId,
+            UserAttributes filteredAttributes,
+            ProjectConfig config,
+            IDecisionReasons reasons)
         {
             if (featureFlag == null)
             {
@@ -380,7 +441,7 @@ namespace OptimizelySDK.Bucketing
 
             if (string.IsNullOrEmpty(featureFlag.RolloutId))
             {
-                Logger.Log(LogLevel.INFO, $"The feature flag \"{featureFlag.Key}\" is not used in a rollout.");
+                Logger.Log(LogLevel.INFO, reasons.AddInfo($"The feature flag \"{featureFlag.Key}\" is not used in a rollout."));
                 return null;
             }
 
@@ -388,7 +449,7 @@ namespace OptimizelySDK.Bucketing
 
             if (string.IsNullOrEmpty(rollout.Id))
             {
-                Logger.Log(LogLevel.ERROR, $"The rollout with id \"{featureFlag.RolloutId}\" is not found in the datafile for feature flag \"{featureFlag.Key}\"");
+                Logger.Log(LogLevel.ERROR, reasons.AddInfo($"The rollout with id \"{featureFlag.RolloutId}\" is not found in the datafile for feature flag \"{featureFlag.Key}\""));
                 return null;
             }
 
@@ -400,16 +461,16 @@ namespace OptimizelySDK.Bucketing
             var rolloutRulesLength = rollout.Experiments.Count;
 
             // Get Bucketing ID from user attributes.
-            string bucketingId = GetBucketingId(userId, filteredAttributes);
+            string bucketingId = GetBucketingId(userId, filteredAttributes, reasons);
 
             // For all rules before the everyone else rule
             for (int i = 0; i < rolloutRulesLength - 1; i++)
             {
                 string loggingKey = (i + 1).ToString(); 
                 var rolloutRule = rollout.Experiments[i];
-                if (ExperimentUtils.DoesUserMeetAudienceConditions(config, rolloutRule, filteredAttributes, LOGGING_KEY_TYPE_RULE, loggingKey, Logger))
+                if (ExperimentUtils.DoesUserMeetAudienceConditions(config, rolloutRule, filteredAttributes, LOGGING_KEY_TYPE_RULE, loggingKey, reasons, Logger))
                 {
-                    variation = Bucketer.Bucket(config, rolloutRule, bucketingId, userId);
+                    variation = Bucketer.Bucket(config, rolloutRule, bucketingId, userId, reasons);
                     if (variation == null || string.IsNullOrEmpty(variation.Id))
                         break;
 
@@ -424,9 +485,9 @@ namespace OptimizelySDK.Bucketing
 
             // Get the last rule which is everyone else rule.
             var everyoneElseRolloutRule = rollout.Experiments[rolloutRulesLength - 1];
-            if (ExperimentUtils.DoesUserMeetAudienceConditions(config, everyoneElseRolloutRule, filteredAttributes, LOGGING_KEY_TYPE_RULE, "Everyone Else", Logger))
+            if (ExperimentUtils.DoesUserMeetAudienceConditions(config, everyoneElseRolloutRule, filteredAttributes, LOGGING_KEY_TYPE_RULE, "Everyone Else", reasons, Logger))
             {
-                variation = Bucketer.Bucket(config, everyoneElseRolloutRule, bucketingId, userId);
+                variation = Bucketer.Bucket(config, everyoneElseRolloutRule, bucketingId, userId, reasons);
                 if (variation != null && !string.IsNullOrEmpty(variation.Id))
                 {
                     Logger.Log(LogLevel.DEBUG, $"User \"{userId}\" meets conditions for targeting rule \"Everyone Else\".");
@@ -450,7 +511,12 @@ namespace OptimizelySDK.Bucketing
         /// <param name = "filteredAttributes" >The user's attributes. This should be filtered to just attributes in the Datafile.</param>
         /// <returns>null if the user is not bucketed into the rollout or if the feature flag was not attached to a rollout.
         /// Otherwise the FeatureDecision entity</returns>
-        public virtual FeatureDecision GetVariationForFeatureExperiment(FeatureFlag featureFlag, string userId, UserAttributes filteredAttributes, ProjectConfig config)
+        public virtual FeatureDecision GetVariationForFeatureExperiment(FeatureFlag featureFlag,
+            string userId,
+            UserAttributes filteredAttributes,
+            ProjectConfig config,
+            List<OptimizelyDecideOption> options,
+            IDecisionReasons reasons)
         {
             if (featureFlag == null)
             {
@@ -460,7 +526,7 @@ namespace OptimizelySDK.Bucketing
 
             if (featureFlag.ExperimentIds == null || featureFlag.ExperimentIds.Count == 0)
             {
-                Logger.Log(LogLevel.INFO, $"The feature flag \"{featureFlag.Key}\" is not used in any experiments.");
+                Logger.Log(LogLevel.INFO, reasons.AddInfo($"The feature flag \"{featureFlag.Key}\" is not used in any experiments."));
                 return null;
             }
 
@@ -471,16 +537,16 @@ namespace OptimizelySDK.Bucketing
                 if (string.IsNullOrEmpty(experiment.Key))
                     continue;
 
-                var variation = GetVariation(experiment, userId, config, filteredAttributes);
+                var variation = GetVariation(experiment, userId, config, filteredAttributes, options, reasons);
 
                 if (variation != null && !string.IsNullOrEmpty(variation.Id))
                 {
-                    Logger.Log(LogLevel.INFO, $"The user \"{userId}\" is bucketed into experiment \"{experiment.Key}\" of feature \"{featureFlag.Key}\".");
+                    Logger.Log(LogLevel.INFO, reasons.AddInfo($"The user \"{userId}\" is bucketed into experiment \"{experiment.Key}\" of feature \"{featureFlag.Key}\"."));
                     return new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_FEATURE_TEST);
                 }
             }
 
-            Logger.Log(LogLevel.INFO, $"The user \"{userId}\" is not bucketed into any of the experiments on the feature \"{featureFlag.Key}\".");
+            Logger.Log(LogLevel.INFO, reasons.AddInfo($"The user \"{userId}\" is not bucketed into any of the experiments on the feature \"{featureFlag.Key}\"."));
             return null;
         }
 
@@ -494,22 +560,43 @@ namespace OptimizelySDK.Bucketing
         /// successfully bucketed.</returns>
         public virtual FeatureDecision GetVariationForFeature(FeatureFlag featureFlag, string userId, ProjectConfig config, UserAttributes filteredAttributes)
         {
+            return GetVariationForFeature(featureFlag, userId, config, filteredAttributes, new List<OptimizelyDecideOption>(), DefaultDecisionReasons.NewInstance());
+        }
+
+        /// <summary>
+        /// Get the variation the user is bucketed into for the FeatureFlag
+        /// </summary>
+        /// <param name = "featureFlag" >The feature flag the user wants to access.</param>
+        /// <param name = "userId" >User Identifier</param>
+        /// <param name = "filteredAttributes" >The user's attributes. This should be filtered to just attributes in the Datafile.</param>
+        /// <param name = "filteredAttributes" >The user's attributes. This should be filtered to just attributes in the Datafile.</param>
+        /// <param name = "options" >An array of decision options.</param>
+        /// <param name = "reasons" >Decision log messages.</param>
+        /// <returns>null if the user is not bucketed into any variation or the FeatureDecision entity if the user is 
+        /// successfully bucketed.</returns>
+        public virtual FeatureDecision GetVariationForFeature(FeatureFlag featureFlag,
+            string userId,
+            ProjectConfig config,
+            UserAttributes filteredAttributes,
+            List<OptimizelyDecideOption> options, 
+            IDecisionReasons reasons)
+        {
             // Check if the feature flag has an experiment and the user is bucketed into that experiment.
-            var decision = GetVariationForFeatureExperiment(featureFlag, userId, filteredAttributes, config);
+            var decision = GetVariationForFeatureExperiment(featureFlag, userId, filteredAttributes, config, options, reasons);
 
             if (decision != null)
                 return decision;
 
             // Check if the feature flag has rollout and the the user is bucketed into one of its rules.
-            decision = GetVariationForFeatureRollout(featureFlag, userId, filteredAttributes, config);
+            decision = GetVariationForFeatureRollout(featureFlag, userId, filteredAttributes, config, reasons);
 
             if (decision != null)
             {
-                Logger.Log(LogLevel.INFO, $"The user \"{userId}\" is bucketed into a rollout for feature flag \"{featureFlag.Key}\".");
+                Logger.Log(LogLevel.INFO, reasons.AddInfo($"The user \"{userId}\" is bucketed into a rollout for feature flag \"{featureFlag.Key}\"."));
                 return decision;
             }
 
-            Logger.Log(LogLevel.INFO, $"The user \"{userId}\" is not bucketed into a rollout for feature flag \"{featureFlag.Key}\".");
+            Logger.Log(LogLevel.INFO, reasons.AddInfo($"The user \"{userId}\" is not bucketed into a rollout for feature flag \"{featureFlag.Key}\"."));
             return new FeatureDecision(null, null, FeatureDecision.DECISION_SOURCE_ROLLOUT);
         }
 
@@ -519,7 +606,7 @@ namespace OptimizelySDK.Bucketing
         /// <param name = "userId" >User Identifier</param>
         /// <param name = "filteredAttributes" >The user's attributes.</param>
         /// <returns>Bucketing Id if it is a string type in attributes, user Id otherwise.</returns>
-        private string GetBucketingId(string userId, UserAttributes filteredAttributes)
+        private string GetBucketingId(string userId, UserAttributes filteredAttributes, IDecisionReasons reasons)
         {
             string bucketingId = userId;
 
@@ -533,7 +620,7 @@ namespace OptimizelySDK.Bucketing
                 }
                 else
                 {
-                    Logger.Log(LogLevel.WARN, "BucketingID attribute is not a string. Defaulted to userId");
+                    Logger.Log(LogLevel.WARN, reasons.AddInfo("BucketingID attribute is not a string. Defaulted to userId"));
                 }
             }
 
