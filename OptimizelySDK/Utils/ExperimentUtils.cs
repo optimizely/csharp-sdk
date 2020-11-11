@@ -17,6 +17,7 @@
 using OptimizelySDK.AudienceConditions;
 using OptimizelySDK.Entity;
 using OptimizelySDK.Logger;
+using OptimizelySDK.OptimizelyDecisions;
 
 namespace OptimizelySDK.Utils
 {
@@ -35,7 +36,6 @@ namespace OptimizelySDK.Utils
             return true;
         }
 
-
         /// <summary>
         /// Check if the user meets audience conditions to be in experiment or not
         /// </summary>
@@ -50,6 +50,27 @@ namespace OptimizelySDK.Utils
             UserAttributes userAttributes,
             string loggingKeyType,
             string loggingKey,
+            ILogger logger)
+        {
+            return DoesUserMeetAudienceConditions(config, experiment, userAttributes, loggingKeyType, loggingKey, DefaultDecisionReasons.NewInstance(), logger);
+        }
+
+        /// <summary>
+        /// Check if the user meets audience conditions to be in experiment or not
+        /// </summary>
+        /// <param name="config">ProjectConfig Configuration for the project</param>
+        /// <param name="experiment">Experiment Entity representing the experiment</param>
+        /// <param name="userAttributes">Attributes of the user. Defaults to empty attributes array if not provided</param>
+        /// <param name="loggingKeyType">It can be either experiment or rule.</param>
+        /// <param name="loggingKey">In case loggingKeyType is experiment it will be experiment key or else it will be rule number.</param>
+        /// <param name="reasons">Decision log messages.</param>
+        /// <returns>true if the user meets audience conditions to be in experiment, false otherwise.</returns>
+        public static bool DoesUserMeetAudienceConditions(ProjectConfig config,
+            Experiment experiment,
+            UserAttributes userAttributes,
+            string loggingKeyType,
+            string loggingKey,
+            IDecisionReasons reasons,
             ILogger logger)
         {
             if (userAttributes == null)
@@ -73,7 +94,7 @@ namespace OptimizelySDK.Utils
 
             var result = expConditions.Evaluate(config, userAttributes, logger).GetValueOrDefault();
             var resultText = result.ToString().ToUpper();
-            logger.Log(LogLevel.INFO, $@"Audiences for {loggingKeyType} ""{loggingKey}"" collectively evaluated to {resultText}");
+            logger.Log(LogLevel.INFO, reasons.AddInfo($@"Audiences for {loggingKeyType} ""{loggingKey}"" collectively evaluated to {resultText}"));
             return result;
         }
     }
