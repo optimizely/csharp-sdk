@@ -197,5 +197,230 @@ namespace OptimizelySDK.Tests
         }
         #endregion
 
+        #region decideAll
+
+        [Test]
+        public void DecideAllOneFlag()
+        {
+            var flagKey = "multi_variate_feature";
+            var flagKeys = new List<string>() { flagKey };
+
+            var variablesExpected = Optimizely.GetAllFeatureVariables(flagKey, UserID);
+
+            var user = Optimizely.CreateUserContext(UserID);
+            user.SetAttribute("browser_type", "chrome");
+
+            var decisions = user.DecideForKeys(flagKeys);
+
+            Assert.True(decisions.Count == 1);
+            var decision = decisions[flagKey];
+
+            OptimizelyDecision expDecision = new OptimizelyDecision(
+            "Gred",
+            false,
+            variablesExpected,
+            "test_experiment_multivariate",
+            flagKey,
+            user,
+            new List<string>());
+            Assert.IsTrue(TestData.CompareObjects(decision, expDecision));
+        }
+
+        [Test]
+        public void DecideAllTwoFlag()
+        {
+            var flagKey1 = "multi_variate_feature";
+            var flagKey2 = "string_single_variable_feature";
+            var flagKeys = new List<string>() { flagKey1, flagKey2 };
+
+            var variablesExpected1 = Optimizely.GetAllFeatureVariables(flagKey1, UserID);
+            var variablesExpected2 = Optimizely.GetAllFeatureVariables(flagKey2, UserID);
+
+            var user = Optimizely.CreateUserContext(UserID);
+            user.SetAttribute("browser_type", "chrome");
+
+            var decisions = user.DecideForKeys(flagKeys);
+
+            Assert.True(decisions.Count == 2);
+
+            OptimizelyDecision expDecision1 = new OptimizelyDecision(
+            "Gred",
+            false,
+            variablesExpected1,
+            "test_experiment_multivariate",
+            flagKey1,
+            user,
+            new List<string>());
+            Assert.IsTrue(TestData.CompareObjects(decisions[flagKey1], expDecision1));
+
+            OptimizelyDecision expDecision2 = new OptimizelyDecision(
+            "control",
+            true,
+            variablesExpected2,
+            "test_experiment_with_feature_rollout",
+            flagKey2,
+            user,
+            new List<string>());
+            Assert.IsTrue(TestData.CompareObjects(decisions[flagKey2], expDecision2));
+        }
+
+        [Test]
+        public void DecideAllAllFlags()
+        {
+            var flagKey1 = "boolean_feature";
+            var flagKey2 = "double_single_variable_feature";
+            var flagKey3 = "integer_single_variable_feature";
+            var flagKey4 = "boolean_single_variable_feature";
+            var flagKey5 = "string_single_variable_feature";
+            var flagKey6 = "multi_variate_feature";
+            var flagKey7 = "mutex_group_feature";
+            var flagKey8 = "empty_feature";
+            var flagKey9 = "no_rollout_experiment_feature";
+            var flagKey10 = "unsupported_variabletype";
+
+            var variablesExpected1 = Optimizely.GetAllFeatureVariables(flagKey1, UserID);
+            var variablesExpected2 = Optimizely.GetAllFeatureVariables(flagKey2, UserID);
+            var variablesExpected3 = Optimizely.GetAllFeatureVariables(flagKey3, UserID);
+            var variablesExpected4 = Optimizely.GetAllFeatureVariables(flagKey4, UserID);
+            var variablesExpected5 = Optimizely.GetAllFeatureVariables(flagKey5, UserID);
+            var variablesExpected6 = Optimizely.GetAllFeatureVariables(flagKey6, UserID);
+            var variablesExpected7 = Optimizely.GetAllFeatureVariables(flagKey7, UserID);
+            var variablesExpected8 = Optimizely.GetAllFeatureVariables(flagKey8, UserID);
+            var variablesExpected9 = Optimizely.GetAllFeatureVariables(flagKey9, UserID);
+            var variablesExpected10 = Optimizely.GetAllFeatureVariables(flagKey10, UserID);
+
+            var user = Optimizely.CreateUserContext(UserID);
+            user.SetAttribute("browser_type", "chrome");
+
+            var decisions = user.DecideAll();
+
+            Assert.True(decisions.Count == 10);
+            OptimizelyDecision expDecision1 = new OptimizelyDecision(
+            null,
+            false,
+            variablesExpected1,
+            null,
+            flagKey1,
+            user,
+            new List<string>());
+            Assert.IsTrue(TestData.CompareObjects(decisions[flagKey1], expDecision1));
+
+            OptimizelyDecision expDecision2 = new OptimizelyDecision(
+            "variation",
+            false,
+            variablesExpected2,
+            "test_experiment_double_feature",
+            flagKey2,
+            user,
+            new List<string>());
+            Assert.IsTrue(TestData.CompareObjects(decisions[flagKey2], expDecision2));
+
+            OptimizelyDecision expDecision3 = new OptimizelyDecision(
+            "control",
+            false,
+            variablesExpected3,
+            "test_experiment_integer_feature",
+            flagKey3,
+            user,
+            new List<string>());
+            Assert.IsTrue(TestData.CompareObjects(decisions[flagKey3], expDecision3));
+
+            OptimizelyDecision expDecision4 = new OptimizelyDecision(
+            "188881",
+            false,
+            variablesExpected4,
+            "188880",
+            flagKey4,
+            user,
+            new List<string>());
+            Assert.IsTrue(TestData.CompareObjects(decisions[flagKey4], expDecision4));
+
+            OptimizelyDecision expDecision5 = new OptimizelyDecision(
+            "control",
+            true,
+            variablesExpected5,
+            "test_experiment_with_feature_rollout",
+            flagKey5,
+            user,
+            new List<string>());
+            Assert.IsTrue(TestData.CompareObjects(decisions[flagKey5], expDecision5));
+
+            OptimizelyDecision expDecision6 = new OptimizelyDecision(
+            "Gred",
+            false,
+            variablesExpected6,
+            "test_experiment_multivariate",
+            flagKey6,
+            user,
+            new List<string>());
+            Assert.IsTrue(TestData.CompareObjects(decisions[flagKey6], expDecision6));
+
+            OptimizelyDecision expDecision7 = new OptimizelyDecision(
+            null,
+            false,
+            variablesExpected7,
+            null,
+            flagKey7,
+            user,
+            new List<string>());
+            Assert.IsTrue(TestData.CompareObjects(decisions[flagKey7], expDecision7));
+
+            OptimizelyDecision expDecision8 = new OptimizelyDecision(
+            null,
+            false,
+            variablesExpected8,
+            null,
+            flagKey8,
+            user,
+            new List<string>());
+            Assert.IsTrue(TestData.CompareObjects(decisions[flagKey8], expDecision8));
+
+            OptimizelyDecision expDecision9 = new OptimizelyDecision(
+            null,
+            false,
+            variablesExpected9,
+            null,
+            flagKey9,
+            user,
+            new List<string>());
+            Assert.IsTrue(TestData.CompareObjects(decisions[flagKey9], expDecision9));
+            
+            OptimizelyDecision expDecision10 = new OptimizelyDecision(
+            null,
+            false,
+            variablesExpected10,
+            null,
+            flagKey10,
+            user,
+            new List<string>());
+            Assert.IsTrue(TestData.CompareObjects(decisions[flagKey10], expDecision10));
+        }
+
+        [Test]
+        public void DecideAllEnabledFlagsOnlyDecideOptions()
+        {
+            var flagKey1 = "string_single_variable_feature";
+
+            var variablesExpected1 = Optimizely.GetAllFeatureVariables(flagKey1, UserID);
+
+            var decideOptions = new List<OptimizelyDecideOption>() { OptimizelyDecideOption.ENABLED_FLAGS_ONLY };
+            var user = Optimizely.CreateUserContext(UserID);
+            user.SetAttribute("browser_type", "chrome");
+
+            var decisions = user.DecideAll(decideOptions);
+
+            Assert.True(decisions.Count == 1);
+
+            OptimizelyDecision expDecision1 = new OptimizelyDecision(
+            "control",
+            true,
+            variablesExpected1,
+            "test_experiment_with_feature_rollout",
+            flagKey1,
+            user,
+            new List<string>());
+            Assert.IsTrue(TestData.CompareObjects(decisions[flagKey1], expDecision1));
+        }
+        #endregion
     }
 }

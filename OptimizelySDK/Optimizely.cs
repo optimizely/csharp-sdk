@@ -835,6 +835,60 @@ namespace OptimizelySDK
                 reasonsToReport);
         }
 
+        public Dictionary<string, OptimizelyDecision> DecideAll(OptimizelyUserContext user,
+                                              List<OptimizelyDecideOption> options)
+        {
+            var decisionMap = new Dictionary<string, OptimizelyDecision>();
+
+            var projectConfig = ProjectConfigManager?.GetConfig();
+            if (projectConfig == null)
+            {
+                Logger.Log(LogLevel.ERROR, "Optimizely instance is not valid, failing isFeatureEnabled call.");
+                return decisionMap;
+            }
+
+            var allFlags = projectConfig.FeatureFlags;
+            var allFlagKeys = new List<string>();
+            for (int i = 0; i < allFlags.Length; i++)
+            { 
+                allFlagKeys.Add(allFlags[i].Key);
+            }
+            return DecideForKeys(user, allFlagKeys, options);
+        }
+
+
+        public Dictionary<string, OptimizelyDecision> DecideForKeys(OptimizelyUserContext user,
+                                                      List<string> keys,
+                                                      List<OptimizelyDecideOption> options)
+        {
+            var decisionDictionary = new Dictionary<string, OptimizelyDecision>();
+
+            var projectConfig = ProjectConfigManager?.GetConfig();
+            if (projectConfig == null)
+            {
+                Logger.Log(LogLevel.ERROR, "Optimizely instance is not valid, failing isFeatureEnabled call.");
+                return decisionDictionary;
+            }
+
+            if (keys.Count == 0)
+            { 
+                return decisionDictionary;
+            }
+
+            var allOptions = GetAllOptions(options);
+
+            foreach (string key in keys)
+            {
+                var decision = Decide(user, key, options);
+                if (!allOptions.Contains(OptimizelyDecideOption.ENABLED_FLAGS_ONLY) || decision.Enabled)
+                {
+                    decisionDictionary.Add(key, decision);
+                }
+            }
+
+            return decisionDictionary;
+        }
+
         private List<OptimizelyDecideOption> GetAllOptions(List<OptimizelyDecideOption> options)
         {
             var copiedOptions = new List<OptimizelyDecideOption>(DefaultDecideOptions);

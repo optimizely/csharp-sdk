@@ -76,7 +76,17 @@ namespace OptimizelySDK
         {
             return Optimizely.Decide(this, key, options);
         }
- 
+
+        /// <summary>
+        /// Returns a key-map of decision results for multiple flag keys and a user context.
+        /// </summary>
+        /// <param name="keys">list of flag keys for which a decision will be made.</param>
+        /// <returns>A dictionary of all decision results, mapped by flag keys.</returns>
+        public Dictionary<string, OptimizelyDecision> DecideForKeys(List<string> keys, List<OptimizelyDecideOption> options)
+        {
+            return Optimizely.DecideForKeys(this, keys, options);
+        }
+
         /// <summary>
         /// Returns a key-map of decision results for multiple flag keys and a user context.
         /// </summary>
@@ -84,7 +94,7 @@ namespace OptimizelySDK
         /// <returns>A dictionary of all decision results, mapped by flag keys.</returns>
         public Dictionary<string, OptimizelyDecision> DecideForKeys(List<string> keys)
         {
-            return null;
+            return Optimizely.DecideForKeys(this, keys, new List<OptimizelyDecideOption>());
         }
 
         /// <summary>
@@ -96,7 +106,6 @@ namespace OptimizelySDK
             return DecideAll(new List<OptimizelyDecideOption>());
         }
 
-
         /// <summary>
         /// Returns a key-map of decision results ({@link OptimizelyDecision}) for all active flag keys.
         /// </summary>
@@ -104,7 +113,7 @@ namespace OptimizelySDK
         /// <returns>All decision results mapped by flag keys.</returns>
         public Dictionary<string, OptimizelyDecision> DecideAll(List<OptimizelyDecideOption> options)
         {
-            return null;
+            return Optimizely.DecideAll(this, options);
         }
 
         /// <summary>
