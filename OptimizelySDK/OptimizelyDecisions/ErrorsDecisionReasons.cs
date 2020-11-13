@@ -18,6 +18,9 @@ using System.Collections.Generic;
 
 namespace OptimizelySDK.OptimizelyDecisions
 {
+    /// <summary>
+    /// NewErrorDecision returns a decision with errors only
+    /// </summary>
     public class ErrorsDecisionReasons : IDecisionReasons
     {
         private readonly List<string> errors = new List<string>();

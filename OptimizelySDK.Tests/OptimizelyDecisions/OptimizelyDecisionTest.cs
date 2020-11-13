@@ -55,7 +55,7 @@ namespace OptimizelySDK.Tests.OptimizelyDecisions
         [Test]
         public void TestNewDecision()
         {
-            var map = new Dictionary<string, object>() {
+            var variableMap = new Dictionary<string, object>() {
                 { "strField", "john doe" },
                 { "intField", 12 },
                 { "objectField", new Dictionary<string, object> () {
@@ -63,7 +63,7 @@ namespace OptimizelySDK.Tests.OptimizelyDecisions
                     }
                 }
             };
-            var optimizelyJSONUsingMap = new OptimizelyJSON(map, ErrorHandlerMock.Object, LoggerMock.Object);
+            var optimizelyJSONUsingMap = new OptimizelyJSON(variableMap, ErrorHandlerMock.Object, LoggerMock.Object);
             string expectedStringObj = "{\"strField\":\"john doe\",\"intField\":12,\"objectField\":{\"inner_field_int\":3}}";
 
             var optimizelyDecision = new OptimizelyDecision("var_key",
@@ -72,7 +72,7 @@ namespace OptimizelySDK.Tests.OptimizelyDecisions
                 "experiment",
                 "feature_key",
                 null,
-                new List<string>());
+                new string[0]);
             Assert.AreEqual(optimizelyDecision.VariationKey, "var_key");
             Assert.AreEqual(optimizelyDecision.FlagKey, "feature_key");
             Assert.AreEqual(optimizelyDecision.Variables.ToString(), expectedStringObj);
@@ -86,6 +86,7 @@ namespace OptimizelySDK.Tests.OptimizelyDecisions
         {
             var decisionReasons = DefaultDecisionReasons.NewInstance(new List<OptimizelyDecideOption>() { OptimizelyDecideOption.INCLUDE_REASONS });
             decisionReasons.AddError(DecisionMessage.Reason(DecisionMessage.FLAG_KEY_INVALID, "invalid_key"));
+            
             Assert.AreEqual(decisionReasons.ToReport()[0], "No flag was found for key \"invalid_key\".");
             decisionReasons.AddError(DecisionMessage.Reason(DecisionMessage.VARIABLE_VALUE_INVALID, "invalid_key"));
             Assert.AreEqual(decisionReasons.ToReport()[1], "Variable value for key \"invalid_key\" is invalid or wrong type.");
