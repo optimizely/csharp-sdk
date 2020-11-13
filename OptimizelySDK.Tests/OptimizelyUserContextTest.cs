@@ -51,7 +51,7 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
-        public void OptimizelyUserContext_withAttributes()
+        public void OptimizelyUserContextWithAttributes()
         {
             var attributes = new UserAttributes() { { "house", "GRYFFINDOR" } };
             OptimizelyUserContext user = new OptimizelyUserContext(Optimizely, UserID, attributes, ErrorHandlerMock.Object, LoggerMock.Object);
@@ -62,7 +62,7 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
-        public void OptimizelyUserContext_noAttributes()
+        public void OptimizelyUserContextNoAttributes()
         {
             OptimizelyUserContext user = new OptimizelyUserContext(Optimizely, UserID, null, ErrorHandlerMock.Object, LoggerMock.Object);
 
@@ -222,7 +222,7 @@ namespace OptimizelySDK.Tests
             "test_experiment_multivariate",
             flagKey,
             user,
-            new List<string>());
+            new string[0]);
             Assert.IsTrue(TestData.CompareObjects(decision, expDecision));
         }
 
@@ -250,7 +250,7 @@ namespace OptimizelySDK.Tests
             "test_experiment_multivariate",
             flagKey1,
             user,
-            new List<string>());
+            new string[0]);
             Assert.IsTrue(TestData.CompareObjects(decisions[flagKey1], expDecision1));
 
             OptimizelyDecision expDecision2 = new OptimizelyDecision(
@@ -260,7 +260,7 @@ namespace OptimizelySDK.Tests
             "test_experiment_with_feature_rollout",
             flagKey2,
             user,
-            new List<string>());
+            new string[0]);
             Assert.IsTrue(TestData.CompareObjects(decisions[flagKey2], expDecision2));
         }
 
@@ -302,7 +302,7 @@ namespace OptimizelySDK.Tests
             null,
             flagKey1,
             user,
-            new List<string>());
+            new string[0]);
             Assert.IsTrue(TestData.CompareObjects(decisions[flagKey1], expDecision1));
 
             OptimizelyDecision expDecision2 = new OptimizelyDecision(
@@ -312,7 +312,7 @@ namespace OptimizelySDK.Tests
             "test_experiment_double_feature",
             flagKey2,
             user,
-            new List<string>());
+            new string[0]);
             Assert.IsTrue(TestData.CompareObjects(decisions[flagKey2], expDecision2));
 
             OptimizelyDecision expDecision3 = new OptimizelyDecision(
@@ -322,7 +322,7 @@ namespace OptimizelySDK.Tests
             "test_experiment_integer_feature",
             flagKey3,
             user,
-            new List<string>());
+            new string[0]);
             Assert.IsTrue(TestData.CompareObjects(decisions[flagKey3], expDecision3));
 
             OptimizelyDecision expDecision4 = new OptimizelyDecision(
@@ -332,7 +332,7 @@ namespace OptimizelySDK.Tests
             "188880",
             flagKey4,
             user,
-            new List<string>());
+            new string[0]);
             Assert.IsTrue(TestData.CompareObjects(decisions[flagKey4], expDecision4));
 
             OptimizelyDecision expDecision5 = new OptimizelyDecision(
@@ -342,7 +342,7 @@ namespace OptimizelySDK.Tests
             "test_experiment_with_feature_rollout",
             flagKey5,
             user,
-            new List<string>());
+            new string[0]);
             Assert.IsTrue(TestData.CompareObjects(decisions[flagKey5], expDecision5));
 
             OptimizelyDecision expDecision6 = new OptimizelyDecision(
@@ -352,7 +352,7 @@ namespace OptimizelySDK.Tests
             "test_experiment_multivariate",
             flagKey6,
             user,
-            new List<string>());
+            new string[0]);
             Assert.IsTrue(TestData.CompareObjects(decisions[flagKey6], expDecision6));
 
             OptimizelyDecision expDecision7 = new OptimizelyDecision(
@@ -362,7 +362,7 @@ namespace OptimizelySDK.Tests
             null,
             flagKey7,
             user,
-            new List<string>());
+            new string[0]);
             Assert.IsTrue(TestData.CompareObjects(decisions[flagKey7], expDecision7));
 
             OptimizelyDecision expDecision8 = new OptimizelyDecision(
@@ -372,7 +372,7 @@ namespace OptimizelySDK.Tests
             null,
             flagKey8,
             user,
-            new List<string>());
+            new string[0]);
             Assert.IsTrue(TestData.CompareObjects(decisions[flagKey8], expDecision8));
 
             OptimizelyDecision expDecision9 = new OptimizelyDecision(
@@ -382,7 +382,7 @@ namespace OptimizelySDK.Tests
             null,
             flagKey9,
             user,
-            new List<string>());
+            new string[0]);
             Assert.IsTrue(TestData.CompareObjects(decisions[flagKey9], expDecision9));
             
             OptimizelyDecision expDecision10 = new OptimizelyDecision(
@@ -392,7 +392,7 @@ namespace OptimizelySDK.Tests
             null,
             flagKey10,
             user,
-            new List<string>());
+            new string[0]);
             Assert.IsTrue(TestData.CompareObjects(decisions[flagKey10], expDecision10));
         }
 
@@ -418,7 +418,7 @@ namespace OptimizelySDK.Tests
             "test_experiment_with_feature_rollout",
             flagKey1,
             user,
-            new List<string>());
+            new string[0]);
             Assert.IsTrue(TestData.CompareObjects(decisions[flagKey1], expDecision1));
         }
         #endregion
