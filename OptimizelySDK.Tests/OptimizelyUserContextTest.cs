@@ -48,7 +48,7 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
-        public void OptimizelyUserContext_withAttributes()
+        public void OptimizelyUserContextWithAttributes()
         {
             var attributes = new UserAttributes() { { "house", "GRYFFINDOR" } };
             OptimizelyUserContext user = new OptimizelyUserContext(Optimizely, UserID, attributes, ErrorHandlerMock.Object, LoggerMock.Object);
@@ -59,7 +59,7 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
-        public void OptimizelyUserContext_noAttributes()
+        public void OptimizelyUserContextNoAttributes()
         {
             OptimizelyUserContext user = new OptimizelyUserContext(Optimizely, UserID, null, ErrorHandlerMock.Object, LoggerMock.Object);
 
@@ -90,7 +90,7 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
-        public void SetAttribute_noAttribute()
+        public void SetAttributeNoAttribute()
         {
             OptimizelyUserContext user = new OptimizelyUserContext(Optimizely, UserID, null, ErrorHandlerMock.Object, LoggerMock.Object);
 
