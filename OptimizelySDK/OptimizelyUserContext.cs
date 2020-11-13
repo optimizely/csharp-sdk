@@ -22,12 +22,18 @@ using OptimizelySDK.OptimizelyDecisions;
 
 namespace OptimizelySDK
 {
+    /// <summary>
+    /// OptimizelyUserContext defines user contexts that the SDK will use to make decisions for
+    /// </summary>
     public class OptimizelyUserContext
     {
         private ILogger Logger;
         private IErrorHandler ErrorHandler;
+        // userID for Optimizely user context
         public string UserId { get; }
+        // user attributes for Optimizely user context.
         public UserAttributes UserAttributes { get; }
+        // Optimizely object to be used.
         public Optimizely Optimizely { get; }
 
         public OptimizelyUserContext(Optimizely optimizely, string userId, UserAttributes userAttributes, IErrorHandler errorHandler, ILogger logger)
@@ -46,7 +52,14 @@ namespace OptimizelySDK
         /// <param name="value">value An attribute value</param>
         public void SetAttribute(string key, object value)
         {
-            UserAttributes[key] = value;
+            if (key == null)
+            {
+                Logger.Log(LogLevel.WARN, "Null attribute key.");
+            }
+            else
+            {
+                UserAttributes[key] = value;
+            }
         }
 
         /// <summary>

@@ -60,7 +60,7 @@ namespace OptimizelySDK
 
         private EventProcessor EventProcessor;
 
-        private List<OptimizelyDecideOption> DefaultDecideOptions;
+        private OptimizelyDecideOption[] DefaultDecideOptions;
 
         /// <summary>
         /// It returns true if the ProjectConfig is valid otherwise false.
@@ -162,7 +162,7 @@ namespace OptimizelySDK
                          IErrorHandler errorHandler = null,
                          UserProfileService userProfileService = null,
                          EventProcessor eventProcessor = null,
-                         List<OptimizelyDecideOption> defaultDecideOptions = null)
+                         OptimizelyDecideOption[] defaultDecideOptions = null)
         {
             ProjectConfigManager = configManager;
 
@@ -174,8 +174,8 @@ namespace OptimizelySDK
                          IErrorHandler errorHandler = null,
                          UserProfileService userProfileService = null,
                          NotificationCenter notificationCenter = null,
-                         EventProcessor eventProcessor = null, 
-                         List<OptimizelyDecideOption> defaultDecideOptions = null)
+                         EventProcessor eventProcessor = null,
+                         OptimizelyDecideOption[] defaultDecideOptions = null)
         {
             Logger = logger ?? new NoOpLogger();
             EventDispatcher = eventDispatcher ?? new DefaultEventDispatcher(Logger);
@@ -186,7 +186,7 @@ namespace OptimizelySDK
             NotificationCenter = notificationCenter ?? new NotificationCenter(Logger);
             DecisionService = new DecisionService(Bucketer, ErrorHandler, userProfileService, Logger);
             EventProcessor = eventProcessor ?? new ForwardingEventProcessor(EventDispatcher, NotificationCenter, Logger);
-            DefaultDecideOptions = defaultDecideOptions ?? new List<OptimizelyDecideOption>();
+            DefaultDecideOptions = defaultDecideOptions ?? new OptimizelyDecideOption[0];
         }
 
         /// <summary>
@@ -260,7 +260,7 @@ namespace OptimizelySDK
                 return null;
             }
 
-            SendImpressionEvent(experiment, variation, userId, userAttributes, config, SOURCE_TYPE_EXPERIMENT);
+            SendImpressionEvent(experiment, variation, userId, userAttributes, config, SOURCE_TYPE_EXPERIMENT, true);
 
             return variation;
         }
@@ -438,7 +438,7 @@ namespace OptimizelySDK
             return DecisionService.GetForcedVariation(experimentKey, userId, config);
         }
 
-#region  FeatureFlag APIs
+        #region  FeatureFlag APIs
 
         /// <summary>
         /// Determine whether a feature is enabled.
@@ -452,7 +452,8 @@ namespace OptimizelySDK
         {
             var config = ProjectConfigManager?.GetConfig();
 
-            if (config == null) {
+            if (config == null)
+            {
 
                 Logger.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'IsFeatureEnabled'.");
 
@@ -476,45 +477,46 @@ namespace OptimizelySDK
                 return false;
 
             bool featureEnabled = false;
-                var sourceInfo = new Dictionary<string, string>();
-                var decision = DecisionService.GetVariationForFeature(featureFlag, userId, config, userAttributes);
-                var variation = decision.Variation;
-                var decisionSource = decision?.Source ?? FeatureDecision.DECISION_SOURCE_ROLLOUT;
+            var sourceInfo = new Dictionary<string, string>();
+            var decision = DecisionService.GetVariationForFeature(featureFlag, userId, config, userAttributes);
+            var variation = decision.Variation;
+            var decisionSource = decision?.Source ?? FeatureDecision.DECISION_SOURCE_ROLLOUT;
 
-                SendImpressionEvent(decision.Experiment, variation, userId, userAttributes, config, featureKey, decisionSource);
 
-                if (variation != null)
+            if (variation != null)
+            {
+                featureEnabled = variation.FeatureEnabled.GetValueOrDefault();
+
+                // This information is only necessary for feature tests.
+                // For rollouts experiments and variations are an implementation detail only.
+                if (decision.Source == FeatureDecision.DECISION_SOURCE_FEATURE_TEST)
                 {
-                    featureEnabled = variation.FeatureEnabled.GetValueOrDefault();
-
-                    // This information is only necessary for feature tests.
-                    // For rollouts experiments and variations are an implementation detail only.
-                    if (decision.Source == FeatureDecision.DECISION_SOURCE_FEATURE_TEST)
-                    {
-                        sourceInfo["experimentKey"] = decision.Experiment.Key;
-                        sourceInfo["variationKey"] = variation.Key;
-                    }
-                    else
-                    {
-                        Logger.Log(LogLevel.INFO, $@"The user ""{userId}"" is not being experimented on feature ""{featureKey}"".");
-                    }
+                    sourceInfo["experimentKey"] = decision.Experiment.Key;
+                    sourceInfo["variationKey"] = variation.Key;
                 }
-
-                if (featureEnabled == true)
-                    Logger.Log(LogLevel.INFO, $@"Feature flag ""{featureKey}"" is enabled for user ""{userId}"".");
                 else
-                    Logger.Log(LogLevel.INFO, $@"Feature flag ""{featureKey}"" is not enabled for user ""{userId}"".");
-
-                var decisionInfo = new Dictionary<string, object>
                 {
-                    { "featureKey", featureKey },
-                    { "featureEnabled", featureEnabled },
-                    { "source", decision.Source },
-                    { "sourceInfo", sourceInfo },
-                };
+                    Logger.Log(LogLevel.INFO, $@"The user ""{userId}"" is not being experimented on feature ""{featureKey}"".");
+                }
+            }
 
-                NotificationCenter.SendNotifications(NotificationCenter.NotificationType.Decision, DecisionNotificationTypes.FEATURE, userId,
-                   userAttributes ?? new UserAttributes(), decisionInfo);
+            if (featureEnabled == true)
+                Logger.Log(LogLevel.INFO, $@"Feature flag ""{featureKey}"" is enabled for user ""{userId}"".");
+            else
+                Logger.Log(LogLevel.INFO, $@"Feature flag ""{featureKey}"" is not enabled for user ""{userId}"".");
+
+            var decisionInfo = new Dictionary<string, object>
+            {
+                { "featureKey", featureKey },
+                { "featureEnabled", featureEnabled },
+                { "source", decision.Source },
+                { "sourceInfo", sourceInfo },
+            };
+
+            SendImpressionEvent(decision.Experiment, variation, userId, userAttributes, config, featureKey, decisionSource, featureEnabled);
+
+            NotificationCenter.SendNotifications(NotificationCenter.NotificationType.Decision, DecisionNotificationTypes.FEATURE, userId,
+               userAttributes ?? new UserAttributes(), decisionInfo);
             return featureEnabled;
         }
 
@@ -688,8 +690,6 @@ namespace OptimizelySDK
             return GetFeatureVariableValueForType<OptimizelyJSON>(featureKey, variableKey, userId, userAttributes, FeatureVariable.JSON_TYPE);
         }
 
-        //============ decide ============//
-
         /// <summary>
         /// Create a context of the user for which decision APIs will be called.
         /// A user context will be created successfully even when the SDK is not fully configured yet.
@@ -800,8 +800,7 @@ namespace OptimizelySDK
             var decisionSource = flagDecision?.Source ?? FeatureDecision.DECISION_SOURCE_ROLLOUT;
             if (!allOptions.Contains(OptimizelyDecideOption.DISABLE_DECISION_EVENT))
             {
-
-                SendImpressionEvent(flagDecision.Experiment, variation, userId, userAttributes, config, key, decisionSource);
+                SendImpressionEvent(flagDecision.Experiment, variation, userId, userAttributes, config, key, decisionSource, featureEnabled);
                 decisionEventDispatched = true;
             }
             var reasonsToReport = decisionReasons.ToReport();
@@ -832,7 +831,7 @@ namespace OptimizelySDK
                 ruleKey,
                 key,
                 user,
-                reasonsToReport);
+                reasonsToReport.ToArray());
         }
 
         public Dictionary<string, OptimizelyDecision> DecideAll(OptimizelyUserContext user,
@@ -909,9 +908,9 @@ namespace OptimizelySDK
         /// <param name="ruleType">It can either be experiment in case impression event is sent from activate or it's feature-test or rollout</param>
         private void SendImpressionEvent(Experiment experiment, Variation variation, string userId,
                                          UserAttributes userAttributes, ProjectConfig config,
-                                         string ruleType)
+                                         string ruleType, bool enabled)
         {
-            SendImpressionEvent(experiment, variation, userId, userAttributes, config, "", ruleType);
+            SendImpressionEvent(experiment, variation, userId, userAttributes, config, "", ruleType, enabled);
         }
 
         /// <summary>
@@ -925,14 +924,14 @@ namespace OptimizelySDK
         /// <param name="ruleType">It can either be experiment in case impression event is sent from activate or it's feature-test or rollout</param>
         private void SendImpressionEvent(Experiment experiment, Variation variation, string userId,
                                          UserAttributes userAttributes, ProjectConfig config,
-                                         string flagKey, string ruleType)
+                                         string flagKey, string ruleType, bool enabled)
         {
             if (experiment != null && !experiment.IsExperimentRunning)
             {
                 Logger.Log(LogLevel.ERROR, @"Experiment has ""Launched"" status so not dispatching event during activation.");
             }
             
-            var userEvent = UserEventFactory.CreateImpressionEvent(config, experiment, variation, userId, userAttributes, flagKey, ruleType);
+            var userEvent = UserEventFactory.CreateImpressionEvent(config, experiment, variation, userId, userAttributes, flagKey, ruleType, enabled);
             if (userEvent == null)
             {
                 return;
