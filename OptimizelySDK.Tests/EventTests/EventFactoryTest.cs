@@ -87,7 +87,8 @@ namespace OptimizelySDK.Tests.EventTests
                                                             { "rule_type", "experiment" },
                                                             { "rule_key", "test_experiment" },
                                                             { "flag_key", "test_experiment" },
-                                                            { "variation_key", "control" }
+                                                            { "variation_key", "control" },
+                                                            {"enabled", false }
                                                         } }
                                                     }
                                                 }
@@ -168,7 +169,9 @@ namespace OptimizelySDK.Tests.EventTests
                                                             { "rule_type", "experiment" },
                                                             { "rule_key", "test_experiment" },
                                                             { "flag_key", "test_experiment" },
-                                                            { "variation_key", "control" }
+                                                            { "variation_key", "control" },
+                                                            {"enabled", false }
+
                                                         }
                                                     }
                                                 }
@@ -268,7 +271,8 @@ namespace OptimizelySDK.Tests.EventTests
                                                             { "rule_type", "experiment" },
                                                             { "rule_key", "test_experiment" },
                                                             { "flag_key", "test_experiment" },
-                                                            { "variation_key", "control" }
+                                                            { "variation_key", "control" },
+                                                            {"enabled", false }
                                                         }
                                                     }
                                                 }
@@ -390,7 +394,8 @@ namespace OptimizelySDK.Tests.EventTests
                                                            { "rule_type", "experiment" },
                                                            { "rule_key", "test_experiment" },
                                                            { "flag_key", "test_experiment" },
-                                                           { "variation_key", "control" }
+                                                           { "variation_key", "control" },
+                                                           {"enabled", false }
                                                         }
                                                     }
                                                 }
@@ -512,7 +517,8 @@ namespace OptimizelySDK.Tests.EventTests
                                                             { "rule_type", "rollout" },
                                                             { "rule_key", "" },
                                                             { "flag_key", "test_feature" },
-                                                            { "variation_key", "" }
+                                                            { "variation_key", "" },
+                                                            { "enabled", false }
                                                         }
                                                     }
                                                 }
@@ -1526,7 +1532,8 @@ namespace OptimizelySDK.Tests.EventTests
                                                             { "rule_type", "experiment" },
                                                             { "rule_key", "test_experiment" },
                                                             { "flag_key", "test_experiment" },
-                                                            { "variation_key", "control" }
+                                                            { "variation_key", "control" },
+                                                            {"enabled", false }
                                                         }
                                                     }
                                                 }
@@ -1633,7 +1640,8 @@ namespace OptimizelySDK.Tests.EventTests
                                                             { "rule_type", "experiment" },
                                                             { "rule_key", "test_experiment" },
                                                             { "flag_key", "test_experiment" },
-                                                            { "variation_key", "control" }
+                                                            { "variation_key", "control" },
+                                                            {"enabled", false }
                                                         }
                                                     }
                                                 }
@@ -1736,7 +1744,8 @@ namespace OptimizelySDK.Tests.EventTests
                                                             { "rule_type", "experiment" },
                                                             { "rule_key", "test_experiment" },
                                                             { "flag_key", "test_experiment" },
-                                                            { "variation_key", "control" }
+                                                            { "variation_key", "control" },
+                                                            {"enabled", false }
                                                         }
                                                     }
                                                 }
