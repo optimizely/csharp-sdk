@@ -60,7 +60,7 @@ namespace OptimizelySDK
 
         private EventProcessor EventProcessor;
 
-        private List<OptimizelyDecideOption> DefaultDecideOptions;
+        private OptimizelyDecideOption[] DefaultDecideOptions;
 
         /// <summary>
         /// It returns true if the ProjectConfig is valid otherwise false.
@@ -162,7 +162,7 @@ namespace OptimizelySDK
                          IErrorHandler errorHandler = null,
                          UserProfileService userProfileService = null,
                          EventProcessor eventProcessor = null,
-                         List<OptimizelyDecideOption> defaultDecideOptions = null)
+                         OptimizelyDecideOption[] defaultDecideOptions = null)
         {
             ProjectConfigManager = configManager;
 
@@ -174,8 +174,8 @@ namespace OptimizelySDK
                          IErrorHandler errorHandler = null,
                          UserProfileService userProfileService = null,
                          NotificationCenter notificationCenter = null,
-                         EventProcessor eventProcessor = null, 
-                         List<OptimizelyDecideOption> defaultDecideOptions = null)
+                         EventProcessor eventProcessor = null,
+                         OptimizelyDecideOption[] defaultDecideOptions = null)
         {
             Logger = logger ?? new NoOpLogger();
             EventDispatcher = eventDispatcher ?? new DefaultEventDispatcher(Logger);
@@ -186,7 +186,7 @@ namespace OptimizelySDK
             NotificationCenter = notificationCenter ?? new NotificationCenter(Logger);
             DecisionService = new DecisionService(Bucketer, ErrorHandler, userProfileService, Logger);
             EventProcessor = eventProcessor ?? new ForwardingEventProcessor(EventDispatcher, NotificationCenter, Logger);
-            DefaultDecideOptions = defaultDecideOptions ?? new List<OptimizelyDecideOption>();
+            DefaultDecideOptions = defaultDecideOptions ?? new OptimizelyDecideOption[0];
         }
 
         /// <summary>
@@ -688,8 +688,6 @@ namespace OptimizelySDK
             return GetFeatureVariableValueForType<OptimizelyJSON>(featureKey, variableKey, userId, userAttributes, FeatureVariable.JSON_TYPE);
         }
 
-        //============ decide ============//
-
         /// <summary>
         /// Create a context of the user for which decision APIs will be called.
         /// A user context will be created successfully even when the SDK is not fully configured yet.
@@ -832,7 +830,7 @@ namespace OptimizelySDK
                 ruleKey,
                 key,
                 user,
-                reasonsToReport);
+                reasonsToReport.ToArray());
         }
 
         private List<OptimizelyDecideOption> GetAllOptions(List<OptimizelyDecideOption> options)
