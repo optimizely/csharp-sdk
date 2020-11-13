@@ -712,6 +712,15 @@ namespace OptimizelySDK
             return new OptimizelyUserContext(this, userId, userAttributes, ErrorHandler, Logger);
         }
 
+        /// <summary>
+        /// Returns a decision result ({@link OptimizelyDecision}) for a given flag key and a user context, which contains all data required to deliver the flag.
+        /// <ul>
+        /// <li>If the SDK finds an error, it’ll return a decision with <b>null</b> for <b>variationKey</b>. The decision will include an error message in <b>reasons</b>.
+        /// </ul>
+        /// </summary>
+        /// <param name="key">A flag key for which a decision will be made.</param>
+        /// <param name="options">A list of options for decision-making.</param>
+        /// <returns>A decision result.</returns>
         public OptimizelyDecision Decide(OptimizelyUserContext user,
                               string key,
                               List<OptimizelyDecideOption> options)
@@ -723,16 +732,9 @@ namespace OptimizelySDK
                 return OptimizelyDecision.NewErrorDecision(key, user, DecisionMessage.SDK_NOT_READY, ErrorHandler, Logger);
             }
             var userId = user.UserId;
-            var inputValues = new Dictionary<string, string>
-            {
-                { USER_ID, userId },
-            };
-
-            if (!ValidateStringInputs(inputValues))
-                return null;
-
+            
             var flag = config.GetFeatureFlagFromKey(key);
-            if (flag == null)
+            if (flag.Key == null)
             {
                 return OptimizelyDecision.NewErrorDecision(key,
                     user,

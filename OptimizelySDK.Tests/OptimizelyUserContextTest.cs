@@ -51,7 +51,7 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
-        public void OptimizelyUserContext_withAttributes()
+        public void OptimizelyUserContextWithAttributes()
         {
             var attributes = new UserAttributes() { { "house", "GRYFFINDOR" } };
             OptimizelyUserContext user = new OptimizelyUserContext(Optimizely, UserID, attributes, ErrorHandlerMock.Object, LoggerMock.Object);
@@ -62,7 +62,7 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
-        public void OptimizelyUserContext_noAttributes()
+        public void OptimizelyUserContextNoAttributes()
         {
             OptimizelyUserContext user = new OptimizelyUserContext(Optimizely, UserID, null, ErrorHandlerMock.Object, LoggerMock.Object);
 
@@ -93,7 +93,7 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
-        public void SetAttribute_noAttribute()
+        public void SetAttributeNoAttribute()
         {
             OptimizelyUserContext user = new OptimizelyUserContext(Optimizely, UserID, null, ErrorHandlerMock.Object, LoggerMock.Object);
 
@@ -108,7 +108,7 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
-        public void SetAttribute_override()
+        public void SetAttributeOverride()
         {
             var attributes = new UserAttributes() { { "house", "GRYFFINDOR" } };
             OptimizelyUserContext user = new OptimizelyUserContext(Optimizely, UserID, attributes, ErrorHandlerMock.Object, LoggerMock.Object);
@@ -122,7 +122,7 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
-        public void SetAttribute_nullValue()
+        public void SetAttributeNullValue()
         {
             var attributes = new UserAttributes() { { "k1", null } };
             OptimizelyUserContext user = new OptimizelyUserContext(Optimizely, UserID, attributes, ErrorHandlerMock.Object, LoggerMock.Object);
@@ -142,7 +142,7 @@ namespace OptimizelySDK.Tests
         #region decide
 
         [Test]
-        public void Decide()
+        public void TestDecide()
         {
             var flagKey = "multi_variate_feature";
             var variablesExpected = Optimizely.GetAllFeatureVariables(flagKey, UserID);
@@ -167,19 +167,20 @@ namespace OptimizelySDK.Tests
 
             var user = Optimizely.CreateUserContext(UserID);
             user.SetAttribute("browser_type", "chrome");
+
+            var decisionExpected = OptimizelyDecision.NewErrorDecision(
+                flagKey,
+                user,
+                DecisionMessage.Reason(DecisionMessage.FLAG_KEY_INVALID, flagKey),
+                ErrorHandlerMock.Object,
+                LoggerMock.Object);
             var decision = user.Decide(flagKey);
 
-            Assert.Null(decision.VariationKey);
-            Assert.False(decision.Enabled);
-            Assert.AreEqual(decision.Variables.ToDictionary(), new Dictionary<string, object>());
-            Assert.IsNull(decision.RuleKey);
-            Assert.AreEqual(decision.FlagKey, flagKey);
-            Assert.AreEqual(decision.UserContext, user);
-            Assert.True(decision.Reasons.IsNullOrEmpty());
+            Assert.IsTrue(TestData.CompareObjects(decision, decisionExpected));
         }
 
         [Test]
-        public void DecideInvalidConfig()
+        public void DecideWhenConfigIsNull()
         {
             Optimizely optimizely = new Optimizely(TestData.UnsupportedVersionDatafile, EventDispatcherMock.Object, LoggerMock.Object, ErrorHandlerMock.Object);
 
