@@ -254,7 +254,7 @@ namespace OptimizelySDK
                 return null;
             }
 
-            SendImpressionEvent(experiment, variation, userId, userAttributes, config, SOURCE_TYPE_EXPERIMENT);
+            SendImpressionEvent(experiment, variation, userId, userAttributes, config, SOURCE_TYPE_EXPERIMENT, true);
 
             return variation;
         }
@@ -475,7 +475,6 @@ namespace OptimizelySDK
             var variation = decision.Variation;
             var decisionSource = decision?.Source ?? FeatureDecision.DECISION_SOURCE_ROLLOUT;
 
-            SendImpressionEvent(decision.Experiment, variation, userId, userAttributes, config, featureKey, decisionSource);
 
             if (variation != null)
             {
@@ -506,6 +505,8 @@ namespace OptimizelySDK
                 { "source", decision.Source },
                 { "sourceInfo", sourceInfo },
             };
+
+            SendImpressionEvent(decision.Experiment, variation, userId, userAttributes, config, featureKey, decisionSource, featureEnabled);
 
             NotificationCenter.SendNotifications(NotificationCenter.NotificationType.Decision, DecisionNotificationTypes.FEATURE, userId,
                userAttributes ?? new UserAttributes(), decisionInfo);
@@ -692,9 +693,9 @@ namespace OptimizelySDK
         /// <param name="ruleType">It can either be experiment in case impression event is sent from activate or it's feature-test or rollout</param>
         private void SendImpressionEvent(Experiment experiment, Variation variation, string userId,
                                          UserAttributes userAttributes, ProjectConfig config,
-                                         string ruleType)
+                                         string ruleType, bool enabled)
         {
-            SendImpressionEvent(experiment, variation, userId, userAttributes, config, "", ruleType);
+            SendImpressionEvent(experiment, variation, userId, userAttributes, config, "", ruleType, enabled);
         }
 
         /// <summary>
@@ -708,14 +709,14 @@ namespace OptimizelySDK
         /// <param name="ruleType">It can either be experiment in case impression event is sent from activate or it's feature-test or rollout</param>
         private void SendImpressionEvent(Experiment experiment, Variation variation, string userId,
                                          UserAttributes userAttributes, ProjectConfig config,
-                                         string flagKey, string ruleType)
+                                         string flagKey, string ruleType, bool enabled)
         {
             if (experiment != null && !experiment.IsExperimentRunning)
             {
                 Logger.Log(LogLevel.ERROR, @"Experiment has ""Launched"" status so not dispatching event during activation.");
             }
             
-            var userEvent = UserEventFactory.CreateImpressionEvent(config, experiment, variation, userId, userAttributes, flagKey, ruleType);
+            var userEvent = UserEventFactory.CreateImpressionEvent(config, experiment, variation, userId, userAttributes, flagKey, ruleType, enabled);
             if (userEvent == null)
             {
                 return;
