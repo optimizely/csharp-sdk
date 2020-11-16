@@ -18,11 +18,17 @@
 using Castle.Core.Internal;
 using Moq;
 using NUnit.Framework;
+using OptimizelySDK.Bucketing;
+using OptimizelySDK.Config;
 using OptimizelySDK.Entity;
 using OptimizelySDK.ErrorHandler;
+using OptimizelySDK.Event;
 using OptimizelySDK.Event.Dispatcher;
 using OptimizelySDK.Logger;
+using OptimizelySDK.Notifications;
 using OptimizelySDK.OptimizelyDecisions;
+using OptimizelySDK.Tests.NotificationTests;
+using OptimizelySDK.Utils;
 using System;
 using System.Collections.Generic;
 
@@ -36,12 +42,15 @@ namespace OptimizelySDK.Tests
         private Mock<ILogger> LoggerMock;
         private Mock<IErrorHandler> ErrorHandlerMock;
         private Mock<IEventDispatcher> EventDispatcherMock;
+        private Mock<TestNotificationCallbacks> NotificationCallbackMock;
 
         [SetUp]
         public void SetUp()
         {
             LoggerMock = new Mock<ILogger>();
             LoggerMock.Setup(i => i.Log(It.IsAny<LogLevel>(), It.IsAny<string>()));
+
+            NotificationCallbackMock = new Mock<TestNotificationCallbacks>();
 
             ErrorHandlerMock = new Mock<IErrorHandler>();
             ErrorHandlerMock.Setup(e => e.HandleError(It.IsAny<Exception>()));
@@ -421,6 +430,187 @@ namespace OptimizelySDK.Tests
             user,
             new string[0]);
             Assert.IsTrue(TestData.CompareObjects(decisions[flagKey1], expDecision1));
+        }
+
+        [Test]
+        public void DecideExcludeVariablesDecideOptions()
+        {
+            var flagKey = "multi_variate_feature";
+            var variablesExpected = new Dictionary<string, object>();
+            var user = Optimizely.CreateUserContext(UserID);
+            user.SetAttribute("browser_type", "chrome");
+            var decideOptions = new List<OptimizelyDecideOption>() { OptimizelyDecideOption.EXCLUDE_VARIABLES };
+
+            var decision = user.Decide(flagKey, decideOptions);
+
+            Assert.AreEqual(decision.VariationKey, "Gred");
+            Assert.False(decision.Enabled);
+            Assert.AreEqual(decision.Variables.ToDictionary(), variablesExpected);
+            Assert.AreEqual(decision.RuleKey, "test_experiment_multivariate");
+            Assert.AreEqual(decision.FlagKey, flagKey);
+            Assert.AreEqual(decision.UserContext, user);
+            Assert.True(decision.Reasons.IsNullOrEmpty());
+        }
+
+        [Test]
+        public void DecideIncludeReasonsDecideOptions()
+        {
+            var flagKey = "invalid_key";
+            var user = Optimizely.CreateUserContext(UserID);
+            user.SetAttribute("browser_type", "chrome");
+
+            var decision = user.Decide(flagKey);
+            Assert.True(decision.Reasons.Length == 1);
+            Assert.AreEqual(decision.Reasons[0], DecisionMessage.Reason(DecisionMessage.FLAG_KEY_INVALID, flagKey));
+
+            var decideOptions = new List<OptimizelyDecideOption>() { OptimizelyDecideOption.INCLUDE_REASONS };
+            
+            decision = user.Decide(flagKey, decideOptions);
+            Assert.True(decision.Reasons.Length == 1);
+            Assert.AreEqual(decision.Reasons[0], DecisionMessage.Reason(DecisionMessage.FLAG_KEY_INVALID, flagKey));
+
+            flagKey = "multi_variate_feature";
+            decision = user.Decide(flagKey);
+            Assert.True(decision.Reasons.Length == 0);
+
+            Assert.AreEqual(decision.VariationKey, "Gred");
+            Assert.False(decision.Enabled);
+            Assert.AreEqual(decision.RuleKey, "test_experiment_multivariate");
+            Assert.AreEqual(decision.FlagKey, flagKey);
+            Assert.AreEqual(decision.UserContext, user);
+            Assert.True(decision.Reasons.IsNullOrEmpty());
+
+            decision = user.Decide(flagKey, decideOptions);
+            Assert.True(decision.Reasons.Length > 0);
+            Assert.AreEqual("User [testUserID] is in variation [Gred] of experiment [test_experiment_multivariate].", decision.Reasons[0]);
+            Assert.AreEqual("The user \"testUserID\" is bucketed into experiment \"test_experiment_multivariate\" of feature \"multi_variate_feature\".", decision.Reasons[1]);
+        }
+
+        [Test]
+        public void TestDoNotSendEventDecide()
+        {
+            var flagKey = "multi_variate_feature";
+            var variablesExpected = Optimizely.GetAllFeatureVariables(flagKey, UserID);
+
+            var optimizely = new Optimizely(TestData.Datafile, EventDispatcherMock.Object, LoggerMock.Object, ErrorHandlerMock.Object);
+            var user = optimizely.CreateUserContext(UserID);
+            user.SetAttribute("browser_type", "chrome");
+
+            var decideOptions = new List<OptimizelyDecideOption>() { OptimizelyDecideOption.DISABLE_DECISION_EVENT };
+            var decision = user.Decide(flagKey, decideOptions);
+            EventDispatcherMock.Verify(dispatcher => dispatcher.DispatchEvent(It.IsAny<LogEvent>()), Times.Never);
+
+            decision = user.Decide(flagKey);
+            EventDispatcherMock.Verify(dispatcher => dispatcher.DispatchEvent(It.IsAny<LogEvent>()), Times.Once);
+
+            Assert.AreEqual(decision.VariationKey, "Gred");
+            Assert.False(decision.Enabled);
+            Assert.AreEqual(decision.Variables.ToDictionary(), variablesExpected.ToDictionary());
+            Assert.AreEqual(decision.RuleKey, "test_experiment_multivariate");
+            Assert.AreEqual(decision.FlagKey, flagKey);
+            Assert.AreEqual(decision.UserContext, user);
+        }
+
+        [Test]
+        public void TestDefaultDecideOptions()
+        {
+            var flagKey = "multi_variate_feature";
+            var variablesExpected = Optimizely.GetAllFeatureVariables(flagKey, UserID);
+            var decideOptions = new List<OptimizelyDecideOption>() { OptimizelyDecideOption.DISABLE_DECISION_EVENT };
+
+            var optimizely = new Optimizely(TestData.Datafile,
+                EventDispatcherMock.Object,
+                LoggerMock.Object,
+                ErrorHandlerMock.Object,
+                defaultDecideOptions: decideOptions.ToArray());
+
+            var user = optimizely.CreateUserContext(UserID);
+            user.SetAttribute("browser_type", "chrome");
+
+            var decision = user.Decide(flagKey);
+            EventDispatcherMock.Verify(dispatcher => dispatcher.DispatchEvent(It.IsAny<LogEvent>()), Times.Never);
+
+            Assert.AreEqual(decision.VariationKey, "Gred");
+            Assert.False(decision.Enabled);
+            Assert.AreEqual(decision.Variables.ToDictionary(), variablesExpected.ToDictionary());
+            Assert.AreEqual(decision.RuleKey, "test_experiment_multivariate");
+            Assert.AreEqual(decision.FlagKey, flagKey);
+            Assert.AreEqual(decision.UserContext, user);
+        }
+
+        [Test]
+        public void TestDecisionNotification()
+        {
+            var flagKey = "string_single_variable_feature";
+            var variationKey = "control";
+            var enabled = true;
+            var variables = Optimizely.GetAllFeatureVariables(flagKey, UserID);
+            var ruleKey = "test_experiment_with_feature_rollout";
+            var reasons = new Dictionary<string, object>();
+            var user = Optimizely.CreateUserContext(UserID);
+            user.SetAttribute("browser_type", "chrome");
+
+            var decisionInfo = new Dictionary<string, object>
+            {
+                { "flagKey", flagKey },
+                { "enabled", enabled },
+                { "variables", variables.ToDictionary() },
+                { "variationKey", variationKey },
+                { "ruleKey", ruleKey },
+                { "reasons", reasons },
+                { "decisionEventDispatched", true },
+                { "featureEnabled", true },
+            };
+         
+            var userAttributes = new UserAttributes
+            {
+               { "browser_type", "chrome" }
+            };
+
+            // Mocking objects.
+            NotificationCallbackMock.Setup(nc => nc.TestDecisionCallback(It.IsAny<string>(), It.IsAny<string>(),
+                It.IsAny<UserAttributes>(), It.IsAny<Dictionary<string, object>>()));
+
+            Optimizely.NotificationCenter.AddNotification(NotificationCenter.NotificationType.Decision, NotificationCallbackMock.Object.TestDecisionCallback);
+
+            user.Decide(flagKey);
+            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionNotificationTypes.FEATURE, UserID, userAttributes, It.Is<Dictionary<string, object>>(info =>
+               TestData.CompareObjects(info, decisionInfo))), 
+               Times.Once); 
+        }
+
+        [Test]
+        public void TestDecideOptionsByPassUPS()
+        {
+            var userProfileServiceMock = new Mock<UserProfileService>();
+            var flagKey = "string_single_variable_feature";
+
+            var experimentId = "122235";
+            var userId = "testUser3";
+            var variationKey = "control";
+            var fbVariationId = "122237";
+            var fbVariationKey = "variation";
+
+
+            var userProfile = new UserProfile(userId, new Dictionary<string, Decision>
+            {
+                { experimentId, new Decision(fbVariationId)}
+            });
+
+            userProfileServiceMock.Setup(_ => _.Lookup(userId)).Returns(userProfile.ToMap());
+
+            var optimizely = new Optimizely(TestData.Datafile, EventDispatcherMock.Object, LoggerMock.Object, ErrorHandlerMock.Object, userProfileServiceMock.Object);
+
+            var user = optimizely.CreateUserContext(userId);
+            
+            var projectConfig = DatafileProjectConfig.Create(TestData.Datafile, LoggerMock.Object, ErrorHandlerMock.Object);
+            
+            var variationUserProfile = user.Decide(flagKey);
+            Assert.AreEqual(fbVariationKey, variationUserProfile.VariationKey);
+
+            var decideOptions = new List<OptimizelyDecideOption>() { OptimizelyDecideOption.IGNORE_USER_PROFILE_SERVICE };
+            variationUserProfile = user.Decide(flagKey, decideOptions);
+            Assert.AreEqual(variationKey, variationUserProfile.VariationKey);
         }
         #endregion
     }

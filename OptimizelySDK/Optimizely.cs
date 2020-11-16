@@ -122,10 +122,11 @@ namespace OptimizelySDK
                           IErrorHandler errorHandler = null,
                           UserProfileService userProfileService = null,
                           bool skipJsonValidation = false,
-                          EventProcessor eventProcessor = null)
+                          EventProcessor eventProcessor = null,
+                          OptimizelyDecideOption[] defaultDecideOptions = null)
         {
             try {
-                InitializeComponents(eventDispatcher, logger, errorHandler, userProfileService, null, eventProcessor);
+                InitializeComponents(eventDispatcher, logger, errorHandler, userProfileService, null, eventProcessor, defaultDecideOptions);
 
                 if (ValidateInputs(datafile, skipJsonValidation)) {
                     var config = DatafileProjectConfig.Create(datafile, Logger, ErrorHandler);
@@ -805,7 +806,7 @@ namespace OptimizelySDK
                 SendImpressionEvent(flagDecision.Experiment, variation, userId, userAttributes, config, key, decisionSource, featureEnabled);
                 decisionEventDispatched = true;
             }
-            var reasonsToReport = decisionReasons.ToReport();
+            List<string> reasonsToReport = decisionReasons.ToReport();
             var variationKey = flagDecision.Variation?.Key;
 
             // TODO: add ruleKey values when available later. use a copy of experimentKey until then.
