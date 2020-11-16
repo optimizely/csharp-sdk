@@ -613,5 +613,42 @@ namespace OptimizelySDK.Tests
             Assert.AreEqual(variationKey, variationUserProfile.VariationKey);
         }
         #endregion
+
+        #region TrackEvent
+        [Test]
+        public void TestTrackEventWithAudienceConditions()
+        {
+            var OptimizelyWithTypedAudiences = new Optimizely(TestData.TypedAudienceDatafile, EventDispatcherMock.Object, LoggerMock.Object, ErrorHandlerMock.Object);
+            var userAttributes = new UserAttributes
+            {
+                { "house", "Gryffindor" },
+                { "should_do_it", false }
+            };
+
+            var user = OptimizelyWithTypedAudiences.CreateUserContext(UserID, userAttributes);
+
+            // Should be excluded as exact match boolean audience with id '3468206643' does not match so the overall conditions fail.
+            user.TrackEvent("user_signed_up");
+
+            EventDispatcherMock.Verify(dispatcher => dispatcher.DispatchEvent(It.IsAny<LogEvent>()), Times.Once);
+        }
+
+        [Test]
+        public void TrackEventEmptyAttributesWithEventTags()
+        {
+            var OptimizelyWithTypedAudiences = new Optimizely(TestData.TypedAudienceDatafile, EventDispatcherMock.Object, LoggerMock.Object, ErrorHandlerMock.Object);
+            
+            var user = OptimizelyWithTypedAudiences.CreateUserContext(UserID);
+
+            // Should be excluded as exact match boolean audience with id '3468206643' does not match so the overall conditions fail.
+            user.TrackEvent("user_signed_up", new EventTags
+            {
+                { "revenue", 42 },
+                { "wont_send_null", null}
+            });
+
+            EventDispatcherMock.Verify(dispatcher => dispatcher.DispatchEvent(It.IsAny<LogEvent>()), Times.Once);
+        }
+        #endregion
     }
 }
