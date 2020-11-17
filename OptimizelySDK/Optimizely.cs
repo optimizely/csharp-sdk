@@ -743,7 +743,7 @@ namespace OptimizelySDK
                     ErrorHandler, Logger);
             }
 
-            var userAttributes = user.UserAttributes;
+            var userAttributes = user.Attributes;
             var decisionEventDispatched = false;
             var allOptions = GetAllOptions(options);
             var decisionReasons = DefaultDecisionReasons.NewInstance(allOptions);

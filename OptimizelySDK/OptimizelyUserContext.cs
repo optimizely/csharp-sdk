@@ -32,7 +32,7 @@ namespace OptimizelySDK
         // userID for Optimizely user context
         public string UserId { get; }
         // user attributes for Optimizely user context.
-        public UserAttributes UserAttributes { get; }
+        public UserAttributes Attributes { get; }
         // Optimizely object to be used.
         public Optimizely Optimizely { get; }
 
@@ -41,7 +41,7 @@ namespace OptimizelySDK
             ErrorHandler = errorHandler;
             Logger = logger;
             Optimizely = optimizely;
-            UserAttributes = userAttributes ?? new UserAttributes();
+            Attributes = userAttributes ?? new UserAttributes();
             UserId = userId;
         }
 
@@ -58,7 +58,7 @@ namespace OptimizelySDK
             }
             else
             {
-                UserAttributes[key] = value;
+                Attributes[key] = value;
             }
         }
 
@@ -146,7 +146,7 @@ namespace OptimizelySDK
         public void TrackEvent(string eventName, 
             EventTags eventTags)
         {
-            Optimizely.Track(eventName, UserId, UserAttributes, eventTags);
+            Optimizely.Track(eventName, UserId, Attributes, eventTags);
         }
     }
 }

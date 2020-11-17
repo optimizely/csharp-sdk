@@ -200,7 +200,7 @@ namespace OptimizelySDK.Tests
             var optlyUserContext = Optimizely.CreateUserContext(TestUserId, attribute);
             Assert.AreEqual(TestUserId, optlyUserContext.UserId);
             Assert.AreEqual(Optimizely, optlyUserContext.Optimizely);
-            Assert.AreEqual(attribute, optlyUserContext.UserAttributes);
+            Assert.AreEqual(attribute, optlyUserContext.Attributes);
         }
 
         [Test]
@@ -209,7 +209,7 @@ namespace OptimizelySDK.Tests
             var optlyUserContext = Optimizely.CreateUserContext(TestUserId);
             Assert.AreEqual(TestUserId, optlyUserContext.UserId);
             Assert.AreEqual(Optimizely, optlyUserContext.Optimizely);
-            Assert.IsTrue(optlyUserContext.UserAttributes.Count == 0);
+            Assert.IsTrue(optlyUserContext.Attributes.Count == 0);
         }
 
         [Test]
@@ -232,11 +232,11 @@ namespace OptimizelySDK.Tests
 
             Assert.AreEqual("userId1", optlyUserContext1.UserId);
             Assert.AreEqual(Optimizely, optlyUserContext1.Optimizely);
-            Assert.AreEqual(attribute1, optlyUserContext1.UserAttributes);
+            Assert.AreEqual(attribute1, optlyUserContext1.Attributes);
 
             Assert.AreEqual("userId2", optlyUserContext2.UserId);
             Assert.AreEqual(Optimizely, optlyUserContext2.Optimizely);
-            Assert.AreEqual(attribute2, optlyUserContext2.UserAttributes);
+            Assert.AreEqual(attribute2, optlyUserContext2.Attributes);
         }
 
         [Test]
@@ -251,7 +251,7 @@ namespace OptimizelySDK.Tests
             var optlyUserContext = Optimizely.CreateUserContext(userId, attribute);
             Assert.AreEqual(TestUserId, optlyUserContext.UserId);
             Assert.AreEqual(Optimizely, optlyUserContext.Optimizely);
-            Assert.AreEqual(attribute, optlyUserContext.UserAttributes);
+            Assert.AreEqual(attribute, optlyUserContext.Attributes);
 
             attribute = new UserAttributes
                 {
@@ -262,7 +262,7 @@ namespace OptimizelySDK.Tests
             userId = "InvalidUser";
             Assert.AreEqual("testUserId", optlyUserContext.UserId);
             Assert.AreEqual(Optimizely, optlyUserContext.Optimizely);
-            Assert.AreNotEqual(attribute, optlyUserContext.UserAttributes);
+            Assert.AreNotEqual(attribute, optlyUserContext.Attributes);
         }
 
         #endregion

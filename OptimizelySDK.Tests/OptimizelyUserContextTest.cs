@@ -67,7 +67,7 @@ namespace OptimizelySDK.Tests
 
             Assert.AreEqual(user.Optimizely, Optimizely);
             Assert.AreEqual(user.UserId, UserID);
-            Assert.AreEqual(user.UserAttributes, attributes);
+            Assert.AreEqual(user.Attributes, attributes);
         }
 
         [Test]
@@ -77,7 +77,7 @@ namespace OptimizelySDK.Tests
 
             Assert.AreEqual(user.Optimizely, Optimizely);
             Assert.AreEqual(user.UserId, UserID);
-            Assert.True(user.UserAttributes.Count == 0);
+            Assert.True(user.Attributes.Count == 0);
         }
 
         [Test]
@@ -93,7 +93,7 @@ namespace OptimizelySDK.Tests
 
             Assert.AreEqual(user.Optimizely, Optimizely);
             Assert.AreEqual(user.UserId, UserID);
-            var newAttributes = user.UserAttributes;
+            var newAttributes = user.Attributes;
             Assert.AreEqual(newAttributes["house"], "GRYFFINDOR");
             Assert.AreEqual(newAttributes["k1"], "v1");
             Assert.AreEqual(newAttributes["k2"], true);
@@ -111,7 +111,7 @@ namespace OptimizelySDK.Tests
 
             Assert.AreEqual(user.Optimizely, Optimizely);
             Assert.AreEqual(user.UserId, UserID);
-            var newAttributes = user.UserAttributes;
+            var newAttributes = user.Attributes;
             Assert.AreEqual(newAttributes["k1"], "v1");
             Assert.AreEqual(newAttributes["k2"], true);
         }
@@ -125,7 +125,7 @@ namespace OptimizelySDK.Tests
             user.SetAttribute("k1", "v1");
             user.SetAttribute("house", "v2");
 
-            var newAttributes = user.UserAttributes;
+            var newAttributes = user.Attributes;
             Assert.AreEqual(newAttributes["k1"], "v1");
             Assert.AreEqual(newAttributes["house"], "v2");
         }
@@ -136,15 +136,15 @@ namespace OptimizelySDK.Tests
             var attributes = new UserAttributes() { { "k1", null } };
             OptimizelyUserContext user = new OptimizelyUserContext(Optimizely, UserID, attributes, ErrorHandlerMock.Object, LoggerMock.Object);
 
-            var newAttributes = user.UserAttributes;
+            var newAttributes = user.Attributes;
             Assert.AreEqual(newAttributes["k1"], null);
 
             user.SetAttribute("k1", true);
-            newAttributes = user.UserAttributes;
+            newAttributes = user.Attributes;
             Assert.AreEqual(newAttributes["k1"], true);
 
             user.SetAttribute("k1", null);
-            newAttributes = user.UserAttributes;
+            newAttributes = user.Attributes;
             Assert.AreEqual(newAttributes["k1"], null);
         }
 
