@@ -2,6 +2,12 @@
 ## [Unreleased]
 
 
+## 3.7.1
+November 18th, 2020
+
+### New Features
+- Add "enabled" field to decision metadata structure. ([#249](https://github.com/optimizely/csharp-sdk/pull/249))
+
 ## 3.7.0
 November 3rd, 2020
 
