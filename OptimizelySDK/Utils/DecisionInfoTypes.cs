@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2019, Optimizely
+ * Copyright 2019-2020, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,5 +23,6 @@ namespace OptimizelySDK.Utils
         public const string FEATURE_TEST = "feature-test";
         public const string FEATURE_VARIABLE = "feature-variable";
         public const string ALL_FEATURE_VARIABLE = "all-feature-variables";
+        public const string FLAG = "flag";
     }
 }

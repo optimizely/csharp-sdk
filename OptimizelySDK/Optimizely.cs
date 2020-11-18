@@ -824,7 +824,7 @@ namespace OptimizelySDK
                 { "featureEnabled", featureEnabled },
             };
 
-            NotificationCenter.SendNotifications(NotificationCenter.NotificationType.Decision, DecisionNotificationTypes.FEATURE, userId,
+            NotificationCenter.SendNotifications(NotificationCenter.NotificationType.Decision, DecisionNotificationTypes.FLAG, userId,
                userAttributes ?? new UserAttributes(), decisionInfo);
 
             return new OptimizelyDecision(
