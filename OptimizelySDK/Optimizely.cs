@@ -732,8 +732,17 @@ namespace OptimizelySDK
             {
                 return OptimizelyDecision.NewErrorDecision(key, user, DecisionMessage.SDK_NOT_READY, ErrorHandler, Logger);
             }
-            var userId = user.UserId;
+
+            if (key == null)
+            {
+                return OptimizelyDecision.NewErrorDecision(key,
+                    user,
+                    DecisionMessage.Reason(DecisionMessage.FLAG_KEY_INVALID, key),
+                    ErrorHandler, Logger);
+            }
             
+            var userId = user?.UserId;
+
             var flag = config.GetFeatureFlagFromKey(key);
             if (flag.Key == null)
             {
