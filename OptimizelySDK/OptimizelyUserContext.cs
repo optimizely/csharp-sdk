@@ -58,8 +58,8 @@ namespace OptimizelySDK
                 Logger.Log(LogLevel.WARN, "Null attribute key.");
             }
             else
-            { 
-                UserAttributes.Add(key, value);
+            {
+                UserAttributes[key] = value;
             }
         }
 
