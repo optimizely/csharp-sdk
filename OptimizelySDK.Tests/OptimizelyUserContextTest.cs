@@ -138,6 +138,20 @@ namespace OptimizelySDK.Tests
             newAttributes = user.UserAttributes;
             Assert.AreEqual(newAttributes["k1"], null);
         }
+        public void SetAttributeToOverrideAttribute()
+        {
+            OptimizelyUserContext user = new OptimizelyUserContext(Optimizely, UserID, null, ErrorHandlerMock.Object, LoggerMock.Object);
+
+
+            Assert.AreEqual(user.Optimizely, Optimizely);
+            Assert.AreEqual(user.UserId, UserID);
+
+            user.SetAttribute("k1", "v1");
+            Assert.AreEqual(user.UserAttributes["k1"], "v1");
+
+            user.SetAttribute("k1", true);
+            Assert.AreEqual(user.UserAttributes["k1"], true);
+        }
 
         #region decide
 
@@ -197,6 +211,5 @@ namespace OptimizelySDK.Tests
             Assert.IsTrue(TestData.CompareObjects(decision, decisionExpected));
         }
         #endregion
-
     }
 }

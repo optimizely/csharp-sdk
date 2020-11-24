@@ -82,7 +82,7 @@ namespace OptimizelySDK.Tests.OptimizelyDecisions
         }
 
         [Test]
-        public void TestNewDecisionReasonWithDecideAllOptions()
+        public void TestNewDecisionReasonWithIncludeReasons()
         {
             var decisionReasons = DefaultDecisionReasons.NewInstance(new List<OptimizelyDecideOption>() { OptimizelyDecideOption.INCLUDE_REASONS });
             decisionReasons.AddError(DecisionMessage.Reason(DecisionMessage.FLAG_KEY_INVALID, "invalid_key"));
@@ -94,5 +94,17 @@ namespace OptimizelySDK.Tests.OptimizelyDecisions
             Assert.AreEqual(decisionReasons.ToReport()[2], "Some info message.");
         }
 
+        [Test]
+        public void TestNewDecisionReasonWithoutIncludeReasons()
+        {
+            var decisionReasons = DefaultDecisionReasons.NewInstance();
+            decisionReasons.AddError(DecisionMessage.Reason(DecisionMessage.FLAG_KEY_INVALID, "invalid_key"));
+
+            Assert.AreEqual(decisionReasons.ToReport()[0], "No flag was found for key \"invalid_key\".");
+            decisionReasons.AddError(DecisionMessage.Reason(DecisionMessage.VARIABLE_VALUE_INVALID, "invalid_key"));
+            Assert.AreEqual(decisionReasons.ToReport()[1], "Variable value for key \"invalid_key\" is invalid or wrong type.");
+            decisionReasons.AddInfo("Some info message.");
+            Assert.AreEqual(decisionReasons.ToReport().Count, 2);
+        }
     }
 }
