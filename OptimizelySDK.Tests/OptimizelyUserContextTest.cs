@@ -147,6 +147,20 @@ namespace OptimizelySDK.Tests
             newAttributes = user.Attributes;
             Assert.AreEqual(newAttributes["k1"], null);
         }
+        public void SetAttributeToOverrideAttribute()
+        {
+            OptimizelyUserContext user = new OptimizelyUserContext(Optimizely, UserID, null, ErrorHandlerMock.Object, LoggerMock.Object);
+
+
+            Assert.AreEqual(user.Optimizely, Optimizely);
+            Assert.AreEqual(user.UserId, UserID);
+
+            user.SetAttribute("k1", "v1");
+            Assert.AreEqual(user.Attributes["k1"], "v1");
+
+            user.SetAttribute("k1", true);
+            Assert.AreEqual(user.Attributes["k1"], true);
+        }
 
         #region decide
 
@@ -166,7 +180,7 @@ namespace OptimizelySDK.Tests
             Assert.AreEqual(decision.RuleKey, "test_experiment_multivariate");
             Assert.AreEqual(decision.FlagKey, flagKey);
             Assert.AreEqual(decision.UserContext, user);
-            Assert.True(decision.Reasons.IsNullOrEmpty());
+            Assert.IsNotNull(decision.Reasons);
         }
 
         [Test]
@@ -559,7 +573,6 @@ namespace OptimizelySDK.Tests
                 { "ruleKey", ruleKey },
                 { "reasons", reasons },
                 { "decisionEventDispatched", true },
-                { "featureEnabled", true },
             };
          
             var userAttributes = new UserAttributes
@@ -574,7 +587,7 @@ namespace OptimizelySDK.Tests
             Optimizely.NotificationCenter.AddNotification(NotificationCenter.NotificationType.Decision, NotificationCallbackMock.Object.TestDecisionCallback);
 
             user.Decide(flagKey);
-            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionNotificationTypes.FEATURE, UserID, userAttributes, It.Is<Dictionary<string, object>>(info =>
+            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionNotificationTypes.FLAG, UserID, userAttributes, It.Is<Dictionary<string, object>>(info =>
                TestData.CompareObjects(info, decisionInfo))), 
                Times.Once); 
         }

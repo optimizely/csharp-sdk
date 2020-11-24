@@ -20,9 +20,9 @@ namespace OptimizelySDK.Utils
     {
         public const string AB_TEST = "ab-test";
         public const string FEATURE = "feature";
+        public const string FLAG = "flag";
         public const string FEATURE_TEST = "feature-test";
         public const string FEATURE_VARIABLE = "feature-variable";
         public const string ALL_FEATURE_VARIABLE = "all-feature-variables";
-        public const string FLAG = "flag";
     }
 }

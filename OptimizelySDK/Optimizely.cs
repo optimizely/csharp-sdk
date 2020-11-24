@@ -187,7 +187,7 @@ namespace OptimizelySDK
             NotificationCenter = notificationCenter ?? new NotificationCenter(Logger);
             DecisionService = new DecisionService(Bucketer, ErrorHandler, userProfileService, Logger);
             EventProcessor = eventProcessor ?? new ForwardingEventProcessor(EventDispatcher, NotificationCenter, Logger);
-            DefaultDecideOptions = defaultDecideOptions ?? new OptimizelyDecideOption[0];
+            DefaultDecideOptions = defaultDecideOptions ?? new OptimizelyDecideOption[] { };
         }
 
         /// <summary>
@@ -744,7 +744,7 @@ namespace OptimizelySDK
             var userId = user?.UserId;
 
             var flag = config.GetFeatureFlagFromKey(key);
-            if (flag.Key == null)
+            if (string.IsNullOrEmpty(flag.Key))
             {
                 return OptimizelyDecision.NewErrorDecision(key,
                     user,
@@ -829,8 +829,7 @@ namespace OptimizelySDK
                 { "variationKey", variationKey },
                 { "ruleKey", ruleKey },
                 { "reasons", decisionReasons },
-                { "decisionEventDispatched", decisionEventDispatched },
-                { "featureEnabled", featureEnabled },
+                { "decisionEventDispatched", decisionEventDispatched }
             };
 
             NotificationCenter.SendNotifications(NotificationCenter.NotificationType.Decision, DecisionNotificationTypes.FLAG, userId,

@@ -88,7 +88,7 @@ namespace OptimizelySDK.Tests.EventTests
                                                             { "rule_key", "test_experiment" },
                                                             { "flag_key", "test_experiment" },
                                                             { "variation_key", "control" },
-                                                            {"enabled", false }
+                                                            { "enabled", false }
                                                         } }
                                                     }
                                                 }

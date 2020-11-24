@@ -25,19 +25,39 @@ namespace OptimizelySDK.OptimizelyDecisions
     /// </summary>
     public class OptimizelyDecision
     {
-        // variation key for optimizely decision.
+        /// <summary>
+        /// variation key for optimizely decision.
+        /// </summary>
         public string VariationKey { get; private set; }
-        // boolean value indicating if the flag is enabled or not.
+        
+        /// <summary>
+        /// boolean value indicating if the flag is enabled or not.
+        /// </summary>
         public bool Enabled { get; private set; }
-        // collection of variables associated with the decision.
+
+        /// <summary>
+        /// collection of variables associated with the decision.
+        /// </summary>
         public OptimizelyJSON Variables { get; private set; }
-        // rule key of the decision.
+        
+        /// <summary>
+        /// rule key of the decision.
+        /// </summary>
         public string RuleKey { get; private set; }
-        // flag key for which the decision was made.
+        
+        /// <summary>
+        /// flag key for which the decision was made.
+        /// </summary>
         public string FlagKey { get; private set; }
-        // user context for which the  decision was made.
+        
+        /// <summary>
+        /// user context for which the  decision was made.
+        /// </summary>
         public OptimizelyUserContext UserContext { get; private set; }
-        // an array of error/info/debug messages describing why the decision has been made.
+        
+        /// <summary>
+        /// an array of error/info/debug messages describing why the decision has been made.
+        /// </summary>
         public string[] Reasons { get; private set; }
 
         public OptimizelyDecision(string variationKey,

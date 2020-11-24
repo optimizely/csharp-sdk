@@ -124,26 +124,26 @@ namespace OptimizelySDK.Bucketing
                 if (string.IsNullOrEmpty(userExperimentId))
                 {
                     message = $"User [{userId}] is in no experiment.";
-                    Logger.Log(LogLevel.INFO, reasons?.AddInfo(message));
+                    Logger.Log(LogLevel.INFO, reasons.AddInfo(message));
                     return new Variation();
                 }
 
                 if (userExperimentId != experiment.Id)
                 {
                     message = $"User [{userId}] is not in experiment [{experiment.Key}] of group [{experiment.GroupId}].";
-                    Logger.Log(LogLevel.INFO, reasons?.AddInfo(message));
+                    Logger.Log(LogLevel.INFO, reasons.AddInfo(message));
                     return new Variation();
                 }
 
                 message = $"User [{userId}] is in experiment [{experiment.Key}] of group [{experiment.GroupId}].";
-                Logger.Log(LogLevel.INFO, reasons?.AddInfo(message));
+                Logger.Log(LogLevel.INFO, reasons.AddInfo(message));
             }
 
             // Bucket user if not in whitelist and in group (if any).
             string variationId = FindBucket(bucketingId, userId, experiment.Id, experiment.TrafficAllocation);
             if (string.IsNullOrEmpty(variationId))
             {
-                Logger.Log(LogLevel.INFO, reasons?.AddInfo($"User [{userId}] is in no variation."));
+                Logger.Log(LogLevel.INFO, reasons.AddInfo($"User [{userId}] is in no variation."));
                 return new Variation();
 
             }
@@ -151,7 +151,7 @@ namespace OptimizelySDK.Bucketing
             // success!
             variation = config.GetVariationFromId(experiment.Key, variationId);
             message = $"User [{userId}] is in variation [{variation.Key}] of experiment [{experiment.Key}].";
-            Logger.Log(LogLevel.INFO, reasons?.AddInfo(message));
+            Logger.Log(LogLevel.INFO, reasons.AddInfo(message));
             return variation;
         }
     }
