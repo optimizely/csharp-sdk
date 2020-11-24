@@ -133,16 +133,16 @@ namespace OptimizelySDK.Bucketing
                     }
                     else if (userProfileMap == null)
                     {
-                        Logger.Log(LogLevel.INFO, reasons?.AddInfo("We were unable to get a user profile map from the UserProfileService."));
+                        Logger.Log(LogLevel.INFO, reasons.AddInfo("We were unable to get a user profile map from the UserProfileService."));
                     }
                     else
                     {
-                        Logger.Log(LogLevel.ERROR, reasons?.AddInfo("The UserProfileService returned an invalid map."));
+                        Logger.Log(LogLevel.ERROR, reasons.AddInfo("The UserProfileService returned an invalid map."));
                     }
                 }
                 catch (Exception exception)
                 {
-                    Logger.Log(LogLevel.ERROR, reasons?.AddInfo(exception.Message));
+                    Logger.Log(LogLevel.ERROR, reasons.AddInfo(exception.Message));
                     ErrorHandler.HandleError(new Exceptions.OptimizelyRuntimeException(exception.Message));
                 }
             }
@@ -156,7 +156,7 @@ namespace OptimizelySDK.Bucketing
 
                 if (variation != null && variation.Key != null)
                 {
-                    if (UserProfileService != null)
+                    if (UserProfileService != null && !ignoreUPS)
                     {
                         var bucketerUserProfile = userProfile ?? new UserProfile(userId, new Dictionary<string, Decision>());
                         SaveVariation(experiment, variation, bucketerUserProfile, reasons);
@@ -168,7 +168,7 @@ namespace OptimizelySDK.Bucketing
 
                 return variation;
             }
-            Logger.Log(LogLevel.INFO, reasons?.AddInfo($"User \"{userId}\" does not meet conditions to be in experiment \"{experiment.Key}\"."));
+            Logger.Log(LogLevel.INFO, reasons.AddInfo($"User \"{userId}\" does not meet conditions to be in experiment \"{experiment.Key}\"."));
 
             return null;
         }
@@ -227,7 +227,7 @@ namespace OptimizelySDK.Bucketing
             // this case is logged in getVariationFromKey   
             if (string.IsNullOrEmpty(variationKey))
                 return null;
-            Logger.Log(LogLevel.DEBUG, reasons?.AddInfo($@"Variation ""{variationKey}"" is mapped to experiment ""{experimentKey}"" and user ""{userId}"" in the forced variation map"));
+            Logger.Log(LogLevel.DEBUG, reasons.AddInfo($@"Variation ""{variationKey}"" is mapped to experiment ""{experimentKey}"" and user ""{userId}"" in the forced variation map"));
 
             Variation variation = config.GetVariationFromKey(experimentKey, variationKey);
 
@@ -317,9 +317,9 @@ namespace OptimizelySDK.Bucketing
                 : null;
 
             if (forcedVariation != null)
-                Logger.Log(LogLevel.INFO, reasons?.AddInfo($"User \"{userId}\" is forced in variation \"{forcedVariationKey}\"."));
+                Logger.Log(LogLevel.INFO, reasons.AddInfo($"User \"{userId}\" is forced in variation \"{forcedVariationKey}\"."));
             else
-                Logger.Log(LogLevel.ERROR, reasons?.AddInfo($"Variation \"{forcedVariationKey}\" is not in the datafile. Not activating user \"{userId}\"."));
+                Logger.Log(LogLevel.ERROR, reasons.AddInfo($"Variation \"{forcedVariationKey}\" is not in the datafile. Not activating user \"{userId}\"."));
 
             return forcedVariation;
         }
@@ -342,7 +342,7 @@ namespace OptimizelySDK.Bucketing
 
             if (decision == null)
             {
-                Logger.Log(LogLevel.INFO, reasons?.AddInfo($"No previously activated variation of experiment \"{experimentKey}\" for user \"{userProfile.UserId}\" found in user profile."));
+                Logger.Log(LogLevel.INFO, reasons.AddInfo($"No previously activated variation of experiment \"{experimentKey}\" for user \"{userProfile.UserId}\" found in user profile."));
                 return null;
             }
 
@@ -356,11 +356,11 @@ namespace OptimizelySDK.Bucketing
 
                 if (savedVariation == null)
                 {
-                    Logger.Log(LogLevel.INFO, reasons?.AddInfo($"User \"{userProfile.UserId}\" was previously bucketed into variation with ID \"{variationId}\" for experiment \"{experimentId}\", but no matching variation was found for that user. We will re-bucket the user."));
+                    Logger.Log(LogLevel.INFO, reasons.AddInfo($"User \"{userProfile.UserId}\" was previously bucketed into variation with ID \"{variationId}\" for experiment \"{experimentId}\", but no matching variation was found for that user. We will re-bucket the user."));
                     return null;
                 }
 
-                Logger.Log(LogLevel.INFO, reasons?.AddInfo($"Returning previously activated variation \"{savedVariation.Key}\" of experiment \"{experimentKey}\" for user \"{userProfile.UserId}\" from user profile."));
+                Logger.Log(LogLevel.INFO, reasons.AddInfo($"Returning previously activated variation \"{savedVariation.Key}\" of experiment \"{experimentKey}\" for user \"{userProfile.UserId}\" from user profile."));
                 return savedVariation;
             }
             catch (Exception)
@@ -407,11 +407,11 @@ namespace OptimizelySDK.Bucketing
             try
             {
                 UserProfileService.Save(userProfile.ToMap());
-                Logger.Log(LogLevel.INFO, reasons?.AddInfo($"Saved variation \"{variation.Id}\" of experiment \"{experiment.Id}\" for user \"{userProfile.UserId}\"."));
+                Logger.Log(LogLevel.INFO, $"Saved variation \"{variation.Id}\" of experiment \"{experiment.Id}\" for user \"{userProfile.UserId}\".");
             }
             catch (Exception exception)
             {
-                Logger.Log(LogLevel.ERROR, reasons?.AddInfo($"Failed to save variation \"{variation.Id}\" of experiment \"{experiment.Id}\" for user \"{userProfile.UserId}\"."));
+                Logger.Log(LogLevel.ERROR, $"Failed to save variation \"{variation.Id}\" of experiment \"{experiment.Id}\" for user \"{userProfile.UserId}\".");
                 ErrorHandler.HandleError(new Exceptions.OptimizelyRuntimeException(exception.Message));
             }
         }
@@ -441,7 +441,7 @@ namespace OptimizelySDK.Bucketing
 
             if (string.IsNullOrEmpty(featureFlag.RolloutId))
             {
-                Logger.Log(LogLevel.INFO, reasons?.AddInfo($"The feature flag \"{featureFlag.Key}\" is not used in a rollout."));
+                Logger.Log(LogLevel.INFO, reasons.AddInfo($"The feature flag \"{featureFlag.Key}\" is not used in a rollout."));
                 return null;
             }
 
@@ -449,7 +449,7 @@ namespace OptimizelySDK.Bucketing
 
             if (string.IsNullOrEmpty(rollout.Id))
             {
-                Logger.Log(LogLevel.ERROR, reasons?.AddInfo($"The rollout with id \"{featureFlag.RolloutId}\" is not found in the datafile for feature flag \"{featureFlag.Key}\""));
+                Logger.Log(LogLevel.ERROR, reasons.AddInfo($"The rollout with id \"{featureFlag.RolloutId}\" is not found in the datafile for feature flag \"{featureFlag.Key}\""));
                 return null;
             }
 
@@ -526,7 +526,7 @@ namespace OptimizelySDK.Bucketing
 
             if (featureFlag.ExperimentIds == null || featureFlag.ExperimentIds.Count == 0)
             {
-                Logger.Log(LogLevel.INFO, reasons?.AddInfo($"The feature flag \"{featureFlag.Key}\" is not used in any experiments."));
+                Logger.Log(LogLevel.INFO, reasons.AddInfo($"The feature flag \"{featureFlag.Key}\" is not used in any experiments."));
                 return null;
             }
 
@@ -541,12 +541,12 @@ namespace OptimizelySDK.Bucketing
 
                 if (variation != null && !string.IsNullOrEmpty(variation.Id))
                 {
-                    Logger.Log(LogLevel.INFO, reasons?.AddInfo($"The user \"{userId}\" is bucketed into experiment \"{experiment.Key}\" of feature \"{featureFlag.Key}\"."));
+                    Logger.Log(LogLevel.INFO, reasons.AddInfo($"The user \"{userId}\" is bucketed into experiment \"{experiment.Key}\" of feature \"{featureFlag.Key}\"."));
                     return new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_FEATURE_TEST);
                 }
             }
 
-            Logger.Log(LogLevel.INFO, reasons?.AddInfo($"The user \"{userId}\" is not bucketed into any of the experiments on the feature \"{featureFlag.Key}\"."));
+            Logger.Log(LogLevel.INFO, reasons.AddInfo($"The user \"{userId}\" is not bucketed into any of the experiments on the feature \"{featureFlag.Key}\"."));
             return null;
         }
 
@@ -592,11 +592,11 @@ namespace OptimizelySDK.Bucketing
 
             if (decision != null)
             {
-                Logger.Log(LogLevel.INFO, reasons?.AddInfo($"The user \"{userId}\" is bucketed into a rollout for feature flag \"{featureFlag.Key}\"."));
+                Logger.Log(LogLevel.INFO, reasons.AddInfo($"The user \"{userId}\" is bucketed into a rollout for feature flag \"{featureFlag.Key}\"."));
                 return decision;
             }
 
-            Logger.Log(LogLevel.INFO, reasons?.AddInfo($"The user \"{userId}\" is not bucketed into a rollout for feature flag \"{featureFlag.Key}\"."));
+            Logger.Log(LogLevel.INFO, reasons.AddInfo($"The user \"{userId}\" is not bucketed into a rollout for feature flag \"{featureFlag.Key}\"."));
             return new FeatureDecision(null, null, FeatureDecision.DECISION_SOURCE_ROLLOUT);
         }
 
@@ -620,7 +620,7 @@ namespace OptimizelySDK.Bucketing
                 }
                 else
                 {
-                    Logger.Log(LogLevel.WARN, reasons?.AddInfo("BucketingID attribute is not a string. Defaulted to userId"));
+                    Logger.Log(LogLevel.WARN, reasons.AddInfo("BucketingID attribute is not a string. Defaulted to userId"));
                 }
             }
 

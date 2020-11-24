@@ -819,11 +819,10 @@ namespace OptimizelySDK
                 { "variationKey", variationKey },
                 { "ruleKey", ruleKey },
                 { "reasons", decisionReasons },
-                { "decisionEventDispatched", decisionEventDispatched },
-                { "featureEnabled", featureEnabled },
+                { "decisionEventDispatched", decisionEventDispatched }
             };
 
-            NotificationCenter.SendNotifications(NotificationCenter.NotificationType.Decision, DecisionNotificationTypes.FEATURE, userId,
+            NotificationCenter.SendNotifications(NotificationCenter.NotificationType.Decision, DecisionNotificationTypes.FLAG, userId,
                userAttributes ?? new UserAttributes(), decisionInfo);
 
             return new OptimizelyDecision(

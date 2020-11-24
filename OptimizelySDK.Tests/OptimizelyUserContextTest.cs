@@ -171,7 +171,7 @@ namespace OptimizelySDK.Tests
             Assert.AreEqual(decision.RuleKey, "test_experiment_multivariate");
             Assert.AreEqual(decision.FlagKey, flagKey);
             Assert.AreEqual(decision.UserContext, user);
-            Assert.True(decision.Reasons.IsNullOrEmpty());
+            Assert.IsNotNull(decision.Reasons);
         }
 
         [Test]

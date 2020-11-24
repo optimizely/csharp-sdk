@@ -94,7 +94,7 @@ namespace OptimizelySDK.Utils
 
             var result = expConditions.Evaluate(config, userAttributes, logger).GetValueOrDefault();
             var resultText = result.ToString().ToUpper();
-            logger.Log(LogLevel.INFO, reasons?.AddInfo($@"Audiences for {loggingKeyType} ""{loggingKey}"" collectively evaluated to {resultText}"));
+            logger.Log(LogLevel.INFO, reasons.AddInfo($@"Audiences for {loggingKeyType} ""{loggingKey}"" collectively evaluated to {resultText}"));
             return result;
         }
     }
