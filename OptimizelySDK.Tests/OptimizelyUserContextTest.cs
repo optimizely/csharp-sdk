@@ -224,7 +224,7 @@ namespace OptimizelySDK.Tests
         #region decideAll
 
         [Test]
-        public void DecideAllOneFlag()
+        public void DecideForKeysWithOneFlag()
         {
             var flagKey = "multi_variate_feature";
             var flagKeys = new List<string>() { flagKey };
@@ -439,6 +439,69 @@ namespace OptimizelySDK.Tests
             "control",
             true,
             variablesExpected1,
+            "test_experiment_with_feature_rollout",
+            flagKey1,
+            user,
+            new string[0]);
+            Assert.IsTrue(TestData.CompareObjects(decisions[flagKey1], expDecision1));
+        }
+
+        [Test]
+        public void DecideAllEnabledFlagsDefaultDecideOptions()
+        {
+            var flagKey1 = "string_single_variable_feature";
+            var decideOptions = new List<OptimizelyDecideOption>() { OptimizelyDecideOption.ENABLED_FLAGS_ONLY };
+
+            var optimizely = new Optimizely(TestData.Datafile,
+                EventDispatcherMock.Object,
+                LoggerMock.Object,
+                ErrorHandlerMock.Object,
+                defaultDecideOptions: decideOptions.ToArray());
+
+            var variablesExpected1 = Optimizely.GetAllFeatureVariables(flagKey1, UserID);
+
+            var user = optimizely.CreateUserContext(UserID);
+            user.SetAttribute("browser_type", "chrome");
+
+            var decisions = user.DecideAll();
+
+            Assert.True(decisions.Count == 1);
+
+            OptimizelyDecision expDecision1 = new OptimizelyDecision(
+            "control",
+            true,
+            variablesExpected1,
+            "test_experiment_with_feature_rollout",
+            flagKey1,
+            user,
+            new string[0]);
+            Assert.IsTrue(TestData.CompareObjects(decisions[flagKey1], expDecision1));
+        }
+
+        [Test]
+        public void DecideAllEnabledFlagsDefaultDecideOptionsPlusApiOptions()
+        {
+            var flagKey1 = "string_single_variable_feature";
+            var decideOptions = new List<OptimizelyDecideOption>() { OptimizelyDecideOption.ENABLED_FLAGS_ONLY };
+
+            var optimizely = new Optimizely(TestData.Datafile,
+                EventDispatcherMock.Object,
+                LoggerMock.Object,
+                ErrorHandlerMock.Object,
+                defaultDecideOptions: decideOptions.ToArray());
+
+            var user = optimizely.CreateUserContext(UserID);
+            user.SetAttribute("browser_type", "chrome");
+            decideOptions = new List<OptimizelyDecideOption>() { OptimizelyDecideOption.EXCLUDE_VARIABLES };
+
+            var decisions = user.DecideAll(decideOptions);
+
+            Assert.True(decisions.Count == 1);
+            var expectedOptlyJson = new Dictionary<string, object>();
+            OptimizelyDecision expDecision1 = new OptimizelyDecision(
+            "control",
+            true,
+            new OptimizelyJSON(dict: expectedOptlyJson, ErrorHandlerMock.Object, LoggerMock.Object),
             "test_experiment_with_feature_rollout",
             flagKey1,
             user,

@@ -107,7 +107,7 @@ namespace OptimizelySDK
         /// <returns>A dictionary of all decision results, mapped by flag keys.</returns>
         public Dictionary<string, OptimizelyDecision> DecideForKeys(List<string> keys)
         {
-            return Optimizely.DecideForKeys(this, keys, new List<OptimizelyDecideOption>());
+            return DecideForKeys(keys, new List<OptimizelyDecideOption>());
         }
 
         /// <summary>
