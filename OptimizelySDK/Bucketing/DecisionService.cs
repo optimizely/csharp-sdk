@@ -89,7 +89,7 @@ namespace OptimizelySDK.Bucketing
             ProjectConfig config,
             UserAttributes filteredAttributes)
         {
-            return GetVariation(experiment, userId, config, filteredAttributes, new List<OptimizelyDecideOption>(), DefaultDecisionReasons.NewInstance());
+            return GetVariation(experiment, userId, config, filteredAttributes, new OptimizelyDecideOption[] { }, DefaultDecisionReasons.NewInstance());
         }
 
         /// <summary>
@@ -103,7 +103,7 @@ namespace OptimizelySDK.Bucketing
             string userId,
             ProjectConfig config,
             UserAttributes filteredAttributes,
-            List<OptimizelyDecideOption> options,
+            OptimizelyDecideOption[] options,
             IDecisionReasons reasons)
         {
             if (!ExperimentUtils.IsExperimentActive(experiment, Logger)) return null;
@@ -117,7 +117,7 @@ namespace OptimizelySDK.Bucketing
 
             if (variation != null) return variation;
             // fetch the user profile map from the user profile service
-            var ignoreUPS = options.Contains(OptimizelyDecideOption.IGNORE_USER_PROFILE_SERVICE);
+            var ignoreUPS = Array.Exists(options, option => option == OptimizelyDecideOption.IGNORE_USER_PROFILE_SERVICE);
 
             UserProfile userProfile = null;
             if (UserProfileService != null && !ignoreUPS)
@@ -515,7 +515,7 @@ namespace OptimizelySDK.Bucketing
             string userId,
             UserAttributes filteredAttributes,
             ProjectConfig config,
-            List<OptimizelyDecideOption> options,
+            OptimizelyDecideOption[] options,
             IDecisionReasons reasons)
         {
             if (featureFlag == null)
@@ -560,7 +560,7 @@ namespace OptimizelySDK.Bucketing
         /// successfully bucketed.</returns>
         public virtual FeatureDecision GetVariationForFeature(FeatureFlag featureFlag, string userId, ProjectConfig config, UserAttributes filteredAttributes)
         {
-            return GetVariationForFeature(featureFlag, userId, config, filteredAttributes, new List<OptimizelyDecideOption>(), DefaultDecisionReasons.NewInstance());
+            return GetVariationForFeature(featureFlag, userId, config, filteredAttributes, new OptimizelyDecideOption[] { }, DefaultDecisionReasons.NewInstance());
         }
 
         /// <summary>
@@ -578,7 +578,7 @@ namespace OptimizelySDK.Bucketing
             string userId,
             ProjectConfig config,
             UserAttributes filteredAttributes,
-            List<OptimizelyDecideOption> options, 
+            OptimizelyDecideOption[] options, 
             IDecisionReasons reasons)
         {
             // Check if the feature flag has an experiment and the user is bucketed into that experiment.

@@ -30,6 +30,7 @@ using OptimizelySDK.Event;
 using OptimizelySDK.OptlyConfig;
 using System.Net;
 using OptimizelySDK.OptimizelyDecisions;
+using System.Linq;
 
 namespace OptimizelySDK
 {
@@ -721,9 +722,9 @@ namespace OptimizelySDK
         /// <param name="key">A flag key for which a decision will be made.</param>
         /// <param name="options">A list of options for decision-making.</param>
         /// <returns>A decision result.</returns>
-        public OptimizelyDecision Decide(OptimizelyUserContext user,
+        internal OptimizelyDecision Decide(OptimizelyUserContext user,
                               string key,
-                              List<OptimizelyDecideOption> options)
+                              OptimizelyDecideOption[] options)
         {
 
             var config = ProjectConfigManager?.GetConfig();
@@ -835,12 +836,13 @@ namespace OptimizelySDK
                 reasonsToReport.ToArray());
         }
 
-        private List<OptimizelyDecideOption> GetAllOptions(List<OptimizelyDecideOption> options)
+        private OptimizelyDecideOption[] GetAllOptions(OptimizelyDecideOption[] options)
         {
-            var copiedOptions = new List<OptimizelyDecideOption>(DefaultDecideOptions);
+            OptimizelyDecideOption[] copiedOptions = new OptimizelyDecideOption[DefaultDecideOptions.Length];
+            Array.Copy(DefaultDecideOptions, copiedOptions, DefaultDecideOptions.Length);
             if (options != null)
             {
-                copiedOptions.AddRange(options);
+                copiedOptions.Concat(options);
             }
             return copiedOptions;
         }

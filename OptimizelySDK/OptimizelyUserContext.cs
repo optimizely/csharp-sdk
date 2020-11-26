@@ -73,7 +73,7 @@ namespace OptimizelySDK
         /// <returns>A decision result.</returns>
         public OptimizelyDecision Decide(string key)
         {
-            return Decide(key, new List<OptimizelyDecideOption>());
+            return Decide(key, new OptimizelyDecideOption[] { });
         }
 
         /// <summary>
@@ -86,7 +86,7 @@ namespace OptimizelySDK
         /// <param name="options">A list of options for decision-making.</param>
         /// <returns>A decision result.</returns>
         public OptimizelyDecision Decide(string key,
-            List<OptimizelyDecideOption> options)
+            OptimizelyDecideOption[] options)
         {
             return Optimizely.Decide(this, key, options);
         }
@@ -107,7 +107,7 @@ namespace OptimizelySDK
         /// <returns>A dictionary of all decision results, mapped by flag keys.</returns>
         public Dictionary<string, OptimizelyDecision> DecideAll()
         {
-            return DecideAll(new List<OptimizelyDecideOption>());
+            return DecideAll(new OptimizelyDecideOption[] { });
         }
 
 
@@ -116,7 +116,7 @@ namespace OptimizelySDK
         /// </summary>
         /// <param name="options">A list of options for decision-making.</param>
         /// <returns>All decision results mapped by flag keys.</returns>
-        public Dictionary<string, OptimizelyDecision> DecideAll(List<OptimizelyDecideOption> options)
+        public Dictionary<string, OptimizelyDecision> DecideAll(OptimizelyDecideOption[] options)
         {
             throw new NotImplementedException();
         }
