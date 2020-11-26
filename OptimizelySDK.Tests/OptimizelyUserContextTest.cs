@@ -427,7 +427,7 @@ namespace OptimizelySDK.Tests
 
             var variablesExpected1 = Optimizely.GetAllFeatureVariables(flagKey1, UserID);
 
-            var decideOptions = new List<OptimizelyDecideOption>() { OptimizelyDecideOption.ENABLED_FLAGS_ONLY };
+            var decideOptions = new OptimizelyDecideOption[] { OptimizelyDecideOption.ENABLED_FLAGS_ONLY };
             var user = Optimizely.CreateUserContext(UserID);
             user.SetAttribute("browser_type", "chrome");
 
@@ -450,13 +450,13 @@ namespace OptimizelySDK.Tests
         public void DecideAllEnabledFlagsDefaultDecideOptions()
         {
             var flagKey1 = "string_single_variable_feature";
-            var decideOptions = new List<OptimizelyDecideOption>() { OptimizelyDecideOption.ENABLED_FLAGS_ONLY };
+            var decideOptions = new OptimizelyDecideOption[] { OptimizelyDecideOption.ENABLED_FLAGS_ONLY };
 
             var optimizely = new Optimizely(TestData.Datafile,
                 EventDispatcherMock.Object,
                 LoggerMock.Object,
                 ErrorHandlerMock.Object,
-                defaultDecideOptions: decideOptions.ToArray());
+                defaultDecideOptions: decideOptions);
 
             var variablesExpected1 = Optimizely.GetAllFeatureVariables(flagKey1, UserID);
 
@@ -482,17 +482,17 @@ namespace OptimizelySDK.Tests
         public void DecideAllEnabledFlagsDefaultDecideOptionsPlusApiOptions()
         {
             var flagKey1 = "string_single_variable_feature";
-            var decideOptions = new List<OptimizelyDecideOption>() { OptimizelyDecideOption.ENABLED_FLAGS_ONLY };
+            var decideOptions = new OptimizelyDecideOption[] { OptimizelyDecideOption.ENABLED_FLAGS_ONLY };
 
             var optimizely = new Optimizely(TestData.Datafile,
                 EventDispatcherMock.Object,
                 LoggerMock.Object,
                 ErrorHandlerMock.Object,
-                defaultDecideOptions: decideOptions.ToArray());
+                defaultDecideOptions: decideOptions);
 
             var user = optimizely.CreateUserContext(UserID);
             user.SetAttribute("browser_type", "chrome");
-            decideOptions = new List<OptimizelyDecideOption>() { OptimizelyDecideOption.EXCLUDE_VARIABLES };
+            decideOptions = new OptimizelyDecideOption[] { OptimizelyDecideOption.EXCLUDE_VARIABLES };
 
             var decisions = user.DecideAll(decideOptions);
 
@@ -516,7 +516,7 @@ namespace OptimizelySDK.Tests
             var variablesExpected = new Dictionary<string, object>();
             var user = Optimizely.CreateUserContext(UserID);
             user.SetAttribute("browser_type", "chrome");
-            var decideOptions = new List<OptimizelyDecideOption>() { OptimizelyDecideOption.EXCLUDE_VARIABLES };
+            var decideOptions = new OptimizelyDecideOption[] { OptimizelyDecideOption.EXCLUDE_VARIABLES };
 
             var decision = user.Decide(flagKey, decideOptions);
 
@@ -540,7 +540,7 @@ namespace OptimizelySDK.Tests
             Assert.True(decision.Reasons.Length == 1);
             Assert.AreEqual(decision.Reasons[0], DecisionMessage.Reason(DecisionMessage.FLAG_KEY_INVALID, flagKey));
 
-            var decideOptions = new List<OptimizelyDecideOption>() { OptimizelyDecideOption.INCLUDE_REASONS };
+            var decideOptions = new OptimizelyDecideOption[] { OptimizelyDecideOption.INCLUDE_REASONS };
             
             decision = user.Decide(flagKey, decideOptions);
             Assert.True(decision.Reasons.Length == 1);
@@ -573,7 +573,7 @@ namespace OptimizelySDK.Tests
             var user = optimizely.CreateUserContext(UserID);
             user.SetAttribute("browser_type", "chrome");
 
-            var decideOptions = new List<OptimizelyDecideOption>() { OptimizelyDecideOption.DISABLE_DECISION_EVENT };
+            var decideOptions = new OptimizelyDecideOption[] { OptimizelyDecideOption.DISABLE_DECISION_EVENT };
             var decision = user.Decide(flagKey, decideOptions);
             EventDispatcherMock.Verify(dispatcher => dispatcher.DispatchEvent(It.IsAny<LogEvent>()), Times.Never);
 
@@ -593,13 +593,13 @@ namespace OptimizelySDK.Tests
         {
             var flagKey = "multi_variate_feature";
             var variablesExpected = Optimizely.GetAllFeatureVariables(flagKey, UserID);
-            var decideOptions = new List<OptimizelyDecideOption>() { OptimizelyDecideOption.DISABLE_DECISION_EVENT };
+            var decideOptions = new OptimizelyDecideOption[] { OptimizelyDecideOption.DISABLE_DECISION_EVENT };
 
             var optimizely = new Optimizely(TestData.Datafile,
                 EventDispatcherMock.Object,
                 LoggerMock.Object,
                 ErrorHandlerMock.Object,
-                defaultDecideOptions: decideOptions.ToArray());
+                defaultDecideOptions: decideOptions);
 
             var user = optimizely.CreateUserContext(UserID);
             user.SetAttribute("browser_type", "chrome");
@@ -684,7 +684,7 @@ namespace OptimizelySDK.Tests
             var variationUserProfile = user.Decide(flagKey);
             Assert.AreEqual(fbVariationKey, variationUserProfile.VariationKey);
 
-            var decideOptions = new List<OptimizelyDecideOption>() { OptimizelyDecideOption.IGNORE_USER_PROFILE_SERVICE };
+            var decideOptions = new OptimizelyDecideOption[] { OptimizelyDecideOption.IGNORE_USER_PROFILE_SERVICE };
             variationUserProfile = user.Decide(flagKey, decideOptions);
             Assert.AreEqual(variationKey, variationUserProfile.VariationKey);
         }

@@ -84,7 +84,7 @@ namespace OptimizelySDK.Tests.OptimizelyDecisions
         [Test]
         public void TestNewDecisionReasonWithIncludeReasons()
         {
-            var decisionReasons = DefaultDecisionReasons.NewInstance(new List<OptimizelyDecideOption>() { OptimizelyDecideOption.INCLUDE_REASONS });
+            var decisionReasons = DefaultDecisionReasons.NewInstance(new OptimizelyDecideOption[] { OptimizelyDecideOption.INCLUDE_REASONS });
             decisionReasons.AddError(DecisionMessage.Reason(DecisionMessage.FLAG_KEY_INVALID, "invalid_key"));
             
             Assert.AreEqual(decisionReasons.ToReport()[0], "No flag was found for key \"invalid_key\".");

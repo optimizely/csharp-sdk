@@ -29,6 +29,7 @@ namespace OptimizelySDK
     {
         private ILogger Logger;
         private IErrorHandler ErrorHandler;
+        private static object mutex = new object();
         // userID for Optimizely user context
         public string UserId { get; }
         // user attributes for Optimizely user context.
@@ -58,7 +59,10 @@ namespace OptimizelySDK
             }
             else
             {
-                Attributes[key] = value;
+                lock (mutex)
+                {
+                    Attributes[key] = value;
+                }
             }
         }
 
@@ -72,7 +76,7 @@ namespace OptimizelySDK
         /// <returns>A decision result.</returns>
         public OptimizelyDecision Decide(string key)
         {
-            return Decide(key, new List<OptimizelyDecideOption>());
+            return Decide(key, new OptimizelyDecideOption[] { });
         }
 
         /// <summary>
@@ -85,7 +89,7 @@ namespace OptimizelySDK
         /// <param name="options">A list of options for decision-making.</param>
         /// <returns>A decision result.</returns>
         public OptimizelyDecision Decide(string key,
-            List<OptimizelyDecideOption> options)
+            OptimizelyDecideOption[] options)
         {
             return Optimizely.Decide(this, key, options);
         }
@@ -95,7 +99,7 @@ namespace OptimizelySDK
         /// </summary>
         /// <param name="keys">list of flag keys for which a decision will be made.</param>
         /// <returns>A dictionary of all decision results, mapped by flag keys.</returns>
-        public Dictionary<string, OptimizelyDecision> DecideForKeys(List<string> keys, List<OptimizelyDecideOption> options)
+        public Dictionary<string, OptimizelyDecision> DecideForKeys(List<string> keys, OptimizelyDecideOption[] options)
         {
             return Optimizely.DecideForKeys(this, keys, options);
         }
@@ -107,7 +111,7 @@ namespace OptimizelySDK
         /// <returns>A dictionary of all decision results, mapped by flag keys.</returns>
         public Dictionary<string, OptimizelyDecision> DecideForKeys(List<string> keys)
         {
-            return DecideForKeys(keys, new List<OptimizelyDecideOption>());
+            return DecideForKeys(keys, new OptimizelyDecideOption[] { });
         }
 
         /// <summary>
@@ -116,7 +120,7 @@ namespace OptimizelySDK
         /// <returns>A dictionary of all decision results, mapped by flag keys.</returns>
         public Dictionary<string, OptimizelyDecision> DecideAll()
         {
-            return DecideAll(new List<OptimizelyDecideOption>());
+            return DecideAll(new OptimizelyDecideOption[] { });
         }
 
         /// <summary>
@@ -124,7 +128,7 @@ namespace OptimizelySDK
         /// </summary>
         /// <param name="options">A list of options for decision-making.</param>
         /// <returns>All decision results mapped by flag keys.</returns>
-        public Dictionary<string, OptimizelyDecision> DecideAll(List<OptimizelyDecideOption> options)
+        public Dictionary<string, OptimizelyDecision> DecideAll(OptimizelyDecideOption[] options)
         {
             return Optimizely.DecideAll(this, options);
         }
