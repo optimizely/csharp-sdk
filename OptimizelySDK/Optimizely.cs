@@ -846,7 +846,7 @@ namespace OptimizelySDK
                 reasonsToReport.ToArray());
         }
 
-        public Dictionary<string, OptimizelyDecision> DecideAll(OptimizelyUserContext user,
+        internal Dictionary<string, OptimizelyDecision> DecideAll(OptimizelyUserContext user,
                                               OptimizelyDecideOption[] options)
         {
             var decisionMap = new Dictionary<string, OptimizelyDecision>();
@@ -868,7 +868,7 @@ namespace OptimizelySDK
         }
 
 
-        public Dictionary<string, OptimizelyDecision> DecideForKeys(OptimizelyUserContext user,
+        internal Dictionary<string, OptimizelyDecision> DecideForKeys(OptimizelyUserContext user,
                                                       List<string> keys,
                                                       OptimizelyDecideOption[] options)
         {
