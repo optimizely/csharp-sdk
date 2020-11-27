@@ -501,11 +501,11 @@ namespace OptimizelySDK.Tests
             OptimizelyDecision expDecision1 = new OptimizelyDecision(
             "control",
             true,
-            new OptimizelyJSON(dict: expectedOptlyJson, ErrorHandlerMock.Object, LoggerMock.Object),
+            new OptimizelyJSON(expectedOptlyJson, ErrorHandlerMock.Object, LoggerMock.Object),
             "test_experiment_with_feature_rollout",
             flagKey1,
             user,
-            new string[0]);
+            new string[] { });
             Assert.IsTrue(TestData.CompareObjects(decisions[flagKey1], expDecision1));
         }
 
