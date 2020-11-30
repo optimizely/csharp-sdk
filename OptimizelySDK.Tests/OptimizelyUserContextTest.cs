@@ -688,6 +688,25 @@ namespace OptimizelySDK.Tests
             variationUserProfile = user.Decide(flagKey, decideOptions);
             Assert.AreEqual(variationKey, variationUserProfile.VariationKey);
         }
+
+        [Test]
+        public void TestDecideOptionsByPassUPSNeverCallsSaveVariation()
+        {
+            var userProfileServiceMock = new Mock<UserProfileService>();
+            var flagKey = "string_single_variable_feature";
+
+            var userId = "testUser3";
+            var variationKey = "control";
+
+            var optimizely = new Optimizely(TestData.Datafile, EventDispatcherMock.Object, LoggerMock.Object, ErrorHandlerMock.Object, userProfileServiceMock.Object);
+            var user = optimizely.CreateUserContext(userId);
+
+            var decideOptions = new OptimizelyDecideOption[] { OptimizelyDecideOption.IGNORE_USER_PROFILE_SERVICE };
+            var variationUserProfile = user.Decide(flagKey, decideOptions);
+            userProfileServiceMock.Verify(l => l.Save(It.IsAny<Dictionary<string, object>>()), Times.Never);
+
+            Assert.AreEqual(variationKey, variationUserProfile.VariationKey);
+        }
         #endregion
 
         #region TrackEvent
