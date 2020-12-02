@@ -21,25 +21,14 @@ namespace OptimizelySDK.OptimizelyDecisions
     /// <summary>
     /// NewErrorDecision returns a decision with errors only
     /// </summary>
-    public class ErrorsDecisionReasons : IDecisionReasons
+    public class ErrorsDecisionReasons : DefaultDecisionReasons
     {
-        private readonly List<string> errors = new List<string>();
 
-        public void AddError(string format, params object[] args)
-        {
-            string message = string.Format(format, args);
-            errors.Add(message);
-        }
-
-        public string AddInfo(string format, params object[] args)
+        public override string AddInfo(string format, params object[] args)
         {
             // skip tracking and pass-through reasons other than critical errors.
             return string.Format(format, args);
         }
 
-        public List<string> ToReport()
-        {
-            return errors;
-        }
     }
 }

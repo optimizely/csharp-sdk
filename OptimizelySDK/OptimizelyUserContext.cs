@@ -30,7 +30,7 @@ namespace OptimizelySDK
     {
         private ILogger Logger;
         private IErrorHandler ErrorHandler;
-        private static object mutex = new object();
+        private object mutex = new object();
         // userID for Optimizely user context
         public string UserId { get; }
         // user attributes for Optimizely user context.
