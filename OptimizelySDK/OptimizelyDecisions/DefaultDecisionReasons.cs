@@ -20,7 +20,7 @@ namespace OptimizelySDK.OptimizelyDecisions
 {
     public class DefaultDecisionReasons : IDecisionReasons
     {
-        private List<string> Errors = new List<string>();
+        protected List<string> Errors = new List<string>();
         private List<string> Infos = new List<string>();
 
         public static IDecisionReasons NewInstance(List<OptimizelyDecideOption> options)
@@ -46,14 +46,14 @@ namespace OptimizelySDK.OptimizelyDecisions
             Errors.Add(message);
         }
 
-        public string AddInfo(string format, params object[] args)
+        public virtual string AddInfo(string format, params object[] args)
         {
             string message = string.Format(format, args);
             Infos.Add(message);
             return message;
         }
 
-        public List<string> ToReport()
+        public virtual List<string> ToReport()
         {
             List<string> reasons = new List<string>(Errors);
             reasons.AddRange(Infos);
