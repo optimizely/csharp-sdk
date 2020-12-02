@@ -859,11 +859,8 @@ namespace OptimizelySDK
             }
 
             var allFlags = projectConfig.FeatureFlags;
-            var allFlagKeys = new List<string>();
-            for (int i = 0; i < allFlags.Length; i++)
-            { 
-                allFlagKeys.Add(allFlags[i].Key);
-            }
+            var allFlagKeys = allFlags.Select(v => v.Key).ToList<string>();
+            
             return DecideForKeys(user, allFlagKeys, options);
         }
 
