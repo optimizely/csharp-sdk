@@ -120,7 +120,7 @@ namespace OptimizelySDK.Bucketing
             var ignoreUPS = Array.Exists(options, option => option == OptimizelyDecideOption.IGNORE_USER_PROFILE_SERVICE);
 
             UserProfile userProfile = null;
-            if (UserProfileService != null && !ignoreUPS)
+            if (!ignoreUPS && UserProfileService != null)
             {
                 try
                 {

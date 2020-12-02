@@ -15,7 +15,6 @@
  *    limitations under the License.
  */
 
-using Castle.Core.Internal;
 using Moq;
 using NUnit.Framework;
 using OptimizelySDK.Entity;
@@ -24,7 +23,6 @@ using OptimizelySDK.Event.Dispatcher;
 using OptimizelySDK.Logger;
 using OptimizelySDK.OptimizelyDecisions;
 using System;
-using System.Collections.Generic;
 
 namespace OptimizelySDK.Tests
 {
