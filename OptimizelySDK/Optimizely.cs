@@ -859,14 +859,14 @@ namespace OptimizelySDK
             }
 
             var allFlags = projectConfig.FeatureFlags;
-            var allFlagKeys = allFlags.Select(v => v.Key).ToList<string>();
+            var allFlagKeys = allFlags.Select(v => v.Key).ToArray<string>();
             
             return DecideForKeys(user, allFlagKeys, options);
         }
 
 
         internal Dictionary<string, OptimizelyDecision> DecideForKeys(OptimizelyUserContext user,
-                                                      List<string> keys,
+                                                      string[] keys,
                                                       OptimizelyDecideOption[] options)
         {
             var decisionDictionary = new Dictionary<string, OptimizelyDecision>();
@@ -878,7 +878,7 @@ namespace OptimizelySDK
                 return decisionDictionary;
             }
 
-            if (keys.Count == 0)
+            if (keys.Length == 0)
             { 
                 return decisionDictionary;
             }

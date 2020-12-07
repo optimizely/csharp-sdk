@@ -99,7 +99,7 @@ namespace OptimizelySDK
         /// </summary>
         /// <param name="keys">list of flag keys for which a decision will be made.</param>
         /// <returns>A dictionary of all decision results, mapped by flag keys.</returns>
-        public Dictionary<string, OptimizelyDecision> DecideForKeys(List<string> keys, OptimizelyDecideOption[] options)
+        public Dictionary<string, OptimizelyDecision> DecideForKeys(string[] keys, OptimizelyDecideOption[] options)
         {
             return Optimizely.DecideForKeys(this, keys, options);
         }
@@ -109,7 +109,7 @@ namespace OptimizelySDK
         /// </summary>
         /// <param name="keys">list of flag keys for which a decision will be made.</param>
         /// <returns>A dictionary of all decision results, mapped by flag keys.</returns>
-        public Dictionary<string, OptimizelyDecision> DecideForKeys(List<string> keys)
+        public Dictionary<string, OptimizelyDecision> DecideForKeys(string[] keys)
         {
             return DecideForKeys(keys, new OptimizelyDecideOption[] { });
         }

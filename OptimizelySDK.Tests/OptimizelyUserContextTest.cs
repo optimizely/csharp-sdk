@@ -227,7 +227,7 @@ namespace OptimizelySDK.Tests
         public void DecideForKeysWithOneFlag()
         {
             var flagKey = "multi_variate_feature";
-            var flagKeys = new List<string>() { flagKey };
+            var flagKeys = new string[] { flagKey };
 
             var variablesExpected = Optimizely.GetAllFeatureVariables(flagKey, UserID);
 
@@ -255,7 +255,7 @@ namespace OptimizelySDK.Tests
         {
             var flagKey1 = "multi_variate_feature";
             var flagKey2 = "string_single_variable_feature";
-            var flagKeys = new List<string>() { flagKey1, flagKey2 };
+            var flagKeys = new string[] { flagKey1, flagKey2 };
 
             var variablesExpected1 = Optimizely.GetAllFeatureVariables(flagKey1, UserID);
             var variablesExpected2 = Optimizely.GetAllFeatureVariables(flagKey2, UserID);
