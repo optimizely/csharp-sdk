@@ -262,11 +262,22 @@ namespace OptimizelySDK.Tests
 
             var user = Optimizely.CreateUserContext(UserID);
             user.SetAttribute("browser_type", "chrome");
+            // Mocking objects.
+            NotificationCallbackMock.Setup(nc => nc.TestDecisionCallback(It.IsAny<string>(), It.IsAny<string>(),
+                It.IsAny<UserAttributes>(), It.IsAny<Dictionary<string, object>>()));
+
+            Optimizely.NotificationCenter.AddNotification(NotificationCenter.NotificationType.Decision, NotificationCallbackMock.Object.TestDecisionCallback);
 
             var decisions = user.DecideForKeys(flagKeys);
 
-            Assert.True(decisions.Count == 2);
+            var userAttributes = new UserAttributes
+            {
+               { "browser_type", "chrome" }
+            };
 
+            Assert.True(decisions.Count == 2);
+            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionNotificationTypes.FLAG, UserID, userAttributes, It.IsAny<Dictionary<string, object>>()),
+               Times.Exactly(2));
             OptimizelyDecision expDecision1 = new OptimizelyDecision(
             "Gred",
             false,
@@ -315,10 +326,23 @@ namespace OptimizelySDK.Tests
 
             var user = Optimizely.CreateUserContext(UserID);
             user.SetAttribute("browser_type", "chrome");
+            // Mocking objects.
+            NotificationCallbackMock.Setup(nc => nc.TestDecisionCallback(It.IsAny<string>(), It.IsAny<string>(),
+                It.IsAny<UserAttributes>(), It.IsAny<Dictionary<string, object>>()));
+
+            Optimizely.NotificationCenter.AddNotification(NotificationCenter.NotificationType.Decision, NotificationCallbackMock.Object.TestDecisionCallback);
 
             var decisions = user.DecideAll();
 
+            var userAttributes = new UserAttributes
+            {
+               { "browser_type", "chrome" }
+            };
+
             Assert.True(decisions.Count == 10);
+            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionNotificationTypes.FLAG, UserID, userAttributes, It.IsAny<Dictionary<string, object>>()),
+               Times.Exactly(10));
+
             OptimizelyDecision expDecision1 = new OptimizelyDecision(
             null,
             false,
