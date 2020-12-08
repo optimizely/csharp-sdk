@@ -280,6 +280,27 @@
 	<Compile Include="..\OptimizelySDK\OptlyConfig\IOptimizelyConfigManager.cs">
       <Link>OptlyConfig\IOptimizelyConfigManager.cs</Link>
     </Compile>
+	<Compile Include="..\OptimizelySDK\OptimizelyDecisions\DecisionMessage.cs">
+      <Link>OptimizelyDecisions\DecisionMessage.cs</Link>
+    </Compile>
+	<Compile Include="..\OptimizelySDK\OptimizelyDecisions\IDecisionReasons.cs">
+      <Link>OptimizelyDecisions\IDecisionReasons.cs</Link>
+    </Compile>
+	<Compile Include="..\OptimizelySDK\OptimizelyDecisions\DefaultDecisionReasons.cs">
+      <Link>OptimizelyDecisions\DefaultDecisionReasons.cs</Link>
+    </Compile>
+	<Compile Include="..\OptimizelySDK\OptimizelyDecisions\ErrorsDecisionReasons.cs">
+      <Link>OptimizelyDecisions\ErrorsDecisionReasons.cs</Link>
+    </Compile>
+	<Compile Include="..\OptimizelySDK\OptimizelyDecisions\OptimizelyDecideOption.cs">
+      <Link>OptimizelyDecisions\OptimizelyDecideOption.cs</Link>
+    </Compile>
+	<Compile Include="..\OptimizelySDK\OptimizelyDecisions\OptimizelyDecision.cs">
+      <Link>OptimizelyDecisions\OptimizelyDecision.cs</Link>
+    </Compile>
+	<Compile Include="..\OptimizelySDK\OptimizelyUserContext.cs">
+      <Link>OptimizelyUserContext.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\OptimizelySDK\Event\.DS_Store">
