@@ -136,6 +136,8 @@ namespace OptimizelySDK.Tests
             newAttributes = user.UserAttributes;
             Assert.AreEqual(newAttributes["k1"], null);
         }
+
+        [Test]
         public void SetAttributeToOverrideAttribute()
         {
             OptimizelyUserContext user = new OptimizelyUserContext(Optimizely, UserID, null, ErrorHandlerMock.Object, LoggerMock.Object);
