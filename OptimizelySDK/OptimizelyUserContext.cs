@@ -46,19 +46,36 @@ namespace OptimizelySDK
             UserId = userId;
         }
 
+        /// <summary>
+        /// Returns Optimizely instance associated with the UserContext.
+        /// </summary>
+        /// <returns> Optimizely instance.</returns>
         public Optimizely GetOptimizely()
         {
             return Optimizely;
         }
 
+        /// <summary>
+        /// Returns UserId associated with the UserContext
+        /// </summary>
+        /// <returns>UserId of this instance.</returns>
         public string GetUserId()
         {
             return UserId;
         }
 
+        /// <summary>
+        /// Returns copy of UserAttributes associated with UserContext.
+        /// </summary>
+        /// <returns>copy of UserAttributes.</returns>
         public UserAttributes GetAttributes()
         {
-            return new UserAttributes(Attributes);
+            UserAttributes copiedAttributes = null;
+            lock(mutex) {
+                copiedAttributes = new UserAttributes(Attributes);
+            }
+
+            return copiedAttributes;
         }
 
         /// <summary>
