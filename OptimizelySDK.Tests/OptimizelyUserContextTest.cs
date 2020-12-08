@@ -65,9 +65,9 @@ namespace OptimizelySDK.Tests
             var attributes = new UserAttributes() { { "house", "GRYFFINDOR" } };
             OptimizelyUserContext user = new OptimizelyUserContext(Optimizely, UserID, attributes, ErrorHandlerMock.Object, LoggerMock.Object);
 
-            Assert.AreEqual(user.Optimizely, Optimizely);
-            Assert.AreEqual(user.UserId, UserID);
-            Assert.AreEqual(user.Attributes, attributes);
+            Assert.AreEqual(user.GetOptimizely(), Optimizely);
+            Assert.AreEqual(user.GetUserId(), UserID);
+            Assert.AreEqual(user.GetAttributes(), attributes);
         }
 
         [Test]
@@ -75,9 +75,9 @@ namespace OptimizelySDK.Tests
         {
             OptimizelyUserContext user = new OptimizelyUserContext(Optimizely, UserID, null, ErrorHandlerMock.Object, LoggerMock.Object);
 
-            Assert.AreEqual(user.Optimizely, Optimizely);
-            Assert.AreEqual(user.UserId, UserID);
-            Assert.True(user.Attributes.Count == 0);
+            Assert.AreEqual(user.GetOptimizely(), Optimizely);
+            Assert.AreEqual(user.GetUserId(), UserID);
+            Assert.True(user.GetAttributes().Count == 0);
         }
 
         [Test]
@@ -91,9 +91,9 @@ namespace OptimizelySDK.Tests
             user.SetAttribute("k3", 100);
             user.SetAttribute("k4", 3.5);
 
-            Assert.AreEqual(user.Optimizely, Optimizely);
-            Assert.AreEqual(user.UserId, UserID);
-            var newAttributes = user.Attributes;
+            Assert.AreEqual(user.GetOptimizely(), Optimizely);
+            Assert.AreEqual(user.GetUserId(), UserID);
+            var newAttributes = user.GetAttributes();
             Assert.AreEqual(newAttributes["house"], "GRYFFINDOR");
             Assert.AreEqual(newAttributes["k1"], "v1");
             Assert.AreEqual(newAttributes["k2"], true);
@@ -109,9 +109,9 @@ namespace OptimizelySDK.Tests
             user.SetAttribute("k1", "v1");
             user.SetAttribute("k2", true);
 
-            Assert.AreEqual(user.Optimizely, Optimizely);
-            Assert.AreEqual(user.UserId, UserID);
-            var newAttributes = user.Attributes;
+            Assert.AreEqual(user.GetOptimizely(), Optimizely);
+            Assert.AreEqual(user.GetUserId(), UserID);
+            var newAttributes = user.GetAttributes();
             Assert.AreEqual(newAttributes["k1"], "v1");
             Assert.AreEqual(newAttributes["k2"], true);
         }
@@ -125,7 +125,7 @@ namespace OptimizelySDK.Tests
             user.SetAttribute("k1", "v1");
             user.SetAttribute("house", "v2");
 
-            var newAttributes = user.Attributes;
+            var newAttributes = user.GetAttributes();
             Assert.AreEqual(newAttributes["k1"], "v1");
             Assert.AreEqual(newAttributes["house"], "v2");
         }
@@ -136,15 +136,15 @@ namespace OptimizelySDK.Tests
             var attributes = new UserAttributes() { { "k1", null } };
             OptimizelyUserContext user = new OptimizelyUserContext(Optimizely, UserID, attributes, ErrorHandlerMock.Object, LoggerMock.Object);
 
-            var newAttributes = user.Attributes;
+            var newAttributes = user.GetAttributes();
             Assert.AreEqual(newAttributes["k1"], null);
 
             user.SetAttribute("k1", true);
-            newAttributes = user.Attributes;
+            newAttributes = user.GetAttributes();
             Assert.AreEqual(newAttributes["k1"], true);
 
             user.SetAttribute("k1", null);
-            newAttributes = user.Attributes;
+            newAttributes = user.GetAttributes();
             Assert.AreEqual(newAttributes["k1"], null);
         }
 
@@ -154,14 +154,14 @@ namespace OptimizelySDK.Tests
             OptimizelyUserContext user = new OptimizelyUserContext(Optimizely, UserID, null, ErrorHandlerMock.Object, LoggerMock.Object);
 
 
-            Assert.AreEqual(user.Optimizely, Optimizely);
-            Assert.AreEqual(user.UserId, UserID);
+            Assert.AreEqual(user.GetOptimizely(), Optimizely);
+            Assert.AreEqual(user.GetUserId(), UserID);
 
             user.SetAttribute("k1", "v1");
-            Assert.AreEqual(user.Attributes["k1"], "v1");
+            Assert.AreEqual(user.GetAttributes()["k1"], "v1");
 
             user.SetAttribute("k1", true);
-            Assert.AreEqual(user.Attributes["k1"], true);
+            Assert.AreEqual(user.GetAttributes()["k1"], true);
         }
 
         #region decide

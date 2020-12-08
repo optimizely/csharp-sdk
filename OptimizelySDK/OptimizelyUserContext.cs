@@ -31,11 +31,11 @@ namespace OptimizelySDK
         private IErrorHandler ErrorHandler;
         private object mutex = new object();
         // userID for Optimizely user context
-        public string UserId { get; }
+        private string UserId;
         // user attributes for Optimizely user context.
-        public UserAttributes Attributes { get; }
+        private UserAttributes Attributes;
         // Optimizely object to be used.
-        public Optimizely Optimizely { get; }
+        private Optimizely Optimizely;
 
         public OptimizelyUserContext(Optimizely optimizely, string userId, UserAttributes userAttributes, IErrorHandler errorHandler, ILogger logger)
         {
@@ -44,6 +44,21 @@ namespace OptimizelySDK
             Optimizely = optimizely;
             Attributes = userAttributes ?? new UserAttributes();
             UserId = userId;
+        }
+
+        public Optimizely GetOptimizely()
+        {
+            return Optimizely;
+        }
+
+        public string GetUserId()
+        {
+            return UserId;
+        }
+
+        public UserAttributes GetAttributes()
+        {
+            return new UserAttributes(Attributes);
         }
 
         /// <summary>
