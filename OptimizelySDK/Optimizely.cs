@@ -123,10 +123,11 @@ namespace OptimizelySDK
                           IErrorHandler errorHandler = null,
                           UserProfileService userProfileService = null,
                           bool skipJsonValidation = false,
-                          EventProcessor eventProcessor = null)
+                          EventProcessor eventProcessor = null,
+                          OptimizelyDecideOption[] defaultDecideOptions = null)
         {
             try {
-                InitializeComponents(eventDispatcher, logger, errorHandler, userProfileService, null, eventProcessor);
+                InitializeComponents(eventDispatcher, logger, errorHandler, userProfileService, null, eventProcessor, defaultDecideOptions);
 
                 if (ValidateInputs(datafile, skipJsonValidation)) {
                     var config = DatafileProjectConfig.Create(datafile, Logger, ErrorHandler);
@@ -187,7 +188,7 @@ namespace OptimizelySDK
             NotificationCenter = notificationCenter ?? new NotificationCenter(Logger);
             DecisionService = new DecisionService(Bucketer, ErrorHandler, userProfileService, Logger);
             EventProcessor = eventProcessor ?? new ForwardingEventProcessor(EventDispatcher, NotificationCenter, Logger);
-            DefaultDecideOptions = defaultDecideOptions ?? new OptimizelyDecideOption[0];
+            DefaultDecideOptions = defaultDecideOptions ?? new OptimizelyDecideOption[] { };
         }
 
         /// <summary>
@@ -732,10 +733,18 @@ namespace OptimizelySDK
             {
                 return OptimizelyDecision.NewErrorDecision(key, user, DecisionMessage.SDK_NOT_READY, ErrorHandler, Logger);
             }
-            var userId = user.UserId;
+            if (key == null)
+            {
+                return OptimizelyDecision.NewErrorDecision(key,
+                    user,
+                    DecisionMessage.Reason(DecisionMessage.FLAG_KEY_INVALID, key),
+                    ErrorHandler, Logger);
+            }
             
+            var userId = user?.UserId;
+
             var flag = config.GetFeatureFlagFromKey(key);
-            if (flag.Key == null)
+            if (string.IsNullOrEmpty(flag.Key))
             {
                 return OptimizelyDecision.NewErrorDecision(key,
                     user,
@@ -743,7 +752,8 @@ namespace OptimizelySDK
                     ErrorHandler, Logger);
             }
 
-            var userAttributes = user.UserAttributes;
+            var userAttributes = user.Attributes;
+
             var decisionEventDispatched = false;
             var allOptions = GetAllOptions(options);
             var decisionReasons = DefaultDecisionReasons.NewInstance(allOptions);
@@ -836,13 +846,63 @@ namespace OptimizelySDK
                 reasonsToReport.ToArray());
         }
 
+        internal Dictionary<string, OptimizelyDecision> DecideAll(OptimizelyUserContext user,
+                                              OptimizelyDecideOption[] options)
+        {
+            var decisionMap = new Dictionary<string, OptimizelyDecision>();
+
+            var projectConfig = ProjectConfigManager?.GetConfig();
+            if (projectConfig == null)
+            {
+                Logger.Log(LogLevel.ERROR, "Optimizely instance is not valid, failing isFeatureEnabled call.");
+                return decisionMap;
+            }
+
+            var allFlags = projectConfig.FeatureFlags;
+            var allFlagKeys = allFlags.Select(v => v.Key).ToArray<string>();
+            
+            return DecideForKeys(user, allFlagKeys, options);
+        }
+
+
+        internal Dictionary<string, OptimizelyDecision> DecideForKeys(OptimizelyUserContext user,
+                                                      string[] keys,
+                                                      OptimizelyDecideOption[] options)
+        {
+            var decisionDictionary = new Dictionary<string, OptimizelyDecision>();
+
+            var projectConfig = ProjectConfigManager?.GetConfig();
+            if (projectConfig == null)
+            {
+                Logger.Log(LogLevel.ERROR, "Optimizely instance is not valid, failing isFeatureEnabled call.");
+                return decisionDictionary;
+            }
+
+            if (keys.Length == 0)
+            { 
+                return decisionDictionary;
+            }
+
+            var allOptions = GetAllOptions(options);
+
+            foreach (string key in keys)
+            {
+                var decision = Decide(user, key, options);
+                if (!allOptions.Contains(OptimizelyDecideOption.ENABLED_FLAGS_ONLY) || decision.Enabled)
+                {
+                    decisionDictionary.Add(key, decision);
+                }
+            }
+
+            return decisionDictionary;
+        }
+
         private OptimizelyDecideOption[] GetAllOptions(OptimizelyDecideOption[] options)
         {
-            OptimizelyDecideOption[] copiedOptions = new OptimizelyDecideOption[DefaultDecideOptions.Length];
-            Array.Copy(DefaultDecideOptions, copiedOptions, DefaultDecideOptions.Length);
+            OptimizelyDecideOption[] copiedOptions = DefaultDecideOptions;
             if (options != null)
             {
-                copiedOptions.Concat(options);
+                copiedOptions = options.Union(DefaultDecideOptions).ToArray();
             }
             return copiedOptions;
         }

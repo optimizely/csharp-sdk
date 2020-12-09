@@ -19,7 +19,6 @@ using System.Collections.Generic;
 using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Entity;
 using OptimizelySDK.OptimizelyDecisions;
-using System;
 
 namespace OptimizelySDK
 {
@@ -34,7 +33,7 @@ namespace OptimizelySDK
         // userID for Optimizely user context
         public string UserId { get; }
         // user attributes for Optimizely user context.
-        public UserAttributes UserAttributes { get; }
+        public UserAttributes Attributes { get; }
         // Optimizely object to be used.
         public Optimizely Optimizely { get; }
 
@@ -43,7 +42,7 @@ namespace OptimizelySDK
             ErrorHandler = errorHandler;
             Logger = logger;
             Optimizely = optimizely;
-            UserAttributes = userAttributes ?? new UserAttributes();
+            Attributes = userAttributes ?? new UserAttributes();
             UserId = userId;
         }
 
@@ -60,9 +59,9 @@ namespace OptimizelySDK
             }
             else
             {
-                lock(mutex) 
-                { 
-                    UserAttributes[key] = value;
+                lock (mutex)
+                {
+                    Attributes[key] = value;
                 }
             }
         }
@@ -94,15 +93,25 @@ namespace OptimizelySDK
         {
             return Optimizely.Decide(this, key, options);
         }
- 
+
         /// <summary>
         /// Returns a key-map of decision results for multiple flag keys and a user context.
         /// </summary>
         /// <param name="keys">list of flag keys for which a decision will be made.</param>
         /// <returns>A dictionary of all decision results, mapped by flag keys.</returns>
-        public Dictionary<string, OptimizelyDecision> DecideForKeys(List<string> keys)
+        public Dictionary<string, OptimizelyDecision> DecideForKeys(string[] keys, OptimizelyDecideOption[] options)
         {
-            throw new NotImplementedException();
+            return Optimizely.DecideForKeys(this, keys, options);
+        }
+
+        /// <summary>
+        /// Returns a key-map of decision results for multiple flag keys and a user context.
+        /// </summary>
+        /// <param name="keys">list of flag keys for which a decision will be made.</param>
+        /// <returns>A dictionary of all decision results, mapped by flag keys.</returns>
+        public Dictionary<string, OptimizelyDecision> DecideForKeys(string[] keys)
+        {
+            return DecideForKeys(keys, new OptimizelyDecideOption[] { });
         }
 
         /// <summary>
@@ -114,7 +123,6 @@ namespace OptimizelySDK
             return DecideAll(new OptimizelyDecideOption[] { });
         }
 
-
         /// <summary>
         /// Returns a key-map of decision results ({@link OptimizelyDecision}) for all active flag keys.
         /// </summary>
@@ -122,7 +130,7 @@ namespace OptimizelySDK
         /// <returns>All decision results mapped by flag keys.</returns>
         public Dictionary<string, OptimizelyDecision> DecideAll(OptimizelyDecideOption[] options)
         {
-            throw new NotImplementedException();
+            return Optimizely.DecideAll(this, options);
         }
 
         /// <summary>
@@ -142,7 +150,7 @@ namespace OptimizelySDK
         public void TrackEvent(string eventName, 
             EventTags eventTags)
         {
-            Optimizely.Track(eventName, UserId, UserAttributes, eventTags);
+            Optimizely.Track(eventName, UserId, Attributes, eventTags);
         }
     }
 }
