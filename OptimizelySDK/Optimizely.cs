@@ -733,7 +733,6 @@ namespace OptimizelySDK
             {
                 return OptimizelyDecision.NewErrorDecision(key, user, DecisionMessage.SDK_NOT_READY, ErrorHandler, Logger);
             }
-
             if (key == null)
             {
                 return OptimizelyDecision.NewErrorDecision(key,
@@ -816,7 +815,7 @@ namespace OptimizelySDK
                 SendImpressionEvent(flagDecision.Experiment, variation, userId, userAttributes, config, key, decisionSource, featureEnabled);
                 decisionEventDispatched = true;
             }
-            List<string> reasonsToReport = decisionReasons.ToReport();
+            var reasonsToReport = decisionReasons.ToReport();
             var variationKey = flagDecision.Variation?.Key;
 
             // TODO: add ruleKey values when available later. use a copy of experimentKey until then.
@@ -896,13 +895,13 @@ namespace OptimizelySDK
 
             return decisionDictionary;
         }
+
         private OptimizelyDecideOption[] GetAllOptions(OptimizelyDecideOption[] options)
         {
-            OptimizelyDecideOption[] copiedOptions = new OptimizelyDecideOption[DefaultDecideOptions.Length];
-            Array.Copy(DefaultDecideOptions, copiedOptions, DefaultDecideOptions.Length);
+            OptimizelyDecideOption[] copiedOptions = DefaultDecideOptions;
             if (options != null)
             {
-                copiedOptions = copiedOptions.Concat(options).Concat(DefaultDecideOptions).ToArray();
+                copiedOptions = options.Union(DefaultDecideOptions).ToArray();
             }
             return copiedOptions;
         }
