@@ -21,6 +21,7 @@ using OptimizelySDK.Entity;
 using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Event.Dispatcher;
 using OptimizelySDK.Logger;
+using OptimizelySDK.OptimizelyDecisions;
 using System;
 
 namespace OptimizelySDK.Tests
@@ -105,6 +106,38 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
+        public void SetAttributeOverride()
+        {
+            var attributes = new UserAttributes() { { "house", "GRYFFINDOR" } };
+            OptimizelyUserContext user = new OptimizelyUserContext(Optimizely, UserID, attributes, ErrorHandlerMock.Object, LoggerMock.Object);
+
+            user.SetAttribute("k1", "v1");
+            user.SetAttribute("house", "v2");
+
+            var newAttributes = user.UserAttributes;
+            Assert.AreEqual(newAttributes["k1"], "v1");
+            Assert.AreEqual(newAttributes["house"], "v2");
+        }
+
+        [Test]
+        public void SetAttributeNullValue()
+        {
+            var attributes = new UserAttributes() { { "k1", null } };
+            OptimizelyUserContext user = new OptimizelyUserContext(Optimizely, UserID, attributes, ErrorHandlerMock.Object, LoggerMock.Object);
+
+            var newAttributes = user.UserAttributes;
+            Assert.AreEqual(newAttributes["k1"], null);
+
+            user.SetAttribute("k1", true);
+            newAttributes = user.UserAttributes;
+            Assert.AreEqual(newAttributes["k1"], true);
+
+            user.SetAttribute("k1", null);
+            newAttributes = user.UserAttributes;
+            Assert.AreEqual(newAttributes["k1"], null);
+        }
+
+        [Test]
         public void SetAttributeToOverrideAttribute()
         {
             OptimizelyUserContext user = new OptimizelyUserContext(Optimizely, UserID, null, ErrorHandlerMock.Object, LoggerMock.Object);
@@ -120,5 +153,63 @@ namespace OptimizelySDK.Tests
             Assert.AreEqual(user.UserAttributes["k1"], true);
         }
 
+        #region decide
+
+        [Test]
+        public void TestDecide()
+        {
+            var flagKey = "multi_variate_feature";
+            var variablesExpected = Optimizely.GetAllFeatureVariables(flagKey, UserID);
+
+            var user = Optimizely.CreateUserContext(UserID);
+            user.SetAttribute("browser_type", "chrome");
+            var decision = user.Decide(flagKey);
+
+            Assert.AreEqual(decision.VariationKey, "Gred");
+            Assert.False(decision.Enabled);
+            Assert.AreEqual(decision.Variables.ToDictionary(), variablesExpected.ToDictionary());
+            Assert.AreEqual(decision.RuleKey, "test_experiment_multivariate");
+            Assert.AreEqual(decision.FlagKey, flagKey);
+            Assert.AreEqual(decision.UserContext, user);
+            Assert.AreEqual(decision.Reasons.Length, 0);
+        }
+
+        [Test]
+        public void DecideInvalidFlagKey()
+        {
+            var flagKey = "invalid_feature";
+
+            var user = Optimizely.CreateUserContext(UserID);
+            user.SetAttribute("browser_type", "chrome");
+
+            var decisionExpected = OptimizelyDecision.NewErrorDecision(
+                flagKey,
+                user,
+                DecisionMessage.Reason(DecisionMessage.FLAG_KEY_INVALID, flagKey),
+                ErrorHandlerMock.Object,
+                LoggerMock.Object);
+            var decision = user.Decide(flagKey);
+
+            Assert.IsTrue(TestData.CompareObjects(decision, decisionExpected));
+        }
+
+        [Test]
+        public void DecideWhenConfigIsNull()
+        {
+            Optimizely optimizely = new Optimizely(TestData.UnsupportedVersionDatafile, EventDispatcherMock.Object, LoggerMock.Object, ErrorHandlerMock.Object);
+
+            var flagKey = "multi_variate_feature";
+            var decisionExpected = OptimizelyDecision.NewErrorDecision(
+                flagKey,
+                new OptimizelyUserContext(optimizely, UserID, new UserAttributes(), ErrorHandlerMock.Object, LoggerMock.Object),
+                DecisionMessage.SDK_NOT_READY,
+                ErrorHandlerMock.Object,
+                LoggerMock.Object);
+            var user = optimizely.CreateUserContext(UserID);
+            var decision = user.Decide(flagKey);
+
+            Assert.IsTrue(TestData.CompareObjects(decision, decisionExpected));
+        }
+        #endregion
     }
 }

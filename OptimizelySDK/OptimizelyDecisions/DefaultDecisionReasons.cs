@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+using System;
 using System.Collections.Generic;
 
 namespace OptimizelySDK.OptimizelyDecisions
@@ -23,9 +24,9 @@ namespace OptimizelySDK.OptimizelyDecisions
         protected List<string> Errors = new List<string>();
         private List<string> Infos = new List<string>();
 
-        public static IDecisionReasons NewInstance(List<OptimizelyDecideOption> options)
+        public static IDecisionReasons NewInstance(OptimizelyDecideOption[] options)
         {
-            if (options != null && options.Contains(OptimizelyDecideOption.INCLUDE_REASONS))
+            if (options != null && Array.Exists(options, option => option == OptimizelyDecideOption.INCLUDE_REASONS))
             {
                 return new DefaultDecisionReasons();
             }
