@@ -898,11 +898,10 @@ namespace OptimizelySDK
         }
         private OptimizelyDecideOption[] GetAllOptions(OptimizelyDecideOption[] options)
         {
-            OptimizelyDecideOption[] copiedOptions = new OptimizelyDecideOption[DefaultDecideOptions.Length];
-            Array.Copy(DefaultDecideOptions, copiedOptions, DefaultDecideOptions.Length);
+            OptimizelyDecideOption[] copiedOptions = DefaultDecideOptions;
             if (options != null)
             {
-                copiedOptions = copiedOptions.Concat(options).Concat(DefaultDecideOptions).ToArray();
+                copiedOptions = options.Union(DefaultDecideOptions).ToArray();
             }
             return copiedOptions;
         }
