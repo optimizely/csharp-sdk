@@ -733,7 +733,6 @@ namespace OptimizelySDK
             {
                 return OptimizelyDecision.NewErrorDecision(key, user, DecisionMessage.SDK_NOT_READY, ErrorHandler, Logger);
             }
-
             if (key == null)
             {
                 return OptimizelyDecision.NewErrorDecision(key,
@@ -754,6 +753,7 @@ namespace OptimizelySDK
             }
 
             var userAttributes = user.Attributes;
+
             var decisionEventDispatched = false;
             var allOptions = GetAllOptions(options);
             var decisionReasons = DefaultDecisionReasons.NewInstance(allOptions);
@@ -816,7 +816,7 @@ namespace OptimizelySDK
                 SendImpressionEvent(flagDecision.Experiment, variation, userId, userAttributes, config, key, decisionSource, featureEnabled);
                 decisionEventDispatched = true;
             }
-            List<string> reasonsToReport = decisionReasons.ToReport();
+            var reasonsToReport = decisionReasons.ToReport();
             var variationKey = flagDecision.Variation?.Key;
 
             // TODO: add ruleKey values when available later. use a copy of experimentKey until then.
@@ -896,6 +896,7 @@ namespace OptimizelySDK
 
             return decisionDictionary;
         }
+
         private OptimizelyDecideOption[] GetAllOptions(OptimizelyDecideOption[] options)
         {
             OptimizelyDecideOption[] copiedOptions = DefaultDecideOptions;
