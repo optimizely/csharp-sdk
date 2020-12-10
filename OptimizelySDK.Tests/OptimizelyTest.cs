@@ -198,18 +198,18 @@ namespace OptimizelySDK.Tests
                     { "location", "San Francisco" }
                 };
             var optlyUserContext = Optimizely.CreateUserContext(TestUserId, attribute);
-            Assert.AreEqual(TestUserId, optlyUserContext.UserId);
-            Assert.AreEqual(Optimizely, optlyUserContext.Optimizely);
-            Assert.AreEqual(attribute, optlyUserContext.Attributes);
+            Assert.AreEqual(TestUserId, optlyUserContext.GetUserId());
+            Assert.AreEqual(Optimizely, optlyUserContext.GetOptimizely());
+            Assert.AreEqual(attribute, optlyUserContext.GetAttributes());
         }
 
         [Test]
         public void TestCreateUserContextWithoutAttributes()
         {
             var optlyUserContext = Optimizely.CreateUserContext(TestUserId);
-            Assert.AreEqual(TestUserId, optlyUserContext.UserId);
-            Assert.AreEqual(Optimizely, optlyUserContext.Optimizely);
-            Assert.IsTrue(optlyUserContext.Attributes.Count == 0);
+            Assert.AreEqual(TestUserId, optlyUserContext.GetUserId());
+            Assert.AreEqual(Optimizely, optlyUserContext.GetOptimizely());
+            Assert.IsTrue(optlyUserContext.GetAttributes().Count == 0);
         }
 
         [Test]
@@ -230,13 +230,13 @@ namespace OptimizelySDK.Tests
                 };
             var optlyUserContext2 = Optimizely.CreateUserContext("userId2", attribute2);
 
-            Assert.AreEqual("userId1", optlyUserContext1.UserId);
-            Assert.AreEqual(Optimizely, optlyUserContext1.Optimizely);
-            Assert.AreEqual(attribute1, optlyUserContext1.Attributes);
+            Assert.AreEqual("userId1", optlyUserContext1.GetUserId());
+            Assert.AreEqual(Optimizely, optlyUserContext1.GetOptimizely());
+            Assert.AreEqual(attribute1, optlyUserContext1.GetAttributes());
 
-            Assert.AreEqual("userId2", optlyUserContext2.UserId);
-            Assert.AreEqual(Optimizely, optlyUserContext2.Optimizely);
-            Assert.AreEqual(attribute2, optlyUserContext2.Attributes);
+            Assert.AreEqual("userId2", optlyUserContext2.GetUserId());
+            Assert.AreEqual(Optimizely, optlyUserContext2.GetOptimizely());
+            Assert.AreEqual(attribute2, optlyUserContext2.GetAttributes());
         }
 
         [Test]
@@ -249,9 +249,9 @@ namespace OptimizelySDK.Tests
                     { "location", "San Francisco" }
                 };
             var optlyUserContext = Optimizely.CreateUserContext(userId, attribute);
-            Assert.AreEqual(TestUserId, optlyUserContext.UserId);
-            Assert.AreEqual(Optimizely, optlyUserContext.Optimizely);
-            Assert.AreEqual(attribute, optlyUserContext.Attributes);
+            Assert.AreEqual(TestUserId, optlyUserContext.GetUserId());
+            Assert.AreEqual(Optimizely, optlyUserContext.GetOptimizely());
+            Assert.AreEqual(attribute, optlyUserContext.GetAttributes());
 
             attribute = new UserAttributes
                 {
@@ -259,10 +259,9 @@ namespace OptimizelySDK.Tests
                     { "level", "low" },
                     { "location", "San Francisco" }
                 };
-            userId = "InvalidUser";
-            Assert.AreEqual("testUserId", optlyUserContext.UserId);
-            Assert.AreEqual(Optimizely, optlyUserContext.Optimizely);
-            Assert.AreNotEqual(attribute, optlyUserContext.Attributes);
+            Assert.AreEqual("testUserId", optlyUserContext.GetUserId());
+            Assert.AreEqual(Optimizely, optlyUserContext.GetOptimizely());
+            Assert.AreNotEqual(attribute, optlyUserContext.GetAttributes());
         }
 
         #endregion

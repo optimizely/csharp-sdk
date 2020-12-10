@@ -741,7 +741,7 @@ namespace OptimizelySDK
                     ErrorHandler, Logger);
             }
             
-            var userId = user?.UserId;
+            var userId = user?.GetUserId();
 
             var flag = config.GetFeatureFlagFromKey(key);
             if (string.IsNullOrEmpty(flag.Key))
@@ -752,8 +752,7 @@ namespace OptimizelySDK
                     ErrorHandler, Logger);
             }
 
-            var userAttributes = user.Attributes;
-
+            var userAttributes = user.GetAttributes();
             var decisionEventDispatched = false;
             var allOptions = GetAllOptions(options);
             var decisionReasons = DefaultDecisionReasons.NewInstance(allOptions);
@@ -863,7 +862,6 @@ namespace OptimizelySDK
             
             return DecideForKeys(user, allFlagKeys, options);
         }
-
 
         internal Dictionary<string, OptimizelyDecision> DecideForKeys(OptimizelyUserContext user,
                                                       string[] keys,
