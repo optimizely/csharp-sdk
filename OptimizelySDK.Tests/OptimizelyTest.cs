@@ -259,7 +259,6 @@ namespace OptimizelySDK.Tests
                     { "level", "low" },
                     { "location", "San Francisco" }
                 };
-            userId = "InvalidUser";
             Assert.AreEqual("testUserId", optlyUserContext.GetUserId());
             Assert.AreEqual(Optimizely, optlyUserContext.GetOptimizely());
             Assert.AreNotEqual(attribute, optlyUserContext.GetAttributes());
