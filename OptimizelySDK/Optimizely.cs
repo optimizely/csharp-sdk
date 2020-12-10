@@ -863,7 +863,6 @@ namespace OptimizelySDK
             return DecideForKeys(user, allFlagKeys, options);
         }
 
-
         internal Dictionary<string, OptimizelyDecision> DecideForKeys(OptimizelyUserContext user,
                                                       string[] keys,
                                                       OptimizelyDecideOption[] options)
