@@ -87,7 +87,25 @@ namespace OptimizelySDK.Tests
             Assert.IsTrue(TestData.CompareObjects(actualVariation, expectedVariation));
             BucketerMock.Verify(_ => _.Bucket(It.IsAny<ProjectConfig>(), It.IsAny<Experiment>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IDecisionReasons>()), Times.Never);
         }
+        [Test]
+        public void TestGetVariationLogsErrorWhenUserProfileMapItsNull()
+        {
+            Experiment experiment = ProjectConfig.Experiments[8];
+            Variation variation = experiment.Variations[0];
 
+            Decision decision = new Decision(variation.Id);
+            Dictionary<string, object> userProfile = null;
+
+            UserProfileServiceMock.Setup(up => up.Lookup(WhitelistedUserId)).Returns(userProfile);
+
+            DecisionService decisionService = new DecisionService(BucketerMock.Object, ErrorHandlerMock.Object, UserProfileServiceMock.Object, LoggerMock.Object);
+            var options = new OptimizelyDecideOption[] { OptimizelyDecideOption.INCLUDE_REASONS };
+            var reasons = DefaultDecisionReasons.NewInstance(new OptimizelyDecideOption[] { OptimizelyDecideOption.INCLUDE_REASONS }); ;
+            decisionService.GetVariation(experiment, GenericUserId, ProjectConfig, new UserAttributes(), options, reasons);
+            Assert.AreEqual(reasons.ToReport()[0], "We were unable to get a user profile map from the UserProfileService.");
+            Assert.AreEqual(reasons.ToReport()[1], "User \"genericUserId\" does not meet conditions to be in experiment \"etag3\".");
+        }
+        
         [Test]
         public void TestGetVariationEvaluatesUserProfileBeforeAudienceTargeting()
         {
