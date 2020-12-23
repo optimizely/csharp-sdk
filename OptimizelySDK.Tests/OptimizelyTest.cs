@@ -59,6 +59,7 @@ namespace OptimizelySDK.Tests
         private Variation VariationWithKeyVariation;
         private Variation GroupVariation;
         private Optimizely OptimizelyWithTypedAudiences;
+        private IDecisionReasons DecisionReasons;
 
         const string FEATUREVARIABLE_BOOLEANTYPE = "boolean";
         const string FEATUREVARIABLE_INTEGERTYPE = "integer";
@@ -79,7 +80,7 @@ namespace OptimizelySDK.Tests
             EventProcessorMock = new Mock<EventProcessor>();
 
             EventProcessorMock.Setup(b => b.Process(It.IsAny<UserEvent>()));
-            
+            DecisionReasons = DefaultDecisionReasons.NewInstance();
             var config = DatafileProjectConfig.Create(
                 content: TestData.Datafile,
                 logger: LoggerMock.Object,
@@ -1512,7 +1513,7 @@ namespace OptimizelySDK.Tests
             var expectedValue = 42.42;
             var experiment = Config.GetExperimentFromKey("test_experiment_double_feature");
             var variation = Config.GetVariationFromKey("test_experiment_double_feature", "control");
-            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_FEATURE_TEST);
+            var decision = Result<FeatureDecision>.NewResult(new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_FEATURE_TEST), DecisionReasons);
 
             DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, Config, null)).Returns(decision);
             
@@ -1535,7 +1536,7 @@ namespace OptimizelySDK.Tests
             var expectedValue = 13;
             var experiment = Config.GetExperimentFromKey("test_experiment_integer_feature");
             var variation = Config.GetVariationFromKey("test_experiment_integer_feature", "variation");
-            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_FEATURE_TEST);
+            var decision = Result<FeatureDecision>.NewResult(new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_FEATURE_TEST), DecisionReasons);
             var userAttributes = new UserAttributes
             {
                { "device_type", "iPhone" },
@@ -1564,7 +1565,7 @@ namespace OptimizelySDK.Tests
             var expectedValue = 14.99;
             var experiment = Config.GetExperimentFromKey("test_experiment_double_feature");
             var variation = Config.GetVariationFromKey("test_experiment_double_feature", "variation");
-            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_FEATURE_TEST);
+            var decision = Result<FeatureDecision>.NewResult(new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_FEATURE_TEST), DecisionReasons);
 
             DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, Config, null)).Returns(decision);
             
@@ -1587,7 +1588,7 @@ namespace OptimizelySDK.Tests
             var expectedValue = 7;
             var experiment = Config.GetExperimentFromKey("test_experiment_integer_feature");
             var variation = Config.GetVariationFromKey("test_experiment_integer_feature", "control");
-            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_FEATURE_TEST);
+            var decision = Result<FeatureDecision>.NewResult(new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_FEATURE_TEST), DecisionReasons);
             var userAttributes = new UserAttributes
             {
                { "device_type", "iPhone" },
@@ -1616,7 +1617,7 @@ namespace OptimizelySDK.Tests
             var expectedValue = true;
             var experiment = Config.GetRolloutFromId("166660").Experiments[0];
             var variation = Config.GetVariationFromKey(experiment.Key, "177771");
-            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT);
+            var decision = Result<FeatureDecision>.NewResult(new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT), DecisionReasons);
 
             DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, Config, null)).Returns(decision);
             
@@ -1639,7 +1640,7 @@ namespace OptimizelySDK.Tests
             var expectedIntValue = 4;
             var experiment = Config.GetRolloutFromId("166661").Experiments[0];
             var variation = Config.GetVariationFromKey(experiment.Key, "177775");
-            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT);
+            var decision = Result<FeatureDecision>.NewResult(new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT), DecisionReasons);
             var userAttributes = new UserAttributes
             {
                { "device_type", "iPhone" },
@@ -1671,7 +1672,7 @@ namespace OptimizelySDK.Tests
             var expectedIntValue = 5;
             var experiment = Config.GetRolloutFromId("166661").Experiments[0];
             var variation = Config.GetVariationFromKey(experiment.Key, "177775");
-            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT);
+            var decision = Result<FeatureDecision>.NewResult(new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT), DecisionReasons);
             var userAttributes = new UserAttributes
             {
                { "device_type", "iPhone" },
@@ -1702,7 +1703,7 @@ namespace OptimizelySDK.Tests
             var expectedValue = "cta_4";
             var experiment = Config.GetRolloutFromId("166661").Experiments[0];
             var variation = Config.GetVariationFromKey(experiment.Key, "177775");
-            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT);
+            var decision = Result<FeatureDecision>.NewResult(new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT), DecisionReasons);
             var userAttributes = new UserAttributes
             {
                { "device_type", "iPhone" },
@@ -1732,7 +1733,7 @@ namespace OptimizelySDK.Tests
             var expectedValue = true;
             var experiment = Config.GetRolloutFromId("166660").Experiments[3];
             var variation = Config.GetVariationFromKey(experiment.Key, "177782");
-            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT);
+            var decision = Result<FeatureDecision>.NewResult(new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT), DecisionReasons);
 
             DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, Config, null)).Returns(decision);
             
@@ -1753,7 +1754,7 @@ namespace OptimizelySDK.Tests
             var expectedValue = "wingardium leviosa";
             var experiment = Config.GetRolloutFromId("166661").Experiments[2];
             var variation = Config.GetVariationFromKey(experiment.Key, "177784");
-            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT);
+            var decision = Result<FeatureDecision>.NewResult(new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT), DecisionReasons);
             var userAttributes = new UserAttributes
             {
                { "device_type", "iPhone" },
@@ -1780,7 +1781,7 @@ namespace OptimizelySDK.Tests
             var featureFlag = Config.GetFeatureFlagFromKey("double_single_variable_feature");
             var variableKey = "double_variable";
             var expectedValue = 14.99;
-            var decision = new FeatureDecision(null, null, FeatureDecision.DECISION_SOURCE_ROLLOUT);
+            var decision = Result<FeatureDecision>.NewResult(new FeatureDecision(null, null, FeatureDecision.DECISION_SOURCE_ROLLOUT), DecisionReasons);
 
             DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, Config, null)).Returns(decision);
 
@@ -1889,7 +1890,7 @@ namespace OptimizelySDK.Tests
             var variableType = "double";
             var expectedValue = 14.99;
 
-            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_FEATURE_TEST);
+            var decision = Result<FeatureDecision>.NewResult(new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_FEATURE_TEST), DecisionReasons);
 
             DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, Config, null)).Returns(decision);
 
@@ -1914,7 +1915,7 @@ namespace OptimizelySDK.Tests
             var featureFlag = Config.GetFeatureFlagFromKey("double_single_variable_feature");
             var experiment = Config.GetExperimentFromKey("test_experiment_integer_feature");
             var differentVariation = Config.GetVariationFromKey("test_experiment_integer_feature", "control");
-            var expectedDecision = new FeatureDecision(experiment, differentVariation, FeatureDecision.DECISION_SOURCE_FEATURE_TEST);
+            var expectedDecision = Result<FeatureDecision>.NewResult(new FeatureDecision(experiment, differentVariation, FeatureDecision.DECISION_SOURCE_FEATURE_TEST), DecisionReasons);
             var variableKey = "double_variable";
             var variableType = "double";
             var expectedValue = 14.99;
@@ -1946,7 +1947,7 @@ namespace OptimizelySDK.Tests
             var expectedValue = 42.42;
             var experiment = Config.GetExperimentFromKey("test_experiment_double_feature");
             var variation = Config.GetVariationFromKey("test_experiment_double_feature", "control");
-            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_FEATURE_TEST);
+            var decision = Result<FeatureDecision>.NewResult(new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_FEATURE_TEST), DecisionReasons);
 
             DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, Config, null)).Returns(decision);
 
@@ -1971,7 +1972,7 @@ namespace OptimizelySDK.Tests
             //experimentid - 177772
             var experiment = Config.Rollouts[0].Experiments[1]; 
             var variation = Config.GetVariationFromId(experiment.Key, "177773");
-            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT);
+            var decision = Result<FeatureDecision>.NewResult(new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT), DecisionReasons);
             var expectedVariableValue = false;
 
             DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, Config, null)).Returns(decision);
@@ -2047,7 +2048,7 @@ namespace OptimizelySDK.Tests
             var featureFlag = Config.GetFeatureFlagFromKey("double_single_variable_feature");
             var experiment = Config.GetExperimentFromKey("test_experiment_double_feature");
             var variation = Config.GetVariationFromKey("test_experiment_double_feature", "variation");
-            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_FEATURE_TEST);
+            var decision = Result<FeatureDecision>.NewResult(new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_FEATURE_TEST), DecisionReasons);
 
             DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, Config, null)).Returns(decision);
 
@@ -2072,7 +2073,7 @@ namespace OptimizelySDK.Tests
             var experiment = rollout.Experiments[0];
             var variation = experiment.Variations[0];
             var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
-            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT);
+            var decision = Result<FeatureDecision>.NewResult(new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT), DecisionReasons);
 
             DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, Config, null)).Returns(decision);
 
@@ -2100,7 +2101,7 @@ namespace OptimizelySDK.Tests
             var experiment = Config.GetExperimentFromKey("test_experiment_double_feature");
             var variation = Config.GetVariationFromKey("test_experiment_double_feature", "control");
             var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
-            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_FEATURE_TEST);
+            var decision = Result<FeatureDecision>.NewResult(new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_FEATURE_TEST), DecisionReasons);
 
             DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, Config, null)).Returns(decision);
 
@@ -2128,7 +2129,7 @@ namespace OptimizelySDK.Tests
             var experiment = Config.GetExperimentFromKey("test_experiment_double_feature");
             var variation = Config.GetVariationFromKey("test_experiment_double_feature", "variation");
             var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
-            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_FEATURE_TEST);
+            var decision = Result<FeatureDecision>.NewResult(new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_FEATURE_TEST), DecisionReasons);
 
             DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, Config, null)).Returns(decision);
 
@@ -2179,8 +2180,8 @@ namespace OptimizelySDK.Tests
             var featureEnabledTrue = Config.GetVariationFromKey("test_experiment_double_feature", "control");
             var featureEnabledFalse = Config.GetVariationFromKey("test_experiment_double_feature", "variation");
             var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
-            var decisionTrue = new FeatureDecision(experiment, featureEnabledTrue, FeatureDecision.DECISION_SOURCE_FEATURE_TEST);
-            var decisionFalse = new FeatureDecision(experiment, featureEnabledFalse, FeatureDecision.DECISION_SOURCE_FEATURE_TEST);
+            var decisionTrue = Result<FeatureDecision>.NewResult(new FeatureDecision(experiment, featureEnabledTrue, FeatureDecision.DECISION_SOURCE_FEATURE_TEST), DecisionReasons);
+            var decisionFalse = Result<FeatureDecision>.NewResult(new FeatureDecision(experiment, featureEnabledFalse, FeatureDecision.DECISION_SOURCE_FEATURE_TEST), DecisionReasons);
 
             DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, Config, null)).Returns(decisionTrue);
             DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, userId, Config, null)).Returns(decisionFalse);
@@ -2243,9 +2244,9 @@ namespace OptimizelySDK.Tests
             var variationKey = "group_exp_1_var_1";
             var featureKey = "boolean_feature";
             var experiment = Config.GetExperimentFromKey(experimentKey);
-            var variation = Config.GetVariationFromKey(experimentKey, variationKey);
+            var variation = Result<Variation>.NewResult(Config.GetVariationFromKey(experimentKey, variationKey), DecisionReasons);
             var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
-            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_FEATURE_TEST);
+            var decision = Result<FeatureDecision>.NewResult(new FeatureDecision(experiment, variation.ResultObject, FeatureDecision.DECISION_SOURCE_FEATURE_TEST), DecisionReasons);
             
             // Mocking objects.
             NotificationCallbackMock.Setup(nc => nc.TestActivateCallback(It.IsAny<Experiment>(), It.IsAny<string>(),
@@ -2274,8 +2275,8 @@ namespace OptimizelySDK.Tests
             // Verify that all the registered callbacks are called once for both Activate and IsFeatureEnabled.
             EventDispatcherMock.Verify(dispatcher => dispatcher.DispatchEvent(It.IsAny<LogEvent>()), Times.Exactly(2));
 
-            NotificationCallbackMock.Verify(nc => nc.TestActivateCallback(experiment, TestUserId, userAttributes, variation, It.IsAny<LogEvent>()), Times.Exactly(2));
-            NotificationCallbackMock.Verify(nc => nc.TestAnotherActivateCallback(experiment, TestUserId, userAttributes, variation, It.IsAny<LogEvent>()), Times.Exactly(2));
+            NotificationCallbackMock.Verify(nc => nc.TestActivateCallback(experiment, TestUserId, userAttributes, variation.ResultObject, It.IsAny<LogEvent>()), Times.Exactly(2));
+            NotificationCallbackMock.Verify(nc => nc.TestAnotherActivateCallback(experiment, TestUserId, userAttributes, variation.ResultObject, It.IsAny<LogEvent>()), Times.Exactly(2));
         }
 
         [Test]
@@ -2321,7 +2322,7 @@ namespace OptimizelySDK.Tests
             var variationKey = "control";
             var eventKey = "purchase";
             var experiment = Config.GetExperimentFromKey(experimentKey);
-            var variation = Config.GetVariationFromKey(experimentKey, variationKey);
+            var variation = Result<Variation>.NewResult(Config.GetVariationFromKey(experimentKey, variationKey), DecisionReasons);
             var logEvent = new LogEvent("https://logx.optimizely.com/v1/events", OptimizelyHelper.SingleParameter,
                 "POST", new Dictionary<string, string> { });
 
@@ -2359,7 +2360,7 @@ namespace OptimizelySDK.Tests
             var experimentKey = "test_experiment";
             var variationKey = "variation";
             var experiment = Config.GetExperimentFromKey(experimentKey);
-            var variation = Config.GetVariationFromKey(experimentKey, variationKey);
+            var variation = Result<Variation>.NewResult(Config.GetVariationFromKey(experimentKey, variationKey), DecisionReasons);
             var userAttributes = new UserAttributes
             {
                { "device_type", "iPhone" },
@@ -2395,7 +2396,7 @@ namespace OptimizelySDK.Tests
             var experimentKey = "group_experiment_1";
             var variationKey = "group_exp_1_var_1";
             var experiment = Config.GetExperimentFromKey(experimentKey);
-            var variation = Config.GetVariationFromKey(experimentKey, variationKey);
+            var variation = Result<Variation>.NewResult(Config.GetVariationFromKey(experimentKey, variationKey), DecisionReasons);
             var userAttributes = new UserAttributes
             {
                { "device_type", "iPhone" },
@@ -2457,7 +2458,7 @@ namespace OptimizelySDK.Tests
             var experimentKey = "test_experiment";
             var variationKey = "variation";
             var experiment = Config.GetExperimentFromKey(experimentKey);
-            var variation = Config.GetVariationFromKey(experimentKey, variationKey);
+            var variation = Result<Variation>.NewResult(Config.GetVariationFromKey(experimentKey, variationKey), DecisionReasons);
             var userAttributes = new UserAttributes
             {
                { "device_type", "iPhone" },
@@ -2494,7 +2495,7 @@ namespace OptimizelySDK.Tests
             var experimentKey = "group_experiment_1";
             var variationKey = "group_exp_1_var_1";
             var experiment = Config.GetExperimentFromKey(experimentKey);
-            var variation = Config.GetVariationFromKey(experimentKey, variationKey);
+            var variation = Result<Variation>.NewResult(Config.GetVariationFromKey(experimentKey, variationKey), DecisionReasons);
             var userAttributes = new UserAttributes
             {
                { "device_type", "iPhone" },
@@ -2553,9 +2554,9 @@ namespace OptimizelySDK.Tests
         {
             var featureKey = "double_single_variable_feature";
             var experiment = Config.GetExperimentFromKey("test_experiment_double_feature");
-            var variation = Config.GetVariationFromKey("test_experiment_double_feature", "control");
+            var variation = Result<Variation>.NewResult(Config.GetVariationFromKey("test_experiment_double_feature", "control"), DecisionReasons);
             var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
-            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_FEATURE_TEST);
+            var decision = Result<FeatureDecision>.NewResult(new FeatureDecision(experiment, variation.ResultObject, FeatureDecision.DECISION_SOURCE_FEATURE_TEST), DecisionReasons);
 
             DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, Config, null)).Returns(decision);
             NotificationCallbackMock.Setup(nc => nc.TestDecisionCallback(It.IsAny<string>(), It.IsAny<string>(),
@@ -2588,9 +2589,9 @@ namespace OptimizelySDK.Tests
         {
             var featureKey = "double_single_variable_feature";
             var experiment = Config.GetExperimentFromKey("test_experiment_double_feature");
-            var variation = Config.GetVariationFromKey("test_experiment_double_feature", "variation");
+            var variation = Result<Variation>.NewResult(Config.GetVariationFromKey("test_experiment_double_feature", "variation"), DecisionReasons);
             var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
-            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_FEATURE_TEST);
+            var decision = Result<FeatureDecision>.NewResult(new FeatureDecision(experiment, variation.ResultObject, FeatureDecision.DECISION_SOURCE_FEATURE_TEST), DecisionReasons);
             
             DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, Config, null)).Returns(decision);
             NotificationCallbackMock.Setup(nc => nc.TestDecisionCallback(It.IsAny<string>(), It.IsAny<string>(),
@@ -2635,7 +2636,7 @@ namespace OptimizelySDK.Tests
             var experiment = Config.GetRolloutFromId("166660").Experiments[0];
             var variation = Config.GetVariationFromKey("177770", "177771");
             var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
-            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT);
+            var decision = Result<FeatureDecision>.NewResult(new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT), DecisionReasons);
 
             DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, Config, userAttributes)).Returns(decision);
             NotificationCallbackMock.Setup(nc => nc.TestDecisionCallback(It.IsAny<string>(), It.IsAny<string>(),
@@ -2674,7 +2675,7 @@ namespace OptimizelySDK.Tests
             var experiment = Config.GetRolloutFromId("166660").Experiments[3];
             var variation = Config.GetVariationFromKey("188880", "188881");
             var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
-            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT);
+            var decision = Result<FeatureDecision>.NewResult(new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT), DecisionReasons);
 
             DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, Config, userAttributes)).Returns(decision);
             NotificationCallbackMock.Setup(nc => nc.TestDecisionCallback(It.IsAny<string>(), It.IsAny<string>(),
@@ -2706,7 +2707,7 @@ namespace OptimizelySDK.Tests
         {
             var featureKey = "boolean_single_variable_feature";
             var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
-            var decision = new FeatureDecision(null, null, FeatureDecision.DECISION_SOURCE_ROLLOUT);
+            var decision = Result<FeatureDecision>.NewResult(new FeatureDecision(null, null, FeatureDecision.DECISION_SOURCE_ROLLOUT), DecisionReasons);
 
             DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, Config, null)).Returns(decision);
             NotificationCallbackMock.Setup(nc => nc.TestDecisionCallback(It.IsAny<string>(), It.IsAny<string>(),
@@ -2846,7 +2847,7 @@ namespace OptimizelySDK.Tests
             var expectedValue = 42.42;
             var experiment = Config.GetExperimentFromKey("test_experiment_double_feature");
             var variation = Config.GetVariationFromKey("test_experiment_double_feature", "control");
-            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_FEATURE_TEST);
+            var decision = Result<FeatureDecision>.NewResult(new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_FEATURE_TEST), DecisionReasons);
 
             DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, Config, null)).Returns(decision);
             NotificationCallbackMock.Setup(nc => nc.TestDecisionCallback(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<UserAttributes>(),
@@ -2894,7 +2895,7 @@ namespace OptimizelySDK.Tests
             };
             var experiment = Config.GetRolloutFromId("166661").Experiments[0];
             var variation = Config.GetVariationFromKey(experiment.Key, "177775");
-            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT);
+            var decision = Result<FeatureDecision>.NewResult(new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT), DecisionReasons);
             var userAttributes = new UserAttributes
             {
                { "device_type", "iPhone" },
@@ -2939,7 +2940,7 @@ namespace OptimizelySDK.Tests
             var expectedValue = 13;
             var experiment = Config.GetExperimentFromKey("test_experiment_integer_feature");
             var variation = Config.GetVariationFromKey("test_experiment_integer_feature", "variation");
-            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_FEATURE_TEST);
+            var decision = Result<FeatureDecision>.NewResult(new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_FEATURE_TEST), DecisionReasons);
             var userAttributes = new UserAttributes
             {
                { "device_type", "iPhone" },
@@ -2989,7 +2990,7 @@ namespace OptimizelySDK.Tests
             var expectedValue = 14.99;
             var experiment = Config.GetExperimentFromKey("test_experiment_double_feature");
             var variation = Config.GetVariationFromKey("test_experiment_double_feature", "variation");
-            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_FEATURE_TEST);
+            var decision = Result<FeatureDecision>.NewResult(new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_FEATURE_TEST), DecisionReasons);
 
             DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, Config, null)).Returns(decision);
             NotificationCallbackMock.Setup(nc => nc.TestDecisionCallback(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<UserAttributes>(),
@@ -3032,7 +3033,7 @@ namespace OptimizelySDK.Tests
             var expectedValue = 7;
             var experiment = Config.GetExperimentFromKey("test_experiment_integer_feature");
             var variation = Config.GetVariationFromKey("test_experiment_integer_feature", "control");
-            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_FEATURE_TEST);
+            var decision = Result<FeatureDecision>.NewResult(new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_FEATURE_TEST), DecisionReasons);
             var userAttributes = new UserAttributes
             {
                { "device_type", "iPhone" },
@@ -3081,7 +3082,7 @@ namespace OptimizelySDK.Tests
             var expectedValue = true;
             var experiment = Config.GetRolloutFromId("166660").Experiments[0];
             var variation = Config.GetVariationFromKey(experiment.Key, "177771");
-            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT);
+            var decision = Result<FeatureDecision>.NewResult(new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT), DecisionReasons);
 
             DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, Config, null)).Returns(decision);
             NotificationCallbackMock.Setup(nc => nc.TestDecisionCallback(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<UserAttributes>(),
@@ -3119,7 +3120,7 @@ namespace OptimizelySDK.Tests
             var expectedValue = "cta_4";
             var experiment = Config.GetRolloutFromId("166661").Experiments[0];
             var variation = Config.GetVariationFromKey(experiment.Key, "177775");
-            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT);
+            var decision = Result<FeatureDecision>.NewResult(new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT), DecisionReasons);
             var userAttributes = new UserAttributes
             {
                { "device_type", "iPhone" },
@@ -3164,7 +3165,7 @@ namespace OptimizelySDK.Tests
             var expectedValue = true;
             var experiment = Config.GetRolloutFromId("166660").Experiments[3];
             var variation = Config.GetVariationFromKey(experiment.Key, "177782");
-            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT);
+            var decision = Result<FeatureDecision>.NewResult(new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT), DecisionReasons);
 
             DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, Config, null)).Returns(decision);
             NotificationCallbackMock.Setup(nc => nc.TestDecisionCallback(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<UserAttributes>(),
@@ -3202,7 +3203,7 @@ namespace OptimizelySDK.Tests
             var expectedValue = "wingardium leviosa";
             var experiment = Config.GetRolloutFromId("166661").Experiments[2];
             var variation = Config.GetVariationFromKey(experiment.Key, "177784");
-            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT);
+            var decision = Result<FeatureDecision>.NewResult(new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT), DecisionReasons);
             var userAttributes = new UserAttributes
             {
                { "device_type", "iPhone" },
@@ -3244,7 +3245,7 @@ namespace OptimizelySDK.Tests
             var featureFlag = Config.GetFeatureFlagFromKey("double_single_variable_feature");
             var variableKey = "double_variable";
             var expectedValue = 14.99;
-            var decision = new FeatureDecision(null, null, FeatureDecision.DECISION_SOURCE_ROLLOUT);
+            var decision = Result<FeatureDecision>.NewResult(new FeatureDecision(null, null, FeatureDecision.DECISION_SOURCE_ROLLOUT), DecisionReasons);
 
             DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, Config, null)).Returns(decision);
             NotificationCallbackMock.Setup(nc => nc.TestDecisionCallback(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<UserAttributes>(),
@@ -3295,7 +3296,7 @@ namespace OptimizelySDK.Tests
             };
             var experiment = Config.GetRolloutFromId("166661").Experiments[0];
             var variation = Config.GetVariationFromKey(experiment.Key, "177775");
-            var decision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT);
+            var decision = Result<FeatureDecision>.NewResult(new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT), DecisionReasons);
             var userAttributes = new UserAttributes
             {
                { "device_type", "iPhone" },
@@ -3389,7 +3390,7 @@ namespace OptimizelySDK.Tests
 
             var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
 
-            var decision = new FeatureDecision(experiment, null, FeatureDecision.DECISION_SOURCE_ROLLOUT);
+            var decision = Result<FeatureDecision>.NewResult(new FeatureDecision(experiment, null, FeatureDecision.DECISION_SOURCE_ROLLOUT), DecisionReasons);
 
             DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, TestUserId, Config, userAttributes)).Returns(decision);
 

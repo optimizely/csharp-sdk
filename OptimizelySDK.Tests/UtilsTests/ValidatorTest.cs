@@ -81,15 +81,15 @@ namespace OptimizelySDK.Tests.UtilsTests
         [Test]
         public void TestDoesUserMeetAudienceConditionsNoAudienceUsedInExperiment()
         {
-            Assert.IsTrue(ExperimentUtils.DoesUserMeetAudienceConditions(Config, Config.GetExperimentFromKey("paused_experiment"), new UserAttributes(), "experiment", "paused_experiment", Logger));
+            Assert.IsTrue(ExperimentUtils.DoesUserMeetAudienceConditions(Config, Config.GetExperimentFromKey("paused_experiment"), new UserAttributes(), "experiment", "paused_experiment", Logger).ResultObject);
         }
 
         [Test]
         public void TestDoesUserMeetAudienceConditionsAudienceUsedInExperimentNoAttributesProvided()
         {
-            Assert.IsFalse(ExperimentUtils.DoesUserMeetAudienceConditions(Config, Config.GetExperimentFromKey("test_experiment"), new UserAttributes(), "experiment", "test_experiment", Logger));
+            Assert.IsFalse(ExperimentUtils.DoesUserMeetAudienceConditions(Config, Config.GetExperimentFromKey("test_experiment"), new UserAttributes(), "experiment", "test_experiment", Logger).ResultObject);
 
-            Assert.IsFalse(ExperimentUtils.DoesUserMeetAudienceConditions(Config, Config.GetExperimentFromKey("test_experiment"), null, "experiment", "test_experiment", Logger));
+            Assert.IsFalse(ExperimentUtils.DoesUserMeetAudienceConditions(Config, Config.GetExperimentFromKey("test_experiment"), null, "experiment", "test_experiment", Logger).ResultObject);
         }
 
         [Test]
@@ -100,7 +100,7 @@ namespace OptimizelySDK.Tests.UtilsTests
                 {"device_type", "iPhone" },
                 {"location", "San Francisco" }
             };
-            Assert.IsTrue(ExperimentUtils.DoesUserMeetAudienceConditions(Config, Config.GetExperimentFromKey("test_experiment"), userAttributes, "experiment", "test_experiment", Logger));
+            Assert.IsTrue(ExperimentUtils.DoesUserMeetAudienceConditions(Config, Config.GetExperimentFromKey("test_experiment"), userAttributes, "experiment", "test_experiment", Logger).ResultObject);
         }
 
         [Test]
@@ -112,7 +112,7 @@ namespace OptimizelySDK.Tests.UtilsTests
                 {"location", "San Francisco" }
             };
 
-            Assert.IsFalse(ExperimentUtils.DoesUserMeetAudienceConditions(Config, Config.GetExperimentFromKey("test_experiment"), null, "experiment", "test_experiment", Logger));
+            Assert.IsFalse(ExperimentUtils.DoesUserMeetAudienceConditions(Config, Config.GetExperimentFromKey("test_experiment"), null, "experiment", "test_experiment", Logger).ResultObject);
         }
 
         [Test]

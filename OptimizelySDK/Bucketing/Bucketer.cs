@@ -108,7 +108,8 @@ namespace OptimizelySDK.Bucketing
         {
             string message;
             Variation variation;
-            IDecisionReasons reasons = null;
+            //TODO: Decide using decide options
+            IDecisionReasons reasons = DefaultDecisionReasons.NewInstance();
 
             if (string.IsNullOrEmpty(experiment.Key))
                 return Result<Variation>.NewResult(new Variation(), reasons);

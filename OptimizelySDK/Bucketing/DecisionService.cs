@@ -105,7 +105,8 @@ namespace OptimizelySDK.Bucketing
             UserAttributes filteredAttributes,
             OptimizelyDecideOption[] options)
         {
-            IDecisionReasons reasons = null;
+            // TODO: make it conditional 
+            IDecisionReasons reasons = DefaultDecisionReasons.NewInstance();
             if (!ExperimentUtils.IsExperimentActive(experiment, Logger)) return null;
 
             // check if a forced variation is set
@@ -147,7 +148,7 @@ namespace OptimizelySDK.Bucketing
                 }
             }
 
-            if (ExperimentUtils.DoesUserMeetAudienceConditions(config, experiment, filteredAttributes, LOGGING_KEY_TYPE_EXPERIMENT, experiment.Key, Logger))
+            if (ExperimentUtils.DoesUserMeetAudienceConditions(config, experiment, filteredAttributes, LOGGING_KEY_TYPE_EXPERIMENT, experiment.Key, Logger).ResultObject)
             {
                 // Get Bucketing ID from user attributes.
                 string bucketingId = GetBucketingId(userId, filteredAttributes);
@@ -182,7 +183,9 @@ namespace OptimizelySDK.Bucketing
         /// <returns>Variation entity which the given user and experiment should be forced into.</returns>
         public Result<Variation> GetForcedVariation(string experimentKey, string userId, ProjectConfig config)
         {
-            IDecisionReasons reasons = null;
+            // TODO Make it conditional
+            IDecisionReasons reasons = DefaultDecisionReasons.NewInstance();
+
             if (ForcedVariationMap.ContainsKey(userId) == false)
             {
                 Logger.Log(LogLevel.DEBUG, $@"User ""{userId}"" is not in the forced variation map.");
@@ -283,7 +286,9 @@ namespace OptimizelySDK.Bucketing
         /// the user is bucketed into if the user has a specified whitelisted variation.</returns>
         public Result<Variation> GetWhitelistedVariation(Experiment experiment, string userId)
         {
-            IDecisionReasons reasons = null;
+            // TODO: Add condition of using decide Options
+            IDecisionReasons reasons = DefaultDecisionReasons.NewInstance();
+
             //if a user has a forced variation mapping, return the respective variation
             Dictionary<string, string> userIdToVariationKeyMap = experiment.UserIdToKeyVariations;
 
@@ -315,7 +320,9 @@ namespace OptimizelySDK.Bucketing
             // If a user profile instance is present then check it for a saved variation
             string experimentId = experiment.Id;
             string experimentKey = experiment.Key;
-            IDecisionReasons reasons = null;
+
+            //TODO Make it conditional
+            IDecisionReasons reasons = DefaultDecisionReasons.NewInstance();
 
             Decision decision = userProfile.ExperimentBucketMap.ContainsKey(experimentId) ?
             userProfile.ExperimentBucketMap[experimentId] : null;
@@ -412,7 +419,8 @@ namespace OptimizelySDK.Bucketing
             UserAttributes filteredAttributes,
             ProjectConfig config)
         {
-            IDecisionReasons reasons = null;
+            // TODO: Make it conditional
+            IDecisionReasons reasons = DefaultDecisionReasons.NewInstance();
 
             if (featureFlag == null)
             {
@@ -449,7 +457,7 @@ namespace OptimizelySDK.Bucketing
             {
                 string loggingKey = (i + 1).ToString(); 
                 var rolloutRule = rollout.Experiments[i];
-                if (ExperimentUtils.DoesUserMeetAudienceConditions(config, rolloutRule, filteredAttributes, LOGGING_KEY_TYPE_RULE, loggingKey, Logger))
+                if (ExperimentUtils.DoesUserMeetAudienceConditions(config, rolloutRule, filteredAttributes, LOGGING_KEY_TYPE_RULE, loggingKey, Logger).ResultObject)
                 {
                     variationResult = Bucketer.Bucket(config, rolloutRule, bucketingId, userId);
                     if (variationResult == null || string.IsNullOrEmpty(variationResult.ResultObject.Id))
@@ -466,7 +474,7 @@ namespace OptimizelySDK.Bucketing
 
             // Get the last rule which is everyone else rule.
             var everyoneElseRolloutRule = rollout.Experiments[rolloutRulesLength - 1];
-            if (ExperimentUtils.DoesUserMeetAudienceConditions(config, everyoneElseRolloutRule, filteredAttributes, LOGGING_KEY_TYPE_RULE, "Everyone Else", Logger))
+            if (ExperimentUtils.DoesUserMeetAudienceConditions(config, everyoneElseRolloutRule, filteredAttributes, LOGGING_KEY_TYPE_RULE, "Everyone Else", Logger).ResultObject)
             {
                 variationResult = Bucketer.Bucket(config, everyoneElseRolloutRule, bucketingId, userId);
                 if (variationResult != null && !string.IsNullOrEmpty(variationResult.ResultObject.Id))
@@ -498,7 +506,8 @@ namespace OptimizelySDK.Bucketing
             ProjectConfig config,
             OptimizelyDecideOption[] options)
         {
-            IDecisionReasons reasons = null;
+            // TODO Make it conditional 
+            IDecisionReasons reasons = DefaultDecisionReasons.NewInstance();
             if (featureFlag == null)
             {
                 Logger.Log(LogLevel.ERROR, "Invalid feature flag provided.");
@@ -560,7 +569,8 @@ namespace OptimizelySDK.Bucketing
             UserAttributes filteredAttributes,
             OptimizelyDecideOption[] options)
         {
-            IDecisionReasons reasons = null;
+            // TODO: Make it conditional 
+            IDecisionReasons reasons = DefaultDecisionReasons.NewInstance();
             // Check if the feature flag has an experiment and the user is bucketed into that experiment.
             var decisionResult = GetVariationForFeatureExperiment(featureFlag, userId, filteredAttributes, config, options);
 
@@ -588,7 +598,8 @@ namespace OptimizelySDK.Bucketing
         /// <returns>Bucketing Id if it is a string type in attributes, user Id otherwise.</returns>
         private string GetBucketingId(string userId, UserAttributes filteredAttributes)
         {
-            IDecisionReasons reasons = null;
+            // TODO: Make it conditional
+            IDecisionReasons reasons = DefaultDecisionReasons.NewInstance();
             string bucketingId = userId;
 
             // If the bucketing ID key is defined in attributes, then use that in place of the userID for the murmur hash key
