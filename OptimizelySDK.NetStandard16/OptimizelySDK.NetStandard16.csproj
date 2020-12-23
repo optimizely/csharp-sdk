@@ -89,9 +89,7 @@
 		<Compile Include="..\OptimizelySDK\OptlyConfig\OptimizelyConfigService.cs" />
 		<Compile Include="..\OptimizelySDK\OptlyConfig\IOptimizelyConfigManager.cs" />
 		<Compile Include="..\OptimizelySDK\OptimizelyDecisions\DecisionMessage.cs" />
-		<Compile Include="..\OptimizelySDK\OptimizelyDecisions\IDecisionReasons.cs" />
-		<Compile Include="..\OptimizelySDK\OptimizelyDecisions\DefaultDecisionReasons.cs" />
-		<Compile Include="..\OptimizelySDK\OptimizelyDecisions\ErrorsDecisionReasons.cs" />
+		<Compile Include="..\OptimizelySDK\OptimizelyDecisions\DecisionReasons.cs" />
 		<Compile Include="..\OptimizelySDK\OptimizelyDecisions\OptimizelyDecideOption.cs" />
 		<Compile Include="..\OptimizelySDK\OptimizelyDecisions\OptimizelyDecision.cs" />
 		<Compile Include="..\OptimizelySDK\OptimizelyUserContext.cs" />

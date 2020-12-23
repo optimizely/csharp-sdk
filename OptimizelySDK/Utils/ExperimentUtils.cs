@@ -52,8 +52,7 @@ namespace OptimizelySDK.Utils
             string loggingKey,
             ILogger logger)
         {
-            // TODO Make it conditional
-            IDecisionReasons reasons = DefaultDecisionReasons.NewInstance();
+            var reasons = new DecisionReasons();
             if (userAttributes == null)
                 userAttributes = new UserAttributes();
 

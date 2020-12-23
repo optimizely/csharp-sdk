@@ -19,27 +19,10 @@ using System.Collections.Generic;
 
 namespace OptimizelySDK.OptimizelyDecisions
 {
-    public class DefaultDecisionReasons : IDecisionReasons
+    public class DecisionReasons
     {
         protected List<string> Errors = new List<string>();
         private List<string> Infos = new List<string>();
-
-        public static IDecisionReasons NewInstance(OptimizelyDecideOption[] options)
-        {
-            if (options != null && Array.Exists(options, option => option == OptimizelyDecideOption.INCLUDE_REASONS))
-            {
-                return new DefaultDecisionReasons();
-            }
-            else
-            {
-                return new ErrorsDecisionReasons();
-            }
-        }
-
-        public static IDecisionReasons NewInstance()
-        {
-            return NewInstance(null);
-        }
 
         public void AddError(string format, params object[] args)
         {
@@ -47,17 +30,30 @@ namespace OptimizelySDK.OptimizelyDecisions
             Errors.Add(message);
         }
 
-        public virtual string AddInfo(string format, params object[] args)
+        public string AddInfo(string format, params object[] args)
         {
             string message = string.Format(format, args);
             Infos.Add(message);
+
             return message;
         }
 
-        public virtual List<string> ToReport()
+        public static DecisionReasons operator +(DecisionReasons a, DecisionReasons b)
+        {
+            a.Errors.AddRange(b.Errors);
+            a.Infos.AddRange(b.Infos);
+
+            return a;
+        }
+
+        public List<string> ToReport(bool includeReasons = false)
         {
             List<string> reasons = new List<string>(Errors);
-            reasons.AddRange(Infos);
+
+            if (includeReasons) {
+                reasons.AddRange(Infos);
+            }
+            
             return reasons;
         }
     }

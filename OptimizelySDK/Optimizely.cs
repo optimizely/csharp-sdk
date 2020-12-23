@@ -482,7 +482,7 @@ namespace OptimizelySDK
             var sourceInfo = new Dictionary<string, string>();
             var decisionResult = DecisionService.GetVariationForFeature(featureFlag, userId, config, userAttributes);
             var variation = decisionResult.ResultObject.Variation;
-            var decisionSource = decisionResult?.ResultObject.Source ?? FeatureDecision.DECISION_SOURCE_ROLLOUT;
+            var decisionSource = decisionResult.ResultObject.Source ?? FeatureDecision.DECISION_SOURCE_ROLLOUT;
 
 
             if (variation != null)
@@ -755,7 +755,7 @@ namespace OptimizelySDK
             var userAttributes = user.GetAttributes();
             var decisionEventDispatched = false;
             var allOptions = GetAllOptions(options);
-            var decisionReasons = DefaultDecisionReasons.NewInstance(allOptions);
+            var decisionReasons = new DecisionReasons();
 
             var flagDecisionResult = DecisionService.GetVariationForFeature(
                 flag,
@@ -814,7 +814,7 @@ namespace OptimizelySDK
                 SendImpressionEvent(flagDecisionResult.ResultObject.Experiment, variation, userId, userAttributes, config, key, decisionSource, featureEnabled);
                 decisionEventDispatched = true;
             }
-            var reasonsToReport = decisionReasons.ToReport();
+            var reasonsToReport = decisionReasons.ToReport(allOptions.Contains(OptimizelyDecideOption.INCLUDE_REASONS));
             var variationKey = flagDecisionResult.ResultObject.Variation?.Key;
 
             // TODO: add ruleKey values when available later. use a copy of experimentKey until then.

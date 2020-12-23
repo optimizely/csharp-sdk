@@ -59,7 +59,7 @@ namespace OptimizelySDK.Tests
         private Variation VariationWithKeyVariation;
         private Variation GroupVariation;
         private Optimizely OptimizelyWithTypedAudiences;
-        private IDecisionReasons DecisionReasons;
+        private DecisionReasons DecisionReasons;
 
         const string FEATUREVARIABLE_BOOLEANTYPE = "boolean";
         const string FEATUREVARIABLE_INTEGERTYPE = "integer";
@@ -80,7 +80,7 @@ namespace OptimizelySDK.Tests
             EventProcessorMock = new Mock<EventProcessor>();
 
             EventProcessorMock.Setup(b => b.Process(It.IsAny<UserEvent>()));
-            DecisionReasons = DefaultDecisionReasons.NewInstance();
+            DecisionReasons = new DecisionReasons();
             var config = DatafileProjectConfig.Create(
                 content: TestData.Datafile,
                 logger: LoggerMock.Object,

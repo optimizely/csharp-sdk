@@ -283,14 +283,8 @@
 	<Compile Include="..\OptimizelySDK\OptimizelyDecisions\DecisionMessage.cs">
       <Link>OptimizelyDecisions\DecisionMessage.cs</Link>
     </Compile>
-	<Compile Include="..\OptimizelySDK\OptimizelyDecisions\IDecisionReasons.cs">
-      <Link>OptimizelyDecisions\IDecisionReasons.cs</Link>
-    </Compile>
-	<Compile Include="..\OptimizelySDK\OptimizelyDecisions\DefaultDecisionReasons.cs">
-      <Link>OptimizelyDecisions\DefaultDecisionReasons.cs</Link>
-    </Compile>
-	<Compile Include="..\OptimizelySDK\OptimizelyDecisions\ErrorsDecisionReasons.cs">
-      <Link>OptimizelyDecisions\ErrorsDecisionReasons.cs</Link>
+	<Compile Include="..\OptimizelySDK\OptimizelyDecisions\DecisionReasons.cs">
+      <Link>OptimizelyDecisions\DecisionReasons.cs</Link>
     </Compile>
 	<Compile Include="..\OptimizelySDK\OptimizelyDecisions\OptimizelyDecideOption.cs">
       <Link>OptimizelyDecisions\OptimizelyDecideOption.cs</Link>

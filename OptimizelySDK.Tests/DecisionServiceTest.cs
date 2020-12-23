@@ -46,7 +46,7 @@ namespace OptimizelySDK.Tests
 
         private Variation VariationWithKeyControl;
         private Variation VariationWithKeyVariation;
-        private IDecisionReasons DecisionReasons;
+        private DecisionReasons DecisionReasons;
         private ProjectConfig Config;
 
         [SetUp]
@@ -63,7 +63,7 @@ namespace OptimizelySDK.Tests
 
             DecisionService = new DecisionService(new Bucketer(LoggerMock.Object), ErrorHandlerMock.Object, null, LoggerMock.Object);
             DecisionServiceMock = new Mock<DecisionService>(BucketerMock.Object, ErrorHandlerMock.Object, null, LoggerMock.Object) { CallBase = true };
-            DecisionReasons = DefaultDecisionReasons.NewInstance();
+            DecisionReasons = new OptimizelySDK.OptimizelyDecisions.DecisionReasons();
 
             VariationWithKeyControl = ProjectConfig.GetVariationFromKey("test_experiment", "control");
             VariationWithKeyVariation = ProjectConfig.GetVariationFromKey("test_experiment", "variation");
