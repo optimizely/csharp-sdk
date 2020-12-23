@@ -91,7 +91,7 @@
 		<Compile Include="..\OptimizelySDK\OptimizelyDecisions\DecisionMessage.cs" />
 		<Compile Include="..\OptimizelySDK\OptimizelyDecisions\IDecisionReasons.cs" />
 		<Compile Include="..\OptimizelySDK\OptimizelyDecisions\DefaultDecisionReasons.cs" />
-		<Compile Include="..\OptimizelySDK\OptimizelyDecisions\ErrorsDecisionReasons.cs"/>
+		<Compile Include="..\OptimizelySDK\OptimizelyDecisions\ErrorsDecisionReasons.cs" />
 		<Compile Include="..\OptimizelySDK\OptimizelyDecisions\OptimizelyDecideOption.cs" />
 		<Compile Include="..\OptimizelySDK\OptimizelyDecisions\OptimizelyDecision.cs" />
 		<Compile Include="..\OptimizelySDK\OptimizelyUserContext.cs" />
@@ -142,6 +142,9 @@
 		</Compile>
 		<Compile Include="..\OptimizelySDK\Event\EventProcessor.cs">
 		  <Link>EventProcessor.cs</Link>
+		</Compile>
+		<Compile Include="..\OptimizelySDK\Entity\Result.cs">
+		  <Link>Result.cs</Link>
 		</Compile>
     </ItemGroup>
     <ItemGroup>

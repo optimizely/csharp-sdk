@@ -301,6 +301,9 @@
 	<Compile Include="..\OptimizelySDK\OptimizelyUserContext.cs">
       <Link>OptimizelyUserContext.cs</Link>
     </Compile>
+	<Compile Include="..\OptimizelySDK\Entity\Result.cs">
+	  <Link>Entity\Result.cs</Link>
+	</Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\OptimizelySDK\Event\.DS_Store">

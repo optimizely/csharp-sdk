@@ -45,34 +45,14 @@ namespace OptimizelySDK.Utils
         /// <param name="loggingKeyType">It can be either experiment or rule.</param>
         /// <param name="loggingKey">In case loggingKeyType is experiment it will be experiment key or else it will be rule number.</param>
         /// <returns>true if the user meets audience conditions to be in experiment, false otherwise.</returns>
-        public static bool DoesUserMeetAudienceConditions(ProjectConfig config,
+        public static Result<bool> DoesUserMeetAudienceConditions(ProjectConfig config,
             Experiment experiment,
             UserAttributes userAttributes,
             string loggingKeyType,
             string loggingKey,
             ILogger logger)
         {
-            return DoesUserMeetAudienceConditions(config, experiment, userAttributes, loggingKeyType, loggingKey, DefaultDecisionReasons.NewInstance(), logger);
-        }
-
-        /// <summary>
-        /// Check if the user meets audience conditions to be in experiment or not
-        /// </summary>
-        /// <param name="config">ProjectConfig Configuration for the project</param>
-        /// <param name="experiment">Experiment Entity representing the experiment</param>
-        /// <param name="userAttributes">Attributes of the user. Defaults to empty attributes array if not provided</param>
-        /// <param name="loggingKeyType">It can be either experiment or rule.</param>
-        /// <param name="loggingKey">In case loggingKeyType is experiment it will be experiment key or else it will be rule number.</param>
-        /// <param name="reasons">Decision log messages.</param>
-        /// <returns>true if the user meets audience conditions to be in experiment, false otherwise.</returns>
-        public static bool DoesUserMeetAudienceConditions(ProjectConfig config,
-            Experiment experiment,
-            UserAttributes userAttributes,
-            string loggingKeyType,
-            string loggingKey,
-            IDecisionReasons reasons,
-            ILogger logger)
-        {
+            IDecisionReasons reasons = null;
             if (userAttributes == null)
                 userAttributes = new UserAttributes();
 
@@ -90,12 +70,12 @@ namespace OptimizelySDK.Utils
 
             // If there are no audiences, return true because that means ALL users are included in the experiment.
             if (expConditions == null)
-                return true;
+                return Result<bool>.NewResult(true, reasons);
 
             var result = expConditions.Evaluate(config, userAttributes, logger).GetValueOrDefault();
             var resultText = result.ToString().ToUpper();
             logger.Log(LogLevel.INFO, reasons.AddInfo($@"Audiences for {loggingKeyType} ""{loggingKey}"" collectively evaluated to {resultText}"));
-            return result;
+            return Result<bool>.NewResult(result, reasons);
         }
     }
 }
