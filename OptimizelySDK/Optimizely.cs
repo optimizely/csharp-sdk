@@ -378,7 +378,7 @@ namespace OptimizelySDK
             var decisionInfo = new Dictionary<string, object>
             {
                 { "experimentKey", experimentKey },
-                { "variationKey", variationResult?.ResultObject.Key },
+                { "variationKey", variationResult?.ResultObject?.Key },
             };
 
             userAttributes = userAttributes ?? new UserAttributes();
@@ -481,8 +481,8 @@ namespace OptimizelySDK
             bool featureEnabled = false;
             var sourceInfo = new Dictionary<string, string>();
             var decisionResult = DecisionService.GetVariationForFeature(featureFlag, userId, config, userAttributes);
-            var variation = decisionResult.ResultObject.Variation;
-            var decisionSource = decisionResult.ResultObject.Source ?? FeatureDecision.DECISION_SOURCE_ROLLOUT;
+            var variation = decisionResult.ResultObject?.Variation;
+            var decisionSource = decisionResult.ResultObject?.Source ?? FeatureDecision.DECISION_SOURCE_ROLLOUT;
 
 
             if (variation != null)
@@ -491,8 +491,9 @@ namespace OptimizelySDK
 
                 // This information is only necessary for feature tests.
                 // For rollouts experiments and variations are an implementation detail only.
-                if (decisionResult.ResultObject.Source == FeatureDecision.DECISION_SOURCE_FEATURE_TEST)
+                if (decisionResult.ResultObject?.Source == FeatureDecision.DECISION_SOURCE_FEATURE_TEST)
                 {
+                    decisionSource = decisionResult.ResultObject.Source;
                     sourceInfo["experimentKey"] = decisionResult.ResultObject.Experiment.Key;
                     sourceInfo["variationKey"] = variation.Key;
                 }
@@ -511,11 +512,11 @@ namespace OptimizelySDK
             {
                 { "featureKey", featureKey },
                 { "featureEnabled", featureEnabled },
-                { "source", decisionResult.ResultObject.Source },
+                { "source", decisionSource },
                 { "sourceInfo", sourceInfo },
             };
 
-            SendImpressionEvent(decisionResult.ResultObject.Experiment, variation, userId, userAttributes, config, featureKey, decisionSource, featureEnabled);
+            SendImpressionEvent(decisionResult.ResultObject?.Experiment, variation, userId, userAttributes, config, featureKey, decisionSource, featureEnabled);
 
             NotificationCenter.SendNotifications(NotificationCenter.NotificationType.Decision, DecisionNotificationTypes.FEATURE, userId,
                userAttributes ?? new UserAttributes(), decisionInfo);
@@ -574,7 +575,7 @@ namespace OptimizelySDK
             var variableValue = featureVariable.DefaultValue;
             var decisionResult = DecisionService.GetVariationForFeature(featureFlag, userId, config, userAttributes);
 
-            if (decisionResult.ResultObject.Variation != null)
+            if (decisionResult.ResultObject?.Variation != null)
             {
                 var variation = decisionResult.ResultObject.Variation;
                 featureEnabled = variation.FeatureEnabled.GetValueOrDefault();
@@ -604,7 +605,7 @@ namespace OptimizelySDK
             }
 
             var sourceInfo = new Dictionary<string, string>();
-            if (decisionResult?.ResultObject.Source == FeatureDecision.DECISION_SOURCE_FEATURE_TEST)
+            if (decisionResult.ResultObject?.Source == FeatureDecision.DECISION_SOURCE_FEATURE_TEST)
             {
                 sourceInfo["experimentKey"] = decisionResult.ResultObject.Experiment.Key;
                 sourceInfo["variationKey"] = decisionResult.ResultObject.Variation.Key;
@@ -618,7 +619,7 @@ namespace OptimizelySDK
                 { "variableKey", variableKey },
                 { "variableValue", typeCastedValue is OptimizelyJSON? ((OptimizelyJSON)typeCastedValue).ToDictionary() : typeCastedValue },
                 { "variableType", variableType.ToString().ToLower() },
-                { "source", decisionResult?.ResultObject.Source },
+                { "source", decisionResult.ResultObject?.Source },
                 { "sourceInfo", sourceInfo },
             };
 
@@ -755,7 +756,6 @@ namespace OptimizelySDK
             var userAttributes = user.GetAttributes();
             var decisionEventDispatched = false;
             var allOptions = GetAllOptions(options);
-            var decisionReasons = new DecisionReasons();
 
             var flagDecisionResult = DecisionService.GetVariationForFeature(
                 flag,
@@ -766,7 +766,7 @@ namespace OptimizelySDK
 
             var featureEnabled = false;
 
-            var variation = flagDecisionResult.ResultObject.Variation;
+            var variation = flagDecisionResult.ResultObject?.Variation;
 
             if (variation != null)
             {
@@ -808,17 +808,18 @@ namespace OptimizelySDK
             
             var optimizelyJSON = new OptimizelyJSON(variableMap, ErrorHandler, Logger);
 
-            var decisionSource = flagDecisionResult?.ResultObject.Source ?? FeatureDecision.DECISION_SOURCE_ROLLOUT;
+            var decisionSource = flagDecisionResult?.ResultObject?.Source ?? FeatureDecision.DECISION_SOURCE_ROLLOUT;
             if (!allOptions.Contains(OptimizelyDecideOption.DISABLE_DECISION_EVENT))
             {
-                SendImpressionEvent(flagDecisionResult.ResultObject.Experiment, variation, userId, userAttributes, config, key, decisionSource, featureEnabled);
+                SendImpressionEvent(flagDecisionResult.ResultObject?.Experiment, variation, userId, userAttributes, config, key, decisionSource, featureEnabled);
                 decisionEventDispatched = true;
             }
+            var decisionReasons = flagDecisionResult.DecisionReasons;
             var reasonsToReport = decisionReasons.ToReport(allOptions.Contains(OptimizelyDecideOption.INCLUDE_REASONS));
-            var variationKey = flagDecisionResult.ResultObject.Variation?.Key;
+            var variationKey = flagDecisionResult.ResultObject?.Variation?.Key;
 
             // TODO: add ruleKey values when available later. use a copy of experimentKey until then.
-            var ruleKey = flagDecisionResult.ResultObject.Experiment?.Key;
+            var ruleKey = flagDecisionResult.ResultObject?.Experiment?.Key;
 
             var decisionInfo = new Dictionary<string, object>
             {
@@ -1030,7 +1031,7 @@ namespace OptimizelySDK
 
             var featureEnabled = false;
             var decisionResult = DecisionService.GetVariationForFeature(featureFlag, userId, config, userAttributes);
-            var variation = decisionResult.ResultObject.Variation;
+            var variation = decisionResult.ResultObject?.Variation;
 
             if (variation != null)
             {
@@ -1071,7 +1072,7 @@ namespace OptimizelySDK
                 valuesMap.Add(featureVariable.Key, typeCastedValue);
             }
             var sourceInfo = new Dictionary<string, string>();
-            if (decisionResult?.ResultObject.Source == FeatureDecision.DECISION_SOURCE_FEATURE_TEST)
+            if (decisionResult?.ResultObject?.Source == FeatureDecision.DECISION_SOURCE_FEATURE_TEST)
             {
                 sourceInfo["experimentKey"] = decisionResult.ResultObject.Experiment.Key;
                 sourceInfo["variationKey"] = decisionResult.ResultObject.Variation.Key;
@@ -1082,7 +1083,7 @@ namespace OptimizelySDK
                 { "featureKey", featureKey },
                 { "featureEnabled", featureEnabled },
                 { "variableValues", valuesMap },
-                { "source", decisionResult?.ResultObject.Source },
+                { "source", decisionResult?.ResultObject?.Source },
                 { "sourceInfo", sourceInfo },
             };
 

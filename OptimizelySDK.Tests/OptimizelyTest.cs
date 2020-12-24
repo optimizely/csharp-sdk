@@ -2775,7 +2775,7 @@ namespace OptimizelySDK.Tests
                 { "sourceInfo", new Dictionary<string, string>
                     {
                         { "experimentKey", "test_experiment_double_feature" },
-                        { "variationKey", "control" },
+                        { "variationKey", "control" }
                     }
                 },
             }))), Times.Once);

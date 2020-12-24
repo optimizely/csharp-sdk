@@ -79,7 +79,7 @@ namespace OptimizelySDK.Tests
             Variation expectedVariation = experiment.Variations[0];
 
             // user excluded without audiences and whitelisting
-            Assert.IsNull(decisionService.GetVariation(experiment, GenericUserId, ProjectConfig, new UserAttributes()));
+            Assert.IsNull(decisionService.GetVariation(experiment, GenericUserId, ProjectConfig, new UserAttributes()).ResultObject);
 
             var actualVariation = decisionService.GetVariation(experiment, WhitelistedUserId, ProjectConfig, new UserAttributes());
 
@@ -490,7 +490,7 @@ namespace OptimizelySDK.Tests
             };
 
             var decision = DecisionService.GetVariationForFeatureExperiment(featureFlag, GenericUserId, new UserAttributes() { }, ProjectConfig, new OptimizelyDecideOption[] { });
-            Assert.IsNull(decision);
+            Assert.IsNull(decision.ResultObject);
 
             LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Experiment ID \"29039203\" is not in datafile."));
         }
@@ -505,7 +505,7 @@ namespace OptimizelySDK.Tests
             var featureFlag = ProjectConfig.GetFeatureFlagFromKey("multi_variate_feature");
 
             var decision = DecisionServiceMock.Object.GetVariationForFeatureExperiment(featureFlag, "user1", new UserAttributes(), ProjectConfig, new OptimizelyDecideOption[] { });
-            Assert.IsNull(decision);
+            Assert.IsNull(decision.ResultObject);
 
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "The user \"user1\" is not bucketed into any of the experiments on the feature \"multi_variate_feature\"."));
         }
@@ -561,7 +561,7 @@ namespace OptimizelySDK.Tests
             var featureFlag = ProjectConfig.GetFeatureFlagFromKey("boolean_feature");
             var actualDecision = DecisionServiceMock.Object.GetVariationForFeatureExperiment(featureFlag, "user1", new UserAttributes(), ProjectConfig, new OptimizelyDecideOption[] { });
 
-            Assert.IsNull(actualDecision);
+            Assert.IsNull(actualDecision.ResultObject);
 
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "The user \"user1\" is not bucketed into any of the experiments on the feature \"boolean_feature\"."));
         }
@@ -674,7 +674,7 @@ namespace OptimizelySDK.Tests
             var decisionService = new DecisionService(BucketerMock.Object, ErrorHandlerMock.Object, null, LoggerMock.Object);
 
             var actualDecision = decisionService.GetVariationForFeatureRollout(featureFlag, "user_1", userAttributes, ProjectConfig);
-            Assert.IsNull(actualDecision);
+            Assert.IsNull(actualDecision.ResultObject);
         }
 
         // Should return expected variation when the user is attempted to be bucketed into all targeting rules
@@ -757,7 +757,7 @@ namespace OptimizelySDK.Tests
             }, ProjectConfig);
 
             // Returned decision entity should be null because bucket value exceeds traffic allocation of everyone else rule.
-            Assert.Null(actualDecision);
+            Assert.Null(actualDecision.ResultObject);
         }
 
         [Test]
@@ -780,12 +780,12 @@ namespace OptimizelySDK.Tests
 
             // Returned variation id should be null.
             actualDecision = decisionService.GetVariationForFeatureRollout(featureFlag, GenericUserId, null, ProjectConfig);
-            Assert.Null(actualDecision);
+            Assert.Null(actualDecision.ResultObject);
 
             // Returned variation id should be null as it fails audience Id checking.
             everyoneElseRule.AudienceIds = new string[] { ProjectConfig.Audiences[0].Id };
             actualDecision = decisionService.GetVariationForFeatureRollout(featureFlag, GenericUserId, null, ProjectConfig);
-            Assert.Null(actualDecision);
+            Assert.Null(actualDecision.ResultObject);
 
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "User \"testUser1\" does not meet the conditions for targeting rule \"1\"."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "User \"testUser1\" does not meet the conditions for targeting rule \"2\"."), Times.Once);
