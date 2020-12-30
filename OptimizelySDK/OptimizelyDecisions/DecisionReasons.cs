@@ -40,6 +40,8 @@ namespace OptimizelySDK.OptimizelyDecisions
 
         public static DecisionReasons operator +(DecisionReasons a, DecisionReasons b)
         {
+            if (b == null) return a;
+
             a.Errors.AddRange(b.Errors);
             a.Infos.AddRange(b.Infos);
 

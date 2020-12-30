@@ -106,7 +106,8 @@ namespace OptimizelySDK.Bucketing
             OptimizelyDecideOption[] options)
         {
             var reasons = new DecisionReasons();
-            if (!ExperimentUtils.IsExperimentActive(experiment, Logger)) return null;
+            if (!ExperimentUtils.IsExperimentActive(experiment, Logger))
+                return Result<Variation>.NullResult(reasons);
 
             // check if a forced variation is set
             var forcedVariationResult = GetForcedVariation(experiment.Key, userId, config);
@@ -199,7 +200,7 @@ namespace OptimizelySDK.Bucketing
             if (ForcedVariationMap.ContainsKey(userId) == false)
             {
                 Logger.Log(LogLevel.DEBUG, $@"User ""{userId}"" is not in the forced variation map.");
-                return null;
+                return Result<Variation>.NullResult(reasons);
             }
 
             Dictionary<string, string> experimentToVariationMap = ForcedVariationMap[userId];
@@ -208,12 +209,12 @@ namespace OptimizelySDK.Bucketing
 
             // this case is logged in getExperimentFromKey  
             if (string.IsNullOrEmpty(experimentId))
-                return null;
+                return Result<Variation>.NullResult(reasons);
 
             if (experimentToVariationMap.ContainsKey(experimentId) == false)
             {
                 Logger.Log(LogLevel.DEBUG, $@"No experiment ""{experimentKey}"" mapped to user ""{userId}"" in the forced variation map.");
-                return null;
+                return Result<Variation>.NullResult(reasons);
             }
 
             string variationId = experimentToVariationMap[experimentId];
@@ -221,14 +222,14 @@ namespace OptimizelySDK.Bucketing
             if (string.IsNullOrEmpty(variationId))
             {
                 Logger.Log(LogLevel.DEBUG, $@"No variation mapped to experiment ""{experimentKey}"" in the forced variation map.");
-                return null;
+                return Result<Variation>.NullResult(reasons);
             }
 
             string variationKey = config.GetVariationFromId(experimentKey, variationId).Key;
 
             // this case is logged in getVariationFromKey   
             if (string.IsNullOrEmpty(variationKey))
-                return null;
+                return Result<Variation>.NullResult(reasons);
             Logger.Log(LogLevel.DEBUG, reasons.AddInfo($@"Variation ""{variationKey}"" is mapped to experiment ""{experimentKey}"" and user ""{userId}"" in the forced variation map"));
 
             Variation variation = config.GetVariationFromKey(experimentKey, variationKey);
@@ -302,7 +303,7 @@ namespace OptimizelySDK.Bucketing
             Dictionary<string, string> userIdToVariationKeyMap = experiment.UserIdToKeyVariations;
 
             if (!userIdToVariationKeyMap.ContainsKey(userId))
-                return null;
+                return Result<Variation>.NullResult(reasons);
 
             string forcedVariationKey = userIdToVariationKeyMap[userId];
             Variation forcedVariation = experiment.VariationKeyToVariationMap.ContainsKey(forcedVariationKey)
@@ -338,7 +339,7 @@ namespace OptimizelySDK.Bucketing
             if (decision == null)
             {
                 Logger.Log(LogLevel.INFO, reasons.AddInfo($"No previously activated variation of experiment \"{experimentKey}\" for user \"{userProfile.UserId}\" found in user profile."));
-                return null;
+                return Result<Variation>.NullResult(reasons);
             }
 
             try
@@ -352,7 +353,7 @@ namespace OptimizelySDK.Bucketing
                 if (savedVariation == null)
                 {
                     Logger.Log(LogLevel.INFO, reasons.AddInfo($"User \"{userProfile.UserId}\" was previously bucketed into variation with ID \"{variationId}\" for experiment \"{experimentId}\", but no matching variation was found for that user. We will re-bucket the user."));
-                    return null;
+                    return Result<Variation>.NullResult(reasons);
                 }
 
                 Logger.Log(LogLevel.INFO, reasons.AddInfo($"Returning previously activated variation \"{savedVariation.Key}\" of experiment \"{experimentKey}\" for user \"{userProfile.UserId}\" from user profile."));
@@ -360,7 +361,7 @@ namespace OptimizelySDK.Bucketing
             }
             catch (Exception)
             {
-                return null;
+                return Result<Variation>.NullResult(reasons);
             }
         }
 
@@ -423,13 +424,13 @@ namespace OptimizelySDK.Bucketing
             if (featureFlag == null)
             {
                 Logger.Log(LogLevel.ERROR, "Invalid feature flag provided.");
-                return null;
+                return Result<FeatureDecision>.NullResult(reasons);
             }
 
             if (string.IsNullOrEmpty(featureFlag.RolloutId))
             {
                 Logger.Log(LogLevel.INFO, reasons.AddInfo($"The feature flag \"{featureFlag.Key}\" is not used in a rollout."));
-                return null;
+                return Result<FeatureDecision>.NullResult(reasons);
             }
 
             Rollout rollout = config.GetRolloutFromId(featureFlag.RolloutId);
@@ -437,11 +438,11 @@ namespace OptimizelySDK.Bucketing
             if (string.IsNullOrEmpty(rollout.Id))
             {
                 Logger.Log(LogLevel.ERROR, reasons.AddInfo($"The rollout with id \"{featureFlag.RolloutId}\" is not found in the datafile for feature flag \"{featureFlag.Key}\""));
-                return null;
+                return Result<FeatureDecision>.NullResult(reasons);
             }
 
             if (rollout.Experiments == null ||  rollout.Experiments.Count == 0) {
-                return null;
+                return Result<FeatureDecision>.NullResult(reasons);
             }
 
             Result<Variation> variationResult = null;
@@ -519,13 +520,13 @@ namespace OptimizelySDK.Bucketing
             if (featureFlag == null)
             {
                 Logger.Log(LogLevel.ERROR, "Invalid feature flag provided.");
-                return null;
+                return Result<FeatureDecision>.NullResult(reasons);
             }
 
             if (featureFlag.ExperimentIds == null || featureFlag.ExperimentIds.Count == 0)
             {
                 Logger.Log(LogLevel.INFO, reasons.AddInfo($"The feature flag \"{featureFlag.Key}\" is not used in any experiments."));
-                return null;
+                return Result<FeatureDecision>.NullResult(reasons);
             }
 
             foreach (var experimentId in featureFlag.ExperimentIds)
