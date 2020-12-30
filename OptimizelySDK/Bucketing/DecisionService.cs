@@ -139,7 +139,7 @@ namespace OptimizelySDK.Bucketing
                         userProfile = UserProfileUtil.ConvertMapToUserProfile(userProfileMap);
                         variationResult = GetStoredVariation(experiment, userProfile, config);
                         reasons += variationResult.DecisionReasons;
-                        if (variationResult != null) return variationResult.SetReasons(reasons);
+                        if (variationResult.ResultObject != null) return variationResult.SetReasons(reasons);
                     }
                     else if (userProfileMap == null)
                     {
