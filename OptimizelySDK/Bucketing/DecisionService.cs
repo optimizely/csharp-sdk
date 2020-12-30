@@ -109,18 +109,19 @@ namespace OptimizelySDK.Bucketing
             if (!ExperimentUtils.IsExperimentActive(experiment, Logger)) return null;
 
             // check if a forced variation is set
-            var forcedVariation = GetForcedVariation(experiment.Key, userId, config);
-            if (forcedVariation != null)
+            var forcedVariationResult = GetForcedVariation(experiment.Key, userId, config);
+            reasons += forcedVariationResult.DecisionReasons;
+
+            if (forcedVariationResult.ResultObject != null)
             {
-                reasons += forcedVariation?.DecisionReasons;
-                return forcedVariation.SetReasons(reasons);
+                return forcedVariationResult.SetReasons(reasons);
             }
 
             var variationResult = GetWhitelistedVariation(experiment, userId);
+            reasons += variationResult.DecisionReasons;
 
             if (variationResult?.ResultObject != null)
-            {
-                reasons += variationResult.DecisionReasons;
+            {                
                 return variationResult.SetReasons(reasons);
             }
             // fetch the user profile map from the user profile service
@@ -154,8 +155,9 @@ namespace OptimizelySDK.Bucketing
                     ErrorHandler.HandleError(new Exceptions.OptimizelyRuntimeException(exception.Message));
                 }
             }
-
-            if (ExperimentUtils.DoesUserMeetAudienceConditions(config, experiment, filteredAttributes, LOGGING_KEY_TYPE_EXPERIMENT, experiment.Key, Logger).ResultObject)
+            var doesUserMeetAudienceConditionsResult = ExperimentUtils.DoesUserMeetAudienceConditions(config, experiment, filteredAttributes, LOGGING_KEY_TYPE_EXPERIMENT, experiment.Key, Logger);
+            reasons += doesUserMeetAudienceConditionsResult.DecisionReasons;
+            if (doesUserMeetAudienceConditionsResult.ResultObject)
             {
                 // Get Bucketing ID from user attributes.
                 var bucketingIdResult = GetBucketingId(userId, filteredAttributes);
@@ -180,7 +182,7 @@ namespace OptimizelySDK.Bucketing
             }
             Logger.Log(LogLevel.INFO, reasons.AddInfo($"User \"{userId}\" does not meet conditions to be in experiment \"{experiment.Key}\"."));
 
-            return Result<Variation>.NewResult(null, reasons);
+            return Result<Variation>.NullResult(reasons);
         }
 
         /// <summary>
@@ -459,7 +461,7 @@ namespace OptimizelySDK.Bucketing
                 {
                     variationResult = Bucketer.Bucket(config, rolloutRule, bucketingIdResult.ResultObject, userId);
 
-                    if (variationResult == null || string.IsNullOrEmpty(variationResult.ResultObject?.Id))
+                    if (string.IsNullOrEmpty(variationResult.ResultObject?.Id))
                     {
                         break;
                     }
@@ -483,7 +485,7 @@ namespace OptimizelySDK.Bucketing
             if (userMeetConditionsResultEveryoneElse.ResultObject)
             {
                 variationResult = Bucketer.Bucket(config, everyoneElseRolloutRule, bucketingIdResult.ResultObject, userId);
-                if (variationResult != null && !string.IsNullOrEmpty(variationResult?.ResultObject?.Id))
+                if (!string.IsNullOrEmpty(variationResult?.ResultObject?.Id))
                 {
                     reasons += variationResult.DecisionReasons;
                     Logger.Log(LogLevel.DEBUG, $"User \"{userId}\" meets conditions for targeting rule \"Everyone Else\".");
@@ -534,9 +536,10 @@ namespace OptimizelySDK.Bucketing
                     continue;
 
                 var variationResult = GetVariation(experiment, userId, config, filteredAttributes, options);
-                if (variationResult != null && !string.IsNullOrEmpty(variationResult.ResultObject?.Id))
+                reasons += variationResult.DecisionReasons;
+
+                if (!string.IsNullOrEmpty(variationResult.ResultObject?.Id))
                 {
-                    reasons += variationResult.DecisionReasons;
                     Logger.Log(LogLevel.INFO, reasons.AddInfo($"The user \"{userId}\" is bucketed into experiment \"{experiment.Key}\" of feature \"{featureFlag.Key}\"."));
                     return Result<FeatureDecision>.NewResult(new FeatureDecision(experiment, variationResult.ResultObject, FeatureDecision.DECISION_SOURCE_FEATURE_TEST), reasons);
                 }
@@ -578,18 +581,19 @@ namespace OptimizelySDK.Bucketing
             var reasons = new DecisionReasons();
             // Check if the feature flag has an experiment and the user is bucketed into that experiment.
             var decisionResult = GetVariationForFeatureExperiment(featureFlag, userId, filteredAttributes, config, options);
+            reasons += decisionResult.DecisionReasons;
 
-            if (decisionResult != null)
+            if (decisionResult.ResultObject != null)
             {
-                reasons += decisionResult.DecisionReasons;
                 return Result<FeatureDecision>.NewResult(decisionResult.ResultObject, reasons);
             }
 
             // Check if the feature flag has rollout and the the user is bucketed into one of its rules.
             decisionResult = GetVariationForFeatureRollout(featureFlag, userId, filteredAttributes, config);
-            if (decisionResult != null)
+            reasons += decisionResult.DecisionReasons;
+
+            if (decisionResult.ResultObject != null)
             {
-                reasons += decisionResult.DecisionReasons;
                 Logger.Log(LogLevel.INFO, reasons.AddInfo($"The user \"{userId}\" is bucketed into a rollout for feature flag \"{featureFlag.Key}\"."));
                 return Result<FeatureDecision>.NewResult(decisionResult.ResultObject, reasons);
             }
