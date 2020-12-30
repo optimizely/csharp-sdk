@@ -692,7 +692,8 @@ namespace OptimizelySDK.Tests
             var variation = Result<Variation>.NewResult(everyoneElseRule.Variations[0], DecisionReasons);
             var expectedDecision = new FeatureDecision(everyoneElseRule, variation.ResultObject, FeatureDecision.DECISION_SOURCE_ROLLOUT);
             //BucketerMock.CallBase = true;
-            BucketerMock.Setup(bm => bm.Bucket(It.IsAny<ProjectConfig>(), everyoneElseRule, It.IsAny<string>(), It.IsAny<string>())).Returns(Result<Variation>.NullResult(null));
+            BucketerMock.Setup(bm => bm.Bucket(It.IsAny<ProjectConfig>(), It.IsNotIn<Experiment>(everyoneElseRule), It.IsAny<string>(), It.IsAny<string>())).Returns(Result<Variation>.NullResult(null));
+            BucketerMock.Setup(bm => bm.Bucket(It.IsAny<ProjectConfig>(), everyoneElseRule, It.IsAny<string>(), It.IsAny<string>())).Returns(variation);
             var decisionService = new DecisionService(BucketerMock.Object, ErrorHandlerMock.Object, null, LoggerMock.Object);
 
             // Provide null attributes so that user does not qualify for audience.

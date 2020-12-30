@@ -2434,7 +2434,8 @@ namespace OptimizelySDK.Tests
             
             NotificationCallbackMock.Setup(nc => nc.TestDecisionCallback(It.IsAny<string>(), It.IsAny<string>(),
                 It.IsAny<UserAttributes>(), It.IsAny<Dictionary<string, object>>()));
-            DecisionServiceMock.Setup(ds => ds.GetVariation(experiment, TestUserId, Config, null)).Returns<Variation>(null);
+            DecisionServiceMock.Setup(ds => ds.GetVariation(experiment, TestUserId, It.IsAny<ProjectConfig>(), null)).Returns(Result<Variation>.NullResult(null));
+            //DecisionServiceMock.Setup(ds => ds.GetVariation(It.IsAny<Experiment>(), It.IsAny<string>(), It.IsAny<ProjectConfig>(), It.IsAny<UserAttributes>())).Returns(Result<Variation>.NullResult(null));
 
             var optly = Helper.CreatePrivateOptimizely();
             var optStronglyTyped = optly.GetObject() as Optimizely;
@@ -2533,7 +2534,8 @@ namespace OptimizelySDK.Tests
 
             NotificationCallbackMock.Setup(nc => nc.TestDecisionCallback(It.IsAny<string>(), It.IsAny<string>(),
                 It.IsAny<UserAttributes>(), It.IsAny<Dictionary<string, object>>()));
-            DecisionServiceMock.Setup(ds => ds.GetVariation(experiment, TestUserId, Config, null)).Returns<Variation>(null);
+            DecisionServiceMock.Setup(ds => ds.GetVariation(It.IsAny<Experiment>(), It.IsAny<string>(), It.IsAny<ProjectConfig>(), It.IsAny<UserAttributes>())).Returns(Result<Variation>.NullResult(null));
+            //DecisionServiceMock.Setup(ds => ds.GetVariation(experiment, TestUserId, Config, null)).Returns(Result<Variation>.NullResult(null));
 
             var optly = Helper.CreatePrivateOptimizely();
             var optStronglyTyped = optly.GetObject() as Optimizely;
