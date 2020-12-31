@@ -36,7 +36,7 @@ namespace OptimizelySDK.Entity
 
         public static Result<T> NullResult(DecisionReasons decisionReasons)
         {
-            return NewResult(default, decisionReasons);
+            return NewResult(default(T), decisionReasons);
         }
     }
 }
