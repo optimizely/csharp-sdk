@@ -121,7 +121,7 @@ namespace OptimizelySDK.Bucketing
             var variationResult = GetWhitelistedVariation(experiment, userId);
             reasons += variationResult.DecisionReasons;
 
-            if (variationResult?.ResultObject != null)
+            if (variationResult.ResultObject != null)
             {                
                 return variationResult.SetReasons(reasons);
             }
@@ -167,7 +167,7 @@ namespace OptimizelySDK.Bucketing
                 variationResult = Bucketer.Bucket(config, experiment, bucketingIdResult.ResultObject, userId);
                 reasons += variationResult.DecisionReasons;
 
-                if (variationResult != null && variationResult.ResultObject?.Key != null)
+                if (variationResult.ResultObject?.Key != null)
                 {
                     if (UserProfileService != null && !ignoreUPS)
                     {
@@ -461,20 +461,15 @@ namespace OptimizelySDK.Bucketing
                 if (userMeetConditionsResult.ResultObject)
                 {
                     variationResult = Bucketer.Bucket(config, rolloutRule, bucketingIdResult.ResultObject, userId);
-
+                    reasons += variationResult?.DecisionReasons;
                     if (string.IsNullOrEmpty(variationResult.ResultObject?.Id))
                     {
                         break;
-                    }
-                    else
-                    {
-                        reasons += variationResult.DecisionReasons;
                     }
                     return Result<FeatureDecision>.NewResult(new FeatureDecision(rolloutRule, variationResult.ResultObject, FeatureDecision.DECISION_SOURCE_ROLLOUT), reasons);
                 }
                 else
                 {
-                    var audience = config.GetAudience(rolloutRule.AudienceIds[0]);
                     Logger.Log(LogLevel.DEBUG, $"User \"{userId}\" does not meet the conditions for targeting rule \"{loggingKey}\".");
                 }
             }
@@ -486,9 +481,10 @@ namespace OptimizelySDK.Bucketing
             if (userMeetConditionsResultEveryoneElse.ResultObject)
             {
                 variationResult = Bucketer.Bucket(config, everyoneElseRolloutRule, bucketingIdResult.ResultObject, userId);
+                reasons += variationResult?.DecisionReasons;
+
                 if (!string.IsNullOrEmpty(variationResult?.ResultObject?.Id))
                 {
-                    reasons += variationResult.DecisionReasons;
                     Logger.Log(LogLevel.DEBUG, $"User \"{userId}\" meets conditions for targeting rule \"Everyone Else\".");
                     return Result<FeatureDecision>.NewResult(new FeatureDecision(everyoneElseRolloutRule, variationResult.ResultObject, FeatureDecision.DECISION_SOURCE_ROLLOUT), reasons);
                 }

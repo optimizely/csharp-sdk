@@ -194,8 +194,10 @@ namespace OptimizelySDK.Tests
 
 
             DecisionService decisionService = new DecisionService(BucketerMock.Object, ErrorHandlerMock.Object, UserProfileServiceMock.Object, LoggerMock.Object);
-
-            Assert.IsTrue(TestData.CompareObjects(variation, decisionService.GetVariation(experiment, UserProfileId, ProjectConfig, new UserAttributes()).ResultObject));
+            var actualVariation = decisionService.GetVariation(experiment, UserProfileId, ProjectConfig, new UserAttributes());
+            Assert.IsTrue(TestData.CompareObjects(variation, actualVariation.ResultObject));
+            Assert.AreEqual(actualVariation.DecisionReasons.ToReport(true).Count, 1);
+            Assert.AreEqual(actualVariation.DecisionReasons.ToReport(true)[0], "Returning previously activated variation \"vtag1\" of experiment \"etag1\" for user \"userProfileId\" from user profile.");
 
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, string.Format("Returning previously activated variation \"{0}\" of experiment \"{1}\" for user \"{2}\" from user profile.",
                 variation.Key, experiment.Key, UserProfileId)));
@@ -773,7 +775,7 @@ namespace OptimizelySDK.Tests
             var expectedDecision = new FeatureDecision(everyoneElseRule, variation.ResultObject, FeatureDecision.DECISION_SOURCE_ROLLOUT);
 
             BucketerMock.Setup(bm => bm.Bucket(It.IsAny<ProjectConfig>(), everyoneElseRule, It.IsAny<string>(), WhitelistedUserId)).Returns(variation);
-            BucketerMock.Setup(bm => bm.Bucket(It.IsAny<ProjectConfig>(), everyoneElseRule, It.IsAny<string>(), GenericUserId)).Returns(Result<Variation>.NullResult(null));
+            BucketerMock.Setup(bm => bm.Bucket(It.IsAny<ProjectConfig>(), everyoneElseRule, It.IsAny<string>(), GenericUserId)).Returns(Result<Variation>.NullResult(DecisionReasons));
             
             var decisionService = new DecisionService(BucketerMock.Object, ErrorHandlerMock.Object, null, LoggerMock.Object);
 
@@ -788,8 +790,8 @@ namespace OptimizelySDK.Tests
             // Returned variation id should be null as it fails audience Id checking.
             everyoneElseRule.AudienceIds = new string[] { ProjectConfig.Audiences[0].Id };
 
-            BucketerMock.Setup(bm => bm.Bucket(It.IsAny<ProjectConfig>(), It.IsAny<Experiment>(), It.IsAny<string>(), GenericUserId)).Returns(Result<Variation>.NullResult(null));
-            actualDecision = decisionService.GetVariationForFeatureRollout(featureFlag, GenericUserId, null, ProjectConfig) ?? Result<FeatureDecision>.NullResult(null);
+            BucketerMock.Setup(bm => bm.Bucket(It.IsAny<ProjectConfig>(), It.IsAny<Experiment>(), It.IsAny<string>(), GenericUserId)).Returns(Result<Variation>.NullResult(DecisionReasons));
+            actualDecision = decisionService.GetVariationForFeatureRollout(featureFlag, GenericUserId, null, ProjectConfig) ?? Result<FeatureDecision>.NullResult(DecisionReasons);
             Assert.Null(actualDecision.ResultObject);
 
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "User \"testUser1\" does not meet the conditions for targeting rule \"1\"."), Times.Once);

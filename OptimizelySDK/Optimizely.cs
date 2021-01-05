@@ -437,7 +437,7 @@ namespace OptimizelySDK
             if (!ValidateStringInputs(inputValues))
                 return null;
 
-            return DecisionService.GetForcedVariation(experimentKey, userId, config)?.ResultObject;
+            return DecisionService.GetForcedVariation(experimentKey, userId, config).ResultObject;
         }
 
         #region  FeatureFlag APIs
@@ -808,7 +808,7 @@ namespace OptimizelySDK
             
             var optimizelyJSON = new OptimizelyJSON(variableMap, ErrorHandler, Logger);
 
-            var decisionSource = flagDecisionResult?.ResultObject?.Source ?? FeatureDecision.DECISION_SOURCE_ROLLOUT;
+            var decisionSource = flagDecisionResult.ResultObject?.Source ?? FeatureDecision.DECISION_SOURCE_ROLLOUT;
             if (!allOptions.Contains(OptimizelyDecideOption.DISABLE_DECISION_EVENT))
             {
                 SendImpressionEvent(flagDecisionResult.ResultObject?.Experiment, variation, userId, userAttributes, config, key, decisionSource, featureEnabled);
@@ -1072,7 +1072,7 @@ namespace OptimizelySDK
                 valuesMap.Add(featureVariable.Key, typeCastedValue);
             }
             var sourceInfo = new Dictionary<string, string>();
-            if (decisionResult?.ResultObject?.Source == FeatureDecision.DECISION_SOURCE_FEATURE_TEST)
+            if (decisionResult.ResultObject?.Source == FeatureDecision.DECISION_SOURCE_FEATURE_TEST)
             {
                 sourceInfo["experimentKey"] = decisionResult.ResultObject.Experiment.Key;
                 sourceInfo["variationKey"] = decisionResult.ResultObject.Variation.Key;
@@ -1083,7 +1083,7 @@ namespace OptimizelySDK
                 { "featureKey", featureKey },
                 { "featureEnabled", featureEnabled },
                 { "variableValues", valuesMap },
-                { "source", decisionResult?.ResultObject?.Source },
+                { "source", decisionResult.ResultObject?.Source },
                 { "sourceInfo", sourceInfo },
             };
 

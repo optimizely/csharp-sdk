@@ -121,7 +121,8 @@ namespace OptimizelySDK.Tests
             LoggerMock.Verify(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()), Times.Exactly(6));
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Assigned bucket [9000] to user [testUserId] with bucketing ID [testBucketingIdControl!]."));
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "User [testUserId] is in no variation."));
-            Assert.AreEqual(variation.DecisionReasons.ToReport().Count, 0);
+            Assert.AreEqual(variation.DecisionReasons.ToReport(true).Count, 1);
+            Assert.AreEqual(variation.DecisionReasons.ToReport(true)[0], "User [testUserId] is in no variation.");
         }
 
         [Test]
@@ -139,7 +140,9 @@ namespace OptimizelySDK.Tests
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "User [testUserId] is in experiment [group_experiment_1] of group [7722400015]."));
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Assigned bucket [4000] to user [testUserId] with bucketing ID [testBucketingIdControl!]."));
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "User [testUserId] is in variation [group_exp_1_var_1] of experiment [group_experiment_1]."));
-            Assert.AreEqual(variation.DecisionReasons.ToReport().Count, 0);
+            Assert.AreEqual(variation.DecisionReasons.ToReport(true).Count, 2);
+            Assert.AreEqual(variation.DecisionReasons.ToReport(true)[0], "User [testUserId] is in experiment [group_experiment_1] of group [7722400015].");
+            Assert.AreEqual(variation.DecisionReasons.ToReport(true)[1], "User [testUserId] is in variation [group_exp_1_var_1] of experiment [group_experiment_1].");
 
             // variation 2
             bucketer.SetBucketValues(new[] { 1500, 7000 });
@@ -150,7 +153,9 @@ namespace OptimizelySDK.Tests
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "User [testUserId] is in experiment [group_experiment_1] of group [7722400015]."));
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Assigned bucket [7000] to user [testUserId] with bucketing ID [testBucketingIdControl!]."));
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "User [testUserId] is in variation [group_exp_1_var_1] of experiment [group_experiment_1]."));
-            Assert.AreEqual(variation1.DecisionReasons.ToReport().Count, 0);
+            Assert.AreEqual(variation1.DecisionReasons.ToReport(true).Count, 2);
+            Assert.AreEqual(variation1.DecisionReasons.ToReport(true)[0], "User [testUserId] is in experiment [group_experiment_1] of group [7722400015].");
+            Assert.AreEqual(variation1.DecisionReasons.ToReport(true)[1], "User [testUserId] is in variation [group_exp_1_var_2] of experiment [group_experiment_1].");
 
             // User not in experiment
             bucketer.SetBucketValues(new[] { 5000, 7000 });
@@ -159,7 +164,8 @@ namespace OptimizelySDK.Tests
                 variation2.ResultObject);
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Assigned bucket [5000] to user [testUserId] with bucketing ID [testBucketingIdControl!]."));
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "User [testUserId] is not in experiment [group_experiment_1] of group [7722400015]."));
-            Assert.AreEqual(variation2.DecisionReasons.ToReport().Count, 0);
+            Assert.AreEqual(variation2.DecisionReasons.ToReport(true).Count, 1);
+            Assert.AreEqual(variation2.DecisionReasons.ToReport(true)[0], "User [testUserId] is not in experiment [group_experiment_1] of group [7722400015].");
 
             LoggerMock.Verify(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()), Times.Exactly(10));
         }
