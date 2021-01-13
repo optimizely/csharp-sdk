@@ -46,7 +46,7 @@ namespace OptimizelySDK
             UserId = userId;
         }
 
-        private OptimizelyUserContext Clone() => new OptimizelyUserContext(Optimizely, UserId, Attributes, ErrorHandler, Logger);
+        private OptimizelyUserContext Copy() => new OptimizelyUserContext(Optimizely, UserId, GetAttributes(), ErrorHandler, Logger);
 
         /// <summary>
         /// Returns Optimizely instance associated with the UserContext.
@@ -125,7 +125,7 @@ namespace OptimizelySDK
         public OptimizelyDecision Decide(string key,
             OptimizelyDecideOption[] options)
         {
-            var optimizelyUserContext = Clone();
+            var optimizelyUserContext = Copy();
             return Optimizely.Decide(optimizelyUserContext, key, options);
         }
 
@@ -136,7 +136,7 @@ namespace OptimizelySDK
         /// <returns>A dictionary of all decision results, mapped by flag keys.</returns>
         public Dictionary<string, OptimizelyDecision> DecideForKeys(string[] keys, OptimizelyDecideOption[] options)
         {
-            var optimizelyUserContext = Clone();
+            var optimizelyUserContext = Copy();
             return Optimizely.DecideForKeys(optimizelyUserContext, keys, options);
         }
 
@@ -166,7 +166,7 @@ namespace OptimizelySDK
         /// <returns>All decision results mapped by flag keys.</returns>
         public Dictionary<string, OptimizelyDecision> DecideAll(OptimizelyDecideOption[] options)
         {
-            var optimizelyUserContext = Clone();
+            var optimizelyUserContext = Copy();
             return Optimizely.DecideAll(optimizelyUserContext, options);
         }
 
