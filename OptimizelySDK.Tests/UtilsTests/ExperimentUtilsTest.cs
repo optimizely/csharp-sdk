@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2019-2020, Optimizely
+ * Copyright 2019-2021, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ using NUnit.Framework;
 using OptimizelySDK.Config;
 using OptimizelySDK.Entity;
 using OptimizelySDK.Logger;
+using OptimizelySDK.OptimizelyDecisions;
 using OptimizelySDK.Utils;
 
 namespace OptimizelySDK.Tests.UtilsTests
@@ -58,10 +59,11 @@ namespace OptimizelySDK.Tests.UtilsTests
         {
             var experiment = Config.GetExperimentFromKey("feat_with_var_test");
             experiment.AudienceIds = new string[] { "3468206648" };
-            
+            var decisionReasons = DefaultDecisionReasons.NewInstance(new OptimizelyDecideOption[] { OptimizelyDecideOption.INCLUDE_REASONS });
             Assert.True(ExperimentUtils.DoesUserMeetAudienceConditions(Config, experiment, null , "experiment", experiment.Key, Logger));;
-            Assert.True(ExperimentUtils.DoesUserMeetAudienceConditions(Config, experiment, new UserAttributes { }, "experiment", experiment.Key, Logger));
+            Assert.True(ExperimentUtils.DoesUserMeetAudienceConditions(Config, experiment, new UserAttributes { }, "experiment", experiment.Key, decisionReasons, Logger));
 
+            Assert.AreEqual(decisionReasons.ToReport()[0], "Audiences for experiment \"feat_with_var_test\" collectively evaluated to TRUE");
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, @"Evaluating audiences for experiment ""feat_with_var_test"": [""3468206648""]."), Times.Exactly(2));
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, @"Starting to evaluate audience ""3468206648"" with conditions: [""not"",{""name"":""input_value"",""type"":""custom_attribute"",""match"":""exists""}]"), Times.Exactly(2));
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, $@"Audience ""3468206648"" evaluated to TRUE"), Times.Exactly(2));
