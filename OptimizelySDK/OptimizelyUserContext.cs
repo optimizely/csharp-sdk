@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2020, Optimizely
+ * Copyright 2020-2021, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +45,8 @@ namespace OptimizelySDK
             Attributes = userAttributes ?? new UserAttributes();
             UserId = userId;
         }
+
+        private OptimizelyUserContext Copy() => new OptimizelyUserContext(Optimizely, UserId, GetAttributes(), ErrorHandler, Logger);
 
         /// <summary>
         /// Returns Optimizely instance associated with the UserContext.
@@ -123,7 +125,8 @@ namespace OptimizelySDK
         public OptimizelyDecision Decide(string key,
             OptimizelyDecideOption[] options)
         {
-            return Optimizely.Decide(this, key, options);
+            var optimizelyUserContext = Copy();
+            return Optimizely.Decide(optimizelyUserContext, key, options);
         }
 
         /// <summary>
@@ -133,7 +136,8 @@ namespace OptimizelySDK
         /// <returns>A dictionary of all decision results, mapped by flag keys.</returns>
         public Dictionary<string, OptimizelyDecision> DecideForKeys(string[] keys, OptimizelyDecideOption[] options)
         {
-            return Optimizely.DecideForKeys(this, keys, options);
+            var optimizelyUserContext = Copy();
+            return Optimizely.DecideForKeys(optimizelyUserContext, keys, options);
         }
 
         /// <summary>
@@ -162,7 +166,8 @@ namespace OptimizelySDK
         /// <returns>All decision results mapped by flag keys.</returns>
         public Dictionary<string, OptimizelyDecision> DecideAll(OptimizelyDecideOption[] options)
         {
-            return Optimizely.DecideAll(this, options);
+            var optimizelyUserContext = Copy();
+            return Optimizely.DecideAll(optimizelyUserContext, options);
         }
 
         /// <summary>
