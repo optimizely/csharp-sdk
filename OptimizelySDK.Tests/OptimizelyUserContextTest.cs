@@ -181,7 +181,8 @@ namespace OptimizelySDK.Tests
             Assert.AreEqual(decision.Variables.ToDictionary(), variablesExpected.ToDictionary());
             Assert.AreEqual(decision.RuleKey, "test_experiment_multivariate");
             Assert.AreEqual(decision.FlagKey, flagKey);
-            Assert.AreEqual(decision.UserContext, user);
+            Assert.AreNotEqual(decision.UserContext, user);
+            Assert.IsTrue(TestData.CompareObjects(decision.UserContext, user));
             Assert.AreEqual(decision.Reasons.Length, 0);
         }
 
@@ -551,7 +552,8 @@ namespace OptimizelySDK.Tests
             Assert.AreEqual(decision.Variables.ToDictionary(), variablesExpected);
             Assert.AreEqual(decision.RuleKey, "test_experiment_multivariate");
             Assert.AreEqual(decision.FlagKey, flagKey);
-            Assert.AreEqual(decision.UserContext, user);
+            Assert.AreNotEqual(decision.UserContext, user);
+            Assert.IsTrue(TestData.CompareObjects(decision.UserContext, user));
             Assert.True(decision.Reasons.IsNullOrEmpty());
         }
 
@@ -580,7 +582,8 @@ namespace OptimizelySDK.Tests
             Assert.False(decision.Enabled);
             Assert.AreEqual(decision.RuleKey, "test_experiment_multivariate");
             Assert.AreEqual(decision.FlagKey, flagKey);
-            Assert.AreEqual(decision.UserContext, user);
+            Assert.AreNotEqual(decision.UserContext, user);
+            Assert.IsTrue(TestData.CompareObjects(decision.UserContext, user));
             Assert.True(decision.Reasons.IsNullOrEmpty());
 
             decision = user.Decide(flagKey, decideOptions);
@@ -611,7 +614,8 @@ namespace OptimizelySDK.Tests
             Assert.AreEqual(decision.Variables.ToDictionary(), variablesExpected.ToDictionary());
             Assert.AreEqual(decision.RuleKey, "test_experiment_multivariate");
             Assert.AreEqual(decision.FlagKey, flagKey);
-            Assert.AreEqual(decision.UserContext, user);
+            Assert.AreNotEqual(decision.UserContext, user);
+            Assert.IsTrue(TestData.CompareObjects(decision.UserContext, user));
         }
 
         [Test]
@@ -638,7 +642,8 @@ namespace OptimizelySDK.Tests
             Assert.AreEqual(decision.Variables.ToDictionary(), variablesExpected.ToDictionary());
             Assert.AreEqual(decision.RuleKey, "test_experiment_multivariate");
             Assert.AreEqual(decision.FlagKey, flagKey);
-            Assert.AreEqual(decision.UserContext, user);
+            Assert.AreNotEqual(decision.UserContext, user);
+            Assert.IsTrue(TestData.CompareObjects(decision.UserContext, user));
         }
 
         [Test]

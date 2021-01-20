@@ -1,5 +1,5 @@
-﻿/* 
- * Copyright 2017, 2019, 2021, Optimizely
+﻿/*
+ * Copyright 2017, 2019-2021, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ namespace OptimizelySDK.Tests
     {
         private Mock<ILogger> LoggerMock;
         private ProjectConfig Config;
+        private DecisionReasons DecisionReasonsObj;
         private const string TestUserId = "testUserId";
         public string TestBucketingIdControl { get; } = "testBucketingIdControl!"; // generates bucketing number 3741
         public string TestBucketingIdVariation { get; } = "123456789'"; // generates bucketing number 4567
@@ -60,6 +61,7 @@ namespace OptimizelySDK.Tests
         public void Initialize()
         {
             LoggerMock = new Mock<ILogger>();
+            DecisionReasonsObj = new DecisionReasons();
             Config = DatafileProjectConfig.Create(TestData.Datafile, LoggerMock.Object, new ErrorHandler.NoOpErrorHandler());
         }
 
@@ -104,6 +106,8 @@ namespace OptimizelySDK.Tests
             LoggerMock.Verify(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()), Times.Exactly(2));
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Assigned bucket [3000] to user [testUserId] with bucketing ID [testBucketingIdControl!]."));
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "User [testUserId] is in variation [control] of experiment [test_experiment]."));
+            Assert.AreEqual(variation.DecisionReasons.ToReport(true)[0], "User [testUserId] is in variation [control] of experiment [test_experiment].");
+
             // variation
             variation = bucketer.Bucket(Config, Config.GetExperimentFromKey("test_experiment"), TestBucketingIdControl, TestUserId);
             Assert.AreEqual(new Variation { Id = "7721010009", Key = "variation" },
@@ -112,6 +116,7 @@ namespace OptimizelySDK.Tests
             LoggerMock.Verify(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()), Times.Exactly(4));
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Assigned bucket [7000] to user [testUserId] with bucketing ID [testBucketingIdControl!]."));
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "User [testUserId] is in variation [variation] of experiment [test_experiment]."));
+            Assert.AreEqual(variation.DecisionReasons.ToReport(true)[0], "User [testUserId] is in variation [variation] of experiment [test_experiment].");
 
             // no variation
             variation = bucketer.Bucket(Config, Config.GetExperimentFromKey("test_experiment"), TestBucketingIdControl, TestUserId);
@@ -166,8 +171,6 @@ namespace OptimizelySDK.Tests
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "User [testUserId] is not in experiment [group_experiment_1] of group [7722400015]."));
             Assert.AreEqual(variation2.DecisionReasons.ToReport(true).Count, 1);
             Assert.AreEqual(variation2.DecisionReasons.ToReport(true)[0], "User [testUserId] is not in experiment [group_experiment_1] of group [7722400015].");
-
-            LoggerMock.Verify(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()), Times.Exactly(10));
         }
 
         [Test]
@@ -194,6 +197,11 @@ namespace OptimizelySDK.Tests
             Assert.AreEqual(expectedVariation,
                 variationResult.ResultObject);
             Assert.AreEqual(variationResult.DecisionReasons.ToReport().Count, 0);
+            variationResult = bucketer.Bucket(Config, experiment, TestBucketingIdControl, TestUserIdBucketsToVariation);
+            Assert.AreEqual(expectedVariation,
+                variationResult.ResultObject);
+            Assert.AreEqual(variationResult.DecisionReasons.ToReport(true).Count, 1);
+            Assert.AreEqual(variationResult.DecisionReasons.ToReport(true)[0], "User [bucketsToVariation!] is in variation [control] of experiment [test_experiment].");
         }
 
         // Test for invalid experiment keys, null variation should be returned
@@ -220,6 +228,12 @@ namespace OptimizelySDK.Tests
             Assert.AreEqual(expectedGroupVariation,
                 variationResult.ResultObject);
             Assert.AreEqual(variationResult.DecisionReasons.ToReport().Count, 0);
+                bucketer.Bucket(Config, Config.GetExperimentFromKey("group_experiment_2"), 
+                TestBucketingIdGroupExp2Var2, TestUserIdBucketsToNoGroup);
+            var report = variationResult.DecisionReasons.ToReport(true);
+            Assert.AreEqual(report.Count, 2);
+            Assert.AreEqual(report[0], "User [testUserId] is in experiment [group_experiment_2] of group [7722400015].");
+            Assert.AreEqual(report[1], "User [testUserId] is in variation [group_exp_2_var_2] of experiment [group_experiment_2].");
         }
 
         // Make sure that user gets bucketed into the rollout rule.
@@ -230,10 +244,16 @@ namespace OptimizelySDK.Tests
             var rollout = Config.GetRolloutFromId("166660");
             var rolloutRule = rollout.Experiments[1];
             var expectedVariation = Config.GetVariationFromId(rolloutRule.Key, "177773");
+            
             var variationResult = bucketer.Bucket(Config, rolloutRule, "testBucketingId", TestUserId);
             Assert.True(TestData.CompareObjects(expectedVariation,
                 variationResult.ResultObject));
             Assert.AreEqual(variationResult.DecisionReasons.ToReport().Count, 0);
+            var variationsResult = bucketer.Bucket(Config, rolloutRule, "testBucketingId", TestUserId);
+            Assert.True(TestData.CompareObjects(expectedVariation,
+                variationsResult.ResultObject));
+            Assert.AreEqual(variationsResult.DecisionReasons.ToReport(true).Count, 1);
+            Assert.AreEqual(variationsResult.DecisionReasons.ToReport(true)[0], "User [testUserId] is in variation [177773] of experiment [177772].");
         }
     }
 }
