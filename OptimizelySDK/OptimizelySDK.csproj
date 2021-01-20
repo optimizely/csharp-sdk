@@ -88,9 +88,7 @@
     <Compile Include="Entity\IdKeyEntity.cs" />
     <Compile Include="Event\Entity\DecisionMetadata.cs" />
     <Compile Include="OptimizelyDecisions\DecisionMessage.cs" />
-    <Compile Include="OptimizelyDecisions\IDecisionReasons.cs" />
-    <Compile Include="OptimizelyDecisions\DefaultDecisionReasons.cs" />
-    <Compile Include="OptimizelyDecisions\ErrorsDecisionReasons.cs" />
+    <Compile Include="OptimizelyDecisions\DecisionReasons.cs" />
     <Compile Include="OptimizelyDecisions\OptimizelyDecideOption.cs" />
     <Compile Include="OptimizelyDecisions\OptimizelyDecision.cs" />
     <Compile Include="OptimizelyUserContext.cs" />
@@ -162,6 +160,7 @@
     <Compile Include="Event\Entity\EventBatch.cs" />
     <Compile Include="Event\Entity\EventContext.cs" />
     <Compile Include="AudienceConditions\SemanticVersion.cs" />
+    <Compile Include="Entity\Result.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Utils\schema.json" />

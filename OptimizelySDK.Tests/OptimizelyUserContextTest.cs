@@ -588,8 +588,8 @@ namespace OptimizelySDK.Tests
 
             decision = user.Decide(flagKey, decideOptions);
             Assert.True(decision.Reasons.Length > 0);
-            Assert.AreEqual("User [testUserID] is in variation [Gred] of experiment [test_experiment_multivariate].", decision.Reasons[0]);
-            Assert.AreEqual("The user \"testUserID\" is bucketed into experiment \"test_experiment_multivariate\" of feature \"multi_variate_feature\".", decision.Reasons[1]);
+            Assert.AreEqual("User [testUserID] is in variation [Gred] of experiment [test_experiment_multivariate].", decision.Reasons[1]);
+            Assert.AreEqual("The user \"testUserID\" is bucketed into experiment \"test_experiment_multivariate\" of feature \"multi_variate_feature\".", decision.Reasons[2]);
         }
 
         [Test]

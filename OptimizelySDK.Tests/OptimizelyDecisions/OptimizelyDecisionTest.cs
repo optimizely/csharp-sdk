@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2020, Optimizely
+ * Copyright 2020-2021, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ using OptimizelySDK.Logger;
 using OptimizelySDK.OptimizelyDecisions;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace OptimizelySDK.Tests.OptimizelyDecisions
 {
@@ -84,20 +85,21 @@ namespace OptimizelySDK.Tests.OptimizelyDecisions
         [Test]
         public void TestNewDecisionReasonWithIncludeReasons()
         {
-            var decisionReasons = DefaultDecisionReasons.NewInstance(new OptimizelyDecideOption[] { OptimizelyDecideOption.INCLUDE_REASONS });
+            var decisionReasons = new DecisionReasons();
+            var decideOptions = new OptimizelyDecideOption[] { OptimizelyDecideOption.INCLUDE_REASONS };
             decisionReasons.AddError(DecisionMessage.Reason(DecisionMessage.FLAG_KEY_INVALID, "invalid_key"));
             
-            Assert.AreEqual(decisionReasons.ToReport()[0], "No flag was found for key \"invalid_key\".");
+            Assert.AreEqual(decisionReasons.ToReport(decideOptions.Contains(OptimizelyDecideOption.INCLUDE_REASONS))[0], "No flag was found for key \"invalid_key\".");
             decisionReasons.AddError(DecisionMessage.Reason(DecisionMessage.VARIABLE_VALUE_INVALID, "invalid_key"));
-            Assert.AreEqual(decisionReasons.ToReport()[1], "Variable value for key \"invalid_key\" is invalid or wrong type.");
+            Assert.AreEqual(decisionReasons.ToReport(decideOptions.Contains(OptimizelyDecideOption.INCLUDE_REASONS))[1], "Variable value for key \"invalid_key\" is invalid or wrong type.");
             decisionReasons.AddInfo("Some info message.");
-            Assert.AreEqual(decisionReasons.ToReport()[2], "Some info message.");
+            Assert.AreEqual(decisionReasons.ToReport(decideOptions.Contains(OptimizelyDecideOption.INCLUDE_REASONS))[2], "Some info message.");
         }
 
         [Test]
         public void TestNewDecisionReasonWithoutIncludeReasons()
         {
-            var decisionReasons = DefaultDecisionReasons.NewInstance();
+            var decisionReasons = new DecisionReasons();
             decisionReasons.AddError(DecisionMessage.Reason(DecisionMessage.FLAG_KEY_INVALID, "invalid_key"));
 
             Assert.AreEqual(decisionReasons.ToReport()[0], "No flag was found for key \"invalid_key\".");
