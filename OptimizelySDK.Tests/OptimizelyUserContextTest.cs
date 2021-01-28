@@ -654,7 +654,7 @@ namespace OptimizelySDK.Tests
             var enabled = true;
             var variables = Optimizely.GetAllFeatureVariables(flagKey, UserID);
             var ruleKey = "test_experiment_with_feature_rollout";
-            var reasons = new Dictionary<string, object>();
+            var reasons = new string[] { };
             var user = Optimizely.CreateUserContext(UserID);
             user.SetAttribute("browser_type", "chrome");
 
