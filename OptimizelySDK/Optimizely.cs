@@ -814,7 +814,7 @@ namespace OptimizelySDK
                 decisionEventDispatched = SendImpressionEvent(flagDecisionResult.ResultObject?.Experiment, variation, userId, userAttributes, config, key, decisionSource, featureEnabled);
             }
             var decisionReasons = flagDecisionResult.DecisionReasons;
-            var reasonsToReport = decisionReasons.ToReport(allOptions.Contains(OptimizelyDecideOption.INCLUDE_REASONS));
+            var reasonsToReport = decisionReasons.ToReport(allOptions.Contains(OptimizelyDecideOption.INCLUDE_REASONS)).ToArray();
             var variationKey = flagDecisionResult.ResultObject?.Variation?.Key;
 
             // TODO: add ruleKey values when available later. use a copy of experimentKey until then.
@@ -827,7 +827,7 @@ namespace OptimizelySDK
                 { "variables", variableMap },
                 { "variationKey", variationKey },
                 { "ruleKey", ruleKey },
-                { "reasons", decisionReasons },
+                { "reasons", reasonsToReport },
                 { "decisionEventDispatched", decisionEventDispatched }
             };
 
@@ -841,7 +841,7 @@ namespace OptimizelySDK
                 ruleKey,
                 key,
                 user,
-                reasonsToReport.ToArray());
+                reasonsToReport);
         }
 
         internal Dictionary<string, OptimizelyDecision> DecideAll(OptimizelyUserContext user,
