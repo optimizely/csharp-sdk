@@ -241,12 +241,90 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
+        public void TestDecisionNotificationSentWhenSendFlagDecisionsFalseAndFeature()
+        {
+            var featureKey = "boolean_feature";
+            var variables = Optimizely.GetAllFeatureVariables(featureKey, TestUserId);
+            var userAttributes = new UserAttributes
+            {
+                { "device_type", "iPhone" },
+                { "location", "San Francisco" }
+            };
+            Config.SendFlagDecisions = false;
+            var fallbackConfigManager = new FallbackProjectConfigManager(Config);
+            var optimizely = new Optimizely(fallbackConfigManager,
+                NotificationCenter,
+                EventDispatcherMock.Object,
+                LoggerMock.Object,
+                ErrorHandlerMock.Object,
+                null,
+                new ForwardingEventProcessor(EventDispatcherMock.Object, NotificationCenter, LoggerMock.Object, ErrorHandlerMock.Object),
+                null);
+
+            // Mocking objects.
+            NotificationCallbackMock.Setup(nc => nc.TestDecisionCallback(It.IsAny<string>(), It.IsAny<string>(),
+               It.IsAny<UserAttributes>(), It.IsAny<Dictionary<string, object>>()));
+            optimizely.NotificationCenter.AddNotification(NotificationCenter.NotificationType.Decision, NotificationCallbackMock.Object.TestDecisionCallback);
+
+            var optimizelyUserContext = optimizely.CreateUserContext(TestUserId, userAttributes);
+            optimizelyUserContext.Decide(featureKey);
+            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionNotificationTypes.FLAG, TestUserId, userAttributes, It.Is<Dictionary<string, object>>(info => TestData.CompareObjects(info, new Dictionary<string, object> {
+                { "flagKey", featureKey },
+                { "enabled", false },
+                { "variables", variables.ToDictionary() },
+                { "variationKey", "group_exp_2_var_1" },
+                { "ruleKey", "group_experiment_2" },
+                { "reasons",  new OptimizelyDecideOption[0] },
+                { "decisionEventDispatched", true }
+            }))), Times.Once);
+            EventDispatcherMock.Verify(dispatcher => dispatcher.DispatchEvent(It.IsAny<LogEvent>()), Times.Once);
+        }
+
+        [Test]
+        public void TestDecisionNotificationSentWhenSendFlagDecisionsTrueAndFeature()
+        {
+            var featureKey = "boolean_feature";
+            var variables = Optimizely.GetAllFeatureVariables(featureKey, TestUserId);
+            var userAttributes = new UserAttributes
+            {
+                { "device_type", "iPhone" },
+                { "location", "San Francisco" }
+            };
+            var fallbackConfigManager = new FallbackProjectConfigManager(Config);
+            var optimizely = new Optimizely(fallbackConfigManager,
+                NotificationCenter,
+                EventDispatcherMock.Object,
+                LoggerMock.Object,
+                ErrorHandlerMock.Object,
+                null,
+                new ForwardingEventProcessor(EventDispatcherMock.Object, NotificationCenter, LoggerMock.Object, ErrorHandlerMock.Object),
+                null);
+
+            // Mocking objects.
+            NotificationCallbackMock.Setup(nc => nc.TestDecisionCallback(It.IsAny<string>(), It.IsAny<string>(),
+               It.IsAny<UserAttributes>(), It.IsAny<Dictionary<string, object>>()));
+            optimizely.NotificationCenter.AddNotification(NotificationCenter.NotificationType.Decision, NotificationCallbackMock.Object.TestDecisionCallback);
+
+            var optimizelyUserContext = optimizely.CreateUserContext(TestUserId, userAttributes);
+            optimizelyUserContext.Decide(featureKey);
+            NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionNotificationTypes.FLAG, TestUserId, userAttributes, It.Is<Dictionary<string, object>>(info => TestData.CompareObjects(info, new Dictionary<string, object> {
+                { "flagKey", featureKey },
+                { "enabled", false },
+                { "variables", variables.ToDictionary() },
+                { "variationKey", "group_exp_2_var_1" },
+                { "ruleKey", "group_experiment_2" },
+                { "reasons",  new OptimizelyDecideOption[0] },
+                { "decisionEventDispatched", true }
+            }))), Times.Once);
+            EventDispatcherMock.Verify(dispatcher => dispatcher.DispatchEvent(It.IsAny<LogEvent>()), Times.Once);
+        }
+
+        [Test]
         public void TestDecisionNotificationNotSentWhenSendFlagDecisionsFalseAndRollout()
         {
             var featureKey = "boolean_single_variable_feature";
             var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
             var variables = Optimizely.GetAllFeatureVariables(featureKey, TestUserId);
-            var reasons = new OptimizelyDecideOption[0];
             var userAttributes = new UserAttributes
             {
                 { "device_type", "iPhone" },
@@ -279,9 +357,10 @@ namespace OptimizelySDK.Tests
                 { "variables", variables.ToDictionary() },
                 { "variationKey", variation.Key },
                 { "ruleKey", ruleKey },
-                { "reasons", reasons },
+                { "reasons",  new OptimizelyDecideOption[0] },
                 { "decisionEventDispatched", false }
             }))), Times.Once);
+            EventDispatcherMock.Verify(dispatcher => dispatcher.DispatchEvent(It.IsAny<LogEvent>()), Times.Never);
         }
 
         [Test]
@@ -290,7 +369,6 @@ namespace OptimizelySDK.Tests
             var featureKey = "boolean_single_variable_feature";
             var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
             var variables = Optimizely.GetAllFeatureVariables(featureKey, TestUserId);
-            var reasons = new OptimizelyDecideOption[0];
             var userAttributes = new UserAttributes
             {
                 { "device_type", "iPhone" },
@@ -323,9 +401,10 @@ namespace OptimizelySDK.Tests
                 { "variables", variables.ToDictionary() },
                 { "variationKey", variation.Key },
                 { "ruleKey", ruleKey },
-                { "reasons", reasons },
+                { "reasons",  new OptimizelyDecideOption[0] },
                 { "decisionEventDispatched", true }
             }))), Times.Once);
+            EventDispatcherMock.Verify(dispatcher => dispatcher.DispatchEvent(It.IsAny<LogEvent>()), Times.Once);
         }
 
         [Test]
