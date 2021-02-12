@@ -209,7 +209,7 @@ namespace OptimizelySDK.Config
                     Interlocked.Exchange(ref resourceInUse, 0);
 
                     // trigger now, due because of delayed latency response
-                    if (scheduleWhenFinished && IsStarted) {                        
+                    if (!Disposed && scheduleWhenFinished && IsStarted) {
                         // Call immediately, because it's due now.
                         scheduleWhenFinished = false;
                         SchedulerService.Change(TimeSpan.FromSeconds(0), PollingInterval);
