@@ -1,6 +1,24 @@
 # Optimizely C# SDK Changelog
-## [Unreleased]
+## [Unreleased]	
 
+
+## [3.8.0]
+February 16th, 2021
+
+### New Features
+- Introducing a new primary interface for retrieving feature flag status, configuration and associated experiment decisions for users ([#248](https://github.com/optimizely/csharp-sdk/pull/248), [#250](https://github.com/optimizely/csharp-sdk/pull/250), [#251](https://github.com/optimizely/csharp-sdk/pull/251), [#253](https://github.com/optimizely/csharp-sdk/pull/253), [#254](https://github.com/optimizely/csharp-sdk/pull/254), [#255](https://github.com/optimizely/csharp-sdk/pull/255), [#256](https://github.com/optimizely/csharp-sdk/pull/256), [#257](https://github.com/optimizely/csharp-sdk/pull/257), [#258](https://github.com/optimizely/csharp-sdk/pull/258)). The new `OptimizelyUserContext` class is instantiated with `CreateUserContext` and exposes the following APIs to get `OptimizelyDecision`:
+
+	- SetAttribute
+	- GetAttributes
+	- Decide
+	- DecideAll
+	- DecideForKeys
+	- TrackEvent
+
+- For details, refer to our documentation page: [https://docs.developers.optimizely.com/full-stack/v4.0/docs/csharp-sdk](https://docs.developers.optimizely.com/full-stack/v4.0/docs/csharp-sdk).
+
+### Bug Fixes:
+- Disposed during inflight request of datafile was causing issues in the PollingProjectConfigManager. ([#258](https://github.com/optimizely/csharp-sdk/pull/258))
 
 ## 3.7.1
 November 18th, 2020
