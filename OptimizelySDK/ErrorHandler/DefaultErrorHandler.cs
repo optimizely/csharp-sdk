@@ -25,7 +25,7 @@ namespace OptimizelySDK.ErrorHandler
         /// </summary>
         /// <param name="logger">Optional logger to be used to include exception message in the log</param>
         /// <param name="throwExceptions">Whether or not to actaully throw the exceptions, true by default</param>
-        public DefaultErrorHandler(ILogger logger = null, bool throwExceptions = true)
+        public DefaultErrorHandler(ILogger logger = null, bool throwExceptions = false)
         {
             Logger = logger;
             ThrowExceptions = throwExceptions;
