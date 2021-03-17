@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright 2019-2020, Optimizely
+ * Copyright 2019-2021, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -161,7 +161,35 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
                 It.Is<System.Net.Http.HttpRequestMessage>(requestMessage =>
                 requestMessage.RequestUri.ToString() == "https://cdn.optimizely.com/json/10192104166.json"
                 )));
+            
             Assert.IsNotNull(httpManager.GetConfig());
+
+            LoggerMock.Verify(_ => _.Log(LogLevel.DEBUG, "Making datafile request to url \"https://cdn.optimizely.com/json/10192104166.json\""));
+            httpManager.Dispose();
+        }
+
+        [Test]
+        public void TestHttpProjectConfigManagerDoesntRaiseExceptionForDefaultErrorHandler()
+        {
+            var t = MockSendAsync(TestData.Datafile);
+
+            HttpProjectConfigManager httpManager = new HttpProjectConfigManager.Builder()
+                .WithSdkKey("10192104166")
+                .WithFormat("https://cdn.optimizely.com/json/{0}.json")
+                .WithLogger(LoggerMock.Object)
+                .WithPollingInterval(TimeSpan.FromMilliseconds(1000))
+                .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(500))
+                .WithStartByDefault()
+                .Build(true);
+
+            t.Wait(1000);
+            HttpClientMock.Verify(_ => _.SendAsync(
+                It.Is<System.Net.Http.HttpRequestMessage>(requestMessage =>
+                requestMessage.RequestUri.ToString() == "https://cdn.optimizely.com/json/10192104166.json"
+                )));
+            var datafileConfig = httpManager.GetConfig();
+            Assert.IsNotNull(datafileConfig);
+            Assert.IsNull(datafileConfig.GetExperimentFromKey("project_config_not_valid").Key);
             LoggerMock.Verify(_ => _.Log(LogLevel.DEBUG, "Making datafile request to url \"https://cdn.optimizely.com/json/10192104166.json\""));
             httpManager.Dispose();
         }
