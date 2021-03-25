@@ -6,8 +6,9 @@
         <title>Optimizely C# SDK</title>
         <authors>Optimizely Development Team</authors>
         <owners>fullstack.optimizely</owners>
-        <licenseUrl>http://www.apache.org/licenses/LICENSE-2.0</licenseUrl>
+        <license type="expression">Apache-2.0</license>
         <projectUrl>https://github.com/optimizely/csharp-sdk</projectUrl>
+        <icon>OptimizelySDK.png</icon>
         <iconUrl>https://github.com/optimizely/csharp-sdk/blob/master/OptimizelySDK.png?raw=true</iconUrl>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <description>C# SDK for Optimizely X Fullstack</description>
@@ -39,10 +40,12 @@
                 <dependency id="murmurhash-signed" version="1.0.2" />
                 <dependency id="Newtonsoft.Json" version="9.0.1" />
                 <dependency id="NJsonSchema" version="8.33.6323.36213" />
+                <dependency id="System.Configuration.ConfigurationManager" version="4.5.0" />
             </group>
         </dependencies>
     </metadata>
     <files>
+        <file src="./../OptimizelySDK.png" target="OptimizelySDK.png" />
         <file src="lib\**" target="lib" />
     </files>
 </package>
