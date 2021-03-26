@@ -2,6 +2,13 @@
 ## [Unreleased]	
 
 
+## 3.9.0
+March 26th, 2021
+
+### Bug Fixes:
+- When no error handler is given for HttpProjectConfigManager, then default error handler should be used without raise exception. [#260](https://github.com/optimizely/csharp-sdk/pull/260)
+- .Net Standard 2.0 was missing Configuration manager library in nugget package. [#262](https://github.com/optimizely/csharp-sdk/pull/262)
+
 ## [3.8.0]
 February 16th, 2021
 
