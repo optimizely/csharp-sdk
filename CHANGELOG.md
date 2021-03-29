@@ -3,7 +3,7 @@
 
 
 ## 3.9.0
-March 26th, 2021
+March 29th, 2021
 
 ### Bug Fixes:
 - When no error handler is given for HttpProjectConfigManager, then default error handler should be used without raise exception. [#260](https://github.com/optimizely/csharp-sdk/pull/260)
