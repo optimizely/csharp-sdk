@@ -35,6 +35,8 @@ namespace OptimizelySDK
     {
         private static int MaxEventBatchSize;
         private static TimeSpan MaxEventFlushInterval;
+        private static TimeSpan PollingInterval;
+        private static TimeSpan BlockingTimeOutPeriod;
         private static ILogger OptimizelyLogger;
         private const string ConfigSectionName = "optlySDKConfigSection";
 
@@ -47,6 +49,16 @@ namespace OptimizelySDK
         public static void SetFlushInterval(TimeSpan flushInterval)
         {
             MaxEventFlushInterval = flushInterval;
+        }
+
+        public static void SetPollingInterval(TimeSpan pollingInterval)
+        {
+            PollingInterval = pollingInterval;
+        }
+
+        public static void SetBlockingTimeOutPeriod(TimeSpan blockingTimeOutPeriod)
+        {
+            BlockingTimeOutPeriod = blockingTimeOutPeriod;
         }
 
         public static void SetLogger(ILogger logger)
@@ -76,13 +88,12 @@ namespace OptimizelySDK
             var eventDispatcher = new DefaultEventDispatcher(logger);
             var builder = new HttpProjectConfigManager.Builder();
             var notificationCenter = new NotificationCenter();
-            
             var configManager = builder
                 .WithSdkKey(httpProjectConfigElement.SDKKey)
                 .WithUrl(httpProjectConfigElement.Url)
                 .WithFormat(httpProjectConfigElement.Format)
-                .WithPollingInterval(TimeSpan.FromMilliseconds(httpProjectConfigElement.PollingInterval))
-                .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(httpProjectConfigElement.BlockingTimeOutPeriod))
+                .WithPollingInterval(PollingInterval == TimeSpan.Zero ? TimeSpan.FromMilliseconds(httpProjectConfigElement.PollingInterval) : PollingInterval)
+                .WithBlockingTimeoutPeriod(BlockingTimeOutPeriod == TimeSpan.Zero ? TimeSpan.FromMilliseconds(httpProjectConfigElement.BlockingTimeOutPeriod) : BlockingTimeOutPeriod)
 #if !NET40 && !NET35
                 .WithAccessToken(httpProjectConfigElement.DatafileAccessToken)
 #endif
@@ -111,7 +122,7 @@ namespace OptimizelySDK
         }
 #endif
 
-            public static Optimizely NewDefaultInstance(string sdkKey)
+        public static Optimizely NewDefaultInstance(string sdkKey)
         {
             return NewDefaultInstance(sdkKey, null);
         }
@@ -128,6 +139,8 @@ namespace OptimizelySDK
                 .WithSdkKey(sdkKey)
                 .WithDatafile(fallback)
                 .WithLogger(logger)
+                .WithPollingInterval(PollingInterval)
+                .WithBlockingTimeoutPeriod(BlockingTimeOutPeriod)
                 .WithErrorHandler(errorHandler)
                 .WithAccessToken(datafileAuthToken)
                 .WithNotificationCenter(notificationCenter)
@@ -160,6 +173,8 @@ namespace OptimizelySDK
                 .WithSdkKey(sdkKey)
                 .WithDatafile(fallback)
                 .WithLogger(logger)
+                .WithPollingInterval(PollingInterval)
+                .WithBlockingTimeoutPeriod(BlockingTimeOutPeriod)
                 .WithErrorHandler(errorHandler)
                 .WithNotificationCenter(notificationCenter)
                 .Build(true);

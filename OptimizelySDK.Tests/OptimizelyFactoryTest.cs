@@ -62,6 +62,53 @@ namespace OptimizelySDK.Tests
             optimizely.Dispose();
         }
 
+        [Test]
+        public void TestOptimizelyInstanceUsingConfigFileWithPollingInterval()
+        {
+            OptimizelyFactory.SetPollingInterval(TimeSpan.FromMilliseconds(2023));
+            var optimizely = OptimizelyFactory.NewDefaultInstance();
+            // Check values are loaded from app.config or not.
+            var projectConfigManager = optimizely.ProjectConfigManager as HttpProjectConfigManager;
+            Assert.NotNull(projectConfigManager);
+
+            var actualConfigManagerProps = new ProjectConfigManagerProps(projectConfigManager);
+            var expectedConfigManagerProps = new ProjectConfigManagerProps
+            {
+                Url = "www.testurl.com",
+                LastModified = "",
+                AutoUpdate = true,
+                DatafileAccessToken = "testingtoken123",
+                BlockingTimeout = TimeSpan.FromSeconds(10),
+                PollingInterval = TimeSpan.FromMilliseconds(2023)
+            };
+
+            Assert.AreEqual(actualConfigManagerProps, expectedConfigManagerProps);
+            optimizely.Dispose();
+        }
+
+        [Test]
+        public void TestOptimizelyInstanceUsingConfigFileWithBlockingTimeOutInterval()
+        {
+            OptimizelyFactory.SetBlockingTimeOutPeriod(TimeSpan.FromSeconds(30));
+            var optimizely = OptimizelyFactory.NewDefaultInstance();
+            // Check values are loaded from app.config or not.
+            var projectConfigManager = optimizely.ProjectConfigManager as HttpProjectConfigManager;
+            Assert.NotNull(projectConfigManager);
+
+            var actualConfigManagerProps = new ProjectConfigManagerProps(projectConfigManager);
+            var expectedConfigManagerProps = new ProjectConfigManagerProps
+            {
+                Url = "www.testurl.com",
+                LastModified = "",
+                AutoUpdate = true,
+                DatafileAccessToken = "testingtoken123",
+                BlockingTimeout = TimeSpan.FromSeconds(30),
+                PollingInterval = TimeSpan.FromSeconds(2)
+            };
+
+            Assert.AreEqual(actualConfigManagerProps, expectedConfigManagerProps);
+            optimizely.Dispose();
+        }
 
         [Test]
         public void TestProjectConfigManagerUsingSDKKey()
