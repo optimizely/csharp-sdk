@@ -111,7 +111,7 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
-        public void TestOptimizelyInstanceUsingConfigFileWithBlockingAndPollingInterval()
+        public void TestOptimizelyInstanceUsingConfigNotUseFactoryClassBlockingTimeoutAndPollingInterval()
         {
             OptimizelyFactory.SetBlockingTimeOutPeriod(TimeSpan.FromSeconds(30));
             OptimizelyFactory.SetPollingInterval(TimeSpan.FromMilliseconds(2023));
@@ -127,8 +127,8 @@ namespace OptimizelySDK.Tests
                 LastModified = "",
                 AutoUpdate = true,
                 DatafileAccessToken = "testingtoken123",
-                BlockingTimeout = TimeSpan.FromSeconds(30),
-                PollingInterval = TimeSpan.FromMilliseconds(2023)
+                BlockingTimeout = TimeSpan.FromMilliseconds(10000),
+                PollingInterval = TimeSpan.FromMilliseconds(2000)
             };
 
             Assert.AreEqual(actualConfigManagerProps, expectedConfigManagerProps);

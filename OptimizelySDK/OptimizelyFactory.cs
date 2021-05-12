@@ -92,8 +92,8 @@ namespace OptimizelySDK
                 .WithSdkKey(httpProjectConfigElement.SDKKey)
                 .WithUrl(httpProjectConfigElement.Url)
                 .WithFormat(httpProjectConfigElement.Format)
-                .WithPollingInterval(PollingInterval == TimeSpan.Zero ? TimeSpan.FromMilliseconds(httpProjectConfigElement.PollingInterval) : PollingInterval)
-                .WithBlockingTimeoutPeriod(BlockingTimeOutPeriod == TimeSpan.Zero ? TimeSpan.FromMilliseconds(httpProjectConfigElement.BlockingTimeOutPeriod) : BlockingTimeOutPeriod)
+                .WithPollingInterval(TimeSpan.FromMilliseconds(httpProjectConfigElement.PollingInterval))
+                .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(httpProjectConfigElement.BlockingTimeOutPeriod))
 #if !NET40 && !NET35
                 .WithAccessToken(httpProjectConfigElement.DatafileAccessToken)
 #endif
