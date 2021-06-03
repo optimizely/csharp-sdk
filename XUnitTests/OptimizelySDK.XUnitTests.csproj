@@ -1,0 +1,38 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="EmptyRolloutRule.json" />
+    <None Remove="simple_ab_experiments.json" />
+    <None Remove="TestData.json" />
+    <None Remove="typed_audience_datafile.json" />
+    <None Remove="unsupported_version_datafile.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="EmptyRolloutRule.json" />
+    <EmbeddedResource Include="simple_ab_experiments.json" />
+    <EmbeddedResource Include="TestData.json" />
+    <EmbeddedResource Include="typed_audience_datafile.json" />
+    <EmbeddedResource Include="unsupported_version_datafile.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />
+    <PackageReference Include="Moq" Version="4.14.5" />
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="4.7.0" />
+    <PackageReference Include="xunit" Version="2.4.0" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.0" />
+    <PackageReference Include="coverlet.collector" Version="1.2.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\OptimizelySDK\OptimizelySDK.csproj" />
+  </ItemGroup>
+
+</Project>
