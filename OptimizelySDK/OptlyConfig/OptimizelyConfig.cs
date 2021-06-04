@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+using Newtonsoft.Json;
 using System.Collections.Generic;
 
 namespace OptimizelySDK.OptlyConfig
@@ -21,7 +22,9 @@ namespace OptimizelySDK.OptlyConfig
     public class OptimizelyConfig
     {
         public string Revision { get; private set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public string SdkKey { get; private set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public string EnvironmentKey { get; private set; }
         public IDictionary<string, OptimizelyExperiment> ExperimentsMap { get; private set; }
         public IDictionary<string, OptimizelyFeature> FeaturesMap { get; private set; }
