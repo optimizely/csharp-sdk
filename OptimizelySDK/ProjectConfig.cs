@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2019-2020, Optimizely
+ * Copyright 2019-2021, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,6 +44,15 @@ namespace OptimizelySDK
         /// </summary>
         string Revision { get; set; }
 
+        /// <summary>
+        /// SDK key of the dataflie.
+        /// </summary>
+        string SdkKey { get; set; }
+
+        /// <summary>
+        /// Environment key of the dataflie.
+        /// </summary>
+        string EnvironmentKey { get; set; }
 
         /// <summary>
         /// SendFlagDecisions determines whether impressions events are sent for ALL decision types.

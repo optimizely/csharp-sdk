@@ -939,6 +939,8 @@
 		}
 	],
 	"revision": "15",
+	"sdkKey": "TestData",
+	"environmentKey": "Production",
 	"anonymizeIP": false,
 	"sendFlagDecisions": true,
 	"botFiltering": true

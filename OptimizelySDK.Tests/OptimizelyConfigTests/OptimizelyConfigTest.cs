@@ -1,5 +1,5 @@
 /* 
- * Copyright 2020, Optimizely
+ * Copyright 2020-2021, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -326,7 +326,7 @@ namespace OptimizelySDK.Tests.OptimizelyConfigTests
             };
 
             OptimizelyConfig optimizelyConfig = new OptimizelyConfigService(datafileProjectConfig).GetOptimizelyConfig();
-            OptimizelyConfig expectedOptimizelyConfig = new OptimizelyConfig(datafileProjectConfig.Revision, experimentsMap, featuresMap);
+            OptimizelyConfig expectedOptimizelyConfig = new OptimizelyConfig(datafileProjectConfig.Revision, datafileProjectConfig.SdkKey, datafileProjectConfig.EnvironmentKey, experimentsMap, featuresMap);
             Assert.IsTrue(TestData.CompareObjects(optimizelyConfig, expectedOptimizelyConfig));
         }
 
@@ -338,10 +338,14 @@ namespace OptimizelySDK.Tests.OptimizelyConfigTests
         public void TestOptimizelyConfigEntity()
         {
             OptimizelyConfig expectedOptlyFeature = new OptimizelyConfig("123",
+                "testSdkKey",
+                "Development",
                 new Dictionary<string, OptimizelyExperiment>(),
                 new Dictionary<string, OptimizelyFeature>()
                 );
             Assert.AreEqual(expectedOptlyFeature.Revision, "123");
+            Assert.AreEqual(expectedOptlyFeature.SdkKey, "testSdkKey");
+            Assert.AreEqual(expectedOptlyFeature.EnvironmentKey, "Development");
             Assert.AreEqual(expectedOptlyFeature.ExperimentsMap, new Dictionary<string, OptimizelyExperiment>());
             Assert.AreEqual(expectedOptlyFeature.FeaturesMap, new Dictionary<string, OptimizelyFeature>());
         }

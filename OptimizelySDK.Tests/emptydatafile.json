@@ -11,5 +11,7 @@
   "attributes": [],
   "accountId": "10367498574",
   "events": [],
-  "revision": "241"
+  "revision": "241",
+  "sdkKey": "emptydatafile",
+  "environmentKey": "Production"
 }

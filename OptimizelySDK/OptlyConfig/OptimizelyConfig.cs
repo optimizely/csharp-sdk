@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2019-2020, Optimizely
+ * Copyright 2019-2021, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,14 +21,18 @@ namespace OptimizelySDK.OptlyConfig
     public class OptimizelyConfig
     {
         public string Revision { get; private set; }
+        public string SdkKey { get; private set; }
+        public string EnvironmentKey { get; private set; }
         public IDictionary<string, OptimizelyExperiment> ExperimentsMap { get; private set; }
         public IDictionary<string, OptimizelyFeature> FeaturesMap { get; private set; }
 
         private string _datafile;
 
-        public OptimizelyConfig(string revision, IDictionary<string, OptimizelyExperiment> experimentsMap, IDictionary<string, OptimizelyFeature> featuresMap, string datafile = null)
+        public OptimizelyConfig(string revision, string sdkKey, string environmentKey, IDictionary<string, OptimizelyExperiment> experimentsMap, IDictionary<string, OptimizelyFeature> featuresMap, string datafile = null)
         {
             Revision = revision;
+            SdkKey = sdkKey;
+            EnvironmentKey = environmentKey;
             ExperimentsMap = experimentsMap;
             FeaturesMap = featuresMap;
             _datafile = datafile;

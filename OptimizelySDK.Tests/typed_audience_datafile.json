@@ -367,5 +367,7 @@
 			]
 		}
 	],
-	"revision": "3"
+	"revision": "3",
+	"sdkKey": "typedAudienceDatafile",
+	"environmentKey": "Production"
 }

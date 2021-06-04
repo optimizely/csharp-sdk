@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2019-2020, Optimizely
+ * Copyright 2019-2021, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,8 @@ namespace OptimizelySDK.OptlyConfig
             var experimentMap = GetExperimentsMap(projectConfig);
             var featureMap = GetFeaturesMap(projectConfig, experimentMap);
             OptimizelyConfig = new OptimizelyConfig(projectConfig.Revision,
+                projectConfig.SdkKey,
+                projectConfig.EnvironmentKey,
                 experimentMap,
                 featureMap,
                 projectConfig.ToDatafile());
