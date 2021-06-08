@@ -64,7 +64,7 @@ namespace OptimizelySDK.Tests
             // Check Revision 
             Assert.AreEqual("15", Config.Revision);
             // Check SDK key 
-            Assert.AreEqual("TestData", Config.SdkKey);
+            Assert.AreEqual("TestData", Config.SDKKey);
             // Check Environment key 
             Assert.AreEqual("Production", Config.EnvironmentKey);
             // Check SendFlagDecision

@@ -34,7 +34,7 @@ namespace OptimizelySDK.OptlyConfig
             var experimentMap = GetExperimentsMap(projectConfig);
             var featureMap = GetFeaturesMap(projectConfig, experimentMap);
             OptimizelyConfig = new OptimizelyConfig(projectConfig.Revision,
-                projectConfig.SdkKey,
+                projectConfig.SDKKey,
                 projectConfig.EnvironmentKey,
                 experimentMap,
                 featureMap,

@@ -72,7 +72,7 @@ namespace OptimizelySDK.Config
         /// <summary>
         /// SDK key of the dataflie.
         /// </summary>
-        public string SdkKey { get; set; }
+        public string SDKKey { get; set; }
 
         /// <summary>
         /// Environment key of the dataflie.

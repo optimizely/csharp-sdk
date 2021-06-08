@@ -326,7 +326,7 @@ namespace OptimizelySDK.Tests.OptimizelyConfigTests
             };
 
             OptimizelyConfig optimizelyConfig = new OptimizelyConfigService(datafileProjectConfig).GetOptimizelyConfig();
-            OptimizelyConfig expectedOptimizelyConfig = new OptimizelyConfig(datafileProjectConfig.Revision, datafileProjectConfig.SdkKey, datafileProjectConfig.EnvironmentKey, experimentsMap, featuresMap);
+            OptimizelyConfig expectedOptimizelyConfig = new OptimizelyConfig(datafileProjectConfig.Revision, datafileProjectConfig.SDKKey, datafileProjectConfig.EnvironmentKey, experimentsMap, featuresMap);
             Assert.IsTrue(TestData.CompareObjects(optimizelyConfig, expectedOptimizelyConfig));
         }
 
@@ -344,7 +344,7 @@ namespace OptimizelySDK.Tests.OptimizelyConfigTests
                 new Dictionary<string, OptimizelyFeature>()
                 );
             Assert.AreEqual(expectedOptlyFeature.Revision, "123");
-            Assert.AreEqual(expectedOptlyFeature.SdkKey, "testSdkKey");
+            Assert.AreEqual(expectedOptlyFeature.SDKKey, "testSdkKey");
             Assert.AreEqual(expectedOptlyFeature.EnvironmentKey, "Development");
             Assert.AreEqual(expectedOptlyFeature.ExperimentsMap, new Dictionary<string, OptimizelyExperiment>());
             Assert.AreEqual(expectedOptlyFeature.FeaturesMap, new Dictionary<string, OptimizelyFeature>());

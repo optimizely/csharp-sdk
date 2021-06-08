@@ -23,7 +23,7 @@ namespace OptimizelySDK.OptlyConfig
     {
         public string Revision { get; private set; }
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-        public string SdkKey { get; private set; }
+        public string SDKKey { get; private set; }
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public string EnvironmentKey { get; private set; }
         public IDictionary<string, OptimizelyExperiment> ExperimentsMap { get; private set; }
@@ -34,7 +34,7 @@ namespace OptimizelySDK.OptlyConfig
         public OptimizelyConfig(string revision, string sdkKey, string environmentKey, IDictionary<string, OptimizelyExperiment> experimentsMap, IDictionary<string, OptimizelyFeature> featuresMap, string datafile = null)
         {
             Revision = revision;
-            SdkKey = sdkKey;
+            SDKKey = sdkKey;
             EnvironmentKey = environmentKey;
             ExperimentsMap = experimentsMap;
             FeaturesMap = featuresMap;

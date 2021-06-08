@@ -47,7 +47,7 @@ namespace OptimizelySDK
         /// <summary>
         /// SDK key of the dataflie.
         /// </summary>
-        string SdkKey { get; set; }
+        string SDKKey { get; set; }
 
         /// <summary>
         /// Environment key of the dataflie.
