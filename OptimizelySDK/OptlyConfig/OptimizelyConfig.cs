@@ -30,6 +30,14 @@ namespace OptimizelySDK.OptlyConfig
         public IDictionary<string, OptimizelyFeature> FeaturesMap { get; private set; }
 
         private string _datafile;
+        
+        public OptimizelyConfig(string revision, IDictionary<string, OptimizelyExperiment> experimentsMap, IDictionary<string, OptimizelyFeature> featuresMap, string datafile = null)
+        {
+            Revision = revision;
+            ExperimentsMap = experimentsMap;
+            FeaturesMap = featuresMap;
+            _datafile = datafile;
+        }
 
         public OptimizelyConfig(string revision, string sdkKey, string environmentKey, IDictionary<string, OptimizelyExperiment> experimentsMap, IDictionary<string, OptimizelyFeature> featuresMap, string datafile = null)
         {
