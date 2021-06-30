@@ -148,6 +148,7 @@ namespace OptimizelySDK.Tests.OptimizelyConfigTests
                     "feat_with_var_test", new OptimizelyExperiment (
                         id: "11564051718",
                         key:"feat_with_var_test",
+                        "",
                         variationsMap: new Dictionary<string, OptimizelyVariation>
                         {
                             {
@@ -173,6 +174,7 @@ namespace OptimizelySDK.Tests.OptimizelyConfigTests
                     "typed_audience_experiment", new OptimizelyExperiment (
                         id: "1323241597",
                         key:"typed_audience_experiment",
+                        "",
                         variationsMap: new Dictionary<string, OptimizelyVariation>
                         {
                             {
@@ -189,6 +191,7 @@ namespace OptimizelySDK.Tests.OptimizelyConfigTests
                     "audience_combinations_experiment", new OptimizelyExperiment (
                         id: "1323241598",
                         key:"audience_combinations_experiment",
+                        audiences: "(\"exactString\" OR \"$$dummySubstringString\") AND (\"$$dummyExists\" OR \"$$dummyExactNumber\" OR \"$$dummyGtNumber\" OR \"$$dummyLtNumber\" OR \"$$dummyExactBoolean\")",
                         variationsMap: new Dictionary<string, OptimizelyVariation>
                         {
                             {
@@ -205,6 +208,7 @@ namespace OptimizelySDK.Tests.OptimizelyConfigTests
                     "feat2_with_var_test", new OptimizelyExperiment(
                         id: "1323241599",
                         key:"feat2_with_var_test",
+                        audiences: "",
                         variationsMap: new Dictionary<string, OptimizelyVariation>
                         {
                             {
@@ -235,6 +239,23 @@ namespace OptimizelySDK.Tests.OptimizelyConfigTests
                     "feat_no_vars", new OptimizelyFeature (
                         id: "11477755619",
                         key: "feat_no_vars",
+                        experimentRules: new List<OptimizelyExperiment>(),
+                        deliveryRules: new List<OptimizelyExperiment>() { new OptimizelyExperiment(
+                                            id: "11551226731",
+                                            key:"feat_no_vars_rule",
+                                            audiences: "",
+                                            variationsMap: new Dictionary<string, OptimizelyVariation>
+                                            {
+                                                {
+                                                    "11557362669", new OptimizelyVariation (
+                                                        id: "11557362669",
+                                                        key: "11557362669",
+                                                        featureEnabled: true,
+                                                        variablesMap: new Dictionary<string, OptimizelyVariable>()
+                                                        )
+                                                }
+                                            }
+                                        ) },
                         experimentsMap: new Dictionary<string, OptimizelyExperiment>(),
                         variablesMap: new Dictionary<string, OptimizelyVariable>())
                 },
@@ -242,12 +263,55 @@ namespace OptimizelySDK.Tests.OptimizelyConfigTests
                     "feat_with_var", new OptimizelyFeature (
                         id: "11567102051",
                         key: "feat_with_var",
+                        experimentRules: new List<OptimizelyExperiment>() {
+                            new OptimizelyExperiment(
+                                    id: "11564051718",
+                                    key:"feat_with_var_test",
+                                    audiences: "",
+                                    variationsMap: new Dictionary<string, OptimizelyVariation>
+                                    {
+                                        {
+                                            "variation_2", new OptimizelyVariation (
+                                                id: "11617170975",
+                                                key: "variation_2",
+                                                featureEnabled: true,
+                                                variablesMap: new Dictionary<string, OptimizelyVariable>
+                                                {
+                                                    {
+                                                        "x" , new OptimizelyVariable (
+                                                            id: "11535264366",
+                                                            key: "x",
+                                                            type: "string",
+                                                            value: "xyz")
+                                                    }
+                                                })
+                                        }
+                                    }
+                                )
+                        },
+                        deliveryRules: new List<OptimizelyExperiment>() { new OptimizelyExperiment(
+                                            id: "11630490911",
+                                            key:"feat_with_var_rule",
+                                            audiences: "",
+                                            variationsMap: new Dictionary<string, OptimizelyVariation>
+                                            {
+                                                {
+                                                    "11475708558", new OptimizelyVariation (
+                                                        id: "11475708558",
+                                                        key: "11475708558",
+                                                        featureEnabled: false,
+                                                        variablesMap: new Dictionary<string, OptimizelyVariable>()
+                                                        )
+                                                }
+                                            }
+                                        ) },
                         experimentsMap: new Dictionary<string, OptimizelyExperiment>
                         {
                             {
                                 "feat_with_var_test", new OptimizelyExperiment(
                                     id: "11564051718",
                                     key:"feat_with_var_test",
+                                    audiences: "",
                                     variationsMap: new Dictionary<string, OptimizelyVariation>
                                     {
                                         {
@@ -281,6 +345,23 @@ namespace OptimizelySDK.Tests.OptimizelyConfigTests
                     "feat2", new OptimizelyFeature (
                         id: "11567102052",
                         key: "feat2",
+                        deliveryRules: new List<OptimizelyExperiment>() { new OptimizelyExperiment(
+                                            id: "11551226732",
+                                            key:"11488548028",
+                                            audiences: "(\"exactString\" OR \"$$dummySubstringString\") AND (\"$$dummyExists\" OR \"$$dummyExactNumber\" OR \"$$dummyGtNumber\" OR \"$$dummyLtNumber\" OR \"$$dummyExactBoolean\")",
+                                            variationsMap: new Dictionary<string, OptimizelyVariation>
+                                            {
+                                                {
+                                                    "11557362670", new OptimizelyVariation (
+                                                        id: "11557362670",
+                                                        key: "11557362670",
+                                                        featureEnabled: true,
+                                                        variablesMap: new Dictionary<string, OptimizelyVariable>()
+                                                        )
+                                                }
+                                            }
+                                        ) },
+                        experimentRules: new List<OptimizelyExperiment>(),
                         experimentsMap: new Dictionary<string, OptimizelyExperiment>(),
                         variablesMap: new Dictionary<string, OptimizelyVariable>())
                 },
@@ -288,12 +369,59 @@ namespace OptimizelySDK.Tests.OptimizelyConfigTests
                     "feat2_with_var", new OptimizelyFeature (
                         id: "11567102053",
                         key: "feat2_with_var",
+                        deliveryRules: new List<OptimizelyExperiment>()
+                        {
+                            new OptimizelyExperiment(
+                                            id: "11630490912",
+                                            key:"11630490912",
+                                            audiences: "",
+                                            variationsMap: new Dictionary<string, OptimizelyVariation>
+                                            {
+                                                {
+                                                    "11475708559", new OptimizelyVariation (
+                                                        id: "11475708559",
+                                                        key: "11475708559",
+                                                        featureEnabled: false,
+                                                        variablesMap: new Dictionary<string, OptimizelyVariable>()
+                                                        )
+                                                }
+                                            }
+                                        )
+                        },
+                        experimentRules: new List<OptimizelyExperiment>()
+                        {
+                            new OptimizelyExperiment (
+                                    id: "1323241599",
+                                    key:"feat2_with_var_test",
+                                    audiences: "",
+                                    variationsMap: new Dictionary<string, OptimizelyVariation>
+                                    {
+                                        {
+                                            "variation_2", new OptimizelyVariation (
+                                                id: "1423767505",
+                                                key: "variation_2",
+                                                featureEnabled: true,
+                                                variablesMap: new Dictionary<string, OptimizelyVariable>
+                                                {
+                                                    {
+                                                        "z" , new OptimizelyVariable (
+                                                            id: "11535264367",
+                                                            key: "z",
+                                                            type: "integer",
+                                                            value: "150")
+                                                    }
+                                                })
+                                        }
+                                    }
+                                )
+                        },
                         experimentsMap: new Dictionary<string, OptimizelyExperiment>
                         {
                             {
                                 "feat2_with_var_test", new OptimizelyExperiment (
                                     id: "1323241599",
                                     key:"feat2_with_var_test",
+                                    audiences: "",
                                     variationsMap: new Dictionary<string, OptimizelyVariation>
                                     {
                                         {
@@ -354,10 +482,15 @@ namespace OptimizelySDK.Tests.OptimizelyConfigTests
         public void TestOptimizelyFeatureEntity()
         {
             OptimizelyFeature expectedOptlyFeature = new OptimizelyFeature("1", "featKey",
+                new List<OptimizelyExperiment>(),
+                new List<OptimizelyExperiment>(),
                 new Dictionary<string, OptimizelyExperiment>(),
                 new Dictionary<string, OptimizelyVariable>()
                 );
             Assert.AreEqual(expectedOptlyFeature.Id, "1");
+            Assert.AreEqual(expectedOptlyFeature.Key, "featKey");
+            Assert.AreEqual(expectedOptlyFeature.ExperimentRules, new List<OptimizelyExperiment>());
+            Assert.AreEqual(expectedOptlyFeature.DeliveryRules, new List<  OptimizelyExperiment>());
             Assert.AreEqual(expectedOptlyFeature.Key, "featKey");
             Assert.AreEqual(expectedOptlyFeature.ExperimentsMap, new Dictionary<string, OptimizelyExperiment>());
             Assert.AreEqual(expectedOptlyFeature.VariablesMap, new Dictionary<string, OptimizelyVariable>());
@@ -367,6 +500,7 @@ namespace OptimizelySDK.Tests.OptimizelyConfigTests
         public void TestOptimizelyExperimentEntity()
         {
             OptimizelyExperiment expectedOptlyExp = new OptimizelyExperiment("1", "exKey",
+                "",
                 new Dictionary<string, OptimizelyVariation> {
                     {
                         "varKey", new OptimizelyVariation("1", "varKey", true, new Dictionary<string, OptimizelyVariable>())
@@ -374,6 +508,7 @@ namespace OptimizelySDK.Tests.OptimizelyConfigTests
                 });
             Assert.AreEqual(expectedOptlyExp.Id, "1");
             Assert.AreEqual(expectedOptlyExp.Key, "exKey");
+            Assert.AreEqual(expectedOptlyExp.Audiences, "");
             Assert.AreEqual(expectedOptlyExp.VariationsMap["varKey"], new OptimizelyVariation("1", "varKey", true, new Dictionary<string, OptimizelyVariable>()));
         }
 

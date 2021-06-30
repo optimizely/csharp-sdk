@@ -1,5 +1,5 @@
-﻿/* 
- * Copyright 2019, Optimizely
+﻿/*
+ * Copyright 2019, 2021, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,12 +20,15 @@ namespace OptimizelySDK.OptlyConfig
 {
     public class OptimizelyExperiment : Entity.IdKeyEntity
     {
+        
         public IDictionary<string, OptimizelyVariation> VariationsMap { get; private set; }
+        public string Audiences { get; private set; }
 
-        public OptimizelyExperiment(string id, string key, IDictionary<string, OptimizelyVariation> variationsMap)
+        public OptimizelyExperiment(string id, string key, string audiences,IDictionary<string, OptimizelyVariation> variationsMap)
         {
             Id = id;
             Key = key;
+            Audiences = audiences;
             VariationsMap = variationsMap;
         }
     }
