@@ -15,6 +15,7 @@
  */
 
 using Newtonsoft.Json;
+using OptimizelySDK.Entity;
 using System.Collections.Generic;
 
 namespace OptimizelySDK.OptlyConfig
@@ -26,11 +27,14 @@ namespace OptimizelySDK.OptlyConfig
         public string SDKKey { get; private set; }
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public string EnvironmentKey { get; private set; }
+        public Entity.Event[] Events { get; private set; }
+        public Audience[] Audiences { get; private set; }
+        public Attribute[] Attributes { get; private set; }
         public IDictionary<string, OptimizelyExperiment> ExperimentsMap { get; private set; }
         public IDictionary<string, OptimizelyFeature> FeaturesMap { get; private set; }
 
         private string _datafile;
-        
+
         public OptimizelyConfig(string revision, IDictionary<string, OptimizelyExperiment> experimentsMap, IDictionary<string, OptimizelyFeature> featuresMap, string datafile = null)
         {
             Revision = revision;
@@ -39,10 +43,13 @@ namespace OptimizelySDK.OptlyConfig
             _datafile = datafile;
         }
 
-        public OptimizelyConfig(string revision, string sdkKey, string environmentKey, IDictionary<string, OptimizelyExperiment> experimentsMap, IDictionary<string, OptimizelyFeature> featuresMap, string datafile = null)
+        public OptimizelyConfig(string revision, string sdkKey, string environmentKey, Attribute[] attributes, Audience[] audiences, Entity.Event[] events, IDictionary<string, OptimizelyExperiment> experimentsMap, IDictionary<string, OptimizelyFeature> featuresMap, string datafile = null)
         {
             Revision = revision;
             SDKKey = sdkKey;
+            Attributes = attributes;
+            Audiences = audiences;
+            Events = events;
             EnvironmentKey = environmentKey;
             ExperimentsMap = experimentsMap;
             FeaturesMap = featuresMap;
