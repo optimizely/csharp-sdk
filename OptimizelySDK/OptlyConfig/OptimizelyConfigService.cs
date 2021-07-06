@@ -34,7 +34,7 @@ namespace OptimizelySDK.OptlyConfig
             }
             var events = GetEvents(projectConfig);
             var attributes = GetAttributes(projectConfig);
-            var audiences = GetAudiences(projectConfig);
+            var audiences = GetAudiences(projectConfig).Select(aud => new OptimizelyAudience(aud.Id, aud.Name, aud.Conditions)).ToArray<OptimizelyAudience>();
             var experimentMap = GetExperimentsMap(projectConfig);
             var featureMap = GetFeaturesMap(projectConfig, experimentMap);
             OptimizelyConfig = new OptimizelyConfig(projectConfig.Revision,
@@ -94,7 +94,8 @@ namespace OptimizelySDK.OptlyConfig
 
         private IDictionary<string, OptimizelyVariation> GetVariationsMap(Experiment experiment,
             IDictionary<string, FeatureVariable> featureVariableIdMap,
-            ProjectConfig projectConfig)
+            ProjectConfig projectConfig,
+            string rolloutId = null)
         {
             var variationsMap = new Dictionary<string, OptimizelyVariation>();
             foreach (Variation variation in experiment.Variations)
@@ -102,7 +103,8 @@ namespace OptimizelySDK.OptlyConfig
                 var variablesMap = MergeFeatureVariables(projectConfig,
                     featureVariableIdMap,
                     experiment.Id,
-                    variation);
+                    variation,
+                    rolloutId);
 
                 var optimizelyVariation = new OptimizelyVariation(variation.Id,
                     variation.Key,
@@ -126,12 +128,22 @@ namespace OptimizelySDK.OptlyConfig
            ProjectConfig projectConfig,
            IDictionary<string, FeatureVariable> variableIdMap,
            string experimentId,
-           Variation variation)
+           Variation variation,
+           string rolloutId = null)
         {
             var featureId = projectConfig.GetExperimentFeatureList(experimentId)?.FirstOrDefault();
             var featureIdVariablesMap = GetFeatureIdVariablesMap(projectConfig);
             var variablesMap = new Dictionary<string, OptimizelyVariable>();
+            string featureIdRollout = null;
+            if (rolloutId != null)
+            {
+                featureIdRollout = projectConfig.FeatureFlags.Where(feat => feat.RolloutId == rolloutId).FirstOrDefault()?.Id;
+            }
 
+            if (featureId == null)
+            {
+                featureId = featureIdRollout;
+            }
             if (featureId?.Any() ?? false)
             {
                 variablesMap = featureIdVariablesMap[featureId]?.Select(f => new OptimizelyVariable(f.Id,
@@ -203,6 +215,10 @@ namespace OptimizelySDK.OptlyConfig
 
         private string GetExperimentAudiences(Experiment experiment, ProjectConfig projectConfig)
         {
+            if (experiment.AudienceConditionsString == null)
+            {
+                return "";
+            }
             var s = JToken.Parse(experiment.AudienceConditionsString).Children();
             return GetSerializedAudiences(s.ToList<object>(), projectConfig.AudienceIdMap);
         }
@@ -267,6 +283,7 @@ namespace OptimizelySDK.OptlyConfig
             {
                 return new List<OptimizelyExperiment>();
             }
+
             var featureVariableIdMap = GetVariableIdMap(projectConfig);
 
             var deliveryRules = new List<OptimizelyExperiment>();
@@ -277,7 +294,7 @@ namespace OptimizelySDK.OptlyConfig
                         id: experiment.Id,
                         key: experiment.Key,
                         audiences: GetExperimentAudiences(experiment, projectConfig),
-                        variationsMap: GetVariationsMap(experiment, featureVariableIdMap, projectConfig)
+                        variationsMap: GetVariationsMap(experiment, featureVariableIdMap, projectConfig, rolloutId: rollout.Id)
                     );
                 deliveryRules.Add(optimizelyExperiment);
             }

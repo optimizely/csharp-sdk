@@ -28,7 +28,7 @@ namespace OptimizelySDK.OptlyConfig
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public string EnvironmentKey { get; private set; }
         public Entity.Event[] Events { get; private set; }
-        public Audience[] Audiences { get; private set; }
+        public OptimizelyAudience[] Audiences { get; private set; }
         public Attribute[] Attributes { get; private set; }
         public IDictionary<string, OptimizelyExperiment> ExperimentsMap { get; private set; }
         public IDictionary<string, OptimizelyFeature> FeaturesMap { get; private set; }
@@ -43,7 +43,7 @@ namespace OptimizelySDK.OptlyConfig
             _datafile = datafile;
         }
 
-        public OptimizelyConfig(string revision, string sdkKey, string environmentKey, Attribute[] attributes, Audience[] audiences, Entity.Event[] events, IDictionary<string, OptimizelyExperiment> experimentsMap, IDictionary<string, OptimizelyFeature> featuresMap, string datafile = null)
+        public OptimizelyConfig(string revision, string sdkKey, string environmentKey, Attribute[] attributes, OptimizelyAudience[] audiences, Entity.Event[] events, IDictionary<string, OptimizelyExperiment> experimentsMap, IDictionary<string, OptimizelyFeature> featuresMap, string datafile = null)
         {
             Revision = revision;
             SDKKey = sdkKey;
@@ -66,3 +66,4 @@ namespace OptimizelySDK.OptlyConfig
         }
     }
 }
+    
