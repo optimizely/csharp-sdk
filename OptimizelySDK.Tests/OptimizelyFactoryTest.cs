@@ -1,6 +1,6 @@
 ﻿/**
  *
- *    Copyright 2020, Optimizely and contributors
+ *    Copyright 2020-2021, Optimizely and contributors
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -62,7 +62,6 @@ namespace OptimizelySDK.Tests
             optimizely.Dispose();
         }
 
-
         [Test]
         public void TestProjectConfigManagerUsingSDKKey()
         {
@@ -78,8 +77,8 @@ namespace OptimizelySDK.Tests
                 Url = "https://cdn.optimizely.com/datafiles/my-sdk-key.json",
                 LastModified = "",
                 AutoUpdate = true,
-                BlockingTimeout = TimeSpan.FromSeconds(15),
-                PollingInterval = TimeSpan.FromMinutes(5)
+                BlockingTimeout = TimeSpan.FromSeconds(30),
+                PollingInterval = TimeSpan.FromMilliseconds(2023)
             };
 
             Assert.AreEqual(actualConfigManagerProps, expectedConfigManagerProps);
@@ -102,12 +101,37 @@ namespace OptimizelySDK.Tests
                 LastModified = "",
                 DatafileAccessToken = "access-token",
                 AutoUpdate = true,
-                BlockingTimeout = TimeSpan.FromSeconds(15),
-                PollingInterval = TimeSpan.FromMinutes(5)
+                BlockingTimeout = TimeSpan.FromSeconds(30),
+                PollingInterval = TimeSpan.FromMilliseconds(2023)
             };
 
             Assert.AreEqual(actualConfigManagerProps, expectedConfigManagerProps);
 
+            optimizely.Dispose();
+        }
+
+        [Test]
+        public void TestOptimizelyInstanceUsingConfigNotUseFactoryClassBlockingTimeoutAndPollingInterval()
+        {
+            OptimizelyFactory.SetBlockingTimeOutPeriod(TimeSpan.FromSeconds(30));
+            OptimizelyFactory.SetPollingInterval(TimeSpan.FromMilliseconds(2023));
+            var optimizely = OptimizelyFactory.NewDefaultInstance();
+            // Check values are loaded from app.config or not.
+            var projectConfigManager = optimizely.ProjectConfigManager as HttpProjectConfigManager;
+            Assert.NotNull(projectConfigManager);
+
+            var actualConfigManagerProps = new ProjectConfigManagerProps(projectConfigManager);
+            var expectedConfigManagerProps = new ProjectConfigManagerProps
+            {
+                Url = "www.testurl.com",
+                LastModified = "",
+                AutoUpdate = true,
+                DatafileAccessToken = "testingtoken123",
+                BlockingTimeout = TimeSpan.FromMilliseconds(10000),
+                PollingInterval = TimeSpan.FromMilliseconds(2000)
+            };
+
+            Assert.AreEqual(actualConfigManagerProps, expectedConfigManagerProps);
             optimizely.Dispose();
         }
 

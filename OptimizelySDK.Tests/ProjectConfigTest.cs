@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2017-2020, Optimizely
+ * Copyright 2017-2021, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,6 +63,10 @@ namespace OptimizelySDK.Tests
             Assert.AreEqual("7720880029", Config.ProjectId);
             // Check Revision 
             Assert.AreEqual("15", Config.Revision);
+            // Check SDK key 
+            Assert.AreEqual("TestData", Config.SDKKey);
+            // Check Environment key 
+            Assert.AreEqual("Production", Config.EnvironmentKey);
             // Check SendFlagDecision
             Assert.IsTrue(Config.SendFlagDecisions);
 
