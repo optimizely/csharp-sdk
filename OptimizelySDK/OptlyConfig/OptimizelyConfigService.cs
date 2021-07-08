@@ -92,6 +92,14 @@ namespace OptimizelySDK.OptlyConfig
             return experimentsMap;
         }
 
+        /// <summary>
+        /// Gets Map of all experiment variations and variables including rollouts
+        /// </summary>
+        /// <param name="experiment">Experiment</param>
+        /// <param name="featureVariableIdMap">The map of feature variables and id</param>
+        /// <param name="projectConfig">The project config</param>
+        /// <param name="rolloutId">Rollout Id if the feature Id is null then use rollout id to get feature Id</param>
+        /// <returns>Dictionary | Dictionary of experiment key and value as experiment object</returns>
         private IDictionary<string, OptimizelyVariation> GetVariationsMap(Experiment experiment,
             IDictionary<string, FeatureVariable> featureVariableIdMap,
             ProjectConfig projectConfig,
@@ -123,6 +131,7 @@ namespace OptimizelySDK.OptlyConfig
         /// <param name="variableIdMap">Map containing variable ID as key and Object of featureVariable</param>
         /// <param name="experimentId">experimentId of featureExperiment</param>
         /// <param name="variation">variation</param>
+        /// <param name="rolloutId">rollout id to get feature id</param>
         /// <returns>Dictionary | Dictionary of FeatureVariable key and value as FeatureVariable object</returns>
         private IDictionary<string, OptimizelyVariable> MergeFeatureVariables(
            ProjectConfig projectConfig,
@@ -140,10 +149,8 @@ namespace OptimizelySDK.OptlyConfig
                 featureIdRollout = projectConfig.FeatureFlags.Where(feat => feat.RolloutId == rolloutId).FirstOrDefault()?.Id;
             }
 
-            if (featureId == null)
-            {
-                featureId = featureIdRollout;
-            }
+            featureId = featureId?? featureIdRollout;
+            
             if (featureId?.Any() ?? false)
             {
                 variablesMap = featureIdVariablesMap[featureId]?.Select(f => new OptimizelyVariable(f.Id,
@@ -213,6 +220,12 @@ namespace OptimizelySDK.OptlyConfig
             return featureIdVariablesMap ?? new Dictionary<string, List<FeatureVariable>>();
         }
 
+        /// <summary>
+        /// Gets stringify audiences used in given experiment
+        /// </summary>
+        /// <param name="experiment">The experiment</param>
+        /// <param name="projectConfig">The project config</param>
+        /// <returns>string | Audiences used in experiment.</returns>
         private string GetExperimentAudiences(Experiment experiment, ProjectConfig projectConfig)
         {
             if (experiment.AudienceConditionsString == null)
@@ -220,33 +233,40 @@ namespace OptimizelySDK.OptlyConfig
                 return "";
             }
             var s = JToken.Parse(experiment.AudienceConditionsString).Children();
-            return GetSerializedAudiences(s.ToList<object>(), projectConfig.AudienceIdMap);
+            return GetSerializedAudiences(new List<object>(s), projectConfig.AudienceIdMap);
         }
+
+        /// <summary>
+        /// Converts list of audience conditions to serialized audiences used in experiment
+        /// </summary>
+        /// <param name="audienceConditions">List of audience conditions in experiment</param>
+        /// <param name="audienceIdMap">The audience Id map</param>
+        /// <returns>string | Serialized audience in which IDs are replaced with audience name.</returns>
         private string GetSerializedAudiences(List<object> audienceConditions, Dictionary<string, Audience> audienceIdMap)
         {
-            var cond = "";
-
             var sAudience = "";
-
 
             if (audienceConditions != null)
             {
+                string cond = "";
                 foreach (var item in audienceConditions)
                 {
                     double res;
                     var subAudience = "";
-                    if (item is List<object>)
+                    // Checks if item is list of conditions means if it is sub audience
+                    if (item is JArray)
                     {
-                        subAudience = GetSerializedAudiences((List<object>)item, audienceIdMap);
+                        subAudience = GetSerializedAudiences(((JArray)item).ToObject<List<object>>(), audienceIdMap);
                         subAudience = "(" + subAudience + ")";
                     }
-                    else if (!double.TryParse(item.ToString(), out res))
+                    else if (!double.TryParse(item.ToString(), out res)) // Checks if item is an audience condition
                     {
                         cond = item.ToString().ToUpper();
                     }
                     else
-                    {
+                    {   // Checks if item is audience id
                         var itemStr = item.ToString();
+                        // if audience condition is not then add Not at start else if there is already audience id in string then place condition betweeen to audiences
                         if (!string.IsNullOrEmpty(sAudience) || cond.Equals("NOT"))
                         {
                             cond = string.IsNullOrEmpty(cond) ? cond : "OR";
@@ -258,11 +278,12 @@ namespace OptimizelySDK.OptlyConfig
                             sAudience = "\"" + audienceIdMap[itemStr]?.Name + "\"";
                         }
                     }
+                    // Checks if sub audience is empty or not
                     if (!string.IsNullOrEmpty(subAudience))
                     {
-                        if (string.IsNullOrEmpty(sAudience) || cond == "NOT")
+                        if (!string.IsNullOrEmpty(sAudience) || cond == "NOT")
                         {
-                            cond = string.IsNullOrEmpty(cond) ? cond : "OR";
+                            cond = !string.IsNullOrEmpty(cond) ? cond : "OR";
 
                             sAudience = sAudience + " " + cond + " " + subAudience;
                         }
@@ -276,6 +297,12 @@ namespace OptimizelySDK.OptlyConfig
             return sAudience;
         }
 
+        /// <summary>
+        /// Gets list of rollout experiments
+        /// </summary>
+        /// <param name="rolloutID">Rollout ID</param>
+        /// <param name="projectConfig">Project Config</param>
+        /// <returns>List | List of Optimizely rollout experiments.</returns>
         private List<OptimizelyExperiment> GetDeliveryRules(string rolloutID, ProjectConfig projectConfig)
         {
             var rollout = projectConfig.GetRolloutFromId(rolloutID);

@@ -191,7 +191,7 @@ namespace OptimizelySDK.Tests.OptimizelyConfigTests
                     "audience_combinations_experiment", new OptimizelyExperiment (
                         id: "1323241598",
                         key:"audience_combinations_experiment",
-                        audiences: "(\"exactString\" OR \"$$dummySubstringString\") AND (\"$$dummyExists\" OR \"$$dummyExactNumber\" OR \"$$dummyGtNumber\" OR \"$$dummyLtNumber\" OR \"$$dummyExactBoolean\")",
+                        audiences: "(\"exactString\" OR \"substringString\") AND (\"exists\" OR \"exactNumber\" OR \"gtNumber\" OR \"ltNumber\" OR \"exactBoolean\")",
                         variationsMap: new Dictionary<string, OptimizelyVariation>
                         {
                             {
@@ -208,7 +208,7 @@ namespace OptimizelySDK.Tests.OptimizelyConfigTests
                     "feat2_with_var_test", new OptimizelyExperiment(
                         id: "1323241599",
                         key:"feat2_with_var_test",
-                        audiences: "",
+                        audiences: "(\"exactString\" OR \"substringString\") AND (\"exists\" OR \"exactNumber\" OR \"gtNumber\" OR \"ltNumber\" OR \"exactBoolean\")",
                         variationsMap: new Dictionary<string, OptimizelyVariation>
                         {
                             {
@@ -241,7 +241,7 @@ namespace OptimizelySDK.Tests.OptimizelyConfigTests
                         key: "feat_no_vars",
                         experimentRules: new List<OptimizelyExperiment>(),
                         deliveryRules: new List<OptimizelyExperiment>() { new OptimizelyExperiment(
-                                            id: "11551226731",
+                                            id: "11488548027",
                                             key:"feat_no_vars_rule",
                                             audiences: "",
                                             variationsMap: new Dictionary<string, OptimizelyVariation>
@@ -251,8 +251,7 @@ namespace OptimizelySDK.Tests.OptimizelyConfigTests
                                                         id: "11557362669",
                                                         key: "11557362669",
                                                         featureEnabled: true,
-                                                        variablesMap: new Dictionary<string, OptimizelyVariable>()
-                                                        )
+                                                        variablesMap: new Dictionary<string, OptimizelyVariable>())
                                                 }
                                             }
                                         ) },
@@ -301,7 +300,9 @@ namespace OptimizelySDK.Tests.OptimizelyConfigTests
                                                         key: "11475708558",
                                                         featureEnabled: false,
                                                         variablesMap: new Dictionary<string, OptimizelyVariable>()
-                                                        )
+                                                        {
+                                                            { "x" , new OptimizelyVariable("11535264366", "x", "string", "x")  }
+                                                        })
                                                 }
                                             }
                                         ) },
@@ -346,9 +347,9 @@ namespace OptimizelySDK.Tests.OptimizelyConfigTests
                         id: "11567102052",
                         key: "feat2",
                         deliveryRules: new List<OptimizelyExperiment>() { new OptimizelyExperiment(
-                                            id: "11551226732",
+                                            id: "11488548028",
                                             key:"11488548028",
-                                            audiences: "(\"exactString\" OR \"$$dummySubstringString\") AND (\"$$dummyExists\" OR \"$$dummyExactNumber\" OR \"$$dummyGtNumber\" OR \"$$dummyLtNumber\" OR \"$$dummyExactBoolean\")",
+                                            audiences: "(\"exactString\" OR \"substringString\") AND (\"exists\" OR \"exactNumber\" OR \"gtNumber\" OR \"ltNumber\" OR \"exactBoolean\")",
                                             variationsMap: new Dictionary<string, OptimizelyVariation>
                                             {
                                                 {
@@ -383,7 +384,15 @@ namespace OptimizelySDK.Tests.OptimizelyConfigTests
                                                         key: "11475708559",
                                                         featureEnabled: false,
                                                         variablesMap: new Dictionary<string, OptimizelyVariable>()
-                                                        )
+                                                        {
+                                                            {
+                                                                "z" , new OptimizelyVariable (
+                                                                    id: "11535264367",
+                                                                    key: "z",
+                                                                    type: "integer",
+                                                                    value: "10")
+                                                            }
+                                                        })
                                                 }
                                             }
                                         )
@@ -393,7 +402,7 @@ namespace OptimizelySDK.Tests.OptimizelyConfigTests
                             new OptimizelyExperiment (
                                     id: "1323241599",
                                     key:"feat2_with_var_test",
-                                    audiences: "",
+                                    audiences: "(\"exactString\" OR \"substringString\") AND (\"exists\" OR \"exactNumber\" OR \"gtNumber\" OR \"ltNumber\" OR \"exactBoolean\")",
                                     variationsMap: new Dictionary<string, OptimizelyVariation>
                                     {
                                         {
@@ -421,7 +430,7 @@ namespace OptimizelySDK.Tests.OptimizelyConfigTests
                                 "feat2_with_var_test", new OptimizelyExperiment (
                                     id: "1323241599",
                                     key:"feat2_with_var_test",
-                                    audiences: "",
+                                    audiences: "(\"exactString\" OR \"substringString\") AND (\"exists\" OR \"exactNumber\" OR \"gtNumber\" OR \"ltNumber\" OR \"exactBoolean\")",
                                     variationsMap: new Dictionary<string, OptimizelyVariation>
                                     {
                                         {
@@ -454,7 +463,54 @@ namespace OptimizelySDK.Tests.OptimizelyConfigTests
             };
 
             OptimizelyConfig optimizelyConfig = new OptimizelyConfigService(datafileProjectConfig).GetOptimizelyConfig();
-            OptimizelyConfig expectedOptimizelyConfig = new OptimizelyConfig(datafileProjectConfig.Revision, datafileProjectConfig.SDKKey, datafileProjectConfig.EnvironmentKey, experimentsMap, featuresMap);
+            OptimizelyConfig expectedOptimizelyConfig = new OptimizelyConfig(datafileProjectConfig.Revision,
+                datafileProjectConfig.SDKKey,
+                datafileProjectConfig.EnvironmentKey,
+                attributes: new Entity.Attribute[]
+                { 
+                    new Entity.Attribute
+                    {
+                       Id = "594015", Key = "house"
+                    },
+                    new Entity.Attribute
+                    {
+                       Id = "594016", Key = "lasers"
+                    },
+                    new Entity.Attribute
+                    {
+                       Id = "594017", Key = "should_do_it"
+                    },
+                    new Entity.Attribute
+                    {
+                       Id = "594018", Key = "favorite_ice_cream"
+                    }
+                },
+                audiences: new OptimizelyAudience[] 
+                {
+                    new OptimizelyAudience("3468206642", "exactString", "[\"and\", [\"or\", [\"or\", {\"name\": \"house\", \"type\": \"custom_attribute\", \"value\": \"Gryffindor\"}]]]"),
+                    new OptimizelyAudience("3468206645", "notChrome", "[\"and\", [\"or\", [\"not\", [\"or\", {\"name\": \"browser_type\", \"type\": \"custom_attribute\", \"value\":\"Chrome\"}]]]]"),
+                    new OptimizelyAudience("3988293898", "$$dummySubstringString", "{\"type\": \"custom_attribute\", \"name\": \"$opt_dummy_attribute\", \"value\": \"impossible_value\"}"),
+                    new OptimizelyAudience("3988293899", "$$dummyExists", "{\"type\": \"custom_attribute\", \"name\": \"$opt_dummy_attribute\", \"value\": \"impossible_value\"}"),
+                    new OptimizelyAudience("3468206646", "$$dummyExactNumber", "{\"type\": \"custom_attribute\", \"name\": \"$opt_dummy_attribute\", \"value\": \"impossible_value\"}"),
+                    new OptimizelyAudience("3468206647", "$$dummyGtNumber", "{\"type\": \"custom_attribute\", \"name\": \"$opt_dummy_attribute\", \"value\": \"impossible_value\"}"),
+                    new OptimizelyAudience("3468206644", "$$dummyLtNumber", "{\"type\": \"custom_attribute\", \"name\": \"$opt_dummy_attribute\", \"value\": \"impossible_value\"}"),
+                    new OptimizelyAudience("3468206643", "$$dummyExactBoolean", "{\"type\": \"custom_attribute\", \"name\": \"$opt_dummy_attribute\", \"value\": \"impossible_value\"}"),
+                    new OptimizelyAudience("0", "$$dummy", "{\"type\": \"custom_attribute\", \"name\": \"$opt_dummy_attribute\", \"value\": \"impossible_value\"}")
+
+                },
+                events: new Entity.Event[]
+                { 
+                    new Entity.Event()
+                    {
+                       Id = "594089", Key = "item_bought", ExperimentIds = new string[] { "11564051718", "1323241597" }
+                    },
+                    new Entity.Event()
+                    {
+                       Id = "594090", Key = "user_signed_up", ExperimentIds = new string[] { "1323241598", "1323241599" }
+                    }
+                },
+                experimentsMap,
+                featuresMap, datafile: TestData.TypedAudienceDatafile);
             Assert.IsTrue(TestData.CompareObjects(optimizelyConfig, expectedOptimizelyConfig));
         }
 
@@ -468,12 +524,18 @@ namespace OptimizelySDK.Tests.OptimizelyConfigTests
             OptimizelyConfig expectedOptlyFeature = new OptimizelyConfig("123",
                 "testSdkKey",
                 "Development",
+                attributes: new Entity.Attribute[0],
+                audiences: new OptimizelyAudience[0],
+                events: new Entity.Event[0],
                 new Dictionary<string, OptimizelyExperiment>(),
                 new Dictionary<string, OptimizelyFeature>()
                 );
             Assert.AreEqual(expectedOptlyFeature.Revision, "123");
             Assert.AreEqual(expectedOptlyFeature.SDKKey, "testSdkKey");
             Assert.AreEqual(expectedOptlyFeature.EnvironmentKey, "Development");
+            Assert.AreEqual(expectedOptlyFeature.Attributes, new Entity.Attribute[0]);
+            Assert.AreEqual(expectedOptlyFeature.Audiences, new OptimizelyAudience[0]);
+            Assert.AreEqual(expectedOptlyFeature.Events, new Entity.Event[0]);
             Assert.AreEqual(expectedOptlyFeature.ExperimentsMap, new Dictionary<string, OptimizelyExperiment>());
             Assert.AreEqual(expectedOptlyFeature.FeaturesMap, new Dictionary<string, OptimizelyFeature>());
         }
