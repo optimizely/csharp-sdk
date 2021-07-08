@@ -210,6 +210,15 @@ namespace OptimizelySDK
         Variation GetVariationFromKey(string experimentKey, string variationKey);
 
         /// <summary>
+        /// Get the Variation from the keys
+        /// </summary>
+        /// <param name="experimentId">key for Experiment</param>
+        /// <param name="variationKey">key for Variation</param>
+        /// <returns>Variation Entity corresponding to the provided experiment key and variation key or a dummy 
+        /// entity if keys are invalid</returns>
+        Variation GetVariationFromKeyByExperimentId(string experimentId, string variationKey);
+
+        /// <summary>
         /// Get the Variation from the Key/ID
         /// </summary>
         /// <param name="experimentKey">key for Experiment</param>
@@ -217,6 +226,15 @@ namespace OptimizelySDK
         /// <returns>Variation Entity corresponding to the provided experiment key and variation ID or a dummy 
         /// entity if key or ID is invalid</returns>
         Variation GetVariationFromId(string experimentKey, string variationId);
+
+        /// <summary>
+        /// Get the Variation from the Key/ID
+        /// </summary>
+        /// <param name="experimentId">key for Experiment</param>
+        /// <param name="variationId">ID for Variation</param>
+        /// <returns>Variation Entity corresponding to the provided experiment key and variation ID or a dummy 
+        /// entity if key or ID is invalid</returns>
+        Variation GetVariationFromIdByExperimentId(string experimentId, string variationId);
 
         /// <summary>
         /// Get the feature from the key
