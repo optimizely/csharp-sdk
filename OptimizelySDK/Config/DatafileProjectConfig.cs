@@ -268,6 +268,7 @@ namespace OptimizelySDK.Config
             TypedAudiences = TypedAudiences ?? new Audience[0];
             FeatureFlags = FeatureFlags ?? new FeatureFlag[0];
             Rollouts = Rollouts ?? new Rollout[0];
+            _ExperimentKeyMap = new Dictionary<string, Experiment>();
 
             _GroupIdMap = ConfigParser<Group>.GenerateMap(entities: Groups, getKey: g => g.Id.ToString(), clone: true);
             //_ExperimentKeyMap = ConfigParser<Experiment>.GenerateMap(entities: Experiments, getKey: e => e.Key, clone: true);
