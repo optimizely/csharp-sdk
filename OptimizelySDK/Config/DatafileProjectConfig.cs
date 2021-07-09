@@ -136,14 +136,14 @@ namespace OptimizelySDK.Config
         public Dictionary<string, Dictionary<string, Variation>> VariationKeyMap { get { return _VariationKeyMap; } }
 
         /// <summary>
-        /// Associative array of experiment key to associative array of variation key to variations
+        /// Associative array of experiment ID to associative array of variation key to variations
         /// </summary>
         private Dictionary<string, Dictionary<string, Variation>> _VariationKeyMapByExperimentId
             = new Dictionary<string, Dictionary<string, Variation>>();
         public Dictionary<string, Dictionary<string, Variation>> VariationKeyMapByExperimentId { get { return _VariationKeyMap; } }
 
         /// <summary>
-        /// Associative array of experiment key to associative array of variation key to variations
+        /// Associative array of experiment ID to associative array of variation key to variations
         /// </summary>
         private Dictionary<string, Dictionary<string, Variation>> _VariationIdMapByExperimentId
             = new Dictionary<string, Dictionary<string, Variation>>();
@@ -271,7 +271,6 @@ namespace OptimizelySDK.Config
             _ExperimentKeyMap = new Dictionary<string, Experiment>();
 
             _GroupIdMap = ConfigParser<Group>.GenerateMap(entities: Groups, getKey: g => g.Id.ToString(), clone: true);
-            //_ExperimentKeyMap = ConfigParser<Experiment>.GenerateMap(entities: Experiments, getKey: e => e.Key, clone: true);
             _ExperimentIdMap = ConfigParser<Experiment>.GenerateMap(entities: Experiments, getKey: e => e.Id, clone: true);
             _EventKeyMap = ConfigParser<Entity.Event>.GenerateMap(entities: Events, getKey: e => e.Key, clone: true);
             _AttributeKeyMap = ConfigParser<Attribute>.GenerateMap(entities: Attributes, getKey: a => a.Key, clone: true);
@@ -295,8 +294,8 @@ namespace OptimizelySDK.Config
 
                 // RJE: I believe that this is equivalent to this:
                 // $this->_experimentKeyMap = array_merge($this->_experimentKeyMap, $experimentsInGroup);
-                foreach (string key in experimentsInGroup.Keys)
-                    _ExperimentIdMap[key] = experimentsInGroup[key];
+                foreach (var experiment in experimentsInGroup.Values)
+                    _ExperimentIdMap[experiment.Id] = experiment;
             }
 
             foreach (Experiment experiment in _ExperimentIdMap.Values)
@@ -551,10 +550,10 @@ namespace OptimizelySDK.Config
         /// <summary>
         /// Get the Variation from the Key/ID
         /// </summary>
-        /// <param name="experimentKey">key for Experiment</param>
+        /// <param name="experimentId">ID for Experiment</param>
         /// <param name="variationId">ID for Variation</param>
         /// <returns>Variation Entity corresponding to the provided experiment key and variation ID or a dummy 
-        /// entity if key or ID is invalid</returns>
+        /// entity if experiment ID or variation ID is invalid</returns>
         public Variation GetVariationFromIdByExperimentId(string experimentId, string variationId)
         {
             if (_VariationIdMapByExperimentId.ContainsKey(experimentId) &&

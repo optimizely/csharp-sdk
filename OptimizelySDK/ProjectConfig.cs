@@ -221,7 +221,7 @@ namespace OptimizelySDK
         /// <summary>
         /// Get the Variation from the keys
         /// </summary>
-        /// <param name="experimentId">key for Experiment</param>
+        /// <param name="experimentId">ID for Experiment</param>
         /// <param name="variationKey">key for Variation</param>
         /// <returns>Variation Entity corresponding to the provided experiment key and variation key or a dummy 
         /// entity if keys are invalid</returns>
@@ -239,7 +239,7 @@ namespace OptimizelySDK
         /// <summary>
         /// Get the Variation from the Key/ID
         /// </summary>
-        /// <param name="experimentId">key for Experiment</param>
+        /// <param name="experimentId">ID for Experiment</param>
         /// <param name="variationId">ID for Variation</param>
         /// <returns>Variation Entity corresponding to the provided experiment key and variation ID or a dummy 
         /// entity if key or ID is invalid</returns>
