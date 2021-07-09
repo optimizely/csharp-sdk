@@ -17,6 +17,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using OptimizelySDK.Entity;
 
@@ -232,8 +233,8 @@ namespace OptimizelySDK.OptlyConfig
             {
                 return "";
             }
-            var s = JToken.Parse(experiment.AudienceConditionsString).Children();
-            return GetSerializedAudiences(new List<object>(s), projectConfig.AudienceIdMap);
+            var s = JsonConvert.DeserializeObject<List<object>>(experiment.AudienceConditionsString);
+            return GetSerializedAudiences(s, projectConfig.AudienceIdMap);
         }
 
         /// <summary>
