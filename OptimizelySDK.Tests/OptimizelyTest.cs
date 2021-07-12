@@ -990,6 +990,9 @@ namespace OptimizelySDK.Tests
             Variation expectedVariation1 = projectConfig.GetVariationFromKey("etag3", "vtag5");
             Variation expectedVariation2 = projectConfig.GetVariationFromKey("etag3", "vtag6");
 
+            Variation expectedVariationUsingVarIDandExpID = projectConfig.GetVariationFromIdByExperimentId("224", "281");
+            Variation expectedVariationUsingVarKeyandExpID = projectConfig.GetVariationFromKeyByExperimentId("224", "vtag6");
+
             //Check whitelisted experiment
             var variation = optimizely.GetVariation("etag3", "testUser1");
             Assert.IsTrue(TestData.CompareObjects(expectedVariation1, variation));
@@ -1000,6 +1003,8 @@ namespace OptimizelySDK.Tests
 
             // verify forced variation preceeds whitelisted variation
             Assert.IsTrue(TestData.CompareObjects(expectedVariation2, variation));
+            Assert.IsTrue(TestData.CompareObjects(expectedVariationUsingVarIDandExpID, variation));
+            Assert.IsTrue(TestData.CompareObjects(expectedVariationUsingVarKeyandExpID, variation));
 
             // remove forced variation and verify whitelisted should be returned.
             Assert.IsTrue(optimizely.SetForcedVariation("etag3", "testUser1", null));
