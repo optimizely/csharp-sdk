@@ -520,7 +520,7 @@ namespace OptimizelySDK.Config
         {
             if (_VariationKeyMapByExperimentId.ContainsKey(experimentId) &&
                 _VariationKeyMapByExperimentId[experimentId].ContainsKey(variationKey))
-                return _VariationKeyMap[experimentId][variationKey];
+                return _VariationKeyMapByExperimentId[experimentId][variationKey];
 
             string message = $@"No variation key ""{variationKey}"" defined in datafile for experiment ""{experimentId}"".";
             Logger.Log(LogLevel.ERROR, message);
