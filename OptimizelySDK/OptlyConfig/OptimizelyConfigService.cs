@@ -17,6 +17,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using OptimizelySDK.Entity;
@@ -35,7 +36,7 @@ namespace OptimizelySDK.OptlyConfig
             }
             var events = GetEvents(projectConfig);
             var attributes = GetAttributes(projectConfig);
-            var audiences = GetAudiences(projectConfig).Select(aud => new OptimizelyAudience(aud.Id, aud.Name, aud.Conditions)).ToArray<OptimizelyAudience>();
+            var audiences = GetAudiences(projectConfig);
             var experimentMap = GetExperimentsMap(projectConfig);
             var featureMap = GetFeaturesMap(projectConfig, experimentMap);
             OptimizelyConfig = new OptimizelyConfig(projectConfig.Revision,
@@ -51,14 +52,14 @@ namespace OptimizelySDK.OptlyConfig
 
         private Entity.Event[] GetEvents(ProjectConfig projectConfig)
         {
-            return projectConfig.Events;
+            return projectConfig.Events ?? new Entity.Event[0];
         }
 
-        private Audience[] GetAudiences(ProjectConfig projectConfig)
+        private OptimizelyAudience[] GetAudiences(ProjectConfig projectConfig)
         {
             var audiencesArr = Array.FindAll(projectConfig.Audiences, aud => !aud.Id.Equals("$opt_dummy_audience"));
             audiencesArr.Concat(projectConfig.TypedAudiences);
-            return audiencesArr;
+            return audiencesArr.Select(aud => new OptimizelyAudience(aud.Id, aud.Name, aud.Conditions)).ToArray<OptimizelyAudience>();
         }
 
         private Entity.Attribute[] GetAttributes(ProjectConfig projectConfig)
@@ -239,13 +240,22 @@ namespace OptimizelySDK.OptlyConfig
 
         /// <summary>
         /// Converts list of audience conditions to serialized audiences used in experiment
+        /// for examples:
+        /// 1. Input: ["or", "1", "2"]
+        ///    Output: "\"us\" OR \"female\""
+        /// 2. Input: ["not", "1"]
+        ///    Output: "NOT \"us\""
+        /// 3. Input: ["or", "1"]
+        ///    Output: "\"us\""
+        /// 4. Input: ["and", ["or", "1", ["and", "2", "3"]], ["and", "11", ["or", "12", "13"]]]
+        ///    Output: "(\"us\" OR (\"female\" AND \"adult\")) AND (\"fr\" AND (\"male\" OR \"kid\"))"
         /// </summary>
         /// <param name="audienceConditions">List of audience conditions in experiment</param>
         /// <param name="audienceIdMap">The audience Id map</param>
         /// <returns>string | Serialized audience in which IDs are replaced with audience name.</returns>
         private string GetSerializedAudiences(List<object> audienceConditions, Dictionary<string, Audience> audienceIdMap)
         {
-            var sAudience = "";
+            StringBuilder sAudience = new StringBuilder("");
 
             if (audienceConditions != null)
             {
@@ -267,35 +277,35 @@ namespace OptimizelySDK.OptlyConfig
                     else
                     {   // Checks if item is audience id
                         var itemStr = item.ToString();
-                        // if audience condition is not then add Not at start else if there is already audience id in string then place condition betweeen to audiences
-                        if (!string.IsNullOrEmpty(sAudience) || cond.Equals("NOT"))
+                        // if audience condition is "NOT" then add "NOT" at start. Otherwise check if there is already audience id in sAudience then append condition between saudience and item
+                        if (!string.IsNullOrEmpty(sAudience.ToString()) || cond.Equals("NOT"))
                         {
                             cond = string.IsNullOrEmpty(cond) ? cond : "OR";
 
-                            sAudience = sAudience + " " + cond + " \"" + audienceIdMap[itemStr]?.Name + "\"";
+                            sAudience = sAudience.Append(" " + cond + " \"" + audienceIdMap[itemStr]?.Name + "\"");
                         }
                         else
                         {
-                            sAudience = "\"" + audienceIdMap[itemStr]?.Name + "\"";
+                            sAudience = new StringBuilder("\"" + audienceIdMap[itemStr]?.Name + "\"");
                         }
                     }
                     // Checks if sub audience is empty or not
                     if (!string.IsNullOrEmpty(subAudience))
                     {
-                        if (!string.IsNullOrEmpty(sAudience) || cond == "NOT")
+                        if (!string.IsNullOrEmpty(sAudience.ToString()) || cond == "NOT")
                         {
                             cond = !string.IsNullOrEmpty(cond) ? cond : "OR";
 
-                            sAudience = sAudience + " " + cond + " " + subAudience;
+                            sAudience = sAudience.Append(" " + cond + " " + subAudience);
                         }
                         else
                         {
-                            sAudience = sAudience + subAudience;
+                            sAudience = sAudience.Append(subAudience);
                         }
                     }
                 }
             }
-            return sAudience;
+            return sAudience.ToString();
         }
 
         /// <summary>
@@ -307,7 +317,7 @@ namespace OptimizelySDK.OptlyConfig
         private List<OptimizelyExperiment> GetDeliveryRules(string rolloutID, ProjectConfig projectConfig)
         {
             var rollout = projectConfig.GetRolloutFromId(rolloutID);
-            if (rollout?.Experiments == null || string.IsNullOrEmpty(rolloutID))
+            if (rollout?.Experiments == null)
             {
                 return new List<OptimizelyExperiment>();
             }
