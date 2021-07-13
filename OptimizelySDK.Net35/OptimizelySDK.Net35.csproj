@@ -287,6 +287,9 @@
 	<Compile Include="..\OptimizelySDK\OptlyConfig\OptimizelyExperiment.cs">
 	  <Link>OptlyConfig\OptimizelyExperiment.cs</Link>
 	</Compile>
+	<Compile Include="..\OptimizelySDK\OptlyConfig\OptimizelyAudience.cs">
+	  <Link>OptlyConfig\OptimizelyAudience.cs</Link>
+	</Compile>
 	<Compile Include="..\OptimizelySDK\OptlyConfig\OptimizelyFeature.cs">
 	  <Link>OptlyConfig\OptimizelyFeature.cs</Link>
 	</Compile>
