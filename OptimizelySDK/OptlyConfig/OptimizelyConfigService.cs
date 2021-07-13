@@ -34,11 +34,12 @@ namespace OptimizelySDK.OptlyConfig
             {
                 return;
             }
-            var events = GetEvents(projectConfig);
             var attributes = GetAttributes(projectConfig);
             var audiences = GetAudiences(projectConfig);
             var experimentMap = GetExperimentsMap(projectConfig);
             var featureMap = GetFeaturesMap(projectConfig, experimentMap);
+            var events = GetEvents(projectConfig);
+
             OptimizelyConfig = new OptimizelyConfig(projectConfig.Revision,
                 projectConfig.SDKKey,
                 projectConfig.EnvironmentKey,
