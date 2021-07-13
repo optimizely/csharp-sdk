@@ -529,7 +529,7 @@ namespace OptimizelySDK.Config
         }
 
         /// <summary>
-        /// Get the Variation from the Key/ID
+        /// Get the Variation from the Key/Id
         /// </summary>
         /// <param name="experimentKey">key for Experiment</param>
         /// <param name="variationId">ID for Variation</param>
@@ -548,7 +548,7 @@ namespace OptimizelySDK.Config
         }
 
         /// <summary>
-        /// Get the Variation from the Key/ID
+        /// Get the Variation from the expId/varId
         /// </summary>
         /// <param name="experimentId">ID for Experiment</param>
         /// <param name="variationId">ID for Variation</param>
