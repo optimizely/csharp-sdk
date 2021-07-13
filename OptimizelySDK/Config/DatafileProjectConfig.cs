@@ -140,14 +140,14 @@ namespace OptimizelySDK.Config
         /// </summary>
         private Dictionary<string, Dictionary<string, Variation>> _VariationKeyMapByExperimentId
             = new Dictionary<string, Dictionary<string, Variation>>();
-        public Dictionary<string, Dictionary<string, Variation>> VariationKeyMapByExperimentId { get { return _VariationKeyMap; } }
+        public Dictionary<string, Dictionary<string, Variation>> VariationKeyMapByExperimentId { get { return _VariationKeyMapByExperimentId; } }
 
         /// <summary>
         /// Associative array of experiment ID to associative array of variation key to variations
         /// </summary>
         private Dictionary<string, Dictionary<string, Variation>> _VariationIdMapByExperimentId
             = new Dictionary<string, Dictionary<string, Variation>>();
-        public Dictionary<string, Dictionary<string, Variation>> VariationKeyIdByExperimentId { get { return _VariationKeyMap; } }
+        public Dictionary<string, Dictionary<string, Variation>> VariationKeyIdByExperimentId { get { return _VariationIdMapByExperimentId; } }
 
 
         /// <summary>
