@@ -150,7 +150,7 @@ namespace OptimizelySDK.Bucketing
             }
 
             // success!
-            variation = config.GetVariationFromId(experiment.Key, variationId);
+            variation = config.GetVariationFromIdByExperimentId(experiment.Id, variationId);
             message = $"User [{userId}] is in variation [{variation.Key}] of experiment [{experiment.Key}].";
             Logger.Log(LogLevel.INFO, reasons.AddInfo(message));
             return Result<Variation>.NewResult(variation, reasons);
