@@ -152,7 +152,7 @@ namespace OptimizelySDK.OptlyConfig
                 featureIdRollout = projectConfig.FeatureFlags.Where(feat => feat.RolloutId == rolloutId).FirstOrDefault()?.Id;
             }
 
-            featureId = featureId?? featureIdRollout;
+            featureId = featureId ?? featureIdRollout;
             
             if (featureId?.Any() ?? false)
             {
@@ -260,10 +260,10 @@ namespace OptimizelySDK.OptlyConfig
 
             if (audienceConditions != null)
             {
+                var audConditions = new string[] { "and", "or", "not" };
                 string cond = "";
                 foreach (var item in audienceConditions)
                 {
-                    double res;
                     var subAudience = "";
                     // Checks if item is list of conditions means if it is sub audience
                     if (item is JArray)
@@ -271,7 +271,7 @@ namespace OptimizelySDK.OptlyConfig
                         subAudience = GetSerializedAudiences(((JArray)item).ToObject<List<object>>(), audienceIdMap);
                         subAudience = "(" + subAudience + ")";
                     }
-                    else if (!double.TryParse(item.ToString(), out res)) // Checks if item is an audience condition
+                    else if (audConditions.Contains(item.ToString())) // Checks if item is an audience condition
                     {
                         cond = item.ToString().ToUpper();
                     }

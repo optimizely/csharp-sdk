@@ -24,7 +24,7 @@ namespace OptimizelySDK.OptlyConfig
         public IDictionary<string, OptimizelyVariation> VariationsMap { get; private set; }
         public string Audiences { get; private set; }
 
-        public OptimizelyExperiment(string id, string key, string audiences,IDictionary<string, OptimizelyVariation> variationsMap)
+        public OptimizelyExperiment(string id, string key, string audiences, IDictionary<string, OptimizelyVariation> variationsMap)
         {
             Id = id;
             Key = key;
