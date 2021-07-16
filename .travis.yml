@@ -2,7 +2,7 @@ language: minimal
 
 env:
   global:
-    RELEASE_BRANCH: "master"
+    RELEASE_BRANCH: "v3.9.x"
 
 # Integration tests need to run first to reset the PR build status to pending
 stages:
