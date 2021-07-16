@@ -125,6 +125,20 @@ namespace OptimizelySDK.Config
             = new Dictionary<string, Dictionary<string, Variation>>();
         public Dictionary<string, Dictionary<string, Variation>> VariationKeyMap { get { return _VariationKeyMap; } }
 
+        /// <summary>
+        /// Associative array of experiment ID to associative array of variation key to variations
+        /// </summary>
+        private Dictionary<string, Dictionary<string, Variation>> _VariationKeyMapByExperimentId
+            = new Dictionary<string, Dictionary<string, Variation>>();
+        public Dictionary<string, Dictionary<string, Variation>> VariationKeyMapByExperimentId { get { return _VariationKeyMapByExperimentId; } }
+
+        /// <summary>
+        /// Associative array of experiment ID to associative array of variation key to variations
+        /// </summary>
+        private Dictionary<string, Dictionary<string, Variation>> _VariationIdMapByExperimentId
+            = new Dictionary<string, Dictionary<string, Variation>>();
+        public Dictionary<string, Dictionary<string, Variation>> VariationKeyIdByExperimentId { get { return _VariationIdMapByExperimentId; } }
+
 
         /// <summary>
         /// Associative array of experiment key to associative array of variation ID to variations
@@ -244,9 +258,10 @@ namespace OptimizelySDK.Config
             TypedAudiences = TypedAudiences ?? new Audience[0];
             FeatureFlags = FeatureFlags ?? new FeatureFlag[0];
             Rollouts = Rollouts ?? new Rollout[0];
+            _ExperimentKeyMap = new Dictionary<string, Experiment>();
 
             _GroupIdMap = ConfigParser<Group>.GenerateMap(entities: Groups, getKey: g => g.Id.ToString(), clone: true);
-            _ExperimentKeyMap = ConfigParser<Experiment>.GenerateMap(entities: Experiments, getKey: e => e.Key, clone: true);
+            _ExperimentIdMap = ConfigParser<Experiment>.GenerateMap(entities: Experiments, getKey: e => e.Id, clone: true);
             _EventKeyMap = ConfigParser<Entity.Event>.GenerateMap(entities: Events, getKey: e => e.Key, clone: true);
             _AttributeKeyMap = ConfigParser<Attribute>.GenerateMap(entities: Attributes, getKey: a => a.Key, clone: true);
             _AudienceIdMap = ConfigParser<Audience>.GenerateMap(entities: Audiences, getKey: a => a.Id.ToString(), clone: true);
@@ -260,7 +275,7 @@ namespace OptimizelySDK.Config
 
             foreach (Group group in Groups)
             {
-                var experimentsInGroup = ConfigParser<Experiment>.GenerateMap(group.Experiments, getKey: e => e.Key, clone: true);
+                var experimentsInGroup = ConfigParser<Experiment>.GenerateMap(group.Experiments, getKey: e => e.Id, clone: true);
                 foreach (Experiment experiment in experimentsInGroup.Values)
                 {
                     experiment.GroupId = group.Id;
@@ -269,22 +284,27 @@ namespace OptimizelySDK.Config
 
                 // RJE: I believe that this is equivalent to this:
                 // $this->_experimentKeyMap = array_merge($this->_experimentKeyMap, $experimentsInGroup);
-                foreach (string key in experimentsInGroup.Keys)
-                    _ExperimentKeyMap[key] = experimentsInGroup[key];
+                foreach (var experiment in experimentsInGroup.Values)
+                    _ExperimentIdMap[experiment.Id] = experiment;
             }
 
-            foreach (Experiment experiment in _ExperimentKeyMap.Values)
+            foreach (Experiment experiment in _ExperimentIdMap.Values)
             {
                 _VariationKeyMap[experiment.Key] = new Dictionary<string, Variation>();
                 _VariationIdMap[experiment.Key] = new Dictionary<string, Variation>();
-                _ExperimentIdMap[experiment.Id] = experiment;
+                _VariationIdMapByExperimentId[experiment.Id] = new Dictionary<string, Variation>();
+                _VariationKeyMapByExperimentId[experiment.Id] = new Dictionary<string, Variation>();
 
+                _ExperimentKeyMap[experiment.Key] = experiment;
+                
                 if (experiment.Variations != null)
                 {
                     foreach (Variation variation in experiment.Variations)
                     {
                         _VariationKeyMap[experiment.Key][variation.Key] = variation;
                         _VariationIdMap[experiment.Key][variation.Id] = variation;
+                        _VariationKeyMapByExperimentId[experiment.Id][variation.Key] = variation;
+                        _VariationIdMapByExperimentId[experiment.Id][variation.Id] = variation;
                     }
                 }
             }
@@ -296,6 +316,8 @@ namespace OptimizelySDK.Config
                 {
                     _VariationKeyMap[rolloutRule.Key] = new Dictionary<string, Variation>();
                     _VariationIdMap[rolloutRule.Key] = new Dictionary<string, Variation>();
+                    _VariationIdMapByExperimentId[rolloutRule.Id] = new Dictionary<string, Variation>();
+                    _VariationKeyMapByExperimentId[rolloutRule.Id] = new Dictionary<string, Variation>();
 
                     if (rolloutRule.Variations != null)
                     {
@@ -303,6 +325,8 @@ namespace OptimizelySDK.Config
                         {
                             _VariationKeyMap[rolloutRule.Key][variation.Key] = variation;
                             _VariationIdMap[rolloutRule.Key][variation.Id] = variation;
+                            _VariationKeyMapByExperimentId[rolloutRule.Id][variation.Key] = variation;
+                            _VariationIdMapByExperimentId[rolloutRule.Id][variation.Id] = variation;
                         }
                     }
                 }
@@ -474,8 +498,28 @@ namespace OptimizelySDK.Config
             return new Variation();
         }
 
+
         /// <summary>
-        /// Get the Variation from the Key/ID
+        /// Get the Variation from the keys
+        /// </summary>
+        /// <param name="experimentId">Id for Experiment</param>
+        /// <param name="variationKey">key for Variation</param>
+        /// <returns>Variation Entity corresponding to the provided experiment key and variation key or a dummy 
+        /// entity if keys are invalid</returns>
+        public Variation GetVariationFromKeyByExperimentId(string experimentId, string variationKey)
+        {
+            if (_VariationKeyMapByExperimentId.ContainsKey(experimentId) &&
+                _VariationKeyMapByExperimentId[experimentId].ContainsKey(variationKey))
+                return _VariationKeyMapByExperimentId[experimentId][variationKey];
+
+            string message = $@"No variation key ""{variationKey}"" defined in datafile for experiment ""{experimentId}"".";
+            Logger.Log(LogLevel.ERROR, message);
+            ErrorHandler.HandleError(new Exceptions.InvalidVariationException("Provided variation is not in datafile."));
+            return new Variation();
+        }
+
+        /// <summary>
+        /// Get the Variation from the Key/Id
         /// </summary>
         /// <param name="experimentKey">key for Experiment</param>
         /// <param name="variationId">ID for Variation</param>
@@ -488,6 +532,25 @@ namespace OptimizelySDK.Config
                 return _VariationIdMap[experimentKey][variationId];
 
             string message = $@"No variation ID ""{variationId}"" defined in datafile for experiment ""{experimentKey}"".";
+            Logger.Log(LogLevel.ERROR, message);
+            ErrorHandler.HandleError(new Exceptions.InvalidVariationException("Provided variation is not in datafile."));
+            return new Variation();
+        }
+
+        /// <summary>
+        /// Get the Variation from the expId/varId
+        /// </summary>
+        /// <param name="experimentId">ID for Experiment</param>
+        /// <param name="variationId">ID for Variation</param>
+        /// <returns>Variation Entity corresponding to the provided experiment key and variation ID or a dummy 
+        /// entity if experiment ID or variation ID is invalid</returns>
+        public Variation GetVariationFromIdByExperimentId(string experimentId, string variationId)
+        {
+            if (_VariationIdMapByExperimentId.ContainsKey(experimentId) &&
+                _VariationIdMapByExperimentId[experimentId].ContainsKey(variationId))
+                return _VariationIdMapByExperimentId[experimentId][variationId];
+
+            string message = $@"No variation ID ""{variationId}"" defined in datafile for experiment ""{experimentId}"".";
             Logger.Log(LogLevel.ERROR, message);
             ErrorHandler.HandleError(new Exceptions.InvalidVariationException("Provided variation is not in datafile."));
             return new Variation();
