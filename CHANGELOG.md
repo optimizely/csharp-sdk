@@ -5,7 +5,7 @@
 July 16th, 2021
 
 ### Bug Fixes:
-- Duplicate experiment key issue with multiple feature flag. While trying to get variation from the variationkeyMap, it was unable to find because the latest experimentKey was overriding the previous one. [#267](https://github.com/optimizely/csharp-sdk/pull/267)
+- Duplicate experiment key issue with multiple feature flags. While trying to get variation from the variationKeyMap, it was unable to find because the latest experimentKey was overriding the previous one. [#267](https://github.com/optimizely/csharp-sdk/pull/267)
 
 ## 3.9.0
 March 29th, 2021
