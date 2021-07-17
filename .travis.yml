@@ -67,7 +67,7 @@ jobs:
     - stage: 'NetStandard16'
       language: csharp
       # dotnet only works on trusty https://github.com/travis-ci/travis-ci/issues/5189
-      dist: trusty
+      dist: xenial
       mono: none
       dotnet: 2.1.502
       install:
@@ -84,7 +84,7 @@ jobs:
     - stage: 'NetStandard20'
       language: csharp
       # dotnet only works on trusty https://github.com/travis-ci/travis-ci/issues/5189
-      dist: trusty
+      dist: xenial
       mono: none
       dotnet: 2.1.502
       install:
