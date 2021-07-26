@@ -282,8 +282,8 @@ namespace OptimizelySDK.OptlyConfig
                         if (!string.IsNullOrEmpty(sAudience.ToString()) || cond.Equals("NOT"))
                         {
                             cond = string.IsNullOrEmpty(cond) ? cond : "OR";
-
-                            sAudience = sAudience.Append(" " + cond + " \"" + audienceIdMap[itemStr]?.Name + "\"");
+                            sAudience = string.IsNullOrEmpty(sAudience.ToString()) ? new StringBuilder(cond + " \"" + audienceIdMap[itemStr]?.Name + "\"") :
+                                        sAudience.Append(" " + cond + " \"" + audienceIdMap[itemStr]?.Name + "\"");
                         }
                         else
                         {
@@ -296,8 +296,8 @@ namespace OptimizelySDK.OptlyConfig
                         if (!string.IsNullOrEmpty(sAudience.ToString()) || cond == "NOT")
                         {
                             cond = !string.IsNullOrEmpty(cond) ? cond : "OR";
-
-                            sAudience = sAudience.Append(" " + cond + " " + subAudience);
+                            sAudience = string.IsNullOrEmpty(sAudience.ToString()) ? new StringBuilder(cond + " " + subAudience) :
+                                    sAudience.Append(" " + cond + " " + subAudience);
                         }
                         else
                         {
