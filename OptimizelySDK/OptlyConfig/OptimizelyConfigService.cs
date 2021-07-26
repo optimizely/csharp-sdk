@@ -83,10 +83,10 @@ namespace OptimizelySDK.OptlyConfig
             foreach (Experiment experiment in experiments)
             {
                 var variationsMap = GetVariationsMap(experiment, featureVariableIdMap, projectConfig);
-
+                var experimentAudience = GetExperimentAudiences(experiment, projectConfig);
                 var optimizelyExperiment = new OptimizelyExperiment(experiment.Id,
                     experiment.Key,
-                    GetExperimentAudiences(experiment, projectConfig),
+                    experimentAudience,
                     variationsMap);
 
                 experimentsMap.Add(experiment.Key, optimizelyExperiment);
@@ -239,6 +239,8 @@ namespace OptimizelySDK.OptlyConfig
             return GetSerializedAudiences(s, projectConfig.AudienceIdMap);
         }
 
+        readonly string[] AUDIENCE_CONDITIONS = { "and", "or", "not" };
+
         /// <summary>
         /// Converts list of audience conditions to serialized audiences used in experiment
         /// for examples:
@@ -260,7 +262,6 @@ namespace OptimizelySDK.OptlyConfig
 
             if (audienceConditions != null)
             {
-                var audConditions = new string[] { "and", "or", "not" };
                 string cond = "";
                 foreach (var item in audienceConditions)
                 {
@@ -271,7 +272,7 @@ namespace OptimizelySDK.OptlyConfig
                         subAudience = GetSerializedAudiences(((JArray)item).ToObject<List<object>>(), audienceIdMap);
                         subAudience = "(" + subAudience + ")";
                     }
-                    else if (audConditions.Contains(item.ToString())) // Checks if item is an audience condition
+                    else if (AUDIENCE_CONDITIONS.Contains(item.ToString())) // Checks if item is an audience condition
                     {
                         cond = item.ToString().ToUpper();
                     }
