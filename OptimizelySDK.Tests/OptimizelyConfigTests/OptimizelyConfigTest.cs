@@ -148,7 +148,7 @@ namespace OptimizelySDK.Tests.OptimizelyConfigTests
                     "feat_with_var_test", new OptimizelyExperiment (
                         id: "11564051718",
                         key:"feat_with_var_test",
-                        "",
+                        audiences: "",
                         variationsMap: new Dictionary<string, OptimizelyVariation>
                         {
                             {
@@ -174,7 +174,7 @@ namespace OptimizelySDK.Tests.OptimizelyConfigTests
                     "typed_audience_experiment", new OptimizelyExperiment (
                         id: "1323241597",
                         key:"typed_audience_experiment",
-                        "",
+                        audiences: "",
                         variationsMap: new Dictionary<string, OptimizelyVariation>
                         {
                             {
@@ -509,8 +509,9 @@ namespace OptimizelySDK.Tests.OptimizelyConfigTests
                        Id = "594090", Key = "user_signed_up", ExperimentIds = new string[] { "1323241598", "1323241599" }
                     }
                 },
-                experimentsMap,
-                featuresMap, datafile: TestData.TypedAudienceDatafile);
+                experimentsMap: experimentsMap,
+                featuresMap: featuresMap,
+                datafile: TestData.TypedAudienceDatafile);
             Assert.IsTrue(TestData.CompareObjects(optimizelyConfig, expectedOptimizelyConfig));
         }
 
@@ -527,8 +528,8 @@ namespace OptimizelySDK.Tests.OptimizelyConfigTests
                 attributes: new Entity.Attribute[0],
                 audiences: new OptimizelyAudience[0],
                 events: new Entity.Event[0],
-                new Dictionary<string, OptimizelyExperiment>(),
-                new Dictionary<string, OptimizelyFeature>()
+                experimentsMap: new Dictionary<string, OptimizelyExperiment>(),
+                featuresMap: new Dictionary<string, OptimizelyFeature>()
                 );
             Assert.AreEqual(expectedOptlyFeature.Revision, "123");
             Assert.AreEqual(expectedOptlyFeature.SDKKey, "testSdkKey");
