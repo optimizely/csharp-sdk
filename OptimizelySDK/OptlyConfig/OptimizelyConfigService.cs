@@ -282,7 +282,7 @@ namespace OptimizelySDK.OptlyConfig
                         // if audience condition is "NOT" then add "NOT" at start. Otherwise check if there is already audience id in sAudience then append condition between saudience and item
                         if (!string.IsNullOrEmpty(sAudience.ToString()) || cond.Equals("NOT"))
                         {
-                            cond = string.IsNullOrEmpty(cond) ? cond : "OR";
+                            cond = string.IsNullOrEmpty(cond) ? "OR" : cond;
                             sAudience = string.IsNullOrEmpty(sAudience.ToString()) ? new StringBuilder(cond + " \"" + audienceIdMap[itemStr]?.Name + "\"") :
                                         sAudience.Append(" " + cond + " \"" + audienceIdMap[itemStr]?.Name + "\"");
                         }
@@ -296,7 +296,7 @@ namespace OptimizelySDK.OptlyConfig
                     {
                         if (!string.IsNullOrEmpty(sAudience.ToString()) || cond == "NOT")
                         {
-                            cond = !string.IsNullOrEmpty(cond) ? cond : "OR";
+                            cond = string.IsNullOrEmpty(cond) ? "OR" : cond;
                             sAudience = string.IsNullOrEmpty(sAudience.ToString()) ? new StringBuilder(cond + " " + subAudience) :
                                     sAudience.Append(" " + cond + " " + subAudience);
                         }
