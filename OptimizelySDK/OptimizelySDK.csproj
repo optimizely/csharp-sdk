@@ -121,6 +121,8 @@
     <Compile Include="Optimizely.cs" />
     <Compile Include="Bucketing\UserProfile.cs" />
     <Compile Include="OptlyConfig\IOptimizelyConfigManager.cs" />
+    <Compile Include="OptlyConfig\OptimizelyEvent.cs" />
+    <Compile Include="OptlyConfig\OptimizelyAttribute.cs" />
     <Compile Include="OptlyConfig\OptimizelyAudience.cs" />
     <Compile Include="OptlyConfig\OptimizelyConfig.cs" />
     <Compile Include="OptlyConfig\OptimizelyConfigService.cs" />

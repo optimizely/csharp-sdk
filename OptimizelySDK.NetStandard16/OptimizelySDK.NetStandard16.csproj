@@ -82,6 +82,8 @@
 		<Compile Include="..\OptimizelySDK\Config\PollingProjectConfigManager.cs" />
 		<Compile Include="..\OptimizelySDK\Config\HttpProjectConfigManager.cs" />
 		<Compile Include="..\OptimizelySDK\OptlyConfig\OptimizelyConfig.cs" />
+		<Compile Include="..\OptimizelySDK\OptlyConfig\OptimizelyAttribute.cs" />
+		<Compile Include="..\OptimizelySDK\OptlyConfig\OptimizelyEvent.cs" />
 		<Compile Include="..\OptimizelySDK\OptlyConfig\OptimizelyExperiment.cs" />
 		<Compile Include="..\OptimizelySDK\OptlyConfig\OptimizelyFeature.cs" />
 		<Compile Include="..\OptimizelySDK\OptlyConfig\OptimizelyVariable.cs" />

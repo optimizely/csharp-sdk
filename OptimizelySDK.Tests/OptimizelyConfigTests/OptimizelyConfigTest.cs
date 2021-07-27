@@ -400,21 +400,21 @@ namespace OptimizelySDK.Tests.OptimizelyConfigTests
             OptimizelyConfig expectedOptimizelyConfig = new OptimizelyConfig(datafileProjectConfig.Revision,
                 datafileProjectConfig.SDKKey,
                 datafileProjectConfig.EnvironmentKey,
-                attributes: new Entity.Attribute[]
+                attributes: new OptimizelyAttribute[]
                 {
-                    new Entity.Attribute
+                    new OptimizelyAttribute
                     {
                        Id = "594015", Key = "house"
                     },
-                    new Entity.Attribute
+                    new OptimizelyAttribute
                     {
                        Id = "594016", Key = "lasers"
                     },
-                    new Entity.Attribute
+                    new OptimizelyAttribute
                     {
                        Id = "594017", Key = "should_do_it"
                     },
-                    new Entity.Attribute
+                    new OptimizelyAttribute
                     {
                        Id = "594018", Key = "favorite_ice_cream"
                     }
@@ -438,13 +438,13 @@ namespace OptimizelySDK.Tests.OptimizelyConfigTests
                     new OptimizelyAudience("3468206643", "exactBoolean", new object[] { "and", new object[] { "or", new object[] { "or", new Dictionary<string, object>() { { "name", "should_do_it" }, { "type", "custom_attribute" }, { "match", "exact" }, { "value", true } } } } }),
                     new OptimizelyAudience("3468206648", "notExist", new object[] { "not", new Dictionary<string, object>() { { "name", "input_value" }, { "type", "custom_attribute" }, { "match", "exists" } } }),
                 },
-                events: new Entity.Event[]
+                events: new OptimizelyEvent[]
                 { 
-                    new Entity.Event()
+                    new OptimizelyEvent()
                     {
                        Id = "594089", Key = "item_bought", ExperimentIds = new string[] { "11564051718", "1323241597" }
                     },
-                    new Entity.Event()
+                    new OptimizelyEvent()
                     {
                        Id = "594090", Key = "user_signed_up", ExperimentIds = new string[] { "1323241598", "1323241599" }
                     }
@@ -465,9 +465,9 @@ namespace OptimizelySDK.Tests.OptimizelyConfigTests
             OptimizelyConfig expectedOptlyFeature = new OptimizelyConfig("123",
                 "testSdkKey",
                 "Development",
-                attributes: new Entity.Attribute[0],
+                attributes: new OptimizelyAttribute[0],
                 audiences: new OptimizelyAudience[0],
-                events: new Entity.Event[0],
+                events: new OptimizelyEvent[0],
                 experimentsMap: new Dictionary<string, OptimizelyExperiment>(),
                 featuresMap: new Dictionary<string, OptimizelyFeature>()
                 );

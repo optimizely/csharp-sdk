@@ -51,9 +51,18 @@ namespace OptimizelySDK.OptlyConfig
                 projectConfig.ToDatafile());
         }
 
-        private Entity.Event[] GetEvents(ProjectConfig projectConfig)
+        private OptimizelyEvent[] GetEvents(ProjectConfig projectConfig)
         {
-            return projectConfig.Events ?? new Entity.Event[0];
+            var optimizelyEvents = new List<OptimizelyEvent>();
+            foreach (var ev in projectConfig.Events)
+            {
+                var optimizelyEvent = new OptimizelyEvent();
+                optimizelyEvent.Id = ev.Id;
+                optimizelyEvent.Key = ev.Key;
+                optimizelyEvent.ExperimentIds = ev.ExperimentIds;
+                optimizelyEvents.Add(optimizelyEvent);
+            }
+            return optimizelyEvents.ToArray();
         }
 
         private OptimizelyAudience[] GetAudiences(ProjectConfig projectConfig)
@@ -63,9 +72,17 @@ namespace OptimizelySDK.OptlyConfig
             return audiencesArr.Select(aud => new OptimizelyAudience(aud.Id, aud.Name, aud.Conditions)).ToArray<OptimizelyAudience>();
         }
 
-        private Entity.Attribute[] GetAttributes(ProjectConfig projectConfig)
+        private OptimizelyAttribute[] GetAttributes(ProjectConfig projectConfig)
         {
-            return projectConfig.Attributes;
+            var attributes = new List<OptimizelyAttribute>();
+            foreach (var attr in projectConfig.Attributes)
+            {
+                var attribute = new OptimizelyAttribute();
+                attribute.Id = attr.Id;
+                attribute.Key = attr.Key;
+                attributes.Add(attribute);
+            }
+            return attributes.ToArray();
         }
 
         /// <summary>
