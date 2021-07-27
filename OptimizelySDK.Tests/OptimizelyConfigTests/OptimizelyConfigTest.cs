@@ -401,7 +401,7 @@ namespace OptimizelySDK.Tests.OptimizelyConfigTests
                 datafileProjectConfig.SDKKey,
                 datafileProjectConfig.EnvironmentKey,
                 attributes: new Entity.Attribute[]
-                { 
+                {
                     new Entity.Attribute
                     {
                        Id = "594015", Key = "house"
@@ -419,7 +419,7 @@ namespace OptimizelySDK.Tests.OptimizelyConfigTests
                        Id = "594018", Key = "favorite_ice_cream"
                     }
                 },
-                audiences: new OptimizelyAudience[] 
+                audiences: new OptimizelyAudience[]
                 {
                     new OptimizelyAudience("3468206642", "exactString", "[\"and\", [\"or\", [\"or\", {\"name\": \"house\", \"type\": \"custom_attribute\", \"value\": \"Gryffindor\"}]]]"),
                     new OptimizelyAudience("3468206645", "notChrome", "[\"and\", [\"or\", [\"not\", [\"or\", {\"name\": \"browser_type\", \"type\": \"custom_attribute\", \"value\":\"Chrome\"}]]]]"),
@@ -429,8 +429,14 @@ namespace OptimizelySDK.Tests.OptimizelyConfigTests
                     new OptimizelyAudience("3468206647", "$$dummyGtNumber", "{\"type\": \"custom_attribute\", \"name\": \"$opt_dummy_attribute\", \"value\": \"impossible_value\"}"),
                     new OptimizelyAudience("3468206644", "$$dummyLtNumber", "{\"type\": \"custom_attribute\", \"name\": \"$opt_dummy_attribute\", \"value\": \"impossible_value\"}"),
                     new OptimizelyAudience("3468206643", "$$dummyExactBoolean", "{\"type\": \"custom_attribute\", \"name\": \"$opt_dummy_attribute\", \"value\": \"impossible_value\"}"),
-                    new OptimizelyAudience("0", "$$dummy", "{\"type\": \"custom_attribute\", \"name\": \"$opt_dummy_attribute\", \"value\": \"impossible_value\"}")
-
+                    new OptimizelyAudience("0", "$$dummy", "{\"type\": \"custom_attribute\", \"name\": \"$opt_dummy_attribute\", \"value\": \"impossible_value\"}"),
+                    new OptimizelyAudience("3988293898", "substringString", new object[] { "and", new object[] { "or", new object[] { "or", new Dictionary<string, string>() { { "name", "house" }, { "type", "custom_attribute" }, { "match", "substring" }, { "value", "Slytherin" } } } } }),
+                    new OptimizelyAudience("3988293899", "exists", new object[] { "and", new object[] { "or", new object[] { "or", new Dictionary<string, string>() { { "name", "favorite_ice_cream" }, { "type", "custom_attribute" }, { "match", "exists" } } } } }),
+                    new OptimizelyAudience("3468206646", "exactNumber", new object[] { "and", new object[] { "or", new object[] { "or", new Dictionary<string, object>() { { "name", "lasers" }, { "type", "custom_attribute" }, { "match", "exact" }, { "value", 45.5 } } } } }),
+                    new OptimizelyAudience("3468206647", "gtNumber", new object[] { "and", new object[] { "or", new object[] { "or", new Dictionary<string, object>() { { "name", "lasers" }, { "type", "custom_attribute" }, { "match", "gt" }, { "value", 70 } } } } }),
+                    new OptimizelyAudience("3468206644", "ltNumber", new object[] { "and", new object[] { "or", new object[] { "or", new Dictionary<string, object>() { { "name", "lasers" }, { "type", "custom_attribute" }, { "match", "lt" }, { "value", 1.0 } } } } }),
+                    new OptimizelyAudience("3468206643", "exactBoolean", new object[] { "and", new object[] { "or", new object[] { "or", new Dictionary<string, object>() { { "name", "should_do_it" }, { "type", "custom_attribute" }, { "match", "exact" }, { "value", true } } } } }),
+                    new OptimizelyAudience("3468206648", "notExist", new object[] { "not", new Dictionary<string, object>() { { "name", "input_value" }, { "type", "custom_attribute" }, { "match", "exists" } } }),
                 },
                 events: new Entity.Event[]
                 { 
@@ -487,7 +493,7 @@ namespace OptimizelySDK.Tests.OptimizelyConfigTests
             Assert.AreEqual(expectedOptlyFeature.Id, "1");
             Assert.AreEqual(expectedOptlyFeature.Key, "featKey");
             Assert.AreEqual(expectedOptlyFeature.ExperimentRules, new List<OptimizelyExperiment>());
-            Assert.AreEqual(expectedOptlyFeature.DeliveryRules, new List<  OptimizelyExperiment>());
+            Assert.AreEqual(expectedOptlyFeature.DeliveryRules, new List<OptimizelyExperiment>());
             Assert.AreEqual(expectedOptlyFeature.Key, "featKey");
             Assert.AreEqual(expectedOptlyFeature.ExperimentsMap, new Dictionary<string, OptimizelyExperiment>());
             Assert.AreEqual(expectedOptlyFeature.VariablesMap, new Dictionary<string, OptimizelyVariable>());
