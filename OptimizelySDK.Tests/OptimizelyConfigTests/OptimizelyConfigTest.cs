@@ -22,6 +22,8 @@ using OptimizelySDK.Logger;
 using OptimizelySDK.OptlyConfig;
 using System.Collections.Generic;
 using System.Threading;
+using OptimizelySDK.Tests.UtilsTests;
+using Newtonsoft.Json.Linq;
 
 namespace OptimizelySDK.Tests.OptimizelyConfigTests
 {
@@ -39,6 +41,62 @@ namespace OptimizelySDK.Tests.OptimizelyConfigTests
         }
 
         #region Test OptimizelyConfigService
+
+        static Type[] ParameterTypes = {
+                typeof(ProjectConfig),
+            };
+
+        private PrivateObject CreatePrivateOptimizelyConfigService(ProjectConfig projectConfig)
+        {
+            return new PrivateObject(typeof(OptimizelyConfigService), ParameterTypes,
+                    new object[]
+                    {
+                        projectConfig
+                    });
+        }
+
+        [Test]
+        public void TestGetOptimizelyConfigServiceSerializedAudiences()
+        {
+            var datafileProjectConfig = DatafileProjectConfig.Create(TestData.TypedAudienceDatafile, new NoOpLogger(), new ErrorHandler.NoOpErrorHandler());
+            var optlyConfigService = CreatePrivateOptimizelyConfigService(datafileProjectConfig);
+
+            var audienceConditions = new List<List<object>>
+            {
+                new List<object>() { "or", "3468206642", "3988293898" },
+                new List<object>() { "or", "3468206642", "3988293898", "3468206646" },
+                new List<object>() { "not", "3468206642" },
+                new List<object>() { "or", "3468206642" },
+                new List<object>() { "and", "3468206642" },
+                new List<object>() { "3468206642" },
+                new List<object>() { "3468206642", "3988293898" },
+                new List<object>() { "and", new JArray() { "or", "3468206642", "3988293898" }, "3468206646" },
+                new List<object>() { "and", new JArray() { "or", "3468206642", new JArray() { "and", "3988293898", "3468206646" } }, new JArray() { "and", "3988293899", new JArray() { "or", "3468206647", "3468206643" } } },
+                new List<object>() { "and", "and" },
+                new List<object>() { "not", new JArray() { "and", "3468206642", "3988293898" } }
+            };
+
+            var expectedAudienceOutputs = new List<string> 
+            {
+                "\"exactString\" OR \"substringString\"",
+                "\"exactString\" OR \"substringString\" OR \"exactNumber\"",
+                "NOT \"exactString\"",
+                "\"exactString\"",
+                "\"exactString\"",
+                "\"exactString\"",
+                "\"exactString\" OR \"substringString\"",
+                "(\"exactString\" OR \"substringString\") AND \"exactNumber\"",
+                "(\"exactString\" OR (\"substringString\" AND \"exactNumber\")) AND (\"exists\" AND (\"gtNumber\" OR \"exactBoolean\"))",
+                "",
+                "NOT (\"exactString\" AND \"substringString\")"
+            };
+
+            for (int testNo = 0; testNo < audienceConditions.Count; testNo++)
+            {
+                var result = (string)optlyConfigService.Invoke(name: "GetSerializedAudiences", audienceConditions[testNo], datafileProjectConfig.AudienceIdMap);
+                Assert.AreEqual(result, expectedAudienceOutputs[testNo]);
+            }
+        }
 
         [Test]
         public void TestAfterDisposeGetOptimizelyConfigIsNoLongerValid()
@@ -457,7 +515,7 @@ namespace OptimizelySDK.Tests.OptimizelyConfigTests
 
         #endregion
 
-        #region OptimizelyConfig entity tests
+            #region OptimizelyConfig entity tests
 
         [Test]
         public void TestOptimizelyConfigEntity()
