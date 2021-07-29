@@ -73,6 +73,7 @@
     <Compile Include="AudienceConditionsTests\ConditionEvaluationTest.cs" />
     <Compile Include="AudienceConditionsTests\ConditionsTest.cs" />
     <Compile Include="ConfigTest\HttpProjectConfigManagerTest.cs" />
+    <Compile Include="ConfigTest\OptimizelyConfigServiceTests.cs" />
     <Compile Include="ConfigTest\PollingProjectConfigManagerTest.cs" />
     <Compile Include="ConfigTest\FallbackProjectConfigManagerTest.cs" />
     <Compile Include="DecisionServiceTest.cs" />
@@ -139,9 +140,7 @@
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
   <ItemGroup />
-  <ItemGroup>
-    <Folder Include="Utils\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.
