@@ -54,9 +54,12 @@ jobs:
         - nuget restore ./OptimizelySDK.Travis.sln
         - nuget install ./OptimizelySDK.Tests/packages.config -OutputDirectory ./packages
         - nuget install NUnit.Runners -Version 2.6.4 -OutputDirectory ./testrunner
+        - dotnet tool install --global altcover.global
       script:
         - xbuild /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=$TRAVIS_BUILD_DIR/keypair.snk /p:Configuration=Release ./OptimizelySDK.Travis.sln
         - mono ./testrunner/NUnit.Runners.2.6.4/tools/nunit-console.exe ./OptimizelySDK.Tests/bin/Release/OptimizelySDK.Tests.dll
+        - altcover /i=./OptimizelySDK.Tests/bin/Release/
+
         # strongname signing from xbuild step needs additional re-signing with sn
         - find . -path './OptimizelySDK*bin/Release/OptimizelySDK*.dll' -not -regex '.*Tests.*' -print0 | while IFS= read -r -d '' file; do sn -R $file ./keypair.snk; done
       after_success:
