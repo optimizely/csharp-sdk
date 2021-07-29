@@ -132,6 +132,12 @@ namespace OptimizelySDK.Tests.UtilsTests
         }
 
         [Test]
+        public void TestAreAttributesValid()
+        {
+            Assert.IsTrue(Validator.AreAttributesValid(new Attribute[0]));
+        }
+
+        [Test]
         public void TestAreEventTagsValidInvalidTags()
         {
             // Some of the tests cases are not applicable because C# is strongly typed.
