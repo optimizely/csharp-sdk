@@ -124,6 +124,8 @@
     <EmbeddedResource Include="simple_ab_experiments.json" />
     <EmbeddedResource Include="EmptyRolloutRule.json" />
     <EmbeddedResource Include="emptydatafile.json" />
+    <EmbeddedResource Include="similar_exp_keys.json" />
+    <EmbeddedResource Include="similar_rule_keys_bucketing.json" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\OptimizelySDK\OptimizelySDK.csproj">

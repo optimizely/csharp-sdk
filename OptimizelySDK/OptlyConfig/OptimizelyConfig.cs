@@ -22,9 +22,7 @@ namespace OptimizelySDK.OptlyConfig
     public class OptimizelyConfig
     {
         public string Revision { get; private set; }
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public string SDKKey { get; private set; }
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public string EnvironmentKey { get; private set; }
         public OptimizelyEvent[] Events { get; private set; }
         public OptimizelyAudience[] Audiences { get; private set; }

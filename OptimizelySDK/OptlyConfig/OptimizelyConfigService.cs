@@ -99,7 +99,12 @@ namespace OptimizelySDK.OptlyConfig
 
         private IDictionary<string, OptimizelyExperiment> GetExperimentsKeyMap(IDictionary<string, OptimizelyExperiment> experimentsMapById)
         {
-            return experimentsMapById?.Values.ToDictionary(k => k.Key);
+            var experimentKeyMaps = new Dictionary<string, OptimizelyExperiment>();
+
+            foreach(var experiment in experimentsMapById.Values) {
+                experimentKeyMaps[experiment.Key] = experiment;
+            }
+            return experimentKeyMaps;
         }
 
         /// <summary>

@@ -131,6 +131,41 @@ namespace OptimizelySDK.Tests.OptimizelyConfigTests
         }
 
         [Test]
+        public void TestGetOptimizelyConfigWithDuplicateExperimentKeys()
+        {
+            var datafileProjectConfig = DatafileProjectConfig.Create(TestData.DuplicateExpKeysDatafile, new NoOpLogger(), new ErrorHandler.NoOpErrorHandler());
+            var optimizelyConfigService = new OptimizelyConfigService(datafileProjectConfig);
+            var optimizelyConfig = optimizelyConfigService.GetOptimizelyConfig();
+            Assert.AreEqual(optimizelyConfig.ExperimentsMap.Count, 1);
+
+            var experimentMapFlag1 = optimizelyConfig.FeaturesMap["flag1"].ExperimentsMap; //9300000007569
+            var experimentMapFlag2 = optimizelyConfig.FeaturesMap["flag2"].ExperimentsMap; // 9300000007573
+            Assert.AreEqual(experimentMapFlag1["targeted_delivery"].Id, "9300000007569");
+            Assert.AreEqual(experimentMapFlag2["targeted_delivery"].Id, "9300000007573");
+
+        }
+
+        [Test]
+        public void TestGetOptimizelyConfigWithDuplicateRuleKeys()
+        {
+            var datafileProjectConfig = DatafileProjectConfig.Create(TestData.DuplicateRuleKeysDatafile, new NoOpLogger(), new ErrorHandler.NoOpErrorHandler());
+            var optimizelyConfigService = new OptimizelyConfigService(datafileProjectConfig);
+            var optimizelyConfig = optimizelyConfigService.GetOptimizelyConfig();
+            Assert.AreEqual(optimizelyConfig.ExperimentsMap.Count, 0);
+
+            var rolloutFlag1 = optimizelyConfig.FeaturesMap["flag_1"].DeliveryRules[0]; // 9300000004977, 
+            var rolloutFlag2 = optimizelyConfig.FeaturesMap["flag_2"].DeliveryRules[0]; // 9300000004979
+            var rolloutFlag3 = optimizelyConfig.FeaturesMap["flag_3"].DeliveryRules[0]; // 9300000004981
+            Assert.AreEqual(rolloutFlag1.Id, "9300000004977");
+            Assert.AreEqual(rolloutFlag1.Key, "targeted_delivery");
+            Assert.AreEqual(rolloutFlag2.Id, "9300000004979");
+            Assert.AreEqual(rolloutFlag2.Key, "targeted_delivery");
+            Assert.AreEqual(rolloutFlag3.Id, "9300000004981");
+            Assert.AreEqual(rolloutFlag3.Key, "targeted_delivery");
+
+        }
+
+        [Test]
         public void TestGetOptimizelyConfigService()
         {
             var datafileProjectConfig = DatafileProjectConfig.Create(TestData.TypedAudienceDatafile, new NoOpLogger(), new ErrorHandler.NoOpErrorHandler());
