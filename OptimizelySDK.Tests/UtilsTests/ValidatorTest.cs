@@ -1,4 +1,4 @@
-﻿/* 
+﻿/*
  * Copyright 2017-2021, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Logger;
 using OptimizelySDK.Utils;
@@ -60,7 +61,6 @@ namespace OptimizelySDK.Tests.UtilsTests
             Assert.IsFalse(Validator.ValidateJSONSchema(invalidScehma));
         }
 
-
         [Test]
         public void TestValidateJsonSchemaNoJsonContent()
         {
@@ -68,15 +68,13 @@ namespace OptimizelySDK.Tests.UtilsTests
             Assert.IsFalse(Validator.ValidateJSONSchema(invalidDataFile));
         }
 
-
         /*
          * Strongly typed userAttributes can't be invalid. That's why these methods can't be tested.
          * It is 100% guaranteed the arguments will be Dicitonary<string, string>
          * public void TestAreAttributesValidValidAttributes()
          * public void TestAreAttributesValidInvalidAttributes()
-         * 
+         *
          */
-
 
         [Test]
         public void TestDoesUserMeetAudienceConditionsNoAudienceUsedInExperiment()
@@ -125,6 +123,12 @@ namespace OptimizelySDK.Tests.UtilsTests
                 {"browser", "Firefox" },
                 {"revenue", 0 }
             }));
+        }
+
+        [Test]
+        public void TestIsAttributeValid()
+        {
+            Assert.IsTrue(Validator.IsAttributeValid(new Attribute()));
         }
 
         [Test]
@@ -177,7 +181,7 @@ namespace OptimizelySDK.Tests.UtilsTests
             };
 
             foreach (var attribute in validUserAttributes)
-                Assert.True(Validator.IsUserAttributeValid(attribute));    
+                Assert.True(Validator.IsUserAttributeValid(attribute));
         }
     }
 }

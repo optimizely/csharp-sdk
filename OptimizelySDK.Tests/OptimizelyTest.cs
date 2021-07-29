@@ -4147,11 +4147,18 @@ namespace OptimizelySDK.Tests
             Assert.IsNull(optimizelyConfig);
         }
 
-        [Test]
-        public void TestGetOptimizelyConfigReturnsNullIfProjectConfigNull()
-        {
-            var mockProjectConfigManager = new Mock<ProjectConfigManager>();
-        }
+        //[Test]
+        //public void TestGetOptimizelyConfigReturnsNullIfProjectConfigNull()
+        //{
+        //    var mockProjectConfigManager = new Mock<ProjectConfigManager>();
+        //    ProjectConfig val = null;
+        //    mockProjectConfigManager.Setup(x => x.GetConfig()).Returns(val);
+        //    var optly = new Optimizely(mockProjectConfigManager.Object);
+
+        //    var config = optly.GetOptimizelyConfig();
+
+        //    Assert.IsNull(config);
+        //}
 
         // Test that OptimizelyConfig.Datafile returns the expected datafile, which was used to generate project config
         [Test]
