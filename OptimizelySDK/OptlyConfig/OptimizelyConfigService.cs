@@ -133,10 +133,9 @@ namespace OptimizelySDK.OptlyConfig
         /// <summary>
         /// Gets Map of all experiment variations and variables including rollouts
         /// </summary>
-        /// <param name="experiment">Experiment</param>
+        /// <param name="variations">variations</param>
         /// <param name="featureVariableIdMap">The map of feature variables and id</param>
-        /// <param name="projectConfig">The project config</param>
-        /// <param name="rolloutId">Rollout Id if the feature Id is null then use rollout id to get feature Id</param>
+        /// <param name="featureId">feature Id of the feature</param>
         /// <returns>Dictionary | Dictionary of experiment key and value as experiment object</returns>
         private IDictionary<string, OptimizelyVariation> GetVariationsMap(IEnumerable<Variation> variations,
             IDictionary<string, FeatureVariable> featureVariableIdMap,
@@ -161,14 +160,14 @@ namespace OptimizelySDK.OptlyConfig
 
             return variationsMap;
         }
+
         /// <summary>
         /// Make map of featureVariable which are associated with given feature experiment 
         /// </summary>
-        /// <param name="projectConfig">The project config</param>
         /// <param name="variableIdMap">Map containing variable ID as key and Object of featureVariable</param>
-        /// <param name="experimentId">experimentId of featureExperiment</param>
-        /// <param name="variation">variation</param>
-        /// <param name="rolloutId">rollout id to get feature id</param>
+        /// <param name="featureId">feature Id of featureExperiment</param>
+        /// <param name="featureVariableUsages">IEnumerable of features variable usage</param>
+        /// <param name="isFeatureEnabled">isFeatureEnabled of variation</param>
         /// <returns>Dictionary | Dictionary of FeatureVariable key and value as FeatureVariable object</returns>
         private IDictionary<string, OptimizelyVariable> MergeFeatureVariables(
            IDictionary<string, FeatureVariable> variableIdMap,
@@ -176,16 +175,7 @@ namespace OptimizelySDK.OptlyConfig
            IEnumerable<FeatureVariableUsage> featureVariableUsages,
            bool isFeatureEnabled)
         {
-            //var featureId = projectConfig.GetExperimentFeatureList(experimentId)?.FirstOrDefault();
-            
             var variablesMap = new Dictionary<string, OptimizelyVariable>();
-            //string featureIdRollout = null;
-            //if (rolloutId != null)
-            //{
-            //    featureIdRollout = projectConfig.FeatureFlags.Where(feat => feat.RolloutId == rolloutId).FirstOrDefault()?.Id;
-            //}
-
-            //featureId = featureId ?? featureIdRollout;
             
             if (!string.IsNullOrEmpty(featureId))
             {
@@ -214,7 +204,7 @@ namespace OptimizelySDK.OptlyConfig
         /// Gets Map of all FeatureFlags and associated experiment map inside it
         /// </summary>
         /// <param name="projectConfig">The project config</param>
-        /// <param name="experimentsMap">Dictionary of experiment key and value as experiment object</param>
+        /// <param name="experimentsMapById">Dictionary of experiment Id as key and value as experiment object</param>
         /// <returns>Dictionary | Dictionary of FeatureFlag key and value as OptimizelyFeature object</returns>
         private IDictionary<string, OptimizelyFeature> GetFeaturesMap(ProjectConfig projectConfig, IDictionary<string, OptimizelyExperiment> experimentsMapById)
         {
@@ -350,7 +340,8 @@ namespace OptimizelySDK.OptlyConfig
         /// <summary>
         /// Gets list of rollout experiments
         /// </summary>
-        /// <param name="rolloutID">Rollout ID</param>
+        /// <param name="featureId">Feature ID</param>
+        /// <param name="experiments">Experiments</param>
         /// <param name="projectConfig">Project Config</param>
         /// <returns>List | List of Optimizely rollout experiments.</returns>
         private List<OptimizelyExperiment> GetDeliveryRules(string featureId, IEnumerable<Experiment> experiments,

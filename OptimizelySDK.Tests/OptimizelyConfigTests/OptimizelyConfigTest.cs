@@ -93,7 +93,7 @@ namespace OptimizelySDK.Tests.OptimizelyConfigTests
 
             for (int testNo = 0; testNo < audienceConditions.Count; testNo++)
             {
-                var result = (string)optlyConfigService.Invoke(name: "GetSerializedAudiences", audienceConditions[testNo], datafileProjectConfig.AudienceIdMap);
+                var result = (string)optlyConfigService.Invoke("GetSerializedAudiences", audienceConditions[testNo], datafileProjectConfig.AudienceIdMap);
                 Assert.AreEqual(result, expectedAudienceOutputs[testNo]);
             }
         }
