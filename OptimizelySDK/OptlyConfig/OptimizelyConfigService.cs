@@ -73,9 +73,13 @@ namespace OptimizelySDK.OptlyConfig
 
         private OptimizelyAudience[] GetAudiences(ProjectConfig projectConfig)
         {
-            var audiencesArr = Array.FindAll(projectConfig.Audiences, aud => !aud.Id.Equals("$opt_dummy_audience"));
-            audiencesArr = audiencesArr.Concat(projectConfig.TypedAudiences).ToArray<Audience>();
-            return audiencesArr.Select(aud => new OptimizelyAudience(aud.Id, aud.Name, aud.Conditions)).ToArray<OptimizelyAudience>();
+            var filteredAudiencesArr = Array.FindAll(projectConfig.Audiences, aud => !aud.Id.Equals("$opt_dummy_audience"));
+            var optimizelyAudience = filteredAudiencesArr.Select(aud => new OptimizelyAudience(aud.Id, aud.Name, aud.Conditions));
+            var typedAudiences = projectConfig.TypedAudiences?.Select(aud => new OptimizelyAudience(aud.Id,
+                aud.Name,
+                JsonConvert.SerializeObject(aud.Conditions)));
+            optimizelyAudience = optimizelyAudience.Concat(typedAudiences);
+            return optimizelyAudience.ToArray<OptimizelyAudience>();
         }
 
         private OptimizelyAttribute[] GetAttributes(ProjectConfig projectConfig)
@@ -311,16 +315,17 @@ namespace OptimizelySDK.OptlyConfig
                     else
                     {   // Checks if item is audience id
                         var itemStr = item.ToString();
+                        var audienceName = audienceIdMap.ContainsKey(itemStr) ? audienceIdMap[itemStr].Name : itemStr;
                         // if audience condition is "NOT" then add "NOT" at start. Otherwise check if there is already audience id in sAudience then append condition between saudience and item
                         if (!string.IsNullOrEmpty(sAudience.ToString()) || cond.Equals("NOT"))
                         {
                             cond = string.IsNullOrEmpty(cond) ? "OR" : cond;
                             sAudience = string.IsNullOrEmpty(sAudience.ToString()) ? new StringBuilder(cond + " \"" + audienceIdMap[itemStr]?.Name + "\"") :
-                                        sAudience.Append(" " + cond + " \"" + audienceIdMap[itemStr]?.Name + "\"");
+                                        sAudience.Append(" " + cond + " \"" + audienceName + "\"");
                         }
                         else
                         {
-                            sAudience = new StringBuilder("\"" + audienceIdMap[itemStr]?.Name + "\"");
+                            sAudience = new StringBuilder("\"" + audienceName + "\"");
                         }
                     }
                     // Checks if sub audience is empty or not

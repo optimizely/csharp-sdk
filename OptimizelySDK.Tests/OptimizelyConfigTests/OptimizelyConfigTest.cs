@@ -73,7 +73,10 @@ namespace OptimizelySDK.Tests.OptimizelyConfigTests
                 new List<object>() { "and", new JArray() { "or", "3468206642", "3988293898" }, "3468206646" },
                 new List<object>() { "and", new JArray() { "or", "3468206642", new JArray() { "and", "3988293898", "3468206646" } }, new JArray() { "and", "3988293899", new JArray() { "or", "3468206647", "3468206643" } } },
                 new List<object>() { "and", "and" },
-                new List<object>() { "not", new JArray() { "and", "3468206642", "3988293898" } }
+                new List<object>() { "not", new JArray() { "and", "3468206642", "3988293898" } },
+                new List<object>() { },
+                new List<object>() { "or", "3468206642", "999999999" },
+
             };
 
             var expectedAudienceOutputs = new List<string> 
@@ -88,7 +91,9 @@ namespace OptimizelySDK.Tests.OptimizelyConfigTests
                 "(\"exactString\" OR \"substringString\") AND \"exactNumber\"",
                 "(\"exactString\" OR (\"substringString\" AND \"exactNumber\")) AND (\"exists\" AND (\"gtNumber\" OR \"exactBoolean\"))",
                 "",
-                "NOT (\"exactString\" AND \"substringString\")"
+                "NOT (\"exactString\" AND \"substringString\")",
+                "",
+                "\"exactString\" OR \"999999999\"",
             };
 
             for (int testNo = 0; testNo < audienceConditions.Count; testNo++)
@@ -163,6 +168,17 @@ namespace OptimizelySDK.Tests.OptimizelyConfigTests
             Assert.AreEqual(rolloutFlag3.Id, "9300000004981");
             Assert.AreEqual(rolloutFlag3.Key, "targeted_delivery");
 
+        }
+
+        [Test]
+        public void TestGetOptimizelyConfigSDKAndEnvironmentKeyDefault()
+        {
+            var datafileProjectConfig = DatafileProjectConfig.Create(TestData.DuplicateRuleKeysDatafile, new NoOpLogger(), new ErrorHandler.NoOpErrorHandler());
+            var optimizelyConfigService = new OptimizelyConfigService(datafileProjectConfig);
+            var optimizelyConfig = optimizelyConfigService.GetOptimizelyConfig();
+
+            Assert.AreEqual(optimizelyConfig.SDKKey, "");
+            Assert.AreEqual(optimizelyConfig.EnvironmentKey, "");
         }
 
         [Test]
@@ -523,13 +539,13 @@ namespace OptimizelySDK.Tests.OptimizelyConfigTests
                     new OptimizelyAudience("3468206644", "$$dummyLtNumber", "{\"type\": \"custom_attribute\", \"name\": \"$opt_dummy_attribute\", \"value\": \"impossible_value\"}"),
                     new OptimizelyAudience("3468206643", "$$dummyExactBoolean", "{\"type\": \"custom_attribute\", \"name\": \"$opt_dummy_attribute\", \"value\": \"impossible_value\"}"),
                     new OptimizelyAudience("0", "$$dummy", "{\"type\": \"custom_attribute\", \"name\": \"$opt_dummy_attribute\", \"value\": \"impossible_value\"}"),
-                    new OptimizelyAudience("3988293898", "substringString", new object[] { "and", new object[] { "or", new object[] { "or", new Dictionary<string, string>() { { "name", "house" }, { "type", "custom_attribute" }, { "match", "substring" }, { "value", "Slytherin" } } } } }),
-                    new OptimizelyAudience("3988293899", "exists", new object[] { "and", new object[] { "or", new object[] { "or", new Dictionary<string, string>() { { "name", "favorite_ice_cream" }, { "type", "custom_attribute" }, { "match", "exists" } } } } }),
-                    new OptimizelyAudience("3468206646", "exactNumber", new object[] { "and", new object[] { "or", new object[] { "or", new Dictionary<string, object>() { { "name", "lasers" }, { "type", "custom_attribute" }, { "match", "exact" }, { "value", 45.5 } } } } }),
-                    new OptimizelyAudience("3468206647", "gtNumber", new object[] { "and", new object[] { "or", new object[] { "or", new Dictionary<string, object>() { { "name", "lasers" }, { "type", "custom_attribute" }, { "match", "gt" }, { "value", 70 } } } } }),
-                    new OptimizelyAudience("3468206644", "ltNumber", new object[] { "and", new object[] { "or", new object[] { "or", new Dictionary<string, object>() { { "name", "lasers" }, { "type", "custom_attribute" }, { "match", "lt" }, { "value", 1.0 } } } } }),
-                    new OptimizelyAudience("3468206643", "exactBoolean", new object[] { "and", new object[] { "or", new object[] { "or", new Dictionary<string, object>() { { "name", "should_do_it" }, { "type", "custom_attribute" }, { "match", "exact" }, { "value", true } } } } }),
-                    new OptimizelyAudience("3468206648", "notExist", new object[] { "not", new Dictionary<string, object>() { { "name", "input_value" }, { "type", "custom_attribute" }, { "match", "exists" } } }),
+                    new OptimizelyAudience("3988293898", "substringString", "[\"and\",[\"or\",[\"or\",{\"name\":\"house\",\"type\":\"custom_attribute\",\"match\":\"substring\",\"value\":\"Slytherin\"}]]]"),
+                    new OptimizelyAudience("3988293899", "exists", "[\"and\",[\"or\",[\"or\",{\"name\":\"favorite_ice_cream\",\"type\":\"custom_attribute\",\"match\":\"exists\"}]]]"),
+                    new OptimizelyAudience("3468206646", "exactNumber", "[\"and\",[\"or\",[\"or\",{\"name\":\"lasers\",\"type\":\"custom_attribute\",\"match\":\"exact\",\"value\":45.5}]]]"),
+                    new OptimizelyAudience("3468206647", "gtNumber", "[\"and\",[\"or\",[\"or\",{\"name\":\"lasers\",\"type\":\"custom_attribute\",\"match\":\"gt\",\"value\":70}]]]"),
+                    new OptimizelyAudience("3468206644", "ltNumber", "[\"and\",[\"or\",[\"or\",{\"name\":\"lasers\",\"type\":\"custom_attribute\",\"match\":\"lt\",\"value\":1.0}]]]"),
+                    new OptimizelyAudience("3468206643", "exactBoolean", "[\"and\",[\"or\",[\"or\",{\"name\":\"should_do_it\",\"type\":\"custom_attribute\",\"match\":\"exact\",\"value\":true}]]]"),
+                    new OptimizelyAudience("3468206648", "notExist", "[\"not\",{\"name\":\"input_value\",\"type\":\"custom_attribute\",\"match\":\"exists\"}]"),
                 },
                 events: new OptimizelyEvent[]
                 { 

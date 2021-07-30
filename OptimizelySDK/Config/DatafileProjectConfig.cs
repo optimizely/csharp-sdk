@@ -72,12 +72,12 @@ namespace OptimizelySDK.Config
         /// <summary>
         /// SDK key of the datafile.
         /// </summary>
-        public string SDKKey { get; set; }
+        public string SDKKey { get; set; } = "";
 
         /// <summary>
         /// Environment key of the datafile.
         /// </summary>
-        public string EnvironmentKey { get; set; }
+        public string EnvironmentKey { get; set; } = "";
 
         /// <summary>
         /// SendFlagDecisions determines whether impressions events are sent for ALL decision types.
