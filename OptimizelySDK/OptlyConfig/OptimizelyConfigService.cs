@@ -16,6 +16,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections;
 using System.Linq;
 using System.Text;
 using Newtonsoft.Json;
@@ -78,7 +79,8 @@ namespace OptimizelySDK.OptlyConfig
             var typedAudiences = projectConfig.TypedAudiences?.Select(aud => new OptimizelyAudience(aud.Id,
                 aud.Name,
                 JsonConvert.SerializeObject(aud.Conditions)));
-            optimizelyAudience = optimizelyAudience.Concat(typedAudiences);
+            optimizelyAudience = optimizelyAudience.Concat(typedAudiences).OrderBy( aud => aud.Name);
+
             return optimizelyAudience.ToArray<OptimizelyAudience>();
         }
 
