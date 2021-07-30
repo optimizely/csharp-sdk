@@ -22,35 +22,38 @@ using OptimizelySDK.Exceptions;
 using OptimizelySDK.Logger;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace OptimizelySDK.Tests
 {
-    class ParentJson
+    internal class ParentJson
     {
         public string strField { get; set; }
         public int intField { get; set; }
         public double doubleField { get; set; }
         public bool boolField { get; set; }
         public ObjectJson objectField { get; set; }
-        
     }
-    class ObjectJson
+
+    internal class ObjectJson
     {
         public int inner_field_int { get; set; }
         public double inner_field_double { get; set; }
-        public string inner_field_string {get;set;}
+        public string inner_field_string { get; set; }
         public bool inner_field_boolean { get; set; }
     }
 
-    class Field4
+    internal class Field4
     {
         public long inner_field1 { get; set; }
         public InnerField2 inner_field2 { get; set; }
     }
-    class InnerField2 : List<object> { }
 
+    internal class InnerField2 : List<object>
+    { }
 
     [TestFixture]
+    [ExcludeFromCodeCoverage]
     public class OptimizelyJSONTest
     {
         private string Payload;
@@ -92,6 +95,7 @@ namespace OptimizelySDK.Tests
             Assert.IsNotNull(optimizelyJSONUsingMap);
             Assert.IsNotNull(optimizelyJSONUsingString);
         }
+
         [Test]
         public void TestToStringReturnValidString()
         {
@@ -220,8 +224,8 @@ namespace OptimizelySDK.Tests
             Assert.IsNull(expectedValue);
             LoggerMock.Verify(log => log.Log(LogLevel.ERROR, "Value for JSON key not found."), Times.Once);
             ErrorHandlerMock.Verify(er => er.HandleError(It.IsAny<OptimizelyRuntimeException>()), Times.Once);
-        } 
-        
+        }
+
         [Test]
         public void TestGetValueObjectNotModifiedIfCalledTwice()
         {
@@ -237,7 +241,7 @@ namespace OptimizelySDK.Tests
         {
             var optimizelyJSONUsingString = new OptimizelyJSON(Payload, ErrorHandlerMock.Object, LoggerMock.Object);
             var expectedValue = optimizelyJSONUsingString.GetValue<Field4>("field4");
-            
+
             Assert.AreEqual(expectedValue.inner_field1, 3);
             Assert.AreEqual(expectedValue.inner_field2, new List<object>() { "1", "2", 3, 4.23, true });
         }
@@ -248,7 +252,7 @@ namespace OptimizelySDK.Tests
             var optimizelyJson = new OptimizelyJSON(Map, ErrorHandlerMock.Object, LoggerMock.Object);
             var expectedValue = optimizelyJson.ToDictionary();
             var actualValue = optimizelyJson.GetValue<ParentJson>(null);
-            
+
             Assert.IsTrue(TestData.CompareObjects(actualValue, expectedValue));
         }
     }

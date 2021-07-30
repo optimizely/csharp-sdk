@@ -26,12 +26,16 @@ using OptimizelySDK.Tests.ConfigTest;
 using OptimizelySDK.Tests.EventTest;
 using OptimizelySDK.Tests.Utils;
 using System;
+using System.Diagnostics.CodeAnalysis;
+
 namespace OptimizelySDK.Tests
 {
     [TestFixture]
+    [ExcludeFromCodeCoverage]
     public class OptimizelyFactoryTest
     {
         private Mock<ILogger> LoggerMock;
+
         [SetUp]
         public void Initialize()
         {

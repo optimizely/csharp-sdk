@@ -1,4 +1,4 @@
-﻿/* 
+﻿/*
  * Copyright 2019, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,10 +20,12 @@ using OptimizelySDK.AudienceConditions;
 using OptimizelySDK.Config;
 using OptimizelySDK.Entity;
 using OptimizelySDK.Logger;
+using System.Diagnostics.CodeAnalysis;
 
 namespace OptimizelySDK.Tests.AudienceConditionsTests
 {
     [TestFixture]
+    [ExcludeFromCodeCoverage]
     public class ConditionsTest
     {
         private Mock<ICondition> TrueConditionMock;
@@ -115,7 +117,7 @@ namespace OptimizelySDK.Tests.AudienceConditionsTests
             Assert.That(andCondition.Evaluate(null, null, Logger), Is.False);
         }
 
-        #endregion // AND Condition Tests
+        #endregion AND Condition Tests
 
         #region OR Condition Tests
 
@@ -164,7 +166,7 @@ namespace OptimizelySDK.Tests.AudienceConditionsTests
             Assert.That(orCondition.Evaluate(null, null, Logger), Is.True);
         }
 
-        #endregion // OR Condition Tests
+        #endregion OR Condition Tests
 
         #region NOT Condition Tests
 
@@ -196,6 +198,6 @@ namespace OptimizelySDK.Tests.AudienceConditionsTests
             Assert.That(notCondition.Evaluate(null, null, Logger), Is.Null);
         }
 
-        #endregion // NOT Condition Tests
+        #endregion NOT Condition Tests
     }
 }

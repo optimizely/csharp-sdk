@@ -31,13 +31,15 @@ using OptimizelySDK.Tests.NotificationTests;
 using OptimizelySDK.Utils;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace OptimizelySDK.Tests
 {
     [TestFixture]
+    [ExcludeFromCodeCoverage]
     public class OptimizelyUserContextTest
     {
-        string UserID = "testUserID";
+        private string UserID = "testUserID";
         private Optimizely Optimizely;
         private Mock<ILogger> LoggerMock;
         private Mock<IErrorHandler> ErrorHandlerMock;
@@ -153,7 +155,6 @@ namespace OptimizelySDK.Tests
         {
             OptimizelyUserContext user = new OptimizelyUserContext(Optimizely, UserID, null, ErrorHandlerMock.Object, LoggerMock.Object);
 
-
             Assert.AreEqual(user.GetOptimizely(), Optimizely);
             Assert.AreEqual(user.GetUserId(), UserID);
 
@@ -222,7 +223,8 @@ namespace OptimizelySDK.Tests
 
             Assert.IsTrue(TestData.CompareObjects(decision, decisionExpected));
         }
-        #endregion
+
+        #endregion decide
 
         #region decideAll
 
@@ -435,7 +437,7 @@ namespace OptimizelySDK.Tests
             user,
             new string[0]);
             Assert.IsTrue(TestData.CompareObjects(decisions[flagKey9], expDecision9));
-            
+
             OptimizelyDecision expDecision10 = new OptimizelyDecision(
             null,
             false,
@@ -569,7 +571,7 @@ namespace OptimizelySDK.Tests
             Assert.AreEqual(decision.Reasons[0], DecisionMessage.Reason(DecisionMessage.FLAG_KEY_INVALID, flagKey));
 
             var decideOptions = new OptimizelyDecideOption[] { OptimizelyDecideOption.INCLUDE_REASONS };
-            
+
             decision = user.Decide(flagKey, decideOptions);
             Assert.True(decision.Reasons.Length == 1);
             Assert.AreEqual(decision.Reasons[0], DecisionMessage.Reason(DecisionMessage.FLAG_KEY_INVALID, flagKey));
@@ -668,7 +670,7 @@ namespace OptimizelySDK.Tests
                 { "reasons", reasons },
                 { "decisionEventDispatched", true },
             };
-         
+
             var userAttributes = new UserAttributes
             {
                { "browser_type", "chrome" }
@@ -682,8 +684,8 @@ namespace OptimizelySDK.Tests
 
             user.Decide(flagKey);
             NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(DecisionNotificationTypes.FLAG, UserID, userAttributes, It.Is<Dictionary<string, object>>(info =>
-               TestData.CompareObjects(info, decisionInfo))), 
-               Times.Once); 
+               TestData.CompareObjects(info, decisionInfo))),
+               Times.Once);
         }
 
         [Test]
@@ -698,7 +700,6 @@ namespace OptimizelySDK.Tests
             var fbVariationId = "122237";
             var fbVariationKey = "variation";
 
-
             var userProfile = new UserProfile(userId, new Dictionary<string, Decision>
             {
                 { experimentId, new Decision(fbVariationId)}
@@ -709,9 +710,9 @@ namespace OptimizelySDK.Tests
             var optimizely = new Optimizely(TestData.Datafile, EventDispatcherMock.Object, LoggerMock.Object, ErrorHandlerMock.Object, userProfileServiceMock.Object);
 
             var user = optimizely.CreateUserContext(userId);
-            
+
             var projectConfig = DatafileProjectConfig.Create(TestData.Datafile, LoggerMock.Object, ErrorHandlerMock.Object);
-            
+
             var variationUserProfile = user.Decide(flagKey);
             Assert.AreEqual(fbVariationKey, variationUserProfile.VariationKey);
 
@@ -738,9 +739,11 @@ namespace OptimizelySDK.Tests
 
             Assert.AreEqual(variationKey, variationUserProfile.VariationKey);
         }
-        #endregion
+
+        #endregion decideAll
 
         #region TrackEvent
+
         [Test]
         public void TestTrackEventWithAudienceConditions()
         {
@@ -763,7 +766,7 @@ namespace OptimizelySDK.Tests
         public void TrackEventEmptyAttributesWithEventTags()
         {
             var OptimizelyWithTypedAudiences = new Optimizely(TestData.TypedAudienceDatafile, EventDispatcherMock.Object, LoggerMock.Object, ErrorHandlerMock.Object);
-            
+
             var user = OptimizelyWithTypedAudiences.CreateUserContext(UserID);
 
             // Should be excluded as exact match boolean audience with id '3468206643' does not match so the overall conditions fail.
@@ -775,6 +778,7 @@ namespace OptimizelySDK.Tests
 
             EventDispatcherMock.Verify(dispatcher => dispatcher.DispatchEvent(It.IsAny<LogEvent>()), Times.Once);
         }
-        #endregion
+
+        #endregion TrackEvent
     }
 }

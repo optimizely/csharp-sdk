@@ -1,4 +1,4 @@
-﻿/* 
+﻿/*
  * Copyright 2019, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,16 +18,18 @@ using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 using OptimizelySDK.AudienceConditions;
 using OptimizelySDK.Utils;
+using System.Diagnostics.CodeAnalysis;
 
 namespace OptimizelySDK.Tests.UtilsTests
 {
     [TestFixture]
+    [ExcludeFromCodeCoverage]
     public class ConditionParserTest
     {
-        JToken Conditions;
-        JToken BaseCondition;
-        JToken AudienceConditions;
-        JToken NoOpAudienceConditions;
+        private JToken Conditions;
+        private JToken BaseCondition;
+        private JToken AudienceConditions;
+        private JToken NoOpAudienceConditions;
 
         [TestFixtureSetUp]
         public void Initialize()

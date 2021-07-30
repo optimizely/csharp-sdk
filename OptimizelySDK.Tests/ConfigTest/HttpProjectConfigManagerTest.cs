@@ -22,6 +22,7 @@ using OptimizelySDK.Tests.NotificationTests;
 using OptimizelySDK.Tests.Utils;
 using System;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Net.Http;
 using System.Threading;
@@ -30,6 +31,7 @@ using System.Threading.Tasks;
 namespace OptimizelySDK.Tests.DatafileManagement_Tests
 {
     [TestFixture]
+    [ExcludeFromCodeCoverage]
     public class HttpProjectConfigManagerTest
     {
         private Mock<ILogger> LoggerMock;
@@ -45,7 +47,6 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
             TestHttpProjectConfigManagerUtil.SetClientFieldValue(HttpClientMock.Object);
             LoggerMock.Setup(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()));
             NotificationCallbackMock.Setup(nc => nc.TestConfigUpdateCallback());
-
         }
 
         [Test]
@@ -161,7 +162,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
                 It.Is<System.Net.Http.HttpRequestMessage>(requestMessage =>
                 requestMessage.RequestUri.ToString() == "https://cdn.optimizely.com/json/10192104166.json"
                 )));
-            
+
             Assert.IsNotNull(httpManager.GetConfig());
 
             LoggerMock.Verify(_ => _.Log(LogLevel.DEBUG, "Making datafile request to url \"https://cdn.optimizely.com/json/10192104166.json\""));
@@ -265,7 +266,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
             t.Wait();
             // in case deadlock, it will release after 3sec.
             httpManager.OnReady().Wait(8000);
-                
+
             HttpClientMock.Verify(_ => _.SendAsync(It.IsAny<HttpRequestMessage>()));
             Assert.NotNull(httpManager.GetConfig());
 
@@ -273,9 +274,10 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         }
 
         #region Notification
+
         [Test]
         public void TestHttpConfigManagerSendConfigUpdateNotificationWhenProjectConfigGetsUpdated()
-        {            
+        {
             var t = MockSendAsync(TestData.Datafile);
 
             var httpManager = new HttpProjectConfigManager.Builder()
@@ -297,7 +299,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
 
         [Test]
         public void TestHttpConfigManagerDoesNotSendConfigUpdateNotificationWhenDatafileIsProvided()
-        {            
+        {
             var t = MockSendAsync(TestData.Datafile, TimeSpan.FromMilliseconds(100));
 
             var httpManager = new HttpProjectConfigManager.Builder()
@@ -307,7 +309,6 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
                 .WithPollingInterval(TimeSpan.FromMilliseconds(1000))
                 .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(500))
                 .Build();
-
 
             httpManager.NotifyOnProjectConfigUpdate += NotificationCallbackMock.Object.TestConfigUpdateCallback;
 
@@ -506,13 +507,13 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
                 requestMessage.RequestUri.ToString() == "http://customformat/QBw9gFM8oTn7ogY9ANCC1z.json"
                 )));
             httpManager.Dispose();
-
         }
 
         public Task MockSendAsync(string datafile = null, TimeSpan? delay = null, HttpStatusCode statusCode = HttpStatusCode.OK)
         {
             return TestHttpProjectConfigManagerUtil.MockSendAsync(HttpClientMock, datafile, delay, statusCode);
         }
-        #endregion
+
+        #endregion Notification
     }
 }

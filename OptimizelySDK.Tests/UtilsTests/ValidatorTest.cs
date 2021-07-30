@@ -20,10 +20,12 @@ using OptimizelySDK.Utils;
 using OptimizelySDK.Entity;
 using NUnit.Framework;
 using OptimizelySDK.Config;
+using System.Diagnostics.CodeAnalysis;
 
 namespace OptimizelySDK.Tests.UtilsTests
 {
     [TestFixture]
+    [ExcludeFromCodeCoverage]
     public class ValidatorTest
     {
         private ILogger Logger;

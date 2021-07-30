@@ -1,4 +1,4 @@
-﻿/* 
+﻿/*
  * Copyright 2019-2020, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,13 +18,14 @@
 
 using NUnit.Framework;
 using System.Configuration;
+using System.Diagnostics.CodeAnalysis;
 
 namespace OptimizelySDK.Tests
 {
     [TestFixture]
+    [ExcludeFromCodeCoverage]
     public class ClientConfigHandlerTest
     {
-
         [Test]
         public void TestHTTPAppConfigSection()
         {
@@ -52,7 +53,7 @@ namespace OptimizelySDK.Tests
             Assert.AreEqual(batchSetting.TimeoutInterval, 10000);
             Assert.IsTrue(batchSetting.DefaultStart);
         }
-
     }
 }
+
 #endif

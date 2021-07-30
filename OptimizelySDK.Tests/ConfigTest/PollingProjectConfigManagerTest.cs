@@ -1,4 +1,4 @@
-﻿/* 
+﻿/*
  * Copyright 2019, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,11 +22,13 @@ using OptimizelySDK.Tests.DatafileManagementTests;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 
 namespace OptimizelySDK.Tests.DatafileManagement_Tests
 {
     [TestFixture]
+    [ExcludeFromCodeCoverage]
     public class PollingProjectConfigManagerTest
     {
         private Mock<ILogger> LoggerMock;
@@ -34,12 +36,12 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
 
         [SetUp]
         public void Setup()
-        {            
+        {
             LoggerMock = new Mock<ILogger>();
             LoggerMock.Setup(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()));
             ProjectConfig = DatafileProjectConfig.Create(TestData.Datafile, LoggerMock.Object, null);
         }
-        
+
         [Test]
         public void TestPollingConfigManagerDoesNotBlockWhenProjectConfigIsAlreadyProvided()
         {
@@ -60,7 +62,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         public void TestPollingConfigManagerBlocksWhenProjectConfigIsNotProvided()
         {
             var stopwatch = new Stopwatch();
-            var configManager = new TestPollingProjectConfigManager(TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(2), true, LoggerMock.Object, new int[] {500 });
+            var configManager = new TestPollingProjectConfigManager(TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(2), true, LoggerMock.Object, new int[] { 500 });
 
             stopwatch.Start();
             var config = configManager.GetConfig();
@@ -89,7 +91,6 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
             //Thread.Sleep(200);
             Assert.AreEqual(2, configManager.Counter);
             configManager.Dispose();
-
         }
 
         [Test]
@@ -136,7 +137,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         [Test]
         public void TestReturnDatafileImmediatelyOnceGetValidDatafileRemotely()
         {
-            var projConfig =  DatafileProjectConfig.Create(TestData.Datafile, LoggerMock.Object, null);
+            var projConfig = DatafileProjectConfig.Create(TestData.Datafile, LoggerMock.Object, null);
             var data = new List<TestPollingData>() {
                 new TestPollingData { PollingTime = 500, ChangeVersion = false, ConfigDatafile = projConfig},
                 new TestPollingData { PollingTime = 500, ChangeVersion = false, ConfigDatafile = projConfig}
@@ -153,9 +154,9 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         [Test]
         public void TestWaitUntilValidDatfileIsNotGiven()
         {
-            // Send invalid datafile. 
+            // Send invalid datafile.
             // Wait for one more poll
-            // Send invalid datafile. 
+            // Send invalid datafile.
             // wait for one more poll
             // then send the right datafile
             // see it should release blocking.
@@ -167,16 +168,14 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
                 new TestPollingData { PollingTime = 50, ChangeVersion = false, ConfigDatafile = projConfig}
             };
 
-
             var configManager = new TestPollingProjectConfigManager(TimeSpan.FromMilliseconds(500), TimeSpan.FromMilliseconds(10000), true, LoggerMock.Object, data.ToArray());
             configManager.Start();
-            // after 3rd attempt should get 
+            // after 3rd attempt should get
             var config = configManager.GetConfig();
             //Assert.NotNull(config);
             Assert.AreEqual(3, configManager.Counter);
             configManager.Dispose();
         }
-
 
         [Test]
         public void TestWaitUntilValidDatafileIsNotGivenOrTimedout()

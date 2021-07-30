@@ -15,9 +15,9 @@
  *    limitations under the License.
  */
 
-
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Schema;
 using NUnit.Framework;
@@ -28,6 +28,7 @@ using OptimizelySDK.Utils;
 namespace OptimizelySDK.Tests.EventTests
 {
     [TestFixture]
+    [ExcludeFromCodeCoverage]
     public class EventEntitiesTest
     {
         [Test]
@@ -144,7 +145,6 @@ namespace OptimizelySDK.Tests.EventTests
         [Test]
         public void TestConversionEventEqualsSerializedPayload()
         {
-
             var guid = Guid.NewGuid();
             var timeStamp = TestData.SecondsSince1970();
 
@@ -202,19 +202,14 @@ namespace OptimizelySDK.Tests.EventTests
                                                             {"value", 1.234},
                                                         }
                                                     }
-
                                                 }
                                             }
                                         }
-
                                     }
-
                                 }
                             }
-
                         }
                     }
-
                 }
             };
 
@@ -226,7 +221,7 @@ namespace OptimizelySDK.Tests.EventTests
                 .WithClientName("csharp-sdk")
                 .WithAnonymizeIP(false)
                 .WithEnrichDecisions(true);
-            
+
             var visitorAttribute = new VisitorAttribute(entityId: "111094", type: "custom", value: "test_value", key: "test_attribute");
 
             var snapshotEvent = new SnapshotEvent.Builder()
@@ -260,7 +255,5 @@ namespace OptimizelySDK.Tests.EventTests
             // Single Conversion Event
             TestData.CompareObjects(expectdPayload, eventBatch);
         }
-
-
     }
 }

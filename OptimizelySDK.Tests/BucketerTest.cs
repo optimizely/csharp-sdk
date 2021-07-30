@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 using Moq;
 using NUnit.Framework;
 using OptimizelySDK.Bucketing;
@@ -20,10 +21,12 @@ using OptimizelySDK.Config;
 using OptimizelySDK.Entity;
 using OptimizelySDK.Logger;
 using OptimizelySDK.OptimizelyDecisions;
+using System.Diagnostics.CodeAnalysis;
 
 namespace OptimizelySDK.Tests
 {
     [TestFixture]
+    [ExcludeFromCodeCoverage]
     public class BucketerTest
     {
         private Mock<ILogger> LoggerMock;
@@ -44,7 +47,7 @@ namespace OptimizelySDK.Tests
             public string UserId { get; set; }
             public string ExperimentId { get; set; }
             public int ExpectedBucketValue { get; set; }
-            
+
             public string BucketingId
             {
                 get { return UserId + ExperimentId; }
@@ -88,7 +91,7 @@ namespace OptimizelySDK.Tests
             })
             {
                 int result = bucketer.GenerateBucketValue(item.BucketingId);
-                Assert.AreEqual(item.ExpectedBucketValue, result, 
+                Assert.AreEqual(item.ExpectedBucketValue, result,
                     string.Format("Unexpected Bucket Value: [{0}] for [{1}]", result, item));
             }
         }
@@ -134,7 +137,7 @@ namespace OptimizelySDK.Tests
         public void TestBucketValidExperimentInGroup()
         {
             TestBucketer bucketer = new TestBucketer(LoggerMock.Object);
-            
+
             // group_experiment_1 (20% experiment)
             // variation 1
             bucketer.SetBucketValues(new[] { 1000, 4000 });
@@ -177,7 +180,7 @@ namespace OptimizelySDK.Tests
         public void TestBucketInvalidExperiment()
         {
             var bucketer = new Bucketer(LoggerMock.Object);
-            
+
             Assert.AreEqual(new Variation { },
                 bucketer.Bucket(Config, new Experiment(), TestBucketingIdControl, TestUserId).ResultObject);
 
@@ -211,7 +214,7 @@ namespace OptimizelySDK.Tests
             var bucketer = new Bucketer(LoggerMock.Object);
             var expectedVariation = new Variation();
             var variationResult = bucketer.Bucket(Config, Config.GetExperimentFromKey("invalid_experiment"), TestBucketingIdVariation, TestUserId);
-            Assert.AreEqual(expectedVariation, 
+            Assert.AreEqual(expectedVariation,
                 variationResult.ResultObject);
             Assert.AreEqual(variationResult.DecisionReasons.ToReport().Count, 0);
         }
@@ -222,14 +225,14 @@ namespace OptimizelySDK.Tests
         {
             var bucketer = new Bucketer(LoggerMock.Object);
             var expectedVariation = new Variation();
-            var expectedGroupVariation = new Variation{ Id = "7725250007", Key = "group_exp_2_var_2" };
+            var expectedGroupVariation = new Variation { Id = "7725250007", Key = "group_exp_2_var_2" };
             var variationResult = bucketer.Bucket(Config, Config.GetExperimentFromKey("group_experiment_2"),
                 TestBucketingIdGroupExp2Var2, TestUserIdBucketsToNoGroup);
             Assert.AreEqual(expectedGroupVariation,
                 variationResult.ResultObject);
             Assert.AreEqual(variationResult.DecisionReasons.ToReport().Count, 0);
-                bucketer.Bucket(Config, Config.GetExperimentFromKey("group_experiment_2"), 
-                TestBucketingIdGroupExp2Var2, TestUserIdBucketsToNoGroup);
+            bucketer.Bucket(Config, Config.GetExperimentFromKey("group_experiment_2"),
+            TestBucketingIdGroupExp2Var2, TestUserIdBucketsToNoGroup);
             var report = variationResult.DecisionReasons.ToReport(true);
             Assert.AreEqual(report.Count, 2);
             Assert.AreEqual(report[0], "User [testUserId] is in experiment [group_experiment_2] of group [7722400015].");
@@ -244,7 +247,7 @@ namespace OptimizelySDK.Tests
             var rollout = Config.GetRolloutFromId("166660");
             var rolloutRule = rollout.Experiments[1];
             var expectedVariation = Config.GetVariationFromId(rolloutRule.Key, "177773");
-            
+
             var variationResult = bucketer.Bucket(Config, rolloutRule, "testBucketingId", TestUserId);
             Assert.True(TestData.CompareObjects(expectedVariation,
                 variationResult.ResultObject));

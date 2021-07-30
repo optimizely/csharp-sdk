@@ -1,4 +1,4 @@
-﻿/* 
+﻿/*
  * Copyright 2019-2021, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,10 +21,12 @@ using OptimizelySDK.Entity;
 using OptimizelySDK.Logger;
 using OptimizelySDK.OptimizelyDecisions;
 using OptimizelySDK.Utils;
+using System.Diagnostics.CodeAnalysis;
 
 namespace OptimizelySDK.Tests.UtilsTests
 {
     [TestFixture]
+    [ExcludeFromCodeCoverage]
     public class ExperimentUtilsTest
     {
         private ProjectConfig Config;
@@ -59,7 +61,7 @@ namespace OptimizelySDK.Tests.UtilsTests
         {
             var experiment = Config.GetExperimentFromKey("feat_with_var_test");
             experiment.AudienceIds = new string[] { "3468206648" };
-            Assert.True(ExperimentUtils.DoesUserMeetAudienceConditions(Config, experiment, null , "experiment", experiment.Key, Logger).ResultObject);;
+            Assert.True(ExperimentUtils.DoesUserMeetAudienceConditions(Config, experiment, null, "experiment", experiment.Key, Logger).ResultObject); ;
             var boolResult = ExperimentUtils.DoesUserMeetAudienceConditions(Config, experiment, new UserAttributes { }, "experiment", experiment.Key, Logger);
             Assert.True(boolResult.ResultObject);
 
@@ -186,6 +188,6 @@ namespace OptimizelySDK.Tests.UtilsTests
             Assert.False(ExperimentUtils.DoesUserMeetAudienceConditions(Config, experiment, userAttributes, "experiment", experiment.Key, Logger).ResultObject);
         }
 
-        #endregion // DoesUserMeetAudienceConditions Tests
+        #endregion DoesUserMeetAudienceConditions Tests
     }
 }

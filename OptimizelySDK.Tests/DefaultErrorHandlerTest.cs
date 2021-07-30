@@ -14,6 +14,7 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
+
 using System;
 using System.Collections.Generic;
 using Moq;
@@ -23,9 +24,11 @@ using OptimizelySDK.Entity;
 using NUnit.Framework;
 using OptimizelySDK.Bucketing;
 using OptimizelySDK.Exceptions;
+using System.Diagnostics.CodeAnalysis;
 
 namespace OptimizelySDK.Tests
 {
+    [ExcludeFromCodeCoverage]
     public class DefaultErrorHandlerTest
     {
         private DefaultErrorHandler DefaultErrorHandler;
@@ -46,7 +49,7 @@ namespace OptimizelySDK.Tests
             {
                 throw new OptimizelyException("Testing exception");
             }
-            catch(OptimizelyException ex)
+            catch (OptimizelyException ex)
             {
                 DefaultErrorHandler.HandleError(ex);
             }
@@ -66,12 +69,11 @@ namespace OptimizelySDK.Tests
             }
             catch (OptimizelyException ex)
             {
-                //have to throw exception. 
+                //have to throw exception.
                 DefaultErrorHandler.HandleError(ex);
             }
 
             LoggerMock.Verify(log => log.Log(LogLevel.ERROR, testingException), Times.Once);
         }
-
     }
 }

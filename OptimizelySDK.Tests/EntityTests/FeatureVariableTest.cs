@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2019-2020, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,12 +15,14 @@
  */
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using NUnit.Framework;
 using OptimizelySDK.Entity;
 
 namespace OptimizelySDK.Tests.EntityTests
 {
     [TestFixture]
+    [ExcludeFromCodeCoverage]
     public class FeatureVariableTest
     {
         [Test]

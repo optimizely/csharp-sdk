@@ -1,4 +1,4 @@
-﻿/* 
+﻿/*
  * Copyright 2019, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,10 +16,12 @@
 
 using NUnit.Framework;
 using OptimizelySDK.Config;
+using System.Diagnostics.CodeAnalysis;
 
 namespace OptimizelySDK.Tests.DatafileManagement_Tests
 {
     [TestFixture]
+    [ExcludeFromCodeCoverage]
     public class AtomicProjectConfigManagerTest
     {
         private FallbackProjectConfigManager ConfigManager;

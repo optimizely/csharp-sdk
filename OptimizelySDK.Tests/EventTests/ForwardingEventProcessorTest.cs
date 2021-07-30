@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using Moq;
 using NUnit.Framework;
 using OptimizelySDK.Config;
@@ -12,7 +13,8 @@ using OptimizelySDK.Notifications;
 namespace OptimizelySDK.Tests.EventTests
 {
     [TestFixture]
-    class ForwardingEventProcessorTest
+    [ExcludeFromCodeCoverage]
+    internal class ForwardingEventProcessorTest
     {
         private const string UserId = "userId";
         private const string EventName = "purchase";
@@ -21,10 +23,10 @@ namespace OptimizelySDK.Tests.EventTests
         private TestForwardingEventDispatcher EventDispatcher;
         private NotificationCenter NotificationCenter = new NotificationCenter();
 
-        Mock<ILogger> LoggerMock;
-        Mock<IErrorHandler> ErrorHandlerMock;
+        private Mock<ILogger> LoggerMock;
+        private Mock<IErrorHandler> ErrorHandlerMock;
 
-        ProjectConfig ProjectConfig;
+        private ProjectConfig ProjectConfig;
 
         [SetUp]
         public void Setup()
@@ -45,11 +47,10 @@ namespace OptimizelySDK.Tests.EventTests
         public void TestEventHandlerWithConversionEvent()
         {
             var userEvent = CreateConversionEvent(EventName);
-            EventProcessor.Process(userEvent);            
+            EventProcessor.Process(userEvent);
 
             Assert.True(EventDispatcher.IsUpdated);
         }
-
 
         [Test]
         public void TestExceptionWhileDispatching()
@@ -58,8 +59,8 @@ namespace OptimizelySDK.Tests.EventTests
             var userEvent = CreateConversionEvent(EventName);
 
             eventProcessor.Process(userEvent);
-            
-            ErrorHandlerMock.Verify(errorHandler => errorHandler.HandleError(It.IsAny<Exception>()), Times.Once );            
+
+            ErrorHandlerMock.Verify(errorHandler => errorHandler.HandleError(It.IsAny<Exception>()), Times.Once);
         }
 
         [Test]
@@ -73,7 +74,6 @@ namespace OptimizelySDK.Tests.EventTests
 
             Assert.True(notificationTriggered);
         }
-
 
         private ConversionEvent CreateConversionEvent(string eventName)
         {

@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017-2019, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,10 +24,12 @@ using NUnit.Framework;
 using OptimizelySDK.Bucketing;
 using OptimizelySDK.Utils;
 using OptimizelySDK.Config;
+using System.Diagnostics.CodeAnalysis;
 
 namespace OptimizelySDK.Tests.EventTests
 {
     [TestFixture]
+    [ExcludeFromCodeCoverage]
     public class EventBuilderTest
     {
         private string TestUserId = string.Empty;
@@ -121,7 +123,6 @@ namespace OptimizelySDK.Tests.EventTests
             TestData.ChangeGUIDAndTimeStamp(logEvent.Params, timeStamp, guid);
 
             Assert.IsTrue(TestData.CompareObjects(expectedLogEvent, logEvent));
-
         }
 
         [Test]
@@ -201,7 +202,6 @@ namespace OptimizelySDK.Tests.EventTests
                 new Dictionary<string, string>
                 {
                     { "Content-Type", "application/json" }
-
                 });
 
             var userAttributes = new UserAttributes
@@ -680,7 +680,6 @@ namespace OptimizelySDK.Tests.EventTests
                 {"7716830082", new Variation{Id="7722370027", Key="control"} }
             };
 
-
             var logEvent = EventBuilder.CreateConversionEvent(Config, "purchase", TestUserId, null,
                 new EventTags
             {
@@ -1145,6 +1144,7 @@ namespace OptimizelySDK.Tests.EventTests
 
             Assert.IsTrue(TestData.CompareObjects(expectedEvent, logEvent));
         }
+
         [Test]
         public void TestConversionEventWithRevenueValue1()
         {
@@ -1232,7 +1232,6 @@ namespace OptimizelySDK.Tests.EventTests
 
             Assert.IsTrue(TestData.CompareObjects(expectedEvent, logEvent));
         }
-
 
         [Test]
         public void TestCreateConversionEventWithBucketingIDAttribute()
@@ -1780,7 +1779,7 @@ namespace OptimizelySDK.Tests.EventTests
         {
             var guid = Guid.NewGuid();
             var timeStamp = TestData.SecondsSince1970();
-            
+
             var eventInMultiExperimentConfig = DatafileProjectConfig.Create(TestData.SimpleABExperimentsDatafile, new NoOpLogger(), new ErrorHandler.NoOpErrorHandler());
 
             var experimentIdVariationMap = new Dictionary<string, Variation>
@@ -1802,7 +1801,7 @@ namespace OptimizelySDK.Tests.EventTests
                                                                 {"value", 1.234},
                                                                 {"non-revenue", "abc"}
                                                              });
-                    
+
             var payloadParams = new Dictionary<string, object>
                 {
                 {"client_version", Optimizely.SDK_VERSION},
@@ -1858,22 +1857,16 @@ namespace OptimizelySDK.Tests.EventTests
                                                             {"value", 1.234},
                                                         }
                                                     }
-
                                                 }
                                             }
                                         }
-
                                     }
-
                                 }
                             }
-
                         }
                     }
-
                 }
             };
-
 
             var expectedLogEvent = new LogEvent(
                 "https://logx.optimizely.com/v1/events",
@@ -1992,7 +1985,7 @@ namespace OptimizelySDK.Tests.EventTests
             {
                 {"7716830082", new Variation{Id="7722370027", Key="control"} }
             };
-            
+
             var logEvent = EventBuilder.CreateConversionEvent(Config, "purchase", TestUserId, userAttributes, null);
 
             TestData.ChangeGUIDAndTimeStamp(logEvent.Params, timeStamp, guid);

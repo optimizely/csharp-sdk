@@ -58,7 +58,7 @@ jobs:
       script:
         - xbuild /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=$TRAVIS_BUILD_DIR/keypair.snk /p:Configuration=Release ./OptimizelySDK.Travis.sln
         - mono ./testrunner/NUnit.Runners.2.6.4/tools/nunit-console.exe ./OptimizelySDK.Tests/bin/Release/OptimizelySDK.Tests.dll
-        - mono ./testcoerage/altcover.8.2.821/tools/net472/AltCover.exe /i=./OptimizelySDK.Tests/bin/Release/
+        - mono ./testcoverage/altcover.8.2.821/tools/net472/AltCover.exe /i=./OptimizelySDK.Tests/bin/Release/
         # strongname signing from xbuild step needs additional re-signing with sn
         - find . -path './OptimizelySDK*bin/Release/OptimizelySDK*.dll' -not -regex '.*Tests.*' -print0 | while IFS= read -r -d '' file; do sn -R $file ./keypair.snk; done
       after_success:

@@ -1,4 +1,4 @@
-﻿/* 
+﻿/*
  * Copyright 2019, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,9 +17,11 @@
 using NUnit.Framework;
 using OptimizelySDK.Utils;
 using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace OptimizelySDK.Tests.UtilsTests
 {
+    [ExcludeFromCodeCoverage]
     public class ExceptionExtensionsTest
     {
         [Test]
@@ -27,7 +29,7 @@ namespace OptimizelySDK.Tests.UtilsTests
         {
             var exception = new Exception("Outer exception.", new Exception("Inner exception.", new Exception("Second level inner exception.")));
             var expectedMessage = "Outer exception.\nInner exception.\nSecond level inner exception.";
-            
+
             Assert.AreEqual(expectedMessage, exception.GetAllMessages());
         }
     }

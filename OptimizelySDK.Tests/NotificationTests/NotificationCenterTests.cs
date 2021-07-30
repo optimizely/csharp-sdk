@@ -1,4 +1,4 @@
-﻿/* 
+﻿/*
  * Copyright 2017, 2019, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,10 +24,12 @@ using OptimizelySDK.Logger;
 using OptimizelySDK.Notifications;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using NotificationType = OptimizelySDK.Notifications.NotificationCenter.NotificationType;
 
 namespace OptimizelySDK.Tests.NotificationTests
 {
+    [ExcludeFromCodeCoverage]
     public class NotificationCenterTests
     {
         private Mock<ILogger> LoggerMock;
@@ -58,7 +60,7 @@ namespace OptimizelySDK.Tests.NotificationTests
             Assert.AreEqual(true, NotificationCenter.RemoveNotification(1));
             Assert.AreEqual(0, NotificationCenter.NotificationsCount);
 
-            //Verify return false with invalid ID. 
+            //Verify return false with invalid ID.
             Assert.AreEqual(false, NotificationCenter.RemoveNotification(1));
 
             // Verify that callback added successfully and return right notification ID.
@@ -106,7 +108,6 @@ namespace OptimizelySDK.Tests.NotificationTests
             Assert.AreEqual(0, NotificationCenter.AddNotification(NotificationTypeTrack,
                 TestNotificationCallbacks.TestActivateCallback));
 
-
             LoggerMock.Verify(l => l.Log(LogLevel.ERROR, $@"Invalid notification type provided for ""{NotificationTypeActivate}"" callback."),
                 Times.Once);
 
@@ -131,7 +132,6 @@ namespace OptimizelySDK.Tests.NotificationTests
             NotificationCenter.AddNotification(NotificationType.OptimizelyConfigUpdate, TestNotificationCallbacks.TestConfigUpdateCallback);
             // Verify that callbacks added successfully.
             Assert.AreEqual(4, NotificationCenter.NotificationsCount);
-
 
             // Verify that only decision callbacks are removed.
             NotificationCenter.ClearNotifications(NotificationTypeActivate);
@@ -216,15 +216,14 @@ namespace OptimizelySDK.Tests.NotificationTests
             notificationCallbackMock.Verify(nc => nc.TestLogEventCallback(It.IsAny<LogEvent>()), Times.Once);
 
             // Verify that after clearing notifications, SendNotification should not call any notification
-            // which were previously registered. 
+            // which were previously registered.
             NotificationCenter.ClearAllNotifications();
             notificationCallbackMock.ResetCalls();
 
             NotificationCenter.SendNotifications(NotificationTypeActivate, config.GetExperimentFromKey("test_experiment"),
                 "testUser", new UserAttributes(), config.GetVariationFromId("test_experiment", "7722370027"), null);
 
-
-            // Again verify notifications which were registered are not called. 
+            // Again verify notifications which were registered are not called.
             notificationCallbackMock.Verify(nc => nc.TestActivateCallback(It.IsAny<Experiment>(), It.IsAny<string>(),
                 It.IsAny<UserAttributes>(), It.IsAny<Variation>(), It.IsAny<LogEvent>()), Times.Never);
 
@@ -234,7 +233,6 @@ namespace OptimizelySDK.Tests.NotificationTests
             notificationCallbackMock.Verify(nc => nc.TestTrackCallback(It.IsAny<string>(), It.IsAny<string>(),
                 It.IsAny<UserAttributes>(), It.IsAny<EventTags>(), It.IsAny<LogEvent>()), Times.Never);
         }
-
     }
 
     #region Test Notification callbacks class.
@@ -245,30 +243,38 @@ namespace OptimizelySDK.Tests.NotificationTests
     public class TestNotificationCallbacks
     {
         public virtual void TestActivateCallback(Experiment experiment, string userId, UserAttributes userAttributes,
-            Variation variation, LogEvent logEvent) {
+            Variation variation, LogEvent logEvent)
+        {
         }
 
         public virtual void TestAnotherActivateCallback(Experiment experiment, string userId, UserAttributes userAttributes,
-            Variation variation, LogEvent logEvent) {
+            Variation variation, LogEvent logEvent)
+        {
         }
-        
+
         public virtual void TestTrackCallback(string eventKey, string userId, UserAttributes userAttributes,
-            EventTags eventTags, LogEvent logEvent) {
+            EventTags eventTags, LogEvent logEvent)
+        {
         }
 
         public virtual void TestAnotherTrackCallback(string eventKey, string userId, UserAttributes userAttributes,
-            EventTags eventTags, LogEvent logEvent) {
+            EventTags eventTags, LogEvent logEvent)
+        {
         }
-        
+
         public virtual void TestDecisionCallback(string type, string userId, UserAttributes userAttributes,
-            Dictionary<string, object> decisionInfo) {
+            Dictionary<string, object> decisionInfo)
+        {
         }
 
-        public virtual void TestConfigUpdateCallback() {
+        public virtual void TestConfigUpdateCallback()
+        {
         }
 
-        public virtual void TestLogEventCallback(LogEvent logEvent) {
+        public virtual void TestLogEventCallback(LogEvent logEvent)
+        {
         }
     }
-    #endregion // Test Notification callbacks class.
+
+    #endregion Test Notification callbacks class.
 }

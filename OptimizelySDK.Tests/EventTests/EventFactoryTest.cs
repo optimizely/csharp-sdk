@@ -17,6 +17,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using Moq;
 using NUnit.Framework;
 using OptimizelySDK.Config;
@@ -29,9 +30,9 @@ using OptimizelySDK.Utils;
 namespace OptimizelySDK.Tests.EventTests
 {
     [TestFixture]
+    [ExcludeFromCodeCoverage]
     public class EventFactoryTest
     {
-
         private string TestUserId = string.Empty;
         private ProjectConfig Config;
         private ILogger Logger;
@@ -171,7 +172,6 @@ namespace OptimizelySDK.Tests.EventTests
                                                             { "flag_key", "test_experiment" },
                                                             { "variation_key", "control" },
                                                             {"enabled", false }
-
                                                         }
                                                     }
                                                 }
@@ -227,7 +227,6 @@ namespace OptimizelySDK.Tests.EventTests
                 new Dictionary<string, string>
                 {
                     { "Content-Type", "application/json" }
-
                 });
 
             var userAttributes = new UserAttributes
@@ -1138,7 +1137,6 @@ namespace OptimizelySDK.Tests.EventTests
                     {"value", 400 }
             });
 
-
             var logEvent = EventFactory.CreateLogEvent(conversionEvent, Logger);
 
             TestData.ChangeGUIDAndTimeStamp(expectedEvent.Params, conversionEvent.Timestamp, Guid.Parse(conversionEvent.UUID));
@@ -1411,7 +1409,6 @@ namespace OptimizelySDK.Tests.EventTests
 
             Assert.IsTrue(TestData.CompareObjects(expectedEvent, logEvent));
         }
-
 
         [Test]
         public void TestCreateConversionEventWithBucketingIDAttribute()
@@ -2060,22 +2057,16 @@ namespace OptimizelySDK.Tests.EventTests
                                                             {"value", 1.234},
                                                         }
                                                     }
-
                                                 }
                                             }
                                         }
-
                                     }
-
                                 }
                             }
-
                         }
                     }
-
                 }
             };
-
 
             var expectedLogEvent = new LogEvent(
                 "https://logx.optimizely.com/v1/events",
@@ -2212,4 +2203,3 @@ namespace OptimizelySDK.Tests.EventTests
         }
     }
 }
-

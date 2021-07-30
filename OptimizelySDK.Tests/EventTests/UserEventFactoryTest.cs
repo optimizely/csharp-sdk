@@ -22,9 +22,11 @@ using OptimizelySDK.Entity;
 using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Event;
 using OptimizelySDK.Logger;
+using System.Diagnostics.CodeAnalysis;
 
 namespace OptimizelySDK.Tests.EventTests
 {
+    [ExcludeFromCodeCoverage]
     public class UserEventFactoryTest
     {
         private string TestUserId = "testUserId";

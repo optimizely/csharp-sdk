@@ -1,4 +1,4 @@
-﻿/* 
+﻿/*
  * Copyright 2017-2018, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,11 +19,13 @@ using NUnit.Framework;
 using OptimizelySDK.Logger;
 using OptimizelySDK.Utils;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace OptimizelySDK.Tests.UtilsTests
 {
     [TestFixture]
-    class EventTagUtilsTest
+    [ExcludeFromCodeCoverage]
+    internal class EventTagUtilsTest
     {
         private Mock<ILogger> LoggerMock;
         private ILogger Logger;
@@ -136,7 +138,7 @@ namespace OptimizelySDK.Tests.UtilsTests
             Assert.AreEqual(EventTagUtils.GetNumericValue(validTag, Logger), expectedValue);
             Assert.AreEqual(EventTagUtils.GetNumericValue(validTag2, Logger), expectedValue2);
             Assert.AreEqual(EventTagUtils.GetNumericValue(validTag3, Logger).ToString(), expectedValue3.ToString());
-            
+
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "The numeric metric value 42.3 will be sent to results."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, $"The numeric metric value {expectedValue} will be sent to results."), Times.Exactly(2));
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, $"The numeric metric value {expectedValue2} will be sent to results."), Times.Once);
@@ -149,8 +151,8 @@ namespace OptimizelySDK.Tests.UtilsTests
             Assert.IsNull(EventTagUtils.GetNumericValue(null, Logger));
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Event tags is undefined."), Times.Once);
 
-            //Errors for all, because it accepts only dictionary// 
-            // Not valid test cases in C# 
+            //Errors for all, because it accepts only dictionary//
+            // Not valid test cases in C#
             //Assert.IsNull(EventTagUtils.GetEventValue(0.5));
             //Assert.IsNull(EventTagUtils.GetEventValue(65536));
             //Assert.IsNull(EventTagUtils.GetEventValue(9223372036854775807));
@@ -159,7 +161,6 @@ namespace OptimizelySDK.Tests.UtilsTests
             //Assert.IsNull(EventTagUtils.GetEventValue(False));
         }
 
-        
         [Test]
         public void TestGetNumericMetricNoValueTag()
         {
@@ -169,19 +170,18 @@ namespace OptimizelySDK.Tests.UtilsTests
 
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "The numeric metric key is not in event tags."), Times.Exactly(2));
 
-            //Errors for all, because it accepts only dictionary// 
+            //Errors for all, because it accepts only dictionary//
             //Assert.IsNull(EventTagUtils.GetEventValue(new object[] { }));
         }
 
         [Test]
         public void TestGetNumericMetricInvalidValueTag()
         {
-            
             // Test that numeric value is not returned when revenue event tag has invalid data type.
 
             Assert.IsNull(EventTagUtils.GetNumericValue(new Dictionary<string, object> { { "non-value", null } }, Logger));
-            Assert.IsNull(EventTagUtils.GetNumericValue(new Dictionary<string, object> { { "non-value",  0.5} }, Logger));
-            Assert.IsNull(EventTagUtils.GetNumericValue(new Dictionary<string, object> { { "non-value",  12345} }, Logger));
+            Assert.IsNull(EventTagUtils.GetNumericValue(new Dictionary<string, object> { { "non-value", 0.5 } }, Logger));
+            Assert.IsNull(EventTagUtils.GetNumericValue(new Dictionary<string, object> { { "non-value", 12345 } }, Logger));
             Assert.IsNull(EventTagUtils.GetNumericValue(new Dictionary<string, object> { { "non-value", "65536" } }, Logger));
             Assert.IsNull(EventTagUtils.GetNumericValue(new Dictionary<string, object> { { "non-value", true } }, Logger));
             Assert.IsNull(EventTagUtils.GetNumericValue(new Dictionary<string, object> { { "non-value", false } }, Logger));
@@ -192,16 +192,14 @@ namespace OptimizelySDK.Tests.UtilsTests
         }
 
         [Test]
-
         public void TestGetNumericMetricValueTag()
         {
-
             // An integer should be cast to a float
             Assert.AreEqual(12345.0, EventTagUtils.GetNumericValue(new Dictionary<string, object> { { "value", 12345 } }, Logger));
 
             // A string should be cast to a float
             Assert.AreEqual(12345.0, EventTagUtils.GetNumericValue(new Dictionary<string, object> { { "value", "12345" } }, Logger));
-            
+
             // Valid float values
             float someFloat = 1.2345F;
 
@@ -209,7 +207,6 @@ namespace OptimizelySDK.Tests.UtilsTests
 
             float maxFloat = float.MaxValue;
             Assert.AreEqual(maxFloat, EventTagUtils.GetNumericValue(new Dictionary<string, object> { { "value", maxFloat } }, Logger));
-
 
             float minFloat = float.MinValue;
             Assert.AreEqual(minFloat, EventTagUtils.GetNumericValue(new Dictionary<string, object> { { "value", minFloat } }, Logger));
@@ -221,16 +218,14 @@ namespace OptimizelySDK.Tests.UtilsTests
             Assert.IsNull(EventTagUtils.GetNumericValue(new Dictionary<string, object> { { "value", true } }, Logger));
             Assert.IsNull(EventTagUtils.GetNumericValue(new Dictionary<string, object> { { "value", new int[] { } } }, Logger));
 
-            var numericValueArray = EventTagUtils.GetNumericValue(new Dictionary<string, object> { { "value", new object[] { }} }, Logger);
+            var numericValueArray = EventTagUtils.GetNumericValue(new Dictionary<string, object> { { "value", new object[] { } } }, Logger);
             Assert.IsNull(numericValueArray, string.Format("Array numeric value is {0}", numericValueArray));
-
 
             var numericValueNone = EventTagUtils.GetNumericValue(new Dictionary<string, object> { { "value", null } }, Logger);
             Assert.IsNull(numericValueNone, string.Format("None numeric value is {0}", numericValueNone));
 
-
             var numericValueOverflow = EventTagUtils.GetNumericValue(new Dictionary<string, object> { { "value", float.MaxValue * 10 } }, Logger);
-            Assert.IsNull(numericValueOverflow, string.Format("Max numeric value is {0}", float.MaxValue * 10 ));
+            Assert.IsNull(numericValueOverflow, string.Format("Max numeric value is {0}", float.MaxValue * 10));
 
             Assert.AreEqual(0.0, EventTagUtils.GetNumericValue(new Dictionary<string, object> { { "value", 0.0 } }, Logger));
 
@@ -250,6 +245,5 @@ namespace OptimizelySDK.Tests.UtilsTests
             // float - inf is not possible.
             // float -inf is not possible.
         }
-
     }
 }

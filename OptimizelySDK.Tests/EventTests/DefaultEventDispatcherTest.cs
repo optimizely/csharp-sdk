@@ -8,10 +8,12 @@ using Newtonsoft.Json.Linq;
 using System;
 using OptimizelySDK.Event.Dispatcher;
 using NUnit.Framework;
+using System.Diagnostics.CodeAnalysis;
 
 namespace OptimizelySDK.Tests.EventTests
 {
     [TestFixture]
+    [ExcludeFromCodeCoverage]
     public class DefaultEventDispatcherTest
     {
         [Test]

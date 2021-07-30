@@ -20,10 +20,12 @@ using OptimizelySDK.AudienceConditions;
 using OptimizelySDK.Entity;
 using OptimizelySDK.Logger;
 using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace OptimizelySDK.Tests.AudienceConditionsTests
 {
     [TestFixture]
+    [ExcludeFromCodeCoverage]
     public class ConditionEvaluationTest
     {
         private BaseCondition LegacyCondition = new BaseCondition { Name = "device_type", Value = "iPhone", Type = "custom_attribute" };

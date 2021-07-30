@@ -1,9 +1,9 @@
-﻿
-using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 using OptimizelySDK.Event;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,13 +11,13 @@ using System.Threading.Tasks;
 namespace OptimizelySDK.Tests.EventTests
 {
     [TestFixture]
+    [ExcludeFromCodeCoverage]
     public class LogEventTest
     {
         private LogEvent LogEvent;
 
         public static bool CompareObjects(object o1, object o2)
         {
-
             var str1 = Newtonsoft.Json.JsonConvert.SerializeObject(o1);
             var str2 = Newtonsoft.Json.JsonConvert.SerializeObject(o2);
             var jtoken1 = JToken.Parse(Newtonsoft.Json.JsonConvert.SerializeObject(o1));
@@ -30,14 +30,14 @@ namespace OptimizelySDK.Tests.EventTests
         public void Setup()
         {
             LogEvent = new LogEvent(
-                url: "https://logx.optimizely.com", 
+                url: "https://logx.optimizely.com",
                 parameters: new Dictionary<string, object>
                 {
                     { "accountId", "1234" },
                     { "projectId", "9876" },
                     { "visitorId", "testUser" }
                 },
-                httpVerb: "POST", 
+                httpVerb: "POST",
                 headers: new Dictionary<string, string>
                 {
                     { "Content-type", "application/json" }
