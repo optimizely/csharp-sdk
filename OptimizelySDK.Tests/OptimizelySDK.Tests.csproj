@@ -79,7 +79,6 @@
     <Compile Include="DecisionServiceTest.cs" />
     <Compile Include="DefaultErrorHandlerTest.cs" />
     <Compile Include="EventTests\EventProcessorProps.cs" />
-    <Compile Include="NotificationTests\ExcludeFromTestCoverageAttribute.cs" />
     <Compile Include="OptimizelyDecisions\OptimizelyDecisionTest.cs" />
     <Compile Include="OptimizelyJSONTest.cs" />
     <Compile Include="EventTests\BatchEventProcessorTest.cs" />
