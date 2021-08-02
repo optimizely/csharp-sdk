@@ -301,6 +301,12 @@
 	<Compile Include="..\OptimizelySDK\OptlyConfig\OptimizelyConfig.cs">
       <Link>OptlyConfig\OptimizelyConfig.cs</Link>
     </Compile>
+	<Compile Include="..\OptimizelySDK\OptlyConfig\OptimizelyAttribute.cs">
+      <Link>OptlyConfig\OptimizelyAttribute.cs</Link>
+    </Compile>
+	<Compile Include="..\OptimizelySDK\OptlyConfig\OptimizelyEvent.cs">
+      <Link>OptlyConfig\OptimizelyEvent.cs</Link>
+    </Compile>
 	<Compile Include="..\OptimizelySDK\OptlyConfig\OptimizelyExperiment.cs">
       <Link>OptlyConfig\OptimizelyExperiment.cs</Link>
     </Compile>
@@ -312,6 +318,9 @@
     </Compile>
 	<Compile Include="..\OptimizelySDK\OptlyConfig\OptimizelyVariation.cs">
       <Link>OptlyConfig\OptimizelyVariation.cs</Link>
+    </Compile>
+	<Compile Include="..\OptimizelySDK\OptlyConfig\OptimizelyAudience.cs">
+      <Link>OptlyConfig\OptimizelyAudience.cs</Link>
     </Compile>
 	<Compile Include="..\OptimizelySDK\OptlyConfig\OptimizelyConfigService.cs">
       <Link>OptlyConfig\OptimizelyConfigService.cs</Link>
