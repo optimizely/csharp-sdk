@@ -48,6 +48,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+	<Compile Include="..\OptimizelySDK\IOptimizelyUserContext.cs">
+	  <Link>IOptimizelyUserContext.cs</Link>
+	</Compile>
 	<Compile Include="..\OptimizelySDK\AudienceConditions\AndCondition.cs">
       <Link>AudienceConditions\AndCondition.cs</Link>
     </Compile>

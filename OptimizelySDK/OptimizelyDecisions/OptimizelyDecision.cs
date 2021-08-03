@@ -53,7 +53,7 @@ namespace OptimizelySDK.OptimizelyDecisions
         /// <summary>
         /// user context for which the  decision was made.
         /// </summary>
-        public OptimizelyUserContext UserContext { get; private set; }
+        public IOptimizelyUserContext UserContext { get; private set; }
         
         /// <summary>
         /// an array of error/info/debug messages describing why the decision has been made.
@@ -65,7 +65,7 @@ namespace OptimizelySDK.OptimizelyDecisions
                               OptimizelyJSON variables,
                               string ruleKey,
                               string flagKey,
-                              OptimizelyUserContext userContext,
+                              IOptimizelyUserContext userContext,
                               string[] reasons)
         {
             VariationKey = variationKey;
@@ -84,7 +84,7 @@ namespace OptimizelySDK.OptimizelyDecisions
         /// and error reason array
         /// </summary>
         public static OptimizelyDecision NewErrorDecision(string key,
-            OptimizelyUserContext optimizelyUserContext,
+            IOptimizelyUserContext optimizelyUserContext,
             string error,
             IErrorHandler errorHandler,
             ILogger logger)

@@ -41,7 +41,7 @@ namespace OptimizelySDK
 		/// <param name="userId">The user ID to be used for bucketing.</param>
 		/// <param name="userAttributes">The user's attributes</param>
 		/// <returns>OptimizelyUserContext | An OptimizelyUserContext associated with this OptimizelyClient.</returns>
-		OptimizelyUserContext CreateUserContext(string userId, UserAttributes userAttributes = null);
+		IOptimizelyUserContext CreateUserContext(string userId, UserAttributes userAttributes = null);
 
 		/// <summary>
 		/// Sends conversion event to Optimizely.

@@ -10,6 +10,9 @@
     <Compile Include="..\OptimizelySDK\IOptimizely.cs">
       <Link>IOptimizely.cs</Link>
     </Compile>
+	<Compile Include="..\OptimizelySDK\IOptimizelyUserContext.cs">
+		  <Link>IOptimizelyUserContext.cs</Link>
+	</Compile>
     <Compile Include="..\OptimizelySDK\Optimizely.cs">
       <Link>Optimizely.cs</Link>
     </Compile>

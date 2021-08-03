@@ -25,7 +25,7 @@ namespace OptimizelySDK
     /// <summary>
     /// OptimizelyUserContext defines user contexts that the SDK will use to make decisions for
     /// </summary>
-    public class OptimizelyUserContext
+    public class OptimizelyUserContext : IOptimizelyUserContext
     {
         private ILogger Logger;
         private IErrorHandler ErrorHandler;
@@ -46,7 +46,7 @@ namespace OptimizelySDK
             UserId = userId;
         }
 
-        private OptimizelyUserContext Copy() => new OptimizelyUserContext(Optimizely, UserId, GetAttributes(), ErrorHandler, Logger);
+        private IOptimizelyUserContext Copy() => new OptimizelyUserContext(Optimizely, UserId, GetAttributes(), ErrorHandler, Logger);
 
         /// <summary>
         /// Returns Optimizely instance associated with the UserContext.
@@ -133,6 +133,7 @@ namespace OptimizelySDK
         /// Returns a key-map of decision results for multiple flag keys and a user context.
         /// </summary>
         /// <param name="keys">list of flag keys for which a decision will be made.</param>
+        /// <param name="options">An array of decision options.</param>
         /// <returns>A dictionary of all decision results, mapped by flag keys.</returns>
         public Dictionary<string, OptimizelyDecision> DecideForKeys(string[] keys, OptimizelyDecideOption[] options)
         {

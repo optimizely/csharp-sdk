@@ -63,7 +63,7 @@ namespace OptimizelySDK.Tests
         public void OptimizelyUserContextWithAttributes()
         {
             var attributes = new UserAttributes() { { "house", "GRYFFINDOR" } };
-            OptimizelyUserContext user = new OptimizelyUserContext(Optimizely, UserID, attributes, ErrorHandlerMock.Object, LoggerMock.Object);
+            IOptimizelyUserContext user = new OptimizelyUserContext(Optimizely, UserID, attributes, ErrorHandlerMock.Object, LoggerMock.Object);
 
             Assert.AreEqual(user.GetOptimizely(), Optimizely);
             Assert.AreEqual(user.GetUserId(), UserID);
@@ -73,7 +73,7 @@ namespace OptimizelySDK.Tests
         [Test]
         public void OptimizelyUserContextNoAttributes()
         {
-            OptimizelyUserContext user = new OptimizelyUserContext(Optimizely, UserID, null, ErrorHandlerMock.Object, LoggerMock.Object);
+            IOptimizelyUserContext user = new OptimizelyUserContext(Optimizely, UserID, null, ErrorHandlerMock.Object, LoggerMock.Object);
 
             Assert.AreEqual(user.GetOptimizely(), Optimizely);
             Assert.AreEqual(user.GetUserId(), UserID);
@@ -84,7 +84,7 @@ namespace OptimizelySDK.Tests
         public void SetAttribute()
         {
             var attributes = new UserAttributes() { { "house", "GRYFFINDOR" } };
-            OptimizelyUserContext user = new OptimizelyUserContext(Optimizely, UserID, attributes, ErrorHandlerMock.Object, LoggerMock.Object);
+            IOptimizelyUserContext user = new OptimizelyUserContext(Optimizely, UserID, attributes, ErrorHandlerMock.Object, LoggerMock.Object);
 
             user.SetAttribute("k1", "v1");
             user.SetAttribute("k2", true);
@@ -104,7 +104,7 @@ namespace OptimizelySDK.Tests
         [Test]
         public void SetAttributeNoAttribute()
         {
-            OptimizelyUserContext user = new OptimizelyUserContext(Optimizely, UserID, null, ErrorHandlerMock.Object, LoggerMock.Object);
+            IOptimizelyUserContext user = new OptimizelyUserContext(Optimizely, UserID, null, ErrorHandlerMock.Object, LoggerMock.Object);
 
             user.SetAttribute("k1", "v1");
             user.SetAttribute("k2", true);
@@ -120,7 +120,7 @@ namespace OptimizelySDK.Tests
         public void SetAttributeOverride()
         {
             var attributes = new UserAttributes() { { "house", "GRYFFINDOR" } };
-            OptimizelyUserContext user = new OptimizelyUserContext(Optimizely, UserID, attributes, ErrorHandlerMock.Object, LoggerMock.Object);
+            IOptimizelyUserContext user = new OptimizelyUserContext(Optimizely, UserID, attributes, ErrorHandlerMock.Object, LoggerMock.Object);
 
             user.SetAttribute("k1", "v1");
             user.SetAttribute("house", "v2");
@@ -134,7 +134,7 @@ namespace OptimizelySDK.Tests
         public void SetAttributeNullValue()
         {
             var attributes = new UserAttributes() { { "k1", null } };
-            OptimizelyUserContext user = new OptimizelyUserContext(Optimizely, UserID, attributes, ErrorHandlerMock.Object, LoggerMock.Object);
+            IOptimizelyUserContext user = new OptimizelyUserContext(Optimizely, UserID, attributes, ErrorHandlerMock.Object, LoggerMock.Object);
 
             var newAttributes = user.GetAttributes();
             Assert.AreEqual(newAttributes["k1"], null);
@@ -151,7 +151,7 @@ namespace OptimizelySDK.Tests
         [Test]
         public void SetAttributeToOverrideAttribute()
         {
-            OptimizelyUserContext user = new OptimizelyUserContext(Optimizely, UserID, null, ErrorHandlerMock.Object, LoggerMock.Object);
+            IOptimizelyUserContext user = new OptimizelyUserContext(Optimizely, UserID, null, ErrorHandlerMock.Object, LoggerMock.Object);
 
 
             Assert.AreEqual(user.GetOptimizely(), Optimizely);

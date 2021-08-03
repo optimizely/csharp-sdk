@@ -100,7 +100,10 @@
 		  <Link>AtomicProjectConfigManager.cs</Link>
 		</Compile>
 		<Compile Include="..\OptimizelySDK\OptimizelyFactory.cs">
-		  <Link>OptimizelyFactory.cs</Link>
+			<Link>OptimizelyFactory.cs</Link>
+		</Compile>
+		<Compile Include="..\OptimizelySDK\IOptimizelyUserContext.cs">
+		  <Link>IOptimizelyUserContext.cs</Link>
 		</Compile>
 		<Compile Include="..\OptimizelySDK\Event\Entity\ConversionEvent.cs">
 		  <Link>ConversionEvent.cs</Link>

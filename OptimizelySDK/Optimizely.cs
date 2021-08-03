@@ -700,7 +700,7 @@ namespace OptimizelySDK
         /// <param name="userId">The user ID to be used for bucketing.</param>
         /// <param name="userAttributes">The user's attributes</param>
         /// <returns>OptimizelyUserContext | An OptimizelyUserContext associated with this OptimizelyClient.</returns>
-        public OptimizelyUserContext CreateUserContext(string userId,
+        public IOptimizelyUserContext CreateUserContext(string userId,
                                                        UserAttributes userAttributes = null)
         {
             var inputValues = new Dictionary<string, string>
@@ -724,7 +724,7 @@ namespace OptimizelySDK
         /// <param name="key">A flag key for which a decision will be made.</param>
         /// <param name="options">A list of options for decision-making.</param>
         /// <returns>A decision result.</returns>
-        internal OptimizelyDecision Decide(OptimizelyUserContext user,
+        internal OptimizelyDecision Decide(IOptimizelyUserContext user,
                               string key,
                               OptimizelyDecideOption[] options)
         {
@@ -844,7 +844,7 @@ namespace OptimizelySDK
                 reasonsToReport);
         }
 
-        internal Dictionary<string, OptimizelyDecision> DecideAll(OptimizelyUserContext user,
+        internal Dictionary<string, OptimizelyDecision> DecideAll(IOptimizelyUserContext user,
                                               OptimizelyDecideOption[] options)
         {
             var decisionMap = new Dictionary<string, OptimizelyDecision>();
@@ -862,7 +862,7 @@ namespace OptimizelySDK
             return DecideForKeys(user, allFlagKeys, options);
         }
 
-        internal Dictionary<string, OptimizelyDecision> DecideForKeys(OptimizelyUserContext user,
+        internal Dictionary<string, OptimizelyDecision> DecideForKeys(IOptimizelyUserContext user,
                                                       string[] keys,
                                                       OptimizelyDecideOption[] options)
         {

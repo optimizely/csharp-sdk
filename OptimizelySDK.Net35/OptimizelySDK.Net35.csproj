@@ -148,6 +148,9 @@
     <Compile Include="..\OptimizelySDK\IOptimizely.cs">
       <Link>IOptimizely.cs</Link>
     </Compile>
+	<Compile Include="..\OptimizelySDK\IOptimizelyUserContext.cs">
+	  <Link>IOptimizelyUserContext.cs</Link>
+	</Compile>
     <Compile Include="..\OptimizelySDK\Logger\DefaultLogger.cs">
       <Link>Logger\DefaultLogger.cs</Link>
     </Compile>
