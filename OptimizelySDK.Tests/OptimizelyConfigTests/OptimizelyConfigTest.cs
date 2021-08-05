@@ -531,12 +531,6 @@ namespace OptimizelySDK.Tests.OptimizelyConfigTests
                 audiences: new OptimizelyAudience[]
                 {
                     new OptimizelyAudience("0", "$$dummy", "{\"type\": \"custom_attribute\", \"name\": \"$opt_dummy_attribute\", \"value\": \"impossible_value\"}"),
-                    new OptimizelyAudience("3468206643", "$$dummyExactBoolean", "{\"type\": \"custom_attribute\", \"name\": \"$opt_dummy_attribute\", \"value\": \"impossible_value\"}"),
-                    new OptimizelyAudience("3468206646", "$$dummyExactNumber", "{\"type\": \"custom_attribute\", \"name\": \"$opt_dummy_attribute\", \"value\": \"impossible_value\"}"),
-                    new OptimizelyAudience("3988293899", "$$dummyExists", "{\"type\": \"custom_attribute\", \"name\": \"$opt_dummy_attribute\", \"value\": \"impossible_value\"}"),
-                    new OptimizelyAudience("3468206647", "$$dummyGtNumber", "{\"type\": \"custom_attribute\", \"name\": \"$opt_dummy_attribute\", \"value\": \"impossible_value\"}"),
-                    new OptimizelyAudience("3468206644", "$$dummyLtNumber", "{\"type\": \"custom_attribute\", \"name\": \"$opt_dummy_attribute\", \"value\": \"impossible_value\"}"),
-                    new OptimizelyAudience("3988293898", "$$dummySubstringString", "{\"type\": \"custom_attribute\", \"name\": \"$opt_dummy_attribute\", \"value\": \"impossible_value\"}"),
                     new OptimizelyAudience("3468206643", "exactBoolean", "[\"and\",[\"or\",[\"or\",{\"name\":\"should_do_it\",\"type\":\"custom_attribute\",\"match\":\"exact\",\"value\":true}]]]"),
                     new OptimizelyAudience("3468206646", "exactNumber", "[\"and\",[\"or\",[\"or\",{\"name\":\"lasers\",\"type\":\"custom_attribute\",\"match\":\"exact\",\"value\":45.5}]]]"),
                     new OptimizelyAudience("3468206642", "exactString", "[\"and\", [\"or\", [\"or\", {\"name\": \"house\", \"type\": \"custom_attribute\", \"value\": \"Gryffindor\"}]]]"),
