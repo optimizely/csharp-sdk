@@ -60,7 +60,8 @@ jobs:
         - xbuild /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=$TRAVIS_BUILD_DIR/keypair.snk /p:Configuration=Release ./OptimizelySDK.Travis.sln
         - mono ./testrunner/NUnit.Runners.2.6.4/tools/nunit-console.exe ./OptimizelySDK.Tests/bin/Release/OptimizelySDK.Tests.dll
         - mono ./testcoverage/altcover.8.2.821/tools/net472/AltCover.exe /i=./OptimizelySDK.Tests/bin/Release/
-        - mono ./coveralls/coveralls.net.0.7.0/tools/csmacnz.Coveralls.exe
+        - mono ./coveralls/coveralls.net.0.7.0/tools/csmacnz.Coveralls.exe --OpenCoverage -i ./coverage.xml
+         - mono ./src/packages/coveralls.net.0.6.0/tools/csmacnz.Coveralls.exe --monocov -i ./monocovCoverage --repoToken $COVERALLS_REPO_TOKEN --commitId $TRAVIS_COMMIT --commitBranch $TRAVIS_BRANCH --commitAuthor "$REPO_COMMIT_AUTHOR" --commitEmail "$REPO_COMMIT_AUTHOR_EMAIL" --commitMessage "$REPO_COMMIT_MESSAGE" --jobId $TRAVIS_JOB_ID  --serviceName travis-ci  --useRelativePaths
         # strongname signing from xbuild step needs additional re-signing with sn
         - find . -path './OptimizelySDK*bin/Release/OptimizelySDK*.dll' -not -regex '.*Tests.*' -print0 | while IFS= read -r -d '' file; do sn -R $file ./keypair.snk; done
       after_success:
