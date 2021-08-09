@@ -1,0 +1,98 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31019.35
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OptimizelySDK.DemoApp", "OptimizelySDK.DemoApp\OptimizelySDK.DemoApp.csproj", "{9394F666-6397-41C0-8867-C3E4DA9156E3}"
+	ProjectSection(ProjectDependencies) = postProject
+		{4DDE7FAA-110D-441C-AB3B-3F31B593E8BF} = {4DDE7FAA-110D-441C-AB3B-3F31B593E8BF}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OptimizelySDK.Tests", "OptimizelySDK.Tests\OptimizelySDK.Tests.csproj", "{DB8A546D-DBB3-441A-8687-A5D90B469027}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OptimizelySDK", "OptimizelySDK\OptimizelySDK.csproj", "{4DDE7FAA-110D-441C-AB3B-3F31B593E8BF}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{26C3BFAE-79A1-4299-978C-0F4916427B9D}"
+	ProjectSection(SolutionItems) = preProject
+		CHANGELOG.MD = CHANGELOG.MD
+		CONTRIBUTING.md = CONTRIBUTING.md
+		keypair.snk = keypair.snk
+		OptimizelySDK.Package\OptimizelySDK.nuspec = OptimizelySDK.Package\OptimizelySDK.nuspec
+		OptimizelySDK.Package\pack.ps1 = OptimizelySDK.Package\pack.ps1
+		README.md = README.md
+		OptimizelySDK.Package\verifysn.ps1 = OptimizelySDK.Package\verifysn.ps1
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OptimizelySDK.NetStandard16", "OptimizelySDK.NetStandard16\OptimizelySDK.NetStandard16.csproj", "{EDCF3773-56E7-416E-A379-B6999A8D8570}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OptimizelySDK.Net35", "OptimizelySDK.Net35\OptimizelySDK.Net35.csproj", "{C8FF7012-37B7-4D64-AB45-0C62195302EC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OptimizelySDK.Net40", "OptimizelySDK.Net40\OptimizelySDK.Net40.csproj", "{41AFD990-BC81-49E3-BD85-40972BB2C262}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OptimizelySDK.NetStandard20", "OptimizelySDK.NetStandard20\OptimizelySDK.NetStandard20.csproj", "{CFEC91C6-B6E5-45D5-97D6-7081B0DC7453}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9394F666-6397-41C0-8867-C3E4DA9156E3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9394F666-6397-41C0-8867-C3E4DA9156E3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9394F666-6397-41C0-8867-C3E4DA9156E3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9394F666-6397-41C0-8867-C3E4DA9156E3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DB8A546D-DBB3-441A-8687-A5D90B469027}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DB8A546D-DBB3-441A-8687-A5D90B469027}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DB8A546D-DBB3-441A-8687-A5D90B469027}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DB8A546D-DBB3-441A-8687-A5D90B469027}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4DDE7FAA-110D-441C-AB3B-3F31B593E8BF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4DDE7FAA-110D-441C-AB3B-3F31B593E8BF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4DDE7FAA-110D-441C-AB3B-3F31B593E8BF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4DDE7FAA-110D-441C-AB3B-3F31B593E8BF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EDCF3773-56E7-416E-A379-B6999A8D8570}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EDCF3773-56E7-416E-A379-B6999A8D8570}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EDCF3773-56E7-416E-A379-B6999A8D8570}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EDCF3773-56E7-416E-A379-B6999A8D8570}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C8FF7012-37B7-4D64-AB45-0C62195302EC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C8FF7012-37B7-4D64-AB45-0C62195302EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C8FF7012-37B7-4D64-AB45-0C62195302EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C8FF7012-37B7-4D64-AB45-0C62195302EC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{41AFD990-BC81-49E3-BD85-40972BB2C262}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{41AFD990-BC81-49E3-BD85-40972BB2C262}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{41AFD990-BC81-49E3-BD85-40972BB2C262}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{41AFD990-BC81-49E3-BD85-40972BB2C262}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CFEC91C6-B6E5-45D5-97D6-7081B0DC7453}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CFEC91C6-B6E5-45D5-97D6-7081B0DC7453}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CFEC91C6-B6E5-45D5-97D6-7081B0DC7453}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CFEC91C6-B6E5-45D5-97D6-7081B0DC7453}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {886C61AF-B158-48F3-96F5-AB16B786E6B2}
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		version = 1.2.1
+		Policies = $0
+		$0.TextStylePolicy = $1
+		$1.TabsToSpaces = True
+		$1.EolMarker = Unix
+		$1.scope = text/x-csharp
+		$0.CSharpFormattingPolicy = $2
+		$2.NewLinesForBracesInProperties = False
+		$2.NewLinesForBracesInAccessors = False
+		$2.NewLinesForBracesInAnonymousMethods = False
+		$2.NewLinesForBracesInControlBlocks = False
+		$2.NewLinesForBracesInAnonymousTypes = False
+		$2.NewLinesForBracesInObjectCollectionArrayInitializers = False
+		$2.NewLinesForBracesInLambdaExpressionBody = False
+		$2.NewLineForElse = False
+		$2.NewLineForCatch = False
+		$2.NewLineForFinally = False
+		$2.NewLineForMembersInObjectInit = False
+		$2.NewLineForMembersInAnonymousTypes = False
+		$2.NewLineForClausesInQuery = False
+		$2.scope = text/x-csharp
+	EndGlobalSection
+EndGlobal
