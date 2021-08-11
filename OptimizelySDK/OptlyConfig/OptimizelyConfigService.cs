@@ -74,11 +74,14 @@ namespace OptimizelySDK.OptlyConfig
 
         private OptimizelyAudience[] GetAudiences(ProjectConfig projectConfig)
         {
-            var filteredAudiencesArr = Array.FindAll(projectConfig.Audiences, aud => !aud.Id.Equals("$opt_dummy_audience"));
-            var optimizelyAudience = filteredAudiencesArr.Select(aud => new OptimizelyAudience(aud.Id, aud.Name, aud.Conditions));
             var typedAudiences = projectConfig.TypedAudiences?.Select(aud => new OptimizelyAudience(aud.Id,
                 aud.Name,
                 JsonConvert.SerializeObject(aud.Conditions)));
+            var typedAudienceIds = typedAudiences.Select(ta => ta.Id).ToList();
+            var filteredAudiencesArr = Array.FindAll(projectConfig.Audiences, aud => !aud.Id.Equals("$opt_dummy_audience")
+                && !typedAudienceIds.Contains(aud.Id));
+            var optimizelyAudience = filteredAudiencesArr.Select(aud => new OptimizelyAudience(aud.Id, aud.Name, aud.Conditions));
+
             optimizelyAudience = optimizelyAudience.Concat(typedAudiences).OrderBy( aud => aud.Name);
 
             return optimizelyAudience.ToArray<OptimizelyAudience>();
