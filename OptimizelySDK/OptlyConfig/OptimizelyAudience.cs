@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright 2019, 2021, Optimizely
+ * Copyright 2021, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,22 +14,30 @@
  * limitations under the License.
  */
 
-using System.Collections.Generic;
-
 namespace OptimizelySDK.OptlyConfig
 {
-    public class OptimizelyExperiment : Entity.IdKeyEntity
+    public class OptimizelyAudience
     {
-        
-        public IDictionary<string, OptimizelyVariation> VariationsMap { get; private set; }
-        public string Audiences { get; private set; }
+        /// <summary>
+        /// Audience ID
+        /// </summary>
+        public string Id { get; set; }
 
-        public OptimizelyExperiment(string id, string key, string audiences, IDictionary<string, OptimizelyVariation> variationsMap)
+        /// <summary>
+        /// Audience Name
+        /// </summary>
+        public string Name { get; set; }
+
+        /// <summary>
+        /// Audience Conditions
+        /// </summary>
+        public object Conditions { get; set; }
+
+        public OptimizelyAudience(string id, string name, object conditions)
         {
             Id = id;
-            Key = key;
-            Audiences = audiences;
-            VariationsMap = variationsMap;
+            Name = name;
+            Conditions = conditions;
         }
     }
 }

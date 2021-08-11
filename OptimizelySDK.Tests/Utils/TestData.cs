@@ -29,12 +29,26 @@ namespace OptimizelySDK.Tests
         private static string typedAudienceDatafile = null;
         private static string emptyRolloutDatafile = null;
         private static string emptyDatafile = null;
+        private static string duplicateExpKeysDatafile = null;
+        private static string duplicateRuleKeysDatafile = null;
 
         public static string Datafile
         {
             get
             {
                 return cachedDataFile ?? (cachedDataFile = LoadJsonData());
+            }
+        }
+
+        public static string DuplicateExpKeysDatafile {
+            get {
+                return duplicateExpKeysDatafile ?? (duplicateExpKeysDatafile = LoadJsonData("similar_exp_keys.json"));
+            }
+        }
+
+        public static string DuplicateRuleKeysDatafile {
+            get {
+                return duplicateRuleKeysDatafile ?? (duplicateRuleKeysDatafile = LoadJsonData("similar_rule_keys_bucketing.json"));
             }
         }
 

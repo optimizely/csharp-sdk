@@ -215,7 +215,8 @@
 			"forcedVariations": {}
 		}
 	],
-	"audiences": [{
+	"audiences": [
+		{
 			"id": "3468206642",
 			"name": "exactString",
 			"conditions": "[\"and\", [\"or\", [\"or\", {\"name\": \"house\", \"type\": \"custom_attribute\", \"value\": \"Gryffindor\"}]]]"
@@ -258,6 +259,11 @@
 		{
 			"id": "0",
 			"name": "$$dummy",
+			"conditions": "{\"type\": \"custom_attribute\", \"name\": \"$opt_dummy_attribute\", \"value\": \"impossible_value\"}"
+		},
+		{
+			"id": "$opt_dummy_audience",
+			"name": "dummy_audience",
 			"conditions": "{\"type\": \"custom_attribute\", \"name\": \"$opt_dummy_attribute\", \"value\": \"impossible_value\"}"
 		}
 	],
