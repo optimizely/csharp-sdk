@@ -66,5 +66,10 @@ namespace OptimizelySDK.Tests.EventTest
 
             return true;
         }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
     }
 }

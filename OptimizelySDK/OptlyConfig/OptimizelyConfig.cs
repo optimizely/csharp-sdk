@@ -22,15 +22,16 @@ namespace OptimizelySDK.OptlyConfig
     public class OptimizelyConfig
     {
         public string Revision { get; private set; }
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public string SDKKey { get; private set; }
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public string EnvironmentKey { get; private set; }
+        public OptimizelyEvent[] Events { get; private set; }
+        public OptimizelyAudience[] Audiences { get; private set; }
+        public OptimizelyAttribute[] Attributes { get; private set; }
         public IDictionary<string, OptimizelyExperiment> ExperimentsMap { get; private set; }
         public IDictionary<string, OptimizelyFeature> FeaturesMap { get; private set; }
 
         private string _datafile;
-        
+
         public OptimizelyConfig(string revision, IDictionary<string, OptimizelyExperiment> experimentsMap, IDictionary<string, OptimizelyFeature> featuresMap, string datafile = null)
         {
             Revision = revision;
@@ -39,10 +40,13 @@ namespace OptimizelySDK.OptlyConfig
             _datafile = datafile;
         }
 
-        public OptimizelyConfig(string revision, string sdkKey, string environmentKey, IDictionary<string, OptimizelyExperiment> experimentsMap, IDictionary<string, OptimizelyFeature> featuresMap, string datafile = null)
+        public OptimizelyConfig(string revision, string sdkKey, string environmentKey, OptimizelyAttribute[] attributes, OptimizelyAudience[] audiences, OptimizelyEvent[] events, IDictionary<string, OptimizelyExperiment> experimentsMap, IDictionary<string, OptimizelyFeature> featuresMap, string datafile = null)
         {
             Revision = revision;
             SDKKey = sdkKey;
+            Attributes = attributes;
+            Audiences = audiences;
+            Events = events;
             EnvironmentKey = environmentKey;
             ExperimentsMap = experimentsMap;
             FeaturesMap = featuresMap;

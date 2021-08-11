@@ -74,5 +74,10 @@ namespace OptimizelySDK.Tests.ConfigTest
 
             return true;
         }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
     }
 }
