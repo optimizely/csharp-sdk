@@ -10,7 +10,7 @@ namespace ConsoleDemo
         private static void Main(string[] args)
         {
             // Instantiate an Optimizely client
-            var optimizelyInstance = OptimizelyFactory.NewDefaultInstance("<YOUR SDK KEY>");
+            var optimizelyInstance = OptimizelyFactory.NewDefaultInstance("<Your SDK key here>");
             var attributes = new UserAttributes();
             attributes.Add("logged_in", true);
 
@@ -21,6 +21,8 @@ namespace ConsoleDemo
 
             Console.WriteLine("Enabled: " + decision.Enabled);
             Console.WriteLine("Flag Key: " + decision.FlagKey);
+
+            Environment.Exit(0);
         }
     }
 }
