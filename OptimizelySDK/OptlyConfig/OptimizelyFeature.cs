@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+using System;
 using System.Collections.Generic;
 
 namespace OptimizelySDK.OptlyConfig
@@ -22,6 +23,8 @@ namespace OptimizelySDK.OptlyConfig
         
         public List<OptimizelyExperiment> ExperimentRules { get; private set; }
         public List<OptimizelyExperiment> DeliveryRules { get; private set; }
+
+        [Obsolete("Use experimentRules and deliveryRules.")]
         public IDictionary<string, OptimizelyExperiment> ExperimentsMap { get; private set; }
         public IDictionary<string, OptimizelyVariable> VariablesMap { get; private set; }
 
