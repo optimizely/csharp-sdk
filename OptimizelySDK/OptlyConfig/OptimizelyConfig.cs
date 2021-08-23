@@ -29,7 +29,12 @@ namespace OptimizelySDK.OptlyConfig
         public OptimizelyAudience[] Audiences { get; private set; }
         public OptimizelyAttribute[] Attributes { get; private set; }
 
-        [Obsolete("This experimentsMap is for experiments of legacy projects only. For flag projects, experiment keys are not guaranteed to be unique across multiple flags, so this map may not include all experiments when keys conflict.")]
+        /// <summary>
+        /// This experimentsMap is for experiments of legacy projects only
+        /// For flag projects, experiment keys are not guaranteed to be unique 
+        /// across multiple flags, so this map may not include all experiments 
+        /// when keys conflict.
+        /// </summary> 
         public IDictionary<string, OptimizelyExperiment> ExperimentsMap { get; private set; }
 
         public IDictionary<string, OptimizelyFeature> FeaturesMap { get; private set; }
