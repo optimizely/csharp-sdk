@@ -227,12 +227,11 @@ namespace OptimizelySDK.OptlyConfig
             foreach (var featureFlag in projectConfig.FeatureFlags)   
             {
 
-                var featureExperimentMap = featureFlag.ExperimentIds.Select(experimentId => experimentsMapById[experimentId])
-                    .ToDictionary(experiment => experiment.Key, experiment => experiment);
+                var experimentRules = featureFlag.ExperimentIds.Select(experimentId => experimentsMapById[experimentId]).ToList();
 
                 var featureVariableMap = featureFlag.Variables.Select(v => (OptimizelyVariable)v).ToDictionary(k => k.Key, v => v) ?? new Dictionary<string, OptimizelyVariable>();
 
-                var experimentRules = featureExperimentMap.Select(exMap => exMap.Value).ToList();
+                var featureExperimentMap = experimentRules.ToDictionary(experiment => experiment.Key, experiment => experiment);
                 var rollout = projectConfig.GetRolloutFromId(featureFlag.RolloutId);
                 var deliveryRules = GetDeliveryRules(featureFlag.Id, rollout.Experiments, projectConfig);
 
