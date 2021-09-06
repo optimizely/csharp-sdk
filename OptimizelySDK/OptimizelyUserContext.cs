@@ -52,7 +52,7 @@ namespace OptimizelySDK
         /// Returns Optimizely instance associated with the UserContext.
         /// </summary>
         /// <returns> Optimizely instance.</returns>
-        public Optimizely GetOptimizely()
+        public virtual Optimizely GetOptimizely()
         {
             return Optimizely;
         }
@@ -61,7 +61,7 @@ namespace OptimizelySDK
         /// Returns UserId associated with the UserContext
         /// </summary>
         /// <returns>UserId of this instance.</returns>
-        public string GetUserId()
+        public virtual string GetUserId()
         {
             return UserId;
         }
@@ -108,7 +108,7 @@ namespace OptimizelySDK
         /// </summary>
         /// <param name="key">A flag key for which a decision will be made.</param>
         /// <returns>A decision result.</returns>
-        public OptimizelyDecision Decide(string key)
+        public virtual OptimizelyDecision Decide(string key)
         {
             return Decide(key, new OptimizelyDecideOption[] { });
         }
@@ -122,7 +122,7 @@ namespace OptimizelySDK
         /// <param name="key">A flag key for which a decision will be made.</param>
         /// <param name="options">A list of options for decision-making.</param>
         /// <returns>A decision result.</returns>
-        public OptimizelyDecision Decide(string key,
+        public virtual OptimizelyDecision Decide(string key,
             OptimizelyDecideOption[] options)
         {
             var optimizelyUserContext = Copy();
@@ -134,7 +134,7 @@ namespace OptimizelySDK
         /// </summary>
         /// <param name="keys">list of flag keys for which a decision will be made.</param>
         /// <returns>A dictionary of all decision results, mapped by flag keys.</returns>
-        public Dictionary<string, OptimizelyDecision> DecideForKeys(string[] keys, OptimizelyDecideOption[] options)
+        public virtual Dictionary<string, OptimizelyDecision> DecideForKeys(string[] keys, OptimizelyDecideOption[] options)
         {
             var optimizelyUserContext = Copy();
             return Optimizely.DecideForKeys(optimizelyUserContext, keys, options);
@@ -145,7 +145,7 @@ namespace OptimizelySDK
         /// </summary>
         /// <param name="keys">list of flag keys for which a decision will be made.</param>
         /// <returns>A dictionary of all decision results, mapped by flag keys.</returns>
-        public Dictionary<string, OptimizelyDecision> DecideForKeys(string[] keys)
+        public virtual Dictionary<string, OptimizelyDecision> DecideForKeys(string[] keys)
         {
             return DecideForKeys(keys, new OptimizelyDecideOption[] { });
         }
@@ -154,7 +154,7 @@ namespace OptimizelySDK
         /// Returns a key-map of decision results ({@link OptimizelyDecision}) for all active flag keys.
         /// </summary>
         /// <returns>A dictionary of all decision results, mapped by flag keys.</returns>
-        public Dictionary<string, OptimizelyDecision> DecideAll()
+        public virtual Dictionary<string, OptimizelyDecision> DecideAll()
         {
             return DecideAll(new OptimizelyDecideOption[] { });
         }
@@ -164,7 +164,7 @@ namespace OptimizelySDK
         /// </summary>
         /// <param name="options">A list of options for decision-making.</param>
         /// <returns>All decision results mapped by flag keys.</returns>
-        public Dictionary<string, OptimizelyDecision> DecideAll(OptimizelyDecideOption[] options)
+        public virtual Dictionary<string, OptimizelyDecision> DecideAll(OptimizelyDecideOption[] options)
         {
             var optimizelyUserContext = Copy();
             return Optimizely.DecideAll(optimizelyUserContext, options);
@@ -174,7 +174,7 @@ namespace OptimizelySDK
         /// Track an event.
         /// </summary>
         /// <param name="eventName">The event name.</param>
-        public void TrackEvent(string eventName)
+        public virtual void TrackEvent(string eventName)
         {
             TrackEvent(eventName, new EventTags());
         }
@@ -184,7 +184,7 @@ namespace OptimizelySDK
         /// </summary>
         /// <param name="eventName">The event name.</param>
         /// <param name="eventTags">A map of event tag names to event tag values.</param>
-        public void TrackEvent(string eventName, 
+        public virtual void TrackEvent(string eventName, 
             EventTags eventTags)
         {
             Optimizely.Track(eventName, UserId, Attributes, eventTags);
