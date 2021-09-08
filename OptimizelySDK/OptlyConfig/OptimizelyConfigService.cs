@@ -74,11 +74,14 @@ namespace OptimizelySDK.OptlyConfig
 
         private OptimizelyAudience[] GetAudiences(ProjectConfig projectConfig)
         {
-            var filteredAudiencesArr = Array.FindAll(projectConfig.Audiences, aud => !aud.Id.Equals("$opt_dummy_audience"));
-            var optimizelyAudience = filteredAudiencesArr.Select(aud => new OptimizelyAudience(aud.Id, aud.Name, aud.Conditions));
             var typedAudiences = projectConfig.TypedAudiences?.Select(aud => new OptimizelyAudience(aud.Id,
                 aud.Name,
                 JsonConvert.SerializeObject(aud.Conditions)));
+            var typedAudienceIds = typedAudiences.Select(ta => ta.Id).ToList();
+            var filteredAudiencesArr = Array.FindAll(projectConfig.Audiences, aud => !aud.Id.Equals("$opt_dummy_audience")
+                && !typedAudienceIds.Contains(aud.Id));
+            var optimizelyAudience = filteredAudiencesArr.Select(aud => new OptimizelyAudience(aud.Id, aud.Name, aud.Conditions));
+
             optimizelyAudience = optimizelyAudience.Concat(typedAudiences).OrderBy( aud => aud.Name);
 
             return optimizelyAudience.ToArray<OptimizelyAudience>();
@@ -224,12 +227,11 @@ namespace OptimizelySDK.OptlyConfig
             foreach (var featureFlag in projectConfig.FeatureFlags)   
             {
 
-                var featureExperimentMap = experimentsMapById.Where(expMap => featureFlag.ExperimentIds.Contains(expMap.Key))
-                    .ToDictionary(k => k.Value.Key, v => v.Value);
+                var experimentRules = featureFlag.ExperimentIds.Select(experimentId => experimentsMapById[experimentId]).ToList();
 
                 var featureVariableMap = featureFlag.Variables.Select(v => (OptimizelyVariable)v).ToDictionary(k => k.Key, v => v) ?? new Dictionary<string, OptimizelyVariable>();
 
-                var experimentRules = featureExperimentMap.Select(exMap => exMap.Value).ToList();
+                var featureExperimentMap = experimentRules.ToDictionary(experiment => experiment.Key, experiment => experiment);
                 var rollout = projectConfig.GetRolloutFromId(featureFlag.RolloutId);
                 var deliveryRules = GetDeliveryRules(featureFlag.Id, rollout.Experiments, projectConfig);
 
