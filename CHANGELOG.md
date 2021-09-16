@@ -1,6 +1,30 @@
 # Optimizely C# SDK Changelog
 ## [Unreleased]	
 
+## 3.10.0
+September 16th, 2021
+
+### New Features
+- Add new public properties to `OptimizelyConfig`. ([#265](https://github.com/optimizely/csharp-sdk/pull/265), [#266](https://github.com/optimizely/csharp-sdk/pull/266), [#273](https://github.com/optimizely/csharp-sdk/pull/273), [#276](https://github.com/optimizely/csharp-sdk/pull/276), [#279](https://github.com/optimizely/csharp-sdk/pull/279))
+	- SDKKey
+ 	- EnvironmentKey
+	- Attributes
+	- Audiences
+	- Events
+	- ExperimentRules and DeliveryRules to OptimizelyFeature
+	- Audiences to OptimizelyExperiment
+- For details, refer to our documentation page: [https://docs.developers.optimizely.com/full-stack/v4.0/docs/optimizelyconfig-csharp](https://docs.developers.optimizely.com/full-stack/v4.0/docs/optimizelyconfig-csharp).
+
+- Add new methods in `OptimizelyFactory` class. ([#264](https://github.com/optimizely/csharp-sdk/pull/264))
+  - SetBlockingTimeOutPeriod
+  - SetPollingInterval
+- Add virtual methods to support mocking in `OptimizelyUserContext` ([#280](https://github.com/optimizely/csharp-sdk/pull/280))
+
+### Deprecated:
+
+* `OptimizelyFeature.ExperimentsMap` of `OptimizelyConfig` is deprecated as of this release. Please use `OptimizelyFeature.ExperimentRules` and `OptimizelyFeature.DeliveryRules`. ([#276](https://github.com/optimizely/csharp-sdk/pull/276))
+
+
 ## 3.9.1
 July 16th, 2021
 
