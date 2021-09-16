@@ -20,6 +20,11 @@ September 16th, 2021
   - SetPollingInterval
 - Add virtual methods to support mocking in `OptimizelyUserContext` ([#280](https://github.com/optimizely/csharp-sdk/pull/280))
 
+### Deprecated:
+
+* `OptimizelyFeature.ExperimentsMap` of `OptimizelyConfig` is deprecated as of this release. Please use `OptimizelyFeature.ExperimentRules` and `OptimizelyFeature.DeliveryRules`. ([#276](https://github.com/optimizely/csharp-sdk/pull/276))
+
+
 ## 3.9.1
 July 16th, 2021
 
