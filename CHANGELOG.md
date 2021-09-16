@@ -5,7 +5,7 @@
 September 16th, 2021
 
 ### New Features
-- Add new public properties to OptimizelyConfig. ([#265](https://github.com/optimizely/csharp-sdk/pull/265), [#266](https://github.com/optimizely/csharp-sdk/pull/266), [#273](https://github.com/optimizely/csharp-sdk/pull/273), [#276](https://github.com/optimizely/csharp-sdk/pull/276), [#279](https://github.com/optimizely/csharp-sdk/pull/279))
+- Add new public properties to `OptimizelyConfig`. ([#265](https://github.com/optimizely/csharp-sdk/pull/265), [#266](https://github.com/optimizely/csharp-sdk/pull/266), [#273](https://github.com/optimizely/csharp-sdk/pull/273), [#276](https://github.com/optimizely/csharp-sdk/pull/276), [#279](https://github.com/optimizely/csharp-sdk/pull/279))
 	- SDKKey
  	- EnvironmentKey
 	- Attributes
