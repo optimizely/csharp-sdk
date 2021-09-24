@@ -122,6 +122,12 @@ namespace OptimizelySDK
         /// </summary>
         Dictionary<string, Rollout> RolloutIdMap { get; }
 
+
+        /// <summary>
+        /// Associative array of Flag to Variation in the datafile
+        /// </summary>
+        Dictionary<string, ICollection<Variation>> FlagVariationMap { get; }
+
         //========================= Datafile Entities ===========================
 
         /// <summary>

@@ -1,4 +1,4 @@
-﻿/* 
+﻿/*
  * Copyright 2017-2021, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,19 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-using System;
-using OptimizelySDK.ErrorHandler;
-using OptimizelySDK.Logger;
+
 using Moq;
-using System.Collections.Generic;
-using Newtonsoft.Json.Linq;
-using OptimizelySDK.Exceptions;
-using NUnit.Framework;
-using OptimizelySDK.Entity;
 using Newtonsoft.Json;
-using OptimizelySDK.Event.Builder;
-using OptimizelySDK.Utils;
+using Newtonsoft.Json.Linq;
+using NUnit.Framework;
 using OptimizelySDK.Config;
+using OptimizelySDK.Entity;
+using OptimizelySDK.ErrorHandler;
+using OptimizelySDK.Exceptions;
+using OptimizelySDK.Logger;
+using OptimizelySDK.Utils;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace OptimizelySDK.Tests
 {
@@ -61,11 +62,11 @@ namespace OptimizelySDK.Tests
             Assert.AreEqual("1592310167", Config.AccountId);
             // Check Project ID
             Assert.AreEqual("7720880029", Config.ProjectId);
-            // Check Revision 
+            // Check Revision
             Assert.AreEqual("15", Config.Revision);
-            // Check SDK key 
+            // Check SDK key
             Assert.AreEqual("TestData", Config.SDKKey);
-            // Check Environment key 
+            // Check Environment key
             Assert.AreEqual("Production", Config.EnvironmentKey);
             // Check SendFlagDecision
             Assert.IsTrue(Config.SendFlagDecisions);
@@ -393,7 +394,7 @@ namespace OptimizelySDK.Tests
             var actualVariationUsage = Config.GetVariationFromKey("test_experiment_multivariate", "Fred");
 
             Assert.IsTrue(TestData.CompareObjects(expectedVariationUsage, actualVariationUsage));
-            
+
             // Check Feature Key map.
             var expectedFeatureKeyMap = new Dictionary<string, FeatureFlag>
             {
@@ -421,6 +422,125 @@ namespace OptimizelySDK.Tests
             Assert.IsTrue(TestData.CompareObjects(expectedRolloutIdMap, Config.RolloutIdMap));
         }
 
+        [Test]
+        public void TestFlagVariations()
+        {
+            var allVariations = Config?.FlagVariationMap;
+
+            var expectedVariations1 = new List<KeyValuePair<string, ICollection<Variation>>>();
+            var expectedVariationList = new List<Variation>
+            {
+                new Variation
+                {
+                    FeatureEnabled = true, Id = "177771",
+                    Key = "177771",
+                    FeatureVariableUsageInstances = new List<FeatureVariableUsage> { new FeatureVariableUsage { Id = "155556", Value="true" } }
+                },
+                new Variation 
+                { 
+                    FeatureEnabled = true, 
+                    Id = "177773", 
+                    Key = "177773", 
+                    FeatureVariableUsageInstances = new List<FeatureVariableUsage> 
+                    { 
+                        new FeatureVariableUsage 
+                        { 
+                            Id = "155556", 
+                            Value="false" 
+                        } 
+                    } 
+                },
+                new Variation 
+                { 
+                    FeatureEnabled = true, 
+                    Id = "177778", 
+                    Key = "177778", 
+                    FeatureVariableUsageInstances = new List<FeatureVariableUsage> 
+                    { 
+                        new FeatureVariableUsage 
+                        { 
+                            Id = "155556", Value="false" 
+                        } 
+                    } 
+                },
+                new Variation 
+                { 
+                    FeatureEnabled = false, 
+                    Id = "177782", 
+                    Key = "177782", 
+                    FeatureVariableUsageInstances = new List<FeatureVariableUsage> 
+                    { 
+                        new FeatureVariableUsage 
+                        { 
+                            Id = "155556", 
+                            Value="false" 
+                        } 
+                    } 
+                },
+                new Variation 
+                { 
+                    FeatureEnabled = false, 
+                    Id = "188881", 
+                    Key = "188881", 
+                    FeatureVariableUsageInstances = new List<FeatureVariableUsage> 
+                    { 
+                        new FeatureVariableUsage 
+                        { 
+                            Id = "155556", 
+                            Value= "false" 
+                        } 
+                    } 
+                },
+                new Variation 
+                { 
+                    FeatureEnabled = true, 
+                    Id = "177775",
+                    Key = "177775", 
+                    FeatureVariableUsageInstances = new List<FeatureVariableUsage> 
+                    { 
+                        new FeatureVariableUsage 
+                        { 
+                            Id = "155558", 
+                            Value= "cta_4" 
+                        }, 
+                        new FeatureVariableUsage 
+                        { 
+                            Id = "17014990011", 
+                            Value = "{\"int_var\": 4 , \"string_var\": \"cta_4\"}" 
+                        }, 
+                        new FeatureVariableUsage 
+                        { 
+                            Id = "170149900112", 
+                            Value = "{\"int_var\": 5 , \"string_var\": \"cta_5\"}" 
+                        } } },
+                new Variation 
+                { 
+                    FeatureEnabled = true, 
+                    Id = "177780", 
+                    Key = "177780", 
+                    FeatureVariableUsageInstances = new List<FeatureVariableUsage> { } 
+                },
+                new Variation 
+                { 
+                    FeatureEnabled = false, 
+                    Id = "177784", 
+                    Key = "177784", 
+                    FeatureVariableUsageInstances = new List<FeatureVariableUsage> 
+                    { 
+                        new FeatureVariableUsage 
+                        { 
+                            Id = "155558",
+                            Value= "cta_5" 
+                        } 
+                    } 
+                }
+            };
+            expectedVariations1.Add(new KeyValuePair<string, ICollection<Variation>>("boolean_feature", expectedVariationList));
+
+            var variations1 = allVariations.Where(v => v.Key == "boolean_feature");
+
+            Assertions.AreEquivalent(expectedVariations1, variations1);
+        }
 
         [Test]
         public void TestIfSendFlagDecisionKeyIsMissingItShouldReturnFalse()
@@ -446,7 +566,7 @@ namespace OptimizelySDK.Tests
         {
             var group = Config.GetGroup("7722400015");
             Assert.AreEqual("7722400015", group.Id);
-            Assert.AreEqual("random", group.Policy);            
+            Assert.AreEqual("random", group.Policy);
         }
 
         [Test]
@@ -458,7 +578,7 @@ namespace OptimizelySDK.Tests
             LoggerMock.Verify(l => l.Log(LogLevel.ERROR, @"Group ID ""invalid_id"" is not in datafile."));
 
             ErrorHandlerMock.Verify(e => e.HandleError(
-                It.Is<InvalidGroupException>(ex => ex.Message == "Provided group is not in datafile.")), 
+                It.Is<InvalidGroupException>(ex => ex.Message == "Provided group is not in datafile.")),
                 Times.Once, "Failed");
 
             Assert.IsTrue(TestData.CompareObjects(group, new Entity.Group()));
@@ -514,7 +634,6 @@ namespace OptimizelySDK.Tests
             Assert.AreEqual("7718020063", ev.Id);
 
             Assert.IsTrue(TestData.CompareObjects(new object[] { "7716830082", "7723330021", "7718750065", "7716830585" }, ev.ExperimentIds));
-
         }
 
         [Test]
@@ -563,7 +682,6 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestGetAttributeInvalidKey()
         {
-
             var attribute = Config.GetAttribute("invalid_key");
 
             LoggerMock.Verify(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()), Times.Once);
@@ -574,7 +692,7 @@ namespace OptimizelySDK.Tests
         }
 
         /// <summary>
-        /// EK = Experiment Key 
+        /// EK = Experiment Key
         /// VK = Variation Key
         /// </summary>
         [Test]
@@ -587,7 +705,7 @@ namespace OptimizelySDK.Tests
         }
 
         /// <summary>
-        /// EK = Experiment Key 
+        /// EK = Experiment Key
         /// VK = Variation Key
         /// </summary>
         [Test]
@@ -601,8 +719,6 @@ namespace OptimizelySDK.Tests
             ErrorHandlerMock.Verify(e => e.HandleError(It.Is<InvalidVariationException>(ex => ex.Message == "Provided variation is not in datafile.")));
 
             Assert.AreEqual(new Entity.Variation(), variation);
-
-
         }
 
         [Test]
@@ -620,7 +736,6 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestGetVariationFromIdValidEKValidVId()
         {
-
             var variation = Config.GetVariationFromId("test_experiment", "7722370027");
             Assert.AreEqual("control", variation.Key);
             Assert.AreEqual("7722370027", variation.Id);
@@ -629,7 +744,6 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestGetVariationFromIdValidEKInvalidVId()
         {
-
             var variation = Config.GetVariationFromId("test_experiment", "invalid_id");
 
             LoggerMock.Verify(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()), Times.Once);
@@ -666,7 +780,6 @@ namespace OptimizelySDK.Tests
             ProjectConfig config = DatafileProjectConfig.Create(TestData.Datafile, new Mock<ILogger>().Object, new DefaultErrorHandler());
             Assert.AreEqual(config.ToDatafile(), TestData.Datafile);
         }
-
 
         // test set/get forced variation for the following cases:
         //      - valid and invalid user ID

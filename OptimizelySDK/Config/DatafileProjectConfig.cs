@@ -20,6 +20,7 @@ using OptimizelySDK.Exceptions;
 using OptimizelySDK.Logger;
 using OptimizelySDK.Utils;
 using System.Collections.Generic;
+using System.Linq;
 using Attribute = OptimizelySDK.Entity.Attribute;
 
 namespace OptimizelySDK.Config
@@ -194,6 +195,12 @@ namespace OptimizelySDK.Config
         /// </summary>
         private Dictionary<string, List<string>> ExperimentFeatureMap = new Dictionary<string, List<string>>();
 
+        /// <summary>
+        /// Associated array of flags to experiments
+        /// </summary>
+        
+        private Dictionary<string, ICollection<Variation>> _FlagVariationMap = new Dictionary<string, ICollection<Variation>>();
+        public Dictionary<string, ICollection<Variation>> FlagVariationMap { get { return _FlagVariationMap;  } }
 
         //========================= Interfaces ===========================
 
@@ -277,6 +284,8 @@ namespace OptimizelySDK.Config
             _AudienceIdMap = ConfigParser<Audience>.GenerateMap(entities: Audiences, getKey: a => a.Id.ToString(), clone: true);
             _FeatureKeyMap = ConfigParser<FeatureFlag>.GenerateMap(entities: FeatureFlags, getKey: f => f.Key, clone: true);
             _RolloutIdMap = ConfigParser<Rollout>.GenerateMap(entities: Rollouts, getKey: r => r.Id.ToString(), clone: true);
+            _FlagVariationMap = GetFlagVariationMap();
+            
 
             // Overwrite similar items in audience id map with typed audience id map.
             var typedAudienceIdMap = ConfigParser<Audience>.GenerateMap(entities: TypedAudiences, getKey: a => a.Id.ToString(), clone: true);
@@ -354,6 +363,35 @@ namespace OptimizelySDK.Config
                 }
             }
         }
+
+        private Dictionary<string, ICollection<Variation>> GetFlagVariationMap()
+        {
+            var map = new Dictionary<string, ICollection<Variation>>();
+            var variations = new List<Variation>();
+            var emptyArray = new List<Experiment>();
+
+            foreach (var flag in this.FeatureFlags)
+            {
+                this.RolloutIdMap.TryGetValue(flag.RolloutId, out var rollout);
+
+                var rules = rollout?.Experiments ?? emptyArray;
+
+                foreach(var rule in rules)
+                {
+                    foreach(var variation in rule.Variations)
+                    {
+                        if(!variations.Contains(variation))
+                        {
+                            variations.Add(variation);
+                        }
+                    }
+                }
+                map[flag.Key] = variations;
+            }
+
+            return map;
+        }
+
 
         /// <summary>
         /// Parse datafile string to create ProjectConfig instance.
