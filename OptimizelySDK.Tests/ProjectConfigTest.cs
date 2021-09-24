@@ -93,7 +93,7 @@ namespace OptimizelySDK.Tests
                 {"etag3",Config.GetExperimentFromKey("etag3") },
                 {"etag4",Config.GetExperimentFromKey("etag4") }
             };
-
+            
             Assert.IsTrue(TestData.CompareObjects(experimentKeyMap, Config.ExperimentKeyMap));
 
             // Check Experiment ID Map
@@ -393,7 +393,8 @@ namespace OptimizelySDK.Tests
             var expectedVariationUsage = new Variation { Id = "122231", Key = "Fred", FeatureVariableUsageInstances = featureVariableUsageInstance, FeatureEnabled = true };
             var actualVariationUsage = Config.GetVariationFromKey("test_experiment_multivariate", "Fred");
 
-            Assert.IsTrue(TestData.CompareObjects(expectedVariationUsage, actualVariationUsage));
+            Assertions.AreEqual(expectedVariationUsage, actualVariationUsage);
+            //Assert.IsTrue(TestData.CompareObjects(expectedVariationUsage, actualVariationUsage));
 
             // Check Feature Key map.
             var expectedFeatureKeyMap = new Dictionary<string, FeatureFlag>
@@ -410,7 +411,8 @@ namespace OptimizelySDK.Tests
                 { "unsupported_variabletype", Config.GetFeatureFlagFromKey("unsupported_variabletype") }
             };
 
-            Assert.IsTrue(TestData.CompareObjects(expectedFeatureKeyMap, Config.FeatureKeyMap));
+            Assertions.AreEquivalent(expectedFeatureKeyMap, Config.FeatureKeyMap);
+            //Assert.IsTrue(TestData.CompareObjects(expectedFeatureKeyMap, Config.FeatureKeyMap));
 
             // Check Feature Key map.
             var expectedRolloutIdMap = new Dictionary<string, Rollout>

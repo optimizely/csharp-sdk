@@ -16,6 +16,74 @@ namespace OptimizelySDK.Tests
     [ExcludeFromCodeCoverage]
     public class Assertions
     {
+        #region FeatureFlags
+        public static void AreEquivalent(Dictionary<string, FeatureFlag> expected, Dictionary<string, FeatureFlag> actual)
+        {
+            var zipped = expected.Zip(actual, (e, a) =>
+            {
+                return new
+                {
+                    Expected = e,
+                    Actual = a
+                };
+            }).ToList();
+
+            foreach (var z in zipped)
+            {
+                AreEqual(z.Expected, z.Actual);
+            }
+        }
+
+        public static void AreEqual(KeyValuePair<string, FeatureFlag> expected, KeyValuePair<string, FeatureFlag> actual)
+        {
+            Assert.AreEqual(expected.Key, actual.Key);
+            AreEqual(expected.Value, actual.Value);
+        }
+
+        public static void AreEqual(FeatureFlag expected, FeatureFlag actual)
+        {
+            Assert.AreEqual(expected.Id, actual.Id);
+            Assert.AreEqual(expected.Key, actual.Key);
+            Assert.AreEqual(expected.RolloutId, actual.RolloutId);
+            AreEquivalent(expected.VariableKeyToFeatureVariableMap, actual.VariableKeyToFeatureVariableMap);
+        }
+        #endregion
+
+        #region FeatureVariable
+        public static void AreEqual(FeatureVariable expected, FeatureVariable actual)
+        {
+            Assert.AreEqual(expected.Id, actual.Id);
+            Assert.AreEqual(expected.Key, actual.Key);
+            Assert.AreEqual(expected.DefaultValue, actual.DefaultValue);
+            Assert.AreEqual(expected.Status, actual.Status);
+            Assert.AreEqual(expected.SubType, actual.SubType);
+            Assert.AreEqual(expected.Type, actual.Type);
+        }
+
+        public static void AreEquivalent(Dictionary<string, FeatureVariable> expected, Dictionary<string, FeatureVariable> actual)
+        {
+            var zipped = expected.Zip(actual, (e, a) =>
+            {
+                return new
+                {
+                    Expected = e,
+                    Actual = a
+                };
+            }).ToList();
+
+            foreach (var z in zipped)
+            {
+                AreEquivalent(z.Expected, z.Actual);
+            }
+        }
+
+        public static void AreEquivalent(KeyValuePair<string, FeatureVariable> expected, KeyValuePair<string, FeatureVariable> actual)
+        {
+            Assert.AreEqual(expected.Key, actual.Key);
+            AreEqual(expected.Value, actual.Value);
+        }
+        #endregion
+
         #region Variations
         public static void AreEqual(Variation expected, Variation actual)
         {
