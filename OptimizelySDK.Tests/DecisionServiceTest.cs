@@ -88,6 +88,7 @@ namespace OptimizelySDK.Tests
             Assert.IsTrue(TestData.CompareObjects(actualVariation.ResultObject, expectedVariation));
             BucketerMock.Verify(_ => _.Bucket(It.IsAny<ProjectConfig>(), It.IsAny<Experiment>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
         }
+
         [Test]
         public void TestGetVariationLogsErrorWhenUserProfileMapItsNull()
         {
@@ -565,7 +566,7 @@ namespace OptimizelySDK.Tests
             var featureFlag = ProjectConfig.GetFeatureFlagFromKey("boolean_feature");
             var actualDecision = DecisionServiceMock.Object.GetVariationForFeatureExperiment(featureFlag, "user1", userAttributes, ProjectConfig, new OptimizelyDecideOption[] { });
 
-            Assert.IsTrue(TestData.CompareObjects(expectedDecision, actualDecision.ResultObject));
+            Assertions.AreEqual(expectedDecision, actualDecision.ResultObject);
 
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "The user \"user1\" is bucketed into experiment \"group_experiment_1\" of feature \"boolean_feature\"."));
         }
