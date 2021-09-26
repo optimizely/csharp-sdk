@@ -84,8 +84,10 @@ namespace OptimizelySDK.Tests
             var actualVariation = decisionService.GetVariation(experiment, WhitelistedUserId, ProjectConfig, new UserAttributes());
 
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, string.Format("User \"{0}\" is forced in variation \"vtag5\".", WhitelistedUserId)), Times.Once);
+            
             // no attributes provided for a experiment that has an audience
-            Assert.IsTrue(TestData.CompareObjects(actualVariation.ResultObject, expectedVariation));
+            Assertions.AreEqual(expectedVariation, actualVariation.ResultObject);
+            
             BucketerMock.Verify(_ => _.Bucket(It.IsAny<ProjectConfig>(), It.IsAny<Experiment>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
         }
 
@@ -214,7 +216,9 @@ namespace OptimizelySDK.Tests
 
             DecisionService decisionService = new DecisionService(BucketerMock.Object, ErrorHandlerMock.Object, UserProfileServiceMock.Object, LoggerMock.Object);
             var actualVariation = decisionService.GetVariation(experiment, UserProfileId, ProjectConfig, new UserAttributes());
-            Assert.IsTrue(TestData.CompareObjects(variation, actualVariation.ResultObject));
+
+            Assertions.AreEqual(variation, actualVariation.ResultObject);
+            
             Assert.AreEqual(actualVariation.DecisionReasons.ToReport(true).Count, 1);
             Assert.AreEqual(actualVariation.DecisionReasons.ToReport(true)[0], "Returning previously activated variation \"vtag1\" of experiment \"etag1\" for user \"userProfileId\" from user profile.");
 
@@ -349,7 +353,10 @@ namespace OptimizelySDK.Tests
             DecisionService decisionService = new DecisionService(mockBucketer.Object, ErrorHandlerMock.Object,
                 UserProfileServiceMock.Object, LoggerMock.Object);
 
-            Assert.IsTrue(TestData.CompareObjects(variation, decisionService.GetVariation(experiment, UserProfileId, ProjectConfig, new UserAttributes())));
+            var actualVariation = decisionService.GetVariation(experiment, UserProfileId, ProjectConfig, new UserAttributes());
+
+            Assertions.AreEqual(variation.ResultObject, actualVariation.ResultObject);
+
             UserProfileServiceMock.Verify(_ => _.Save(It.IsAny<Dictionary<string, object>>()), Times.Once);
         }
 
@@ -378,13 +385,14 @@ namespace OptimizelySDK.Tests
             Assert.IsTrue(optlyObject.SetForcedVariation(experimentKey, userId, expectedForcedVariationKey), string.Format(@"Set variation to ""{0}"" failed.", expectedForcedVariationKey));
 
             var actualForcedVariation = optlyObject.GetVariation(experimentKey, userId, userAttributes);
-            Assert.IsTrue(TestData.CompareObjects(VariationWithKeyVariation, actualForcedVariation));
+
+            Assertions.AreEqual(VariationWithKeyVariation, actualForcedVariation);
 
             // clear forced variation and confirm that normal bucketing occurs
             Assert.IsTrue(optlyObject.SetForcedVariation(experimentKey, userId, null));
 
             actualVariation = optlyObject.GetVariation(experimentKey, userId, userAttributes);
-            Assert.IsTrue(TestData.CompareObjects(VariationWithKeyControl, actualVariation));
+            Assertions.AreEqual(VariationWithKeyControl, actualVariation);
 
             // check that a paused experiment returns null
             Assert.IsTrue(optlyObject.SetForcedVariation(pausedExperimentKey, userId, expectedForcedVariationKey), string.Format(@"Set variation to ""{0}"" failed.", expectedForcedVariationKey));
