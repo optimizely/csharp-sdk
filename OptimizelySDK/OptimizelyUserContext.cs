@@ -261,12 +261,27 @@ namespace OptimizelySDK
         }
 
         /// <summary>
-        /// 
+        /// Finds a forced variation
         /// </summary>
-        /// <param name="String"></param>
-        /// <param name=""></param>
-        /// <param name="ruleKey"></param>
-        /// <returns></returns>
+        /// <param name="flagKey">The flag key</param>
+        /// <returns>The variation key for a forced decision</returns>
+        public string GetForcedDecision(string flagKey)
+        {
+            if (Optimizely.GetOptimizelyConfig() == null)
+            {
+                Logger.Log(LogLevel.ERROR, "Optimizely SDK not ready.");
+                return null;
+            }
+
+            return FindForcedDecision(flagKey, null);
+        }
+
+        /// <summary>
+        /// Finds a forced variation
+        /// </summary>
+        /// <param name="flagKey">The flag key</param>
+        /// <param name="ruleKey">The rule key</param>
+        /// <returns>The variation key for a forced decision</returns>
         public string GetForcedDecision(string flagKey, string ruleKey)
         {
             if (Optimizely.GetOptimizelyConfig() == null)
@@ -279,11 +294,11 @@ namespace OptimizelySDK
         }
 
         /// <summary>
-        /// 
+        /// Finds a forced variation
         /// </summary>
-        /// <param name="flagKey"></param>
-        /// <param name="ruleKey"></param>
-        /// <returns></returns>
+        /// <param name="flagKey">The flag key</param>
+        /// <param name="ruleKey">The rule key</param>
+        /// <returns>The variation key for a forced decision</returns>
         public string FindForcedDecision(string flagKey, string ruleKey)
         {
             string variationKey = null;

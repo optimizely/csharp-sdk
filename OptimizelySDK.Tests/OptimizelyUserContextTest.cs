@@ -235,6 +235,19 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
+
+        public void GetForcedDecisionReturnsValueWithOnlyFlagKey()
+        {
+            var user = Optimizely.CreateUserContext(UserID);
+
+            user.SetForcedDecision("flag", "variation");
+
+            var result = user.GetForcedDecision("flag");
+
+            Assert.AreEqual("variation", result);
+        }
+
+        [Test]
         public void FindForcedDecisionReturnsValueWithoutRuleKey()
         {
             var user = Optimizely.CreateUserContext(UserID);
