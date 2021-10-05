@@ -302,6 +302,42 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
+        public void RemoveAllForcedDecisionsRemovesDecisions()
+        {
+            var user = Optimizely.CreateUserContext(UserID);
+
+            user.SetForcedDecision("flag", "rule", "variation");
+            user.SetForcedDecision("flag2", "rule2", "variation2");
+            user.SetForcedDecision("flag3", "rule3", "variation3");
+
+            user.RemoveAllForcedDecisions();
+
+            var result1 = user.GetForcedDecision("flag", null);
+            Assert.AreEqual(null, result1);
+            
+            var result2 = user.GetForcedDecision("flag2", null);
+            Assert.AreEqual(null, result2);
+
+            var result3 = user.GetForcedDecision("flag3", null);
+            Assert.AreEqual(null, result3);
+        }
+
+        [Test]
+        public void RemoveAllForcedDecisionsReturnsFalseForNullConfig()
+        {
+            var optly = new Optimizely(new FallbackProjectConfigManager(null));
+
+
+            var user = optly.CreateUserContext(UserID);
+            user.SetForcedDecision("flag", "variation");
+
+            var result = user.RemoveAllForcedDecisions();
+
+            Assert.AreEqual(false, result);
+
+        }
+
+        [Test]
         public void DecideInvalidFlagKey()
         {
             var flagKey = "invalid_feature";
