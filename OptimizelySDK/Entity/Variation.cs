@@ -35,6 +35,7 @@ namespace OptimizelySDK.Entity
                 // Generating Variable Usage key map.
                 if (_FeatureVariableUsageInstances != null)
                     VariableIdToVariableUsageInstanceMap = ConfigParser<FeatureVariableUsage>.GenerateMap(entities: _FeatureVariableUsageInstances, getKey: v => v.Id.ToString(), clone: true);
+                
             }
         }
 

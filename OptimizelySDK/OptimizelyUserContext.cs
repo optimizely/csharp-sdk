@@ -27,6 +27,26 @@ namespace OptimizelySDK
     /// </summary>
     public class OptimizelyUserContext
     {
+        private class ForcedDecision
+        {
+            private string flagKey;
+            private string ruleKey;
+            private string variationKey;
+
+            public ForcedDecision(string flagKey, string ruleKey, string variationKey)
+            {
+                this.flagKey = flagKey;
+                this.ruleKey = ruleKey;
+                this.variationKey = variationKey;
+            }
+
+            public string FlagKey { get { return flagKey; } set { this.flagKey = value; } }
+
+            public string RuleKey { get { return ruleKey; } set { this.ruleKey = value; } }
+
+            public string VariationKey { get { return variationKey; } set { this.variationKey = value; } }
+        }
+
         private ILogger Logger;
         private IErrorHandler ErrorHandler;
         private object mutex = new object();
@@ -36,6 +56,9 @@ namespace OptimizelySDK
         private UserAttributes Attributes;
         // Optimizely object to be used.
         private Optimizely Optimizely;
+
+        private Dictionary<string, Dictionary<string, ForcedDecision>> ForcedDecisionsMap = new Dictionary<string, Dictionary<string, ForcedDecision>>();
+        private Dictionary<string, ForcedDecision> ForcedDecisionsMapWithNoRuleKey = new Dictionary<string, ForcedDecision>();
 
         public OptimizelyUserContext(Optimizely optimizely, string userId, UserAttributes userAttributes, IErrorHandler errorHandler, ILogger logger)
         {
@@ -188,6 +211,100 @@ namespace OptimizelySDK
             EventTags eventTags)
         {
             Optimizely.Track(eventName, UserId, Attributes, eventTags);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="flagKey"></param>
+        /// <param name="variationKey"></param>
+        /// <returns></returns>
+
+        public bool SetForcedDecision(string flagKey, string variationKey)
+        {
+            return SetForcedDecision(flagKey, null, variationKey);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="flagKey"></param>
+        /// <param name="ruleKey"></param>
+        /// <param name="variationKey"></param>
+        /// <returns></returns>
+        public bool SetForcedDecision(string flagKey, string ruleKey, string variationKey)
+        {
+            if (Optimizely.GetOptimizelyConfig() == null)
+            {
+                Logger.Log(LogLevel.ERROR, "Optimizely config is null");
+                return false;
+            }
+
+            if(ruleKey == null)
+            {
+                if (ForcedDecisionsMapWithNoRuleKey.TryGetValue(flagKey, out var value))
+                {
+                    value.VariationKey = variationKey;
+                }
+                else
+                {
+                    ForcedDecisionsMapWithNoRuleKey.Add(flagKey, new ForcedDecision(flagKey, null, variationKey));
+                }
+            }
+            else
+            {
+                Dictionary<string, ForcedDecision> forcedDecision = new Dictionary<string, ForcedDecision>();
+                forcedDecision.Add(ruleKey, new ForcedDecision(flagKey, ruleKey, variationKey));
+                ForcedDecisionsMap.Add(flagKey, forcedDecision);
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="String"></param>
+        /// <param name=""></param>
+        /// <param name="ruleKey"></param>
+        /// <returns></returns>
+        public string GetForcedDecision(string flagKey, string ruleKey)
+        {
+            if (Optimizely.GetOptimizelyConfig() == null)
+            {
+                Logger.Log(LogLevel.ERROR, "Optimizely SDK not ready.");
+                return null;
+            }
+
+            return FindForcedDecision(flagKey, ruleKey);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="flagKey"></param>
+        /// <param name="ruleKey"></param>
+        /// <returns></returns>
+        public string FindForcedDecision(string flagKey, string ruleKey)
+        {
+            string variationKey = null;
+            if (ruleKey != null)
+            {
+                if (ForcedDecisionsMap.Count > 0 && ForcedDecisionsMap.ContainsKey(flagKey))
+                {
+                    if (ForcedDecisionsMap.TryGetValue(flagKey, out var forcedDecision) && forcedDecision.TryGetValue(ruleKey, out var forcedDecision2))
+                    {
+                        variationKey = forcedDecision2.VariationKey;
+                    }
+                }
+            }
+            else
+            {
+                if (ForcedDecisionsMapWithNoRuleKey.Count > 0 && ForcedDecisionsMapWithNoRuleKey.TryGetValue(flagKey, out var forcedDecision))
+                {
+                    variationKey = forcedDecision.VariationKey;
+                }
+            }
+            return variationKey;
         }
     }
 }

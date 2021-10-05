@@ -187,6 +187,78 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
+        public void SetForcedDecisionSetsValue()
+        {
+            var user = Optimizely.CreateUserContext(UserID);
+
+            var result = user.SetForcedDecision("flag", "variation");
+
+            Assert.IsTrue(result);
+        }
+
+        [Test]
+        public void SetForcedDecisionReturnsFalseAndLogErrorForNullConfig()
+        {
+            var optly = new Optimizely(new FallbackProjectConfigManager(null));
+           
+
+            var user = optly.CreateUserContext(UserID);
+            var result = user.SetForcedDecision("flag", "variation");
+
+            Assert.IsFalse(result);
+            //should assert logger is called
+        }
+
+        [Test]
+        public void GetForcedDecisionsReturnsValueWithRuleKey()
+        {
+            var user = Optimizely.CreateUserContext(UserID);
+
+            user.SetForcedDecision("flag", "rule", "variation");
+
+            var result = user.GetForcedDecision("flag", "rule");
+
+            Assert.AreEqual("variation", result);
+        }
+
+        [Test]
+
+        public void GetForcedDecisionReturnsValueWithoutRuleKey()
+        {
+            var user = Optimizely.CreateUserContext(UserID);
+
+            user.SetForcedDecision("flag", "variation");
+
+            var result = user.GetForcedDecision("flag", null);
+
+            Assert.AreEqual("variation", result);
+        }
+
+        [Test]
+        public void FindForcedDecisionReturnsValueWithoutRuleKey()
+        {
+            var user = Optimizely.CreateUserContext(UserID);
+
+            user.SetForcedDecision("flag", "variation");
+
+            var result = user.FindForcedDecision("flag", null);
+
+            Assert.AreEqual("variation", result);
+        }
+
+        [Test]
+        public void FindForcedDecisionReturnsValueWithRuleKey()
+        {
+            var user = Optimizely.CreateUserContext(UserID);
+
+            user.SetForcedDecision("flag", "rule", "variation");
+
+            var result = user.FindForcedDecision("flag", "rule");
+
+            Assert.AreEqual("variation", result);
+        }
+
+        [Test]
         public void DecideInvalidFlagKey()
         {
             var flagKey = "invalid_feature";

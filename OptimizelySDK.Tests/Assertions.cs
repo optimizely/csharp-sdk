@@ -18,22 +18,34 @@ namespace OptimizelySDK.Tests
     {
         #region Basic asserts
 
+        public static bool HasItems(IEnumerable<object> expected, IEnumerable<object> actual, bool allowNull = true)
+        {
+            if (allowNull && expected == null && actual == null)
+                return false;
+            
+            Assert.AreEqual(expected.Count(), actual.Count());
+
+            return true;
+        }
+
         public static void AreEquivalent(IEnumerable<string> expected, IEnumerable<string> actual)
         {
-            Assert.AreEqual(expected.Count(), actual.Count());
-            var zipped = expected.Zip(actual, (e, a) =>
+            if (HasItems(expected, actual, false))
             {
-                return new
+                var zipped = expected.Zip(actual, (e, a) =>
                 {
-                    Expected = e,
-                    Actual = a
-                };
-            }).ToList();
+                    return new
+                    {
+                        Expected = e,
+                        Actual = a
+                    };
+                }).ToList();
 
-            foreach (var z in zipped)
-            {
-                Assert.AreEqual(z.Expected, z.Actual);
-            };
+                foreach (var z in zipped)
+                {
+                    Assert.AreEqual(z.Expected, z.Actual);
+                };
+            }
         }
 
         public static void AreEquivalent(Dictionary<string, string> expected, Dictionary<string, string> actual)
@@ -96,6 +108,7 @@ namespace OptimizelySDK.Tests
         #region FeatureFlags
         public static void AreEquivalent(Dictionary<string, FeatureFlag> expected, Dictionary<string, FeatureFlag> actual)
         {
+            Assert.AreEqual(expected.Count, actual.Count);
             var zipped = expected.Zip(actual, (e, a) =>
             {
                 return new
@@ -139,6 +152,7 @@ namespace OptimizelySDK.Tests
 
         public static void AreEquivalent(Dictionary<string, FeatureVariable> expected, Dictionary<string, FeatureVariable> actual)
         {
+            Assert.AreEqual(expected.Count, actual.Count);
             var zipped = expected.Zip(actual, (e, a) =>
             {
                 return new
@@ -244,22 +258,30 @@ namespace OptimizelySDK.Tests
         #region FeatureVariableUsage
         public static void AreEquivalent(IEnumerable<FeatureVariableUsage> expected, IEnumerable<FeatureVariableUsage> actual)
         {
-            Assert.AreEqual(expected.Count(), actual.Count());
-            expected.Zip(actual, (e, a) =>
+            if (HasItems(expected, actual))
             {
-                return new
+                expected.Zip(actual, (e, a) =>
                 {
-                    Expected = e,
-                    Actual = a
-                };
-            }).ToList().ForEach((item) =>
-            {
-                AreEqual(item.Expected, item.Actual);
-            });
+                    return new
+                    {
+                        Expected = e,
+                        Actual = a
+                    };
+                }).ToList().ForEach((item) =>
+                {
+                    AreEqual(item.Expected, item.Actual);
+                });
+            }
         }
 
         public static void AreEquivalent(Dictionary<string, FeatureVariableUsage> expected, Dictionary<string, FeatureVariableUsage> actual)
         {
+            if (expected == null && actual == null)
+            {
+                return;
+            }
+
+            Assert.AreEqual(expected.Count(), actual.Count());
             expected.Zip(actual, (e, a) =>
             {
                 return new
