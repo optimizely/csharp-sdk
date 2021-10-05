@@ -334,7 +334,6 @@ namespace OptimizelySDK.Tests
             var result = user.RemoveAllForcedDecisions();
 
             Assert.AreEqual(false, result);
-
         }
 
         [Test]
