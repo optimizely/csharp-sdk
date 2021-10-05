@@ -197,7 +197,7 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
-        public void SetForcedDecisionReturnsFalseAndLogErrorForNullConfig()
+        public void SetForcedDecisionReturnsFalseForNullConfig()
         {
             var optly = new Optimizely(new FallbackProjectConfigManager(null));
            
@@ -269,6 +269,36 @@ namespace OptimizelySDK.Tests
             var result = user.FindForcedDecision("flag", "rule");
 
             Assert.AreEqual("variation", result);
+        }
+
+        [Test]
+        public void RemoveForcedDecisionRemovesDecision()
+        {
+            var user = Optimizely.CreateUserContext(UserID);
+
+            user.SetForcedDecision("flag", "rule", "variation");
+
+            user.RemoveForcedDecision("flag", "rule");
+
+            var result = user.FindForcedDecision("flag", "rule");
+
+            Assert.AreEqual(null, result);
+
+        }
+
+        [Test]
+        public void RemoveForcedDecisionReturnsFalseForNullConfig()
+        {
+            var optly = new Optimizely(new FallbackProjectConfigManager(null));
+
+
+            var user = optly.CreateUserContext(UserID);
+            user.SetForcedDecision("flag", "variation");
+
+            var result = user.RemoveForcedDecision("flag", null);
+
+            Assert.AreEqual(false, result);
+            
         }
 
         [Test]

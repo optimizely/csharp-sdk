@@ -19,6 +19,7 @@ using System.Collections.Generic;
 using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Entity;
 using OptimizelySDK.OptimizelyDecisions;
+using System;
 
 namespace OptimizelySDK
 {
@@ -320,6 +321,65 @@ namespace OptimizelySDK
                 }
             }
             return variationKey;
+        }
+
+        /**
+    * Remove a forced decision
+    *
+    * @param flagKey The flag key in the forced decision
+    * @return Returns a boolean of true if successful, otherwise false
+    */
+        public bool RemoveForcedDecision(string flagKey)
+        {
+            return RemoveForcedDecision(flagKey, null);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="flagKey"></param>
+        /// <param name="ruleKey"></param>
+        /// <returns></returns>
+        public bool RemoveForcedDecision(string flagKey, string ruleKey)
+        {
+            if (Optimizely.GetOptimizelyConfig() == null)
+            {
+                Logger.Log(LogLevel.ERROR, "Optimizely SDK not ready.");
+                return false;
+            }
+            if (ruleKey != null)
+            {
+                ForcedDecisionsMap.TryGetValue(flagKey, out var decision);
+                decision.Remove(ruleKey);
+                if (decision.Count == 0)
+                {
+                    ForcedDecisionsMap.Remove(flagKey);
+                }
+                return true;
+            }
+            else
+            {
+                
+                ForcedDecisionsMapWithNoRuleKey.Remove(flagKey);
+                return true;
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public bool RemoveAllForcedDecisions()
+        {
+            if (Optimizely.GetOptimizelyConfig() == null)
+            {
+                Logger.Log(LogLevel.ERROR, "Optimizely SDK not ready.");
+                return false;
+            }
+            // Clear both maps for with and without ruleKey
+            ForcedDecisionsMap.Clear();
+            ForcedDecisionsMapWithNoRuleKey.Clear();
+            return true;
         }
     }
 }
