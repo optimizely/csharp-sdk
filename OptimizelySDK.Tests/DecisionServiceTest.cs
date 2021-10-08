@@ -58,7 +58,6 @@ namespace OptimizelySDK.Tests
             ErrorHandlerMock = new Mock<IErrorHandler>();
             UserProfileServiceMock = new Mock<UserProfileService>();
             BucketerMock = new Mock<Bucketer>(LoggerMock.Object);
-
             ProjectConfig = DatafileProjectConfig.Create(TestData.Datafile, LoggerMock.Object, ErrorHandlerMock.Object);
             WhitelistedExperiment = ProjectConfig.ExperimentIdMap["224"];
             WhitelistedVariation = WhitelistedExperiment.VariationKeyToVariationMap["vtag5"];
@@ -80,6 +79,8 @@ namespace OptimizelySDK.Tests
             Experiment experiment = ProjectConfig.Experiments[8];
             Variation expectedVariation = experiment.Variations[0];
 
+            var optlyObject = new Optimizely(TestData.Datafile, new ValidEventDispatcher(), LoggerMock.Object);
+            OptimizelyUserContextMock = new Mock<OptimizelyUserContext>(optlyObject, WhitelistedUserId, new UserAttributes(), ErrorHandlerMock.Object, LoggerMock.Object);
             OptimizelyUserContextMock.Setup(ouc => ouc.GetUserId()).Returns(GenericUserId);
             // user excluded without audiences and whitelisting
             Assert.IsNull(decisionService.GetVariation(experiment, OptimizelyUserContextMock.Object, ProjectConfig, new UserAttributes()).ResultObject);
@@ -227,6 +228,7 @@ namespace OptimizelySDK.Tests
             UserProfileServiceMock.Setup(_ => _.Lookup(UserProfileId)).Returns(userProfile.ToMap());
 
             DecisionService decisionService = new DecisionService(BucketerMock.Object, ErrorHandlerMock.Object, UserProfileServiceMock.Object, LoggerMock.Object);
+
             OptimizelyUserContextMock.Setup(ouc => ouc.GetUserId()).Returns(UserProfileId);
             var actualVariation = decisionService.GetVariation(experiment, OptimizelyUserContextMock.Object, ProjectConfig, new UserAttributes());
 

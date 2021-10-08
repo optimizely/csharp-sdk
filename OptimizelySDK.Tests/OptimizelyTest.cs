@@ -2499,7 +2499,7 @@ namespace OptimizelySDK.Tests
             NotificationCallbackMock.Setup(nc => nc.TestTrackCallback(It.IsAny<string>(), It.IsAny<string>(),
                 It.IsAny<UserAttributes>(), It.IsAny<EventTags>(), It.IsAny<LogEvent>()));
 
-            Mock<OptimizelyUserContext> mockUserContext = new Mock<OptimizelyUserContext>();
+            Mock<OptimizelyUserContext> mockUserContext = new Mock<OptimizelyUserContext>(OptimizelyMock.Object, TestUserId, userAttributes, ErrorHandlerMock.Object, LoggerMock.Object);
             mockUserContext.Setup(ouc => ouc.GetUserId()).Returns(TestUserId);
 
             DecisionServiceMock.Setup(ds => ds.GetVariation(experiment, mockUserContext.Object, It.IsAny<ProjectConfig>(), userAttributes)).Returns(variation);
