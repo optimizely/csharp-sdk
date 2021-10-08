@@ -1,5 +1,6 @@
 ﻿using NUnit.Framework;
 using OptimizelySDK.Entity;
+using OptimizelySDK.OptlyConfig;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -22,7 +23,7 @@ namespace OptimizelySDK.Tests
         {
             if (allowNull && expected == null && actual == null)
                 return false;
-            
+
             Assert.AreEqual(expected.Count(), actual.Count());
 
             return true;
@@ -71,9 +72,216 @@ namespace OptimizelySDK.Tests
             Assert.AreEqual(expected.Key, actual.Key);
             Assert.AreEqual(expected.Value, actual.Value);
         }
-        #endregion
+
+        #endregion Basic asserts
+
+        #region OptimizelyAudience
+
+        private static void AreEquivalent(OptimizelyAudience[] expected, OptimizelyAudience[] actual)
+        {
+            Assert.AreEqual(expected.Count(), actual.Count());
+            var zipped = expected.Zip(actual, (e, a) =>
+            {
+                return new
+                {
+                    Expected = e,
+                    Actual = a
+                };
+            }).ToList();
+
+            foreach (var z in zipped)
+            {
+                AreEqual(z.Expected, z.Actual);
+            };
+        }
+
+        private static void AreEqual(OptimizelyAudience expected, OptimizelyAudience actual)
+        {
+            Assert.AreEqual(expected.Id, actual.Id);
+            Assert.AreEqual(expected.Name, actual.Name);
+            AreEqual(expected.Conditions, actual.Conditions);
+        }
+
+        #endregion OptimizelyAudience
+
+        #region OptimizelyConfig
+
+        public static void AreEqual(OptimizelyConfig expected, OptimizelyConfig actual)
+        {
+            AreEquivalent(expected.Attributes, actual.Attributes);
+            AreEquivalent(expected.Audiences, actual.Audiences);
+            Assert.AreEqual(expected.EnvironmentKey, actual.EnvironmentKey);
+            AreEquivalent(expected.Events, actual.Events);
+            AreEquivalent(expected.ExperimentsMap, actual.ExperimentsMap);
+            AreEquivalent(expected.FeaturesMap, actual.FeaturesMap);
+            AreEquivalent(expected.FlagToVariationMap, actual.FlagToVariationMap);
+            Assert.AreEqual(expected.Revision, actual.Revision);
+            Assert.AreEqual(expected.SDKKey, actual.SDKKey);
+        }
+
+        private static void AreEquivalent(OptimizelyAttribute[] expected, OptimizelyAttribute[] actual)
+        {
+            throw new NotImplementedException();
+        }
+
+        #endregion OptimizelyConfig
+
+        #region OptimizelyEvent
+
+        public static void AreEquivalent(OptimizelyEvent[] expected, OptimizelyEvent[] actual)
+        {
+            Assert.AreEqual(expected.Count(), actual.Count());
+            var zipped = expected.Zip(actual, (e, a) =>
+            {
+                return new
+                {
+                    Expected = e,
+                    Actual = a
+                };
+            }).ToList();
+
+            foreach (var z in zipped)
+            {
+                AreEqual(z.Expected, z.Actual);
+            };
+        }
+
+        private static void AreEqual(OptimizelyEvent expected, OptimizelyEvent actual)
+        {
+            Assert.AreEqual(expected.Id, actual.Id);
+            Assert.AreEqual(expected.Key, actual.Key);
+            AreEquivalent(expected.ExperimentIds, actual.ExperimentIds);
+        }
+
+        #endregion OptimizelyEvent
+
+        #region OptimizelyExperiement
+
+        public static void AreEquivalent(List<OptimizelyExperiment> expected, List<OptimizelyExperiment> actual)
+        {
+            Assert.AreEqual(expected.Count, actual.Count);
+            var zipped = expected.Zip(actual, (e, a) =>
+            {
+                return new
+                {
+                    Expected = e,
+                    Actual = a
+                };
+            }).ToList();
+
+            foreach (var z in zipped)
+            {
+                AreEqual(z.Expected, z.Actual);
+            };
+        }
+
+        public static void AreEqual(OptimizelyExperiment expected, OptimizelyExperiment actual)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static void AreEquivalent(IDictionary<string, OptimizelyExperiment> expected, IDictionary<string, OptimizelyExperiment> actual)
+        {
+            Assert.AreEqual(expected.Count, actual.Count);
+            var zipped = expected.Zip(actual, (e, a) =>
+            {
+                return new
+                {
+                    Expected = e,
+                    Actual = a
+                };
+            }).ToList();
+
+            foreach (var z in zipped)
+            {
+                AreEquivalent(z.Expected, z.Actual);
+            };
+        }
+
+        public static void AreEquivalent(KeyValuePair<string, OptimizelyExperiment> expected, KeyValuePair<string, OptimizelyExperiment> actual)
+        {
+            Assert.AreEqual(expected.Key, actual.Key);
+            AreEqual(expected.Value, actual.Value);
+        }
+
+        #endregion OptimizelyExperiement
+
+        #region OptimizelyFeature
+
+        public static void AreEquivalent(IDictionary<string, OptimizelyFeature> expected, IDictionary<string, OptimizelyFeature> actual)
+        {
+            Assert.AreEqual(expected.Count, actual.Count);
+            var zipped = expected.Zip(actual, (e, a) =>
+            {
+                return new
+                {
+                    Expected = e,
+                    Actual = a
+                };
+            }).ToList();
+
+            foreach (var z in zipped)
+            {
+                AreEquivalent(z.Expected, z.Actual);
+            };
+        }
+
+        public static void AreEquivalent(KeyValuePair<string, OptimizelyFeature> expected, KeyValuePair<string, OptimizelyFeature> actual)
+        {
+            Assert.AreEqual(expected.Key, actual.Key);
+            AreEqual(expected.Value, actual.Value);
+        }
+
+        public static void AreEqual(OptimizelyFeature expected, OptimizelyFeature actual)
+        {
+            AreEquivalent(expected.DeliveryRules, actual.DeliveryRules);
+            AreEquivalent(expected.ExperimentRules, actual.ExperimentRules);
+            AreEquivalent(expected.ExperimentsMap, actual.ExperimentsMap);
+            Assert.AreEqual(expected.Id, actual.Id);
+            Assert.AreEqual(expected.Key, actual.Key);
+            AreEquivalent(expected.VariablesMap, actual.VariablesMap);
+        }
+
+        #endregion OptimizelyFeature
+
+        #region OptimizelyVariable
+
+        public static void AreEquivalent(IDictionary<string, OptimizelyVariable> expected, IDictionary<string, OptimizelyVariable> actual)
+        {
+            Assert.AreEqual(expected.Count, actual.Count);
+            var zipped = expected.Zip(actual, (e, a) =>
+            {
+                return new
+                {
+                    Expected = e,
+                    Actual = a
+                };
+            }).ToList();
+
+            foreach (var z in zipped)
+            {
+                AreEquivalent(z.Expected, z.Actual);
+            };
+        }
+
+        public static void AreEquivalent(KeyValuePair<string, OptimizelyVariable> expected, KeyValuePair<string, OptimizelyVariable> actual)
+        {
+            Assert.AreEqual(expected.Key, actual.Key);
+            AreEqual(expected.Value, actual.Value);
+        }
+
+        public static void AreEqual(OptimizelyVariable expected, OptimizelyVariable actual)
+        {
+            Assert.AreEqual(expected.Id, actual.Id);
+            Assert.AreEqual(expected.Key, actual.Key);
+            Assert.AreEqual(expected.Type, actual.Type);
+            Assert.AreEqual(expected.Value, actual.Value);
+        }
+
+        #endregion OptimizelyVariable
 
         #region Experiment
+
         public static void AreEqual(Experiment expected, Experiment actual)
         {
             Assert.AreEqual(expected.AudienceConditions, actual.AudienceConditions);
@@ -97,16 +305,20 @@ namespace OptimizelySDK.Tests
             AreEquivalent(expected.VariationKeyToVariationMap, actual.VariationKeyToVariationMap);
             AreEquivalent(expected.Variations, actual.Variations);
         }
-        #endregion
+
+        #endregion Experiment
 
         #region FeatureDecision
+
         public static void AreEqual(FeatureDecision expected, FeatureDecision actual)
         {
             AreEqual(expected.Experiment, actual.Experiment);
         }
-        #endregion
+
+        #endregion FeatureDecision
 
         #region FeatureFlags
+
         public static void AreEquivalent(Dictionary<string, FeatureFlag> expected, Dictionary<string, FeatureFlag> actual)
         {
             Assert.AreEqual(expected.Count, actual.Count);
@@ -138,9 +350,11 @@ namespace OptimizelySDK.Tests
             Assert.AreEqual(expected.RolloutId, actual.RolloutId);
             AreEquivalent(expected.VariableKeyToFeatureVariableMap, actual.VariableKeyToFeatureVariableMap);
         }
-        #endregion
+
+        #endregion FeatureFlags
 
         #region FeatureVariable
+
         public static void AreEqual(FeatureVariable expected, FeatureVariable actual)
         {
             Assert.AreEqual(expected.Id, actual.Id);
@@ -174,9 +388,11 @@ namespace OptimizelySDK.Tests
             Assert.AreEqual(expected.Key, actual.Key);
             AreEqual(expected.Value, actual.Value);
         }
-        #endregion
+
+        #endregion FeatureVariable
 
         #region Variations
+
         public static void AreEqual(Variation expected, Variation actual)
         {
             Assert.AreEqual(expected.Id, actual.Id);
@@ -223,7 +439,7 @@ namespace OptimizelySDK.Tests
             };
         }
 
-        public static void AreEquivalent(Dictionary<string, List<Variation>> expected, Dictionary<string, List<Variation>> actual)
+        public static void AreEquivalent(IDictionary<string, List<Variation>> expected, IDictionary<string, List<Variation>> actual)
         {
             Assert.AreEqual(expected.Count, actual.Count);
             var zipped = expected.Zip(actual, (e, a) =>
@@ -275,9 +491,10 @@ namespace OptimizelySDK.Tests
             });
         }
 
-        #endregion
+        #endregion Variations
 
         #region FeatureVariableUsage
+
         public static void AreEquivalent(IEnumerable<FeatureVariableUsage> expected, IEnumerable<FeatureVariableUsage> actual)
         {
             if (HasItems(expected, actual))
@@ -328,9 +545,11 @@ namespace OptimizelySDK.Tests
             Assert.AreEqual(expected.Id, actual.Id);
             Assert.AreEqual(expected.Value, actual.Value);
         }
-        #endregion
+
+        #endregion FeatureVariableUsage
 
         #region TrafficAllocation
+
         public static void AreEquivalent(IEnumerable<TrafficAllocation> expected, IEnumerable<TrafficAllocation> actual)
         {
             Assert.AreEqual(expected.Count(), actual.Count());
@@ -354,6 +573,7 @@ namespace OptimizelySDK.Tests
             Assert.AreEqual(expected.EndOfRange, actual.EndOfRange);
             Assert.AreEqual(expected.EntityId, actual.EntityId);
         }
-        #endregion
+
+        #endregion TrafficAllocation
     }
 }

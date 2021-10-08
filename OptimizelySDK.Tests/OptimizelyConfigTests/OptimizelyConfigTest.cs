@@ -702,7 +702,9 @@ namespace OptimizelySDK.Tests.OptimizelyConfigTests
                 flagToVariationMap: expectedflagVariations,
                 datafile: TestData.TypedAudienceDatafile);
 
-            Assert.IsTrue(TestData.CompareObjects(optimizelyConfig, expectedOptimizelyConfig));
+            Assertions.AreEqual(expectedOptimizelyConfig, optimizelyConfig);
+
+            //Assert.IsTrue(TestData.CompareObjects(optimizelyConfig, expectedOptimizelyConfig));
         }
 
         #endregion Test OptimizelyConfigService
