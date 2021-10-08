@@ -110,7 +110,7 @@ namespace OptimizelySDK.Bucketing
                 return Result<Variation>.NullResult(reasons);
 
             // check if a forced variation is set
-            var forcedVariationResult = GetForcedVariation(experiment.Key, user, config);
+            var forcedVariationResult = GetForcedVariation(experiment.Key, userId, config);
             reasons += forcedVariationResult.DecisionReasons;
 
             if (forcedVariationResult.ResultObject != null)
@@ -192,10 +192,9 @@ namespace OptimizelySDK.Bucketing
         /// <param name="userId">The user ID</param>
         /// <param name="config">Project Config</param>
         /// <returns>Variation entity which the given user and experiment should be forced into.</returns>
-        public Result<Variation> GetForcedVariation(string experimentKey, OptimizelyUserContext user, ProjectConfig config)
+        public Result<Variation> GetForcedVariation(string experimentKey, string userId, ProjectConfig config)
         {
             var reasons = new DecisionReasons();
-            var userId = user.GetUserId();
 
             if (ForcedVariationMap.ContainsKey(userId) == false)
             {

@@ -379,7 +379,7 @@ namespace OptimizelySDK
             if (experiment.Key == null)
                 return null;
 
-            var variation = DecisionService.GetVariation(experiment, userId, config, userAttributes).ResultObject;
+            var variation = DecisionService.GetVariation(experiment, CreateUserContext(userId, userAttributes), config, userAttributes).ResultObject;
             var decisionInfo = new Dictionary<string, object>
             {
                 { "experimentKey", experimentKey },
@@ -427,7 +427,6 @@ namespace OptimizelySDK
         public Variation GetForcedVariation(string experimentKey, string userId)
         {
             var config = ProjectConfigManager?.GetConfig();
-
             if (config == null)
             {
                 return null;
@@ -484,7 +483,7 @@ namespace OptimizelySDK
 
             bool featureEnabled = false;
             var sourceInfo = new Dictionary<string, string>();
-            var decision = DecisionService.GetVariationForFeature(featureFlag, userId, config, userAttributes).ResultObject;
+            var decision = DecisionService.GetVariationForFeature(featureFlag, CreateUserContext(userId, userAttributes), config, userAttributes).ResultObject;
             var variation = decision?.Variation;
             var decisionSource = decision?.Source ?? FeatureDecision.DECISION_SOURCE_ROLLOUT;
 
@@ -575,7 +574,7 @@ namespace OptimizelySDK
 
             var featureEnabled = false;
             var variableValue = featureVariable.DefaultValue;
-            var decision = DecisionService.GetVariationForFeature(featureFlag, userId, config, userAttributes).ResultObject;
+            var decision = DecisionService.GetVariationForFeature(featureFlag, CreateUserContext(userId, userAttributes), config, userAttributes).ResultObject;
 
             if (decision?.Variation != null)
             {
@@ -759,7 +758,7 @@ namespace OptimizelySDK
 
             var flagDecisionResult = DecisionService.GetVariationForFeature(
                 flag,
-                userId,
+                user,
                 config,
                 userAttributes,
                 allOptions);
@@ -1029,7 +1028,7 @@ namespace OptimizelySDK
                 return null;
 
             var featureEnabled = false;
-            var decisionResult = DecisionService.GetVariationForFeature(featureFlag, userId, config, userAttributes);
+            var decisionResult = DecisionService.GetVariationForFeature(featureFlag, CreateUserContext(userId, userAttributes), config, userAttributes);
             var variation = decisionResult.ResultObject?.Variation;
 
             if (variation != null)
