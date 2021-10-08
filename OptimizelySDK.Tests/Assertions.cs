@@ -98,6 +98,7 @@ namespace OptimizelySDK.Tests
             AreEquivalent(expected.Variations, actual.Variations);
         }
         #endregion
+
         #region FeatureDecision
         public static void AreEqual(FeatureDecision expected, FeatureDecision actual)
         {
@@ -204,16 +205,9 @@ namespace OptimizelySDK.Tests
             };
         }
 
-        public static void AreEqual(KeyValuePair<string, Variation> expected, KeyValuePair<string, Variation> actual)
+        public static void AreEquivalent(List<Dictionary<string, List<Variation>>> expected, List<Dictionary<string, List<Variation>>> actual)
         {
-            Assert.AreEqual(expected.Key, actual.Key);
-            AreEqual(expected.Value, actual.Value);
-        }
-
-        public static void AreEquivalent(IEnumerable<KeyValuePair<string, ICollection<Variation>>> expected, IEnumerable<KeyValuePair<string, ICollection<Variation>>> actual)
-        {
-            Assert.AreEqual(expected.Count(), actual.Count());
-
+            Assert.AreEqual(expected.Count, actual.Count);
             var zipped = expected.Zip(actual, (e, a) =>
             {
                 return new
@@ -223,19 +217,47 @@ namespace OptimizelySDK.Tests
                 };
             }).ToList();
 
-            foreach(var z in zipped)
+            foreach (var z in zipped)
             {
                 AreEquivalent(z.Expected, z.Actual);
-            }
+            };
         }
 
-        public static void AreEquivalent(KeyValuePair<string, ICollection<Variation>> expected, KeyValuePair<string, ICollection<Variation>> actual)
+        public static void AreEquivalent(Dictionary<string, List<Variation>> expected, Dictionary<string, List<Variation>> actual)
+        {
+            Assert.AreEqual(expected.Count, actual.Count);
+            var zipped = expected.Zip(actual, (e, a) =>
+            {
+                return new
+                {
+                    Expected = e,
+                    Actual = a
+                };
+            }).ToList();
+
+            foreach (var z in zipped)
+            {
+                AreEqual(z.Expected, z.Actual);
+            };
+        }
+
+        public static void AreEqual(KeyValuePair<string, Variation> expected, KeyValuePair<string, Variation> actual)
+        {
+            Assert.AreEqual(expected.Key, actual.Key);
+            AreEqual(expected.Value, actual.Value);
+        }
+
+        public static void AreEqual(KeyValuePair<string, List<Variation>> expected, KeyValuePair<string, List<Variation>> actual)
         {
             Assert.AreEqual(expected.Key, actual.Key);
             AreEquivalent(expected.Value, actual.Value);
         }
 
-
+        public static void AreEquivalent(KeyValuePair<string, List<Variation>> expected, KeyValuePair<string, List<Variation>> actual)
+        {
+            Assert.AreEqual(expected.Key, actual.Key);
+            AreEquivalent(expected.Value, actual.Value);
+        }
 
         public static void AreEquivalent(IEnumerable<Variation> expected, IEnumerable<Variation> actual)
         {

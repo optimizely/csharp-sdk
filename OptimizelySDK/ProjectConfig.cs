@@ -126,7 +126,7 @@ namespace OptimizelySDK
         /// <summary>
         /// Associative array of Flag to Variation in the datafile
         /// </summary>
-        Dictionary<string, ICollection<Variation>> FlagVariationMap { get; }
+        Dictionary<string, List<Variation>> FlagVariationMap { get; }
 
         //========================= Datafile Entities ===========================
 

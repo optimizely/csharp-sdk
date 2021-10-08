@@ -199,8 +199,8 @@ namespace OptimizelySDK.Config
         /// Associated array of flags to experiments
         /// </summary>
         
-        private Dictionary<string, ICollection<Variation>> _FlagVariationMap = new Dictionary<string, ICollection<Variation>>();
-        public Dictionary<string, ICollection<Variation>> FlagVariationMap { get { return _FlagVariationMap;  } }
+        private Dictionary<string, List<Variation>> _FlagVariationMap = new Dictionary<string, List<Variation>>();
+        public Dictionary<string, List<Variation>> FlagVariationMap { get { return _FlagVariationMap;  } }
 
         //========================= Interfaces ===========================
 
@@ -364,9 +364,9 @@ namespace OptimizelySDK.Config
             }
         }
 
-        private Dictionary<string, ICollection<Variation>> GetFlagVariationMap()
+        private Dictionary<string, List<Variation>> GetFlagVariationMap()
         {
-            var map = new Dictionary<string, ICollection<Variation>>();
+            var map = new Dictionary<string, List<Variation>>();
             var variations = new List<Variation>();
             var emptyArray = new List<Experiment>();
 

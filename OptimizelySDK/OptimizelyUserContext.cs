@@ -323,12 +323,11 @@ namespace OptimizelySDK
             return variationKey;
         }
 
-        /**
-    * Remove a forced decision
-    *
-    * @param flagKey The flag key in the forced decision
-    * @return Returns a boolean of true if successful, otherwise false
-    */
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="flagKey"></param>
+        /// <returns></returns>
         public bool RemoveForcedDecision(string flagKey)
         {
             return RemoveForcedDecision(flagKey, null);
@@ -376,10 +375,78 @@ namespace OptimizelySDK
                 Logger.Log(LogLevel.ERROR, "Optimizely SDK not ready.");
                 return false;
             }
-            // Clear both maps for with and without ruleKey
+            
             ForcedDecisionsMap.Clear();
             ForcedDecisionsMapWithNoRuleKey.Clear();
             return true;
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="flagKey"></param>
+        /// <returns></returns>
+        public Result<Variation> FindValidatedForcedDecision(string flagKey)
+        {
+            return FindValidatedForcedDecision(flagKey, null);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="flagKey"></param>
+        /// <param name="ruleKey"></param>
+        /// <returns></returns>
+        public Result<Variation> FindValidatedForcedDecision(string flagKey, string ruleKey)
+        {
+            DecisionReasons reasons = new DecisionReasons();
+            
+            string variationKey = FindForcedDecision(flagKey, ruleKey);
+            if (variationKey != null)
+            {
+                Variation variation =  new Variation();
+                string strRuleKey = ruleKey ?? "null";
+                string info = string.Empty;
+                if (variation != null)
+                {
+                    info = "Variation " + variationKey + " is mapped to flag: " + flagKey + " and rule: " + strRuleKey + " in the forced decision map.";
+                    Logger.Log(LogLevel.INFO, info);
+                    reasons.AddInfo(info);
+                    return Result<Variation>.NewResult(variation, reasons);
+                }
+                else
+                {
+                    info = "Invalid variation is mapped to flag: " + flagKey + " and rule: " + strRuleKey + " forced decision map.";
+                    Logger.Log(LogLevel.INFO, info);
+                    reasons.AddInfo(info);
+                }
+            }
+
+            return Result<Variation>.NullResult(reasons);
+
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="flagKey"></param>
+        /// <param name="variationKey"></param>
+        /// <returns></returns>
+        public Variation GetFlagVariationByKey(string flagKey, string variationKey)
+        {
+            var flagVariationsMap = Optimizely.GetOptimizelyConfig().FlagToVariationMap;
+            if (flagVariationsMap.TryGetValue(flagKey, out var variations))
+            {
+                foreach (var variation in variations)
+                {
+                    if (variation.Key.Equals(variationKey))
+                    {
+                        return variation;
+                    }
+                }
+            }
+            return null;
+        }
+
     }
 }

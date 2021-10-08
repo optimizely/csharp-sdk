@@ -139,6 +139,14 @@ namespace OptimizelySDK
 		/// <returns>List of the feature keys that are enabled for the user.</returns>
 		List<string> GetEnabledFeatures(string userId, UserAttributes userAttributes = null);
 
+		/// <summary>
+		/// Get the variation by flag key
+		/// </summary>
+		/// <param name="flagKey">The flag key</param>
+		/// <param name="variationKey">The variation key</param>
+		/// <returns></returns>
+		Variation GetFlagVariationByKey(string flagKey, string variationKey);
+
 		#endregion
 	}
 }

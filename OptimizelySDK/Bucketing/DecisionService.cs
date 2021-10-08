@@ -187,15 +187,6 @@ namespace OptimizelySDK.Bucketing
         }
 
         /// <summary>
-        /// Get a Variation of an Experiment from an Experiment Rule
-        /// </summary>
-        /// 
-        public virtual Result<Variation> GetVariationFromExperimentRule(ProjectConfig config, string flagKey, Experiment rule, OptimizelyUserContext userContext, OptimizelyDecideOption[] options)
-        {
-            return new Result<Variation>();
-        }
-
-        /// <summary>
         /// Gets the forced variation for the given user and experiment.  
         /// </summary>
         /// <param name="experimentKey">The experiment key</param>

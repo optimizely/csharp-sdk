@@ -46,6 +46,7 @@ namespace OptimizelySDK.OptlyConfig
             
             var featureMap = GetFeaturesMap(projectConfig, experimentsMapById);
             var events = GetEvents(projectConfig);
+            var variationByFlagMap = GetVariationsByFlag(projectConfig);
 
             OptimizelyConfig = new OptimizelyConfig(projectConfig.Revision,
                 projectConfig.SDKKey,
@@ -55,7 +56,13 @@ namespace OptimizelySDK.OptlyConfig
                 events,
                 experimentsKeyMap,
                 featureMap,
+                flagToVariationMap: variationByFlagMap,
                 projectConfig.ToDatafile());
+        }
+
+        private Dictionary<string, List<Variation>> GetVariationsByFlag(ProjectConfig projectConfig)
+        {
+            return projectConfig.FlagVariationMap;
         }
 
         private OptimizelyEvent[] GetEvents(ProjectConfig projectConfig)

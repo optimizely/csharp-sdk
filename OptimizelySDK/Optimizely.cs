@@ -1119,7 +1119,7 @@ namespace OptimizelySDK
             return new OptimizelyConfigService(config).GetOptimizelyConfig();
         }
 
-#endregion // FeatureFlag APIs
+        #endregion // FeatureFlag APIs
 
         /// <summary>
         /// Validate all string inputs are not null or empty.
@@ -1195,6 +1195,22 @@ namespace OptimizelySDK
             (EventProcessor as IDisposable)?.Dispose();
 
             ProjectConfigManager = null;
+        }
+
+        public Variation GetFlagVariationByKey(string flagKey, string variationKey)
+        {
+            Dictionary<string, List<Variation>> flagVariationsMap = new Dictionary<string, List<Variation>>();
+            if (flagVariationsMap.TryGetValue(flagKey, out var variations))
+            {
+                foreach(var variation in variations)
+                {
+                    if (variation.Key.Equals(variationKey))
+                    {
+                        return variation;
+                    }
+                }
+            }
+            return null;
         }
     }    
 }

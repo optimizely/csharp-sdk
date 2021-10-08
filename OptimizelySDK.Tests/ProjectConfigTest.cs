@@ -429,7 +429,7 @@ namespace OptimizelySDK.Tests
         {
             var allVariations = Config?.FlagVariationMap;
 
-            var expectedVariations1 = new List<KeyValuePair<string, ICollection<Variation>>>();
+            var expectedVariations1 = new List<Dictionary<string, List<Variation>>>();
             var expectedVariationList = new List<Variation>
             {
                 new Variation
@@ -537,9 +537,9 @@ namespace OptimizelySDK.Tests
                     } 
                 }
             };
-            expectedVariations1.Add(new KeyValuePair<string, ICollection<Variation>>("boolean_feature", expectedVariationList));
+            expectedVariations1.Add(new Dictionary<string, List<Variation>> { { "boolean_feature", expectedVariationList } });
 
-            var variations1 = allVariations.Where(v => v.Key == "boolean_feature");
+            var variations1 = allVariations.Where(v => v.Key == "boolean_feature").Select(v => new Dictionary<string, List<Variation>> { { v.Key, v.Value } }).ToList();
 
             Assertions.AreEquivalent(expectedVariations1, variations1);
         }
