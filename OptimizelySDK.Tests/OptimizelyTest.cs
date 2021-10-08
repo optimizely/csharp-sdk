@@ -2498,6 +2498,7 @@ namespace OptimizelySDK.Tests
                 It.IsAny<UserAttributes>(), It.IsAny<Variation>(), It.IsAny<LogEvent>()));
             NotificationCallbackMock.Setup(nc => nc.TestTrackCallback(It.IsAny<string>(), It.IsAny<string>(),
                 It.IsAny<UserAttributes>(), It.IsAny<EventTags>(), It.IsAny<LogEvent>()));
+
             Mock<OptimizelyUserContext> mockUserContext = new Mock<OptimizelyUserContext>();
             mockUserContext.Setup(ouc => ouc.GetUserId()).Returns(TestUserId);
 
