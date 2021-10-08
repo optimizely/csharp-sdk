@@ -200,7 +200,9 @@ namespace OptimizelySDK.Tests
 
         public static void AreEqual(OptimizelyExperiment expected, OptimizelyExperiment actual)
         {
-            throw new NotImplementedException();
+            Assert.AreEqual(expected.Id, actual.Id);
+            Assert.AreEqual(expected.Key, actual.Key);
+            Assert.AreEqual(expected.Audiences, actual.Audiences);
         }
 
         public static void AreEquivalent(IDictionary<string, OptimizelyExperiment> expected, IDictionary<string, OptimizelyExperiment> actual)

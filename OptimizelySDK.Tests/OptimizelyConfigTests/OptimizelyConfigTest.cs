@@ -703,8 +703,6 @@ namespace OptimizelySDK.Tests.OptimizelyConfigTests
                 datafile: TestData.TypedAudienceDatafile);
 
             Assertions.AreEqual(expectedOptimizelyConfig, optimizelyConfig);
-
-            //Assert.IsTrue(TestData.CompareObjects(optimizelyConfig, expectedOptimizelyConfig));
         }
 
         #endregion Test OptimizelyConfigService
