@@ -75,6 +75,34 @@ namespace OptimizelySDK.Tests
 
         #endregion Basic asserts
 
+        #region OptimizelyAttribute
+
+        public static void AreEquivalent(OptimizelyAttribute[] expected, OptimizelyAttribute[] actual)
+        {
+            Assert.AreEqual(expected.Count(), actual.Count());
+            var zipped = expected.Zip(actual, (e, a) =>
+            {
+                return new
+                {
+                    Expected = e,
+                    Actual = a
+                };
+            }).ToList();
+
+            foreach (var z in zipped)
+            {
+                AreEqual(z.Expected, z.Actual);
+            };
+        }
+
+        public static void AreEqual(OptimizelyAttribute expected, OptimizelyAttribute actual)
+        {
+            Assert.AreEqual(expected.Id, actual.Id);
+            Assert.AreEqual(expected.Key, actual.Key);
+        }
+
+        #endregion OptimizelyAttribute
+
         #region OptimizelyAudience
 
         private static void AreEquivalent(OptimizelyAudience[] expected, OptimizelyAudience[] actual)
@@ -117,11 +145,6 @@ namespace OptimizelySDK.Tests
             AreEquivalent(expected.FlagToVariationMap, actual.FlagToVariationMap);
             Assert.AreEqual(expected.Revision, actual.Revision);
             Assert.AreEqual(expected.SDKKey, actual.SDKKey);
-        }
-
-        private static void AreEquivalent(OptimizelyAttribute[] expected, OptimizelyAttribute[] actual)
-        {
-            throw new NotImplementedException();
         }
 
         #endregion OptimizelyConfig

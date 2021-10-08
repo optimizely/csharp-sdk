@@ -704,7 +704,7 @@ namespace OptimizelySDK.Tests.OptimizelyConfigTests
 
             Assertions.AreEqual(expectedOptimizelyConfig, optimizelyConfig);
 
-            Assert.IsTrue(TestData.CompareObjects(optimizelyConfig, expectedOptimizelyConfig));
+            //Assert.IsTrue(TestData.CompareObjects(optimizelyConfig, expectedOptimizelyConfig));
         }
 
         #endregion Test OptimizelyConfigService
