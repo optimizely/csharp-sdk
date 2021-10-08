@@ -1,4 +1,4 @@
-﻿/* 
+﻿/*
 * Copyright 2017-2021, Optimizely
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,7 +26,7 @@ namespace OptimizelySDK.Bucketing
 {
     /// <summary>
     /// Optimizely's decision service that determines which variation of an experiment the user will be allocated to.
-    /// The decision service contains all logic around how a user decision is made.  
+    /// The decision service contains all logic around how a user decision is made.
     /// This includes the following:
     /// 1. Checking experiment status
     /// 2. Checking whitelisting
@@ -44,18 +44,17 @@ namespace OptimizelySDK.Bucketing
         private UserProfileService UserProfileService;
         private ILogger Logger;
 
-        /// <summary>   
-        /// Associative array of user IDs to an associative array   
-        /// of experiments to variations.This contains all the forced variations    
-        /// set by the user by calling setForcedVariation (it is not the same as the    
-        /// whitelisting forcedVariations data structure in the Experiments class). 
+        /// <summary>
+        /// Associative array of user IDs to an associative array
+        /// of experiments to variations.This contains all the forced variations
+        /// set by the user by calling setForcedVariation (it is not the same as the
+        /// whitelisting forcedVariations data structure in the Experiments class).
         /// </summary>
-    #if NET35
+#if NET35
         private Dictionary<string, Dictionary<string, string>> ForcedVariationMap;
-    #else
+#else
         private System.Collections.Concurrent.ConcurrentDictionary<string, Dictionary<string, string>> ForcedVariationMap;
-    #endif
-
+#endif
 
         /// <summary>
         ///  Initialize a decision service for the Optimizely client.
@@ -70,11 +69,11 @@ namespace OptimizelySDK.Bucketing
             ErrorHandler = errorHandler;
             UserProfileService = userProfileService;
             Logger = logger;
-        #if NET35
+#if NET35
             ForcedVariationMap = new Dictionary<string, Dictionary<string, string>>();
-        #else
+#else
             ForcedVariationMap = new System.Collections.Concurrent.ConcurrentDictionary<string, Dictionary<string, string>>();
-        #endif
+#endif
         }
 
         /// <summary>
@@ -85,11 +84,11 @@ namespace OptimizelySDK.Bucketing
         /// <param name = "filteredAttributes" > The user's attributes. This should be filtered to just attributes in the Datafile.</param>
         /// <returns>The Variation the user is allocated into.</returns>
         public virtual Result<Variation> GetVariation(Experiment experiment,
-            string userId,
+            OptimizelyUserContext user,
             ProjectConfig config,
             UserAttributes filteredAttributes)
         {
-            return GetVariation(experiment, userId, config, filteredAttributes, new OptimizelyDecideOption[] { });
+            return GetVariation(experiment, user, config, filteredAttributes, new OptimizelyDecideOption[] { });
         }
 
         /// <summary>
@@ -100,17 +99,18 @@ namespace OptimizelySDK.Bucketing
         /// <param name = "filteredAttributes" > The user's attributes. This should be filtered to just attributes in the Datafile.</param>
         /// <returns>The Variation the user is allocated into.</returns>
         public virtual Result<Variation> GetVariation(Experiment experiment,
-            string userId,
+            OptimizelyUserContext user,
             ProjectConfig config,
             UserAttributes filteredAttributes,
             OptimizelyDecideOption[] options)
         {
             var reasons = new DecisionReasons();
+            var userId = user.GetUserId();
             if (!ExperimentUtils.IsExperimentActive(experiment, Logger))
                 return Result<Variation>.NullResult(reasons);
 
             // check if a forced variation is set
-            var forcedVariationResult = GetForcedVariation(experiment.Key, userId, config);
+            var forcedVariationResult = GetForcedVariation(experiment.Key, user, config);
             reasons += forcedVariationResult.DecisionReasons;
 
             if (forcedVariationResult.ResultObject != null)
@@ -122,7 +122,7 @@ namespace OptimizelySDK.Bucketing
             reasons += variationResult.DecisionReasons;
 
             if (variationResult.ResultObject != null)
-            {                
+            {
                 return variationResult.SetReasons(reasons);
             }
             // fetch the user profile map from the user profile service
@@ -133,7 +133,7 @@ namespace OptimizelySDK.Bucketing
             {
                 try
                 {
-                    Dictionary<string, object> userProfileMap = UserProfileService.Lookup(userId);
+                    Dictionary<string, object> userProfileMap = UserProfileService.Lookup(user.GetUserId());
                     if (userProfileMap != null && UserProfileUtil.IsValidUserProfileMap(userProfileMap))
                     {
                         userProfile = UserProfileUtil.ConvertMapToUserProfile(userProfileMap);
@@ -173,7 +173,6 @@ namespace OptimizelySDK.Bucketing
                     {
                         var bucketerUserProfile = userProfile ?? new UserProfile(userId, new Dictionary<string, Decision>());
                         SaveVariation(experiment, variationResult.ResultObject, bucketerUserProfile);
-
                     }
                     else
                         Logger.Log(LogLevel.INFO, "This decision will not be saved since the UserProfileService is null.");
@@ -181,21 +180,22 @@ namespace OptimizelySDK.Bucketing
 
                 return variationResult.SetReasons(reasons);
             }
-            Logger.Log(LogLevel.INFO, reasons.AddInfo($"User \"{userId}\" does not meet conditions to be in experiment \"{experiment.Key}\"."));
+            Logger.Log(LogLevel.INFO, reasons.AddInfo($"User \"{user.GetUserId()}\" does not meet conditions to be in experiment \"{experiment.Key}\"."));
 
             return Result<Variation>.NullResult(reasons);
         }
 
         /// <summary>
-        /// Gets the forced variation for the given user and experiment.  
+        /// Gets the forced variation for the given user and experiment.
         /// </summary>
         /// <param name="experimentKey">The experiment key</param>
         /// <param name="userId">The user ID</param>
         /// <param name="config">Project Config</param>
         /// <returns>Variation entity which the given user and experiment should be forced into.</returns>
-        public Result<Variation> GetForcedVariation(string experimentKey, string userId, ProjectConfig config)
+        public Result<Variation> GetForcedVariation(string experimentKey, OptimizelyUserContext user, ProjectConfig config)
         {
             var reasons = new DecisionReasons();
+            var userId = user.GetUserId();
 
             if (ForcedVariationMap.ContainsKey(userId) == false)
             {
@@ -207,7 +207,7 @@ namespace OptimizelySDK.Bucketing
 
             string experimentId = config.GetExperimentFromKey(experimentKey).Id;
 
-            // this case is logged in getExperimentFromKey  
+            // this case is logged in getExperimentFromKey
             if (string.IsNullOrEmpty(experimentId))
                 return Result<Variation>.NullResult(reasons);
 
@@ -227,7 +227,7 @@ namespace OptimizelySDK.Bucketing
 
             string variationKey = config.GetVariationFromId(experimentKey, variationId).Key;
 
-            // this case is logged in getVariationFromKey   
+            // this case is logged in getVariationFromKey
             if (string.IsNullOrEmpty(variationKey))
                 return Result<Variation>.NullResult(reasons);
             Logger.Log(LogLevel.DEBUG, reasons.AddInfo($@"Variation ""{variationKey}"" is mapped to experiment ""{experimentKey}"" and user ""{userId}"" in the forced variation map"));
@@ -247,7 +247,7 @@ namespace OptimizelySDK.Bucketing
         /// <returns>A boolean value that indicates if the set completed successfully.</returns>
         public bool SetForcedVariation(string experimentKey, string userId, string variationKey, ProjectConfig config)
         {
-            // Empty variation key is considered as invalid.    
+            // Empty variation key is considered as invalid.
             if (variationKey != null && variationKey.Length == 0)
             {
                 Logger.Log(LogLevel.DEBUG, "Variation key is invalid.");
@@ -256,11 +256,11 @@ namespace OptimizelySDK.Bucketing
 
             var experimentId = config.GetExperimentFromKey(experimentKey).Id;
 
-            // this case is logged in getExperimentFromKey  
+            // this case is logged in getExperimentFromKey
             if (string.IsNullOrEmpty(experimentId))
                 return false;
 
-            // clear the forced variation if the variation key is null  
+            // clear the forced variation if the variation key is null
             if (variationKey == null)
             {
                 if (ForcedVariationMap.ContainsKey(userId) && ForcedVariationMap[userId].ContainsKey(experimentId))
@@ -272,15 +272,15 @@ namespace OptimizelySDK.Bucketing
 
             string variationId = config.GetVariationFromKey(experimentKey, variationKey).Id;
 
-            // this case is logged in getVariationFromKey   
+            // this case is logged in getVariationFromKey
             if (string.IsNullOrEmpty(variationId))
                 return false;
 
-            // Add User if not exist.   
+            // Add User if not exist.
             if (ForcedVariationMap.ContainsKey(userId) == false)
                 ForcedVariationMap[userId] = new Dictionary<string, string>();
 
-            // Add/Replace Experiment to Variation ID map.  
+            // Add/Replace Experiment to Variation ID map.
             ForcedVariationMap[userId][experimentId] = variationId;
 
             Logger.Log(LogLevel.DEBUG, $@"Set variation ""{variationId}"" for experiment ""{experimentId}"" and user ""{userId}"" in the forced variation map.");
@@ -394,7 +394,6 @@ namespace OptimizelySDK.Bucketing
             {
                 UserProfileService.Save(userProfile.ToMap());
                 Logger.Log(LogLevel.INFO, $"Saved variation \"{variation.Id}\" of experiment \"{experiment.Id}\" for user \"{userProfile.UserId}\".");
-
             }
             catch (Exception exception)
             {
@@ -402,7 +401,7 @@ namespace OptimizelySDK.Bucketing
                 ErrorHandler.HandleError(new Exceptions.OptimizelyRuntimeException(exception.Message));
             }
         }
-       
+
         /// <summary>
         /// Try to bucket the user into a rollout rule.
         /// Evaluate the user for rules in priority order by seeing if the user satisfies the audience.
@@ -441,7 +440,8 @@ namespace OptimizelySDK.Bucketing
                 return Result<FeatureDecision>.NullResult(reasons);
             }
 
-            if (rollout.Experiments == null ||  rollout.Experiments.Count == 0) {
+            if (rollout.Experiments == null || rollout.Experiments.Count == 0)
+            {
                 return Result<FeatureDecision>.NullResult(reasons);
             }
 
@@ -454,7 +454,7 @@ namespace OptimizelySDK.Bucketing
             // For all rules before the everyone else rule
             for (int i = 0; i < rolloutRulesLength - 1; i++)
             {
-                string loggingKey = (i + 1).ToString(); 
+                string loggingKey = (i + 1).ToString();
                 var rolloutRule = rollout.Experiments[i];
                 var userMeetConditionsResult = ExperimentUtils.DoesUserMeetAudienceConditions(config, rolloutRule, filteredAttributes, LOGGING_KEY_TYPE_RULE, loggingKey, Logger);
                 reasons += userMeetConditionsResult.DecisionReasons;
@@ -507,12 +507,13 @@ namespace OptimizelySDK.Bucketing
         /// <returns>null if the user is not bucketed into the rollout or if the feature flag was not attached to a rollout.
         /// Otherwise the FeatureDecision entity</returns>
         public virtual Result<FeatureDecision> GetVariationForFeatureExperiment(FeatureFlag featureFlag,
-            string userId,
+            OptimizelyUserContext user,
             UserAttributes filteredAttributes,
             ProjectConfig config,
             OptimizelyDecideOption[] options)
         {
             var reasons = new DecisionReasons();
+            var userId = user.GetUserId();
             if (featureFlag == null)
             {
                 Logger.Log(LogLevel.ERROR, "Invalid feature flag provided.");
@@ -532,7 +533,7 @@ namespace OptimizelySDK.Bucketing
                 if (string.IsNullOrEmpty(experiment.Key))
                     continue;
 
-                var variationResult = GetVariation(experiment, userId, config, filteredAttributes, options); //GetVariationFromExperimentRule(config, featureFlag.Key, experiment, null, options);
+                var variationResult = GetVariation(experiment, user, config, filteredAttributes, options);
                 reasons += variationResult.DecisionReasons;
 
                 if (!string.IsNullOrEmpty(variationResult.ResultObject?.Id))
@@ -552,11 +553,11 @@ namespace OptimizelySDK.Bucketing
         /// <param name = "featureFlag" >The feature flag the user wants to access.</param>
         /// <param name = "userId" >User Identifier</param>
         /// <param name = "filteredAttributes" >The user's attributes. This should be filtered to just attributes in the Datafile.</param>
-        /// <returns>null if the user is not bucketed into any variation or the FeatureDecision entity if the user is 
+        /// <returns>null if the user is not bucketed into any variation or the FeatureDecision entity if the user is
         /// successfully bucketed.</returns>
-        public virtual Result<FeatureDecision> GetVariationForFeature(FeatureFlag featureFlag, string userId, ProjectConfig config, UserAttributes filteredAttributes)
+        public virtual Result<FeatureDecision> GetVariationForFeature(FeatureFlag featureFlag, OptimizelyUserContext user, ProjectConfig config, UserAttributes filteredAttributes)
         {
-            return GetVariationForFeature(featureFlag, userId, config, filteredAttributes, new OptimizelyDecideOption[] { });
+            return GetVariationForFeature(featureFlag, user, config, filteredAttributes, new OptimizelyDecideOption[] { });
         }
 
         /// <summary>
@@ -567,17 +568,18 @@ namespace OptimizelySDK.Bucketing
         /// <param name = "filteredAttributes" >The user's attributes. This should be filtered to just attributes in the Datafile.</param>
         /// <param name = "filteredAttributes" >The user's attributes. This should be filtered to just attributes in the Datafile.</param>
         /// <param name = "options" >An array of decision options.</param>
-        /// <returns>null if the user is not bucketed into any variation or the FeatureDecision entity if the user is 
+        /// <returns>null if the user is not bucketed into any variation or the FeatureDecision entity if the user is
         /// successfully bucketed.</returns>
         public virtual Result<FeatureDecision> GetVariationForFeature(FeatureFlag featureFlag,
-            string userId,
+            OptimizelyUserContext user,
             ProjectConfig config,
             UserAttributes filteredAttributes,
             OptimizelyDecideOption[] options)
         {
             var reasons = new DecisionReasons();
+            var userId = user.GetUserId();
             // Check if the feature flag has an experiment and the user is bucketed into that experiment.
-            var decisionResult = GetVariationForFeatureExperiment(featureFlag, userId, filteredAttributes, config, options);
+            var decisionResult = GetVariationForFeatureExperiment(featureFlag, user, filteredAttributes, config, options);
             reasons += decisionResult.DecisionReasons;
 
             if (decisionResult.ResultObject != null)
