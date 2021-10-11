@@ -120,6 +120,8 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestGetVariationEvaluatesUserProfileBeforeAudienceTargeting()
         {
+            var optlyObject = new Optimizely(TestData.Datafile, new ValidEventDispatcher(), LoggerMock.Object);
+            OptimizelyUserContextMock = new Mock<OptimizelyUserContext>(optlyObject, WhitelistedUserId, new UserAttributes(), ErrorHandlerMock.Object, LoggerMock.Object);
             OptimizelyUserContextMock.Setup(ouc => ouc.GetUserId()).Returns(GenericUserId);
 
             Experiment experiment = ProjectConfig.Experiments[8];
@@ -157,7 +159,7 @@ namespace OptimizelySDK.Tests
             Assertions.AreEqual(WhitelistedVariation, expectedVariation);
             Assert.IsTrue(TestData.CompareObjects(WhitelistedVariation, decisionService.GetWhitelistedVariation(WhitelistedExperiment, WhitelistedUserId).ResultObject));
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, string.Format("User \"{0}\" is forced in variation \"{1}\".",
-                WhitelistedUserId, WhitelistedVariation.Key)), Times.Once);
+                WhitelistedUserId, WhitelistedVariation.Key)), Times.Exactly(2));
 
             BucketerMock.Verify(_ => _.Bucket(It.IsAny<ProjectConfig>(), It.IsAny<Experiment>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
         }
@@ -229,7 +231,10 @@ namespace OptimizelySDK.Tests
 
             DecisionService decisionService = new DecisionService(BucketerMock.Object, ErrorHandlerMock.Object, UserProfileServiceMock.Object, LoggerMock.Object);
 
+            var optlyObject = new Optimizely(TestData.Datafile, new ValidEventDispatcher(), LoggerMock.Object);
+            OptimizelyUserContextMock = new Mock<OptimizelyUserContext>(optlyObject, WhitelistedUserId, new UserAttributes(), ErrorHandlerMock.Object, LoggerMock.Object);
             OptimizelyUserContextMock.Setup(ouc => ouc.GetUserId()).Returns(UserProfileId);
+
             var actualVariation = decisionService.GetVariation(experiment, OptimizelyUserContextMock.Object, ProjectConfig, new UserAttributes());
 
             Assertions.AreEqual(variation, actualVariation.ResultObject);
@@ -895,13 +900,16 @@ namespace OptimizelySDK.Tests
                 It.IsAny<UserAttributes>(), ProjectConfig, It.IsAny<OptimizelyDecideOption[]>())).Returns(Result<FeatureDecision>.NullResult(null));
             DecisionServiceMock.Setup(ds => ds.GetVariationForFeatureRollout(It.IsAny<FeatureFlag>(), It.IsAny<string>(),
                 It.IsAny<UserAttributes>(), ProjectConfig)).Returns(expectedDecision);
+
+            var optlyObject = new Optimizely(TestData.Datafile, new ValidEventDispatcher(), LoggerMock.Object);
+            OptimizelyUserContextMock = new Mock<OptimizelyUserContext>(optlyObject, WhitelistedUserId, new UserAttributes(), ErrorHandlerMock.Object, LoggerMock.Object);
             OptimizelyUserContextMock.Setup(ouc => ouc.GetUserId()).Returns(UserProfileId);
 
             var actualDecision = DecisionServiceMock.Object.GetVariationForFeature(featureFlag, OptimizelyUserContextMock.Object, ProjectConfig, new UserAttributes());
 
             Assert.IsTrue(TestData.CompareObjects(expectedDecision, actualDecision));
 
-            LoggerMock.Verify(l => l.Log(LogLevel.INFO, "The user \"user1\" is bucketed into a rollout for feature flag \"string_single_variable_feature\"."));
+            LoggerMock.Verify(l => l.Log(LogLevel.INFO, "The user \"userProfileId\" is bucketed into a rollout for feature flag \"string_single_variable_feature\"."));
         }
 
         // Should return null when the user neither gets bucketed into feature experiment nor in feature rollout.
