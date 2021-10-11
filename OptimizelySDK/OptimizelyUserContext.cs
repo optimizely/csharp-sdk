@@ -1,4 +1,4 @@
-﻿/* 
+﻿/*
  * Copyright 2020-2021, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -51,10 +51,13 @@ namespace OptimizelySDK
         private ILogger Logger;
         private IErrorHandler ErrorHandler;
         private object mutex = new object();
+
         // userID for Optimizely user context
         private string UserId;
+
         // user attributes for Optimizely user context.
         private UserAttributes Attributes;
+
         // Optimizely object to be used.
         private Optimizely Optimizely;
 
@@ -97,7 +100,8 @@ namespace OptimizelySDK
         public UserAttributes GetAttributes()
         {
             UserAttributes copiedAttributes = null;
-            lock(mutex) {
+            lock (mutex)
+            {
                 copiedAttributes = new UserAttributes(Attributes);
             }
 
@@ -208,17 +212,17 @@ namespace OptimizelySDK
         /// </summary>
         /// <param name="eventName">The event name.</param>
         /// <param name="eventTags">A map of event tag names to event tag values.</param>
-        public virtual void TrackEvent(string eventName, 
+        public virtual void TrackEvent(string eventName,
             EventTags eventTags)
         {
             Optimizely.Track(eventName, UserId, Attributes, eventTags);
         }
 
         /// <summary>
-        /// 
+        /// Set a forced decision.
         /// </summary>
-        /// <param name="flagKey"></param>
-        /// <param name="variationKey"></param>
+        /// <param name="flagKey">The flag key.</param>
+        /// <param name="variationKey">The variation key.</param>
         /// <returns></returns>
 
         public bool SetForcedDecision(string flagKey, string variationKey)
@@ -227,11 +231,11 @@ namespace OptimizelySDK
         }
 
         /// <summary>
-        /// 
+        /// Set a forced decision.
         /// </summary>
-        /// <param name="flagKey"></param>
-        /// <param name="ruleKey"></param>
-        /// <param name="variationKey"></param>
+        /// <param name="flagKey">The flag key.</param>
+        /// <param name="ruleKey">The rule key.</param>
+        /// <param name="variationKey">The variation key.</param>
         /// <returns></returns>
         public bool SetForcedDecision(string flagKey, string ruleKey, string variationKey)
         {
@@ -241,7 +245,7 @@ namespace OptimizelySDK
                 return false;
             }
 
-            if(ruleKey == null)
+            if (ruleKey == null)
             {
                 if (ForcedDecisionsMapWithNoRuleKey.TryGetValue(flagKey, out var value))
                 {
@@ -324,21 +328,21 @@ namespace OptimizelySDK
         }
 
         /// <summary>
-        /// 
+        /// Removes a forced decision.
         /// </summary>
-        /// <param name="flagKey"></param>
-        /// <returns></returns>
+        /// <param name="flagKey">The flag key.</param>
+        /// <returns>Whether the item was removed.</returns>
         public bool RemoveForcedDecision(string flagKey)
         {
             return RemoveForcedDecision(flagKey, null);
         }
 
         /// <summary>
-        /// 
+        /// Removes a forced decision.
         /// </summary>
-        /// <param name="flagKey"></param>
+        /// <param name="flagKey">The flag key.</param>
         /// <param name="ruleKey"></param>
-        /// <returns></returns>
+        /// <returns>Whether the item was removed.</returns>
         public bool RemoveForcedDecision(string flagKey, string ruleKey)
         {
             if (Optimizely.GetOptimizelyConfig() == null)
@@ -358,16 +362,15 @@ namespace OptimizelySDK
             }
             else
             {
-                
                 ForcedDecisionsMapWithNoRuleKey.Remove(flagKey);
                 return true;
             }
         }
 
         /// <summary>
-        /// 
+        /// Removes all forced decisions.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>Whether the clear was successful.</returns>
         public bool RemoveAllForcedDecisions()
         {
             if (Optimizely.GetOptimizelyConfig() == null)
@@ -375,36 +378,36 @@ namespace OptimizelySDK
                 Logger.Log(LogLevel.ERROR, "Optimizely SDK not ready.");
                 return false;
             }
-            
+
             ForcedDecisionsMap.Clear();
             ForcedDecisionsMapWithNoRuleKey.Clear();
             return true;
         }
 
         /// <summary>
-        /// 
+        /// Finds a validated forced decision.
         /// </summary>
-        /// <param name="flagKey"></param>
-        /// <returns></returns>
+        /// <param name="flagKey">The flag key.</param>
+        /// <returns>A result with the variation.</returns>
         public Result<Variation> FindValidatedForcedDecision(string flagKey)
         {
             return FindValidatedForcedDecision(flagKey, null);
         }
 
         /// <summary>
-        /// 
+        /// Finds a validated forced decision.
         /// </summary>
-        /// <param name="flagKey"></param>
-        /// <param name="ruleKey"></param>
-        /// <returns></returns>
+        /// <param name="flagKey">The flag key.</param>
+        /// <param name="ruleKey">The rule key.</param>
+        /// <returns>A result with the variation</returns>
         public Result<Variation> FindValidatedForcedDecision(string flagKey, string ruleKey)
         {
             DecisionReasons reasons = new DecisionReasons();
-            
+
             string variationKey = FindForcedDecision(flagKey, ruleKey);
             if (variationKey != null)
             {
-                Variation variation =  new Variation();
+                Variation variation = new Variation();
                 string strRuleKey = ruleKey ?? "null";
                 string info = string.Empty;
                 if (variation != null)
@@ -423,30 +426,6 @@ namespace OptimizelySDK
             }
 
             return Result<Variation>.NullResult(reasons);
-
         }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="flagKey"></param>
-        /// <param name="variationKey"></param>
-        /// <returns></returns>
-        public Variation GetFlagVariationByKey(string flagKey, string variationKey)
-        {
-            var flagVariationsMap = Optimizely.GetOptimizelyConfig().FlagToVariationMap;
-            if (flagVariationsMap.TryGetValue(flagKey, out var variations))
-            {
-                foreach (var variation in variations)
-                {
-                    if (variation.Key.Equals(variationKey))
-                    {
-                        return variation;
-                    }
-                }
-            }
-            return null;
-        }
-
     }
 }
