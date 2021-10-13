@@ -287,9 +287,9 @@ namespace OptimizelySDK.Tests
             var optly = new Optimizely(new FallbackProjectConfigManager(null));
 
             var user = optly.CreateUserContext(UserID);
-            user.SetForcedDecision("flag", "variation");
+            user.SetForcedDecision("flagKey", "variation");
 
-            var result = user.RemoveForcedDecision("flag", null);
+            var result = user.RemoveForcedDecision("flagKey", null);
 
             Assert.AreEqual(false, result);
         }
@@ -299,19 +299,19 @@ namespace OptimizelySDK.Tests
         {
             var user = Optimizely.CreateUserContext(UserID);
 
-            user.SetForcedDecision("flag", "rule", "variation");
-            user.SetForcedDecision("flag2", "rule2", "variation2");
-            user.SetForcedDecision("flag3", "rule3", "variation3");
+            user.SetForcedDecision("flagKey", "ruleKey", "variation");
+            user.SetForcedDecision("flagKey2", "ruleKey2", "variation2");
+            user.SetForcedDecision("flagKey3", "ruleKey3", "variation3");
 
             user.RemoveAllForcedDecisions();
 
-            var result1 = user.GetForcedDecision("flag", null);
+            var result1 = user.GetForcedDecision("flagKey", null);
             Assert.AreEqual(null, result1);
 
-            var result2 = user.GetForcedDecision("flag2", null);
+            var result2 = user.GetForcedDecision("flagKey2", null);
             Assert.AreEqual(null, result2);
 
-            var result3 = user.GetForcedDecision("flag3", null);
+            var result3 = user.GetForcedDecision("flagKey3", null);
             Assert.AreEqual(null, result3);
         }
 
@@ -321,7 +321,7 @@ namespace OptimizelySDK.Tests
             var optly = new Optimizely(new FallbackProjectConfigManager(null));
 
             var user = optly.CreateUserContext(UserID);
-            user.SetForcedDecision("flag", "variation");
+            user.SetForcedDecision("flagKey", "variation");
 
             var result = user.RemoveAllForcedDecisions();
 
