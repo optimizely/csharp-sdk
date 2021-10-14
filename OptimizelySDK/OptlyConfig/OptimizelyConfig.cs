@@ -1,4 +1,4 @@
-﻿/* 
+﻿/*
  * Copyright 2019-2021, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -32,15 +32,13 @@ namespace OptimizelySDK.OptlyConfig
 
         /// <summary>
         /// This experimentsMap is for experiments of legacy projects only.
-        /// For flag projects, experiment keys are not guaranteed to be unique 
-        /// across multiple flags, so this map may not include all experiments 
+        /// For flag projects, experiment keys are not guaranteed to be unique
+        /// across multiple flags, so this map may not include all experiments
         /// when keys conflict.
-        /// </summary> 
+        /// </summary>
         public IDictionary<string, OptimizelyExperiment> ExperimentsMap { get; private set; }
 
         public IDictionary<string, OptimizelyFeature> FeaturesMap { get; private set; }
-
-        public IDictionary<string, List<Variation>> FlagToVariationMap { get; private set; }
 
         private string _datafile;
 
@@ -62,20 +60,6 @@ namespace OptimizelySDK.OptlyConfig
             EnvironmentKey = environmentKey;
             ExperimentsMap = experimentsMap;
             FeaturesMap = featuresMap;
-            _datafile = datafile;
-        }
-
-        public OptimizelyConfig(string revision, string sdkKey, string environmentKey, OptimizelyAttribute[] attributes, OptimizelyAudience[] audiences, OptimizelyEvent[] events, IDictionary<string, OptimizelyExperiment> experimentsMap, IDictionary<string, OptimizelyFeature> featuresMap, IDictionary<string, List<Variation>> flagToVariationMap, string datafile = null)
-        {
-            Revision = revision;
-            SDKKey = sdkKey;
-            Attributes = attributes;
-            Audiences = audiences;
-            Events = events;
-            EnvironmentKey = environmentKey;
-            ExperimentsMap = experimentsMap;
-            FeaturesMap = featuresMap;
-            FlagToVariationMap = flagToVariationMap;
             _datafile = datafile;
         }
 

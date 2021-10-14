@@ -142,7 +142,6 @@ namespace OptimizelySDK.Tests
             AreEquivalent(expected.Events, actual.Events);
             AreEquivalent(expected.ExperimentsMap, actual.ExperimentsMap);
             AreEquivalent(expected.FeaturesMap, actual.FeaturesMap);
-            AreEquivalent(expected.FlagToVariationMap, actual.FlagToVariationMap);
             Assert.AreEqual(expected.Revision, actual.Revision);
             Assert.AreEqual(expected.SDKKey, actual.SDKKey);
         }

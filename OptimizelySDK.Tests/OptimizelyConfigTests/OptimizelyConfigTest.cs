@@ -699,7 +699,6 @@ namespace OptimizelySDK.Tests.OptimizelyConfigTests
                 },
                 experimentsMap: experimentsMap,
                 featuresMap: featuresMap,
-                flagToVariationMap: expectedflagVariations,
                 datafile: TestData.TypedAudienceDatafile);
 
             Assertions.AreEqual(expectedOptimizelyConfig, optimizelyConfig);
@@ -719,8 +718,7 @@ namespace OptimizelySDK.Tests.OptimizelyConfigTests
                 audiences: new OptimizelyAudience[0],
                 events: new OptimizelyEvent[0],
                 experimentsMap: new Dictionary<string, OptimizelyExperiment>(),
-                featuresMap: new Dictionary<string, OptimizelyFeature>(),
-                flagToVariationMap: new Dictionary<string, List<Variation>>()
+                featuresMap: new Dictionary<string, OptimizelyFeature>()
                 );
             Assert.AreEqual(expectedOptlyFeature.Revision, "123");
             Assert.AreEqual(expectedOptlyFeature.SDKKey, "testSdkKey");
