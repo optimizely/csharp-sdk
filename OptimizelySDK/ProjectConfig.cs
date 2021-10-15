@@ -1,4 +1,4 @@
-﻿/* 
+﻿/*
  * Copyright 2019-2021, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,18 +26,15 @@ namespace OptimizelySDK
         /// </summary>
         string Version { get; set; }
 
-
         /// <summary>
         /// Account ID of the account using the SDK.
         /// </summary>
         string AccountId { get; set; }
 
-
         /// <summary>
         /// Project ID of the Full Stack project.
         /// </summary>
         string ProjectId { get; set; }
-
 
         /// <summary>
         /// Revision of the datafile.
@@ -68,7 +65,6 @@ namespace OptimizelySDK
         /// Bot filtering flag.
         /// </summary>
         bool? BotFiltering { get; set; }
-
 
         //========================= Mappings ===========================
 
@@ -122,7 +118,6 @@ namespace OptimizelySDK
         /// </summary>
         Dictionary<string, Rollout> RolloutIdMap { get; }
 
-
         /// <summary>
         /// Associative array of Flag to Variation in the datafile
         /// </summary>
@@ -139,7 +134,6 @@ namespace OptimizelySDK
         /// Associative list of experiments to Experiment(s) in the datafile.
         /// </summary>
         Experiment[] Experiments { get; set; }
-
 
         /// <summary>
         /// Associative list of events.
@@ -220,7 +214,7 @@ namespace OptimizelySDK
         /// </summary>
         /// <param name="experimentKey">key for Experiment</param>
         /// <param name="variationKey">key for Variation</param>
-        /// <returns>Variation Entity corresponding to the provided experiment key and variation key or a dummy 
+        /// <returns>Variation Entity corresponding to the provided experiment key and variation key or a dummy
         /// entity if keys are invalid</returns>
         Variation GetVariationFromKey(string experimentKey, string variationKey);
 
@@ -229,7 +223,7 @@ namespace OptimizelySDK
         /// </summary>
         /// <param name="experimentId">ID for Experiment</param>
         /// <param name="variationKey">key for Variation</param>
-        /// <returns>Variation Entity corresponding to the provided experiment key and variation key or a dummy 
+        /// <returns>Variation Entity corresponding to the provided experiment key and variation key or a dummy
         /// entity if keys are invalid</returns>
         Variation GetVariationFromKeyByExperimentId(string experimentId, string variationKey);
 
@@ -238,7 +232,7 @@ namespace OptimizelySDK
         /// </summary>
         /// <param name="experimentKey">key for Experiment</param>
         /// <param name="variationId">ID for Variation</param>
-        /// <returns>Variation Entity corresponding to the provided experiment key and variation ID or a dummy 
+        /// <returns>Variation Entity corresponding to the provided experiment key and variation ID or a dummy
         /// entity if key or ID is invalid</returns>
         Variation GetVariationFromId(string experimentKey, string variationId);
 
@@ -247,7 +241,7 @@ namespace OptimizelySDK
         /// </summary>
         /// <param name="experimentId">ID for Experiment</param>
         /// <param name="variationId">ID for Variation</param>
-        /// <returns>Variation Entity corresponding to the provided experiment key and variation ID or a dummy 
+        /// <returns>Variation Entity corresponding to the provided experiment key and variation ID or a dummy
         /// entity if key or ID is invalid</returns>
         Variation GetVariationFromIdByExperimentId(string experimentId, string variationId);
 
@@ -290,6 +284,5 @@ namespace OptimizelySDK
         /// Returns the datafile corresponding to ProjectConfig
         /// </summary>
         string ToDatafile();
-
     }
 }

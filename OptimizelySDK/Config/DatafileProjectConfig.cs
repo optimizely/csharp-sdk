@@ -1,4 +1,4 @@
-﻿/* 
+﻿/*
  * Copyright 2019-2021, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 using Newtonsoft.Json;
 using OptimizelySDK.Entity;
 using OptimizelySDK.ErrorHandler;
@@ -52,18 +53,15 @@ namespace OptimizelySDK.Config
         /// </summary>
         public string Version { get; set; }
 
-
         /// <summary>
         /// Account ID of the account using the SDK.
         /// </summary>
         public string AccountId { get; set; }
 
-
         /// <summary>
         /// Project ID of the Full Stack project.
         /// </summary>
         public string ProjectId { get; set; }
-
 
         /// <summary>
         /// Revision of the datafile.
@@ -84,7 +82,7 @@ namespace OptimizelySDK.Config
         /// SendFlagDecisions determines whether impressions events are sent for ALL decision types.
         /// </summary>
         public bool SendFlagDecisions { get; set; }
-        
+
         /// <summary>
         /// Allow Anonymize IP by truncating the last block of visitors' IP address.
         /// </summary>
@@ -109,24 +107,28 @@ namespace OptimizelySDK.Config
             OPTLYSDKVersion.V4
         };
 
-
         //========================= Mappings ===========================
 
         /// <summary>
         /// Associative array of group ID to Group(s) in the datafile
         /// </summary>
         private Dictionary<string, Group> _GroupIdMap;
+
         public Dictionary<string, Group> GroupIdMap { get { return _GroupIdMap; } }
+
         /// <summary>
         /// Associative array of experiment key to Experiment(s) in the datafile
         /// </summary>
         private Dictionary<string, Experiment> _ExperimentKeyMap;
+
         public Dictionary<string, Experiment> ExperimentKeyMap { get { return _ExperimentKeyMap; } }
+
         /// <summary>
         /// Associative array of experiment ID to Experiment(s) in the datafile
         /// </summary>
         private Dictionary<string, Experiment> _ExperimentIdMap
             = new Dictionary<string, Experiment>();
+
         public Dictionary<string, Experiment> ExperimentIdMap { get { return _ExperimentIdMap; } }
 
         /// <summary>
@@ -134,6 +136,7 @@ namespace OptimizelySDK.Config
         /// </summary>
         private Dictionary<string, Dictionary<string, Variation>> _VariationKeyMap
             = new Dictionary<string, Dictionary<string, Variation>>();
+
         public Dictionary<string, Dictionary<string, Variation>> VariationKeyMap { get { return _VariationKeyMap; } }
 
         /// <summary>
@@ -141,6 +144,7 @@ namespace OptimizelySDK.Config
         /// </summary>
         private Dictionary<string, Dictionary<string, Variation>> _VariationKeyMapByExperimentId
             = new Dictionary<string, Dictionary<string, Variation>>();
+
         public Dictionary<string, Dictionary<string, Variation>> VariationKeyMapByExperimentId { get { return _VariationKeyMapByExperimentId; } }
 
         /// <summary>
@@ -148,45 +152,50 @@ namespace OptimizelySDK.Config
         /// </summary>
         private Dictionary<string, Dictionary<string, Variation>> _VariationIdMapByExperimentId
             = new Dictionary<string, Dictionary<string, Variation>>();
-        public Dictionary<string, Dictionary<string, Variation>> VariationKeyIdByExperimentId { get { return _VariationIdMapByExperimentId; } }
 
+        public Dictionary<string, Dictionary<string, Variation>> VariationKeyIdByExperimentId { get { return _VariationIdMapByExperimentId; } }
 
         /// <summary>
         /// Associative array of experiment key to associative array of variation ID to variations
         /// </summary>
         private Dictionary<string, Dictionary<string, Variation>> _VariationIdMap
             = new Dictionary<string, Dictionary<string, Variation>>();
+
         public Dictionary<string, Dictionary<string, Variation>> VariationIdMap { get { return _VariationIdMap; } }
 
         /// <summary>
         /// Associative array of event key to Event(s) in the datafile
         /// </summary>
         private Dictionary<string, Entity.Event> _EventKeyMap;
+
         public Dictionary<string, Entity.Event> EventKeyMap { get { return _EventKeyMap; } }
 
         /// <summary>
         /// Associative array of attribute key to Attribute(s) in the datafile
         /// </summary>
         private Dictionary<string, Attribute> _AttributeKeyMap;
+
         public Dictionary<string, Attribute> AttributeKeyMap { get { return _AttributeKeyMap; } }
 
         /// <summary>
         /// Associative array of audience ID to Audience(s) in the datafile
         /// </summary>
         private Dictionary<string, Audience> _AudienceIdMap;
-        public Dictionary<string, Audience> AudienceIdMap { get { return _AudienceIdMap; } }
 
+        public Dictionary<string, Audience> AudienceIdMap { get { return _AudienceIdMap; } }
 
         /// <summary>
         /// Associative array of Feature Key to Feature(s) in the datafile
         /// </summary>
         private Dictionary<string, FeatureFlag> _FeatureKeyMap;
+
         public Dictionary<string, FeatureFlag> FeatureKeyMap { get { return _FeatureKeyMap; } }
 
         /// <summary>
         /// Associative array of Rollout ID to Rollout(s) in the datafile
         /// </summary>
         private Dictionary<string, Rollout> _RolloutIdMap;
+
         public Dictionary<string, Rollout> RolloutIdMap { get { return _RolloutIdMap; } }
 
         /// <summary>
@@ -198,9 +207,9 @@ namespace OptimizelySDK.Config
         /// <summary>
         /// Associated array of flags to experiments
         /// </summary>
-        
+
         private Dictionary<string, List<Variation>> _FlagVariationMap = new Dictionary<string, List<Variation>>();
-        public Dictionary<string, List<Variation>> FlagVariationMap { get { return _FlagVariationMap;  } }
+        public Dictionary<string, List<Variation>> FlagVariationMap { get { return _FlagVariationMap; } }
 
         //========================= Interfaces ===========================
 
@@ -214,7 +223,6 @@ namespace OptimizelySDK.Config
         /// </summary>
         public IErrorHandler ErrorHandler { get; set; }
 
-
         //========================= Datafile Entities ===========================
 
         /// <summary>
@@ -226,7 +234,6 @@ namespace OptimizelySDK.Config
         /// Associative list of experiments to Experiment(s) in the datafile.
         /// </summary>
         public Experiment[] Experiments { get; set; }
-
 
         /// <summary>
         /// Associative list of events.
@@ -260,7 +267,6 @@ namespace OptimizelySDK.Config
 
         //========================= Initialization ===========================
 
-
         /// <summary>
         /// Initialize the arrays and mappings
         /// This can't be done in the constructor because the object is created via serialization
@@ -285,7 +291,6 @@ namespace OptimizelySDK.Config
             _FeatureKeyMap = ConfigParser<FeatureFlag>.GenerateMap(entities: FeatureFlags, getKey: f => f.Key, clone: true);
             _RolloutIdMap = ConfigParser<Rollout>.GenerateMap(entities: Rollouts, getKey: r => r.Id.ToString(), clone: true);
             _FlagVariationMap = GetFlagVariationMap();
-            
 
             // Overwrite similar items in audience id map with typed audience id map.
             var typedAudienceIdMap = ConfigParser<Audience>.GenerateMap(entities: TypedAudiences, getKey: a => a.Id.ToString(), clone: true);
@@ -315,7 +320,7 @@ namespace OptimizelySDK.Config
                 _VariationKeyMapByExperimentId[experiment.Id] = new Dictionary<string, Variation>();
 
                 _ExperimentKeyMap[experiment.Key] = experiment;
-                
+
                 if (experiment.Variations != null)
                 {
                     foreach (Variation variation in experiment.Variations)
@@ -376,11 +381,11 @@ namespace OptimizelySDK.Config
 
                 var rules = rollout?.Experiments ?? emptyArray;
 
-                foreach(var rule in rules)
+                foreach (var rule in rules)
                 {
-                    foreach(var variation in rule.Variations)
+                    foreach (var variation in rule.Variations)
                     {
-                        if(!variations.Contains(variation))
+                        if (!variations.Contains(variation))
                         {
                             variations.Add(variation);
                         }
@@ -391,7 +396,6 @@ namespace OptimizelySDK.Config
 
             return map;
         }
-
 
         /// <summary>
         /// Parse datafile string to create ProjectConfig instance.
@@ -532,7 +536,7 @@ namespace OptimizelySDK.Config
         /// </summary>
         /// <param name="experimentKey">key for Experiment</param>
         /// <param name="variationKey">key for Variation</param>
-        /// <returns>Variation Entity corresponding to the provided experiment key and variation key or a dummy 
+        /// <returns>Variation Entity corresponding to the provided experiment key and variation key or a dummy
         /// entity if keys are invalid</returns>
         public Variation GetVariationFromKey(string experimentKey, string variationKey)
         {
@@ -546,13 +550,12 @@ namespace OptimizelySDK.Config
             return new Variation();
         }
 
-
         /// <summary>
         /// Get the Variation from the keys
         /// </summary>
         /// <param name="experimentId">Id for Experiment</param>
         /// <param name="variationKey">key for Variation</param>
-        /// <returns>Variation Entity corresponding to the provided experiment key and variation key or a dummy 
+        /// <returns>Variation Entity corresponding to the provided experiment key and variation key or a dummy
         /// entity if keys are invalid</returns>
         public Variation GetVariationFromKeyByExperimentId(string experimentId, string variationKey)
         {
@@ -571,7 +574,7 @@ namespace OptimizelySDK.Config
         /// </summary>
         /// <param name="experimentKey">key for Experiment</param>
         /// <param name="variationId">ID for Variation</param>
-        /// <returns>Variation Entity corresponding to the provided experiment key and variation ID or a dummy 
+        /// <returns>Variation Entity corresponding to the provided experiment key and variation ID or a dummy
         /// entity if key or ID is invalid</returns>
         public Variation GetVariationFromId(string experimentKey, string variationId)
         {
@@ -590,7 +593,7 @@ namespace OptimizelySDK.Config
         /// </summary>
         /// <param name="experimentId">ID for Experiment</param>
         /// <param name="variationId">ID for Variation</param>
-        /// <returns>Variation Entity corresponding to the provided experiment key and variation ID or a dummy 
+        /// <returns>Variation Entity corresponding to the provided experiment key and variation ID or a dummy
         /// entity if experiment ID or variation ID is invalid</returns>
         public Variation GetVariationFromIdByExperimentId(string experimentId, string variationId)
         {
@@ -643,7 +646,6 @@ namespace OptimizelySDK.Config
         /// <returns>Attribute ID corresponding to the provided attribute key. Attribute key if it is a reserved attribute</returns>
         public string GetAttributeId(string attributeKey)
         {
-
             var hasReservedPrefix = attributeKey.StartsWith(RESERVED_ATTRIBUTE_PREFIX);
 
             if (_AttributeKeyMap.ContainsKey(attributeKey))
