@@ -402,7 +402,6 @@ namespace OptimizelySDK.Tests
             // confirm normal bucketing occurs before setting the forced variation
             var actualVariation = optlyObject.GetVariation(experimentKey, userId, userAttributes);
             Assertions.AreEqual(VariationWithKeyControl, actualVariation);
-            //Assert.IsTrue(TestData.CompareObjects(VariationWithKeyControl, actualVariation));
 
             // test valid experiment
             Assert.IsTrue(optlyObject.SetForcedVariation(experimentKey, userId, expectedForcedVariationKey), string.Format(@"Set variation to ""{0}"" failed.", expectedForcedVariationKey));
