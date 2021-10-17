@@ -483,7 +483,7 @@ namespace OptimizelySDK
 
             bool featureEnabled = false;
             var sourceInfo = new Dictionary<string, string>();
-            var decision = DecisionService.GetVariationForFeature(featureFlag, CreateUserContext(userId, userAttributes), config, userAttributes).ResultObject;
+            var decision = DecisionService.GetVariationForFeature(featureFlag, CreateUserContext(userId, userAttributes), config).ResultObject;
             var variation = decision?.Variation;
             var decisionSource = decision?.Source ?? FeatureDecision.DECISION_SOURCE_ROLLOUT;
 
@@ -574,7 +574,7 @@ namespace OptimizelySDK
 
             var featureEnabled = false;
             var variableValue = featureVariable.DefaultValue;
-            var decision = DecisionService.GetVariationForFeature(featureFlag, CreateUserContext(userId, userAttributes), config, userAttributes).ResultObject;
+            var decision = DecisionService.GetVariationForFeature(featureFlag, CreateUserContext(userId, userAttributes), config).ResultObject;
 
             if (decision?.Variation != null)
             {
@@ -1028,7 +1028,7 @@ namespace OptimizelySDK
                 return null;
 
             var featureEnabled = false;
-            var decisionResult = DecisionService.GetVariationForFeature(featureFlag, CreateUserContext(userId, userAttributes), config, userAttributes);
+            var decisionResult = DecisionService.GetVariationForFeature(featureFlag, CreateUserContext(userId, userAttributes), config);
             var variation = decisionResult.ResultObject?.Variation;
 
             if (variation != null)

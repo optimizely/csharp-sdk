@@ -554,9 +554,9 @@ namespace OptimizelySDK.Bucketing
         /// <param name = "filteredAttributes" >The user's attributes. This should be filtered to just attributes in the Datafile.</param>
         /// <returns>null if the user is not bucketed into any variation or the FeatureDecision entity if the user is
         /// successfully bucketed.</returns>
-        public virtual Result<FeatureDecision> GetVariationForFeature(FeatureFlag featureFlag, OptimizelyUserContext user, ProjectConfig config, UserAttributes filteredAttributes)
+        public virtual Result<FeatureDecision> GetVariationForFeature(FeatureFlag featureFlag, OptimizelyUserContext user, ProjectConfig config)
         {
-            return GetVariationForFeature(featureFlag, user, config, filteredAttributes, new OptimizelyDecideOption[] { });
+            return GetVariationForFeature(featureFlag, user, config, user.GetAttributes(), new OptimizelyDecideOption[] { });
         }
 
         /// <summary>

@@ -878,7 +878,7 @@ namespace OptimizelySDK.Tests
                 It.IsAny<UserAttributes>(), ProjectConfig, It.IsAny<OptimizelyDecideOption[]>())).Returns(expectedDecision);
             OptimizelyUserContextMock.Setup(ouc => ouc.GetUserId()).Returns("user1");
 
-            var actualDecision = DecisionServiceMock.Object.GetVariationForFeature(featureFlag, OptimizelyUserContextMock.Object, ProjectConfig, new UserAttributes());
+            var actualDecision = DecisionServiceMock.Object.GetVariationForFeature(featureFlag, OptimizelyUserContextMock.Object, ProjectConfig);
             Assert.IsTrue(TestData.CompareObjects(expectedDecision, actualDecision));
         }
 
@@ -903,7 +903,7 @@ namespace OptimizelySDK.Tests
             OptimizelyUserContextMock = new Mock<OptimizelyUserContext>(optlyObject, WhitelistedUserId, new UserAttributes(), ErrorHandlerMock.Object, LoggerMock.Object);
             OptimizelyUserContextMock.Setup(ouc => ouc.GetUserId()).Returns(UserProfileId);
 
-            var actualDecision = DecisionServiceMock.Object.GetVariationForFeature(featureFlag, OptimizelyUserContextMock.Object, ProjectConfig, new UserAttributes());
+            var actualDecision = DecisionServiceMock.Object.GetVariationForFeature(featureFlag, OptimizelyUserContextMock.Object, ProjectConfig);
 
             Assert.IsTrue(TestData.CompareObjects(expectedDecision, actualDecision));
 
@@ -920,7 +920,7 @@ namespace OptimizelySDK.Tests
             DecisionServiceMock.Setup(ds => ds.GetVariationForFeatureExperiment(It.IsAny<FeatureFlag>(), It.IsAny<OptimizelyUserContext>(), It.IsAny<UserAttributes>(), ProjectConfig, new OptimizelyDecideOption[] { })).Returns(Result<FeatureDecision>.NullResult(null));
             DecisionServiceMock.Setup(ds => ds.GetVariationForFeatureRollout(It.IsAny<FeatureFlag>(), It.IsAny<string>(), It.IsAny<UserAttributes>(), ProjectConfig)).Returns(Result<FeatureDecision>.NullResult(null));
 
-            var actualDecision = DecisionServiceMock.Object.GetVariationForFeature(featureFlag, OptimizelyUserContextMock.Object, ProjectConfig, new UserAttributes());
+            var actualDecision = DecisionServiceMock.Object.GetVariationForFeature(featureFlag, OptimizelyUserContextMock.Object, ProjectConfig);
             Assert.IsTrue(TestData.CompareObjects(expectedDecision, actualDecision.ResultObject));
 
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "The user \"user1\" is not bucketed into a rollout for feature flag \"string_single_variable_feature\"."));
@@ -938,6 +938,10 @@ namespace OptimizelySDK.Tests
             var userAttributes = new UserAttributes {
                 { "browser_type", "chrome" }
             };
+
+            var optlyObject = new Optimizely(TestData.Datafile, new ValidEventDispatcher(), LoggerMock.Object);
+
+            OptimizelyUserContextMock = new Mock<OptimizelyUserContext>(optlyObject, WhitelistedUserId, userAttributes, ErrorHandlerMock.Object, LoggerMock.Object);
             OptimizelyUserContextMock.Setup(ouc => ouc.GetUserId()).Returns(UserProfileId);
 
             DecisionServiceMock.Setup(ds => ds.GetVariation(experiment, OptimizelyUserContextMock.Object, ProjectConfig, userAttributes, It.IsAny<OptimizelyDecideOption[]>())).Returns(variation);
@@ -958,7 +962,7 @@ namespace OptimizelySDK.Tests
 
             Assert.IsTrue(TestData.CompareObjects(expectedRolloutDecision, actualRolloutDecision.ResultObject));
 
-            actualDecision = DecisionServiceMock.Object.GetVariationForFeature(featureFlag, OptimizelyUserContextMock.Object, ProjectConfig, userAttributes);
+            actualDecision = DecisionServiceMock.Object.GetVariationForFeature(featureFlag, OptimizelyUserContextMock.Object, ProjectConfig);
 
             // The user is bucketed into feature experiment's variation and not the rollout's variation.
             Assert.IsTrue(TestData.CompareObjects(expectedDecision, actualDecision.ResultObject));
