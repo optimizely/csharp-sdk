@@ -394,7 +394,6 @@ namespace OptimizelySDK.Tests
             var actualVariationUsage = Config.GetVariationFromKey("test_experiment_multivariate", "Fred");
 
             Assertions.AreEqual(expectedVariationUsage, actualVariationUsage);
-            //Assert.IsTrue(TestData.CompareObjects(expectedVariationUsage, actualVariationUsage));
 
             // Check Feature Key map.
             var expectedFeatureKeyMap = new Dictionary<string, FeatureFlag>
@@ -412,7 +411,6 @@ namespace OptimizelySDK.Tests
             };
 
             Assertions.AreEquivalent(expectedFeatureKeyMap, Config.FeatureKeyMap);
-            //Assert.IsTrue(TestData.CompareObjects(expectedFeatureKeyMap, Config.FeatureKeyMap));
 
             // Check Feature Key map.
             var expectedRolloutIdMap = new Dictionary<string, Rollout>
@@ -432,6 +430,34 @@ namespace OptimizelySDK.Tests
             var expectedVariations1 = new List<Dictionary<string, List<Variation>>>();
             var expectedVariationList = new List<Variation>
             {
+                new Variation
+                {
+                    FeatureEnabled = true,
+                    Id = "122239",
+                    Key = "control",
+                    FeatureVariableUsageInstances = new List<FeatureVariableUsage> { new FeatureVariableUsage { Id = "155551", Value="42.42" } }
+                },
+                new Variation
+                {
+                    FeatureEnabled = false,
+                    Id = "122240",
+                    Key = "variation",
+                    FeatureVariableUsageInstances = new List<FeatureVariableUsage> { new FeatureVariableUsage { Id = "155551", Value="13.37" } }
+                },
+                new Variation
+                {
+                    FeatureEnabled = false,
+                    Id = "122242",
+                    Key = "control",
+                    FeatureVariableUsageInstances = new List<FeatureVariableUsage> { new FeatureVariableUsage { Id = "155553", Value="42" } }
+                },
+                new Variation
+                {
+                    FeatureEnabled = true,
+                    Id = "122243",
+                    Key = "variation",
+                    FeatureVariableUsageInstances = new List<FeatureVariableUsage> { new FeatureVariableUsage { Id = "155553", Value="13" } }
+                },
                 new Variation
                 {
                     FeatureEnabled = true, Id = "177771",
@@ -496,6 +522,39 @@ namespace OptimizelySDK.Tests
                 new Variation
                 {
                     FeatureEnabled = true,
+                    Id = "122236",
+                    Key = "control",
+                    FeatureVariableUsageInstances = new List<FeatureVariableUsage>
+                    {
+                        new FeatureVariableUsage
+                        {
+                            Id = "155558",
+                            Value= "cta_1"
+                        },
+                        new FeatureVariableUsage
+                        {
+                            Id = "17014990011",
+                            Value = "{\"int_var\": 1, \"boolean_key\": false}"
+                        }
+                    }
+                },
+                new Variation
+                {
+                    FeatureEnabled = true,
+                    Id = "122237",
+                    Key = "variation",
+                    FeatureVariableUsageInstances = new List<FeatureVariableUsage>
+                    {
+                        new FeatureVariableUsage
+                        {
+                            Id = "155558",
+                            Value= "cta_2"
+                        },
+                    }
+                },
+                new Variation
+                {
+                    FeatureEnabled = true,
                     Id = "177775",
                     Key = "177775",
                     FeatureVariableUsageInstances = new List<FeatureVariableUsage>
@@ -508,13 +567,15 @@ namespace OptimizelySDK.Tests
                         new FeatureVariableUsage
                         {
                             Id = "17014990011",
-                            Value = "{\"int_var\": 4 , \"string_var\": \"cta_4\"}"
+                            Value= "{\"int_var\": 4 , \"string_var\": \"cta_4\"}"
                         },
                         new FeatureVariableUsage
                         {
                             Id = "170149900112",
-                            Value = "{\"int_var\": 5 , \"string_var\": \"cta_5\"}"
-                        } } },
+                            Value= "{\"int_var\": 5 , \"string_var\": \"cta_5\"}"
+                        }
+                    }
+                },
                 new Variation
                 {
                     FeatureEnabled = true,
@@ -535,12 +596,89 @@ namespace OptimizelySDK.Tests
                             Value= "cta_5"
                         }
                     }
+                },
+                new Variation
+                {
+                    FeatureEnabled = true,
+                    Id = "122231",
+                    Key = "Fred",
+                    FeatureVariableUsageInstances = new List<FeatureVariableUsage>
+                    {
+                        new FeatureVariableUsage
+                        {
+                            Id = "155560",
+                            Value = "F"
+                        },
+                        new FeatureVariableUsage
+                        {
+                            Id = "155561",
+                            Value = "red"
+                        }
+                    }
+                },
+                new Variation
+                {
+                    FeatureEnabled = false,
+                    Id = "122232",
+                    Key = "Feorge",
+                    FeatureVariableUsageInstances = new List<FeatureVariableUsage>
+                    {
+                        new FeatureVariableUsage
+                        {
+                            Id = "155560",
+                            Value = "F"
+                        },
+                        new FeatureVariableUsage
+                        {
+                            Id = "155561",
+                            Value = "eorge"
+                        }
+                    }
+                },
+                new Variation
+                {
+                    FeatureEnabled = null,
+                    Id = "122233",
+                    Key = "Gred",
+                    FeatureVariableUsageInstances = new List<FeatureVariableUsage>
+                    {
+                        new FeatureVariableUsage
+                        {
+                            Id = "155560",
+                            Value = "G"
+                        },
+                        new FeatureVariableUsage
+                        {
+                            Id = "155561",
+                            Value = "red"
+                        }
+                    }
+                },
+                new Variation
+                {
+                    FeatureEnabled = true,
+                    Id = "122234",
+                    Key = "George",
+                    FeatureVariableUsageInstances = new List<FeatureVariableUsage>
+                    {
+                        new FeatureVariableUsage
+                        {
+                            Id = "155560",
+                            Value = "G"
+                        },
+                        new FeatureVariableUsage
+                        {
+                            Id = "155561",
+                            Value = "eorge"
+                        }
+                    }
                 }
             };
             expectedVariations1.Add(new Dictionary<string, List<Variation>> { { "boolean_feature", expectedVariationList } });
 
             var variations1 = allVariations.Where(v => v.Key == "boolean_feature").Select(v => new Dictionary<string, List<Variation>> { { v.Key, v.Value } }).ToList();
 
+            TestData.CompareObjects(expectedVariations1, variations1);
             Assertions.AreEquivalent(expectedVariations1, variations1);
         }
 
