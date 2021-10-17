@@ -373,15 +373,10 @@ namespace OptimizelySDK.Config
         {
             var map = new Dictionary<string, List<Variation>>();
             var variations = new List<Variation>();
-            var emptyArray = new List<Experiment>();
 
             foreach (var flag in this.FeatureFlags)
             {
-                this.RolloutIdMap.TryGetValue(flag.RolloutId, out var rollout);
-
-                var rules = rollout?.Experiments ?? emptyArray;
-
-                foreach (var rule in rules)
+                foreach (var rule in GetAllRulesForFlag(flag))
                 {
                     foreach (var variation in rule.Variations)
                     {
@@ -395,6 +390,28 @@ namespace OptimizelySDK.Config
             }
 
             return map;
+        }
+
+        private List<Experiment> GetAllRulesForFlag(FeatureFlag flag)
+        {
+            var rules = new List<Experiment>();
+
+            RolloutIdMap.TryGetValue(flag.RolloutId, out var rollout);
+
+            foreach (var expId in flag.ExperimentIds)
+            {
+                if (ExperimentIdMap.TryGetValue(expId, out var rule))
+                {
+                    rules.Add(rule);
+                }
+            }
+
+            if (rollout != null)
+            {
+                rules.AddRange(rollout.Experiments);
+            }
+
+            return rules;
         }
 
         /// <summary>
