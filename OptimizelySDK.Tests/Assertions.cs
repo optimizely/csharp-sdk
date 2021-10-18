@@ -1,5 +1,6 @@
 ﻿using NUnit.Framework;
 using OptimizelySDK.Entity;
+using OptimizelySDK.OptimizelyDecisions;
 using OptimizelySDK.OptlyConfig;
 using System;
 using System.Collections.Generic;
@@ -599,5 +600,24 @@ namespace OptimizelySDK.Tests
         }
 
         #endregion TrafficAllocation
+
+        #region DecisionReasons
+
+        public static void AreEqual(DecisionReasons expected, DecisionReasons actual)
+        {
+            AreEquivalent(expected.ToReport(), actual.ToReport());
+        }
+
+        #endregion DecisionReasons
+
+        #region Result T
+
+        public static void AreEqual(Result<Variation> expected, Result<Variation> actual)
+        {
+            AreEqual(expected.DecisionReasons, actual.DecisionReasons);
+            AreEqual(expected.ResultObject, actual.ResultObject);
+        }
+
+        #endregion Result T
     }
 }
