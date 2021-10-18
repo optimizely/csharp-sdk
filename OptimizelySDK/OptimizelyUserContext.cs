@@ -266,17 +266,17 @@ namespace OptimizelySDK
         }
 
         /// <summary>
-        /// Finds a forced variation
+        /// Gets a forced variation
         /// </summary>
         /// <param name="flagKey">The flag key</param>
         /// <returns>The variation key for a forced decision</returns>
         public string GetForcedDecision(string flagKey)
         {
-            return FindForcedDecision(flagKey, null);
+            return GetForcedDecision(flagKey, null);
         }
 
         /// <summary>
-        /// Finds a forced variation
+        /// Gets a forced variation
         /// </summary>
         /// <param name="flagKey">The flag key</param>
         /// <param name="ruleKey">The rule key</param>
