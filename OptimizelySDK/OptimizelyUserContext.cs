@@ -345,6 +345,12 @@ namespace OptimizelySDK
         /// <returns>Whether the item was removed.</returns>
         public bool RemoveForcedDecision(string flagKey, string ruleKey)
         {
+            if (string.IsNullOrEmpty(flagKey))
+            {
+                Logger.Log(LogLevel.WARN, "flagKey cannot be null");
+                return false;
+            }
+
             if (Optimizely.GetOptimizelyConfig() == null)
             {
                 Logger.Log(LogLevel.ERROR, "Optimizely SDK not ready.");

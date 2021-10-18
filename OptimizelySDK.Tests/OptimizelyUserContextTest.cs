@@ -278,6 +278,14 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
+        public void RemoveForcedDecisionReturnsFalseForNullFlagKey()
+        {
+            var user = Optimizely.CreateUserContext(UserID);
+
+            Assert.IsFalse(user.RemoveForcedDecision(null));
+        }
+
+        [Test]
         public void RemoveForcedDecisionRemovesDecision()
         {
             var user = Optimizely.CreateUserContext(UserID);
