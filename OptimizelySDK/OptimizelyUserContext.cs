@@ -272,12 +272,6 @@ namespace OptimizelySDK
         /// <returns>The variation key for a forced decision</returns>
         public string GetForcedDecision(string flagKey)
         {
-            if (Optimizely.GetOptimizelyConfig() == null)
-            {
-                Logger.Log(LogLevel.ERROR, "Optimizely SDK not ready.");
-                return null;
-            }
-
             return FindForcedDecision(flagKey, null);
         }
 
@@ -289,6 +283,12 @@ namespace OptimizelySDK
         /// <returns>The variation key for a forced decision</returns>
         public string GetForcedDecision(string flagKey, string ruleKey)
         {
+            if (string.IsNullOrEmpty(flagKey))
+            {
+                Logger.Log(LogLevel.ERROR, "flagkey cannot be null");
+                return null;
+            }
+
             if (Optimizely.GetOptimizelyConfig() == null)
             {
                 Logger.Log(LogLevel.ERROR, "Optimizely SDK not ready.");

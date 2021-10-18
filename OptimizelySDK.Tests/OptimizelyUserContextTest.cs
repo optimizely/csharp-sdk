@@ -208,6 +208,16 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
+        public void GetForcedDecisionReturnsNullWithNullFlagKey()
+        {
+            var user = Optimizely.CreateUserContext(UserID);
+
+            var result = user.GetForcedDecision(null);
+
+            Assert.IsNull(result);
+        }
+
+        [Test]
         public void GetForcedDecisionsReturnsValueWithRuleKey()
         {
             var user = Optimizely.CreateUserContext(UserID);
