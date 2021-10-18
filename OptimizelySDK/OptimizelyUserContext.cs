@@ -285,7 +285,7 @@ namespace OptimizelySDK
         {
             if (string.IsNullOrEmpty(flagKey))
             {
-                Logger.Log(LogLevel.ERROR, "flagkey cannot be null");
+                Logger.Log(LogLevel.WARN, "flagkey cannot be null");
                 return null;
             }
 
