@@ -729,10 +729,12 @@ namespace OptimizelySDK
                               OptimizelyDecideOption[] options)
         {
             var config = ProjectConfigManager?.GetConfig();
+
             if (config == null)
             {
                 return OptimizelyDecision.NewErrorDecision(key, user, DecisionMessage.SDK_NOT_READY, ErrorHandler, Logger);
             }
+
             if (key == null)
             {
                 return OptimizelyDecision.NewErrorDecision(key,
@@ -740,8 +742,6 @@ namespace OptimizelySDK
                     DecisionMessage.Reason(DecisionMessage.FLAG_KEY_INVALID, key),
                     ErrorHandler, Logger);
             }
-
-            var userId = user?.GetUserId();
 
             var flag = config.GetFeatureFlagFromKey(key);
             if (string.IsNullOrEmpty(flag.Key))
@@ -752,20 +752,34 @@ namespace OptimizelySDK
                     ErrorHandler, Logger);
             }
 
+            var userId = user?.GetUserId();
             var userAttributes = user.GetAttributes();
             var decisionEventDispatched = false;
             var allOptions = GetAllOptions(options);
+            var decisionReasons = new DecisionReasons();
+            FeatureDecision decision = null;
 
-            var flagDecisionResult = DecisionService.GetVariationForFeature(
-                flag,
-                user,
-                config,
-                userAttributes,
-                allOptions);
+            var forcedDecisionVariation = user.FindValidatedForcedDecision(flag.Key, null);
+            if (forcedDecisionVariation?.ResultObject != null)
+            {
+                decision = new FeatureDecision(null, forcedDecisionVariation.ResultObject, FeatureDecision.DECISION_SOURCE_FEATURE_TEST);
+                decisionReasons = forcedDecisionVariation.DecisionReasons;
+            }
+            else
+            {
+                var flagDecisionResult = DecisionService.GetVariationForFeature(
+                    flag,
+                    user,
+                    config,
+                    userAttributes,
+                    allOptions
+                );
+                decisionReasons = flagDecisionResult.DecisionReasons;
+                decision = flagDecisionResult.ResultObject;
+            }
 
             var featureEnabled = false;
-
-            var variation = flagDecisionResult.ResultObject?.Variation;
+            var variation = decision?.Variation;
 
             if (variation != null)
             {
@@ -806,17 +820,16 @@ namespace OptimizelySDK
 
             var optimizelyJSON = new OptimizelyJSON(variableMap, ErrorHandler, Logger);
 
-            var decisionSource = flagDecisionResult.ResultObject?.Source ?? FeatureDecision.DECISION_SOURCE_ROLLOUT;
+            var decisionSource = decision?.Source ?? FeatureDecision.DECISION_SOURCE_ROLLOUT;
             if (!allOptions.Contains(OptimizelyDecideOption.DISABLE_DECISION_EVENT))
             {
-                decisionEventDispatched = SendImpressionEvent(flagDecisionResult.ResultObject?.Experiment, variation, userId, userAttributes, config, key, decisionSource, featureEnabled);
+                decisionEventDispatched = SendImpressionEvent(decision?.Experiment, variation, userId, userAttributes, config, key, decisionSource, featureEnabled);
             }
-            var decisionReasons = flagDecisionResult.DecisionReasons;
             var reasonsToReport = decisionReasons.ToReport(allOptions.Contains(OptimizelyDecideOption.INCLUDE_REASONS)).ToArray();
-            var variationKey = flagDecisionResult.ResultObject?.Variation?.Key;
+            var variationKey = decision?.Variation?.Key;
 
             // TODO: add ruleKey values when available later. use a copy of experimentKey until then.
-            var ruleKey = flagDecisionResult.ResultObject?.Experiment?.Key;
+            var ruleKey = decision?.Experiment?.Key;
 
             var decisionInfo = new Dictionary<string, object>
             {
