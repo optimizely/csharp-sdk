@@ -345,7 +345,7 @@ namespace OptimizelySDK
             {
                 Variation variation = new Variation();
                 string strRuleKey = ruleKey ?? "null";
-                string info = string.Empty;
+                string info;
                 if (variation != null)
                 {
                     info = string.Format("Variation {0} is mapped to flag: {1} and rule: {2} in the forced decision map.", variationKey, flagKey, strRuleKey);
