@@ -62,7 +62,6 @@ namespace OptimizelySDK
         private Optimizely Optimizely;
 
         private Dictionary<string, Dictionary<string, ForcedDecision>> ForcedDecisionsMap = new Dictionary<string, Dictionary<string, ForcedDecision>>();
-        private Dictionary<string, ForcedDecision> ForcedDecisionsMapWithNoRuleKey = new Dictionary<string, ForcedDecision>();
 
         public OptimizelyUserContext(Optimizely optimizely, string userId, UserAttributes userAttributes, IErrorHandler errorHandler, ILogger logger)
         {
@@ -245,23 +244,11 @@ namespace OptimizelySDK
                 return false;
             }
 
-            if (ruleKey != null)
-            {
-                Dictionary<string, ForcedDecision> forcedDecision = new Dictionary<string, ForcedDecision>();
-                forcedDecision.Add(ruleKey, new ForcedDecision(flagKey, ruleKey, variationKey));
-                ForcedDecisionsMap.Add(flagKey, forcedDecision);
-            }
-            else
-            {
-                if (ForcedDecisionsMapWithNoRuleKey.TryGetValue(flagKey, out var value))
+            ForcedDecisionsMap[flagKey] = new Dictionary<string, ForcedDecision> {
                 {
-                    value.VariationKey = variationKey;
+                    flagKey, new ForcedDecision(flagKey, ruleKey ?? "hardcoded-key", variationKey)
                 }
-                else
-                {
-                    ForcedDecisionsMapWithNoRuleKey.Add(flagKey, new ForcedDecision(flagKey, null, variationKey));
-                }
-            }
+            };
 
             return true;
         }
@@ -316,21 +303,31 @@ namespace OptimizelySDK
                 return false;
             }
 
-            if (ruleKey != null)
+            if (ForcedDecisionsMap.TryGetValue(flagKey, out var decision))
             {
-                ForcedDecisionsMap.TryGetValue(flagKey, out var decision);
                 decision.Remove(ruleKey);
                 if (decision.Count == 0)
                 {
                     ForcedDecisionsMap.Remove(flagKey);
                 }
-                return true;
             }
-            else
-            {
-                ForcedDecisionsMapWithNoRuleKey.Remove(flagKey);
-                return true;
-            }
+            return true;
+
+            //if (ruleKey != null)
+            //{
+            //    ForcedDecisionsMap.TryGetValue(flagKey, out var decision);
+            //    decision.Remove(ruleKey);
+            //    if (decision.Count == 0)
+            //    {
+            //        ForcedDecisionsMap.Remove(flagKey);
+            //    }
+            //    return true;
+            //}
+            //else
+            //{
+            //    ForcedDecisionsMapWithNoRuleKey.Remove(flagKey);
+            //    return true;
+            //}
         }
 
         /// <summary>
@@ -346,7 +343,6 @@ namespace OptimizelySDK
             }
 
             ForcedDecisionsMap.Clear();
-            ForcedDecisionsMapWithNoRuleKey.Clear();
             return true;
         }
 
@@ -368,7 +364,7 @@ namespace OptimizelySDK
                 string info = string.Empty;
                 if (variation != null)
                 {
-                    info = string.Format("Variation {0} is mapped to flag: {1} and rule: {2} in the forced decision map.", variationKey, flagKey, strRuleKey;
+                    info = string.Format("Variation {0} is mapped to flag: {1} and rule: {2} in the forced decision map.", variationKey, flagKey, strRuleKey);
                     Logger.Log(LogLevel.INFO, info);
                     reasons.AddInfo(info);
                     return Result<Variation>.NewResult(variation, reasons);
