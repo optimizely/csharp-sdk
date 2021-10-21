@@ -287,23 +287,12 @@ namespace OptimizelySDK
             }
 
             string variationKey = null;
-            if (ruleKey != null)
+
+            if (ForcedDecisionsMap.TryGetValue(flagKey, out var forcedDecisionMap) && forcedDecisionMap.TryGetValue(ruleKey, out var forcedDecision))
             {
-                if (ForcedDecisionsMap.Count > 0 && ForcedDecisionsMap.ContainsKey(flagKey))
-                {
-                    if (ForcedDecisionsMap.TryGetValue(flagKey, out var forcedDecision) && forcedDecision.TryGetValue(ruleKey, out var forcedDecision2))
-                    {
-                        variationKey = forcedDecision2.VariationKey;
-                    }
-                }
+                variationKey = forcedDecision.VariationKey;
             }
-            else
-            {
-                if (ForcedDecisionsMapWithNoRuleKey.Count > 0 && ForcedDecisionsMapWithNoRuleKey.TryGetValue(flagKey, out var forcedDecision))
-                {
-                    variationKey = forcedDecision.VariationKey;
-                }
-            }
+
             return variationKey;
         }
 
@@ -379,14 +368,14 @@ namespace OptimizelySDK
                 string info = string.Empty;
                 if (variation != null)
                 {
-                    info = "Variation " + variationKey + " is mapped to flag: " + flagKey + " and rule: " + strRuleKey + " in the forced decision map.";
+                    info = string.Format("Variation {0} is mapped to flag: {1} and rule: {2} in the forced decision map.", variationKey, flagKey, strRuleKey;
                     Logger.Log(LogLevel.INFO, info);
                     reasons.AddInfo(info);
                     return Result<Variation>.NewResult(variation, reasons);
                 }
                 else
                 {
-                    info = "Invalid variation is mapped to flag: " + flagKey + " and rule: " + strRuleKey + " forced decision map.";
+                    info = string.Format("Invalid variation is mapped to flag: {0} and rule: {1} forced decision map.", flagKey, strRuleKey);
                     Logger.Log(LogLevel.INFO, info);
                     reasons.AddInfo(info);
                 }
