@@ -37,7 +37,7 @@ namespace OptimizelySDK.Tests
     [TestFixture]
     public class OptimizelyUserContextTest
     {
-        private string UserID = "testUserID";
+        const string UserID = "testUserID";
         private Optimizely Optimizely;
         private Mock<ILogger> LoggerMock;
         private Mock<IErrorHandler> ErrorHandlerMock;
