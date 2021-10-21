@@ -246,7 +246,7 @@ namespace OptimizelySDK
 
             ForcedDecisionsMap[flagKey] = new Dictionary<string, ForcedDecision> {
                 {
-                    flagKey, new ForcedDecision(flagKey, ruleKey ?? "hardcoded-key", variationKey)
+                    flagKey, new ForcedDecision(flagKey, ruleKey, variationKey)
                 }
             };
 
@@ -312,22 +312,6 @@ namespace OptimizelySDK
                 }
             }
             return true;
-
-            //if (ruleKey != null)
-            //{
-            //    ForcedDecisionsMap.TryGetValue(flagKey, out var decision);
-            //    decision.Remove(ruleKey);
-            //    if (decision.Count == 0)
-            //    {
-            //        ForcedDecisionsMap.Remove(flagKey);
-            //    }
-            //    return true;
-            //}
-            //else
-            //{
-            //    ForcedDecisionsMapWithNoRuleKey.Remove(flagKey);
-            //    return true;
-            //}
         }
 
         /// <summary>
