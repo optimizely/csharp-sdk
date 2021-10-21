@@ -245,11 +245,23 @@ namespace OptimizelySDK
                 return false;
             }
 
-            ForcedDecisionsMap[flagKey] = new Dictionary<string, ForcedDecision> {
+            if (ruleKey != null)
+            {
+                Dictionary<string, ForcedDecision> forcedDecision = new Dictionary<string, ForcedDecision>();
+                forcedDecision.Add(ruleKey, new ForcedDecision(flagKey, ruleKey, variationKey));
+                ForcedDecisionsMap.Add(flagKey, forcedDecision);
+            }
+            else
+            {
+                if (ForcedDecisionsMapWithNoRuleKey.TryGetValue(flagKey, out var value))
                 {
-                    flagKey, new ForcedDecision(flagKey, ruleKey ?? null, variationKey)
+                    value.VariationKey = variationKey;
                 }
-            };
+                else
+                {
+                    ForcedDecisionsMapWithNoRuleKey.Add(flagKey, new ForcedDecision(flagKey, null, variationKey));
+                }
+            }
 
             return true;
         }
