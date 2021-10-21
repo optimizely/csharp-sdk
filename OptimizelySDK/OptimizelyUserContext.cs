@@ -48,6 +48,8 @@ namespace OptimizelySDK
             public string VariationKey { get { return variationKey; } set { this.variationKey = value; } }
         }
 
+        private const string nullRuleKey = "HardCodedNullRuleKey";
+
         private ILogger Logger;
         private IErrorHandler ErrorHandler;
         private object mutex = new object();
@@ -246,7 +248,7 @@ namespace OptimizelySDK
 
             ForcedDecisionsMap[flagKey] = new Dictionary<string, ForcedDecision> {
                 {
-                    flagKey, new ForcedDecision(flagKey, ruleKey, variationKey)
+                    ruleKey ?? nullRuleKey, new ForcedDecision(flagKey, ruleKey, variationKey)
                 }
             };
 
@@ -275,9 +277,12 @@ namespace OptimizelySDK
 
             string variationKey = null;
 
-            if (ForcedDecisionsMap.TryGetValue(flagKey, out var forcedDecisionMap) && forcedDecisionMap.TryGetValue(ruleKey, out var forcedDecision))
+            if (ForcedDecisionsMap.TryGetValue(flagKey, out var forcedDecisionMap))
             {
-                variationKey = forcedDecision.VariationKey;
+                if (forcedDecisionMap.TryGetValue(ruleKey ?? nullRuleKey, out var forcedDecision))
+                {
+                    variationKey = forcedDecision.VariationKey;
+                }
             }
 
             return variationKey;
