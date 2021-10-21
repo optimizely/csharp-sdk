@@ -245,23 +245,12 @@ namespace OptimizelySDK
                 return false;
             }
 
-            if (ruleKey != null)
-            {
-                Dictionary<string, ForcedDecision> forcedDecision = new Dictionary<string, ForcedDecision>();
-                forcedDecision.Add(ruleKey, new ForcedDecision(flagKey, ruleKey, variationKey));
-                ForcedDecisionsMap.Add(flagKey, forcedDecision);
-            }
-            else
-            {
-                if (ForcedDecisionsMapWithNoRuleKey.TryGetValue(flagKey, out var value))
+            ForcedDecisionsMap[flagKey] = new Dictionary<string, ForcedDecision> {
                 {
-                    value.VariationKey = variationKey;
+                    flagKey, new ForcedDecision(flagKey, ruleKey ?? null, variationKey)
                 }
-                else
-                {
-                    ForcedDecisionsMapWithNoRuleKey.Add(flagKey, new ForcedDecision(flagKey, null, variationKey));
-                }
-            }
+            };
+
             return true;
         }
 
@@ -320,11 +309,12 @@ namespace OptimizelySDK
                 return false;
             }
 
-            if (Optimizely.IsValid)
+            if (!Optimizely.IsValid)
             {
                 Logger.Log(LogLevel.ERROR, "Optimizely SDK not ready.");
                 return false;
             }
+
             if (ruleKey != null)
             {
                 ForcedDecisionsMap.TryGetValue(flagKey, out var decision);
@@ -348,7 +338,7 @@ namespace OptimizelySDK
         /// <returns>Whether the clear was successful.</returns>
         public bool RemoveAllForcedDecisions()
         {
-            if (Optimizely.GetOptimizelyConfig() == null)
+            if (!Optimizely.IsValid)
             {
                 Logger.Log(LogLevel.ERROR, "Optimizely SDK not ready.");
                 return false;
