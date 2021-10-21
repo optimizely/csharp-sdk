@@ -269,19 +269,9 @@ namespace OptimizelySDK
         /// Gets a forced variation
         /// </summary>
         /// <param name="flagKey">The flag key</param>
-        /// <returns>The variation key for a forced decision</returns>
-        public string GetForcedDecision(string flagKey)
-        {
-            return GetForcedDecision(flagKey, null);
-        }
-
-        /// <summary>
-        /// Gets a forced variation
-        /// </summary>
-        /// <param name="flagKey">The flag key</param>
         /// <param name="ruleKey">The rule key</param>
         /// <returns>The variation key for a forced decision</returns>
-        public string GetForcedDecision(string flagKey, string ruleKey)
+        public string GetForcedDecision(string flagKey, string ruleKey = null)
         {
             if (Optimizely.GetOptimizelyConfig() == null)
             {
@@ -320,19 +310,9 @@ namespace OptimizelySDK
         /// Removes a forced decision.
         /// </summary>
         /// <param name="flagKey">The flag key.</param>
-        /// <returns>Whether the item was removed.</returns>
-        public bool RemoveForcedDecision(string flagKey)
-        {
-            return RemoveForcedDecision(flagKey, null);
-        }
-
-        /// <summary>
-        /// Removes a forced decision.
-        /// </summary>
-        /// <param name="flagKey">The flag key.</param>
         /// <param name="ruleKey"></param>
         /// <returns>Whether the item was removed.</returns>
-        public bool RemoveForcedDecision(string flagKey, string ruleKey)
+        public bool RemoveForcedDecision(string flagKey, string ruleKey = null)
         {
             if (string.IsNullOrEmpty(flagKey))
             {
@@ -383,19 +363,9 @@ namespace OptimizelySDK
         /// Finds a validated forced decision.
         /// </summary>
         /// <param name="flagKey">The flag key.</param>
-        /// <returns>A result with the variation.</returns>
-        public Result<Variation> FindValidatedForcedDecision(string flagKey)
-        {
-            return FindValidatedForcedDecision(flagKey, null);
-        }
-
-        /// <summary>
-        /// Finds a validated forced decision.
-        /// </summary>
-        /// <param name="flagKey">The flag key.</param>
         /// <param name="ruleKey">The rule key.</param>
         /// <returns>A result with the variation</returns>
-        public Result<Variation> FindValidatedForcedDecision(string flagKey, string ruleKey)
+        public Result<Variation> FindValidatedForcedDecision(string flagKey, string ruleKey = null)
         {
             DecisionReasons reasons = new DecisionReasons();
 
