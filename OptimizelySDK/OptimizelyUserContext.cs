@@ -239,13 +239,19 @@ namespace OptimizelySDK
         /// <returns></returns>
         public bool SetForcedDecision(string flagKey, string ruleKey, string variationKey)
         {
-            if (Optimizely.GetOptimizelyConfig() == null)
+            if (!Optimizely.IsValid)
             {
                 Logger.Log(LogLevel.ERROR, "Optimizely config is null");
                 return false;
             }
 
-            if (ruleKey == null)
+            if (ruleKey != null)
+            {
+                Dictionary<string, ForcedDecision> forcedDecision = new Dictionary<string, ForcedDecision>();
+                forcedDecision.Add(ruleKey, new ForcedDecision(flagKey, ruleKey, variationKey));
+                ForcedDecisionsMap.Add(flagKey, forcedDecision);
+            }
+            else
             {
                 if (ForcedDecisionsMapWithNoRuleKey.TryGetValue(flagKey, out var value))
                 {
@@ -255,12 +261,6 @@ namespace OptimizelySDK
                 {
                     ForcedDecisionsMapWithNoRuleKey.Add(flagKey, new ForcedDecision(flagKey, null, variationKey));
                 }
-            }
-            else
-            {
-                Dictionary<string, ForcedDecision> forcedDecision = new Dictionary<string, ForcedDecision>();
-                forcedDecision.Add(ruleKey, new ForcedDecision(flagKey, ruleKey, variationKey));
-                ForcedDecisionsMap.Add(flagKey, forcedDecision);
             }
             return true;
         }
@@ -273,7 +273,7 @@ namespace OptimizelySDK
         /// <returns>The variation key for a forced decision</returns>
         public string GetForcedDecision(string flagKey, string ruleKey = null)
         {
-            if (Optimizely.GetOptimizelyConfig() == null)
+            if (!Optimizely.IsValid)
             {
                 Logger.Log(LogLevel.ERROR, "Optimizely SDK not ready.");
                 return null;
@@ -320,7 +320,7 @@ namespace OptimizelySDK
                 return false;
             }
 
-            if (Optimizely.GetOptimizelyConfig() == null)
+            if (Optimizely.IsValid)
             {
                 Logger.Log(LogLevel.ERROR, "Optimizely SDK not ready.");
                 return false;
