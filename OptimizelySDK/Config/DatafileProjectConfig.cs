@@ -369,6 +369,10 @@ namespace OptimizelySDK.Config
             }
         }
 
+        /// <summary>
+        /// Get the Flag variation map to use
+        /// </summary>
+        /// <returns>A map of flag key to variations</returns>
         private Dictionary<string, List<Variation>> GetFlagVariationMap()
         {
             var map = new Dictionary<string, List<Variation>>();
@@ -392,6 +396,11 @@ namespace OptimizelySDK.Config
             return map;
         }
 
+        /// <summary>
+        /// Retrieves all the rules for a given feature flag
+        /// </summary>
+        /// <param name="flag">Feature flag to use</param>
+        /// <returns>A list of experiments</returns>
         private List<Experiment> GetAllRulesForFlag(FeatureFlag flag)
         {
             var rules = new List<Experiment>();
