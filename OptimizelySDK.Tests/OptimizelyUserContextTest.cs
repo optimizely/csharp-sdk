@@ -186,7 +186,7 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
-        public void SetForcedDecisionSetsValue()
+        public void TestSetForcedDecisionSetsValue()
         {
             var user = Optimizely.CreateUserContext(UserID);
 
@@ -281,7 +281,7 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
-        public void RemoveForcedDecisionReturnsFalseForNullFlagKey()
+        public void TestRemoveForcedDecisionReturnsFalseForNullFlagKey()
         {
             var user = Optimizely.CreateUserContext(UserID);
 
@@ -289,7 +289,7 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
-        public void RemoveForcedDecisionRemovesDecision()
+        public void TestRemoveForcedDecisionRemovesDecision()
         {
             var user = Optimizely.CreateUserContext(UserID);
 
@@ -303,7 +303,7 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
-        public void RemoveForcedDecisionReturnsFalseForNullConfig()
+        public void TestRemoveForcedDecisionReturnsFalseForNullConfig()
         {
             var optly = new Optimizely(new FallbackProjectConfigManager(null));
 
@@ -316,7 +316,7 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
-        public void RemoveAllForcedDecisionsRemovesDecisions()
+        public void TestRemoveAllForcedDecisionsRemovesDecisions()
         {
             var user = Optimizely.CreateUserContext(UserID);
 
@@ -337,7 +337,7 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
-        public void RemoveAllForcedDecisionsReturnsFalseForNullConfig()
+        public void TestRemoveAllForcedDecisionsReturnsFalseForNullConfig()
         {
             var optly = new Optimizely(new FallbackProjectConfigManager(null));
 
