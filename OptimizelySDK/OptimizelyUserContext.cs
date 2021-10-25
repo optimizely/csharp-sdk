@@ -71,6 +71,7 @@ namespace OptimizelySDK
             Logger = logger;
             Optimizely = optimizely;
             Attributes = userAttributes ?? new UserAttributes();
+            ForcedDecisionsMap = new Dictionary<string, Dictionary<string, OptimizelyForcedDecision>>();
             UserId = userId;
         }
 
