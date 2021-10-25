@@ -220,7 +220,7 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestGetForcedDecisionsReturnsValueWithRuleKey()
         {
-            OptimizelyUserContext user = new OptimizelyUserContext(Optimizely, UserID, null, null, ErrorHandlerMock.Object, LoggerMock.Object);
+            var user = Optimizely.CreateUserContext(UserID);
 
             user.SetForcedDecision("flagKey", "ruleKey", "variation");
 
