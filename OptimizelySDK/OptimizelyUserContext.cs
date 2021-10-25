@@ -28,13 +28,13 @@ namespace OptimizelySDK
     /// </summary>
     public class OptimizelyUserContext
     {
-        private class ForcedDecision
+        public class OptimizelyForcedDecision
         {
             private string flagKey;
             private string ruleKey;
             private string variationKey;
 
-            public ForcedDecision(string flagKey, string ruleKey, string variationKey)
+            public OptimizelyForcedDecision(string flagKey, string ruleKey, string variationKey)
             {
                 this.flagKey = flagKey;
                 this.ruleKey = ruleKey;
@@ -63,7 +63,7 @@ namespace OptimizelySDK
         // Optimizely object to be used.
         private Optimizely Optimizely;
 
-        private Dictionary<string, Dictionary<string, ForcedDecision>> ForcedDecisionsMap = new Dictionary<string, Dictionary<string, ForcedDecision>>();
+        private Dictionary<string, Dictionary<string, OptimizelyForcedDecision>> ForcedDecisionsMap { get; set; }
 
         public OptimizelyUserContext(Optimizely optimizely, string userId, UserAttributes userAttributes, IErrorHandler errorHandler, ILogger logger)
         {
@@ -74,7 +74,17 @@ namespace OptimizelySDK
             UserId = userId;
         }
 
-        private OptimizelyUserContext Copy() => new OptimizelyUserContext(Optimizely, UserId, GetAttributes(), ErrorHandler, Logger);
+        public OptimizelyUserContext(Optimizely optimizely, string userId, UserAttributes userAttributes, Dictionary<string, Dictionary<string, OptimizelyForcedDecision>> forcedDecisions, IErrorHandler errorHandler, ILogger logger)
+        {
+            ErrorHandler = errorHandler;
+            Logger = logger;
+            Optimizely = optimizely;
+            Attributes = userAttributes ?? new UserAttributes();
+            ForcedDecisionsMap = forcedDecisions ?? new Dictionary<string, Dictionary<string, OptimizelyForcedDecision>>();
+            UserId = userId;
+        }
+
+        private OptimizelyUserContext Copy() => new OptimizelyUserContext(Optimizely, UserId, GetAttributes(), ForcedDecisionsMap, ErrorHandler, Logger);
 
         /// <summary>
         /// Returns Optimizely instance associated with the UserContext.
