@@ -246,11 +246,14 @@ namespace OptimizelySDK
                 return false;
             }
 
-            ForcedDecisionsMap[flagKey] = new Dictionary<string, ForcedDecision> {
+            lock (mutex)
+            {
+                ForcedDecisionsMap[flagKey] = new Dictionary<string, ForcedDecision> {
                 {
                     ruleKey ?? nullRuleKey, new ForcedDecision(flagKey, ruleKey, variationKey)
                 }
-            };
+                };
+            }
 
             return true;
         }
@@ -277,14 +280,16 @@ namespace OptimizelySDK
 
             string variationKey = null;
 
-            if (ForcedDecisionsMap.TryGetValue(flagKey, out var forcedDecisionMap))
+            lock (mutex)
             {
-                if (forcedDecisionMap.TryGetValue(ruleKey ?? nullRuleKey, out var forcedDecision))
+                if (ForcedDecisionsMap.TryGetValue(flagKey, out var forcedDecisionMap))
                 {
-                    variationKey = forcedDecision.VariationKey;
+                    if (forcedDecisionMap.TryGetValue(ruleKey ?? nullRuleKey, out var forcedDecision))
+                    {
+                        variationKey = forcedDecision.VariationKey;
+                    }
                 }
             }
-
             return variationKey;
         }
 
