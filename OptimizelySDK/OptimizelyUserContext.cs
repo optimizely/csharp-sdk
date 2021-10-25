@@ -258,9 +258,9 @@ namespace OptimizelySDK
 
             lock (mutex)
             {
-                ForcedDecisionsMap[flagKey] = new Dictionary<string, ForcedDecision> {
+                ForcedDecisionsMap[flagKey] = new Dictionary<string, OptimizelyForcedDecision> {
                 {
-                    ruleKey ?? nullRuleKey, new ForcedDecision(flagKey, ruleKey, variationKey)
+                    ruleKey ?? nullRuleKey, new OptimizelyForcedDecision(flagKey, ruleKey, variationKey)
                 }
                 };
             }
