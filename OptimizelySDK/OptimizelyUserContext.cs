@@ -26,28 +26,8 @@ namespace OptimizelySDK
     /// <summary>
     /// OptimizelyUserContext defines user contexts that the SDK will use to make decisions for
     /// </summary>
-    public class OptimizelyUserContext
+    public partial class OptimizelyUserContext
     {
-        public class OptimizelyForcedDecision
-        {
-            private string flagKey;
-            private string ruleKey;
-            private string variationKey;
-
-            public OptimizelyForcedDecision(string flagKey, string ruleKey, string variationKey)
-            {
-                this.flagKey = flagKey;
-                this.ruleKey = ruleKey;
-                this.variationKey = variationKey;
-            }
-
-            public string FlagKey { get { return flagKey; } set { this.flagKey = value; } }
-
-            public string RuleKey { get { return ruleKey; } set { this.ruleKey = value; } }
-
-            public string VariationKey { get { return variationKey; } set { this.variationKey = value; } }
-        }
-
         private const string nullRuleKey = "HardCodedNullRuleKey";
 
         private ILogger Logger;
@@ -259,10 +239,11 @@ namespace OptimizelySDK
 
             lock (mutex)
             {
-                ForcedDecisionsMap[flagKey] = new Dictionary<string, OptimizelyForcedDecision> {
+                ForcedDecisionsMap[flagKey] = new Dictionary<string, OptimizelyForcedDecision>
                 {
-                    ruleKey ?? nullRuleKey, new OptimizelyForcedDecision(flagKey, ruleKey, variationKey)
-                }
+                    {
+                        ruleKey ?? nullRuleKey, new OptimizelyForcedDecision(variationKey)
+                    }
                 };
             }
 

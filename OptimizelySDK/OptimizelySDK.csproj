@@ -91,6 +91,7 @@
     <Compile Include="OptimizelyDecisions\DecisionReasons.cs" />
     <Compile Include="OptimizelyDecisions\OptimizelyDecideOption.cs" />
     <Compile Include="OptimizelyDecisions\OptimizelyDecision.cs" />
+    <Compile Include="OptimizelyForcedDecision.cs" />
     <Compile Include="OptimizelyUserContext.cs" />
     <Compile Include="OptimizelyJSON.cs" />
     <Compile Include="Entity\Rollout.cs" />
@@ -120,6 +121,7 @@
     <Compile Include="Notifications\NotificationCenter.cs" />
     <Compile Include="Optimizely.cs" />
     <Compile Include="Bucketing\UserProfile.cs" />
+    <Compile Include="OptimizelyDecisionContext.cs" />
     <Compile Include="OptlyConfig\IOptimizelyConfigManager.cs" />
     <Compile Include="OptlyConfig\OptimizelyEvent.cs" />
     <Compile Include="OptlyConfig\OptimizelyAttribute.cs" />
