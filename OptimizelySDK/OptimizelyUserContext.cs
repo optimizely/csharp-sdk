@@ -28,8 +28,6 @@ namespace OptimizelySDK
     /// </summary>
     public partial class OptimizelyUserContext
     {
-        private const string nullRuleKey = "HardCodedNullRuleKey";
-
         private ILogger Logger;
         private IErrorHandler ErrorHandler;
         private object mutex = new object();
@@ -214,22 +212,10 @@ namespace OptimizelySDK
         /// Set a forced decision.
         /// </summary>
         /// <param name="flagKey">The flag key.</param>
-        /// <param name="variationKey">The variation key.</param>
-        /// <returns></returns>
-
-        public bool SetForcedDecision(string flagKey, string variationKey)
-        {
-            return SetForcedDecision(flagKey, null, variationKey);
-        }
-
-        /// <summary>
-        /// Set a forced decision.
-        /// </summary>
-        /// <param name="flagKey">The flag key.</param>
         /// <param name="ruleKey">The rule key.</param>
         /// <param name="variationKey">The variation key.</param>
         /// <returns></returns>
-        public bool SetForcedDecision(string flagKey, string ruleKey, string variationKey)
+        public bool SetForcedDecision(OptimizelyDecisionContext context, OptimizelyForcedDecision decision)
         {
             if (!Optimizely.IsValid)
             {
@@ -239,10 +225,10 @@ namespace OptimizelySDK
 
             lock (mutex)
             {
-                ForcedDecisionsMap[flagKey] = new Dictionary<string, OptimizelyForcedDecision>
+                ForcedDecisionsMap[context.FlagKey] = new Dictionary<string, OptimizelyForcedDecision>
                 {
                     {
-                        ruleKey ?? nullRuleKey, new OptimizelyForcedDecision(variationKey)
+                        context.RuleKey ?? OptimizelyDecisionContext.OPTI_NULL_RULE_KEY, new OptimizelyForcedDecision(decision.VariationKey)
                     }
                 };
             }
@@ -256,7 +242,7 @@ namespace OptimizelySDK
         /// <param name="flagKey">The flag key</param>
         /// <param name="ruleKey">The rule key</param>
         /// <returns>The variation key for a forced decision</returns>
-        public string GetForcedDecision(string flagKey, string ruleKey = null)
+        public string GetForcedDecision(OptimizelyDecisionContext context)
         {
             if (!Optimizely.IsValid)
             {
@@ -264,7 +250,7 @@ namespace OptimizelySDK
                 return null;
             }
 
-            if (string.IsNullOrEmpty(flagKey))
+            if (context == null || string.IsNullOrEmpty(context.FlagKey))
             {
                 Logger.Log(LogLevel.WARN, "flagkey cannot be null");
                 return null;
@@ -274,9 +260,9 @@ namespace OptimizelySDK
 
             lock (mutex)
             {
-                if (ForcedDecisionsMap.TryGetValue(flagKey, out var forcedDecisionMap))
+                if (ForcedDecisionsMap.TryGetValue(context.FlagKey, out var forcedDecisionMap))
                 {
-                    if (forcedDecisionMap.TryGetValue(ruleKey ?? nullRuleKey, out var forcedDecision))
+                    if (forcedDecisionMap.TryGetValue(context.RuleKey ?? OptimizelyDecisionContext.OPTI_NULL_RULE_KEY, out var forcedDecision))
                     {
                         variationKey = forcedDecision.VariationKey;
                     }
@@ -291,9 +277,9 @@ namespace OptimizelySDK
         /// <param name="flagKey">The flag key.</param>
         /// <param name="ruleKey"></param>
         /// <returns>Whether the item was removed.</returns>
-        public bool RemoveForcedDecision(string flagKey, string ruleKey = null)
+        public bool RemoveForcedDecision(OptimizelyDecisionContext context)
         {
-            if (string.IsNullOrEmpty(flagKey))
+            if (context == null || string.IsNullOrEmpty(context.FlagKey))
             {
                 Logger.Log(LogLevel.WARN, "flagKey cannot be null");
                 return false;
@@ -305,12 +291,12 @@ namespace OptimizelySDK
                 return false;
             }
 
-            if (ForcedDecisionsMap.TryGetValue(flagKey, out var decision))
+            if (ForcedDecisionsMap.TryGetValue(context.FlagKey, out var decision))
             {
-                decision.Remove(ruleKey);
+                decision.Remove(context.RuleKey);
                 if (decision.Count == 0)
                 {
-                    ForcedDecisionsMap.Remove(flagKey);
+                    ForcedDecisionsMap.Remove(context.FlagKey);
                 }
             }
             return true;
@@ -338,26 +324,26 @@ namespace OptimizelySDK
         /// <param name="flagKey">The flag key.</param>
         /// <param name="ruleKey">The rule key.</param>
         /// <returns>A result with the variation</returns>
-        public Result<Variation> FindValidatedForcedDecision(string flagKey, string ruleKey = null)
+        public Result<Variation> FindValidatedForcedDecision(OptimizelyDecisionContext context)
         {
             DecisionReasons reasons = new DecisionReasons();
 
-            string variationKey = GetForcedDecision(flagKey, ruleKey);
+            string variationKey = GetForcedDecision(context);
             if (variationKey != null)
             {
                 Variation variation = new Variation();
-                string strRuleKey = ruleKey ?? "null";
+                string strRuleKey = context.RuleKey ?? OptimizelyDecisionContext.OPTI_NULL_RULE_KEY;
                 string info;
                 if (variation != null)
                 {
-                    info = string.Format("Variation {0} is mapped to flag: {1} and rule: {2} in the forced decision map.", variationKey, flagKey, strRuleKey);
+                    info = string.Format("Variation {0} is mapped to flag: {1} and rule: {2} in the forced decision map.", variationKey, context.FlagKey, strRuleKey);
                     Logger.Log(LogLevel.INFO, info);
                     reasons.AddInfo(info);
                     return Result<Variation>.NewResult(variation, reasons);
                 }
                 else
                 {
-                    info = string.Format("Invalid variation is mapped to flag: {0} and rule: {1} forced decision map.", flagKey, strRuleKey);
+                    info = string.Format("Invalid variation is mapped to flag: {0} and rule: {1} forced decision map.", context.FlagKey, strRuleKey);
                     Logger.Log(LogLevel.INFO, info);
                     reasons.AddInfo(info);
                 }

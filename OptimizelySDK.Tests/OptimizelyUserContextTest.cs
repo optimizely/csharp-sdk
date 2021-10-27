@@ -189,8 +189,9 @@ namespace OptimizelySDK.Tests
         public void TestSetForcedDecisionSetsValue()
         {
             var user = Optimizely.CreateUserContext(UserID);
-
-            var result = user.SetForcedDecision("flag", "variation");
+            var context = new OptimizelyDecisionContext("flag", null);
+            var decision = new OptimizelyForcedDecision("variationKey");
+            var result = user.SetForcedDecision(context, decision);
 
             Assert.IsTrue(result);
         }
@@ -201,7 +202,10 @@ namespace OptimizelySDK.Tests
             var optly = new Optimizely(new FallbackProjectConfigManager(null));
 
             var user = optly.CreateUserContext(UserID);
-            var result = user.SetForcedDecision("flag", "variation");
+
+            var context = new OptimizelyDecisionContext("flag", null);
+            var decision = new OptimizelyForcedDecision("variationKey");
+            var result = user.SetForcedDecision(context, decision);
 
             Assert.IsFalse(result);
             //TODO: should assert logger is called
@@ -221,10 +225,11 @@ namespace OptimizelySDK.Tests
         public void TestGetForcedDecisionsReturnsValueWithRuleKey()
         {
             var user = Optimizely.CreateUserContext(UserID);
+            var context = new OptimizelyDecisionContext("flagKey", "ruleKey");
+            var decision = new OptimizelyForcedDecision("variation");
+            user.SetForcedDecision(context, decision);
 
-            user.SetForcedDecision("flagKey", "ruleKey", "variation");
-
-            var result = user.GetForcedDecision("flagKey", "ruleKey");
+            var result = user.GetForcedDecision(context);
 
             Assert.AreEqual("variation", result);
         }
@@ -233,36 +238,39 @@ namespace OptimizelySDK.Tests
         public void TestGetForcedDecisionReturnsValueWithoutRuleKey()
         {
             var user = Optimizely.CreateUserContext(UserID);
+            var context = new OptimizelyDecisionContext("flagKey", null);
+            var decision = new OptimizelyForcedDecision("variationKey");
+            user.SetForcedDecision(context, decision);
 
-            user.SetForcedDecision("flagKey", "variation");
+            var result = user.GetForcedDecision(context);
 
-            var result = user.GetForcedDecision("flagKey", null);
-
-            Assert.AreEqual("variation", result);
+            Assert.AreEqual("variationKey", result);
         }
 
         [Test]
         public void TestGetForcedDecisionReturnsValueWithOnlyFlagKey()
         {
             var user = Optimizely.CreateUserContext(UserID);
+            var context = new OptimizelyDecisionContext("flagKey", null);
+            var decision = new OptimizelyForcedDecision("variationKey");
+            user.SetForcedDecision(context, decision);
 
-            user.SetForcedDecision("flagKey", "variation");
+            var result = user.GetForcedDecision(context);
 
-            var result = user.GetForcedDecision("flagKey");
-
-            Assert.AreEqual("variation", result);
+            Assert.AreEqual("variationKey", result);
         }
 
         [Test]
         public void TestGetForcedDecisionReturnsValueWithRuleKey()
         {
             var user = Optimizely.CreateUserContext(UserID);
+            var context = new OptimizelyDecisionContext("flagKey", "ruleKey");
+            var decision = new OptimizelyForcedDecision("variationKey");
+            user.SetForcedDecision(context, decision);
 
-            user.SetForcedDecision("flagKey", "rule", "variation");
+            var result = user.GetForcedDecision(context);
 
-            var result = user.GetForcedDecision("flagKey", "rule");
-
-            Assert.AreEqual("variation", result);
+            Assert.AreEqual("variationKey", result);
         }
 
         [Test]
@@ -273,9 +281,11 @@ namespace OptimizelySDK.Tests
             var expectedResult = Result<Variation>.NewResult(new Variation { }, decisionReasons);
             var user = Optimizely.CreateUserContext(UserID);
 
-            user.SetForcedDecision("flagKey", "rule", "variation");
+            var context = new OptimizelyDecisionContext("flagKey", "ruleKey");
+            var decision = new OptimizelyForcedDecision("variationKey");
+            user.SetForcedDecision(context, decision);
 
-            var result = user.FindValidatedForcedDecision("flagKey", "rule");
+            var result = user.FindValidatedForcedDecision(context);
 
             Assertions.AreEqual(expectedResult, result);
         }
@@ -292,12 +302,15 @@ namespace OptimizelySDK.Tests
         public void TestRemoveForcedDecisionRemovesDecision()
         {
             var user = Optimizely.CreateUserContext(UserID);
+            var context = new OptimizelyDecisionContext("flagKey", "ruleKey");
+            var decision = new OptimizelyForcedDecision("variationKey");
+            var setResult = user.SetForcedDecision(context, decision);
 
-            user.SetForcedDecision("flagKey", "ruleKey", "variation");
+            Assert.IsTrue(setResult);
 
-            user.RemoveForcedDecision("flagKey", "ruleKey");
+            user.RemoveForcedDecision(context);
 
-            var result = user.GetForcedDecision("flagKey", "ruleKey");
+            var result = user.GetForcedDecision(context);
 
             Assert.AreEqual(null, result);
         }
@@ -308,9 +321,12 @@ namespace OptimizelySDK.Tests
             var optly = new Optimizely(new FallbackProjectConfigManager(null));
 
             var user = optly.CreateUserContext(UserID);
-            user.SetForcedDecision("flagKey", "variation");
 
-            var result = user.RemoveForcedDecision("flagKey", null);
+            var context = new OptimizelyDecisionContext("flagKey", null);
+            var decision = new OptimizelyForcedDecision("variationKey");
+            var setResult = user.SetForcedDecision(context, decision);
+
+            var result = user.RemoveForcedDecision(context);
 
             Assert.AreEqual(false, result);
         }
@@ -320,19 +336,27 @@ namespace OptimizelySDK.Tests
         {
             var user = Optimizely.CreateUserContext(UserID);
 
-            user.SetForcedDecision("flagKey", "ruleKey", "variation");
-            user.SetForcedDecision("flagKey2", "ruleKey2", "variation2");
-            user.SetForcedDecision("flagKey3", "ruleKey3", "variation3");
+            var context1 = new OptimizelyDecisionContext("flagKey", "ruleKey1");
+            var context2 = new OptimizelyDecisionContext("flagKey2", "ruleKey2");
+            var context3 = new OptimizelyDecisionContext("flagKey3", "ruleKey3");
+
+            var decision1 = new OptimizelyForcedDecision("variation");
+            var decision2 = new OptimizelyForcedDecision("variation2");
+            var decision3 = new OptimizelyForcedDecision("variation3");
+
+            user.SetForcedDecision(context1, decision1);
+            user.SetForcedDecision(context2, decision2);
+            user.SetForcedDecision(context3, decision3);
 
             user.RemoveAllForcedDecisions();
 
-            var result1 = user.GetForcedDecision("flagKey", null);
+            var result1 = user.GetForcedDecision(context1);
             Assert.AreEqual(null, result1);
 
-            var result2 = user.GetForcedDecision("flagKey2", null);
+            var result2 = user.GetForcedDecision(context2);
             Assert.AreEqual(null, result2);
 
-            var result3 = user.GetForcedDecision("flagKey3", null);
+            var result3 = user.GetForcedDecision(context3);
             Assert.AreEqual(null, result3);
         }
 
@@ -342,7 +366,10 @@ namespace OptimizelySDK.Tests
             var optly = new Optimizely(new FallbackProjectConfigManager(null));
 
             var user = optly.CreateUserContext(UserID);
-            user.SetForcedDecision("flagKey", "variation");
+
+            var context = new OptimizelyDecisionContext("flagKey");
+            var decision = new OptimizelyForcedDecision("variation");
+            user.SetForcedDecision(context, decision);
 
             var result = user.RemoveAllForcedDecisions();
 
