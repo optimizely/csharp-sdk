@@ -21,17 +21,19 @@ namespace OptimizelySDK
         public const string OPTI_NULL_RULE_KEY = "$opt-null-rule-key";
         private string flagKey;
         private string ruleKey;
+        private string decisionKey;
 
-        public OptimizelyDecisionContext(string flagKey, string ruleKey, string variationKey)
+        public OptimizelyDecisionContext(string flagKey, string ruleKey = null)
         {
             this.flagKey = flagKey;
             this.ruleKey = ruleKey;
+            this.decisionKey = string.Format("{0}-{1}", flagKey, ruleKey ?? OPTI_NULL_RULE_KEY);
         }
 
-        public string FlagKey { get { return flagKey; } set { this.flagKey = value; } }
+        public string FlagKey { get { return flagKey; } }
 
-        public string RuleKey { get { return ruleKey; } set { this.ruleKey = value; } }
+        public string RuleKey { get { return ruleKey; } }
 
-        public string GetDecisionKey { get { return string.Format("{0}-{1}", flagKey, ruleKey ?? OPTI_NULL_RULE_KEY); } }
+        public string GetDecisionKey { get { return decisionKey; } }
     }
 }
