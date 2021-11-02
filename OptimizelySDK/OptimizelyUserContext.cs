@@ -219,7 +219,7 @@ namespace OptimizelySDK
         {
             if (!Optimizely.IsValid)
             {
-                Logger.Log(LogLevel.ERROR, "Optimizely config is null");
+                Logger.Log(LogLevel.ERROR, DecisionMessage.SDK_NOT_READY);
                 return false;
             }
 
@@ -246,13 +246,13 @@ namespace OptimizelySDK
         {
             if (!Optimizely.IsValid)
             {
-                Logger.Log(LogLevel.ERROR, "Optimizely SDK not ready.");
+                Logger.Log(LogLevel.ERROR, DecisionMessage.SDK_NOT_READY);
                 return null;
             }
 
             if (context == null || string.IsNullOrEmpty(context.FlagKey))
             {
-                Logger.Log(LogLevel.WARN, "flagkey cannot be null");
+                Logger.Log(LogLevel.WARN, "flagKey cannot be null");
                 return null;
             }
 
@@ -287,7 +287,7 @@ namespace OptimizelySDK
 
             if (!Optimizely.IsValid)
             {
-                Logger.Log(LogLevel.ERROR, "Optimizely SDK not ready.");
+                Logger.Log(LogLevel.ERROR, DecisionMessage.SDK_NOT_READY);
                 return false;
             }
 
@@ -310,7 +310,7 @@ namespace OptimizelySDK
         {
             if (!Optimizely.IsValid)
             {
-                Logger.Log(LogLevel.ERROR, "Optimizely SDK not ready.");
+                Logger.Log(LogLevel.ERROR, DecisionMessage.SDK_NOT_READY);
                 return false;
             }
 
