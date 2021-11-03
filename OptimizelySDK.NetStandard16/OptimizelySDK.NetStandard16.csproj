@@ -97,6 +97,12 @@
 		<Compile Include="..\OptimizelySDK\OptimizelyDecisions\OptimizelyDecision.cs" />
 		<Compile Include="..\OptimizelySDK\OptimizelyUserContext.cs" />
 		<Compile Include="..\OptimizelySDK\Config\FallbackProjectConfigManager.cs">
+		<Compile Include="..\OptimizelySDK\OptimizelyDecisionContext.cs">
+			<Link>OptimizelyDecisionContext.cs</Link>
+		</Compile>
+		<Compile Include="..\OptimizelySDK\OptimizelyForcedDecision.cs">
+		  <Link>OptimizelyForcedDecision.cs</Link>
+		</Compile>
 		  <Link>AtomicProjectConfigManager.cs</Link>
 		</Compile>
 		<Compile Include="..\OptimizelySDK\OptimizelyFactory.cs">
