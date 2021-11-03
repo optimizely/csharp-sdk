@@ -210,20 +210,17 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
-        public void Random()
+        public void TestGetForcedDecisionReturnsNullIfInvalidConfig()
         {
-            var user = Optimizely.CreateUserContext(UserID);
-            var context = new OptimizelyDecisionContext("flag2", "");
+            var optly = new Optimizely(new FallbackProjectConfigManager(null));
 
-            var decision = new OptimizelyForcedDecision("variation2");
+            var user = optly.CreateUserContext(UserID);
 
-            var result = user.SetForcedDecision(context, decision);
+            var context = new OptimizelyDecisionContext("flag", null);
+            var decision = new OptimizelyForcedDecision("variationKey");
+            var result = user.GetForcedDecision(context);
 
-            Assert.IsTrue(result);
-
-            var test = user.GetForcedDecision(context);
-
-            Assert.AreEqual("variation2", test);
+            Assert.IsNull(result);
         }
 
         [Test]
