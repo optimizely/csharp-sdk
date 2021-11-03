@@ -186,6 +186,19 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
+        public void TestForcedDecisionReturnsCorrectGetDecisionKey()
+        {
+            var user = Optimizely.CreateUserContext(UserID);
+            var context = new OptimizelyDecisionContext("flag", null);
+
+            Assert.AreEqual(context.GetDecisionKey, "flag-$opt-null-rule-key");
+
+            context = new OptimizelyDecisionContext("flag", "ruleKey");
+
+            Assert.AreEqual(context.GetDecisionKey, "flag-ruleKey");
+        }
+
+        [Test]
         public void TestSetForcedDecisionSetsValue()
         {
             var user = Optimizely.CreateUserContext(UserID);
@@ -194,6 +207,23 @@ namespace OptimizelySDK.Tests
             var result = user.SetForcedDecision(context, decision);
 
             Assert.IsTrue(result);
+        }
+
+        [Test]
+        public void Random()
+        {
+            var user = Optimizely.CreateUserContext(UserID);
+            var context = new OptimizelyDecisionContext("flag2", "");
+
+            var decision = new OptimizelyForcedDecision("variation2");
+
+            var result = user.SetForcedDecision(context, decision);
+
+            Assert.IsTrue(result);
+
+            var test = user.GetForcedDecision(context);
+
+            Assert.AreEqual("variation2", test);
         }
 
         [Test]
