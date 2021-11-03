@@ -631,9 +631,12 @@ namespace OptimizelySDK.Tests
         public static void AreEqual(Result<Variation> expected, Result<Variation> actual)
         {
             AreEqual(expected.DecisionReasons, actual.DecisionReasons);
-            AreEqual(expected.ResultObject, actual.ResultObject);
-        }
+            if (expected.ResultObject != null && actual.ResultObject != null)
+            {
+                AreEqual(expected.ResultObject, actual.ResultObject);
+            }
 
-        #endregion Result T
+            #endregion Result T
+        }
     }
 }
