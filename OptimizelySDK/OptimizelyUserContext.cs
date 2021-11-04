@@ -347,7 +347,7 @@ namespace OptimizelySDK
                     }
                 }
             }
-            return Result<Variation>.NewResult(null, reasons);
+            return Result<Variation>.NullResult(reasons);
         }
     }
 }

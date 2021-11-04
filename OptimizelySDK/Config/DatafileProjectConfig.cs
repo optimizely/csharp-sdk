@@ -661,7 +661,7 @@ namespace OptimizelySDK.Config
             {
                 foreach (var variation in variations)
                 {
-                    if (variation.Key.Equals(flagKey))
+                    if (variation.Key.Equals(variationKey))
                     {
                         return variation;
                     }
