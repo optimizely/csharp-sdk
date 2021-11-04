@@ -329,27 +329,26 @@ namespace OptimizelySDK
             DecisionReasons reasons = new DecisionReasons();
 
             string variationKey = GetForcedDecision(context);
+            Variation variation = null;
             if (variationKey != null)
             {
-                Variation variation = new Variation();
                 string strRuleKey = context.RuleKey ?? OptimizelyDecisionContext.OPTI_NULL_RULE_KEY;
-                string info;
-                if (variation != null)
+                if (!string.IsNullOrEmpty(variationKey))
                 {
-                    info = string.Format("Variation {0} is mapped to flag: {1} and rule: {2} in the forced decision map.", variationKey, context.FlagKey, strRuleKey);
-                    Logger.Log(LogLevel.INFO, info);
-                    reasons.AddInfo(info);
-                    return Result<Variation>.NewResult(variation, reasons);
-                }
-                else
-                {
-                    info = string.Format("Invalid variation is mapped to flag: {0} and rule: {1} forced decision map.", context.FlagKey, strRuleKey);
-                    Logger.Log(LogLevel.INFO, info);
-                    reasons.AddInfo(info);
+                    variation = Optimizely.ProjectConfigManager.GetConfig().GetFlagVariationByKey(context.FlagKey, variationKey);
+                    if (variation != null)
+                    {
+                        reasons.AddInfo("Decided by forced decision.");
+                        reasons.AddInfo("Variation {0} is mapped to {1} and user {2} in the forced decision map", variationKey, strRuleKey, this.UserId);
+                    }
+                    else
+                    {
+                        reasons.AddInfo("Invalid variation is mapped to {0} and user {1} in the forced decision map.", strRuleKey, this.UserId);
+                    }
                 }
             }
 
-            return Result<Variation>.NullResult(reasons);
+            return Result<Variation>.NewResult(variation, reasons);
         }
     }
 }

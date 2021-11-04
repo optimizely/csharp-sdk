@@ -253,6 +253,14 @@ namespace OptimizelySDK
         FeatureFlag GetFeatureFlagFromKey(string featureKey);
 
         /// <summary>
+        /// Gets the variation associated with an experiment or rollout for a given feature flag key
+        /// </summary>
+        /// <param name="flagKey">feature flag key</param>
+        /// <param name="variationKey">variation key</param>
+        /// <returns></returns>
+        Variation GetFlagVariationByKey(string flagKey, string variationKey);
+
+        /// <summary>
         /// Get the rollout from the ID
         /// </summary>
         /// <param name="rolloutId">ID for rollout</param>

@@ -650,6 +650,27 @@ namespace OptimizelySDK.Config
         }
 
         /// <summary>
+        /// Gets the variation associated with an experiment or rollout for a given feature flag key
+        /// </summary>
+        /// <param name="flagKey">feature flag key</param>
+        /// <param name="variationKey">variation key</param>
+        /// <returns></returns>
+        public Variation GetFlagVariationByKey(string flagKey, string variationKey)
+        {
+            if (_FlagVariationMap.TryGetValue(flagKey, out var variations))
+            {
+                foreach (var variation in variations)
+                {
+                    if (variation.Key.Equals(flagKey))
+                    {
+                        return variation;
+                    }
+                }
+            }
+            return null;
+        }
+
+        /// <summary>
         /// Get the rollout from the ID
         /// </summary>
         /// <param name="rolloutId">ID for rollout</param>
