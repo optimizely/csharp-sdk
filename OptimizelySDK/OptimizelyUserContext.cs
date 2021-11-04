@@ -293,13 +293,17 @@ namespace OptimizelySDK
 
             if (ForcedDecisionsMap.TryGetValue(context.FlagKey, out var decision))
             {
-                decision.Remove(context.RuleKey);
-                if (decision.Count == 0)
+                if (!string.IsNullOrEmpty(context.RuleKey))
                 {
-                    ForcedDecisionsMap.Remove(context.FlagKey);
+                    decision.Remove(context.RuleKey);
+                    if (decision.Count == 0)
+                    {
+                        ForcedDecisionsMap.Remove(context.FlagKey);
+                        return true;
+                    }
                 }
             }
-            return true;
+            return false;
         }
 
         /// <summary>
