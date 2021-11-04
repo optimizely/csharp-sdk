@@ -348,7 +348,7 @@ namespace OptimizelySDK
                     if (variation != null)
                     {
                         reasons.AddInfo("Decided by forced decision.");
-                        reasons.AddInfo("Variation {0} is mapped to {1} and user {2} in the forced decision map", variationKey, strRuleKey, this.UserId);
+                        reasons.AddInfo("Variation ({0}) is mapped to ({1}) and user ({2}) in the forced decision map", variationKey, strRuleKey, this.UserId);
                         return Result<Variation>.NewResult(variation, reasons);
                     }
                     else
