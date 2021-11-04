@@ -199,27 +199,6 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
-        public void RemoveMe()
-        {
-            var datafile = "";
-            using (System.IO.StreamReader reader = new System.IO.StreamReader(@"C:\Users\Dustin\dev\csharp\csharp-sdk\OptimizelySDK.Tests\fsc.json"))
-                datafile = reader.ReadToEnd();
-
-            Optimizely = new Optimizely(datafile, EventDispatcherMock.Object, LoggerMock.Object, ErrorHandlerMock.Object);
-            var user = Optimizely.CreateUserContext("test_user_1");
-            var context = new OptimizelyDecisionContext("flag_1", null);
-            var context2 = new OptimizelyDecisionContext("flag_2", "ruleKey");
-            var decision = new OptimizelyForcedDecision("exp_variation_1");
-            var decision2 = new OptimizelyForcedDecision("exp_variation_2");
-
-            user.SetForcedDecision(context, decision);
-            user.SetForcedDecision(context2, decision2);
-
-            var result = user.DecideAll();
-            var str1 = Newtonsoft.Json.JsonConvert.SerializeObject(result);
-        }
-
-        [Test]
         public void TestSetForcedDecisionSetsValue()
         {
             var user = Optimizely.CreateUserContext(UserID);
