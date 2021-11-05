@@ -92,6 +92,15 @@ namespace OptimizelySDK.Tests
 
         #endregion Basic asserts
 
+        #region
+
+        public static void AreEqual(OptimizelyForcedDecision expected, OptimizelyForcedDecision actual)
+        {
+            Assert.AreEqual(expected.VariationKey, actual.VariationKey);
+        }
+
+        #endregion
+
         #region OptimizelyAttribute
 
         public static void AreEquivalent(OptimizelyAttribute[] expected, OptimizelyAttribute[] actual)

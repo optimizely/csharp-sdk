@@ -34,6 +34,6 @@ namespace OptimizelySDK
 
         public string RuleKey { get { return ruleKey; } }
 
-        public string GetDecisionKey { get { return decisionKey; } }
+        public string DecisionKey { get { return decisionKey; } }
     }
 }
