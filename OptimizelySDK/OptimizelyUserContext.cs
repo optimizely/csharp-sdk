@@ -250,7 +250,7 @@ namespace OptimizelySDK
                 return null;
             }
 
-            if (context == null || string.IsNullOrEmpty(context.FlagKey))
+            if (context == null || context.FlagKey == null)
             {
                 Logger.Log(LogLevel.WARN, "flagKey cannot be null");
                 return null;
@@ -279,7 +279,7 @@ namespace OptimizelySDK
         /// <returns>Whether the item was removed.</returns>
         public bool RemoveForcedDecision(OptimizelyDecisionContext context)
         {
-            if (context == null || string.IsNullOrEmpty(context.FlagKey))
+            if (context == null || context.FlagKey == null)
             {
                 Logger.Log(LogLevel.WARN, "flagKey cannot be null");
                 return false;
