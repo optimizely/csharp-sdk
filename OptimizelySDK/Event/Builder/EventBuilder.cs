@@ -1,4 +1,4 @@
-﻿/* 
+﻿/*
  * Copyright 2017-2019, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 using OptimizelySDK.Bucketing;
 using OptimizelySDK.Entity;
 using OptimizelySDK.Logger;
@@ -92,9 +93,10 @@ namespace OptimizelySDK.Event.Builder
 
             //Omit attribute values that are not supported by the log endpoint.
             foreach (var validUserAttribute in userAttributes.Where(attribute => Validator.IsUserAttributeValid(attribute)))
-            {                
+            {
                 var attributeId = config.GetAttributeId(validUserAttribute.Key);
-                if (!string.IsNullOrEmpty(attributeId)) {
+                if (!string.IsNullOrEmpty(attributeId))
+                {
                     userFeatures.Add(new Dictionary<string, object>
                     {
                         { "entity_id", attributeId },
@@ -123,25 +125,23 @@ namespace OptimizelySDK.Event.Builder
 
         private Dictionary<string, object> GetImpressionParams(Experiment experiment, string variationId)
         {
-
             var impressionEvent = new Dictionary<string, object>();
 
             var decisions = new object[]
             {
                     new Dictionary<string, object>
                     {
-                        { Params.CAMPAIGN_ID,   experiment.LayerId },
-                        { Params.EXPERIMENT_ID, experiment.Id },
+                        { Params.CAMPAIGN_ID,   experiment != null ? experiment.LayerId : null },
+                        { Params.EXPERIMENT_ID, experiment != null ? experiment.Id : null },
                         { Params.VARIATION_ID,  variationId }
                     }
             };
-
 
             var events = new object[]
             {
                     new Dictionary<string, object>
                     {
-                        { "entity_id", experiment.LayerId },
+                        { "entity_id", experiment != null ? experiment.LayerId : null },
                         { "timestamp", DateTimeUtils.SecondsSince1970*1000 },
                         { "key", ACTIVATE_EVENT_KEY },
                         { "uuid", Guid.NewGuid() }
@@ -156,7 +156,6 @@ namespace OptimizelySDK.Event.Builder
 
         private List<object> GetConversionParams(ProjectConfig config, string eventKey, string userId, Dictionary<string, object> eventTags)
         {
-
             var conversionEventParams = new List<object>();
             var snapshot = new Dictionary<string, object>();
 
@@ -168,16 +167,19 @@ namespace OptimizelySDK.Event.Builder
                         { "key", eventKey }
                     };
 
-            if (eventTags != null) {
+            if (eventTags != null)
+            {
                 var revenue = EventTagUtils.GetRevenueValue(eventTags, Logger);
 
-                if (revenue != null) {
+                if (revenue != null)
+                {
                     eventDict[EventTagUtils.REVENUE_EVENT_METRIC_NAME] = revenue;
                 }
 
                 var eventVallue = EventTagUtils.GetNumericValue(eventTags, Logger);
 
-                if (eventVallue != null) {
+                if (eventVallue != null)
+                {
                     eventDict[EventTagUtils.VALUE_EVENT_METRIC_NAME] = eventVallue;
                 }
 
@@ -198,7 +200,8 @@ namespace OptimizelySDK.Event.Builder
         {
             var visitors = commonParams[Params.VISITORS] as object[];
 
-            if (visitors.Length > 0) {
+            if (visitors.Length > 0)
+            {
                 var visitor = visitors[0] as Dictionary<string, object>;
                 visitor["snapshots"] = conversionOrImpressionOnlyParams;
             }
@@ -218,7 +221,6 @@ namespace OptimizelySDK.Event.Builder
         public virtual LogEvent CreateImpressionEvent(ProjectConfig config, Experiment experiment, string variationId,
             string userId, UserAttributes userAttributes)
         {
-
             var commonParams = GetCommonParams(config, userId, userAttributes ?? new UserAttributes());
             var impressionOnlyParams = GetImpressionParams(experiment, variationId);
 
@@ -226,7 +228,6 @@ namespace OptimizelySDK.Event.Builder
 
             return new LogEvent(IMPRESSION_ENDPOINT, impressionParams, HTTP_VERB, HTTP_HEADERS);
         }
-
 
         /// <summary>
         /// Create conversion event to be sent to the logging endpoint.
