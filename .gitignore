@@ -245,3 +245,4 @@ OptimizelySDK.Package/nuget.exe
 OptimizelySDK.Package/content
 OptimizelySDK.Package/lib
 /OptimizelySDK.Tests/fsc.json
+/datafiles
