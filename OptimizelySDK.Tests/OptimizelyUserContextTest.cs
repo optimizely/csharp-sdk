@@ -191,11 +191,11 @@ namespace OptimizelySDK.Tests
             var user = Optimizely.CreateUserContext(UserID);
             var context = new OptimizelyDecisionContext("flag", null);
 
-            Assert.AreEqual(context.GetDecisionKey, "flag-$opt-null-rule-key");
+            Assert.AreEqual(context.DecisionKey, "flag-$opt-null-rule-key");
 
             context = new OptimizelyDecisionContext("flag", "ruleKey");
 
-            Assert.AreEqual(context.GetDecisionKey, "flag-ruleKey");
+            Assert.AreEqual(context.DecisionKey, "flag-ruleKey");
         }
 
         [Test]
@@ -258,7 +258,7 @@ namespace OptimizelySDK.Tests
 
             var result = user.GetForcedDecision(context);
 
-            Assert.AreEqual("variation", result);
+            Assertions.AreEqual(decision, result);
         }
 
         [Test]
@@ -271,7 +271,7 @@ namespace OptimizelySDK.Tests
 
             var result = user.GetForcedDecision(context);
 
-            Assert.AreEqual("variationKey", result);
+            Assertions.AreEqual(decision, result);
         }
 
         [Test]
@@ -284,7 +284,7 @@ namespace OptimizelySDK.Tests
 
             var result = user.GetForcedDecision(context);
 
-            Assert.AreEqual("variationKey", result);
+            Assertions.AreEqual(decision, result);
         }
 
         [Test]
@@ -297,7 +297,7 @@ namespace OptimizelySDK.Tests
 
             var result = user.GetForcedDecision(context);
 
-            Assert.AreEqual("variationKey", result);
+            Assertions.AreEqual(decision, result);
         }
 
         [Test]
