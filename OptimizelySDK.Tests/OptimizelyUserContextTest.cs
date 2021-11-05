@@ -312,7 +312,7 @@ namespace OptimizelySDK.Tests
 
             var result = user.FindValidatedForcedDecision(context);
 
-            Assert.IsNull(result);
+            Assertions.AreEqual(expectedResult, result);
         }
 
         [Test]
