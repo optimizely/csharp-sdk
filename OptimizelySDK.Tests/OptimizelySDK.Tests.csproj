@@ -136,7 +136,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="fsc.json" />
     <None Include="packages.config" />
     <EmbeddedResource Include="unsupported_version_datafile.json" />
     <EmbeddedResource Include="typed_audience_datafile.json" />

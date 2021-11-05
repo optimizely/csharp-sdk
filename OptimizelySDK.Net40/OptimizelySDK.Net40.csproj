@@ -192,8 +192,6 @@
     <Compile Include="..\OptimizelySDK\Utils\DateTimeUtils.cs">
       <Link>Utils\DateTimeUtils.cs</Link>
     </Compile>
-    <Compile Include="OptimizelyDecisionContext.cs" />
-    <Compile Include="OptimizelyForcedDecision.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="..\OptimizelySDK\Bucketing\Bucketer.cs">
       <Link>Bucketing\Bucketer.cs</Link>
