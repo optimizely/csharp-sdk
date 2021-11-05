@@ -300,7 +300,10 @@ namespace OptimizelySDK
                 return false;
             }
 
-            ForcedDecisionsMap.Clear();
+            lock (mutex)
+            {
+                ForcedDecisionsMap.Clear();
+            }
             return true;
         }
 
