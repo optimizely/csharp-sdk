@@ -444,6 +444,25 @@ namespace OptimizelySDK
             return DecisionService.GetForcedVariation(experimentKey, userId, config).ResultObject;
         }
 
+        public Variation GetFlagVariationByKey(string flagKey, string variationKey)
+        {
+            var flagVariationMap = ProjectConfigManager?.GetConfig().FlagVariationMap;
+            if (flagVariationMap.ContainsKey(flagKey) == true)
+            {
+                flagVariationMap.TryGetValue(flagKey, out var variations);
+
+                foreach (var variation in variations)
+                {
+                    if (variation.Key.Equals(variationKey))
+                    {
+                        return variation;
+                    }
+                }
+            }
+
+            return null;
+        }
+
         #region FeatureFlag APIs
 
         /// <summary>
@@ -744,7 +763,7 @@ namespace OptimizelySDK
             }
 
             var flag = config.GetFeatureFlagFromKey(key);
-            if (string.IsNullOrEmpty(flag.Key))
+            if (flag.Key == null)
             {
                 return OptimizelyDecision.NewErrorDecision(key,
                     user,
@@ -761,7 +780,7 @@ namespace OptimizelySDK
 
             var decisionContext = new OptimizelyDecisionContext(flag.Key);
             var forcedDecisionVariation = user.FindValidatedForcedDecision(decisionContext);
-            if (forcedDecisionVariation?.ResultObject != null)
+            if (forcedDecisionVariation != null)
             {
                 decision = new FeatureDecision(null, forcedDecisionVariation.ResultObject, FeatureDecision.DECISION_SOURCE_FEATURE_TEST);
                 decisionReasons = forcedDecisionVariation.DecisionReasons;

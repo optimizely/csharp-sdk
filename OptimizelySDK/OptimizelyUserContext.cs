@@ -319,22 +319,20 @@ namespace OptimizelySDK
             Variation variation = null;
             if (forcedDecision != null)
             {
-                if (forcedDecision != null)
+                var variationKey = forcedDecision.VariationKey;
+                variation = Optimizely.GetFlagVariationByKey(context.FlagKey, variationKey);
+                if (variation != null)
                 {
-                    var variationKey = forcedDecision.VariationKey;
-                    if (variation != null)
-                    {
-                        reasons.AddInfo("Decided by forced decision.");
-                        reasons.AddInfo("Variation ({0}) is mapped to ({1}) and user ({2}) in the forced decision map", variationKey, context.FlagKey, this.UserId);
-                        return Result<Variation>.NewResult(variation, reasons);
-                    }
-                    else
-                    {
-                        reasons.AddInfo("Invalid variation is mapped to {0} and user {1} in the forced decision map.", context.FlagKey, this.UserId);
-                    }
+                    reasons.AddInfo("Decided by forced decision.");
+                    reasons.AddInfo("Variation ({0}) is mapped to ({1}) and user ({2}) in the forced decision map", variationKey, context.FlagKey, this.UserId);
+                    return Result<Variation>.NewResult(variation, reasons);
+                }
+                else
+                {
+                    reasons.AddInfo("Invalid variation is mapped to {0} and user {1} in the forced decision map.", context.FlagKey, this.UserId);
                 }
             }
-            return Result<Variation>.NullResult(reasons);
+            return Result<Variation>.NewResult(null, reasons);
         }
     }
 }
