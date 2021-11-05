@@ -332,7 +332,7 @@ namespace OptimizelySDK
                     reasons.AddInfo("Invalid variation is mapped to {0} and user {1} in the forced decision map.", context.FlagKey, this.UserId);
                 }
             }
-            return null;
+            return Result<Variation>.NullResult(reasons);
         }
     }
 }
