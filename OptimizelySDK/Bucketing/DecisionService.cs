@@ -532,7 +532,7 @@ namespace OptimizelySDK.Bucketing
                 if (string.IsNullOrEmpty(experiment.Key))
                     continue;
 
-                var variationResult = GetVariation(experiment, user, config, filteredAttributes, options);
+                var variationResult = GetVariationFromExperiment(config, featureFlag.Key, experiment, user, options);
                 reasons += variationResult.DecisionReasons;
 
                 if (!string.IsNullOrEmpty(variationResult.ResultObject?.Id))
@@ -544,6 +544,28 @@ namespace OptimizelySDK.Bucketing
 
             Logger.Log(LogLevel.INFO, reasons.AddInfo($"The user \"{userId}\" is not bucketed into any of the experiments on the feature \"{featureFlag.Key}\"."));
             return Result<FeatureDecision>.NullResult(reasons);
+        }
+
+        private Result<Variation> GetVariationFromExperiment(ProjectConfig config, string flagKey, Experiment experiment, OptimizelyUserContext user, OptimizelyDecideOption[] options)
+        {
+            var reasons = new DecisionReasons();
+
+            var ruleKey = experiment != null ? experiment.Key : null;
+
+            var decisionContext = new OptimizelyDecisionContext(flagKey, ruleKey);
+            var response = user.FindValidatedForcedDecision(decisionContext);
+
+            reasons += response.DecisionReasons;
+
+            if (response.ResultObject != null)
+            {
+                return Result<Variation>.NewResult(response.ResultObject, reasons);
+            }
+
+            var decisionResponse = GetVariation(experiment, user, config, user.GetAttributes());
+            reasons += decisionResponse.DecisionReasons;
+
+            return Result<Variation>.NewResult(decisionResponse.ResultObject, reasons);
         }
 
         /// <summary>
