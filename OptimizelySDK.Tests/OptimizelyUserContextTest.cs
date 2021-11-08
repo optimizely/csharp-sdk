@@ -191,11 +191,11 @@ namespace OptimizelySDK.Tests
             var user = Optimizely.CreateUserContext(UserID);
             var context = new OptimizelyDecisionContext("flag", null);
 
-            Assert.AreEqual(context.DecisionKey, "flag-$opt-null-rule-key");
+            Assert.AreEqual("flag-$opt$-$opt-null-rule-key", context.DecisionKey);
 
             context = new OptimizelyDecisionContext("flag", "ruleKey");
 
-            Assert.AreEqual(context.DecisionKey, "flag-ruleKey");
+            Assert.AreEqual("flag-$opt$-ruleKey", context.DecisionKey);
         }
 
         [Test]
