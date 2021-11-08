@@ -543,7 +543,7 @@ namespace OptimizelySDK.Bucketing
             }
 
             Logger.Log(LogLevel.INFO, reasons.AddInfo($"The user \"{userId}\" is not bucketed into any of the experiments on the feature \"{featureFlag.Key}\"."));
-            return Result<FeatureDecision>.NewResult(null, reasons);
+            return Result<FeatureDecision>.NullResult(reasons);
         }
 
         /// <summary>

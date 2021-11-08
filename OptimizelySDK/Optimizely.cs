@@ -780,10 +780,11 @@ namespace OptimizelySDK
 
             var decisionContext = new OptimizelyDecisionContext(flag.Key);
             var forcedDecisionVariation = user.FindValidatedForcedDecision(decisionContext);
+            decisionReasons += forcedDecisionVariation.DecisionReasons;
+
             if (forcedDecisionVariation.ResultObject != Result<Variation>.NullResult(null).ResultObject)
             {
                 decision = new FeatureDecision(null, forcedDecisionVariation.ResultObject, FeatureDecision.DECISION_SOURCE_FEATURE_TEST);
-                decisionReasons = forcedDecisionVariation.DecisionReasons;
             }
             else
             {
@@ -794,16 +795,15 @@ namespace OptimizelySDK
                     userAttributes,
                     allOptions
                 );
-                decisionReasons = flagDecisionResult.DecisionReasons;
+                decisionReasons += flagDecisionResult.DecisionReasons;
                 decision = flagDecisionResult.ResultObject;
             }
 
             var featureEnabled = false;
-            var variation = decision?.Variation;
 
-            if (variation != null)
+            if (decision?.Variation != null)
             {
-                featureEnabled = variation.FeatureEnabled.GetValueOrDefault();
+                featureEnabled = decision.Variation.FeatureEnabled.GetValueOrDefault();
             }
 
             if (featureEnabled)
@@ -814,6 +814,7 @@ namespace OptimizelySDK
             {
                 Logger.Log(LogLevel.INFO, "Feature \"" + key + "\" is not enabled for user \"" + userId + "\"");
             }
+
             var variableMap = new Dictionary<string, object>();
             if (flag?.Variables != null && !allOptions.Contains(OptimizelyDecideOption.EXCLUDE_VARIABLES))
             {
@@ -822,7 +823,7 @@ namespace OptimizelySDK
                     string variableValue = featureVariable.DefaultValue;
                     if (featureEnabled)
                     {
-                        var featureVariableUsageInstance = variation.GetFeatureVariableUsageFromId(featureVariable.Id);
+                        var featureVariableUsageInstance = decision?.Variation.GetFeatureVariableUsageFromId(featureVariable.Id);
                         if (featureVariableUsageInstance != null)
                         {
                             variableValue = featureVariableUsageInstance.Value;
@@ -843,13 +844,13 @@ namespace OptimizelySDK
             var decisionSource = decision?.Source ?? FeatureDecision.DECISION_SOURCE_ROLLOUT;
             if (!allOptions.Contains(OptimizelyDecideOption.DISABLE_DECISION_EVENT))
             {
-                decisionEventDispatched = SendImpressionEvent(decision?.Experiment, variation, userId, userAttributes, config, key, decisionSource, featureEnabled);
+                decisionEventDispatched = SendImpressionEvent(decision?.Experiment, decision?.Variation, userId, userAttributes, config, key, decisionSource, featureEnabled);
             }
             var reasonsToReport = decisionReasons.ToReport(allOptions.Contains(OptimizelyDecideOption.INCLUDE_REASONS)).ToArray();
             var variationKey = decision?.Variation?.Key;
 
             // TODO: add ruleKey values when available later. use a copy of experimentKey until then.
-            var ruleKey = decision != null ? decision?.Experiment?.Key : null;
+            var ruleKey = decision != null && decision.Experiment != null ? decision?.Experiment?.Key : null;
 
             var decisionInfo = new Dictionary<string, object>
             {

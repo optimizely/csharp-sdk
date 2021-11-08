@@ -90,6 +90,11 @@ namespace OptimizelySDK.Tests
             Assert.AreEqual(expected.Value, actual.Value);
         }
 
+        public static void AreEqual(OptimizelyJSON expected, OptimizelyJSON actual)
+        {
+            Assert.AreEqual(expected.ToString(), actual.ToString());
+        }
+
         private static void AreEquivalent(KeyValuePair<string, object> expected, KeyValuePair<string, object> actual)
         {
             Assert.AreEqual(expected.Key, actual.Key);
@@ -182,7 +187,7 @@ namespace OptimizelySDK.Tests
 
         #region OptimizelyUserContext
 
-        private static void AreEqual(OptimizelyUserContext expected, OptimizelyUserContext actual)
+        public static void AreEqual(OptimizelyUserContext expected, OptimizelyUserContext actual)
         {
             Assert.AreEqual(expected.GetUserId(), actual.GetUserId());
             AreEquivalent(expected.GetAttributes(), actual.GetAttributes());
