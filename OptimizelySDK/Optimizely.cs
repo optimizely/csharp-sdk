@@ -846,7 +846,7 @@ namespace OptimizelySDK
             {
                 decisionEventDispatched = SendImpressionEvent(decision?.Experiment, decision?.Variation, userId, userAttributes, config, key, decisionSource, featureEnabled);
             }
-            var reasonsToReport = decisionReasons.ToReport().ToArray();
+            var reasonsToReport = decisionReasons.ToReport(true).ToArray();
             var variationKey = decision?.Variation?.Key;
 
             // TODO: add ruleKey values when available later. use a copy of experimentKey until then.
