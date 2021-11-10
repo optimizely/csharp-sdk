@@ -16,6 +16,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using OptimizelySDK.Entity;
 using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Logger;
@@ -532,7 +533,7 @@ namespace OptimizelySDK.Bucketing
                 if (string.IsNullOrEmpty(experiment.Key))
                     continue;
 
-                var variationResult = GetVariationFromExperiment(config, featureFlag.Key, experiment, user, options);
+                var variationResult = GetVariationFromExperiment(config, featureFlag, experiment, user, options);
                 reasons += variationResult.DecisionReasons;
 
                 if (!string.IsNullOrEmpty(variationResult.ResultObject?.Id))
@@ -546,26 +547,57 @@ namespace OptimizelySDK.Bucketing
             return Result<FeatureDecision>.NullResult(reasons);
         }
 
-        private Result<Variation> GetVariationFromExperiment(ProjectConfig config, string flagKey, Experiment experiment, OptimizelyUserContext user, OptimizelyDecideOption[] options)
+        private Result<Variation> GetVariationFromExperiment(ProjectConfig config, FeatureFlag flag, Experiment experiment, OptimizelyUserContext user, OptimizelyDecideOption[] options)
+        {
+            var reasons = new DecisionReasons();
+
+            if (flag.ExperimentIds.Any())
+            {
+                foreach (var expId in flag.ExperimentIds)
+                {
+                    config.ExperimentIdMap.TryGetValue(expId, out var exp);
+
+                    var decisionVariation = GetVariationFromExperimentRule(config, flag.Key, experiment, user, options);
+                }
+                var ruleKey = experiment != null ? experiment.Key : null;
+
+                var decisionContext = new OptimizelyDecisionContext(flag.Key, ruleKey);
+                var response = user.FindValidatedForcedDecision(decisionContext);
+
+                reasons += response.DecisionReasons;
+
+                if (response.ResultObject != null)
+                {
+                    return Result<Variation>.NewResult(response.ResultObject, reasons);
+                }
+
+                var decisionResponse = GetVariation(experiment, user, config, user.GetAttributes());
+                reasons += decisionResponse.DecisionReasons;
+            }
+
+            return Result<Variation>.NullResult(reasons);
+        }
+
+        private object GetVariationFromExperimentRule(ProjectConfig config, string key, Experiment experiment, OptimizelyUserContext user, OptimizelyDecideOption[] options)
         {
             var reasons = new DecisionReasons();
 
             var ruleKey = experiment != null ? experiment.Key : null;
 
-            var decisionContext = new OptimizelyDecisionContext(flagKey, ruleKey);
-            var response = user.FindValidatedForcedDecision(decisionContext);
+            var decisionContext = new OptimizelyDecisionContext(key, ruleKey);
 
-            reasons += response.DecisionReasons;
+            var forcedDecisionResponse = user.FindValidatedForcedDecision(decisionContext);
 
-            if (response.ResultObject != null)
+            reasons += forcedDecisionResponse.DecisionReasons;
+
+            var variation = forcedDecisionResponse?.ResultObject;
+
+            if (variation != null)
             {
-                return Result<Variation>.NewResult(response.ResultObject, reasons);
+                return Result<Variation>.NewResult(variation, reasons);
             }
 
-            var decisionResponse = GetVariation(experiment, user, config, user.GetAttributes());
-            reasons += decisionResponse.DecisionReasons;
-
-            return Result<Variation>.NewResult(decisionResponse.ResultObject, reasons);
+            return GetVariation(experiment, user, config, user.GetAttributes());
         }
 
         /// <summary>
