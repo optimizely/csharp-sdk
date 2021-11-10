@@ -378,7 +378,6 @@ namespace OptimizelySDK
             Experiment experiment = config.GetExperimentFromKey(experimentKey);
             if (experiment.Key == null)
                 return null;
-
             var variation = DecisionService.GetVariation(experiment, CreateUserContext(userId, userAttributes), config, userAttributes).ResultObject;
             var decisionInfo = new Dictionary<string, object>
             {
@@ -782,7 +781,7 @@ namespace OptimizelySDK
             var forcedDecisionVariation = user.FindValidatedForcedDecision(decisionContext);
             decisionReasons += forcedDecisionVariation.DecisionReasons;
 
-            if (forcedDecisionVariation.ResultObject != Result<Variation>.NullResult(null).ResultObject)
+            if (forcedDecisionVariation.ResultObject != null)
             {
                 decision = new FeatureDecision(null, forcedDecisionVariation.ResultObject, FeatureDecision.DECISION_SOURCE_FEATURE_TEST);
             }
