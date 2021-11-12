@@ -845,7 +845,7 @@ namespace OptimizelySDK.Tests
             actualDecision = decisionService.GetVariationForFeatureRollout(featureFlag, optimizelyUserContext4, ProjectConfig);
 
             // Returned decision entity should be null because bucket value exceeds traffic allocation of everyone else rule.
-            Assert.Null(actualDecision.ResultObject);
+            Assert.Null(actualDecision.ResultObject?.Variation?.Key);
         }
 
         [Test]

@@ -455,7 +455,7 @@ namespace OptimizelySDK.Bucketing
                 var decisionResult = GetVariationFromDeliveryRule(config, featureFlag.Key, rolloutRules, index, user);
                 reasons += decisionResult.DecisionReasons;
 
-                if (decisionResult.ResultObject?.Variation != null)
+                if (decisionResult.ResultObject?.Variation?.Key != null)
                 {
                     return Result<FeatureDecision>.NewResult(new FeatureDecision(rolloutRules[index], decisionResult.ResultObject.Variation, FeatureDecision.DECISION_SOURCE_ROLLOUT), reasons);
                 }
@@ -577,7 +577,7 @@ namespace OptimizelySDK.Bucketing
             Result<Variation> bucketedVariation = null;
 
             // Evaluate if user meets the audience condition of this rollout rule
-            var doesUserMeetAudienceConditionsResult = ExperimentUtils.DoesUserMeetAudienceConditions(config, rule, attributes, LOGGING_KEY_TYPE_EXPERIMENT, rule.Key, Logger);
+            var doesUserMeetAudienceConditionsResult = ExperimentUtils.DoesUserMeetAudienceConditions(config, rule, attributes, LOGGING_KEY_TYPE_RULE, rule.Key, Logger);
             reasons += doesUserMeetAudienceConditionsResult.DecisionReasons;
             if (doesUserMeetAudienceConditionsResult.ResultObject)
             {
@@ -599,7 +599,7 @@ namespace OptimizelySDK.Bucketing
             }
             else
             {
-                Logger.Log(LogLevel.DEBUG, reasons.AddInfo($"User \"{userId}\" does not meet conditions for targeting rule \"{loggingKey}\"."));
+                Logger.Log(LogLevel.DEBUG, reasons.AddInfo($"User \"{userId}\" does not meet the conditions for targeting rule \"{loggingKey}\"."));
             }
 
             return Result<FeatureDecision>.NewResult(new FeatureDecision(rule, bucketedVariation?.ResultObject, null), skipToEveryoneElse, reasons);
@@ -676,11 +676,11 @@ namespace OptimizelySDK.Bucketing
 
             if (decisionResult.ResultObject != null)
             {
-                Logger.Log(LogLevel.INFO, reasons.AddInfo($"User \"{userId}\" is bucketed into a rollout for feature flag \"{featureFlag.Key}\"."));
+                Logger.Log(LogLevel.INFO, reasons.AddInfo($"The user \"{userId}\" is bucketed into a rollout for feature flag \"{featureFlag.Key}\"."));
                 return Result<FeatureDecision>.NewResult(decisionResult.ResultObject, reasons);
             }
 
-            Logger.Log(LogLevel.INFO, reasons.AddInfo($"User \"{userId}\" is not bucketed into a rollout for feature flag \"{featureFlag.Key}\"."));
+            Logger.Log(LogLevel.INFO, reasons.AddInfo($"The user \"{userId}\" is not bucketed into a rollout for feature flag \"{featureFlag.Key}\"."));
             return Result<FeatureDecision>.NullResult(reasons);
         }
 
