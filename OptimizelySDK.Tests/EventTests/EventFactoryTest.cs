@@ -511,7 +511,7 @@ namespace OptimizelySDK.Tests.EventTests
                                                 new Dictionary<string, object>
                                                 {
                                                     {"campaign_id", null },
-                                                    {"experiment_id", null },
+                                                    {"experiment_id", "" },
                                                     {"variation_id", null },
                                                     { "metadata", new Dictionary<string, object> {
                                                             { "rule_type", "rollout" },
