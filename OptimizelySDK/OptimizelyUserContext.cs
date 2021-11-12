@@ -225,7 +225,7 @@ namespace OptimizelySDK
 
             lock (mutex)
             {
-                ForcedDecisionsMap.Add(context.DecisionKey, decision);
+                ForcedDecisionsMap[context.DecisionKey] = decision;
             }
 
             return true;
@@ -317,22 +317,21 @@ namespace OptimizelySDK
         {
             DecisionReasons reasons = new DecisionReasons();
             var forcedDecision = GetForcedDecision(context);
-            string strRuleKey = context.RuleKey ?? OptimizelyDecisionContext.OPTI_NULL_RULE_KEY;
 
-            Variation variation = null;
             if (forcedDecision != null)
             {
+                var loggingKey = context.RuleKey != null ? "flag (" + context.FlagKey + "), rule (" + context.RuleKey + ")" : "flag (" + context.FlagKey + ")";
                 var variationKey = forcedDecision.VariationKey;
-                variation = Optimizely.GetFlagVariationByKey(context.FlagKey, variationKey);
+                var variation = Optimizely.GetFlagVariationByKey(context.FlagKey, variationKey);
                 if (variation != null)
                 {
                     reasons.AddInfo("Decided by forced decision.");
-                    reasons.AddInfo("Variation ({0}) is mapped to flag ({1}) and user ({2}) in the forced decision map.", variationKey, context.FlagKey, this.UserId);
+                    reasons.AddInfo("Variation ({0}) is mapped to {1} and user ({2}) in the forced decision map.", variationKey, loggingKey, UserId);
                     return Result<Variation>.NewResult(variation, reasons);
                 }
                 else
                 {
-                    reasons.AddInfo("Invalid variation is mapped to flag ({0}) and user ({1}) in the forced decision map.", context.FlagKey, this.UserId);
+                    reasons.AddInfo("Invalid variation is mapped to {0} and user ({1}) in the forced decision map.", loggingKey, UserId);
                 }
             }
             return Result<Variation>.NullResult(reasons);

@@ -114,7 +114,7 @@ namespace OptimizelySDK.Event
             var eventContext = impressionEvent.Context;
 
             Decision decision = new Decision(impressionEvent.Experiment?.LayerId,
-                impressionEvent.Experiment?.Id,
+                impressionEvent.Experiment?.Id ??"",
                 impressionEvent.Variation?.Id,
                 impressionEvent.Metadata);
 
