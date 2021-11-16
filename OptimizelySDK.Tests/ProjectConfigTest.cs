@@ -433,245 +433,30 @@ namespace OptimizelySDK.Tests
                 new Variation
                 {
                     FeatureEnabled = true,
-                    Id = "122239",
-                    Key = "control",
-                    FeatureVariableUsageInstances = new List<FeatureVariableUsage> { new FeatureVariableUsage { Id = "155551", Value="42.42" } }
+                    Id = "7722260071",
+                    Key = "group_exp_1_var_1",
+                    FeatureVariableUsageInstances = new List<FeatureVariableUsage> { new FeatureVariableUsage { Id = "155563", Value= "groupie_1_v1" } }
+                },
+                new Variation
+                {
+                    FeatureEnabled = true,
+                    Id = "7722360022",
+                    Key = "group_exp_1_var_2",
+                    FeatureVariableUsageInstances = new List<FeatureVariableUsage> { new FeatureVariableUsage { Id = "155563", Value= "groupie_1_v2" } }
                 },
                 new Variation
                 {
                     FeatureEnabled = false,
-                    Id = "122240",
-                    Key = "variation",
-                    FeatureVariableUsageInstances = new List<FeatureVariableUsage> { new FeatureVariableUsage { Id = "155551", Value="13.37" } }
+                    Id = "7713030086",
+                    Key = "group_exp_2_var_1",
+                    FeatureVariableUsageInstances = new List<FeatureVariableUsage> { new FeatureVariableUsage { Id = "155563", Value= "groupie_2_v1" } }
                 },
                 new Variation
                 {
                     FeatureEnabled = false,
-                    Id = "122242",
-                    Key = "control",
-                    FeatureVariableUsageInstances = new List<FeatureVariableUsage> { new FeatureVariableUsage { Id = "155553", Value="42" } }
-                },
-                new Variation
-                {
-                    FeatureEnabled = true,
-                    Id = "122243",
-                    Key = "variation",
-                    FeatureVariableUsageInstances = new List<FeatureVariableUsage> { new FeatureVariableUsage { Id = "155553", Value="13" } }
-                },
-                new Variation
-                {
-                    FeatureEnabled = true, Id = "177771",
-                    Key = "177771",
-                    FeatureVariableUsageInstances = new List<FeatureVariableUsage> { new FeatureVariableUsage { Id = "155556", Value="true" } }
-                },
-                new Variation
-                {
-                    FeatureEnabled = true,
-                    Id = "177773",
-                    Key = "177773",
-                    FeatureVariableUsageInstances = new List<FeatureVariableUsage>
-                    {
-                        new FeatureVariableUsage
-                        {
-                            Id = "155556",
-                            Value="false"
-                        }
-                    }
-                },
-                new Variation
-                {
-                    FeatureEnabled = true,
-                    Id = "177778",
-                    Key = "177778",
-                    FeatureVariableUsageInstances = new List<FeatureVariableUsage>
-                    {
-                        new FeatureVariableUsage
-                        {
-                            Id = "155556", Value="false"
-                        }
-                    }
-                },
-                new Variation
-                {
-                    FeatureEnabled = false,
-                    Id = "177782",
-                    Key = "177782",
-                    FeatureVariableUsageInstances = new List<FeatureVariableUsage>
-                    {
-                        new FeatureVariableUsage
-                        {
-                            Id = "155556",
-                            Value="false"
-                        }
-                    }
-                },
-                new Variation
-                {
-                    FeatureEnabled = false,
-                    Id = "188881",
-                    Key = "188881",
-                    FeatureVariableUsageInstances = new List<FeatureVariableUsage>
-                    {
-                        new FeatureVariableUsage
-                        {
-                            Id = "155556",
-                            Value= "false"
-                        }
-                    }
-                },
-                new Variation
-                {
-                    FeatureEnabled = true,
-                    Id = "122236",
-                    Key = "control",
-                    FeatureVariableUsageInstances = new List<FeatureVariableUsage>
-                    {
-                        new FeatureVariableUsage
-                        {
-                            Id = "155558",
-                            Value= "cta_1"
-                        },
-                        new FeatureVariableUsage
-                        {
-                            Id = "17014990011",
-                            Value = "{\"int_var\": 1, \"boolean_key\": false}"
-                        }
-                    }
-                },
-                new Variation
-                {
-                    FeatureEnabled = true,
-                    Id = "122237",
-                    Key = "variation",
-                    FeatureVariableUsageInstances = new List<FeatureVariableUsage>
-                    {
-                        new FeatureVariableUsage
-                        {
-                            Id = "155558",
-                            Value= "cta_2"
-                        },
-                    }
-                },
-                new Variation
-                {
-                    FeatureEnabled = true,
-                    Id = "177775",
-                    Key = "177775",
-                    FeatureVariableUsageInstances = new List<FeatureVariableUsage>
-                    {
-                        new FeatureVariableUsage
-                        {
-                            Id = "155558",
-                            Value= "cta_4"
-                        },
-                        new FeatureVariableUsage
-                        {
-                            Id = "17014990011",
-                            Value= "{\"int_var\": 4 , \"string_var\": \"cta_4\"}"
-                        },
-                        new FeatureVariableUsage
-                        {
-                            Id = "170149900112",
-                            Value= "{\"int_var\": 5 , \"string_var\": \"cta_5\"}"
-                        }
-                    }
-                },
-                new Variation
-                {
-                    FeatureEnabled = true,
-                    Id = "177780",
-                    Key = "177780",
-                    FeatureVariableUsageInstances = new List<FeatureVariableUsage> { }
-                },
-                new Variation
-                {
-                    FeatureEnabled = false,
-                    Id = "177784",
-                    Key = "177784",
-                    FeatureVariableUsageInstances = new List<FeatureVariableUsage>
-                    {
-                        new FeatureVariableUsage
-                        {
-                            Id = "155558",
-                            Value= "cta_5"
-                        }
-                    }
-                },
-                new Variation
-                {
-                    FeatureEnabled = true,
-                    Id = "122231",
-                    Key = "Fred",
-                    FeatureVariableUsageInstances = new List<FeatureVariableUsage>
-                    {
-                        new FeatureVariableUsage
-                        {
-                            Id = "155560",
-                            Value = "F"
-                        },
-                        new FeatureVariableUsage
-                        {
-                            Id = "155561",
-                            Value = "red"
-                        }
-                    }
-                },
-                new Variation
-                {
-                    FeatureEnabled = false,
-                    Id = "122232",
-                    Key = "Feorge",
-                    FeatureVariableUsageInstances = new List<FeatureVariableUsage>
-                    {
-                        new FeatureVariableUsage
-                        {
-                            Id = "155560",
-                            Value = "F"
-                        },
-                        new FeatureVariableUsage
-                        {
-                            Id = "155561",
-                            Value = "eorge"
-                        }
-                    }
-                },
-                new Variation
-                {
-                    FeatureEnabled = null,
-                    Id = "122233",
-                    Key = "Gred",
-                    FeatureVariableUsageInstances = new List<FeatureVariableUsage>
-                    {
-                        new FeatureVariableUsage
-                        {
-                            Id = "155560",
-                            Value = "G"
-                        },
-                        new FeatureVariableUsage
-                        {
-                            Id = "155561",
-                            Value = "red"
-                        }
-                    }
-                },
-                new Variation
-                {
-                    FeatureEnabled = true,
-                    Id = "122234",
-                    Key = "George",
-                    FeatureVariableUsageInstances = new List<FeatureVariableUsage>
-                    {
-                        new FeatureVariableUsage
-                        {
-                            Id = "155560",
-                            Value = "G"
-                        },
-                        new FeatureVariableUsage
-                        {
-                            Id = "155561",
-                            Value = "eorge"
-                        }
-                    }
+                    Id = "7725250007",
+                    Key = "group_exp_2_var_2",
+                    FeatureVariableUsageInstances = new List<FeatureVariableUsage> { new FeatureVariableUsage { Id = "155563", Value= "groupie_2_v2" } }
                 }
             };
             expectedVariations1.Add(new Dictionary<string, List<Variation>> { { "boolean_feature", expectedVariationList } });

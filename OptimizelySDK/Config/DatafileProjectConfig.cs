@@ -290,7 +290,6 @@ namespace OptimizelySDK.Config
             _AudienceIdMap = ConfigParser<Audience>.GenerateMap(entities: Audiences, getKey: a => a.Id.ToString(), clone: true);
             _FeatureKeyMap = ConfigParser<FeatureFlag>.GenerateMap(entities: FeatureFlags, getKey: f => f.Key, clone: true);
             _RolloutIdMap = ConfigParser<Rollout>.GenerateMap(entities: Rollouts, getKey: r => r.Id.ToString(), clone: true);
-            _FlagVariationMap = GetFlagVariationMap();
 
             // Overwrite similar items in audience id map with typed audience id map.
             var typedAudienceIdMap = ConfigParser<Audience>.GenerateMap(entities: TypedAudiences, getKey: a => a.Id.ToString(), clone: true);
@@ -367,6 +366,7 @@ namespace OptimizelySDK.Config
                         ExperimentFeatureMap[experimentId] = new List<string> { feature.Id };
                 }
             }
+            _FlagVariationMap = GetFlagVariationMap();
         }
 
         /// <summary>
@@ -375,25 +375,26 @@ namespace OptimizelySDK.Config
         /// <returns>A map of flag key to variations</returns>
         private Dictionary<string, List<Variation>> GetFlagVariationMap()
         {
-            var map = new Dictionary<string, List<Variation>>();
-            var variations = new List<Variation>();
+            var variationsDict = new Dictionary<string, List<Variation>>();
 
-            foreach (var flag in this.FeatureFlags)
+            foreach (var flag in FeatureFlags)
             {
+                var variationIdToVariationsDict = new Dictionary<string, Variation>();
+
                 foreach (var rule in GetAllRulesForFlag(flag))
                 {
                     foreach (var variation in rule.Variations)
                     {
-                        if (!variations.Contains(variation))
+                        if (!variationIdToVariationsDict.ContainsKey(variation.Id))
                         {
-                            variations.Add(variation);
+                            variationIdToVariationsDict.Add(variation.Id, variation);
                         }
                     }
                 }
-                map[flag.Key] = variations;
+                // Grab all the variations from the flag experiments and rollouts and add to flagVariationsMap
+                variationsDict[flag.Key] = variationIdToVariationsDict.Values.ToList<Variation>();
             }
-
-            return map;
+            return variationsDict;
         }
 
         /// <summary>
