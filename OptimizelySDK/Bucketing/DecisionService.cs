@@ -452,6 +452,11 @@ namespace OptimizelySDK.Bucketing
             var index = 0;
             while (index < rolloutRulesLength)
             {
+                if (!rolloutRules[index].IsExperimentRunning)
+                { 
+                    index++;
+                    continue;
+                }
                 var decisionResult = GetVariationFromDeliveryRule(config, featureFlag.Key, rolloutRules, index, user);
                 reasons += decisionResult.DecisionReasons;
 
