@@ -26,7 +26,7 @@ namespace OptimizelySDK
     /// <summary>
     /// OptimizelyUserContext defines user contexts that the SDK will use to make decisions for
     /// </summary>
-    public partial class OptimizelyUserContext
+    public class OptimizelyUserContext
     {
         private ILogger Logger;
         private IErrorHandler ErrorHandler;
