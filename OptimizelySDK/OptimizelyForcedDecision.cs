@@ -18,13 +18,13 @@ namespace OptimizelySDK
 {
     public class OptimizelyForcedDecision
     {
-        private string variationKey;
+        private string _variationKey;
 
         public OptimizelyForcedDecision(string variationKey)
         {
-            this.variationKey = variationKey;
+            this._variationKey = variationKey;
         }
 
-        public string VariationKey { get { return variationKey; } }
+        public string VariationKey { get { return _variationKey; } }
     }
 }
