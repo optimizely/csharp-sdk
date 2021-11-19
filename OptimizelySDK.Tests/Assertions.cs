@@ -251,6 +251,7 @@ namespace OptimizelySDK.Tests
             AreEquivalent(expected.Reasons, actual.Reasons);
             Assert.AreEqual(expected.RuleKey, actual.RuleKey);
             AreEqual(expected.UserContext, actual.UserContext);
+            Assert.AreEqual(expected.VariationKey, actual.VariationKey);
         }
 
         public static void AreEquivalent(IDictionary<string, OptimizelyDecision> expected, IDictionary<string, OptimizelyDecision> actual)
