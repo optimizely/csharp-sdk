@@ -565,7 +565,7 @@
 					"key": "integer_variable",
 					"type": "integer",
 					"defaultValue": "7"
-				}					
+				}
 			]
 		},
 		{
@@ -733,6 +733,32 @@
 						{
 							"entityId": "177773",
 							"endOfRange": 10000
+						}
+					]
+				},
+				{
+					"id": "177788",
+					"key": "177788",
+					"status": "Paused",
+					"layerId": "166660",
+					"audienceIds": [],
+					"variations": [
+						{
+							"id": "177709",
+							"key": "177709",
+							"variables": [
+								{
+									"id": "155556",
+									"value": "false"
+								}
+							],
+							"featureEnabled": true
+						}
+					],
+					"trafficAllocation": [
+						{
+							"entityId": "177709",
+							"endOfRange": 9200
 						}
 					]
 				},

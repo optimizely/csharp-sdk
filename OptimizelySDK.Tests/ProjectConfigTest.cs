@@ -204,6 +204,11 @@ namespace OptimizelySDK.Tests
                      {"177773", Config.GetVariationFromKey("177772", "177773") }
                  }
                 },
+                { "177788", new Dictionary<string, object>
+                 {
+                     {"177709", Config.GetVariationFromKey("177788", "177709") }
+                 }
+                },
                 { "177776", new Dictionary<string, object>
                  {
                      {"177778", Config.GetVariationFromKey("177776", "177778") }
@@ -323,6 +328,11 @@ namespace OptimizelySDK.Tests
                 { "177772", new Dictionary<string, object>
                  {
                      {"177773", Config.GetVariationFromId("177772", "177773") }
+                 }
+                },
+                { "177788", new Dictionary<string, object>
+                 {
+                     {"177709", Config.GetVariationFromId("177788", "177709") }
                  }
                 },
                 { "177776", new Dictionary<string, object>
