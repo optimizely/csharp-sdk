@@ -75,7 +75,7 @@
     <Compile Include="AudienceConditionsTests\ConditionsTest.cs" />
     <Compile Include="ConfigTest\HttpProjectConfigManagerTest.cs" />
     <Compile Include="ConfigTest\PollingProjectConfigManagerTest.cs" />
-    <Compile Include="ConfigTest\FallbackProjectConfigManagerTest.cs" />
+    <Compile Include="ConfigTest\AtomicProjectConfigManagerTest.cs" />
     <Compile Include="DecisionServiceTest.cs" />
     <Compile Include="DefaultErrorHandlerTest.cs" />
     <Compile Include="EventTests\EventProcessorProps.cs" />
@@ -135,9 +135,7 @@
       <Name>OptimizelySDK</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-	<Folder Include="Utils\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <None Include="packages.config" />
     <EmbeddedResource Include="unsupported_version_datafile.json" />
