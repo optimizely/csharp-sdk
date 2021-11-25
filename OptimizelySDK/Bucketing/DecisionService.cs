@@ -81,28 +81,27 @@ namespace OptimizelySDK.Bucketing
         /// Get a Variation of an Experiment for a user to be allocated into.
         /// </summary>
         /// <param name = "experiment" > The Experiment the user will be bucketed into.</param>
-        /// <param name = "userId" > The userId of the user.
-        /// <param name = "filteredAttributes" > The user's attributes. This should be filtered to just attributes in the Datafile.</param>
+        /// <param name = "user" > Optimizely user context.
+        /// <param name = "config" > Project config.</param>
         /// <returns>The Variation the user is allocated into.</returns>
         public virtual Result<Variation> GetVariation(Experiment experiment,
             OptimizelyUserContext user,
-            ProjectConfig config,
-            UserAttributes filteredAttributes)
+            ProjectConfig config)
         {
-            return GetVariation(experiment, user, config, filteredAttributes, new OptimizelyDecideOption[] { });
+            return GetVariation(experiment, user, config, new OptimizelyDecideOption[] { });
         }
 
         /// <summary>
         /// Get a Variation of an Experiment for a user to be allocated into.
         /// </summary>
         /// <param name = "experiment" > The Experiment the user will be bucketed into.</param>
-        /// <param name = "userId" > The userId of the user.
-        /// <param name = "filteredAttributes" > The user's attributes. This should be filtered to just attributes in the Datafile.</param>
+        /// <param name = "user" > optimizely user context.
+        /// <param name = "config" > Project Config.</param>
+        /// <param name = "options" >An array of decision options.</param>
         /// <returns>The Variation the user is allocated into.</returns>
         public virtual Result<Variation> GetVariation(Experiment experiment,
             OptimizelyUserContext user,
             ProjectConfig config,
-            UserAttributes filteredAttributes,
             OptimizelyDecideOption[] options)
         {
             var reasons = new DecisionReasons();
@@ -159,6 +158,7 @@ namespace OptimizelySDK.Bucketing
                     ErrorHandler.HandleError(new Exceptions.OptimizelyRuntimeException(exception.Message));
                 }
             }
+            var filteredAttributes = user.GetAttributes();
             var doesUserMeetAudienceConditionsResult = ExperimentUtils.DoesUserMeetAudienceConditions(config, experiment, filteredAttributes, LOGGING_KEY_TYPE_EXPERIMENT, experiment.Key, Logger);
             reasons += doesUserMeetAudienceConditionsResult.DecisionReasons;
             if (doesUserMeetAudienceConditionsResult.ResultObject)
@@ -623,7 +623,7 @@ namespace OptimizelySDK.Bucketing
                 return Result<Variation>.NewResult(variation, reasons);
             }
 
-            var decisionResponse = GetVariation(experiment, user, config, user.GetAttributes(), options);
+            var decisionResponse = GetVariation(experiment, user, config, options);
 
             reasons += decisionResponse?.DecisionReasons;
 

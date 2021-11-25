@@ -131,8 +131,8 @@ namespace OptimizelySDK.Event.Builder
             {
                     new Dictionary<string, object>
                     {
-                        { Params.CAMPAIGN_ID,   experiment != null ? experiment.LayerId : null },
-                        { Params.EXPERIMENT_ID, experiment != null ? experiment.Id : "" },
+                        { Params.CAMPAIGN_ID,   experiment?.LayerId },
+                        { Params.EXPERIMENT_ID, experiment?.Id ?? string.Empty },
                         { Params.VARIATION_ID,  variationId }
                     }
             };
@@ -176,11 +176,11 @@ namespace OptimizelySDK.Event.Builder
                     eventDict[EventTagUtils.REVENUE_EVENT_METRIC_NAME] = revenue;
                 }
 
-                var eventVallue = EventTagUtils.GetNumericValue(eventTags, Logger);
+                var eventValue = EventTagUtils.GetNumericValue(eventTags, Logger);
 
-                if (eventVallue != null)
+                if (eventValue != null)
                 {
-                    eventDict[EventTagUtils.VALUE_EVENT_METRIC_NAME] = eventVallue;
+                    eventDict[EventTagUtils.VALUE_EVENT_METRIC_NAME] = eventValue;
                 }
 
                 if (eventTags.Any())

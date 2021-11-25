@@ -378,14 +378,16 @@ namespace OptimizelySDK
             Experiment experiment = config.GetExperimentFromKey(experimentKey);
             if (experiment.Key == null)
                 return null;
-            var variation = DecisionService.GetVariation(experiment, CreateUserContext(userId, userAttributes), config, userAttributes).ResultObject;
+            userAttributes = userAttributes ?? new UserAttributes();
+
+            var userContext = CreateUserContext(userId, userAttributes);
+            var variation = DecisionService.GetVariation(experiment, userContext, config)?.ResultObject;
             var decisionInfo = new Dictionary<string, object>
             {
                 { "experimentKey", experimentKey },
                 { "variationKey", variation?.Key },
             };
 
-            userAttributes = userAttributes ?? new UserAttributes();
             var decisionNotificationType = config.IsFeatureExperiment(experiment.Id) ? DecisionNotificationTypes.FEATURE_TEST : DecisionNotificationTypes.AB_TEST;
             NotificationCenter.SendNotifications(NotificationCenter.NotificationType.Decision, decisionNotificationType, userId,
                 userAttributes, decisionInfo);
@@ -443,19 +445,29 @@ namespace OptimizelySDK
             return DecisionService.GetForcedVariation(experimentKey, userId, config).ResultObject;
         }
 
+        /// <summary>
+        /// Gets a variation based on flagKey and variationKey
+        /// </summary>
+        /// <param name="flagKey">The flag key for the variation</param>
+        /// <param name="variationKey">The variation key for the variation</param>
+        /// <returns>Returns a variation based on flagKey and variationKey, otherwise null</returns>
         public Variation GetFlagVariationByKey(string flagKey, string variationKey)
         {
-            var flagVariationMap = ProjectConfigManager?.GetConfig().FlagVariationMap;
-            if (flagVariationMap.ContainsKey(flagKey) == true)
-            {
-                flagVariationMap.TryGetValue(flagKey, out var variations);
+            var config = ProjectConfigManager?.GetConfig();
 
-                foreach (var variation in variations)
+            if (config == null)
+            {
+                return null;
+            }
+
+            var flagVariationMap = config.FlagVariationMap;
+            if (flagVariationMap.TryGetValue(flagKey, out var variations))
+            {
+                foreach (var variation in from variation in variations
+                                          where variation.Key == variationKey
+                                          select variation)
                 {
-                    if (variation.Key.Equals(variationKey))
-                    {
-                        return variation;
-                    }
+                    return variation;
                 }
             }
 

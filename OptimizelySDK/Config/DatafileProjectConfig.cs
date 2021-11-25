@@ -355,18 +355,32 @@ namespace OptimizelySDK.Config
                 }
             }
 
-            // Adding experiments in experiment-feature map.
+            var variationsDict = new Dictionary<string, List<Variation>>();
+
+            // Adding experiments in experiment-feature map and flag variation map to use.
             foreach (var feature in FeatureFlags)
             {
                 foreach (var experimentId in feature.ExperimentIds ?? new List<string>())
-                {
+                {   
                     if (ExperimentFeatureMap.ContainsKey(experimentId))
                         ExperimentFeatureMap[experimentId].Add(feature.Id);
                     else
                         ExperimentFeatureMap[experimentId] = new List<string> { feature.Id };
                 }
+
+                // Get the Flag variation map to use
+                var variationIdToVariationsDict = new Dictionary<string, Variation>();
+                foreach (var variation in from rule in GetAllRulesForFlag(feature)
+                                          from variation in rule.Variations
+                                          where !variationIdToVariationsDict.ContainsKey(variation.Id)
+                                          select variation)
+                {
+                    variationIdToVariationsDict.Add(variation.Id, variation);
+                }
+                // Grab all the variations from the flag experiments and rollouts and add to flagVariationsMap
+                variationsDict[feature.Key] = variationIdToVariationsDict.Values.ToList<Variation>();
             }
-            _FlagVariationMap = GetFlagVariationMap();
+            _FlagVariationMap = variationsDict;
         }
 
         /// <summary>
