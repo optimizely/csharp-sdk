@@ -23,6 +23,63 @@ using System;
 
 namespace OptimizelySDK
 {
+
+    public class ForcedDecisionsStore
+    {
+        public const string OPTI_NULL_RULE_KEY = "$opt-null-rule-key";
+
+        private Dictionary<string, Dictionary<string, OptimizelyForcedDecision>> ForcedDecisionsMap { get; set; }
+
+        public ForcedDecisionsStore()
+        {
+            ForcedDecisionsMap = new Dictionary<string, Dictionary<string, OptimizelyForcedDecision>>();
+        }
+
+        public int Count {
+            get {
+                return ForcedDecisionsMap.Count;
+            }
+        }
+        public bool Remove(OptimizelyDecisionContext context)
+        {
+            if (string.IsNullOrEmpty(context.RuleKey)) {
+                return ForcedDecisionsMap.Remove(context.FlagKey);
+            } else if (ForcedDecisionsMap.TryGetValue(context.FlagKey, out var flagDecisionMap)) {
+                return flagDecisionMap.Remove(context.RuleKey);
+            }
+
+            return false;
+        }
+
+        public void RemoveAll()
+        {
+            ForcedDecisionsMap.Clear();
+        }
+        
+        public OptimizelyForcedDecision this[OptimizelyDecisionContext context]
+        {
+            get {
+                if (context != null && !string.IsNullOrEmpty(context.FlagKey)
+                    && ForcedDecisionsMap.TryGetValue(context.FlagKey, out Dictionary<string, OptimizelyForcedDecision> flagForcedDecision)) {
+                    var ruleKey = context.RuleKey ?? OPTI_NULL_RULE_KEY;
+                    flagForcedDecision.TryGetValue(ruleKey, out var forcedDecision);
+                    return forcedDecision;
+                    
+                }
+                return null;
+            }
+            set {
+                if (context != null && !string.IsNullOrEmpty(context.FlagKey)) {
+                    var ruleKey = context.RuleKey ?? OPTI_NULL_RULE_KEY;
+                    ForcedDecisionsMap[context.FlagKey] = new Dictionary<string, OptimizelyForcedDecision> {
+                        { ruleKey, value }
+                    };
+                }
+            }
+
+        }
+    }
+
     /// <summary>
     /// OptimizelyUserContext defines user contexts that the SDK will use to make decisions for
     /// </summary>
@@ -41,29 +98,31 @@ namespace OptimizelySDK
         // Optimizely object to be used.
         private Optimizely Optimizely;
 
-        private Dictionary<string, OptimizelyForcedDecision> ForcedDecisionsMap { get; set; }
+        private ForcedDecisionsStore ForcedDecisionsStore { get; set; }
 
-        public OptimizelyUserContext(Optimizely optimizely, string userId, UserAttributes userAttributes, IErrorHandler errorHandler, ILogger logger)
+        public OptimizelyUserContext(Optimizely optimizely, string userId, UserAttributes userAttributes, IErrorHandler errorHandler, ILogger logger) :
+            this(optimizely, userId, userAttributes, null, errorHandler, logger)
+        {
+            
+            //ErrorHandler = errorHandler;
+            //Logger = logger;
+            //Optimizely = optimizely;
+            //Attributes = userAttributes ?? new UserAttributes();
+            //ForcedDecisionsStore = new ForcedDecisionsStore();
+            //UserId = userId;
+        }
+
+        public OptimizelyUserContext(Optimizely optimizely, string userId, UserAttributes userAttributes, ForcedDecisionsStore forcedDecisionsStore, IErrorHandler errorHandler, ILogger logger)
         {
             ErrorHandler = errorHandler;
             Logger = logger;
             Optimizely = optimizely;
             Attributes = userAttributes ?? new UserAttributes();
-            ForcedDecisionsMap = new Dictionary<string, OptimizelyForcedDecision>();
+            ForcedDecisionsStore = forcedDecisionsStore ?? new ForcedDecisionsStore();
             UserId = userId;
         }
 
-        public OptimizelyUserContext(Optimizely optimizely, string userId, UserAttributes userAttributes, Dictionary<string, OptimizelyForcedDecision> forcedDecisions, IErrorHandler errorHandler, ILogger logger)
-        {
-            ErrorHandler = errorHandler;
-            Logger = logger;
-            Optimizely = optimizely;
-            Attributes = userAttributes ?? new UserAttributes();
-            ForcedDecisionsMap = forcedDecisions ?? new Dictionary<string, OptimizelyForcedDecision>();
-            UserId = userId;
-        }
-
-        private OptimizelyUserContext Copy() => new OptimizelyUserContext(Optimizely, UserId, GetAttributes(), ForcedDecisionsMap, ErrorHandler, Logger);
+        private OptimizelyUserContext Copy() => new OptimizelyUserContext(Optimizely, UserId, GetAttributes(), ForcedDecisionsStore, ErrorHandler, Logger);
 
         /// <summary>
         /// Returns Optimizely instance associated with the UserContext.
@@ -225,7 +284,7 @@ namespace OptimizelySDK
 
             lock (mutex)
             {
-                ForcedDecisionsMap[context.DecisionKey] = decision;
+                ForcedDecisionsStore[context] = decision;
             }
 
             return true;
@@ -251,7 +310,7 @@ namespace OptimizelySDK
                 return null;
             }
 
-            if (ForcedDecisionsMap.Count == 0)
+            if (ForcedDecisionsStore.Count == 0)
             {
                 return null;
             }
@@ -260,7 +319,7 @@ namespace OptimizelySDK
 
             lock (mutex)
             {
-                ForcedDecisionsMap.TryGetValue(context.DecisionKey, out decision);
+                decision = ForcedDecisionsStore[context];
             }
             return decision;
         }
@@ -275,17 +334,11 @@ namespace OptimizelySDK
         {
             if (context == null || context.FlagKey == null)
             {
-                Logger.Log(LogLevel.WARN, "flagKey cannot be null");
+                Logger.Log(LogLevel.WARN, "FlagKey cannot be null");
                 return false;
             }
 
-            if (!Optimizely.IsValid)
-            {
-                Logger.Log(LogLevel.ERROR, DecisionMessage.SDK_NOT_READY);
-                return false;
-            }
-
-            return ForcedDecisionsMap.Remove(context.DecisionKey);
+            return ForcedDecisionsStore.Remove(context);
         }
 
         /// <summary>
@@ -302,7 +355,7 @@ namespace OptimizelySDK
 
             lock (mutex)
             {
-                ForcedDecisionsMap.Clear();
+                ForcedDecisionsStore.RemoveAll();
             }
             return true;
         }
@@ -310,10 +363,10 @@ namespace OptimizelySDK
         /// <summary>
         /// Finds a validated forced decision.
         /// </summary>
-        /// <param name="flagKey">The flag key.</param>
+        /// <param name="context">The flag key.</param> ///TODO: Need to correct it.
         /// <param name="ruleKey">The rule key.</param>
         /// <returns>A result with the variation</returns>
-        public Result<Variation> FindValidatedForcedDecision(OptimizelyDecisionContext context)
+        public Result<Variation> FindValidatedForcedDecision(OptimizelyDecisionContext context, ProjectConfig config)
         {
             DecisionReasons reasons = new DecisionReasons();
             var forcedDecision = GetForcedDecision(context);
@@ -322,7 +375,7 @@ namespace OptimizelySDK
             {
                 var loggingKey = context.RuleKey != null ? "flag (" + context.FlagKey + "), rule (" + context.RuleKey + ")" : "flag (" + context.FlagKey + ")";
                 var variationKey = forcedDecision.VariationKey;
-                var variation = Optimizely.GetFlagVariationByKey(context.FlagKey, variationKey);
+                var variation = config.GetFlagVariationByKey(context.FlagKey, variationKey);
                 if (variation != null)
                 {
                     reasons.AddInfo("Decided by forced decision.");

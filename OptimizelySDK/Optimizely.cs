@@ -451,28 +451,24 @@ namespace OptimizelySDK
         /// <param name="flagKey">The flag key for the variation</param>
         /// <param name="variationKey">The variation key for the variation</param>
         /// <returns>Returns a variation based on flagKey and variationKey, otherwise null</returns>
-        public Variation GetFlagVariationByKey(string flagKey, string variationKey)
-        {
-            var config = ProjectConfigManager?.GetConfig();
+        //public Variation GetFlagVariationByKey(string flagKey, string variationKey)
+        //{
+        //    var config = ProjectConfigManager?.GetConfig();
 
-            if (config == null)
-            {
-                return null;
-            }
+        //    if (config == null)
+        //    {
+        //        return null;
+        //    }
 
-            var flagVariationMap = config.FlagVariationMap;
-            if (flagVariationMap.TryGetValue(flagKey, out var variations))
-            {
-                foreach (var variation in from variation in variations
-                                          where variation.Key == variationKey
-                                          select variation)
-                {
-                    return variation;
-                }
-            }
+        //    if (config.FlagVariationMap.TryGetValue(flagKey, out var variationsKeyMap))
+        //    {
 
-            return null;
-        }
+        //        variationsKeyMap.TryGetValue(variationKey, out var variation);
+        //        return variation;
+        //    }
+
+        //    return null;
+        //}
 
         #region FeatureFlag APIs
 
@@ -790,7 +786,7 @@ namespace OptimizelySDK
             FeatureDecision decision = null;
 
             var decisionContext = new OptimizelyDecisionContext(flag.Key);
-            var forcedDecisionVariation = user.FindValidatedForcedDecision(decisionContext);
+            var forcedDecisionVariation = user.FindValidatedForcedDecision(decisionContext, config);
             decisionReasons += forcedDecisionVariation.DecisionReasons;
 
             if (forcedDecisionVariation.ResultObject != null)

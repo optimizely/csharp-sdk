@@ -554,7 +554,7 @@ namespace OptimizelySDK.Bucketing
             //Check forced decision first
             var rule = rules[ruleIndex];
             var decisionContext = new OptimizelyDecisionContext(key, rule.Key);
-            var forcedDecisionResponse = user.FindValidatedForcedDecision(decisionContext);
+            var forcedDecisionResponse = user.FindValidatedForcedDecision(decisionContext, config);
 
             reasons += forcedDecisionResponse.DecisionReasons;
             if (forcedDecisionResponse.ResultObject != null)
@@ -612,7 +612,7 @@ namespace OptimizelySDK.Bucketing
 
             var decisionContext = new OptimizelyDecisionContext(key, ruleKey);
 
-            var forcedDecisionResponse = user.FindValidatedForcedDecision(decisionContext);
+            var forcedDecisionResponse = user.FindValidatedForcedDecision(decisionContext, config);
 
             reasons += forcedDecisionResponse.DecisionReasons;
 
