@@ -196,7 +196,7 @@ namespace OptimizelySDK.Tests
             context = new OptimizelyDecisionContext("flag", "ruleKey");
 
             Assert.AreEqual("flag", context.FlagKey);
-            Assert.AreEqual("ruleKey", context.RuleKey)
+            Assert.AreEqual("ruleKey", context.RuleKey);
         }
 
         [Test]
