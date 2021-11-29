@@ -374,11 +374,13 @@ namespace OptimizelySDK.Config
                     else
                         ExperimentFeatureMap[experimentId] = new List<string> { feature.Id };
                 }
-                var rolloutRules = RolloutIdMap[feature.RolloutId];
-                var rolloutRulesVariations = rolloutRules.Experiments.SelectMany(ex => ex.Variations);
-                foreach(var rolloutRuleVariation in rolloutRulesVariations) {
-                    map[rolloutRuleVariation.Key] = rolloutRuleVariation;
+                if (RolloutIdMap.TryGetValue(feature.RolloutId, out var rolloutRules)) {
+                    var rolloutRulesVariations = rolloutRules.Experiments.SelectMany(ex => ex.Variations);
+                    foreach (var rolloutRuleVariation in rolloutRulesVariations) {
+                        map[rolloutRuleVariation.Key] = rolloutRuleVariation;
+                    }
                 }
+                
 
                 flagToVariationsMap[feature.Key] = map;
 

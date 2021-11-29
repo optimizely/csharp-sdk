@@ -371,7 +371,7 @@ namespace OptimizelySDK
             DecisionReasons reasons = new DecisionReasons();
             var forcedDecision = GetForcedDecision(context);
 
-            if (forcedDecision != null)
+            if (config != null && forcedDecision != null)
             {
                 var loggingKey = context.RuleKey != null ? "flag (" + context.FlagKey + "), rule (" + context.RuleKey + ")" : "flag (" + context.FlagKey + ")";
                 var variationKey = forcedDecision.VariationKey;
