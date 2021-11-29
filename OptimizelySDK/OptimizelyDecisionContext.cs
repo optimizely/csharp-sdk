@@ -17,7 +17,8 @@
 namespace OptimizelySDK
 {
     /// <summary>
-    /// ///TODO: Add documentation.
+    /// OptimizelyDecisionContext contains flag key and rule key to be used for setting 
+    /// and getting forced decision.
     /// </summary>
     public class OptimizelyDecisionContext
     {

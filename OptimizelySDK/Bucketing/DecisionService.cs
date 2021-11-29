@@ -501,47 +501,23 @@ namespace OptimizelySDK.Bucketing
 
                 if (string.IsNullOrEmpty(experiment.Key))
                     continue;
+               
+                var decisionVariation = GetVariationFromExperimentRule(config, featureFlag.Key, experiment, user, options);
+                reasons += decisionVariation?.DecisionReasons;
 
-                var variationResult = GetVariationFromExperiment(config, featureFlag, experiment, user, options);
-                reasons += variationResult.DecisionReasons;
+                var variation = decisionVariation?.ResultObject;
 
-                if (variationResult?.ResultObject?.Experiment != null && variationResult?.ResultObject?.Variation?.Id != null)
+                if (variation?.Id != null)
                 {
                     Logger.Log(LogLevel.INFO, reasons.AddInfo($"The user \"{userId}\" is bucketed into experiment \"{experiment.Key}\" of feature \"{featureFlag.Key}\"."));
-                    return Result<FeatureDecision>.NewResult(new FeatureDecision(experiment, variationResult.ResultObject.Variation, FeatureDecision.DECISION_SOURCE_FEATURE_TEST), reasons);
+
+                    var featureDecision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_FEATURE_TEST);
+                    return Result<FeatureDecision>.NewResult(featureDecision, reasons);
                 }
+
             }
 
             Logger.Log(LogLevel.INFO, reasons.AddInfo($"The user \"{userId}\" is not bucketed into any of the experiments on the feature \"{featureFlag.Key}\"."));
-            return Result<FeatureDecision>.NullResult(reasons);
-        }
-
-        
-
-        private Result<FeatureDecision> GetVariationFromExperiment(ProjectConfig config, FeatureFlag flag, Experiment experiment, OptimizelyUserContext user, OptimizelyDecideOption[] options)
-        {
-            var reasons = new DecisionReasons();
-
-            if (flag.ExperimentIds.Any())
-            {
-                foreach (var expId in flag.ExperimentIds)
-                {
-                    config.ExperimentIdMap.TryGetValue(expId, out var exp);
-
-                    var decisionVariation = GetVariationFromExperimentRule(config, flag.Key, experiment, user, options);
-                    reasons += decisionVariation?.DecisionReasons;
-
-                    var variation = decisionVariation?.ResultObject;
-
-                    if (variation != null)
-                    {
-                        var featureDecision = new FeatureDecision(exp, variation, FeatureDecision.DECISION_SOURCE_FEATURE_TEST);
-
-                        return Result<FeatureDecision>.NewResult(featureDecision, reasons);
-                    }
-                }
-            }
-
             return Result<FeatureDecision>.NullResult(reasons);
         }
 
