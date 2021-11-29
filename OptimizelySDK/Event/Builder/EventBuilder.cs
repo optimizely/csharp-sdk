@@ -132,7 +132,7 @@ namespace OptimizelySDK.Event.Builder
                     new Dictionary<string, object>
                     {
                         { Params.CAMPAIGN_ID,   experiment?.LayerId },
-                        { Params.EXPERIMENT_ID, experiment != null ? experiment.Id : "" },
+                        { Params.EXPERIMENT_ID, experiment?.Id},
                         { Params.VARIATION_ID,  variationId }
                     }
             };
