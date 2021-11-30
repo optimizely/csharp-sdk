@@ -452,6 +452,7 @@ namespace OptimizelySDK.Bucketing
             var index = 0;
             while (index < rolloutRulesLength)
             {
+                /// TODO: add findvalidated forced decision here, no need to add separate function.
                 var decisionResult = GetVariationFromDeliveryRule(config, featureFlag.Key, rolloutRules, index, user);
                 reasons += decisionResult.DecisionReasons;
 
@@ -498,20 +499,33 @@ namespace OptimizelySDK.Bucketing
             foreach (var experimentId in featureFlag.ExperimentIds)
             {
                 var experiment = config.GetExperimentFromId(experimentId);
+                Variation decisionVariation = null;
 
                 if (string.IsNullOrEmpty(experiment.Key))
                     continue;
-               
-                var decisionVariation = GetVariationFromExperimentRule(config, featureFlag.Key, experiment, user, options);
-                reasons += decisionVariation?.DecisionReasons;
+                
 
-                var variation = decisionVariation?.ResultObject;
+                var forcedDecisionResponse = user.FindValidatedForcedDecision(
+                    new OptimizelyDecisionContext(featureFlag.Key, experiment?.Key), config);
+                reasons += forcedDecisionResponse.DecisionReasons;
+                
+                if (forcedDecisionResponse?.ResultObject != null) {
+                    decisionVariation = forcedDecisionResponse.ResultObject;
+                } else {
+                    var decisionResponse = GetVariation(experiment, user, config, options);
 
-                if (variation?.Id != null)
+                    reasons += decisionResponse?.DecisionReasons;
+
+                    decisionVariation = decisionResponse.ResultObject;
+                }
+
+                
+
+                if (decisionVariation?.Id != null)
                 {
                     Logger.Log(LogLevel.INFO, reasons.AddInfo($"The user \"{userId}\" is bucketed into experiment \"{experiment.Key}\" of feature \"{featureFlag.Key}\"."));
 
-                    var featureDecision = new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_FEATURE_TEST);
+                    var featureDecision = new FeatureDecision(experiment, decisionVariation, FeatureDecision.DECISION_SOURCE_FEATURE_TEST);
                     return Result<FeatureDecision>.NewResult(featureDecision, reasons);
                 }
 
@@ -521,6 +535,15 @@ namespace OptimizelySDK.Bucketing
             return Result<FeatureDecision>.NullResult(reasons);
         }
 
+        /// <summary>
+        ///  TODO: Remove this one as well. Keep it simple. 
+        /// </summary>
+        /// <param name="config"></param>
+        /// <param name="key"></param>
+        /// <param name="rules"></param>
+        /// <param name="ruleIndex"></param>
+        /// <param name="user"></param>
+        /// <returns></returns>
         private Result<FeatureDecision> GetVariationFromDeliveryRule(ProjectConfig config, string key, List<Experiment> rules, int ruleIndex, OptimizelyUserContext user)
         {
             var reasons = new DecisionReasons();
@@ -580,13 +603,21 @@ namespace OptimizelySDK.Bucketing
 
             return Result<FeatureDecision>.NewResult(new FeatureDecision(rule, bucketedVariation?.ResultObject, null), skipToEveryoneElse, reasons);
         }
+
+        /// <summary>
+        ///  TODO: Need to remove.
+        /// </summary>
+        /// <param name="config"></param>
+        /// <param name="key"></param>
+        /// <param name="experiment"></param>
+        /// <param name="user"></param>
+        /// <param name="options"></param>
+        /// <returns></returns>
         private Result<Variation> GetVariationFromExperimentRule(ProjectConfig config, string key, Experiment experiment, OptimizelyUserContext user, OptimizelyDecideOption[] options)
         {
             var reasons = new DecisionReasons();
 
-            var ruleKey = experiment != null ? experiment.Key : null;
-
-            var decisionContext = new OptimizelyDecisionContext(key, ruleKey);
+            var decisionContext = new OptimizelyDecisionContext(key, experiment?.Key);
 
             var forcedDecisionResponse = user.FindValidatedForcedDecision(decisionContext, config);
 
@@ -605,6 +636,7 @@ namespace OptimizelySDK.Bucketing
 
             return Result<Variation>.NewResult(decisionResponse?.ResultObject, reasons);
         }
+
 
         /// <summary>
         /// Get the variation the user is bucketed into for the FeatureFlag

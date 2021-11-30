@@ -356,10 +356,12 @@ namespace OptimizelySDK.Config
             }
 
             var variationsDict = new Dictionary<string, List<Variation>>();
+            ///TODO: Need to remove.
             var flagToVariationsMap = new Dictionary<string, Dictionary<string, Variation>>();
             // Adding experiments in experiment-feature map and flag variation map to use.
             foreach (var feature in FeatureFlags)
             {
+                /// TODO: give proper name.
                 var map = new Dictionary<string, Variation>();
                 foreach (var experimentId in feature.ExperimentIds ?? new List<string>())
                 {
