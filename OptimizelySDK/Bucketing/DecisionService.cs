@@ -568,7 +568,7 @@ namespace OptimizelySDK.Bucketing
                     decisionVariation = decisionResponse.ResultObject;
                 }
 
-                if (decisionVariation?.Id != null)
+                if (!string.IsNullOrEmpty(decisionVariation?.Id))
                 {
                     Logger.Log(LogLevel.INFO, reasons.AddInfo($"The user \"{userId}\" is bucketed into experiment \"{experiment.Key}\" of feature \"{featureFlag.Key}\"."));
 

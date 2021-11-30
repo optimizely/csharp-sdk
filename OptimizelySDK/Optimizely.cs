@@ -445,31 +445,6 @@ namespace OptimizelySDK
             return DecisionService.GetForcedVariation(experimentKey, userId, config).ResultObject;
         }
 
-        /// <summary>
-        /// Gets a variation based on flagKey and variationKey
-        /// </summary>
-        /// <param name="flagKey">The flag key for the variation</param>
-        /// <param name="variationKey">The variation key for the variation</param>
-        /// <returns>Returns a variation based on flagKey and variationKey, otherwise null</returns>
-        //public Variation GetFlagVariationByKey(string flagKey, string variationKey)
-        //{
-        //    var config = ProjectConfigManager?.GetConfig();
-
-        //    if (config == null)
-        //    {
-        //        return null;
-        //    }
-
-        //    if (config.FlagVariationMap.TryGetValue(flagKey, out var variationsKeyMap))
-        //    {
-
-        //        variationsKeyMap.TryGetValue(variationKey, out var variation);
-        //        return variation;
-        //    }
-
-        //    return null;
-        //}
-
         #region FeatureFlag APIs
 
         /// <summary>
