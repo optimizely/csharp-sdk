@@ -651,7 +651,7 @@ namespace OptimizelySDK.Config
         /// <returns></returns>
         public Variation GetFlagVariationByKey(string flagKey, string variationKey)
         {
-            if (this.FlagVariationMap.TryGetValue(flagKey, out var variationsKeyMap)) {
+            if (FlagVariationMap.TryGetValue(flagKey, out var variationsKeyMap)) {
 
                 variationsKeyMap.TryGetValue(variationKey, out var variation);
                 return variation;

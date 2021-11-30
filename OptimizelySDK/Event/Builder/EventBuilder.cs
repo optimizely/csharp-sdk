@@ -141,7 +141,7 @@ namespace OptimizelySDK.Event.Builder
             {
                     new Dictionary<string, object>
                     {
-                        { "entity_id", experiment != null ? experiment.LayerId : null },
+                        { "entity_id", experiment?.LayerId },
                         { "timestamp", DateTimeUtils.SecondsSince1970*1000 },
                         { "key", ACTIVATE_EVENT_KEY },
                         { "uuid", Guid.NewGuid() }
