@@ -362,41 +362,30 @@ namespace OptimizelySDK.Config
             foreach (var feature in FeatureFlags)
             {
                 /// TODO: give proper name.
-                var map = new Dictionary<string, Variation>();
+                var flagVariationToVariationDict = new Dictionary<string, Variation>();
                 foreach (var experimentId in feature.ExperimentIds ?? new List<string>())
                 {
-                    var variationsKeyToVariationsMap = ExperimentIdMap[experimentId].VariationKeyToVariationMap;
-
-                    foreach (var kv in variationsKeyToVariationsMap) {
-                        map[kv.Key] = kv.Value;
+                    foreach (var variationDictKV in ExperimentIdMap[experimentId].VariationKeyToVariationMap) {
+                        flagVariationToVariationDict[variationDictKV.Key] = variationDictKV.Value;
                     }
 
                     if (ExperimentFeatureMap.ContainsKey(experimentId))
+                    {
                         ExperimentFeatureMap[experimentId].Add(feature.Id);
+                    }
                     else
+                    { 
                         ExperimentFeatureMap[experimentId] = new List<string> { feature.Id };
+                    }
                 }
                 if (RolloutIdMap.TryGetValue(feature.RolloutId, out var rolloutRules)) {
                     var rolloutRulesVariations = rolloutRules.Experiments.SelectMany(ex => ex.Variations);
                     foreach (var rolloutRuleVariation in rolloutRulesVariations) {
-                        map[rolloutRuleVariation.Key] = rolloutRuleVariation;
+                        flagVariationToVariationDict[rolloutRuleVariation.Key] = rolloutRuleVariation;
                     }
                 }
                 
-
-                flagToVariationsMap[feature.Key] = map;
-
-                //// Get the Flag variation map to use
-                //var variationIdToVariationsDict = new Dictionary<string, Variation>();
-                //foreach (var variation in from rule in GetAllRulesForFlag(feature)
-                //                          from variation in rule.Variations
-                //                          where !variationIdToVariationsDict.ContainsKey(variation.Id)
-                //                          select variation)
-                //{
-                //    variationIdToVariationsDict.Add(variation.Id, variation);
-                //}
-                //// Grab all the variations from the flag experiments and rollouts and add to flagVariationsMap
-                //variationsDict[feature.Key] = variationIdToVariationsDict.Values.ToList<Variation>();
+                flagToVariationsMap[feature.Key] = flagVariationToVariationDict;
             }
             _FlagVariationMap = flagToVariationsMap;
         }

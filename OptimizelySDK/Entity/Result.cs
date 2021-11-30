@@ -21,19 +21,7 @@ namespace OptimizelySDK.Entity
     {
         public T ResultObject;
         public DecisionReasons DecisionReasons;
-        public bool SkipToEveryoneElse;
 
-        /// <summary>
-        /// Result object with boolean variable as well
-        /// </summary>
-        /// <param name="resultObject"></param>
-        /// <param name="skipToEveryoneElse"></param>
-        /// <param name="decisionReasons"></param>
-        /// <returns></returns>
-        public static Result<T> NewResult(T resultObject, bool skipToEveryoneElse, DecisionReasons decisionReasons)
-        {
-            return new Result<T> { DecisionReasons = decisionReasons, ResultObject = resultObject, SkipToEveryoneElse = skipToEveryoneElse };
-        }
         public static Result<T> NewResult(T resultObject, DecisionReasons decisionReasons)
         {
             return new Result<T> { DecisionReasons = decisionReasons, ResultObject = resultObject };

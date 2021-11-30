@@ -227,7 +227,7 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestSetForcedDecisionReturnsFalseForNullConfig()
         {
-            var optly = new Optimizely(new FallbackProjectConfigManager(null));
+            var optly = new Optimizely(new FallbackProjectConfigManager(null), logger: LoggerMock.Object);
 
             var user = optly.CreateUserContext(UserID);
 
@@ -236,7 +236,7 @@ namespace OptimizelySDK.Tests
             var result = user.SetForcedDecision(context, decision);
 
             Assert.IsFalse(result);
-            //TODO: should assert logger is called
+            LoggerMock.Verify(log => log.Log(LogLevel.ERROR, "Optimizely SDK not configured properly yet."), Times.Once);
         }
 
         [Test]
