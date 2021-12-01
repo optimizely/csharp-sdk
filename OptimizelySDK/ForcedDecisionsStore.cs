@@ -23,14 +23,16 @@ namespace OptimizelySDK
     /// </summary>
     public class ForcedDecisionsStore
     {
-        public const string OPTI_NULL_RULE_KEY = "$opt-null-rule-key";
-        public const string OPTI_KEY_DIVIDER = "-$opt$-";
-
         private Dictionary<string, OptimizelyForcedDecision> ForcedDecisionsMap { get; set; }
 
         public ForcedDecisionsStore()
         {
             ForcedDecisionsMap = new Dictionary<string, OptimizelyForcedDecision>();
+        }
+
+        public ForcedDecisionsStore(ForcedDecisionsStore forcedDecisionsStore)
+        {
+            ForcedDecisionsMap = new Dictionary<string, OptimizelyForcedDecision>(forcedDecisionsStore.ForcedDecisionsMap);
         }
 
         public int Count
@@ -42,8 +44,7 @@ namespace OptimizelySDK
         }
         public bool Remove(OptimizelyDecisionContext context)
         {
-            var decisionKey = getKey(context);
-            return ForcedDecisionsMap.Remove(decisionKey);
+            return ForcedDecisionsMap.Remove(context.GetKey());
         }
 
         public void RemoveAll()
@@ -51,17 +52,12 @@ namespace OptimizelySDK
             ForcedDecisionsMap.Clear();
         }
 
-        private string getKey(OptimizelyDecisionContext context)
-        {
-            return string.Format("{0}{1}{2}", context.FlagKey, OPTI_KEY_DIVIDER, context.RuleKey ?? OPTI_NULL_RULE_KEY);
-        }
-
         public OptimizelyForcedDecision this[OptimizelyDecisionContext context]
         {
             get
             {
                 if (context != null && context.FlagKey != null
-                    && ForcedDecisionsMap.TryGetValue(getKey(context), out OptimizelyForcedDecision flagForcedDecision))
+                    && ForcedDecisionsMap.TryGetValue(context.GetKey(), out OptimizelyForcedDecision flagForcedDecision))
                 {
                     return flagForcedDecision;
                 }
@@ -71,7 +67,7 @@ namespace OptimizelySDK
             {
                 if (context != null && context.FlagKey != null)
                 {
-                    ForcedDecisionsMap[getKey(context)] = value;
+                    ForcedDecisionsMap[context.GetKey()] = value;
                 }
             }
 

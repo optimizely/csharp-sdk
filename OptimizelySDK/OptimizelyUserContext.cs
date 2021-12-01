@@ -58,7 +58,7 @@ namespace OptimizelySDK
             UserId = userId;
         }
 
-        private OptimizelyUserContext Copy() => new OptimizelyUserContext(Optimizely, UserId, GetAttributes(), ForcedDecisionsStore, ErrorHandler, Logger);
+        private OptimizelyUserContext Copy() => new OptimizelyUserContext(Optimizely, UserId, GetAttributes(), GetForcedDecisionsStore(), ErrorHandler, Logger);
 
         /// <summary>
         /// Returns Optimizely instance associated with the UserContext.
@@ -91,6 +91,21 @@ namespace OptimizelySDK
             }
 
             return copiedAttributes;
+        }
+
+        /// <summary>
+        /// Returns copy of ForcedDecisionsStore associated with UserContext.
+        /// </summary>
+        /// <returns>copy of ForcedDecisionsStore.</returns>
+        public ForcedDecisionsStore GetForcedDecisionsStore()
+        {
+            ForcedDecisionsStore copiedForcedDecisionsStore = null;
+            lock (mutex)
+            {
+                copiedForcedDecisionsStore = new ForcedDecisionsStore(ForcedDecisionsStore);
+            }
+
+            return copiedForcedDecisionsStore;
         }
 
         /// <summary>
@@ -206,9 +221,8 @@ namespace OptimizelySDK
         /// <summary>
         /// Set a forced decision.
         /// </summary>
-        /// <param name="flagKey">The flag key.</param>
-        /// <param name="ruleKey">The rule key.</param>
-        /// <param name="variationKey">The variation key.</param>
+        /// <param name="context">The context object containing flag and rule key.</param>
+        /// <param name="decision">OptimizelyForcedDecision object containing variation key.</param>
         /// <returns></returns>
         public bool SetForcedDecision(OptimizelyDecisionContext context, OptimizelyForcedDecision decision)
         {
@@ -229,8 +243,7 @@ namespace OptimizelySDK
         /// <summary>
         /// Gets a forced variation
         /// </summary>
-        /// <param name="flagKey">The flag key</param>
-        /// <param name="ruleKey">The rule key</param>
+        /// <param name="context">The context object containing flag and rule key.</param>
         /// <returns>The variation key for a forced decision</returns>
         public OptimizelyForcedDecision GetForcedDecision(OptimizelyDecisionContext context)
         {
@@ -278,8 +291,11 @@ namespace OptimizelySDK
                 Logger.Log(LogLevel.ERROR, DecisionMessage.SDK_NOT_READY);
                 return false;
             }
-
-            return ForcedDecisionsStore.Remove(context);
+            
+            lock (mutex)
+            {
+                return ForcedDecisionsStore.Remove(context);
+            }
         }
 
         /// <summary>

@@ -22,8 +22,12 @@ namespace OptimizelySDK
     /// </summary>
     public class OptimizelyDecisionContext
     {
+        public const string OPTI_NULL_RULE_KEY = "$opt-null-rule-key";
+        public const string OPTI_KEY_DIVIDER = "-$opt$-";
+
         private string flagKey;
         private string ruleKey;
+        private string decisionKey;
 
         public string FlagKey { get { return flagKey; } }
         public string RuleKey { get { return ruleKey; } }
@@ -33,6 +37,12 @@ namespace OptimizelySDK
             this.flagKey = flagKey;
             this.ruleKey = ruleKey;
         }
+
+        public string GetKey()
+        {
+            return string.Format("{0}{1}{2}", FlagKey, OPTI_KEY_DIVIDER, RuleKey ?? OPTI_NULL_RULE_KEY);
+        }
+
 
     }
 }
