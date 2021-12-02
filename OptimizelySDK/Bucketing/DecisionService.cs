@@ -632,7 +632,7 @@ namespace OptimizelySDK.Bucketing
             }
 
             Logger.Log(LogLevel.INFO, reasons.AddInfo($"The user \"{userId}\" is not bucketed into a rollout for feature flag \"{featureFlag.Key}\"."));
-            return Result<FeatureDecision>.NullResult(reasons);
+            return Result<FeatureDecision>.NewResult(new FeatureDecision(null, null, FeatureDecision.DECISION_SOURCE_ROLLOUT), reasons); ;
         }
 
         /// <summary>
