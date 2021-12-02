@@ -2438,7 +2438,7 @@ namespace OptimizelySDK.Tests
             Mock<OptimizelyUserContext> mockUserContext = new Mock<OptimizelyUserContext>(OptimizelyMock.Object, TestUserId, userAttributes, ErrorHandlerMock.Object, LoggerMock.Object);
             mockUserContext.Setup(ouc => ouc.GetUserId()).Returns(TestUserId);
 
-            DecisionServiceMock.Setup(ds => ds.GetVariation(experiment, It.IsAny<OptimizelyUserContext>(), It.IsAny<ProjectConfig>(), userAttributes)).Returns(variation);
+            DecisionServiceMock.Setup(ds => ds.GetVariation(experiment, It.IsAny<OptimizelyUserContext>(), It.IsAny<ProjectConfig>())).Returns(variation);
             DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag, It.IsAny<OptimizelyUserContext>(), It.IsAny<ProjectConfig>())).Returns(decision);
 
             var optly = Helper.CreatePrivateOptimizely();
@@ -2452,8 +2452,8 @@ namespace OptimizelySDK.Tests
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
 
             // Calling Activate and IsFeatureEnabled.
-            optly.Invoke("Activate", experimentKey, TestUserId, userAttributes);
-            optly.Invoke("IsFeatureEnabled", featureKey, TestUserId, userAttributes);
+            optStronglyTyped.Activate(experimentKey, TestUserId, userAttributes);
+            optStronglyTyped.IsFeatureEnabled(featureKey, TestUserId, userAttributes);
 
             // Verify that all the registered callbacks are called once for both Activate and IsFeatureEnabled.
             EventDispatcherMock.Verify(dispatcher => dispatcher.DispatchEvent(It.IsAny<LogEvent>()), Times.Exactly(2));
@@ -2521,7 +2521,7 @@ namespace OptimizelySDK.Tests
             Mock<OptimizelyUserContext> mockUserContext = new Mock<OptimizelyUserContext>(Optimizely, TestUserId, new UserAttributes(), ErrorHandlerMock.Object, LoggerMock.Object);
             mockUserContext.Setup(ouc => ouc.GetUserId()).Returns(TestUserId);
 
-            DecisionServiceMock.Setup(ds => ds.GetVariation(experiment, It.IsAny<OptimizelyUserContext>(), Config, userAttributes)).Returns(variation);
+            DecisionServiceMock.Setup(ds => ds.GetVariation(experiment, It.IsAny<OptimizelyUserContext>(), Config)).Returns(variation);
 
             // Adding notification listeners.
             var notificationType = NotificationCenter.NotificationType.Track;
@@ -2559,7 +2559,7 @@ namespace OptimizelySDK.Tests
             NotificationCallbackMock.Setup(nc => nc.TestDecisionCallback(It.IsAny<string>(), It.IsAny<string>(),
                 It.IsAny<UserAttributes>(), It.IsAny<Dictionary<string, object>>()));
 
-            DecisionServiceMock.Setup(ds => ds.GetVariation(experiment, It.IsAny<OptimizelyUserContext>(), Config, userAttributes)).Returns(variation);
+            DecisionServiceMock.Setup(ds => ds.GetVariation(experiment, It.IsAny<OptimizelyUserContext>(), Config)).Returns(variation);
 
             var optly = Helper.CreatePrivateOptimizely();
             optly.SetFieldOrProperty("ProjectConfigManager", ConfigManager);
@@ -2596,7 +2596,7 @@ namespace OptimizelySDK.Tests
             NotificationCallbackMock.Setup(nc => nc.TestDecisionCallback(It.IsAny<string>(), It.IsAny<string>(),
                 It.IsAny<UserAttributes>(), It.IsAny<Dictionary<string, object>>()));
 
-            DecisionServiceMock.Setup(ds => ds.GetVariation(experiment, It.IsAny<OptimizelyUserContext>(), Config, userAttributes)).Returns(variation);
+            DecisionServiceMock.Setup(ds => ds.GetVariation(experiment, It.IsAny<OptimizelyUserContext>(), Config)).Returns(variation);
 
             var optly = Helper.CreatePrivateOptimizely();
             optly.SetFieldOrProperty("ProjectConfigManager", ConfigManager);
@@ -2668,7 +2668,7 @@ namespace OptimizelySDK.Tests
             Mock<OptimizelyUserContext> mockUserContext = new Mock<OptimizelyUserContext>(optStronglyTyped, TestUserId, new UserAttributes(), ErrorHandlerMock.Object, LoggerMock.Object);
             mockUserContext.Setup(ouc => ouc.GetUserId()).Returns(TestUserId);
 
-            DecisionServiceMock.Setup(ds => ds.GetVariation(experiment, It.IsAny<OptimizelyUserContext>(), Config, userAttributes)).Returns(variation);
+            DecisionServiceMock.Setup(ds => ds.GetVariation(experiment, It.IsAny<OptimizelyUserContext>(), Config)).Returns(variation);
 
             optStronglyTyped.NotificationCenter.AddNotification(NotificationCenter.NotificationType.Decision, NotificationCallbackMock.Object.TestDecisionCallback);
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
@@ -2707,7 +2707,7 @@ namespace OptimizelySDK.Tests
             Mock<OptimizelyUserContext> mockUserContext = new Mock<OptimizelyUserContext>(optStronglyTyped, TestUserId, new UserAttributes(), ErrorHandlerMock.Object, LoggerMock.Object);
             mockUserContext.Setup(ouc => ouc.GetUserId()).Returns(TestUserId);
 
-            DecisionServiceMock.Setup(ds => ds.GetVariation(experiment, It.IsAny<OptimizelyUserContext>(), Config, userAttributes)).Returns(variation);
+            DecisionServiceMock.Setup(ds => ds.GetVariation(experiment, It.IsAny<OptimizelyUserContext>(), Config)).Returns(variation);
 
             optStronglyTyped.NotificationCenter.AddNotification(NotificationCenter.NotificationType.Decision, NotificationCallbackMock.Object.TestDecisionCallback);
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
@@ -2735,11 +2735,7 @@ namespace OptimizelySDK.Tests
             NotificationCallbackMock.Setup(nc => nc.TestDecisionCallback(It.IsAny<string>(), It.IsAny<string>(),
                 It.IsAny<UserAttributes>(), It.IsAny<Dictionary<string, object>>()));
 
-            Mock<OptimizelyUserContext> mockUserContext = new Mock<OptimizelyUserContext>(optStronglyTyped, TestUserId, new UserAttributes(), ErrorHandlerMock.Object, LoggerMock.Object);
-
-            mockUserContext.Setup(ouc => ouc.GetUserId()).Returns(TestUserId);
-
-            DecisionServiceMock.Setup(ds => ds.GetVariation(It.IsAny<Experiment>(), It.IsAny<OptimizelyUserContext>(), It.IsAny<ProjectConfig>(), It.IsAny<UserAttributes>())).Returns(Result<Variation>.NullResult(null));
+            DecisionServiceMock.Setup(ds => ds.GetVariation(It.IsAny<Experiment>(), It.IsAny<OptimizelyUserContext>(), It.IsAny<ProjectConfig>())).Returns(Result<Variation>.NullResult(null));
             //DecisionServiceMock.Setup(ds => ds.GetVariation(experiment, TestUserId, Config, null)).Returns(Result<Variation>.NullResult(null));
 
             optStronglyTyped.NotificationCenter.AddNotification(NotificationCenter.NotificationType.Decision, NotificationCallbackMock.Object.TestDecisionCallback);

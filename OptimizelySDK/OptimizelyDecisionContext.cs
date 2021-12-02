@@ -16,25 +16,33 @@
 
 namespace OptimizelySDK
 {
+    /// <summary>
+    /// OptimizelyDecisionContext contains flag key and rule key to be used for setting 
+    /// and getting forced decision.
+    /// </summary>
     public class OptimizelyDecisionContext
     {
         public const string OPTI_NULL_RULE_KEY = "$opt-null-rule-key";
         public const string OPTI_KEY_DIVIDER = "-$opt$-";
+
         private string flagKey;
         private string ruleKey;
         private string decisionKey;
 
-        public OptimizelyDecisionContext(string flagKey, string ruleKey = null)
+        public string FlagKey { get { return flagKey; } }
+        public string RuleKey { get { return ruleKey; } }
+
+        public OptimizelyDecisionContext(string flagKey, string ruleKey= null)
         {
             this.flagKey = flagKey;
             this.ruleKey = ruleKey;
-            this.decisionKey = string.Format("{0}{1}{2}", flagKey, OPTI_KEY_DIVIDER, ruleKey ?? OPTI_NULL_RULE_KEY);
         }
 
-        public string FlagKey { get { return flagKey; } }
+        public string GetKey()
+        {
+            return string.Format("{0}{1}{2}", FlagKey, OPTI_KEY_DIVIDER, RuleKey ?? OPTI_NULL_RULE_KEY);
+        }
 
-        public string RuleKey { get { return ruleKey; } }
 
-        public string DecisionKey { get { return decisionKey; } }
     }
 }

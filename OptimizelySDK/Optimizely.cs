@@ -378,14 +378,16 @@ namespace OptimizelySDK
             Experiment experiment = config.GetExperimentFromKey(experimentKey);
             if (experiment.Key == null)
                 return null;
-            var variation = DecisionService.GetVariation(experiment, CreateUserContext(userId, userAttributes), config, userAttributes).ResultObject;
+            userAttributes = userAttributes ?? new UserAttributes();
+
+            var userContext = CreateUserContext(userId, userAttributes);
+            var variation = DecisionService.GetVariation(experiment, userContext, config)?.ResultObject;
             var decisionInfo = new Dictionary<string, object>
             {
                 { "experimentKey", experimentKey },
                 { "variationKey", variation?.Key },
             };
 
-            userAttributes = userAttributes ?? new UserAttributes();
             var decisionNotificationType = config.IsFeatureExperiment(experiment.Id) ? DecisionNotificationTypes.FEATURE_TEST : DecisionNotificationTypes.AB_TEST;
             NotificationCenter.SendNotifications(NotificationCenter.NotificationType.Decision, decisionNotificationType, userId,
                 userAttributes, decisionInfo);
@@ -441,25 +443,6 @@ namespace OptimizelySDK
                 return null;
 
             return DecisionService.GetForcedVariation(experimentKey, userId, config).ResultObject;
-        }
-
-        public Variation GetFlagVariationByKey(string flagKey, string variationKey)
-        {
-            var flagVariationMap = ProjectConfigManager?.GetConfig().FlagVariationMap;
-            if (flagVariationMap.ContainsKey(flagKey) == true)
-            {
-                flagVariationMap.TryGetValue(flagKey, out var variations);
-
-                foreach (var variation in variations)
-                {
-                    if (variation.Key.Equals(variationKey))
-                    {
-                        return variation;
-                    }
-                }
-            }
-
-            return null;
         }
 
         #region FeatureFlag APIs
@@ -778,7 +761,7 @@ namespace OptimizelySDK
             FeatureDecision decision = null;
 
             var decisionContext = new OptimizelyDecisionContext(flag.Key);
-            var forcedDecisionVariation = user.FindValidatedForcedDecision(decisionContext);
+            var forcedDecisionVariation = user.FindValidatedForcedDecision(decisionContext, config);
             decisionReasons += forcedDecisionVariation.DecisionReasons;
 
             if (forcedDecisionVariation.ResultObject != null)

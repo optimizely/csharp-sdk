@@ -119,9 +119,9 @@ namespace OptimizelySDK
         Dictionary<string, Rollout> RolloutIdMap { get; }
 
         /// <summary>
-        /// Associative array of Flag to Variation in the datafile
+        /// Associative dictionary of Flag to Variation key and Variation in the datafile
         /// </summary>
-        Dictionary<string, List<Variation>> FlagVariationMap { get; }
+        Dictionary<string, Dictionary<string, Variation>> FlagVariationMap { get; }
 
         //========================= Datafile Entities ===========================
 

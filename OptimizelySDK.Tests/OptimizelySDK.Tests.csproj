@@ -75,7 +75,7 @@
     <Compile Include="AudienceConditionsTests\ConditionsTest.cs" />
     <Compile Include="ConfigTest\HttpProjectConfigManagerTest.cs" />
     <Compile Include="ConfigTest\PollingProjectConfigManagerTest.cs" />
-    <Compile Include="ConfigTest\AtomicProjectConfigManagerTest.cs" />
+    <Compile Include="ConfigTest\FallbackProjectConfigManagerTest.cs" />
     <Compile Include="DecisionServiceTest.cs" />
     <Compile Include="DefaultErrorHandlerTest.cs" />
     <Compile Include="EventTests\EventProcessorProps.cs" />
@@ -93,6 +93,7 @@
     <Compile Include="NotificationTests\NotificationCenterTests.cs" />
     <Compile Include="ClientConfigHandlerTest.cs" />
     <Compile Include="OptimizelyTest.cs" />
+    <Compile Include="ForcedDecisionsStoreTest.cs" />
     <Compile Include="OptimizelyUserContextTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestBucketer.cs" />
