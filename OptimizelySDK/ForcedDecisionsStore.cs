@@ -24,10 +24,28 @@ namespace OptimizelySDK
     public class ForcedDecisionsStore
     {
         private Dictionary<string, OptimizelyForcedDecision> ForcedDecisionsMap { get; set; }
+        private static ForcedDecisionsStore NullForcedDecisionStore;
 
+        /// <summary>
+        /// Instantiates a NULL object when ForcedDecisionStore first time is used.
+        /// </summary>
+        static ForcedDecisionsStore()
+        {
+            NullForcedDecisionStore = new ForcedDecisionsStore();
+        }
         public ForcedDecisionsStore()
         {
             ForcedDecisionsMap = new Dictionary<string, OptimizelyForcedDecision>();
+        }
+
+        /// <summary>
+        /// This method will return instance of ForcedDecisionStore that won't be accessible from outside.
+        /// Instead of copying everytime or putting NULL for every forced decision condition, this approach looks fine to me.
+        /// </summary>
+        /// <returns></returns>
+        internal static ForcedDecisionsStore NullForcedDecision()
+        {
+            return NullForcedDecisionStore;
         }
 
         public ForcedDecisionsStore(ForcedDecisionsStore forcedDecisionsStore)

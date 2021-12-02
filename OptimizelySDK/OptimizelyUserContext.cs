@@ -102,6 +102,11 @@ namespace OptimizelySDK
             ForcedDecisionsStore copiedForcedDecisionsStore = null;
             lock (mutex)
             {
+                if (ForcedDecisionsStore.Count == 0)
+                {
+                    copiedForcedDecisionsStore = ForcedDecisionsStore.NullForcedDecision();
+                }
+
                 copiedForcedDecisionsStore = new ForcedDecisionsStore(ForcedDecisionsStore);
             }
 
