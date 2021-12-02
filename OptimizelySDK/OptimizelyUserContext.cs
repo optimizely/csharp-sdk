@@ -105,9 +105,10 @@ namespace OptimizelySDK
                 if (ForcedDecisionsStore.Count == 0)
                 {
                     copiedForcedDecisionsStore = ForcedDecisionsStore.NullForcedDecision();
+                } else
+                {
+                    copiedForcedDecisionsStore = new ForcedDecisionsStore(ForcedDecisionsStore);
                 }
-
-                copiedForcedDecisionsStore = new ForcedDecisionsStore(ForcedDecisionsStore);
             }
 
             return copiedForcedDecisionsStore;
