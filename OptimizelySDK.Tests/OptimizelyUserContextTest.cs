@@ -225,21 +225,6 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
-        public void TestSetForcedDecisionReturnsFalseForNullConfig()
-        {
-            var optly = new Optimizely(new FallbackProjectConfigManager(null), logger: LoggerMock.Object);
-
-            var user = optly.CreateUserContext(UserID);
-
-            var context = new OptimizelyDecisionContext("flag", null);
-            var decision = new OptimizelyForcedDecision("variationKey");
-            var result = user.SetForcedDecision(context, decision);
-
-            Assert.IsFalse(result);
-            LoggerMock.Verify(log => log.Log(LogLevel.ERROR, "Optimizely SDK not configured properly yet."), Times.Once);
-        }
-
-        [Test]
         public void TestGetForcedDecisionReturnsNullWithNullFlagKey()
         {
             var user = Optimizely.CreateUserContext(UserID);
@@ -342,22 +327,6 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
-        public void TestRemoveForcedDecisionReturnsFalseForNullConfig()
-        {
-            var optly = new Optimizely(new FallbackProjectConfigManager(null));
-
-            var user = optly.CreateUserContext(UserID);
-
-            var context = new OptimizelyDecisionContext("flagKey", null);
-            var decision = new OptimizelyForcedDecision("variationKey");
-            var setResult = user.SetForcedDecision(context, decision);
-
-            var result = user.RemoveForcedDecision(context);
-
-            Assert.AreEqual(false, result);
-        }
-
-        [Test]
         public void TestRemoveAllForcedDecisionsRemovesDecisions()
         {
             var user = Optimizely.CreateUserContext(UserID);
@@ -384,22 +353,6 @@ namespace OptimizelySDK.Tests
 
             var result3 = user.GetForcedDecision(context3);
             Assert.AreEqual(null, result3);
-        }
-
-        [Test]
-        public void TestRemoveAllForcedDecisionsReturnsFalseForNullConfig()
-        {
-            var optly = new Optimizely(new FallbackProjectConfigManager(null));
-
-            var user = optly.CreateUserContext(UserID);
-
-            var context = new OptimizelyDecisionContext("flagKey");
-            var decision = new OptimizelyForcedDecision("variation");
-            user.SetForcedDecision(context, decision);
-
-            var result = user.RemoveAllForcedDecisions();
-
-            Assert.AreEqual(false, result);
         }
 
         [Test]

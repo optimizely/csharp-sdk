@@ -232,12 +232,6 @@ namespace OptimizelySDK
         /// <returns></returns>
         public bool SetForcedDecision(OptimizelyDecisionContext context, OptimizelyForcedDecision decision)
         {
-            if (!Optimizely.IsValid)
-            {
-                Logger.Log(LogLevel.ERROR, DecisionMessage.SDK_NOT_READY);
-                return false;
-            }
-
             lock (mutex)
             {
                 ForcedDecisionsStore[context] = decision;
@@ -253,12 +247,6 @@ namespace OptimizelySDK
         /// <returns>The variation key for a forced decision</returns>
         public OptimizelyForcedDecision GetForcedDecision(OptimizelyDecisionContext context)
         {
-            if (!Optimizely.IsValid)
-            {
-                Logger.Log(LogLevel.ERROR, DecisionMessage.SDK_NOT_READY);
-                return null;
-            }
-
             if (context == null || context.FlagKey == null)
             {
                 Logger.Log(LogLevel.WARN, "flagKey cannot be null");
@@ -291,12 +279,6 @@ namespace OptimizelySDK
                 Logger.Log(LogLevel.WARN, "FlagKey cannot be null");
                 return false;
             }
-
-            if (!Optimizely.IsValid)
-            {
-                Logger.Log(LogLevel.ERROR, DecisionMessage.SDK_NOT_READY);
-                return false;
-            }
             
             lock (mutex)
             {
@@ -310,12 +292,6 @@ namespace OptimizelySDK
         /// <returns>Whether the clear was successful.</returns>
         public bool RemoveAllForcedDecisions()
         {
-            if (!Optimizely.IsValid)
-            {
-                Logger.Log(LogLevel.ERROR, DecisionMessage.SDK_NOT_READY);
-                return false;
-            }
-
             lock (mutex)
             {
                 ForcedDecisionsStore.RemoveAll();
