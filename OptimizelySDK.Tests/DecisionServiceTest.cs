@@ -951,7 +951,7 @@ namespace OptimizelySDK.Tests
             OptimizelyUserContextMock.Setup(ouc => ouc.GetUserId()).Returns(UserProfileId);
 
             var actualDecision = DecisionServiceMock.Object.GetVariationForFeature(featureFlag, OptimizelyUserContextMock.Object, ProjectConfig);
-            Assert.IsNull(actualDecision.ResultObject);
+            Assert.IsNull(actualDecision.ResultObject.Variation);
 
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "The user \"userProfileId\" is not bucketed into a rollout for feature flag \"string_single_variable_feature\"."));
         }
