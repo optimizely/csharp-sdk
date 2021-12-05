@@ -110,21 +110,21 @@ namespace OptimizelySDK.Bucketing
                 return Result<Variation>.NullResult(reasons);
 
             // check if a forced variation is set
-            var decisionVariation = GetForcedVariation(experiment.Key, userId, config);
-            reasons += decisionVariation.DecisionReasons;
-            var variation = decisionVariation?.ResultObject;
+            var decisionVariationResult = GetForcedVariation(experiment.Key, userId, config);
+            reasons += decisionVariationResult.DecisionReasons;
+            var variation = decisionVariationResult.ResultObject;
 
             if (variation == null)
             {
-                decisionVariation = GetWhitelistedVariation(experiment, user.GetUserId());
-                reasons += decisionVariation?.DecisionReasons;
+                decisionVariationResult = GetWhitelistedVariation(experiment, user.GetUserId());
+                reasons += decisionVariationResult.DecisionReasons;
 
-                variation = decisionVariation?.ResultObject;
+                variation = decisionVariationResult.ResultObject;
             }
 
             if (variation != null)
             {
-                return decisionVariation;
+                return decisionVariationResult;
             }
 
             // fetch the user profile map from the user profile service
@@ -139,9 +139,9 @@ namespace OptimizelySDK.Bucketing
                     if (userProfileMap != null && UserProfileUtil.IsValidUserProfileMap(userProfileMap))
                     {
                         userProfile = UserProfileUtil.ConvertMapToUserProfile(userProfileMap);
-                        decisionVariation = GetStoredVariation(experiment, userProfile, config);
-                        reasons += decisionVariation?.DecisionReasons;
-                        if (decisionVariation?.ResultObject != null) return decisionVariation?.SetReasons(reasons);
+                        decisionVariationResult = GetStoredVariation(experiment, userProfile, config);
+                        reasons += decisionVariationResult.DecisionReasons;
+                        if (decisionVariationResult.ResultObject != null) return decisionVariationResult.SetReasons(reasons);
                     }
                     else if (userProfileMap == null)
                     {
@@ -167,21 +167,21 @@ namespace OptimizelySDK.Bucketing
                 var bucketingIdResult = GetBucketingId(userId, filteredAttributes);
                 reasons += bucketingIdResult.DecisionReasons;
 
-                decisionVariation = Bucketer.Bucket(config, experiment, bucketingIdResult.ResultObject, userId);
-                reasons += decisionVariation?.DecisionReasons;
+                decisionVariationResult = Bucketer.Bucket(config, experiment, bucketingIdResult.ResultObject, userId);
+                reasons += decisionVariationResult.DecisionReasons;
 
-                if (decisionVariation?.ResultObject?.Key != null)
+                if (decisionVariationResult.ResultObject?.Key != null)
                 {
                     if (UserProfileService != null && !ignoreUPS)
                     {
                         var bucketerUserProfile = userProfile ?? new UserProfile(userId, new Dictionary<string, Decision>());
-                        SaveVariation(experiment, decisionVariation?.ResultObject, bucketerUserProfile);
+                        SaveVariation(experiment, decisionVariationResult.ResultObject, bucketerUserProfile);
                     }
                     else
                         Logger.Log(LogLevel.INFO, "This decision will not be saved since the UserProfileService is null.");
                 }
 
-                return decisionVariation?.SetReasons(reasons);
+                return decisionVariationResult.SetReasons(reasons);
             }
             Logger.Log(LogLevel.INFO, reasons.AddInfo($"User \"{user.GetUserId()}\" does not meet conditions to be in experiment \"{experiment.Key}\"."));
 
@@ -441,13 +441,12 @@ namespace OptimizelySDK.Bucketing
                 return Result<FeatureDecision>.NullResult(reasons);
             }
 
-            var rolloutRulesLength = rollout.Experiments.Count;
-            var rolloutRules = rollout.Experiments;
-
-            if (rolloutRules == null || rolloutRulesLength == 0)
-            {
+            if (rollout.Experiments == null || rollout.Experiments.Count == 0) {
                 return Result<FeatureDecision>.NullResult(reasons);
             }
+
+            var rolloutRulesLength = rollout.Experiments.Count;
+            var rolloutRules = rollout.Experiments;
 
             var userId = user.GetUserId();
             var attributes = user.GetAttributes();

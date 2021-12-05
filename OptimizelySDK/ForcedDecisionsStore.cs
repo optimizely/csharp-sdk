@@ -74,7 +74,7 @@ namespace OptimizelySDK
         {
             get
             {
-                if (context != null && context.FlagKey != null
+                if (context != null && context.IsValid
                     && ForcedDecisionsMap.TryGetValue(context.GetKey(), out OptimizelyForcedDecision flagForcedDecision))
                 {
                     return flagForcedDecision;

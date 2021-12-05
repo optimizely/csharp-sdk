@@ -69,10 +69,8 @@ namespace OptimizelySDK
         /// It returns true if the ProjectConfig is valid otherwise false.
         /// Also, it may block execution if GetConfig() blocks execution to get ProjectConfig.
         /// </summary>
-        public bool IsValid
-        {
-            get
-            {
+        public bool IsValid {
+            get {
                 return ProjectConfigManager?.GetConfig() != null;
             }
         }
@@ -130,22 +128,17 @@ namespace OptimizelySDK
                           EventProcessor eventProcessor = null,
                           OptimizelyDecideOption[] defaultDecideOptions = null)
         {
-            try
-            {
+            try {
                 InitializeComponents(eventDispatcher, logger, errorHandler, userProfileService, null, eventProcessor, defaultDecideOptions);
 
-                if (ValidateInputs(datafile, skipJsonValidation))
-                {
+                if (ValidateInputs(datafile, skipJsonValidation)) {
                     var config = DatafileProjectConfig.Create(datafile, Logger, ErrorHandler);
                     ProjectConfigManager = new FallbackProjectConfigManager(config);
-                }
-                else
-                {
+                } else {
                     Logger.Log(LogLevel.ERROR, "Provided 'datafile' has invalid schema.");
                 }
             }
-            catch (Exception ex)
-            {
+            catch (Exception ex) {
                 string error = String.Empty;
                 if (ex.GetType() == typeof(ConfigParseException))
                     error = ex.Message;

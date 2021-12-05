@@ -247,7 +247,7 @@ namespace OptimizelySDK
         /// <returns>The variation key for a forced decision</returns>
         public OptimizelyForcedDecision GetForcedDecision(OptimizelyDecisionContext context)
         {
-            if (context == null || context.FlagKey == null)
+            if (context == null || !context.IsValid)
             {
                 Logger.Log(LogLevel.WARN, "flagKey cannot be null");
                 return null;
@@ -274,7 +274,7 @@ namespace OptimizelySDK
         /// <returns>Whether the item was removed.</returns>
         public bool RemoveForcedDecision(OptimizelyDecisionContext context)
         {
-            if (context == null || context.FlagKey == null)
+            if (context == null || !context.IsValid)
             {
                 Logger.Log(LogLevel.WARN, "FlagKey cannot be null");
                 return false;

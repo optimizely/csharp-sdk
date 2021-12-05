@@ -29,11 +29,26 @@ namespace OptimizelySDK
         private string ruleKey;
         private string decisionKey;
 
+        /// <summary>
+        /// Represents the object is valid or not.
+        /// </summary>
+        public bool IsValid { get; private set; }
+
+        /// <summary>
+        /// Flag key of the context.
+        /// </summary>
         public string FlagKey { get { return flagKey; } }
+
+        /// <summary>
+        /// Rule key, it can be experiment or rollout key and nullable.
+        /// </summary>
         public string RuleKey { get { return ruleKey; } }
 
         public OptimizelyDecisionContext(string flagKey, string ruleKey= null)
         {
+            if (flagKey != null) {
+                IsValid = true;
+            }
             this.flagKey = flagKey;
             this.ruleKey = ruleKey;
         }
