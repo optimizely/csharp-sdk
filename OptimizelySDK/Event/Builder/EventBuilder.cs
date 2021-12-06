@@ -130,8 +130,8 @@ namespace OptimizelySDK.Event.Builder
             {
                     new Dictionary<string, object>
                     {
-                        { Params.CAMPAIGN_ID,   experiment.LayerId },
-                        { Params.EXPERIMENT_ID, experiment.Id },
+                        { Params.CAMPAIGN_ID,   experiment?.LayerId },
+                        { Params.EXPERIMENT_ID, experiment?.Id ?? string.Empty },
                         { Params.VARIATION_ID,  variationId }
                     }
             };
@@ -141,7 +141,7 @@ namespace OptimizelySDK.Event.Builder
             {
                     new Dictionary<string, object>
                     {
-                        { "entity_id", experiment.LayerId },
+                        { "entity_id", experiment?.LayerId },
                         { "timestamp", DateTimeUtils.SecondsSince1970*1000 },
                         { "key", ACTIVATE_EVENT_KEY },
                         { "uuid", Guid.NewGuid() }
