@@ -124,6 +124,7 @@ namespace OptimizelySDK.Bucketing
 
             if (variation != null)
             {
+                decisionVariationResult.SetReasons(reasons);
                 return decisionVariationResult;
             }
 
