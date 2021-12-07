@@ -747,7 +747,7 @@ namespace OptimizelySDK
             }
 
             var userId = user?.GetUserId();
-            var userAttributes = user.GetAttributes();
+            var userAttributes = user?.GetAttributes();
             var decisionEventDispatched = false;
             var allOptions = GetAllOptions(options);
             var decisionReasons = new DecisionReasons();
