@@ -111,8 +111,6 @@ namespace OptimizelySDK.Event
                 return null;
             }
 
-            var eventContext = impressionEvent.Context;
-
             Decision decision = new Decision(impressionEvent.Experiment?.LayerId,
                 impressionEvent.Experiment?.Id ?? string.Empty,
                 impressionEvent.Variation?.Id,

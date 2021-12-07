@@ -41,29 +41,24 @@ namespace OptimizelySDK
         // Optimizely object to be used.
         private Optimizely Optimizely;
 
-        private Dictionary<string, OptimizelyForcedDecision> ForcedDecisionsMap { get; set; }
+        private ForcedDecisionsStore ForcedDecisionsStore { get; set; }
 
-        public OptimizelyUserContext(Optimizely optimizely, string userId, UserAttributes userAttributes, IErrorHandler errorHandler, ILogger logger)
+        public OptimizelyUserContext(Optimizely optimizely, string userId, UserAttributes userAttributes, IErrorHandler errorHandler, ILogger logger) :
+            this(optimizely, userId, userAttributes, null, errorHandler, logger)
+        {
+        }
+
+        public OptimizelyUserContext(Optimizely optimizely, string userId, UserAttributes userAttributes, ForcedDecisionsStore forcedDecisionsStore, IErrorHandler errorHandler, ILogger logger)
         {
             ErrorHandler = errorHandler;
             Logger = logger;
             Optimizely = optimizely;
             Attributes = userAttributes ?? new UserAttributes();
-            ForcedDecisionsMap = new Dictionary<string, OptimizelyForcedDecision>();
+            ForcedDecisionsStore = forcedDecisionsStore ?? new ForcedDecisionsStore();
             UserId = userId;
         }
 
-        public OptimizelyUserContext(Optimizely optimizely, string userId, UserAttributes userAttributes, Dictionary<string, OptimizelyForcedDecision> forcedDecisions, IErrorHandler errorHandler, ILogger logger)
-        {
-            ErrorHandler = errorHandler;
-            Logger = logger;
-            Optimizely = optimizely;
-            Attributes = userAttributes ?? new UserAttributes();
-            ForcedDecisionsMap = forcedDecisions ?? new Dictionary<string, OptimizelyForcedDecision>();
-            UserId = userId;
-        }
-
-        private OptimizelyUserContext Copy() => new OptimizelyUserContext(Optimizely, UserId, GetAttributes(), ForcedDecisionsMap, ErrorHandler, Logger);
+        private OptimizelyUserContext Copy() => new OptimizelyUserContext(Optimizely, UserId, GetAttributes(), GetForcedDecisionsStore(), ErrorHandler, Logger);
 
         /// <summary>
         /// Returns Optimizely instance associated with the UserContext.
@@ -96,6 +91,27 @@ namespace OptimizelySDK
             }
 
             return copiedAttributes;
+        }
+
+        /// <summary>
+        /// Returns copy of ForcedDecisionsStore associated with UserContext.
+        /// </summary>
+        /// <returns>copy of ForcedDecisionsStore.</returns>
+        public ForcedDecisionsStore GetForcedDecisionsStore()
+        {
+            ForcedDecisionsStore copiedForcedDecisionsStore = null;
+            lock (mutex)
+            {
+                if (ForcedDecisionsStore.Count == 0)
+                {
+                    copiedForcedDecisionsStore = ForcedDecisionsStore.NullForcedDecision();
+                } else
+                {
+                    copiedForcedDecisionsStore = new ForcedDecisionsStore(ForcedDecisionsStore);
+                }
+            }
+
+            return copiedForcedDecisionsStore;
         }
 
         /// <summary>
@@ -211,21 +227,14 @@ namespace OptimizelySDK
         /// <summary>
         /// Set a forced decision.
         /// </summary>
-        /// <param name="flagKey">The flag key.</param>
-        /// <param name="ruleKey">The rule key.</param>
-        /// <param name="variationKey">The variation key.</param>
+        /// <param name="context">The context object containing flag and rule key.</param>
+        /// <param name="decision">OptimizelyForcedDecision object containing variation key.</param>
         /// <returns></returns>
         public bool SetForcedDecision(OptimizelyDecisionContext context, OptimizelyForcedDecision decision)
         {
-            if (!Optimizely.IsValid)
-            {
-                Logger.Log(LogLevel.ERROR, DecisionMessage.SDK_NOT_READY);
-                return false;
-            }
-
             lock (mutex)
             {
-                ForcedDecisionsMap[context.DecisionKey] = decision;
+                ForcedDecisionsStore[context] = decision;
             }
 
             return true;
@@ -234,24 +243,17 @@ namespace OptimizelySDK
         /// <summary>
         /// Gets a forced variation
         /// </summary>
-        /// <param name="flagKey">The flag key</param>
-        /// <param name="ruleKey">The rule key</param>
+        /// <param name="context">The context object containing flag and rule key.</param>
         /// <returns>The variation key for a forced decision</returns>
         public OptimizelyForcedDecision GetForcedDecision(OptimizelyDecisionContext context)
         {
-            if (!Optimizely.IsValid)
-            {
-                Logger.Log(LogLevel.ERROR, DecisionMessage.SDK_NOT_READY);
-                return null;
-            }
-
-            if (context == null || context.FlagKey == null)
+            if (context == null || !context.IsValid)
             {
                 Logger.Log(LogLevel.WARN, "flagKey cannot be null");
                 return null;
             }
 
-            if (ForcedDecisionsMap.Count == 0)
+            if (ForcedDecisionsStore.Count == 0)
             {
                 return null;
             }
@@ -260,7 +262,7 @@ namespace OptimizelySDK
 
             lock (mutex)
             {
-                ForcedDecisionsMap.TryGetValue(context.DecisionKey, out decision);
+                decision = ForcedDecisionsStore[context];
             }
             return decision;
         }
@@ -268,24 +270,20 @@ namespace OptimizelySDK
         /// <summary>
         /// Removes a forced decision.
         /// </summary>
-        /// <param name="flagKey">The flag key.</param>
-        /// <param name="ruleKey"></param>
+        /// <param name="context">The context object containing flag and rule key.</param>
         /// <returns>Whether the item was removed.</returns>
         public bool RemoveForcedDecision(OptimizelyDecisionContext context)
         {
-            if (context == null || context.FlagKey == null)
+            if (context == null || !context.IsValid)
             {
-                Logger.Log(LogLevel.WARN, "flagKey cannot be null");
+                Logger.Log(LogLevel.WARN, "FlagKey cannot be null");
                 return false;
             }
-
-            if (!Optimizely.IsValid)
+            
+            lock (mutex)
             {
-                Logger.Log(LogLevel.ERROR, DecisionMessage.SDK_NOT_READY);
-                return false;
+                return ForcedDecisionsStore.Remove(context);
             }
-
-            return ForcedDecisionsMap.Remove(context.DecisionKey);
         }
 
         /// <summary>
@@ -294,15 +292,9 @@ namespace OptimizelySDK
         /// <returns>Whether the clear was successful.</returns>
         public bool RemoveAllForcedDecisions()
         {
-            if (!Optimizely.IsValid)
-            {
-                Logger.Log(LogLevel.ERROR, DecisionMessage.SDK_NOT_READY);
-                return false;
-            }
-
             lock (mutex)
             {
-                ForcedDecisionsMap.Clear();
+                ForcedDecisionsStore.RemoveAll();
             }
             return true;
         }
@@ -310,19 +302,19 @@ namespace OptimizelySDK
         /// <summary>
         /// Finds a validated forced decision.
         /// </summary>
-        /// <param name="flagKey">The flag key.</param>
-        /// <param name="ruleKey">The rule key.</param>
+        /// <param name="context">Object containing flag and rule key of which forced decision is set.</param>
+        /// <param name="config">The Project config.</param>
         /// <returns>A result with the variation</returns>
-        public Result<Variation> FindValidatedForcedDecision(OptimizelyDecisionContext context)
+        public Result<Variation> FindValidatedForcedDecision(OptimizelyDecisionContext context, ProjectConfig config)
         {
             DecisionReasons reasons = new DecisionReasons();
             var forcedDecision = GetForcedDecision(context);
 
-            if (forcedDecision != null)
+            if (config != null && forcedDecision != null)
             {
                 var loggingKey = context.RuleKey != null ? "flag (" + context.FlagKey + "), rule (" + context.RuleKey + ")" : "flag (" + context.FlagKey + ")";
                 var variationKey = forcedDecision.VariationKey;
-                var variation = Optimizely.GetFlagVariationByKey(context.FlagKey, variationKey);
+                var variation = config.GetFlagVariationByKey(context.FlagKey, variationKey);
                 if (variation != null)
                 {
                     reasons.AddInfo("Decided by forced decision.");

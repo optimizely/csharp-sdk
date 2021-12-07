@@ -16,25 +16,48 @@
 
 namespace OptimizelySDK
 {
+    /// <summary>
+    /// OptimizelyDecisionContext contains flag key and rule key to be used for setting 
+    /// and getting forced decision.
+    /// </summary>
     public class OptimizelyDecisionContext
     {
         public const string OPTI_NULL_RULE_KEY = "$opt-null-rule-key";
         public const string OPTI_KEY_DIVIDER = "-$opt$-";
+
         private string flagKey;
         private string ruleKey;
         private string decisionKey;
 
-        public OptimizelyDecisionContext(string flagKey, string ruleKey = null)
-        {
-            this.flagKey = flagKey;
-            this.ruleKey = ruleKey;
-            this.decisionKey = string.Format("{0}{1}{2}", flagKey, OPTI_KEY_DIVIDER, ruleKey ?? OPTI_NULL_RULE_KEY);
-        }
+        /// <summary>
+        /// Represents the object is valid or not.
+        /// </summary>
+        public bool IsValid { get; private set; }
 
+        /// <summary>
+        /// Flag key of the context.
+        /// </summary>
         public string FlagKey { get { return flagKey; } }
 
+        /// <summary>
+        /// Rule key, it can be experiment or rollout key and nullable.
+        /// </summary>
         public string RuleKey { get { return ruleKey; } }
 
-        public string DecisionKey { get { return decisionKey; } }
+        public OptimizelyDecisionContext(string flagKey, string ruleKey= null)
+        {
+            if (flagKey != null) {
+                IsValid = true;
+            }
+            this.flagKey = flagKey;
+            this.ruleKey = ruleKey;
+        }
+
+        public string GetKey()
+        {
+            return string.Format("{0}{1}{2}", FlagKey, OPTI_KEY_DIVIDER, RuleKey ?? OPTI_NULL_RULE_KEY);
+        }
+
+
     }
 }

@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright 2020-2021, Optimizely
+ * Copyright 2021, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ namespace OptimizelySDK
 
         public OptimizelyForcedDecision(string variationKey)
         {
-            this._variationKey = variationKey;
+            _variationKey = variationKey;
         }
 
         public string VariationKey { get { return _variationKey; } }

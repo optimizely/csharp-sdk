@@ -76,11 +76,11 @@ namespace OptimizelySDK.Event
             .WithProjectId(projectConfig.ProjectId)
             .WithAccountId(projectConfig.AccountId)
             .WithAnonymizeIP(projectConfig.AnonymizeIP)
-            .WithRevision(projectConfig.Revision)
+            .WithRevision(projectConfig.Revision)                
             .Build();
 
-            var variationKey = "";
-            var ruleKey = "";
+            var variationKey = ""; 
+            var ruleKey = "";   
             if (variation != null)
             {
                 variationKey = variation.Key;
@@ -97,6 +97,7 @@ namespace OptimizelySDK.Event
                 .WithVariation(variation)
                 .WithVisitorAttributes(EventFactory.BuildAttributeList(userAttributes, projectConfig))
                 .Build();
+            
         }
 
         /// <summary>
@@ -108,12 +109,14 @@ namespace OptimizelySDK.Event
         /// <param name="userAttributes">The user's attributes</param>
         /// <param name="eventTags">Array Hash representing metadata associated with the event.</param>
         /// <returns>ConversionEvent instance</returns>
-        public static ConversionEvent CreateConversionEvent(ProjectConfig projectConfig,
+        public static ConversionEvent CreateConversionEvent(ProjectConfig projectConfig,                                                            
                                                             string eventKey,
                                                             string userId,
                                                             UserAttributes userAttributes,
                                                             EventTags eventTags)
         {
+            
+
             var eventContext = new EventContext.Builder()
                     .WithProjectId(projectConfig.ProjectId)
                     .WithAccountId(projectConfig.AccountId)
@@ -128,7 +131,7 @@ namespace OptimizelySDK.Event
                 .WithEvent(projectConfig.GetEvent(eventKey))
                 .WithUserId(userId)
                 .WithVisitorAttributes(EventFactory.BuildAttributeList(userAttributes, projectConfig))
-                .Build();
+                .Build();            
         }
     }
 }
