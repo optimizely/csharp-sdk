@@ -1,4 +1,4 @@
-﻿/* 
+﻿/*
  * Copyright 2019-2021, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,7 +30,6 @@ namespace OptimizelySDK.OptlyConfig
         private OptimizelyConfig OptimizelyConfig;
 
         private IDictionary<string, List<FeatureVariable>> featureIdVariablesMap;
-        
 
         public OptimizelyConfigService(ProjectConfig projectConfig)
         {
@@ -43,7 +42,7 @@ namespace OptimizelySDK.OptlyConfig
             var audiences = GetAudiences(projectConfig);
             var experimentsMapById = GetExperimentsMapById(projectConfig);
             var experimentsKeyMap = GetExperimentsKeyMap(experimentsMapById);
-            
+
             var featureMap = GetFeaturesMap(projectConfig, experimentsMapById);
             var events = GetEvents(projectConfig);
 
@@ -82,7 +81,7 @@ namespace OptimizelySDK.OptlyConfig
                 && !typedAudienceIds.Contains(aud.Id));
             var optimizelyAudience = filteredAudiencesArr.Select(aud => new OptimizelyAudience(aud.Id, aud.Name, aud.Conditions));
 
-            optimizelyAudience = optimizelyAudience.Concat(typedAudiences).OrderBy( aud => aud.Name);
+            optimizelyAudience = optimizelyAudience.Concat(typedAudiences).OrderBy(aud => aud.Name);
 
             return optimizelyAudience.ToArray<OptimizelyAudience>();
         }
@@ -110,7 +109,8 @@ namespace OptimizelySDK.OptlyConfig
         {
             var experimentKeyMaps = new Dictionary<string, OptimizelyExperiment>();
 
-            foreach(var experiment in experimentsMapById.Values) {
+            foreach (var experiment in experimentsMapById.Values)
+            {
                 experimentKeyMaps[experiment.Key] = experiment;
             }
             return experimentKeyMaps;
@@ -176,7 +176,7 @@ namespace OptimizelySDK.OptlyConfig
         }
 
         /// <summary>
-        /// Make map of featureVariable which are associated with given feature experiment 
+        /// Make map of featureVariable which are associated with given feature experiment
         /// </summary>
         /// <param name="variableIdMap">Map containing variable ID as key and Object of featureVariable</param>
         /// <param name="featureId">feature Id of featureExperiment</param>
@@ -190,7 +190,7 @@ namespace OptimizelySDK.OptlyConfig
            bool isFeatureEnabled)
         {
             var variablesMap = new Dictionary<string, OptimizelyVariable>();
-            
+
             if (!string.IsNullOrEmpty(featureId))
             {
                 variablesMap = featureIdVariablesMap[featureId]?.Select(f => new OptimizelyVariable(f.Id,
@@ -224,9 +224,8 @@ namespace OptimizelySDK.OptlyConfig
         {
             var FeaturesMap = new Dictionary<string, OptimizelyFeature>();
 
-            foreach (var featureFlag in projectConfig.FeatureFlags)   
+            foreach (var featureFlag in projectConfig.FeatureFlags)
             {
-
                 var experimentRules = featureFlag.ExperimentIds.Select(experimentId => experimentsMapById[experimentId]).ToList();
 
                 var featureVariableMap = featureFlag.Variables.Select(v => (OptimizelyVariable)v).ToDictionary(k => k.Key, v => v) ?? new Dictionary<string, OptimizelyVariable>();
@@ -247,7 +246,6 @@ namespace OptimizelySDK.OptlyConfig
 
             return FeaturesMap;
         }
-
 
         #region Helper Methods for creating id value maps
 
@@ -279,7 +277,7 @@ namespace OptimizelySDK.OptlyConfig
             return GetSerializedAudiences(s, projectConfig.AudienceIdMap);
         }
 
-        readonly string[] AUDIENCE_CONDITIONS = { "and", "or", "not" };
+        private readonly string[] AUDIENCE_CONDITIONS = { "and", "or", "not" };
 
         /// <summary>
         /// Converts list of audience conditions to serialized audiences used in experiment
@@ -396,12 +394,11 @@ namespace OptimizelySDK.OptlyConfig
             return featureVariablesIdMap ?? new Dictionary<string, FeatureVariable>();
         }
 
-        #endregion
+        #endregion Helper Methods for creating id value maps
 
         public OptimizelyConfig GetOptimizelyConfig()
         {
             return OptimizelyConfig;
         }
-
     }
 }

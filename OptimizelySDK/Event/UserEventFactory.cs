@@ -84,7 +84,7 @@ namespace OptimizelySDK.Event
             if (variation != null)
             {
                 variationKey = variation.Key;
-                ruleKey = activatedExperiment.Key;
+                ruleKey = activatedExperiment?.Key ?? string.Empty;
             }
             var metadata = new DecisionMetadata(flagKey, ruleKey, ruleType, variationKey, enabled);
 

@@ -1,4 +1,4 @@
-﻿/* 
+﻿/*
  * Copyright 2019-2021, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-using Newtonsoft.Json;
-using System;
 using System.Collections.Generic;
 
 namespace OptimizelySDK.OptlyConfig
@@ -31,10 +29,10 @@ namespace OptimizelySDK.OptlyConfig
 
         /// <summary>
         /// This experimentsMap is for experiments of legacy projects only.
-        /// For flag projects, experiment keys are not guaranteed to be unique 
-        /// across multiple flags, so this map may not include all experiments 
+        /// For flag projects, experiment keys are not guaranteed to be unique
+        /// across multiple flags, so this map may not include all experiments
         /// when keys conflict.
-        /// </summary> 
+        /// </summary>
         public IDictionary<string, OptimizelyExperiment> ExperimentsMap { get; private set; }
 
         public IDictionary<string, OptimizelyFeature> FeaturesMap { get; private set; }

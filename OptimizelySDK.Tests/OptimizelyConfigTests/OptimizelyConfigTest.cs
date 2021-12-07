@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2020-2021, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,23 +14,22 @@
  * limitations under the License.
  */
 
-using System;
 using Moq;
+using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 using OptimizelySDK.Config;
+using OptimizelySDK.Entity;
 using OptimizelySDK.Logger;
 using OptimizelySDK.OptlyConfig;
-using System.Collections.Generic;
-using System.Threading;
 using OptimizelySDK.Tests.UtilsTests;
-using Newtonsoft.Json.Linq;
+using System;
+using System.Collections.Generic;
 
 namespace OptimizelySDK.Tests.OptimizelyConfigTests
 {
     [TestFixture]
     public class OptimizelyConfigTest
     {
-
         private Mock<ILogger> LoggerMock;
 
         [SetUp]
@@ -42,7 +41,7 @@ namespace OptimizelySDK.Tests.OptimizelyConfigTests
 
         #region Test OptimizelyConfigService
 
-        static Type[] ParameterTypes = {
+        private static Type[] ParameterTypes = {
                 typeof(ProjectConfig),
             };
 
@@ -76,10 +75,9 @@ namespace OptimizelySDK.Tests.OptimizelyConfigTests
                 new List<object>() { "not", new JArray() { "and", "3468206642", "3988293898" } },
                 new List<object>() { },
                 new List<object>() { "or", "3468206642", "999999999" },
-
             };
 
-            var expectedAudienceOutputs = new List<string> 
+            var expectedAudienceOutputs = new List<string>
             {
                 "\"exactString\" OR \"substringString\"",
                 "\"exactString\" OR \"substringString\" OR \"exactNumber\"",
@@ -147,7 +145,6 @@ namespace OptimizelySDK.Tests.OptimizelyConfigTests
             var experimentMapFlag2 = optimizelyConfig.FeaturesMap["flag2"].ExperimentsMap; // 9300000007573
             Assert.AreEqual(experimentMapFlag1["targeted_delivery"].Id, "9300000007569");
             Assert.AreEqual(experimentMapFlag2["targeted_delivery"].Id, "9300000007573");
-
         }
 
         [Test]
@@ -158,7 +155,7 @@ namespace OptimizelySDK.Tests.OptimizelyConfigTests
             var optimizelyConfig = optimizelyConfigService.GetOptimizelyConfig();
             Assert.AreEqual(optimizelyConfig.ExperimentsMap.Count, 0);
 
-            var rolloutFlag1 = optimizelyConfig.FeaturesMap["flag_1"].DeliveryRules[0]; // 9300000004977, 
+            var rolloutFlag1 = optimizelyConfig.FeaturesMap["flag_1"].DeliveryRules[0]; // 9300000004977,
             var rolloutFlag2 = optimizelyConfig.FeaturesMap["flag_2"].DeliveryRules[0]; // 9300000004979
             var rolloutFlag3 = optimizelyConfig.FeaturesMap["flag_3"].DeliveryRules[0]; // 9300000004981
             Assert.AreEqual(rolloutFlag1.Id, "9300000004977");
@@ -167,7 +164,6 @@ namespace OptimizelySDK.Tests.OptimizelyConfigTests
             Assert.AreEqual(rolloutFlag2.Key, "targeted_delivery");
             Assert.AreEqual(rolloutFlag3.Id, "9300000004981");
             Assert.AreEqual(rolloutFlag3.Key, "targeted_delivery");
-
         }
 
         [Test]
@@ -274,7 +270,6 @@ namespace OptimizelySDK.Tests.OptimizelyConfigTests
                     )
                 }
             };
-
 
             var featuresMap = new Dictionary<string, OptimizelyFeature>
             {
@@ -542,7 +537,7 @@ namespace OptimizelySDK.Tests.OptimizelyConfigTests
                     new OptimizelyAudience("3988293898", "substringString", "[\"and\",[\"or\",[\"or\",{\"name\":\"house\",\"type\":\"custom_attribute\",\"match\":\"substring\",\"value\":\"Slytherin\"}]]]"),
                 },
                 events: new OptimizelyEvent[]
-                { 
+                {
                     new OptimizelyEvent()
                     {
                        Id = "594089", Key = "item_bought", ExperimentIds = new string[] { "11564051718", "1323241597" }
@@ -555,12 +550,13 @@ namespace OptimizelySDK.Tests.OptimizelyConfigTests
                 experimentsMap: experimentsMap,
                 featuresMap: featuresMap,
                 datafile: TestData.TypedAudienceDatafile);
-            Assert.IsTrue(TestData.CompareObjects(optimizelyConfig, expectedOptimizelyConfig));
+
+            Assertions.AreEqual(expectedOptimizelyConfig, optimizelyConfig);
         }
 
-        #endregion
+        #endregion Test OptimizelyConfigService
 
-            #region OptimizelyConfig entity tests
+        #region OptimizelyConfig entity tests
 
         [Test]
         public void TestOptimizelyConfigEntity()
@@ -640,6 +636,6 @@ namespace OptimizelySDK.Tests.OptimizelyConfigTests
             Assert.AreEqual(expectedOptlyVariable.Value, "2");
         }
 
-        #endregion
+        #endregion OptimizelyConfig entity tests
     }
 }

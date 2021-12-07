@@ -1,4 +1,4 @@
-﻿/* 
+﻿/*
  * Copyright 2017, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 using OptimizelySDK.Utils;
 using System.Collections.Generic;
 
@@ -21,6 +22,7 @@ namespace OptimizelySDK.Entity
     public class Variation : IdKeyEntity
     {
         private List<FeatureVariableUsage> _FeatureVariableUsageInstances;
+
         [Newtonsoft.Json.JsonProperty("variables")]
         public List<FeatureVariableUsage> FeatureVariableUsageInstances
         {
@@ -51,6 +53,7 @@ namespace OptimizelySDK.Entity
         }
 
         public bool? FeatureEnabled { get; set; }
+
         public bool IsFeatureEnabled
         {
             get

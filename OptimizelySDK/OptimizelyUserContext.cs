@@ -1,4 +1,4 @@
-﻿/* 
+﻿/*
  * Copyright 2020-2021, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,6 +19,7 @@ using System.Collections.Generic;
 using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Entity;
 using OptimizelySDK.OptimizelyDecisions;
+using System;
 
 namespace OptimizelySDK
 {
@@ -30,23 +31,34 @@ namespace OptimizelySDK
         private ILogger Logger;
         private IErrorHandler ErrorHandler;
         private object mutex = new object();
+
         // userID for Optimizely user context
         private string UserId;
+
         // user attributes for Optimizely user context.
         private UserAttributes Attributes;
+
         // Optimizely object to be used.
         private Optimizely Optimizely;
 
-        public OptimizelyUserContext(Optimizely optimizely, string userId, UserAttributes userAttributes, IErrorHandler errorHandler, ILogger logger)
+        private ForcedDecisionsStore ForcedDecisionsStore { get; set; }
+
+        public OptimizelyUserContext(Optimizely optimizely, string userId, UserAttributes userAttributes, IErrorHandler errorHandler, ILogger logger) :
+            this(optimizely, userId, userAttributes, null, errorHandler, logger)
+        {
+        }
+
+        public OptimizelyUserContext(Optimizely optimizely, string userId, UserAttributes userAttributes, ForcedDecisionsStore forcedDecisionsStore, IErrorHandler errorHandler, ILogger logger)
         {
             ErrorHandler = errorHandler;
             Logger = logger;
             Optimizely = optimizely;
             Attributes = userAttributes ?? new UserAttributes();
+            ForcedDecisionsStore = forcedDecisionsStore ?? new ForcedDecisionsStore();
             UserId = userId;
         }
 
-        private OptimizelyUserContext Copy() => new OptimizelyUserContext(Optimizely, UserId, GetAttributes(), ErrorHandler, Logger);
+        private OptimizelyUserContext Copy() => new OptimizelyUserContext(Optimizely, UserId, GetAttributes(), GetForcedDecisionsStore(), ErrorHandler, Logger);
 
         /// <summary>
         /// Returns Optimizely instance associated with the UserContext.
@@ -73,11 +85,33 @@ namespace OptimizelySDK
         public UserAttributes GetAttributes()
         {
             UserAttributes copiedAttributes = null;
-            lock(mutex) {
+            lock (mutex)
+            {
                 copiedAttributes = new UserAttributes(Attributes);
             }
 
             return copiedAttributes;
+        }
+
+        /// <summary>
+        /// Returns copy of ForcedDecisionsStore associated with UserContext.
+        /// </summary>
+        /// <returns>copy of ForcedDecisionsStore.</returns>
+        public ForcedDecisionsStore GetForcedDecisionsStore()
+        {
+            ForcedDecisionsStore copiedForcedDecisionsStore = null;
+            lock (mutex)
+            {
+                if (ForcedDecisionsStore.Count == 0)
+                {
+                    copiedForcedDecisionsStore = ForcedDecisionsStore.NullForcedDecision();
+                } else
+                {
+                    copiedForcedDecisionsStore = new ForcedDecisionsStore(ForcedDecisionsStore);
+                }
+            }
+
+            return copiedForcedDecisionsStore;
         }
 
         /// <summary>
@@ -184,10 +218,115 @@ namespace OptimizelySDK
         /// </summary>
         /// <param name="eventName">The event name.</param>
         /// <param name="eventTags">A map of event tag names to event tag values.</param>
-        public virtual void TrackEvent(string eventName, 
+        public virtual void TrackEvent(string eventName,
             EventTags eventTags)
         {
             Optimizely.Track(eventName, UserId, Attributes, eventTags);
+        }
+
+        /// <summary>
+        /// Set a forced decision.
+        /// </summary>
+        /// <param name="context">The context object containing flag and rule key.</param>
+        /// <param name="decision">OptimizelyForcedDecision object containing variation key.</param>
+        /// <returns></returns>
+        public bool SetForcedDecision(OptimizelyDecisionContext context, OptimizelyForcedDecision decision)
+        {
+            lock (mutex)
+            {
+                ForcedDecisionsStore[context] = decision;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Gets a forced variation
+        /// </summary>
+        /// <param name="context">The context object containing flag and rule key.</param>
+        /// <returns>The variation key for a forced decision</returns>
+        public OptimizelyForcedDecision GetForcedDecision(OptimizelyDecisionContext context)
+        {
+            if (context == null || !context.IsValid)
+            {
+                Logger.Log(LogLevel.WARN, "flagKey cannot be null");
+                return null;
+            }
+
+            if (ForcedDecisionsStore.Count == 0)
+            {
+                return null;
+            }
+
+            OptimizelyForcedDecision decision = null;
+
+            lock (mutex)
+            {
+                decision = ForcedDecisionsStore[context];
+            }
+            return decision;
+        }
+
+        /// <summary>
+        /// Removes a forced decision.
+        /// </summary>
+        /// <param name="context">The context object containing flag and rule key.</param>
+        /// <returns>Whether the item was removed.</returns>
+        public bool RemoveForcedDecision(OptimizelyDecisionContext context)
+        {
+            if (context == null || !context.IsValid)
+            {
+                Logger.Log(LogLevel.WARN, "FlagKey cannot be null");
+                return false;
+            }
+            
+            lock (mutex)
+            {
+                return ForcedDecisionsStore.Remove(context);
+            }
+        }
+
+        /// <summary>
+        /// Removes all forced decisions.
+        /// </summary>
+        /// <returns>Whether the clear was successful.</returns>
+        public bool RemoveAllForcedDecisions()
+        {
+            lock (mutex)
+            {
+                ForcedDecisionsStore.RemoveAll();
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// Finds a validated forced decision.
+        /// </summary>
+        /// <param name="context">Object containing flag and rule key of which forced decision is set.</param>
+        /// <param name="config">The Project config.</param>
+        /// <returns>A result with the variation</returns>
+        public Result<Variation> FindValidatedForcedDecision(OptimizelyDecisionContext context, ProjectConfig config)
+        {
+            DecisionReasons reasons = new DecisionReasons();
+            var forcedDecision = GetForcedDecision(context);
+
+            if (config != null && forcedDecision != null)
+            {
+                var loggingKey = context.RuleKey != null ? "flag (" + context.FlagKey + "), rule (" + context.RuleKey + ")" : "flag (" + context.FlagKey + ")";
+                var variationKey = forcedDecision.VariationKey;
+                var variation = config.GetFlagVariationByKey(context.FlagKey, variationKey);
+                if (variation != null)
+                {
+                    reasons.AddInfo("Decided by forced decision.");
+                    reasons.AddInfo("Variation ({0}) is mapped to {1} and user ({2}) in the forced decision map.", variationKey, loggingKey, UserId);
+                    return Result<Variation>.NewResult(variation, reasons);
+                }
+                else
+                {
+                    reasons.AddInfo("Invalid variation is mapped to {0} and user ({1}) in the forced decision map.", loggingKey, UserId);
+                }
+            }
+            return Result<Variation>.NullResult(reasons);
         }
     }
 }
