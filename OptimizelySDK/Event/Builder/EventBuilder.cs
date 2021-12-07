@@ -175,10 +175,10 @@ namespace OptimizelySDK.Event.Builder
                     eventDict[EventTagUtils.REVENUE_EVENT_METRIC_NAME] = revenue;
                 }
 
-                var eventVallue = EventTagUtils.GetNumericValue(eventTags, Logger);
+                var eventValue = EventTagUtils.GetNumericValue(eventTags, Logger);
 
-                if (eventVallue != null) {
-                    eventDict[EventTagUtils.VALUE_EVENT_METRIC_NAME] = eventVallue;
+                if (eventValue != null) {
+                    eventDict[EventTagUtils.VALUE_EVENT_METRIC_NAME] = eventValue;
                 }
 
                 if (eventTags.Any())
