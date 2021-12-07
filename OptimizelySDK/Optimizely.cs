@@ -825,7 +825,7 @@ namespace OptimizelySDK
             var variationKey = decision?.Variation?.Key;
 
             // TODO: add ruleKey values when available later. use a copy of experimentKey until then.
-            var ruleKey = decision != null && decision.Experiment != null ? decision?.Experiment?.Key : null;
+            var ruleKey = decision?.Experiment?.Key;
 
             var decisionInfo = new Dictionary<string, object>
             {
