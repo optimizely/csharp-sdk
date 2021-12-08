@@ -186,6 +186,25 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
+        public void TestDecideIgnorePausedExperiment()
+        {
+            var flagKey = "boolean_single_variable_feature";
+            var variablesExpected = Optimizely.GetAllFeatureVariables(flagKey, UserID);
+
+            var user = Optimizely.CreateUserContext(UserID);
+            var decision = user.Decide(flagKey);
+
+            Assert.AreEqual(decision.VariationKey, "188881");
+            Assert.False(decision.Enabled);
+            Assert.AreEqual(decision.Variables.ToDictionary(), variablesExpected.ToDictionary());
+            Assert.AreEqual(decision.RuleKey, "188880");
+            Assert.AreEqual(decision.FlagKey, flagKey);
+            Assert.AreNotEqual(decision.UserContext, user);
+            Assert.IsTrue(TestData.CompareObjects(decision.UserContext, user));
+            Assert.AreEqual(decision.Reasons.Length, 0);
+        }
+
+        [Test]
         public void TestForcedDecisionReturnsCorrectFlagAndRuleKeys()
         {
             var user = Optimizely.CreateUserContext(UserID);

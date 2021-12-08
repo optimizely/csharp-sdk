@@ -793,7 +793,7 @@ namespace OptimizelySDK.Tests
             var rollout = ProjectConfig.GetRolloutFromId(rolloutId);
             var expWithAudienceiPhoneUsers = rollout.Experiments[1];
             var expWithAudienceChromeUsers = rollout.Experiments[0];
-            var expWithNoAudience = rollout.Experiments[2];
+            var expWithNoAudience = rollout.Experiments[3];
             var varWithAudienceiPhoneUsers = expWithAudienceiPhoneUsers.Variations[0];
             var varWithAudienceChromeUsers = expWithAudienceChromeUsers.Variations[0];
             var varWithNoAudience = expWithNoAudience.Variations[0];
@@ -853,7 +853,7 @@ namespace OptimizelySDK.Tests
             var featureFlag = ProjectConfig.GetFeatureFlagFromKey("boolean_single_variable_feature");
             var rolloutId = featureFlag.RolloutId;
             var rollout = ProjectConfig.GetRolloutFromId(rolloutId);
-            var everyoneElseRule = rollout.Experiments[2];
+            var everyoneElseRule = rollout.Experiments[3];
             var variation = Result<Variation>.NewResult(everyoneElseRule.Variations[0], DecisionReasons);
             var expectedDecision = new FeatureDecision(everyoneElseRule, variation.ResultObject, FeatureDecision.DECISION_SOURCE_ROLLOUT);
 
@@ -884,7 +884,7 @@ namespace OptimizelySDK.Tests
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "User \"testUser1\" does not meet the conditions for targeting rule \"2\"."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "User \"genericUserId\" does not meet the conditions for targeting rule \"1\"."), Times.Exactly(2));
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "User \"genericUserId\" does not meet the conditions for targeting rule \"2\"."), Times.Exactly(2));
-            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "User \"genericUserId\" does not meet the conditions for targeting rule \"3\"."), Times.Exactly(1));
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "User \"genericUserId\" does not meet the conditions for targeting rule \"4\"."), Times.Exactly(1));
         }
 
         #endregion GetVariationForFeatureRollout Tests
