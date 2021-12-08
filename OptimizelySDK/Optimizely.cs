@@ -69,10 +69,8 @@ namespace OptimizelySDK
         /// It returns true if the ProjectConfig is valid otherwise false.
         /// Also, it may block execution if GetConfig() blocks execution to get ProjectConfig.
         /// </summary>
-        public bool IsValid
-        {
-            get
-            {
+        public bool IsValid {
+            get {
                 return ProjectConfigManager?.GetConfig() != null;
             }
         }
@@ -130,22 +128,17 @@ namespace OptimizelySDK
                           EventProcessor eventProcessor = null,
                           OptimizelyDecideOption[] defaultDecideOptions = null)
         {
-            try
-            {
+            try {
                 InitializeComponents(eventDispatcher, logger, errorHandler, userProfileService, null, eventProcessor, defaultDecideOptions);
 
-                if (ValidateInputs(datafile, skipJsonValidation))
-                {
+                if (ValidateInputs(datafile, skipJsonValidation)) {
                     var config = DatafileProjectConfig.Create(datafile, Logger, ErrorHandler);
                     ProjectConfigManager = new FallbackProjectConfigManager(config);
-                }
-                else
-                {
+                } else {
                     Logger.Log(LogLevel.ERROR, "Provided 'datafile' has invalid schema.");
                 }
             }
-            catch (Exception ex)
-            {
+            catch (Exception ex) {
                 string error = String.Empty;
                 if (ex.GetType() == typeof(ConfigParseException))
                     error = ex.Message;
@@ -378,14 +371,16 @@ namespace OptimizelySDK
             Experiment experiment = config.GetExperimentFromKey(experimentKey);
             if (experiment.Key == null)
                 return null;
-            var variation = DecisionService.GetVariation(experiment, CreateUserContext(userId, userAttributes), config, userAttributes).ResultObject;
+            userAttributes = userAttributes ?? new UserAttributes();
+
+            var userContext = CreateUserContext(userId, userAttributes);
+            var variation = DecisionService.GetVariation(experiment, userContext, config)?.ResultObject;
             var decisionInfo = new Dictionary<string, object>
             {
                 { "experimentKey", experimentKey },
                 { "variationKey", variation?.Key },
             };
 
-            userAttributes = userAttributes ?? new UserAttributes();
             var decisionNotificationType = config.IsFeatureExperiment(experiment.Id) ? DecisionNotificationTypes.FEATURE_TEST : DecisionNotificationTypes.AB_TEST;
             NotificationCenter.SendNotifications(NotificationCenter.NotificationType.Decision, decisionNotificationType, userId,
                 userAttributes, decisionInfo);
@@ -441,25 +436,6 @@ namespace OptimizelySDK
                 return null;
 
             return DecisionService.GetForcedVariation(experimentKey, userId, config).ResultObject;
-        }
-
-        public Variation GetFlagVariationByKey(string flagKey, string variationKey)
-        {
-            var flagVariationMap = ProjectConfigManager?.GetConfig().FlagVariationMap;
-            if (flagVariationMap.ContainsKey(flagKey) == true)
-            {
-                flagVariationMap.TryGetValue(flagKey, out var variations);
-
-                foreach (var variation in variations)
-                {
-                    if (variation.Key.Equals(variationKey))
-                    {
-                        return variation;
-                    }
-                }
-            }
-
-            return null;
         }
 
         #region FeatureFlag APIs
@@ -771,14 +747,14 @@ namespace OptimizelySDK
             }
 
             var userId = user?.GetUserId();
-            var userAttributes = user.GetAttributes();
+            var userAttributes = user?.GetAttributes();
             var decisionEventDispatched = false;
             var allOptions = GetAllOptions(options);
             var decisionReasons = new DecisionReasons();
             FeatureDecision decision = null;
 
             var decisionContext = new OptimizelyDecisionContext(flag.Key);
-            var forcedDecisionVariation = user.FindValidatedForcedDecision(decisionContext);
+            var forcedDecisionVariation = user.FindValidatedForcedDecision(decisionContext, config);
             decisionReasons += forcedDecisionVariation.DecisionReasons;
 
             if (forcedDecisionVariation.ResultObject != null)
@@ -849,7 +825,7 @@ namespace OptimizelySDK
             var variationKey = decision?.Variation?.Key;
 
             // TODO: add ruleKey values when available later. use a copy of experimentKey until then.
-            var ruleKey = decision != null && decision.Experiment != null ? decision?.Experiment?.Key : null;
+            var ruleKey = decision?.Experiment?.Key;
 
             var decisionInfo = new Dictionary<string, object>
             {
@@ -859,7 +835,7 @@ namespace OptimizelySDK
                 { "variationKey", variationKey },
                 { "ruleKey", ruleKey },
                 { "reasons", reasonsToReport },
-                { "decisionEventDispatched", decisionEventDispatched }
+                { "decisionEventDispatched", decisionEventDispatched } 
             };
 
             NotificationCenter.SendNotifications(NotificationCenter.NotificationType.Decision, DecisionNotificationTypes.FLAG, userId,

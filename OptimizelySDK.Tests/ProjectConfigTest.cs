@@ -204,11 +204,6 @@ namespace OptimizelySDK.Tests
                      {"177773", Config.GetVariationFromKey("177772", "177773") }
                  }
                 },
-                { "177788", new Dictionary<string, object>
-                 {
-                     {"177709", Config.GetVariationFromKey("177788", "177709") }
-                 }
-                },
                 { "177776", new Dictionary<string, object>
                  {
                      {"177778", Config.GetVariationFromKey("177776", "177778") }
@@ -330,11 +325,6 @@ namespace OptimizelySDK.Tests
                      {"177773", Config.GetVariationFromId("177772", "177773") }
                  }
                 },
-                { "177788", new Dictionary<string, object>
-                 {
-                     {"177709", Config.GetVariationFromId("177788", "177709") }
-                 }
-                },
                 { "177776", new Dictionary<string, object>
                  {
                      {"177778", Config.GetVariationFromId("177776", "177778") }
@@ -437,44 +427,43 @@ namespace OptimizelySDK.Tests
         {
             var allVariations = Config?.FlagVariationMap;
 
-            var expectedVariations1 = new List<Dictionary<string, List<Variation>>>();
-            var expectedVariationList = new List<Variation>
+            var expectedVariationDict = new Dictionary<string, Variation>
             {
-                new Variation
-                {
-                    FeatureEnabled = true,
-                    Id = "7722260071",
-                    Key = "group_exp_1_var_1",
-                    FeatureVariableUsageInstances = new List<FeatureVariableUsage> { new FeatureVariableUsage { Id = "155563", Value= "groupie_1_v1" } }
+                { "group_exp_1_var_1",  new Variation
+                    {
+                        FeatureEnabled = true,
+                        Id = "7722260071",
+                        Key = "group_exp_1_var_1",
+                        FeatureVariableUsageInstances = new List<FeatureVariableUsage> { new FeatureVariableUsage { Id = "155563", Value= "groupie_1_v1" } }
+                    }
                 },
-                new Variation
-                {
-                    FeatureEnabled = true,
-                    Id = "7722360022",
-                    Key = "group_exp_1_var_2",
-                    FeatureVariableUsageInstances = new List<FeatureVariableUsage> { new FeatureVariableUsage { Id = "155563", Value= "groupie_1_v2" } }
+                { "group_exp_1_var_2",  new Variation
+                    {
+                        FeatureEnabled = true,
+                        Id = "7722360022",
+                        Key = "group_exp_1_var_2",
+                        FeatureVariableUsageInstances = new List<FeatureVariableUsage> { new FeatureVariableUsage { Id = "155563", Value= "groupie_1_v2" } }
+                    }
                 },
-                new Variation
-                {
-                    FeatureEnabled = false,
-                    Id = "7713030086",
-                    Key = "group_exp_2_var_1",
-                    FeatureVariableUsageInstances = new List<FeatureVariableUsage> { new FeatureVariableUsage { Id = "155563", Value= "groupie_2_v1" } }
+                { "group_exp_2_var_1",  new Variation
+                    {
+                        FeatureEnabled = false,
+                        Id = "7713030086",
+                        Key = "group_exp_2_var_1",
+                        FeatureVariableUsageInstances = new List<FeatureVariableUsage> { new FeatureVariableUsage { Id = "155563", Value= "groupie_2_v1" } }
+                    }
                 },
-                new Variation
-                {
-                    FeatureEnabled = false,
-                    Id = "7725250007",
-                    Key = "group_exp_2_var_2",
-                    FeatureVariableUsageInstances = new List<FeatureVariableUsage> { new FeatureVariableUsage { Id = "155563", Value= "groupie_2_v2" } }
+                { "group_exp_2_var_2",  new Variation
+                    {
+                        FeatureEnabled = false,
+                        Id = "7725250007",
+                        Key = "group_exp_2_var_2",
+                        FeatureVariableUsageInstances = new List<FeatureVariableUsage> { new FeatureVariableUsage { Id = "155563", Value= "groupie_2_v2" } }
+                    }
                 }
             };
-            expectedVariations1.Add(new Dictionary<string, List<Variation>> { { "boolean_feature", expectedVariationList } });
-
-            var variations1 = allVariations.Where(v => v.Key == "boolean_feature").Select(v => new Dictionary<string, List<Variation>> { { v.Key, v.Value } }).ToList();
-
-            TestData.CompareObjects(expectedVariations1, variations1);
-            Assertions.AreEquivalent(expectedVariations1, variations1);
+            var filteredActualFlagVariations = allVariations["boolean_feature"];
+            TestData.CompareObjects(expectedVariationDict, filteredActualFlagVariations);
         }
 
         [Test]

@@ -205,11 +205,10 @@ namespace OptimizelySDK.Config
         private Dictionary<string, List<string>> ExperimentFeatureMap = new Dictionary<string, List<string>>();
 
         /// <summary>
-        /// Associated array of flags to experiments
+        /// Associated dictionary of flags to variations key value.
         /// </summary>
-
-        private Dictionary<string, List<Variation>> _FlagVariationMap = new Dictionary<string, List<Variation>>();
-        public Dictionary<string, List<Variation>> FlagVariationMap { get { return _FlagVariationMap; } }
+        private Dictionary<string, Dictionary<string, Variation>> _FlagVariationMap = new Dictionary<string, Dictionary<string, Variation>>();
+        public Dictionary<string, Dictionary<string, Variation>> FlagVariationMap { get { return _FlagVariationMap; } }
 
         //========================= Interfaces ===========================
 
@@ -355,73 +354,36 @@ namespace OptimizelySDK.Config
                 }
             }
 
-            // Adding experiments in experiment-feature map.
+            var flagToVariationsMap = new Dictionary<string, Dictionary<string, Variation>>();
+            // Adding experiments in experiment-feature map and flag variation map to use.
             foreach (var feature in FeatureFlags)
             {
+                var variationKeyToVariationDict = new Dictionary<string, Variation>();
                 foreach (var experimentId in feature.ExperimentIds ?? new List<string>())
                 {
+                    foreach (var variationDictKV in ExperimentIdMap[experimentId].VariationKeyToVariationMap) {
+                        variationKeyToVariationDict[variationDictKV.Key] = variationDictKV.Value;
+                    }
+
                     if (ExperimentFeatureMap.ContainsKey(experimentId))
-                        ExperimentFeatureMap[experimentId].Add(feature.Id);
-                    else
-                        ExperimentFeatureMap[experimentId] = new List<string> { feature.Id };
-                }
-            }
-            _FlagVariationMap = GetFlagVariationMap();
-        }
-
-        /// <summary>
-        /// Get the Flag variation map to use
-        /// </summary>
-        /// <returns>A map of flag key to variations</returns>
-        private Dictionary<string, List<Variation>> GetFlagVariationMap()
-        {
-            var variationsDict = new Dictionary<string, List<Variation>>();
-
-            foreach (var flag in FeatureFlags)
-            {
-                var variationIdToVariationsDict = new Dictionary<string, Variation>();
-
-                foreach (var rule in GetAllRulesForFlag(flag))
-                {
-                    foreach (var variation in rule.Variations)
                     {
-                        if (!variationIdToVariationsDict.ContainsKey(variation.Id))
-                        {
-                            variationIdToVariationsDict.Add(variation.Id, variation);
-                        }
+                        ExperimentFeatureMap[experimentId].Add(feature.Id);
+                    }
+                    else
+                    { 
+                        ExperimentFeatureMap[experimentId] = new List<string> { feature.Id };
                     }
                 }
-                // Grab all the variations from the flag experiments and rollouts and add to flagVariationsMap
-                variationsDict[flag.Key] = variationIdToVariationsDict.Values.ToList<Variation>();
-            }
-            return variationsDict;
-        }
-
-        /// <summary>
-        /// Retrieves all the rules for a given feature flag
-        /// </summary>
-        /// <param name="flag">Feature flag to use</param>
-        /// <returns>A list of experiments</returns>
-        private List<Experiment> GetAllRulesForFlag(FeatureFlag flag)
-        {
-            var rules = new List<Experiment>();
-
-            RolloutIdMap.TryGetValue(flag.RolloutId, out var rollout);
-
-            foreach (var expId in flag.ExperimentIds)
-            {
-                if (ExperimentIdMap.TryGetValue(expId, out var rule))
-                {
-                    rules.Add(rule);
+                if (RolloutIdMap.TryGetValue(feature.RolloutId, out var rolloutRules)) {
+                    var rolloutRulesVariations = rolloutRules.Experiments.SelectMany(ex => ex.Variations);
+                    foreach (var rolloutRuleVariation in rolloutRulesVariations) {
+                        variationKeyToVariationDict[rolloutRuleVariation.Key] = rolloutRuleVariation;
+                    }
                 }
+                
+                flagToVariationsMap[feature.Key] = variationKeyToVariationDict;
             }
-
-            if (rollout != null)
-            {
-                rules.AddRange(rollout.Experiments);
-            }
-
-            return rules;
+            _FlagVariationMap = flagToVariationsMap;
         }
 
         /// <summary>
@@ -658,16 +620,12 @@ namespace OptimizelySDK.Config
         /// <returns></returns>
         public Variation GetFlagVariationByKey(string flagKey, string variationKey)
         {
-            if (_FlagVariationMap.TryGetValue(flagKey, out var variations))
-            {
-                foreach (var variation in variations)
-                {
-                    if (variation.Key.Equals(variationKey))
-                    {
-                        return variation;
-                    }
-                }
+            if (FlagVariationMap.TryGetValue(flagKey, out var variationsKeyMap)) {
+
+                variationsKeyMap.TryGetValue(variationKey, out var variation);
+                return variation;
             }
+
             return null;
         }
 

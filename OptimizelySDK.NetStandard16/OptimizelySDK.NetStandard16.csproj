@@ -96,6 +96,7 @@
 			<Compile Include="..\OptimizelySDK\OptimizelyUserContext.cs" />
 			<Compile Include="..\OptimizelySDK\Config\FallbackProjectConfigManager.cs" />
 			<Compile Include="..\OptimizelySDK\OptimizelyDecisionContext.cs" />
+			<Compile Include="..\OptimizelySDK\ForcedDecisionsStore.cs" />
 			<Compile Include="..\OptimizelySDK\OptimizelyForcedDecision.cs">
 				<Link>OptimizelyForcedDecision.cs</Link>
 			</Compile>

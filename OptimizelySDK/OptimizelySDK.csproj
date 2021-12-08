@@ -92,6 +92,7 @@
     <Compile Include="OptimizelyDecisions\OptimizelyDecideOption.cs" />
     <Compile Include="OptimizelyDecisions\OptimizelyDecision.cs" />
     <Compile Include="OptimizelyForcedDecision.cs" />
+    <Compile Include="ForcedDecisionsStore.cs" />
     <Compile Include="OptimizelyUserContext.cs" />
     <Compile Include="OptimizelyJSON.cs" />
     <Compile Include="Entity\Rollout.cs" />

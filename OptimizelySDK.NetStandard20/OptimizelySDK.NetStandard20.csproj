@@ -307,6 +307,9 @@
 	<Compile Include="..\OptimizelySDK\OptimizelyDecisionContext.cs">
 		<Link>OptimizelyDecisionContext.cs</Link>
 	</Compile>
+	<Compile Include="..\OptimizelySDK\ForcedDecisionsStore.cs">
+		<Link>ForcedDecisionsStore.cs</Link>
+	</Compile>
 	<Compile Include="..\OptimizelySDK\OptimizelyForcedDecision.cs">
 	  <Link>OptimizelyForcedDecision.cs</Link>
 	</Compile>
