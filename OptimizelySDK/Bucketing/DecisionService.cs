@@ -455,6 +455,11 @@ namespace OptimizelySDK.Bucketing
             var index = 0;
             while (index < rolloutRulesLength)
             {
+                if (!rolloutRules[index].IsExperimentRunning)
+                { 
+                    index++;
+                    continue;
+                }
                 // To skip rules
                 var skipToEveryoneElse = false;
 
