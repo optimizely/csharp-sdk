@@ -21,7 +21,7 @@ namespace OptimizelySDK.Entity
     {
         public T ResultObject;
         public DecisionReasons DecisionReasons;
-        
+
         public static Result<T> NewResult(T resultObject, DecisionReasons decisionReasons)
         {
             return new Result<T> { DecisionReasons = decisionReasons, ResultObject = resultObject };
