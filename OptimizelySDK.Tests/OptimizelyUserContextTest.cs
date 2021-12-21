@@ -289,16 +289,18 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestFindValidatedForcedDecisionReturnsCorrectDecisionWithNullVariation()
         {
-            var decisionReasons = new DecisionReasons();
-            decisionReasons.AddInfo("{0}", "Invalid variation is mapped to flag: flagKey and rule: rule forced decision map.");
-            var expectedResult = Result<Variation>.NullResult(decisionReasons);
-            var user = Optimizely.CreateUserContext(UserID);
+            /// TODO: Fix this case 
+            Assert.False(true);
+            //var decisionReasons = new DecisionReasons();
+            //decisionReasons.AddInfo("{0}", "Invalid variation is mapped to flag: flagKey and rule: rule forced decision map.");
+            //var expectedResult = Result<Variation>.NullResult(decisionReasons);
+            //var user = Optimizely.CreateUserContext(UserID);
 
-            var context = new OptimizelyDecisionContext("flagKey", "ruleKey");
+            //var context = new OptimizelyDecisionContext("flagKey", "ruleKey");
 
-            var result = user.FindValidatedForcedDecision(context, null);
+            //var result = user.FindValidatedForcedDecision(context, null);
 
-            Assertions.AreEqual(expectedResult, result);
+            //Assertions.AreEqual(expectedResult, result);
         }
 
         [Test]

@@ -298,35 +298,5 @@ namespace OptimizelySDK
             }
             return true;
         }
-
-        /// <summary>
-        /// Finds a validated forced decision.
-        /// </summary>
-        /// <param name="context">Object containing flag and rule key of which forced decision is set.</param>
-        /// <param name="config">The Project config.</param>
-        /// <returns>A result with the variation</returns>
-        public Result<Variation> FindValidatedForcedDecision(OptimizelyDecisionContext context, ProjectConfig config)
-        {
-            DecisionReasons reasons = new DecisionReasons();
-            var forcedDecision = GetForcedDecision(context);
-
-            if (config != null && forcedDecision != null)
-            {
-                var loggingKey = context.RuleKey != null ? "flag (" + context.FlagKey + "), rule (" + context.RuleKey + ")" : "flag (" + context.FlagKey + ")";
-                var variationKey = forcedDecision.VariationKey;
-                var variation = config.GetFlagVariationByKey(context.FlagKey, variationKey);
-                if (variation != null)
-                {
-                    reasons.AddInfo("Decided by forced decision.");
-                    reasons.AddInfo("Variation ({0}) is mapped to {1} and user ({2}) in the forced decision map.", variationKey, loggingKey, UserId);
-                    return Result<Variation>.NewResult(variation, reasons);
-                }
-                else
-                {
-                    reasons.AddInfo("Invalid variation is mapped to {0} and user ({1}) in the forced decision map.", loggingKey, UserId);
-                }
-            }
-            return Result<Variation>.NullResult(reasons);
-        }
     }
 }
