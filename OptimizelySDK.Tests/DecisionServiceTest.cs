@@ -72,6 +72,25 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
+        public void TestFindValidatedForcedDecisionReturnsCorrectDecisionWithNullVariation()
+        {
+            DecisionService decisionService = new DecisionService(BucketerMock.Object, ErrorHandlerMock.Object, null, LoggerMock.Object);
+
+            var optlyObject = new Optimizely(TestData.Datafile, new ValidEventDispatcher(), LoggerMock.Object);
+
+            var decisionReasons = new DecisionReasons();
+            decisionReasons.AddInfo("{0}", "Invalid variation is mapped to flag: flagKey and rule: rule forced decision map.");
+            var expectedResult = Result<Variation>.NullResult(decisionReasons);
+            var user = optlyObject.CreateUserContext(GenericUserId);
+
+            var context = new OptimizelyDecisionContext("flagKey", "ruleKey");
+
+            var result = decisionService.ValidatedForcedDecision(context, Config, user);
+
+            Assertions.AreEqual(expectedResult, result);
+        }
+
+        [Test]
         public void TestGetVariationForcedVariationPrecedesAudienceEval()
         {
             DecisionService decisionService = new DecisionService(BucketerMock.Object, ErrorHandlerMock.Object, null, LoggerMock.Object);

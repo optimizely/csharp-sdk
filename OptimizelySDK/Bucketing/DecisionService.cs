@@ -461,8 +461,7 @@ namespace OptimizelySDK.Bucketing
                 //Check forced decision first
                 var rule = rolloutRules[index];
                 var decisionContext = new OptimizelyDecisionContext(featureFlag.Key, rule.Key);
-                var forcedDecision = user.GetForcedDecision(decisionContext);
-                var forcedDecisionResponse = ValidatedForcedDecision(decisionContext, forcedDecision, config, userId);
+                var forcedDecisionResponse = ValidatedForcedDecision(decisionContext, config, user);
 
                 reasons += forcedDecisionResponse.DecisionReasons;
                 if (forcedDecisionResponse.ResultObject != null)
@@ -552,8 +551,7 @@ namespace OptimizelySDK.Bucketing
                 if (string.IsNullOrEmpty(experiment.Key))
                     continue;
                 var decisionContext = new OptimizelyDecisionContext(featureFlag.Key, experiment?.Key);
-                var forcedDecision = user.GetForcedDecision(decisionContext);
-                var forcedDecisionResponse = ValidatedForcedDecision(decisionContext, forcedDecision, config, userId);
+                var forcedDecisionResponse = ValidatedForcedDecision(decisionContext, config, user);
 
                 reasons += forcedDecisionResponse.DecisionReasons;
                 
@@ -668,13 +666,14 @@ namespace OptimizelySDK.Bucketing
         /// Finds a validated forced decision.
         /// </summary>
         /// <param name="context">Object containing flag and rule key of which forced decision is set.</param>
-        /// <param name="flagDecision">Object containing forced decision based on the provided context.</param>
         /// <param name="config">The Project config.</param>
+        /// <param name="user">Optimizely user context.</param>
         /// <returns>A result with the variation</returns>
-        public Result<Variation> ValidatedForcedDecision(OptimizelyDecisionContext context, OptimizelyForcedDecision forcedDecision, ProjectConfig config, string userId)
+        public Result<Variation> ValidatedForcedDecision(OptimizelyDecisionContext context, ProjectConfig config, OptimizelyUserContext user)
         {
             DecisionReasons reasons = new DecisionReasons();
-
+            var userId = user.GetUserId();
+            var forcedDecision = user.GetForcedDecision(context);
             if (config != null && forcedDecision != null) {
                 var loggingKey = context.RuleKey != null ? "flag (" + context.FlagKey + "), rule (" + context.RuleKey + ")" : "flag (" + context.FlagKey + ")";
                 var variationKey = forcedDecision.VariationKey;
