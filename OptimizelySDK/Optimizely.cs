@@ -754,7 +754,7 @@ namespace OptimizelySDK
             FeatureDecision decision = null;
 
             var decisionContext = new OptimizelyDecisionContext(flag.Key);
-            var forcedDecisionVariation = user.FindValidatedForcedDecision(decisionContext, config);
+            var forcedDecisionVariation = DecisionService.ValidatedForcedDecision(decisionContext, config, user);
             decisionReasons += forcedDecisionVariation.DecisionReasons;
 
             if (forcedDecisionVariation.ResultObject != null)
