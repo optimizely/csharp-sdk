@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright 2017, 2019-2021, Optimizely
+ * Copyright 2021-2022, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,18 +18,15 @@ using NUnit.Framework;
 using OptimizelySDK.Entity;
 using OptimizelySDK.OptimizelyDecisions;
 using OptimizelySDK.OptlyConfig;
-using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace OptimizelySDK.Tests
 {
     /// <summary>
     /// Simplifies assertions and provides more insight into which particular piece is failing for a value.
-    /// Especially helpful for Test Driven Development
+    /// especially helpful for Test Driven Development
     /// </summary>
     [ExcludeFromCodeCoverage]
     public class Assertions
@@ -40,7 +37,7 @@ namespace OptimizelySDK.Tests
         {
             if (allowNull && expected == null && actual == null)
                 return false;
-
+            
             Assert.AreEqual(expected.Count(), actual.Count());
 
             return true;
@@ -116,20 +113,22 @@ namespace OptimizelySDK.Tests
 
         public static void AreEquivalent(OptimizelyAttribute[] expected, OptimizelyAttribute[] actual)
         {
-            Assert.AreEqual(expected.Count(), actual.Count());
-            var zipped = expected.Zip(actual, (e, a) =>
+            if (HasItems(expected, actual, false))
             {
-                return new
+                var zipped = expected.Zip(actual, (e, a) =>
                 {
-                    Expected = e,
-                    Actual = a
-                };
-            }).ToList();
+                    return new
+                    {
+                        Expected = e,
+                        Actual = a
+                    };
+                }).ToList();
 
-            foreach (var z in zipped)
-            {
-                AreEqual(z.Expected, z.Actual);
-            };
+                foreach (var z in zipped)
+                {
+                    AreEqual(z.Expected, z.Actual);
+                };
+            }
         }
 
         public static void AreEqual(OptimizelyAttribute expected, OptimizelyAttribute actual)
@@ -722,7 +721,9 @@ namespace OptimizelySDK.Tests
                 AreEqual(expected.ResultObject, actual.ResultObject);
             }
 
-            #endregion Result T
         }
+
+        #endregion Result T
+
     }
 }

@@ -70,6 +70,7 @@
     <Reference Include="System.Net.Http.WebRequest" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AssertionTest.cs" />
     <Compile Include="Assertions.cs" />
     <Compile Include="AudienceConditionsTests\ConditionEvaluationTest.cs" />
     <Compile Include="AudienceConditionsTests\ConditionsTest.cs" />
