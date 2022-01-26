@@ -53,24 +53,6 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
-        public void HasItemsTestBothNullAndAllowNullIsTrue()
-        {
-            IEnumerable<object> expected = null;
-            IEnumerable<object> actual = null;
-
-            Assert.IsTrue(Assertions.HasItems(expected, actual, true));
-        }
-
-        [Test]
-        public void HasItemsTestBothNullAndAllowNullIsFalse()
-        {
-            IEnumerable<object> expected = null;
-            IEnumerable<object> actual = null;
-
-            Assert.IsFalse(Assertions.HasItems(expected, actual, false));
-        }
-
-        [Test]
         public void AreEquivalentTestBothAreEqual()
         {
             var expected = new string[] { "abc", "def" };
@@ -136,25 +118,25 @@ namespace OptimizelySDK.Tests
         public void AreEqualOptimizelyConfigTest()
         {
             OptimizelyConfig expected = new OptimizelyConfig("1", "sdkKey", "envKey", new OptimizelyAttribute[0], new OptimizelyAudience[0], new OptimizelyEvent[0],
-                new Dictionary<string, OptimizelyExperiment> 
-                { 
-                    { "1", 
-                        new OptimizelyExperiment("1", "ex1", "", new Dictionary<string, OptimizelyVariation> 
-                        { 
-                            { "var1", new OptimizelyVariation("var1", "varKey", false, null) } 
-                        }) 
-                    } 
+                new Dictionary<string, OptimizelyExperiment>
+                {
+                    { "1",
+                        new OptimizelyExperiment("1", "ex1", "", new Dictionary<string, OptimizelyVariation>
+                        {
+                            { "var1", new OptimizelyVariation("var1", "varKey", false, null) }
+                        })
+                    }
                 },
                 new Dictionary<string, OptimizelyFeature>
                 {
                     {
                         "2",
-                        new OptimizelyFeature("2", "feat2", new List<OptimizelyExperiment> { 
+                        new OptimizelyFeature("2", "feat2", new List<OptimizelyExperiment> {
                             { new OptimizelyExperiment("1", "ex1", "", new Dictionary<string, OptimizelyVariation>
                                 {
                                     { "var1", new OptimizelyVariation("var1", "varKey", false, null) }
-                                }) 
-                            } 
+                                })
+                            }
                         },
                         new List<OptimizelyExperiment> {
                             { new OptimizelyExperiment("1", "ex1", "", new Dictionary<string, OptimizelyVariation>
@@ -162,7 +144,16 @@ namespace OptimizelySDK.Tests
                                     { "var1", new OptimizelyVariation("var1", "varKey", false, null) }
                                 })
                             }
-                        }, null, null
+                        }, new Dictionary<string, OptimizelyExperiment> {
+                            { "ex1" , new OptimizelyExperiment("1", "ex1", "", new Dictionary<string, OptimizelyVariation>
+                                {
+                                    { "var1", new OptimizelyVariation("var1", "varKey", false, null) }
+                                })
+                            } 
+                        }, new Dictionary<string, OptimizelyVariable>
+                            {
+                                { "s", new OptimizelyVariable("1", "varKKey", "1", "2")  }
+                            }
                         )
                     }
                 }
@@ -194,7 +185,16 @@ namespace OptimizelySDK.Tests
                                     { "var1", new OptimizelyVariation("var1", "varKey", false, null) }
                                 })
                             }
-                        }, null, null
+                        }, new Dictionary<string, OptimizelyExperiment> {
+                            { "ex1" , new OptimizelyExperiment("1", "ex1", "", new Dictionary<string, OptimizelyVariation>
+                                {
+                                    { "var1", new OptimizelyVariation("var1", "varKey", false, null) }
+                                })
+                            }
+                        }, new Dictionary<string, OptimizelyVariable>
+                            {
+                                { "s", new OptimizelyVariable("1", "varKKey", "1", "2")  }
+                            }
                         )
                     }
                 }
@@ -203,5 +203,44 @@ namespace OptimizelySDK.Tests
         }
 
         #endregion OptimizelyConfig
+
+        #region OptimizelyUserContext
+
+        [Test]
+        public static void AreEqual()
+        {
+            OptimizelyUserContext expected = new OptimizelyUserContext(null, "test",
+                new UserAttributes { { "1", "test" } }, null, null); 
+            OptimizelyUserContext actual = new OptimizelyUserContext(null, "test",
+                new UserAttributes { { "1", "test" } }, null, null); ;
+            Assertions.AreEqual(expected, actual);
+        }
+
+        #endregion
+
+        #region OptimizelyEvent
+
+        [Test]
+        public static void AreEquivalent()
+        {
+            OptimizelyEvent[] expected = new OptimizelyEvent[] { new OptimizelyEvent() { ExperimentIds = new string[] { "1", "2" }, Id = "1", Key = "keyEvent" } };
+            OptimizelyEvent[] actual = new OptimizelyEvent[] { new OptimizelyEvent() { ExperimentIds = new string[] { "1", "2" }, Id = "1", Key = "keyEvent" } };
+            Assertions.AreEquivalent(expected, actual);
+        }
+
+        #endregion OptimizelyEvent
+
+        #region OptimizelyDecision
+
+        [Test]
+        public static void AreEqualOptimizelyDecision()
+        {
+            OptimizelyDecision expected = new OptimizelyDecision("varKey", false, null, "testRuleKey", "testFlagKey", null, new string[0]);
+            OptimizelyDecision actual = new OptimizelyDecision("varKey", false, null, "testRuleKey", "testFlagKey", null, new string[0]);
+            Assertions.AreEqual(expected, actual);
+        }
+
+        #endregion
+
     }
 }

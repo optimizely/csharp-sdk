@@ -188,6 +188,10 @@ namespace OptimizelySDK.Tests
 
         public static void AreEqual(OptimizelyUserContext expected, OptimizelyUserContext actual)
         {
+            if (expected == actual)
+            {
+                return;
+            }
             Assert.AreEqual(expected.GetUserId(), actual.GetUserId());
             AreEquivalent(expected.GetAttributes(), actual.GetAttributes());
         }
