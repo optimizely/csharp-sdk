@@ -1,0 +1,131 @@
+
+name: Csharp CI with .NET
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:
+    inputs:
+      SNAPSHOT:
+        type: boolean
+        description: Set SNAPSHOT true to publish
+
+jobs:
+  lint_markdown_files:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '2.6'
+        bundler-cache: true # runs 'bundle install' and caches installed gems automatically
+    - name: Install gem
+      run: |
+        gem install awesome_bot
+    - name: Run tests
+      run: find . -type f -name '*.md' -exec awesome_bot {} \;
+  
+  integration_tests:
+    uses: optimizely/csharp-sdk/.github/workflows/integration_test.yml@mnoman/gitAction
+    with:
+      BUILD_NUMBER: ${{ github.run_id }}
+      GITHUB_CONTEXT: ${{ toJson(github) }}
+      EVENT_NAME: ${{ github.event_name }}
+      REPOSITORY: ${{ github.repository }}
+      SHA: ${{ github.sha }}
+      TRAVIS_PULL_REQUEST_SHA: ${{ github.event.pull_request.head.sha }}
+      TRAVIS_PULL_REQUEST: ${{ github.event.pull_request.number }}
+      EVENT_MESSAGE: ${{ github.event.message }}
+      HEAD_REF: ${{ github.head_ref }}
+      REF_NAME: ${{ github.ref_name }}
+    secrets:
+      CI_USER_TOKEN: ${{ secrets.CI_USER_TOKEN }}
+      TRAVIS_COM_TOKEN: ${{ secrets.TRAVIS_COM_TOKEN }}
+      
+  fullstack_production_suite:
+    uses: optimizely/csharp-sdk/.github/workflows/integration_test.yml@mnoman/gitAction
+    with:
+      FULLSTACK_TEST_REPO: ProdTesting
+      BUILD_NUMBER: ${{ github.run_id }}
+      GITHUB_CONTEXT: ${{ toJson(github) }}
+      EVENT_NAME: ${{ github.event_name }}
+      REPOSITORY: ${{ github.repository }}
+      SHA: ${{ github.sha }}
+      TRAVIS_PULL_REQUEST_SHA: ${{ github.event.pull_request.head.sha }}
+      TRAVIS_PULL_REQUEST: ${{ github.event.pull_request.number }}
+      EVENT_MESSAGE: ${{ github.event.message }}
+      HEAD_REF: ${{ github.head_ref }}
+      REF_NAME: ${{ github.ref_name }}
+    secrets:
+      CI_USER_TOKEN: ${{ secrets.CI_USER_TOKEN }}
+      TRAVIS_COM_TOKEN: ${{ secrets.TRAVIS_COM_TOKEN }}
+  
+  unit_test:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 5.0.x
+
+    - name: Add msbuild to PATH
+      uses: microsoft/setup-msbuild@v1.0.2
+
+    - name: Setup Nuget
+      uses: Nuget/setup-nuget@v1.0.5
+
+    - name: Restore nuget packages
+      run: |
+        nuget restore OptimizelySDK.Travis.sln
+        nuget install ./OptimizelySDK.Tests/packages.config -OutputDirectory ./packages
+        nuget install NUnit.Runners -Version 2.6.4 -OutputDirectory ./testrunner
+    - name: script
+      run: |
+        xbuild /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=$TRAVIS_BUILD_DIR/keypair.snk /p:Configuration=Release ./OptimizelySDK.Travis.sln
+        mono ./testrunner/NUnit.Runners.2.6.4/tools/nunit-console.exe ./OptimizelySDK.Tests/bin/Release/OptimizelySDK.Tests.dll
+        # strongname signing from xbuild step needs additional re-signing with sn
+        find . -path './OptimizelySDK*bin/Release/OptimizelySDK*.dll' -not -regex '.*Tests.*' -print0 | while IFS= read -r -d '' file; do sn -R $file ./keypair.snk; done
+
+  netStandard16:
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v2
+      with:
+        dotnet-version: 3.1.x
+    - name: Restore dependencies
+      run: dotnet restore OptimizelySDK.NetStandard16/OptimizelySDK.NetStandard16.csproj
+    - name: Build
+      run: |
+        # strongname signing is taken care of in build step
+        dotnet build OptimizelySDK.NetStandard16/OptimizelySDK.NetStandard16.csproj /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=$TRAVIS_BUILD_DIR/keypair.snk -c Release
+        # TODO: no dotnet test yet for NetStandard16
+    - name: Test
+      run: dotnet test --no-build --verbosity normal
+
+  netStandard20:
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v2
+      with:
+        dotnet-version: 3.1.x
+    - name: Restore dependencies
+      run: dotnet restore OptimizelySDK.NetStandard20/OptimizelySDK.NetStandard20.csproj
+    - name: Build
+      run: |
+        # strongname signing is taken care of in build step
+        dotnet build OptimizelySDK.NetStandard20/OptimizelySDK.NetStandard20.csproj /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=$TRAVIS_BUILD_DIR/keypair.snk -c Release
+        # TODO: no dotnet test yet for NetStandard16
