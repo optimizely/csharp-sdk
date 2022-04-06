@@ -92,13 +92,13 @@ jobs:
         find . -path './OptimizelySDK*bin/Release/OptimizelySDK*.dll' -not -regex '.*Tests.*' -print0 | while IFS= read -r -d '' file; do sn -R $file ./keypair.snk; done
 
   netStandard16:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
     - uses: actions/checkout@v3
     - name: Setup .NET
       uses: actions/setup-dotnet@v2
       with:
-        dotnet-version: 1.6.x
+        dotnet-version: 1.1.x
     - name: Restore dependencies
       run: dotnet restore OptimizelySDK.NetStandard16/OptimizelySDK.NetStandard16.csproj
     - name: Build
@@ -110,7 +110,7 @@ jobs:
       run: dotnet test --no-build --verbosity normal
 
   netStandard20:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
     - uses: actions/checkout@v3
     - name: Setup .NET
