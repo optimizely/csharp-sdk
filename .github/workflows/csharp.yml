@@ -89,19 +89,16 @@ jobs:
       run: |
         xbuild /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=$TRAVIS_BUILD_DIR/keypair.snk /p:Configuration=Release ./OptimizelySDK.Travis.sln
         mono ./testrunner/NUnit.Runners.2.6.4/tools/nunit-console.exe ./OptimizelySDK.Tests/bin/Release/OptimizelySDK.Tests.dll
-        # strongname signing from xbuild step needs additional re-signing with sn
         find . -path './OptimizelySDK*bin/Release/OptimizelySDK*.dll' -not -regex '.*Tests.*' -print0 | while IFS= read -r -d '' file; do sn -R $file ./keypair.snk; done
 
   netStandard16:
-    if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v3
     - name: Setup .NET
       uses: actions/setup-dotnet@v2
       with:
-        dotnet-version: 3.1.x
+        dotnet-version: 1.6.x
     - name: Restore dependencies
       run: dotnet restore OptimizelySDK.NetStandard16/OptimizelySDK.NetStandard16.csproj
     - name: Build
@@ -113,15 +110,13 @@ jobs:
       run: dotnet test --no-build --verbosity normal
 
   netStandard20:
-    if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v3
     - name: Setup .NET
       uses: actions/setup-dotnet@v2
       with:
-        dotnet-version: 3.1.x
+        dotnet-version: 2.0.x
     - name: Restore dependencies
       run: dotnet restore OptimizelySDK.NetStandard20/OptimizelySDK.NetStandard20.csproj
     - name: Build
