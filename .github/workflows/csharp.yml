@@ -84,12 +84,12 @@ jobs:
     - name: script
       run: |
         docker run -v $(pwd):/usr/project mono:6.12 bash -c 'cd /usr/project && xbuild /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=/usr/project/keypair.snk /p:Configuration=Release ./OptimizelySDK.Travis.sln'
-    - name: find and sign dll
-      run: |
-        find . -path './OptimizelySDK*bin/Release/OptimizelySDK*.dll' -not -regex '.*Tests.*' -print0 | while IFS= read -r -d '' file; do sn -R $file ./keypair.snk; done
+    #- name: find and sign dll
+     # run: |
+      #  find . -path './OptimizelySDK*bin/Release/OptimizelySDK*.dll' -not -regex '.*Tests.*' -print0 | while IFS= read -r -d '' file; do sn -R $file ./keypair.snk; done
 
   netStandard16:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
     - uses: actions/checkout@v3
     - name: Setup .NET
@@ -101,7 +101,7 @@ jobs:
     - name: Build
       run: |
         # strongname signing is taken care of in build step
-        dotnet build OptimizelySDK.NetStandard16/OptimizelySDK.NetStandard16.csproj /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=./keypair.snk -c Release
+        dotnet build OptimizelySDK.NetStandard16/OptimizelySDK.NetStandard16.csproj /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=D:\a\csharp-sdk\csharp-sdk\keypair.snk -c Release
         # TODO: no dotnet test yet for NetStandard16
     - name: Test
       run: dotnet test --no-build --verbosity normal
