@@ -64,7 +64,7 @@ jobs:
       TRAVIS_COM_TOKEN: ${{ secrets.TRAVIS_COM_TOKEN }}
   
   unit_test:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v3
@@ -87,7 +87,7 @@ jobs:
         nuget install NUnit.Runners -Version 2.6.4 -OutputDirectory ./testrunner
     - name: script
       run: |
-        msbuild /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=$TRAVIS_BUILD_DIR/keypair.snk /p:Configuration=Release ./OptimizelySDK.Travis.sln
+        docker run -v $(pwd):/usr/project mono:6.12 bash -c 'cd /usr/project && xbuild /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=/usr/project/keypair.snk /p:Configuration=Release ./OptimizelySDK.Travis.sln'
     - name: script1
       shell: bash
       run: |
@@ -106,7 +106,7 @@ jobs:
     - name: Build
       run: |
         # strongname signing is taken care of in build step
-        dotnet build OptimizelySDK.NetStandard16/OptimizelySDK.NetStandard16.csproj /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=$TRAVIS_BUILD_DIR/keypair.snk -c Release
+        dotnet build OptimizelySDK.NetStandard16/OptimizelySDK.NetStandard16.csproj /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=./keypair.snk -c Release
         # TODO: no dotnet test yet for NetStandard16
     - name: Test
       run: dotnet test --no-build --verbosity normal
@@ -124,5 +124,5 @@ jobs:
     - name: Build
       run: |
         # strongname signing is taken care of in build step
-        dotnet build OptimizelySDK.NetStandard20/OptimizelySDK.NetStandard20.csproj /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=$TRAVIS_BUILD_DIR/keypair.snk -c Release
+        dotnet build OptimizelySDK.NetStandard20/OptimizelySDK.NetStandard20.csproj /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=./keypair.snk -c Release
         # TODO: no dotnet test yet for NetStandard16
