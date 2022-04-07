@@ -85,9 +85,9 @@ jobs:
       run: |
         docker run -v $(pwd):/usr/project mono:6.12 bash -c 'cd /usr/project && xbuild /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=/usr/project/keypair.snk /p:Configuration=Release ./OptimizelySDK.Travis.sln'
         docker run -v $(pwd):/usr/project mono:6.12 bash -c 'cd /usr/project && mono ./testrunner/NUnit.Runners.2.6.4/tools/nunit-console.exe ./OptimizelySDK.Tests/bin/Release/OptimizelySDK.Tests.dll'
-    #- name: find and sign dll
-     # run: |
-      #  find . -path './OptimizelySDK*bin/Release/OptimizelySDK*.dll' -not -regex '.*Tests.*' -print0 | while IFS= read -r -d '' file; do sn -R $file ./keypair.snk; done
+    - name: find and sign dll
+      run: |
+        find . -path './OptimizelySDK*bin/Release/OptimizelySDK*.dll' -not -regex '.*Tests.*' -print0 | while IFS= read -r -d '' file; do sn -R $file ./keypair.snk; done
 
   netStandard16:
     runs-on: windows-latest
