@@ -88,7 +88,7 @@ jobs:
         echo "deb https://download.mono-project.com/repo/ubuntu stable-bionic main" | sudo tee /etc/apt/sources.list.d/mono-official-stable.list
         sudo apt update
         sudo apt install mono-devel        
-        xbuild /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=/usr/project/keypair.snk /p:Configuration=Release ./OptimizelySDK.Travis.sln'
+        xbuild /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=/usr/project/keypair.snk /p:Configuration=Release ./OptimizelySDK.Travis.sln
     - name: find and sign dll
       run: |
         sudo find . -path './OptimizelySDK*bin/Release/OptimizelySDK*.dll' -not -regex '.*Tests.*' -print0 | while IFS= read -r -d '' file; do sn -R $file ./keypair.snk; done
