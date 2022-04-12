@@ -1,0 +1,31 @@
+name: Reusable action of running unit tests
+
+on:
+  workflow_call:
+  
+jobs:
+  unit_test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 5.0.x
+    - name: Restore nuget packages
+      run: |
+        nuget restore OptimizelySDK.Travis.sln
+        nuget install ./OptimizelySDK.Tests/packages.config -OutputDirectory ./packages
+        nuget install NUnit.Runners -Version 2.6.4 -OutputDirectory ./testrunner
+    - name: script
+      run: |
+        sudo apt install gnupg ca-certificates
+        sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF
+        echo "deb https://download.mono-project.com/repo/ubuntu stable-bionic main" | sudo tee /etc/apt/sources.list.d/mono-official-stable.list
+        sudo apt update
+        sudo apt install mono-devel        
+        xbuild /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=$(pwd)/keypair.snk /p:Configuration=Release ./OptimizelySDK.Travis.sln
+        mono ./testrunner/NUnit.Runners.2.6.4/tools/nunit-console.exe ./OptimizelySDK.Tests/bin/Release/OptimizelySDK.Tests.dll
+    - name: find and sign dll
+      run: |
+        sudo find . -path './OptimizelySDK*bin/Release/OptimizelySDK*.dll' -not -regex '.*Tests.*' -print0 | while IFS= read -r -d '' file; do sn -R $file ./keypair.snk; done
