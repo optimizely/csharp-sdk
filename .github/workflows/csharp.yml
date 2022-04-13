@@ -38,7 +38,27 @@ jobs:
       TRAVIS_COM_TOKEN: ${{ secrets.TRAVIS_COM_TOKEN }}
   
   unit_test:
-    uses: optimizely/csharp-sdk/.github/workflows/unit_test.yml@mnoman/gitAction
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 5.0.x
+    - name: Restore nuget packages
+      run: |
+        nuget restore OptimizelySDK.Travis.sln
+        nuget install ./OptimizelySDK.Tests/packages.config -OutputDirectory ./packages
+        nuget install NUnit.Runners -Version 2.6.4 -OutputDirectory ./testrunner
+    - name: script
+      run: |
+        ./install_mono.sh
+        xbuild /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=$(pwd)/keypair.snk /p:Configuration=Release ./OptimizelySDK.Travis.sln
+        mono ./testrunner/NUnit.Runners.2.6.4/tools/nunit-console.exe ./OptimizelySDK.Tests/bin/Release/OptimizelySDK.Tests.dll
+    - name: find and sign dll
+      run: |
+        sudo find . -path './OptimizelySDK*bin/Release/OptimizelySDK*.dll' -not -regex '.*Tests.*' -print0 | while IFS= read -r -d '' file; do sn -R $file ./keypair.snk; done
+
     
   netStandard16:
     runs-on: windows-2022
