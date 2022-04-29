@@ -87,6 +87,16 @@
     <Compile Include="Entity\Group.cs" />
     <Compile Include="Entity\IdKeyEntity.cs" />
     <Compile Include="Event\Entity\DecisionMetadata.cs" />
+    <Compile Include="Notifications\DecisionNotification.cs" />
+    <Compile Include="Notifications\ActivateNotificationListenerInterface.cs" />
+    <Compile Include="Notifications\ActivateNotificationListener.cs" />
+    <Compile Include="Notifications\ActivateNotification.cs" />
+    <Compile Include="Notifications\FeatureTestSourceInfo.cs" />
+    <Compile Include="Notifications\NotificationHandler.cs" />
+    <Compile Include="Notifications\NotificationListener.cs" />
+    <Compile Include="Notifications\NotificationManager.cs" />
+    <Compile Include="Notifications\RolloutSourceInfo.cs" />
+    <Compile Include="Notifications\SourceInfo.cs" />
     <Compile Include="OptimizelyDecisions\DecisionMessage.cs" />
     <Compile Include="OptimizelyDecisions\DecisionReasons.cs" />
     <Compile Include="OptimizelyDecisions\OptimizelyDecideOption.cs" />

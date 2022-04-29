@@ -17,6 +17,7 @@
 using OptimizelySDK.Entity;
 using OptimizelySDK.Event;
 using OptimizelySDK.Logger;
+using OptimizelySDK.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -105,7 +106,7 @@ namespace OptimizelySDK.Notifications
                 return notificationsCount;
             }
         }
-
+        GenericDictionary NotifierDict;
         /// <summary>
         /// NotificationCenter constructor
         /// </summary>
@@ -114,9 +115,56 @@ namespace OptimizelySDK.Notifications
         {
             Logger = logger ?? new NoOpLogger();
 
-            foreach (NotificationType notificationType in Enum.GetValues(typeof(NotificationType))) {
-                Notifications[notificationType] = new Dictionary<int, object>();
+            int counter = 0;
+            var validManagers = new GenericDictionary();
+            validManagers.Add<NotificationManager<ActivateNotification>> (typeof(ActivateNotification).Name, new NotificationManager<ActivateNotification>());
+            //validManagers.Add<NotificationManager<TrackNotification>>(TrackNotification.class, new NotificationManager<TrackNotification>());
+            validManagers.Add<NotificationManager<DecisionNotification>>(typeof(DecisionNotification).Name, new NotificationManager<DecisionNotification>());
+            //validManagers.Add<NotificationManager<UpdateConfigNotification>>(typeof(UpdateConfigNotification).Name, new NotificationManager<UpdateConfigNotification>());
+            validManagers.Add<NotificationManager<LogEvent>>(typeof(DecisionNotification).Name, new NotificationManager<LogEvent>());
+
+            NotifierDict = validManagers;
+        }
+
+        public NotificationManager<T> getNotificationManager<T>()
+        {
+            return NotifierDict.GetValue<NotificationManager<T>>(typeof(T).Name);
+        }
+
+        public int addActivateNotificationListener(ActivateNotificationListenerInterface activateNotificationListener)
+        {
+            NotificationManager<ActivateNotification> notificationManager = getNotificationManager<ActivateNotification>();
+            if (notificationManager == null) 
+            {
+                Logger.Log(LogLevel.WARN, "Notification listener was the wrong type. It was not added to the notification center.");
+                return -1;
             }
+
+            if (activateNotificationListener is ActivateNotificationListener) {
+                return notificationManager.addHandler(activateNotificationListener as ActivateNotificationListener);
+            } else {
+                return notificationManager.addHandler(message => { } 
+                    activateNotificationListener.OnActivate(
+                    message.GetExperiment(),
+                    message.GetUserId(),
+                    message.GetAttributes(),
+                    message.GetVariation(),
+                    message.GetEvent()
+                ));
+            }
+        }
+
+            public int addNotificationHandler<T>(NotificationHandler<T> handler)
+        {
+            NotificationManager<T> notificationManager = getNotificationManager<T>();
+
+            if (notificationManager == null)
+            {
+                logger.warn("{} not supported by the NotificationCenter.", clazz);
+                return -1;
+            }
+
+            return notificationManager.addHandler(handler);
         }
 
         public int GetNotificationCount(NotificationType notificationType)
