@@ -76,11 +76,13 @@
     <Compile Include="Config\audience\AudienceIdCondition.cs" />
     <Compile Include="Config\audience\Condition.cs" />
     <Compile Include="Config\audience\EmptyCondition.cs" />
+    <Compile Include="Config\audience\match\DefaultMatchForLegacyAttributes.cs" />
     <Compile Include="Config\audience\match\ExactMatch.cs" />
     <Compile Include="Config\audience\match\ExisitsMatch.cs" />
     <Compile Include="Config\audience\match\GEMatch.cs" />
     <Compile Include="Config\audience\match\GTMatch.cs" />
     <Compile Include="Config\audience\match\LEMatch.cs" />
+    <Compile Include="Config\audience\match\SubstringMatch.cs" />
     <Compile Include="Config\audience\match\LTMatch.cs" />
     <Compile Include="Config\audience\match\Match.cs" />
     <Compile Include="Config\audience\match\MatchRegistry.cs" />

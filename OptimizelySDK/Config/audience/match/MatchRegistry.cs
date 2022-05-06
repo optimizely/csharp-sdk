@@ -10,7 +10,15 @@ namespace OptimizelySDK.Config.audience.match
     {
         private readonly static Dictionary<string, Match> Registry = new Dictionary<string, Match>        
         {
-            { EXACT, new ExactMatch() }
+            { EXACT, new ExactMatch() },
+            { EXISTS, new ExisitsMatch() },
+            { GREATER_THAN, new GTMatch() },
+            { GREATER_THAN_EQ, new GEMatch() },
+            { LEGACY, new DefaultMatchForLegacyAttributes() },
+            { LESS_THAN, new LTMatch() },
+            { LESS_THAN_EQ, new LEMatch() },
+            { SUBSTRING, new SubstringMatch() },
+
         };
 
 
