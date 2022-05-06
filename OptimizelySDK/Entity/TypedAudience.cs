@@ -10,7 +10,7 @@ namespace OptimizelySDK.Entity
     public class TypedAudience : Audience
     {
         // TODO need to ask if Object will work
-        public new Condition Conditions { get; set; }
+        public new Condition<object> Conditions { get; set; }
 
     }
 }

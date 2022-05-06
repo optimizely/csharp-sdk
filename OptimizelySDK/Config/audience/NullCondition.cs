@@ -2,7 +2,7 @@
 
 namespace OptimizelySDK.Config.audience
 {
-    public class NullCondition<T> : Condition
+    public class NullCondition<T> : Condition<T>
     {
         public bool? Evaluate(ProjectConfig config, UserAttributes attributes)
         {

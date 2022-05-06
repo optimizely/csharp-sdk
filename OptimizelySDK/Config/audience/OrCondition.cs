@@ -1,19 +1,23 @@
 ﻿using OptimizelySDK.Entity;
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace OptimizelySDK.Config.audience
 {
-    class OrCondition<T> : Condition
+    class OrCondition<T> : Condition<T>
     {
-        private readonly Condition[] Conditions;
+        private readonly Condition<T>[] Conditions;
         private static readonly string OPERAND = "OR";
 
-        public OrCondition(Condition[] conditions)
+        public OrCondition(Condition<T>[] conditions)
         {
             Conditions = conditions;
         }
 
-        public Condition[] getConditions()
+        public Condition<T>[] getConditions()
         {
             return Conditions;
         }
@@ -22,7 +26,7 @@ namespace OptimizelySDK.Config.audience
         {
             if (Conditions == null) return null;
             bool foundNull = false;
-            foreach (Condition condition in Conditions)
+            foreach (Condition<T> condition in Conditions)
             {
                 bool? conditionEval = condition.Evaluate(config, attributes);
                 if (conditionEval == null)

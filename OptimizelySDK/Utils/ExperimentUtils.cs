@@ -54,7 +54,7 @@ namespace OptimizelySDK.Utils
                 return Result<bool?>.NewResult(true, reasons);
             }
 
-            List<Condition> conditions = new List<Condition>();
+            List<Condition<object>> conditions = new List<Condition<object>>();
             foreach (string audienceId in experimentAudienceIds)
             {
                 var condition = new AudienceIdCondition<object>(audienceId);
@@ -80,7 +80,7 @@ namespace OptimizelySDK.Utils
         {
             var reasons = new DecisionReasons();
 
-            var conditions = experiment.AudienceConditions;
+            var conditions = experiment.AudienceConditionsList;
             if (conditions == null) return Result<bool?>.NewResult(null, reasons);
 
             bool? result = null;

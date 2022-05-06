@@ -7,12 +7,12 @@ using System.Threading.Tasks;
 
 namespace OptimizelySDK.Config.audience
 {
-    class AndCondition<T> : Condition
+    class AndCondition<T> : Condition<T>
     {
-        private readonly Condition[] Conditions;
+        private readonly Condition<T>[] Conditions;
         private static readonly string OPERAND = "AND";
 
-        public AndCondition(Condition[] conditions)
+        public AndCondition(Condition<T>[] conditions)
         {
             Conditions = conditions;
         }
@@ -28,7 +28,7 @@ namespace OptimizelySDK.Config.audience
             // true and false is false
             // true and true is true
             // null and null is null
-            foreach (Condition condition in Conditions)
+            foreach (Condition<T> condition in Conditions)
             {
                 bool? conditionEval = condition.Evaluate(config, attributes);
                 if (conditionEval == null)

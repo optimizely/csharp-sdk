@@ -3,12 +3,12 @@ using OptimizelySDK.Entity;
 
 namespace OptimizelySDK.Config.audience
 {
-    public class NotCondition<T> : Condition
+    public class NotCondition<T> : Condition<T>
     {
-        private Condition _Condition { get; }
+        private Condition<T> _Condition { get; }
         private readonly static string OPERAND = "NOT";
 
-        public NotCondition(Condition condition)
+        public NotCondition(Condition<T> condition)
         {
             _Condition = condition;
         }

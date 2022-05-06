@@ -16,7 +16,6 @@
 using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
 using OptimizelySDK.Utils;
-using OptimizelySDK.AudienceConditions;
 using Newtonsoft.Json;
 using OptimizelySDK.Config.audience;
 
@@ -68,12 +67,12 @@ namespace OptimizelySDK.Entity
         /// </summary>
         public string[] AudienceIds { get; set; }
 
-        private ICondition _audienceIdsList = null;
+        private Condition<string> _audienceIdsList = null;
 
         /// <summary>
         /// De-serialized audience conditions
         /// </summary>
-        public ICondition AudienceIdsList
+        public Condition<string> AudienceIdsList
         {
             get
             {
@@ -82,11 +81,11 @@ namespace OptimizelySDK.Entity
                 
                 if (_audienceIdsList == null)
                 {
-                    var conditions = new List<ICondition>();
+                    var conditions = new List<Condition<string>>();
                     foreach (var audienceId in AudienceIds)
-                        conditions.Add(new AudienceIdCondition() { AudienceId = (string)audienceId });
+                        conditions.Add(new AudienceIdCondition<string>(audienceId));
 
-                    _audienceIdsList = new OrCondition() { Conditions = conditions.ToArray() };
+                    _audienceIdsList = new OrCondition<string>(conditions.ToArray());
                 }
                 
                 return _audienceIdsList;
@@ -120,7 +119,31 @@ namespace OptimizelySDK.Entity
         /// <summary>
         /// Audience Conditions
         /// </summary>
-        public Condition<AudienceIdCondition> AudienceConditions { get; set; }
+        public object AudienceConditions { get; set; }
+
+        private Condition<object> _audienceConditionsList = null;
+
+        /// <summary>
+        /// De-serialized audience conditions
+        /// </summary>
+        public Condition<object> AudienceConditionsList
+        {
+            get
+            {
+                if (AudienceConditions == null)
+                    return null;
+
+                if (_audienceConditionsList == null)
+                {
+                    if (AudienceConditions is string)
+                        _audienceConditionsList = ConditionParser.ParseAudienceConditions(JToken.Parse((string)AudienceConditions));
+                    else
+                        _audienceConditionsList = ConditionParser.ParseAudienceConditions((JToken)AudienceConditions);
+                }
+
+                return _audienceConditionsList;
+            }
+        }
 
         private string _audienceConditionsString = null;
 

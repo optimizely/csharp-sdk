@@ -40,7 +40,7 @@ namespace OptimizelySDK.Utils
         /// </summary>
         const string NOT_OPERATOR = "not";
 
-        public static Condition ParseAudienceConditions(JToken audienceConditions)
+        public static Condition<object> ParseAudienceConditions(JToken audienceConditions)
         {
             if (audienceConditions.Type != JTokenType.Array)
             { 
@@ -58,14 +58,14 @@ namespace OptimizelySDK.Utils
             else
                 conditionOperator = OR_OPERATOR;
 
-            var conditions = new List<Condition>();
+            var conditions = new List<Condition<object>>();
             for (int i = startIndex; i < conditionsArray.Count; ++i)
                 conditions.Add(ParseAudienceConditions(conditionsArray[i]));
 
             return GetConditions(conditions, conditionOperator);
         }
 
-        public static Condition ParseConditions(JToken conditionObj)
+        public static Condition<object> ParseConditions(JToken conditionObj)
         {
             if (conditionObj.Type != JTokenType.Array)
                 return new UserAttribute<object>
@@ -85,7 +85,7 @@ namespace OptimizelySDK.Utils
             else
                 conditionOperator = OR_OPERATOR;
 
-            var conditions = new List<Condition>();
+            var conditions = new List<Condition<object>>();
             for (int i = startIndex; i < conditionsArray.Count; ++i)
             {
                 conditions.Add(ParseConditions(conditionsArray[i]));
@@ -108,9 +108,9 @@ namespace OptimizelySDK.Utils
             }
         }
 
-        public static Condition GetConditions(List<Condition> conditions, string conditionOperator)
+        public static Condition<object> GetConditions(List<Condition<object>> conditions, string conditionOperator)
         {
-            Condition condition = null;
+            Condition<object> condition = null;
             switch (conditionOperator)
             {
                 case AND_OPERATOR:

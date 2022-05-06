@@ -39,12 +39,12 @@ namespace OptimizelySDK.Entity
         /// </summary>
         public object Conditions { get; set; }
 
-        private Condition _decodedConditions = null;
+        private Condition<object> _decodedConditions = null;
 
         /// <summary>
         /// De-serialized audience conditions
         /// </summary>
-        public Condition ParsedConditions
+        public Condition<object> ParsedConditions
         {
             get
             {

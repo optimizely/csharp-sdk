@@ -4,7 +4,7 @@ using System;
 
 namespace OptimizelySDK.Config.audience
 {
-    public class UserAttribute<T> : Condition
+    public class UserAttribute<T> : Condition<T>
     {
         public string Name { get; set; }
         public string Type { get; set; }

@@ -3,7 +3,7 @@ using System;
 
 namespace OptimizelySDK.Config.audience
 {
-    public class AudienceIdCondition<T> : Condition
+    public class AudienceIdCondition<T> : Condition<T>
     {
         public Audience _Audience { get; set; }
         private readonly string AudienceId;

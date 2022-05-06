@@ -15,7 +15,7 @@ namespace OptimizelySDK.Entity
         public string Name { get; set; }
 
         // TODO need to ask if Object will work
-        public Condition conditions { get; set; }
+        public Condition<UserAttribute<object>> conditions { get; set; }
 
     }
 }
