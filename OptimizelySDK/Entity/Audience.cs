@@ -17,6 +17,7 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using OptimizelySDK.AudienceConditions;
+using OptimizelySDK.Config.audience;
 using OptimizelySDK.Utils;
 
 namespace OptimizelySDK.Entity
@@ -38,12 +39,12 @@ namespace OptimizelySDK.Entity
         /// </summary>
         public object Conditions { get; set; }
 
-        private ICondition _decodedConditions = null;
+        private Condition _decodedConditions = null;
 
         /// <summary>
         /// De-serialized audience conditions
         /// </summary>
-        public ICondition ConditionList
+        public Condition ParsedConditions
         {
             get
             {
@@ -90,5 +91,6 @@ namespace OptimizelySDK.Entity
                 return _conditionsString;
             }
         }
+
     }
 }

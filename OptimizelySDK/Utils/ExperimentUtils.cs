@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-using OptimizelySDK.AudienceConditions;
+using OptimizelySDK.Config.audience;
 using OptimizelySDK.Entity;
 using OptimizelySDK.Logger;
 using OptimizelySDK.OptimizelyDecisions;
+using System;
+using System.Collections.Generic;
 
 namespace OptimizelySDK.Utils
 {
@@ -35,6 +37,68 @@ namespace OptimizelySDK.Utils
 
             return true;
         }
+
+        public static Result<bool?> EvaluateAudience(ProjectConfig projectConfig,
+                                                                    Experiment experiment,
+                                                                    UserAttributes attributes,
+                                                                    string loggingEntityType,
+                                                                    string loggingKey)
+        {
+            var reasons = new DecisionReasons();
+
+            var experimentAudienceIds = experiment.AudienceIds;
+
+            // if there are no audiences, ALL users should be part of the experiment
+            if (experimentAudienceIds.Length == 0)
+            {
+                return Result<bool?>.NewResult(true, reasons);
+            }
+
+            List<Condition> conditions = new List<Condition>();
+            foreach (string audienceId in experimentAudienceIds)
+            {
+                var condition = new AudienceIdCondition<object>(audienceId);
+                conditions.Add(condition);
+            }
+
+            var implicitOr = new OrCondition<object>(conditions.ToArray());
+
+            //logger.debug("Evaluating audiences for {} \"{}\": {}.", loggingEntityType, loggingKey, conditions);
+
+            var result = implicitOr.Evaluate(projectConfig, attributes);
+            var message = reasons.AddInfo("Audiences for %s \"%s\" collectively evaluated to %s.", loggingEntityType, loggingKey, result);
+            //logger.info(message);
+
+            return Result<bool?>.NewResult(result, reasons);
+        }
+
+        public static Result<bool?> EvaluateAudienceConditions(ProjectConfig projectConfig,
+                                                                Experiment experiment,
+                                                                UserAttributes attributes,
+                                                                string loggingEntityType,
+                                                                string loggingKey)
+        {
+            var reasons = new DecisionReasons();
+
+            var conditions = experiment.AudienceConditions;
+            if (conditions == null) return Result<bool?>.NewResult(null, reasons);
+
+            bool? result = null;
+            try
+            {
+                result = conditions.Evaluate(projectConfig, attributes);
+                string message = reasons.AddInfo("Audiences for %s \"%s\" collectively evaluated to %s.", loggingEntityType, loggingKey, result);
+                //logger.info(message);
+            }
+            catch (Exception e)
+            {
+                string message = reasons.AddInfo("Condition invalid: %s", e.Message);
+                //logger.error(message);
+            }
+
+            return Result<bool?>.NewResult(result, reasons);
+        }
+
 
         /// <summary>
         /// Check if the user meets audience conditions to be in experiment or not
@@ -56,26 +120,22 @@ namespace OptimizelySDK.Utils
             if (userAttributes == null)
                 userAttributes = new UserAttributes();
 
-            ICondition expConditions = null;
-            if (experiment.AudienceConditionsList != null)
+            Result<bool?> decisionResponse;
+            if (experiment.AudienceConditions != null)
             {
-                expConditions = experiment.AudienceConditionsList;
-                logger.Log(LogLevel.DEBUG, $@"Evaluating audiences for {loggingKeyType} ""{loggingKey}"": {experiment.AudienceConditionsString}.");
+                //logger.debug("Evaluating audiences for {} \"{}\": {}.", loggingEntityType, loggingKey, experiment.getAudienceConditions());
+                decisionResponse = EvaluateAudienceConditions(config, experiment, userAttributes, loggingKeyType, loggingKey);
             }
             else
             {
-                expConditions = experiment.AudienceIdsList;
-                logger.Log(LogLevel.DEBUG, $@"Evaluating audiences for {loggingKeyType} ""{loggingKey}"": {experiment.AudienceIdsString}.");
+                decisionResponse = EvaluateAudience(config, experiment, userAttributes, loggingKeyType, loggingKey);
             }
+            bool? resolveReturn = decisionResponse.ResultObject;
+            reasons += decisionResponse.DecisionReasons;
 
-            // If there are no audiences, return true because that means ALL users are included in the experiment.
-            if (expConditions == null)
-                return Result<bool>.NewResult(true, reasons);
-
-            var result = expConditions.Evaluate(config, userAttributes, logger).GetValueOrDefault();
-            var resultText = result.ToString().ToUpper();
-            logger.Log(LogLevel.INFO, reasons.AddInfo($@"Audiences for {loggingKeyType} ""{loggingKey}"" collectively evaluated to {resultText}"));
-            return Result<bool>.NewResult(result, reasons);
+            return Result<bool>.NewResult(
+                resolveReturn != null ? (bool)resolveReturn : false,    // make it Nonnull for if-evaluation
+                reasons);
         }
     }
 }

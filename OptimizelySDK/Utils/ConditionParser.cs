@@ -15,7 +15,7 @@
  */
 
 using Newtonsoft.Json.Linq;
-using OptimizelySDK.AudienceConditions;
+using OptimizelySDK.Config.audience;
 using System.Collections.Generic;
 
 namespace OptimizelySDK.Utils
@@ -40,14 +40,15 @@ namespace OptimizelySDK.Utils
         /// </summary>
         const string NOT_OPERATOR = "not";
 
-        public static ICondition ParseAudienceConditions(JToken audienceConditions)
+        public static Condition ParseAudienceConditions(JToken audienceConditions)
         {
             if (audienceConditions.Type != JTokenType.Array)
-                return new AudienceIdCondition { AudienceId = (string)audienceConditions };
-
+            { 
+                return new AudienceIdCondition<object>((string)audienceConditions);
+            }
             var conditionsArray = audienceConditions as JArray;
             if (conditionsArray.Count == 0)
-                return new EmptyCondition();
+                return new EmptyCondition<object>();
 
             var startIndex = 0;
             var conditionOperator = GetOperator(conditionsArray.First.ToString());
@@ -57,17 +58,17 @@ namespace OptimizelySDK.Utils
             else
                 conditionOperator = OR_OPERATOR;
 
-            List<ICondition> conditions = new List<ICondition>();
+            var conditions = new List<Condition>();
             for (int i = startIndex; i < conditionsArray.Count; ++i)
                 conditions.Add(ParseAudienceConditions(conditionsArray[i]));
 
             return GetConditions(conditions, conditionOperator);
         }
 
-        public static ICondition ParseConditions(JToken conditionObj)
+        public static Condition ParseConditions(JToken conditionObj)
         {
             if (conditionObj.Type != JTokenType.Array)
-                return new BaseCondition
+                return new UserAttribute<object>
                 {
                     Match = conditionObj["match"]?.ToString(),
                     Type = conditionObj["type"]?.ToString(),
@@ -84,7 +85,7 @@ namespace OptimizelySDK.Utils
             else
                 conditionOperator = OR_OPERATOR;
 
-            List<ICondition> conditions = new List<ICondition>();
+            var conditions = new List<Condition>();
             for (int i = startIndex; i < conditionsArray.Count; ++i)
             {
                 conditions.Add(ParseConditions(conditionsArray[i]));
@@ -107,19 +108,19 @@ namespace OptimizelySDK.Utils
             }
         }
 
-        public static ICondition GetConditions(List<ICondition> conditions, string conditionOperator)
+        public static Condition GetConditions(List<Condition> conditions, string conditionOperator)
         {
-            ICondition condition = null;
+            Condition condition = null;
             switch (conditionOperator)
             {
                 case AND_OPERATOR:
-                    condition = new AndCondition() { Conditions = conditions.ToArray() };
+                    condition = new AndCondition<object>(conditions.ToArray());
                     break;
                 case OR_OPERATOR:
-                    condition = new OrCondition() { Conditions = conditions.ToArray() };
+                    condition = new OrCondition<object>(conditions.ToArray());
                     break;
                 case NOT_OPERATOR:
-                    condition = new NotCondition() { Condition = conditions.Count == 0 ? null : conditions[0] };
+                    condition = new NotCondition<object>(conditions.Count == 0 ? null : conditions[0]);
                     break;
                 default:
                     break;

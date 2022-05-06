@@ -18,6 +18,7 @@ using Newtonsoft.Json.Linq;
 using OptimizelySDK.Utils;
 using OptimizelySDK.AudienceConditions;
 using Newtonsoft.Json;
+using OptimizelySDK.Config.audience;
 
 namespace OptimizelySDK.Entity
 {
@@ -119,31 +120,7 @@ namespace OptimizelySDK.Entity
         /// <summary>
         /// Audience Conditions
         /// </summary>
-        public object AudienceConditions { get; set; }
-
-        private ICondition _audienceConditionsList = null;
-
-        /// <summary>
-        /// De-serialized audience conditions
-        /// </summary>
-        public ICondition AudienceConditionsList
-        {
-            get
-            {
-                if (AudienceConditions == null)
-                    return null;
-
-                if (_audienceConditionsList == null)
-                {
-                    if (AudienceConditions is string)
-                        _audienceConditionsList = ConditionParser.ParseAudienceConditions(JToken.Parse((string)AudienceConditions));
-                    else
-                        _audienceConditionsList = ConditionParser.ParseAudienceConditions((JToken)AudienceConditions);
-                }
-
-                return _audienceConditionsList;
-            }
-        }
+        public Condition<AudienceIdCondition> AudienceConditions { get; set; }
 
         private string _audienceConditionsString = null;
 

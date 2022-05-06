@@ -34,8 +34,8 @@ namespace OptimizelySDK.AudienceConditions
             if (audience == null || string.IsNullOrEmpty(audience.Id))
                 return null;
 
-            logger.Log(LogLevel.DEBUG, $@"Starting to evaluate audience ""{AudienceId}"" with conditions: {audience.ConditionsString}");
-            var result = audience.ConditionList.Evaluate(config, attributes, logger);
+            //logger.Log(LogLevel.DEBUG, $@"Starting to evaluate audience ""{AudienceId}"" with conditions: {audience.ConditionsString}");
+            bool? result = true;//audience.Conditions.Evaluate(config, attributes);
             var resultText = result?.ToString().ToUpper() ?? "UNKNOWN";
             logger.Log(LogLevel.DEBUG, $@"Audience ""{AudienceId}"" evaluated to {resultText}");
 
