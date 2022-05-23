@@ -16,18 +16,13 @@
 
 namespace OptimizelySDK.OptlyConfig
 {
-    //wrong comment indentation
     public class OptimizelyAudience
     {
         /// <summary>
         /// Audience ID
         /// </summary>
-        public string Id { // Get universal answer (bad)
-            get; 
-            set; 
-            }
-        // TODO: 
-        // KLUDGE:   
+        public string Id { get; set; }
+
         /// <summary>
         /// Audience Name
         /// </summary>
@@ -43,7 +38,6 @@ namespace OptimizelySDK.OptlyConfig
             Id = id;
             Name = name;
             Conditions = conditions;
-            // Avoid magic numbers
-            }
+        }
     }
 }
