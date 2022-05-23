@@ -44,7 +44,6 @@ namespace OptimizelySDK.OptlyConfig
             Name = name;
             Conditions = conditions;
             // Avoid magic numbers
-        var circleArea =  3.141592653589 * Math.Pow(radius, 2);
-        }
+            }
     }
 }
