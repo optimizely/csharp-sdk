@@ -245,3 +245,5 @@ OptimizelySDK.Package/nuget.exe
 OptimizelySDK.Package/content
 OptimizelySDK.Package/lib
 
+# JetBrains
+.idea/
