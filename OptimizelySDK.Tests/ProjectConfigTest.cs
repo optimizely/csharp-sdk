@@ -822,5 +822,18 @@ namespace OptimizelySDK.Tests
 
             Assert.True(typedConfig.IsFeatureExperiment(experiment.Id));
         }
+        
+        [Test]
+        public void TestRolloutWithEmptyStringRolloutId()
+        {
+            var rolloutId = string.Empty;
+            
+            var rollout = Config.GetRolloutFromId(rolloutId);
+
+            // OptlyConfig.OptimizelyConfigService.GetDeliveryRules L362
+            Assert.IsNull(rollout.Experiments);
+            // Bucketing.DecisionService.GetVariationForFeatureRollout L439
+            Assert.IsNull(rollout.Id);
+        }
     }
 }
