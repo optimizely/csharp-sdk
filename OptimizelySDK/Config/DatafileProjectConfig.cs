@@ -636,7 +636,7 @@ namespace OptimizelySDK.Config
         /// <returns>Rollout Entity corresponding to the rollout ID or a dummy entity if ID is invalid</returns>
         public Rollout GetRolloutFromId(string rolloutId)
         {
-            if (string.IsNullOrWhiteSpace(rolloutId))
+            if (string.IsNullOrEmpty(rolloutId.Trim()))
             {
                 return new Rollout();
             }
