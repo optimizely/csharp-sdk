@@ -824,6 +824,21 @@ namespace OptimizelySDK.Tests
         }
         
         [Test]
+        public void TestRolloutWithEmptyStringRolloutIdFromConfigFile()
+        {
+            var projectConfig = DatafileProjectConfig.Create(TestData.EmptyRolloutDatafile, new NoOpLogger(), new NoOpErrorHandler());
+            Assert.IsNotNull(projectConfig);
+            var featureFlag = projectConfig.FeatureKeyMap["empty_rollout_id"];
+            
+            var rollout = projectConfig.GetRolloutFromId(featureFlag.RolloutId);
+
+            // OptlyConfig.OptimizelyConfigService.GetDeliveryRules L362
+            Assert.IsNull(rollout.Experiments);
+            // Bucketing.DecisionService.GetVariationForFeatureRollout L439
+            Assert.IsNull(rollout.Id);
+        }
+        
+        [Test]
         public void TestRolloutWithEmptyStringRolloutId()
         {
             var rolloutId = string.Empty;
