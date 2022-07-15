@@ -826,15 +826,13 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestRolloutWithEmptyStringRolloutIdFromConfigFile()
         {
-            var projectConfig = DatafileProjectConfig.Create(TestData.EmptyRolloutDatafile, new NoOpLogger(), new NoOpErrorHandler());
+            var projectConfig = DatafileProjectConfig.Create(TestData.EmptyRolloutDatafile, null, null);
             Assert.IsNotNull(projectConfig);
             var featureFlag = projectConfig.FeatureKeyMap["empty_rollout_id"];
             
             var rollout = projectConfig.GetRolloutFromId(featureFlag.RolloutId);
 
-            // OptlyConfig.OptimizelyConfigService.GetDeliveryRules L362
             Assert.IsNull(rollout.Experiments);
-            // Bucketing.DecisionService.GetVariationForFeatureRollout L439
             Assert.IsNull(rollout.Id);
         }
         
@@ -845,9 +843,7 @@ namespace OptimizelySDK.Tests
             
             var rollout = Config.GetRolloutFromId(rolloutId);
 
-            // OptlyConfig.OptimizelyConfigService.GetDeliveryRules L362
             Assert.IsNull(rollout.Experiments);
-            // Bucketing.DecisionService.GetVariationForFeatureRollout L439
             Assert.IsNull(rollout.Id);
         }
         
@@ -858,9 +854,18 @@ namespace OptimizelySDK.Tests
             
             var rollout = Config.GetRolloutFromId(rolloutId);
 
-            // OptlyConfig.OptimizelyConfigService.GetDeliveryRules L362
             Assert.IsNull(rollout.Experiments);
-            // Bucketing.DecisionService.GetVariationForFeatureRollout L439
+            Assert.IsNull(rollout.Id);
+        }
+        
+        [Test]
+        public void TestRolloutWithConsistingOfANullRolloutId()
+        {
+            string nullRolloutId = null;
+            
+            var rollout = Config.GetRolloutFromId(nullRolloutId);
+
+            Assert.IsNull(rollout.Experiments);
             Assert.IsNull(rollout.Id);
         }
     }
