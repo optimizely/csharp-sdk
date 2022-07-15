@@ -37,6 +37,8 @@ namespace OptimizelySDK
 
         // user attributes for Optimizely user context.
         private UserAttributes Attributes;
+        
+        private List<string> QualifiedSegments;
 
         // Optimizely object to be used.
         private Optimizely Optimizely;
@@ -56,9 +58,19 @@ namespace OptimizelySDK
             Attributes = userAttributes ?? new UserAttributes();
             ForcedDecisionsStore = forcedDecisionsStore ?? new ForcedDecisionsStore();
             UserId = userId;
+            QualifiedSegments = new List<string>();
         }
 
         private OptimizelyUserContext Copy() => new OptimizelyUserContext(Optimizely, UserId, GetAttributes(), GetForcedDecisionsStore(), ErrorHandler, Logger);
+        
+        /// <summary>
+        /// Returns true if the user is qualified for the given segment name
+        /// </summary>
+        /// <param name="segment">A String segment key which will be check in qualified segments list that if it exist then user is qualified.</param>
+        /// <returns>Is user qualified for a segment.</returns>
+        public bool IsQualifiedFor(string segment) {
+            return QualifiedSegments.Contains(segment);
+        }
 
         /// <summary>
         /// Returns Optimizely instance associated with the UserContext.
