@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright 2019-2021, Optimizely
+ * Copyright 2019-2022, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -636,6 +636,15 @@ namespace OptimizelySDK.Config
         /// <returns>Rollout Entity corresponding to the rollout ID or a dummy entity if ID is invalid</returns>
         public Rollout GetRolloutFromId(string rolloutId)
         {
+#if NET35 || NET40
+    if (string.IsNullOrEmpty(rolloutId) || string.IsNullOrEmpty(rolloutId.Trim()))
+#else
+    if (string.IsNullOrWhiteSpace(rolloutId))
+#endif
+            {
+                return new Rollout();
+            }
+            
             if (_RolloutIdMap.ContainsKey(rolloutId))
                 return _RolloutIdMap[rolloutId];
 
