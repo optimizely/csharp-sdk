@@ -64,6 +64,9 @@
     <Compile Include="..\OptimizelySDK\Config\DatafileProjectConfig.cs">
       <Link>Config\DatafileProjectConfig.cs</Link>
     </Compile>
+    <Compile Include="..\OptimizelySDK\Config\Integration.cs">
+      <Link>Config\Integration</Link>
+    </Compile>
     <Compile Include="..\OptimizelySDK\Config\FallbackProjectConfigManager.cs">
       <Link>Config\FallbackProjectConfigManager.cs</Link>
     </Compile>

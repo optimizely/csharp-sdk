@@ -20,6 +20,7 @@ using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Exceptions;
 using OptimizelySDK.Logger;
 using OptimizelySDK.Utils;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Attribute = OptimizelySDK.Entity.Attribute;
@@ -97,6 +98,16 @@ namespace OptimizelySDK.Config
         /// Raw datafile
         /// </summary>
         public string Datafile { get; set; }
+
+        /// <summary>
+        /// Configured host name for the Optimizely Data Platform. 
+        /// </summary>
+        public string HostForOdp { get; set; }
+        
+        /// <summary>
+        /// Configured public key from the Optimizely Data Platform.
+        /// </summary>
+        public string PublicKeyForOdp { get; set; }
 
         /// <summary>
         /// Supported datafile versions list.
@@ -263,6 +274,11 @@ namespace OptimizelySDK.Config
         /// Associative list of Rollouts.
         /// </summary>
         public Rollout[] Rollouts { get; set; }
+        
+        /// <summary>
+        /// Associative list of Integrations.
+        /// </summary>
+        private Integration[] Integrations { get; set; }
 
         //========================= Initialization ===========================
 
@@ -280,6 +296,7 @@ namespace OptimizelySDK.Config
             TypedAudiences = TypedAudiences ?? new Audience[0];
             FeatureFlags = FeatureFlags ?? new FeatureFlag[0];
             Rollouts = Rollouts ?? new Rollout[0];
+            Integrations = Integrations ?? new Integration[0];
             _ExperimentKeyMap = new Dictionary<string, Experiment>();
 
             _GroupIdMap = ConfigParser<Group>.GenerateMap(entities: Groups, getKey: g => g.Id.ToString(), clone: true);
@@ -351,6 +368,16 @@ namespace OptimizelySDK.Config
                             _VariationIdMapByExperimentId[rolloutRule.Id][variation.Id] = variation;
                         }
                     }
+                }
+            }
+
+            foreach (var integration in Integrations)
+            {
+                if (integration.Key?.ToLower() == "odp")
+                {
+                    HostForOdp = integration.Host;
+                    PublicKeyForOdp = integration.PublicKey;
+                    break;
                 }
             }
 
