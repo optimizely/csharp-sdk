@@ -1,11 +1,11 @@
 ﻿/* 
- * Copyright 2019-2020, Optimizely
+ * Copyright 2019-2022, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,7 +15,6 @@
  */
 
 using Newtonsoft.Json;
-using OptimizelySDK.Entity;
 using OptimizelySDK.Logger;
 using OptimizelySDK.Utils;
 using System;
@@ -28,7 +27,7 @@ namespace OptimizelySDK.AudienceConditions
     public class BaseCondition : ICondition
     {
         /// <summary>
-        /// String constant representing custome attribute condition type.
+        /// String constant representing custom attribute condition type.
         /// </summary>
         public const string CUSTOM_ATTRIBUTE_CONDITION_TYPE = "custom_attribute";
 
@@ -44,13 +43,15 @@ namespace OptimizelySDK.AudienceConditions
         [JsonProperty("value")]
         public object Value { get; set; }
 
-        public bool? Evaluate(ProjectConfig config, UserAttributes userAttributes, ILogger logger)
+        public bool? Evaluate(ProjectConfig config, OptimizelyUserContext user, ILogger logger)
         {
             if (Type == null || Type != CUSTOM_ATTRIBUTE_CONDITION_TYPE)
             {
                 logger.Log(LogLevel.WARN, $@"Audience condition ""{this}"" uses an unknown condition type. You may need to upgrade to a newer release of the Optimizely SDK.");
                 return null;
             }
+
+            var userAttributes = user.GetAttributes();
             
             object attributeValue = null;
             if (userAttributes.TryGetValue(Name, out attributeValue) == false && Match != AttributeMatchTypes.EXIST)

@@ -1,11 +1,11 @@
 ﻿/*
- * Copyright 2017-2021, Optimizely
+ * Copyright 2017-2022, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -508,66 +508,6 @@ namespace OptimizelySDK.Tests
             var optimizelyUnsupportedVersion = new Optimizely(TestData.UnsupportedVersionDatafile, null, LoggerMock.Object, ErrorHandlerMock.Object, null, true);
             LoggerMock.Verify(l => l.Log(LogLevel.ERROR, $"This version of the C# SDK does not support the given datafile version: 5"), Times.Once);
             ErrorHandlerMock.Verify(e => e.HandleError(It.Is<ConfigParseException>(ex => ex.Message == $"This version of the C# SDK does not support the given datafile version: 5")), Times.Once);
-        }
-
-        [Test]
-        public void TestValidatePreconditionsExperimentNotRunning()
-        {
-            var optly = Helper.CreatePrivateOptimizely();
-
-            optly.SetFieldOrProperty("ProjectConfigManager", ConfigManager);
-
-            bool result = (bool)optly.Invoke("ValidatePreconditions",
-                Config.GetExperimentFromKey("paused_experiment"),
-                TestUserId, ConfigManager.GetConfig(), new UserAttributes { });
-            Assert.IsFalse(result);
-        }
-
-        [Test]
-        public void TestValidatePreconditionsExperimentRunning()
-        {
-            var optly = Helper.CreatePrivateOptimizely();
-            bool result = (bool)optly.Invoke("ValidatePreconditions",
-                Config.GetExperimentFromKey("test_experiment"),
-                TestUserId,
-                ConfigManager.GetConfig(),
-                new UserAttributes
-                {
-                    { "device_type", "iPhone" },
-                    { "location", "San Francisco" }
-                }
-                );
-            Assert.IsTrue(result);
-        }
-
-        [Test]
-        public void TestValidatePreconditionsUserInForcedVariationNotInExperiment()
-        {
-            var optly = Helper.CreatePrivateOptimizely();
-            bool result = (bool)optly.Invoke("ValidatePreconditions",
-                Config.GetExperimentFromKey("test_experiment"),
-                "user1", ConfigManager.GetConfig(), new UserAttributes { });
-            Assert.IsTrue(result);
-        }
-
-        [Test]
-        public void TestValidatePreconditionsUserInForcedVariationInExperiment()
-        {
-            var optly = Helper.CreatePrivateOptimizely();
-            bool result = (bool)optly.Invoke("ValidatePreconditions",
-                Config.GetExperimentFromKey("test_experiment"),
-                "user1", ConfigManager.GetConfig(), new UserAttributes { });
-            Assert.IsTrue(result);
-        }
-
-        [Test]
-        public void TestValidatePreconditionsUserNotInForcedVariationNotInExperiment()
-        {
-            var optly = Helper.CreatePrivateOptimizely();
-            bool result = (bool)optly.Invoke("ValidatePreconditions",
-                Config.GetExperimentFromKey("test_experiment"),
-                TestUserId, ConfigManager.GetConfig(), new UserAttributes { });
-            Assert.IsFalse(result);
         }
 
         [Test]

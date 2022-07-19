@@ -1,11 +1,11 @@
 ﻿/* 
- * Copyright 2017-2021, Optimizely
+ * Copyright 2017-2022, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,6 +19,7 @@ using OptimizelySDK.Utils;
 using OptimizelySDK.Entity;
 using NUnit.Framework;
 using OptimizelySDK.Config;
+using OptimizelySDK.Tests.Utils;
 
 namespace OptimizelySDK.Tests.UtilsTests
 {
@@ -81,13 +82,13 @@ namespace OptimizelySDK.Tests.UtilsTests
         [Test]
         public void TestDoesUserMeetAudienceConditionsNoAudienceUsedInExperiment()
         {
-            Assert.IsTrue(ExperimentUtils.DoesUserMeetAudienceConditions(Config, Config.GetExperimentFromKey("paused_experiment"), new UserAttributes(), "experiment", "paused_experiment", Logger).ResultObject);
+            Assert.IsTrue(ExperimentUtils.DoesUserMeetAudienceConditions(Config, Config.GetExperimentFromKey("paused_experiment"), new UserAttributes().ToUserContext(), "experiment", "paused_experiment", Logger).ResultObject);
         }
 
         [Test]
         public void TestDoesUserMeetAudienceConditionsAudienceUsedInExperimentNoAttributesProvided()
         {
-            Assert.IsFalse(ExperimentUtils.DoesUserMeetAudienceConditions(Config, Config.GetExperimentFromKey("test_experiment"), new UserAttributes(), "experiment", "test_experiment", Logger).ResultObject);
+            Assert.IsFalse(ExperimentUtils.DoesUserMeetAudienceConditions(Config, Config.GetExperimentFromKey("test_experiment"), new UserAttributes().ToUserContext(), "experiment", "test_experiment", Logger).ResultObject);
 
             Assert.IsFalse(ExperimentUtils.DoesUserMeetAudienceConditions(Config, Config.GetExperimentFromKey("test_experiment"), null, "experiment", "test_experiment", Logger).ResultObject);
         }
@@ -100,19 +101,13 @@ namespace OptimizelySDK.Tests.UtilsTests
                 {"device_type", "iPhone" },
                 {"location", "San Francisco" }
             };
-            Assert.IsTrue(ExperimentUtils.DoesUserMeetAudienceConditions(Config, Config.GetExperimentFromKey("test_experiment"), userAttributes, "experiment", "test_experiment", Logger).ResultObject);
+            Assert.IsTrue(ExperimentUtils.DoesUserMeetAudienceConditions(Config, Config.GetExperimentFromKey("test_experiment"), userAttributes.ToUserContext(), "experiment", "test_experiment", Logger).ResultObject);
         }
 
         [Test]
         public void TestDoesUserMeetAudienceConditionsAudienceNoMatch()
         {
-            var userAttributes = new UserAttributes
-            {
-                {"device_type", "Android" },
-                {"location", "San Francisco" }
-            };
-
-            Assert.IsFalse(ExperimentUtils.DoesUserMeetAudienceConditions(Config, Config.GetExperimentFromKey("test_experiment"), null, "experiment", "test_experiment", Logger).ResultObject);
+            Assert.IsFalse(ExperimentUtils.DoesUserMeetAudienceConditions(Config, Config.GetExperimentFromKey("test_experiment"), new UserAttributes().ToUserContext(), "experiment", "test_experiment", Logger).ResultObject);
         }
 
         [Test]

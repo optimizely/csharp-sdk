@@ -14,28 +14,25 @@
  * limitations under the License.
  */
 
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using OptimizelySDK.Entity;
 using OptimizelySDK.Logger;
 
 namespace OptimizelySDK.AudienceConditions
 {
     /// <summary>
-    /// Represents Audiece Id condition for audience evaluation.
+    /// Represents Audience Id condition for audience evaluation.
     /// </summary>
     public class AudienceIdCondition : ICondition
     {
         public string AudienceId { get; set; }
         
-        public bool? Evaluate(ProjectConfig config, UserAttributes attributes, ILogger logger)
+        public bool? Evaluate(ProjectConfig config, OptimizelyUserContext user, ILogger logger)
         {
             var audience = config?.GetAudience(AudienceId);
             if (audience == null || string.IsNullOrEmpty(audience.Id))
                 return null;
 
             logger.Log(LogLevel.DEBUG, $@"Starting to evaluate audience ""{AudienceId}"" with conditions: {audience.ConditionsString}");
-            var result = audience.ConditionList.Evaluate(config, attributes, logger);
+            var result = audience.ConditionList.Evaluate(config, user, logger);
             var resultText = result?.ToString().ToUpper() ?? "UNKNOWN";
             logger.Log(LogLevel.DEBUG, $@"Audience ""{AudienceId}"" evaluated to {resultText}");
 

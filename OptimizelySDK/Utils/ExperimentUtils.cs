@@ -1,11 +1,11 @@
 /* 
- * Copyright 2017-2021, Optimizely
+ * Copyright 2017-2022, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -41,20 +41,23 @@ namespace OptimizelySDK.Utils
         /// </summary>
         /// <param name="config">ProjectConfig Configuration for the project</param>
         /// <param name="experiment">Experiment Entity representing the experiment</param>
-        /// <param name="userAttributes">Attributes of the user. Defaults to empty attributes array if not provided</param>
+        /// <param name="user">OptimizelyUserContext in use</param>
         /// <param name="loggingKeyType">It can be either experiment or rule.</param>
         /// <param name="loggingKey">In case loggingKeyType is experiment it will be experiment key or else it will be rule number.</param>
+        /// <param name="logger">Custom logger implementation to record log outputs</param>
         /// <returns>true if the user meets audience conditions to be in experiment, false otherwise.</returns>
         public static Result<bool> DoesUserMeetAudienceConditions(ProjectConfig config,
             Experiment experiment,
-            UserAttributes userAttributes,
+            OptimizelyUserContext user,
             string loggingKeyType,
             string loggingKey,
             ILogger logger)
         {
             var reasons = new DecisionReasons();
-            if (userAttributes == null)
-                userAttributes = new UserAttributes();
+            if (user == null)
+            {
+                return Result<bool>.NewResult(false, reasons);
+            }
 
             ICondition expConditions = null;
             if (experiment.AudienceConditionsList != null)
@@ -72,7 +75,7 @@ namespace OptimizelySDK.Utils
             if (expConditions == null)
                 return Result<bool>.NewResult(true, reasons);
 
-            var result = expConditions.Evaluate(config, userAttributes, logger).GetValueOrDefault();
+            var result = expConditions.Evaluate(config, user, logger).GetValueOrDefault();
             var resultText = result.ToString().ToUpper();
             logger.Log(LogLevel.INFO, reasons.AddInfo($@"Audiences for {loggingKeyType} ""{loggingKey}"" collectively evaluated to {resultText}"));
             return Result<bool>.NewResult(result, reasons);

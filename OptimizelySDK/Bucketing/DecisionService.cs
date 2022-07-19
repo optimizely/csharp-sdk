@@ -1,11 +1,11 @@
 ﻿/*
-* Copyright 2017-2021, Optimizely
+* Copyright 2017-2022, Optimizely
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
 * You may obtain a copy of the License at
 *
-* http://www.apache.org/licenses/LICENSE-2.0
+* https://www.apache.org/licenses/LICENSE-2.0
 *
 * Unless required by applicable law or agreed to in writing, software
 * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,7 +16,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using OptimizelySDK.Entity;
 using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Logger;
@@ -160,7 +159,7 @@ namespace OptimizelySDK.Bucketing
                 }
             }
             var filteredAttributes = user.GetAttributes();
-            var doesUserMeetAudienceConditionsResult = ExperimentUtils.DoesUserMeetAudienceConditions(config, experiment, filteredAttributes, LOGGING_KEY_TYPE_EXPERIMENT, experiment.Key, Logger);
+            var doesUserMeetAudienceConditionsResult = ExperimentUtils.DoesUserMeetAudienceConditions(config, experiment, user, LOGGING_KEY_TYPE_EXPERIMENT, experiment.Key, Logger);
             reasons += doesUserMeetAudienceConditionsResult.DecisionReasons;
             if (doesUserMeetAudienceConditionsResult.ResultObject)
             {
@@ -411,9 +410,7 @@ namespace OptimizelySDK.Bucketing
         /// Fall back onto the everyone else rule if the user is ever excluded from a rule due to traffic allocation.
         /// </summary>
         /// <param name = "featureFlag" >The feature flag the user wants to access.</param>
-        /// <param name = "userId" >User Identifier</param>
-        /// <param name = "filteredAttributes" >The user's attributes. This should be filtered to just attributes in the Datafile.</param>
-        /// <param name = "reasons" >Decision log messages.</param>
+        /// <param name = "user" >The user context.</param>
         /// <returns>null if the user is not bucketed into the rollout or if the feature flag was not attached to a rollout.
         /// otherwise the FeatureDecision entity</returns>
         public virtual Result<FeatureDecision> GetVariationForFeatureRollout(FeatureFlag featureFlag,
@@ -480,7 +477,7 @@ namespace OptimizelySDK.Bucketing
                 var loggingKey = everyoneElse ? "Everyone Else" : string.Format("{0}", index + 1);
 
                 // Evaluate if user meets the audience condition of this rollout rule
-                var doesUserMeetAudienceConditionsResult = ExperimentUtils.DoesUserMeetAudienceConditions(config, rule, attributes, LOGGING_KEY_TYPE_RULE, rule.Key, Logger);
+                var doesUserMeetAudienceConditionsResult = ExperimentUtils.DoesUserMeetAudienceConditions(config, rule, user, LOGGING_KEY_TYPE_RULE, rule.Key, Logger);
                 reasons += doesUserMeetAudienceConditionsResult.DecisionReasons;
                 if (doesUserMeetAudienceConditionsResult.ResultObject)
                 {

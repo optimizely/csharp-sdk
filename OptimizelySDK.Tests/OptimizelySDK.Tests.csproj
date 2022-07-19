@@ -106,6 +106,7 @@
     <Compile Include="UtilsTests\ExperimentUtilsTest.cs" />
     <Compile Include="UtilsTests\PrivateObject.cs" />
     <Compile Include="UtilsTests\ValidatorTest.cs" />
+    <Compile Include="Utils\TestConversionExtensions.cs" />
     <Compile Include="ValidEventDispatcher.cs" />
     <Compile Include="ConfigTest\TestPollingProjectConfigManager.cs" />
     <Compile Include="EntityTests\FeatureVariableTest.cs" />
