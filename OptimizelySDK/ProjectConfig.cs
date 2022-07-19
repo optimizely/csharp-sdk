@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,6 +15,7 @@
  */
 
 using OptimizelySDK.Entity;
+using OptimizelySDK.Config;
 using System.Collections.Generic;
 
 namespace OptimizelySDK
@@ -69,12 +70,12 @@ namespace OptimizelySDK
         /// <summary>
         /// Configured host name for the Optimizely Data Platform. 
         /// </summary>
-        string HostForOdp { get; set; }
+        string HostForOdp { get; }
         
         /// <summary>
         /// Configured public key from the Optimizely Data Platform.
         /// </summary>
-        string PublicKeyForOdp { get; set; }
+        string PublicKeyForOdp { get; }
 
         //========================= Mappings ===========================
 
@@ -174,6 +175,11 @@ namespace OptimizelySDK
         /// Associative list of Rollouts.
         /// </summary>
         Rollout[] Rollouts { get; set; }
+
+        /// <summary>
+        /// Associative list of Integrations.
+        /// </summary>
+        Integration[] Integrations { get; }
 
         //========================= Getters ===========================
 

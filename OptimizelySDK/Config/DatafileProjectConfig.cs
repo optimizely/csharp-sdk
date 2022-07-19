@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -102,12 +102,12 @@ namespace OptimizelySDK.Config
         /// <summary>
         /// Configured host name for the Optimizely Data Platform. 
         /// </summary>
-        public string HostForOdp { get; set; }
+        public string HostForOdp { get; private set; }
         
         /// <summary>
         /// Configured public key from the Optimizely Data Platform.
         /// </summary>
-        public string PublicKeyForOdp { get; set; }
+        public string PublicKeyForOdp { get; private set; }
 
         /// <summary>
         /// Supported datafile versions list.
@@ -278,7 +278,7 @@ namespace OptimizelySDK.Config
         /// <summary>
         /// Associative list of Integrations.
         /// </summary>
-        private Integration[] Integrations { get; set; }
+        public Integration[] Integrations { get; private set; }
 
         //========================= Initialization ===========================
 
