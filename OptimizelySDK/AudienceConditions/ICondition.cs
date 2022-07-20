@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-using OptimizelySDK.Entity;
 using OptimizelySDK.Logger;
 
 namespace OptimizelySDK.AudienceConditions

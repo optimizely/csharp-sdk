@@ -18,6 +18,7 @@ using Newtonsoft.Json;
 using OptimizelySDK.Logger;
 using OptimizelySDK.Utils;
 using System;
+using System.Linq;
 
 namespace OptimizelySDK.AudienceConditions
 {
@@ -29,7 +30,17 @@ namespace OptimizelySDK.AudienceConditions
         /// <summary>
         /// String constant representing custom attribute condition type.
         /// </summary>
-        public const string CUSTOM_ATTRIBUTE_CONDITION_TYPE = "custom_attribute";
+        private const string CUSTOM_ATTRIBUTE = "custom_attribute";
+        
+        /// <summary>
+        /// String constant representing a third-party condition type.
+        /// </summary>
+        private const string THIRD_PARTY_DIMENSION = "third_party_dimension";
+
+        /// <summary>
+        /// String constant to match status of qualified segments.  
+        /// </summary>
+        private const string QUALIFIED = "qualified";
 
         [JsonProperty("type")]
         public string Type { get; set; }
@@ -45,7 +56,7 @@ namespace OptimizelySDK.AudienceConditions
 
         public bool? Evaluate(ProjectConfig config, OptimizelyUserContext user, ILogger logger)
         {
-            if (Type == null || Type != CUSTOM_ATTRIBUTE_CONDITION_TYPE)
+            if (!IsValidType())
             {
                 logger.Log(LogLevel.WARN, $@"Audience condition ""{this}"" uses an unknown condition type. You may need to upgrade to a newer release of the Optimizely SDK.");
                 return null;
@@ -60,6 +71,17 @@ namespace OptimizelySDK.AudienceConditions
                 return null;
             }
 
+            if (Match == QUALIFIED)
+            {
+                if (Value is string)
+                {
+                    return user.IsQualifiedFor(Value.ToString());
+                }
+                
+                logger.Log(LogLevel.WARN, $@"Audience condition ""{this}"" has a qualified match but invalid value.");
+                return null;
+            }
+
             var evaluator = GetEvaluator();
             if (evaluator == null)
             {
@@ -68,6 +90,11 @@ namespace OptimizelySDK.AudienceConditions
             }
 
             return evaluator(attributeValue, logger);
+        }
+
+        private bool IsValidType()
+        {
+            return new[] {CUSTOM_ATTRIBUTE, THIRD_PARTY_DIMENSION}.Contains(Type);
         }
         
         public Func<object, ILogger, bool?> GetEvaluator()
