@@ -277,7 +277,7 @@ namespace OptimizelySDK.Config
         /// <summary>
         /// Associative list of Integrations.
         /// </summary>
-        public Integration[] Integrations { get; private set; }
+        public Integration[] Integrations { get; set; }
 
         //========================= Initialization ===========================
 
@@ -370,15 +370,9 @@ namespace OptimizelySDK.Config
                 }
             }
 
-            foreach (var integration in Integrations)
-            {
-                if (integration.Key?.ToLower() == "odp")
-                {
-                    HostForOdp = integration.Host;
-                    PublicKeyForOdp = integration.PublicKey;
-                    break;
-                }
-            }
+            var integration = Integrations.FirstOrDefault(i => i.Key.ToLower() == "odp");
+            HostForOdp = integration?.Host;
+            PublicKeyForOdp = integration?.PublicKey;
 
             var flagToVariationsMap = new Dictionary<string, Dictionary<string, Variation>>();
             // Adding experiments in experiment-feature map and flag variation map to use.

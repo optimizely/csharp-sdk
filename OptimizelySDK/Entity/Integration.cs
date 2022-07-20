@@ -14,24 +14,13 @@
  * limitations under the License.
  */
 
-namespace OptimizelySDK.Config
+namespace OptimizelySDK.Entity
 {
-    public class Integration
+    public class Integration : IdKeyEntity
     {
-        public string Key { get; private set; }
-        public string Host { get; private set; }
-        public string PublicKey { get; private set; }
-
-        public Integration(
-            string key,
-            string host,
-            string publicKey
-        )
-        {
-            Key = key;
-            Host = host;
-            PublicKey = publicKey;
-        }
+        public string Host { get; set; }
+        
+        public string PublicKey { get; set; }
 
         public override string ToString()
         {
