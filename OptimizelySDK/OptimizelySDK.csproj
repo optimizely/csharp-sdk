@@ -72,7 +72,6 @@
     <Compile Include="Bucketing\Bucketer.cs" />
     <Compile Include="Bucketing\Decision.cs" />
     <Compile Include="ClientConfigHandler.cs" />
-    <Compile Include="Config\Integration.cs" />
     <Compile Include="Entity\Attribute.cs" />
     <Compile Include="Entity\Audience.cs" />
     <Compile Include="AudienceConditions\BaseCondition.cs" />
@@ -87,6 +86,7 @@
     <Compile Include="Entity\ForcedVariation.cs" />
     <Compile Include="Entity\Group.cs" />
     <Compile Include="Entity\IdKeyEntity.cs" />
+    <Compile Include="Entity\Integration.cs" />
     <Compile Include="Event\Entity\DecisionMetadata.cs" />
     <Compile Include="OptimizelyDecisions\DecisionMessage.cs" />
     <Compile Include="OptimizelyDecisions\DecisionReasons.cs" />
