@@ -178,6 +178,15 @@ namespace OptimizelySDK.Tests.OptimizelyConfigTests
         }
 
         [Test]
+        public void TestGetOptimizelyConfigWithOdpIntegration()
+        {
+            var datafileProjectConfig = DatafileProjectConfig.Create(TestData.TypedAudienceDatafile, new NoOpLogger(), new ErrorHandler.NoOpErrorHandler());
+
+            Assert.AreEqual("https://api.zaius.com", datafileProjectConfig.HostForOdp);
+            Assert.AreEqual("W4WzcEs-ABgXorzY7h1LCQ", datafileProjectConfig.PublicKeyForOdp);
+        }
+        
+        [Test]
         public void TestGetOptimizelyConfigService()
         {
             var datafileProjectConfig = DatafileProjectConfig.Create(TestData.TypedAudienceDatafile, new NoOpLogger(), new ErrorHandler.NoOpErrorHandler());
