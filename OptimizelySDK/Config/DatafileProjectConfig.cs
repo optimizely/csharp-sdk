@@ -20,7 +20,6 @@ using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Exceptions;
 using OptimizelySDK.Logger;
 using OptimizelySDK.Utils;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Attribute = OptimizelySDK.Entity.Attribute;
