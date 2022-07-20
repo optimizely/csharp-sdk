@@ -187,7 +187,16 @@ namespace OptimizelySDK.Tests.OptimizelyConfigTests
         }
         
         [Test]
-        public void TestGetOptimizelyConfigWithEmptyOdpIntegration()
+        public void TestGetOptimizelyConfigWithEmptyIntegrationCollection()
+        {
+            var datafileProjectConfig = DatafileProjectConfig.Create(TestData.EmptyDatafile, new NoOpLogger(), new ErrorHandler.NoOpErrorHandler());
+
+            Assert.IsNull(datafileProjectConfig.HostForOdp);
+            Assert.IsNull(datafileProjectConfig.PublicKeyForOdp);
+        }
+        
+        [Test]
+        public void TestGetOptimizelyConfigWithOtherIntegrationsInCollection()
         {
             var datafileProjectConfig = DatafileProjectConfig.Create(TestData.EmptyRolloutDatafile, new NoOpLogger(), new ErrorHandler.NoOpErrorHandler());
 

@@ -50,7 +50,13 @@
     }
   ],
   "groups": [],
-  "integrations": [],
+  "integrations": [
+    {
+      "key": "not-odp",
+      "host": "https://example.com",
+      "publicKey": "CleAr1y-!a-R3a7-pUbl1c-k3y"
+    }
+  ],
   "attributes": [],
   "botFiltering": false,
   "accountId": "8272261422",
