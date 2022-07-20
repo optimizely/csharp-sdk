@@ -337,7 +337,4 @@
       <LogicalName>OptimizelySDK.Utils.schema.json</LogicalName>
     </EmbeddedResource>
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\OptimizelySDK\OptimizelySDK.csproj" />
-  </ItemGroup>
 </Project>
