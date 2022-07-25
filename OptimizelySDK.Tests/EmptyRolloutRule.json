@@ -25,6 +25,20 @@
       ],
       "id": "18244658520",
       "key": "empty_rollout"
+    },
+    {
+      "experimentIds": [],
+      "rolloutId": "",
+      "variables": [
+        {
+          "defaultValue": "",
+          "type": "string",
+          "id": "2832355113",
+          "key": "var_2"
+        }
+      ],
+      "id": "24246538512",
+      "key": "empty_rollout_id"
     }
   ],
   "experiments": [],

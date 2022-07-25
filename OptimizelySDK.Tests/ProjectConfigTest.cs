@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright 2017-2021, Optimizely
+ * Copyright 2017-2022, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -821,6 +821,52 @@ namespace OptimizelySDK.Tests
             var experiment = typedConfig.GetExperimentFromKey("feat2_with_var_test");
 
             Assert.True(typedConfig.IsFeatureExperiment(experiment.Id));
+        }
+        
+        [Test]
+        public void TestRolloutWithEmptyStringRolloutIdFromConfigFile()
+        {
+            var projectConfig = DatafileProjectConfig.Create(TestData.EmptyRolloutDatafile, null, null);
+            Assert.IsNotNull(projectConfig);
+            var featureFlag = projectConfig.FeatureKeyMap["empty_rollout_id"];
+            
+            var rollout = projectConfig.GetRolloutFromId(featureFlag.RolloutId);
+
+            Assert.IsNull(rollout.Experiments);
+            Assert.IsNull(rollout.Id);
+        }
+        
+        [Test]
+        public void TestRolloutWithEmptyStringRolloutId()
+        {
+            var rolloutId = string.Empty;
+            
+            var rollout = Config.GetRolloutFromId(rolloutId);
+
+            Assert.IsNull(rollout.Experiments);
+            Assert.IsNull(rollout.Id);
+        }
+        
+        [Test]
+        public void TestRolloutWithConsistingOfASingleSpaceRolloutId()
+        {
+            var rolloutId = " "; // single space
+            
+            var rollout = Config.GetRolloutFromId(rolloutId);
+
+            Assert.IsNull(rollout.Experiments);
+            Assert.IsNull(rollout.Id);
+        }
+        
+        [Test]
+        public void TestRolloutWithConsistingOfANullRolloutId()
+        {
+            string nullRolloutId = null;
+            
+            var rollout = Config.GetRolloutFromId(nullRolloutId);
+
+            Assert.IsNull(rollout.Experiments);
+            Assert.IsNull(rollout.Id);
         }
     }
 }

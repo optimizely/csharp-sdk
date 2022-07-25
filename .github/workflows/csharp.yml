@@ -1,28 +1,30 @@
-
+---
 name: Csharp CI with .NET
 
 on:
   push:
-    branches: [ master ]
+    branches: [master]
   pull_request:
-    branches: [ master ]
+    branches: [master]
 
 jobs:
-  lint_markdown_files:
+  lint_code_base:
     runs-on: ubuntu-latest
+    name: Lint Code Base
     steps:
-    - uses: actions/checkout@v3
-    - name: Set up Ruby
-      uses: ruby/setup-ruby@v1
-      with:
-        ruby-version: '2.6'
-        bundler-cache: true # runs 'bundle install' and caches installed gems automatically
-    - name: Install gem
-      run: |
-        gem install awesome_bot
-    - name: Run tests
-      run: find . -type f -name '*.md' -exec awesome_bot {} \;
-  
+      - name: Checkout Code
+        uses: actions/checkout@v3
+        with:
+          # Full git history is needed to get a proper list of changed files
+          fetch-depth: 0
+      - name: Lint Code Base
+        uses: github/super-linter@v4
+        env:
+          VALIDATE_ALL_CODEBASE: false
+          DEFAULT_BRANCH: master
+          VALIDATE_CSHARP: true
+          VALIDATE_MARKDOWN: true
+
   integration_tests:
     uses: optimizely/csharp-sdk/.github/workflows/integration_test.yml@master
     secrets:
@@ -40,54 +42,54 @@ jobs:
   unit_test:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: 5.0.x
-    - name: Restore nuget packages
-      run: |
-        nuget restore OptimizelySDK.Travis.sln
-        nuget install ./OptimizelySDK.Tests/packages.config -OutputDirectory ./packages
-        nuget install NUnit.Runners -Version 2.6.4 -OutputDirectory ./testrunner
-    - name: script
-      run: |
-        ./install_mono.sh
-        xbuild /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=$(pwd)/keypair.snk /p:Configuration=Release ./OptimizelySDK.Travis.sln
-        mono ./testrunner/NUnit.Runners.2.6.4/tools/nunit-console.exe ./OptimizelySDK.Tests/bin/Release/OptimizelySDK.Tests.dll
-    - name: find and sign dll
-      run: |
-        sudo find . -path './OptimizelySDK*bin/Release/OptimizelySDK*.dll' -not -regex '.*Tests.*' -print0 | while IFS= read -r -d '' file; do sn -R $file ./keypair.snk; done
+      - uses: actions/checkout@v3
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 5.0.x
+      - name: Restore nuget packages
+        run: |
+          nuget restore OptimizelySDK.Travis.sln
+          nuget install ./OptimizelySDK.Tests/packages.config -OutputDirectory ./packages
+          nuget install NUnit.Runners -Version 2.6.4 -OutputDirectory ./testrunner
+      - name: script
+        run: |
+          ./install_mono.sh
+          xbuild /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=$(pwd)/keypair.snk /p:Configuration=Release ./OptimizelySDK.Travis.sln
+          mono ./testrunner/NUnit.Runners.2.6.4/tools/nunit-console.exe ./OptimizelySDK.Tests/bin/Release/OptimizelySDK.Tests.dll
+      - name: find and sign dll
+        run: |
+          sudo find . -path './OptimizelySDK*bin/Release/OptimizelySDK*.dll' -not -regex '.*Tests.*' -print0 | while IFS= read -r -d '' file; do sn -R $file ./keypair.snk; done
 
     
   netStandard16:
     runs-on: windows-2022
     steps:
-    - uses: actions/checkout@v3
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v2
-      with:
-        dotnet-version: 3.1.x
-    - name: Restore dependencies
-      run: dotnet restore OptimizelySDK.NetStandard16/OptimizelySDK.NetStandard16.csproj
-    - name: Build
-      run: |
-        # strongname signing is taken care of in build step
-        dotnet build OptimizelySDK.NetStandard16/OptimizelySDK.NetStandard16.csproj /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=D:\a\csharp-sdk\csharp-sdk\keypair.snk -c Release
-        # TODO: no dotnet test yet for NetStandard16
+      - uses: actions/checkout@v3
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: 3.1.x
+      - name: Restore dependencies
+        run: dotnet restore OptimizelySDK.NetStandard16/OptimizelySDK.NetStandard16.csproj
+      - name: Build
+        run: |
+          # strongname signing is taken care of in build step
+          dotnet build OptimizelySDK.NetStandard16/OptimizelySDK.NetStandard16.csproj /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=D:\a\csharp-sdk\csharp-sdk\keypair.snk -c Release
+          # TODO: no dotnet test yet for NetStandard16
 
   netStandard20:
     runs-on: windows-2022
     steps:
-    - uses: actions/checkout@v3
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v2
-      with:
-        dotnet-version: 3.1.x
-    - name: Restore dependencies
-      run: dotnet restore OptimizelySDK.NetStandard20/OptimizelySDK.NetStandard20.csproj
-    - name: Build
-      run: |
-        # strongname signing is taken care of in build step
-        dotnet build OptimizelySDK.NetStandard20/OptimizelySDK.NetStandard20.csproj /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=D:\a\csharp-sdk\csharp-sdk\keypair.snk -c Release
-        # TODO: no dotnet test yet for NetStandard16
+      - uses: actions/checkout@v3
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: 3.1.x
+      - name: Restore dependencies
+        run: dotnet restore OptimizelySDK.NetStandard20/OptimizelySDK.NetStandard20.csproj
+      - name: Build
+        run: |
+          # strongname signing is taken care of in build step
+          dotnet build OptimizelySDK.NetStandard20/OptimizelySDK.NetStandard20.csproj /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=D:\a\csharp-sdk\csharp-sdk\keypair.snk -c Release
+          # TODO: no dotnet test yet for NetStandard16
