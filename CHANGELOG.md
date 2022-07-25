@@ -1,6 +1,12 @@
 # Optimizely C# SDK Changelog
 ## [Unreleased]	
 
+## 3.11.1
+July 25th, 2022
+
+### Bug Fixes
+- Handle possible empty string `rolloutId` in datafile
+
 ## 3.11.0
 January 6th, 2022
 
