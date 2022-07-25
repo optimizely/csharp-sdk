@@ -25,14 +25,14 @@ namespace OptimizelySDK.AudienceConditions
     {
         public string AudienceId { get; set; }
         
-        public bool? Evaluate(ProjectConfig config, OptimizelyUserContext context, ILogger logger)
+        public bool? Evaluate(ProjectConfig config, OptimizelyUserContext userContext, ILogger logger)
         {
             var audience = config?.GetAudience(AudienceId);
             if (audience == null || string.IsNullOrEmpty(audience.Id))
                 return null;
 
             logger.Log(LogLevel.DEBUG, $@"Starting to evaluate audience ""{AudienceId}"" with conditions: {audience.ConditionsString}");
-            var result = audience.ConditionList.Evaluate(config, context, logger);
+            var result = audience.ConditionList.Evaluate(config, userContext, logger);
             var resultText = result?.ToString().ToUpper() ?? "UNKNOWN";
             logger.Log(LogLevel.DEBUG, $@"Audience ""{AudienceId}"" evaluated to {resultText}");
 

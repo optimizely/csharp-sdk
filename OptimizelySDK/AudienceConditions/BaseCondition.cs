@@ -61,7 +61,7 @@ namespace OptimizelySDK.AudienceConditions
         [JsonProperty("value")]
         public object Value { get; set; }
 
-        public bool? Evaluate(ProjectConfig config, OptimizelyUserContext context, ILogger logger)
+        public bool? Evaluate(ProjectConfig config, OptimizelyUserContext userContext, ILogger logger)
         {
             if (!validTypes.Contains(Type))
             {
@@ -69,7 +69,7 @@ namespace OptimizelySDK.AudienceConditions
                 return null;
             }
 
-            var userAttributes = context.GetAttributes();
+            var userAttributes = userContext.GetAttributes();
             
             object attributeValue = null;
             if (userAttributes.TryGetValue(Name, out attributeValue) == false && Match != AttributeMatchTypes.EXIST)
@@ -82,7 +82,7 @@ namespace OptimizelySDK.AudienceConditions
             {
                 if (Value is string)
                 {
-                    return context.IsQualifiedFor(Value.ToString());
+                    return userContext.IsQualifiedFor(Value.ToString());
                 }
                 
                 logger.Log(LogLevel.WARN, $@"Audience condition ""{this}"" has a qualified match but invalid value.");
