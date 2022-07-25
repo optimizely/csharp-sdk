@@ -23,6 +23,6 @@ namespace OptimizelySDK.AudienceConditions
     /// </summary>
     public interface ICondition
     {
-        bool? Evaluate(ProjectConfig config, OptimizelyUserContext user, ILogger logger);
+        bool? Evaluate(ProjectConfig config, OptimizelyUserContext context, ILogger logger);
     }
 }
