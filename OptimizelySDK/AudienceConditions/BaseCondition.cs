@@ -42,6 +42,13 @@ namespace OptimizelySDK.AudienceConditions
         /// </summary>
         private const string QUALIFIED = "qualified";
 
+        /// <summary>
+        /// Valid types allowed for validation
+        /// </summary>
+        private static readonly string[] validTypes = {
+            CUSTOM_ATTRIBUTE, THIRD_PARTY_DIMENSION,
+        };
+
         [JsonProperty("type")]
         public string Type { get; set; }
 
@@ -56,7 +63,7 @@ namespace OptimizelySDK.AudienceConditions
 
         public bool? Evaluate(ProjectConfig config, OptimizelyUserContext context, ILogger logger)
         {
-            if (!IsValidType())
+            if (!validTypes.Contains(Type))
             {
                 logger.Log(LogLevel.WARN, $@"Audience condition ""{this}"" uses an unknown condition type. You may need to upgrade to a newer release of the Optimizely SDK.");
                 return null;
@@ -90,11 +97,6 @@ namespace OptimizelySDK.AudienceConditions
             }
 
             return evaluator(attributeValue, logger);
-        }
-
-        private bool IsValidType()
-        {
-            return new[] {CUSTOM_ATTRIBUTE, THIRD_PARTY_DIMENSION}.Contains(Type);
         }
         
         public Func<object, ILogger, bool?> GetEvaluator()
