@@ -51,4 +51,71 @@ jobs:
           AWS_DEFAULT_REGION: ${{ secrets.OFTA_REGION }}
         run: |
           find . -path './OptimizelySDK*bin/Release/OptimizelySDK*.dll' -not -regex '.*Tests.*' -print0 | while IFS= read -r -d '' file; do (AWS_ACCESS_KEY_ID=${{ env.AWS_ACCESS_KEY_ID }} AWS_SECRET_ACCESS_KEY=${{ env.AWS_SECRET_ACCESS_KEY }} AWS_DEFAULT_REGION=${{ env.AWS_DEFAULT_REGION }} aws s3 cp $file s3://optly-fs-travisci-artifacts/${{ env.REPO_SLUG }}/${{ env.BUILD_NUMBER }}/${{ env.RUN_NUMBER }}/${{ env.ATTEMPT_NUM }}/$(basename $file)-unsigned); done
- 
+
+  netStandard16:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: 3.1.x
+      - name: Restore dependencies
+        run: dotnet restore OptimizelySDK.NetStandard16/OptimizelySDK.NetStandard16.csproj
+      - name: Build
+        id: netStandard16_build
+        run: |
+          # strongname signing is taken care of in build step
+          dotnet build OptimizelySDK.NetStandard16/OptimizelySDK.NetStandard16.csproj /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=D:\a\csharp-sdk\csharp-sdk\keypair.snk -c Release
+          # TODO: no dotnet test yet for NetStandard16
+      - name: Set the env
+        if: always() && steps.netStandard16_build.outcome == 'success'
+        run: |
+          echo "REPO_SLUG=${{ github.repository }}" >> $GITHUB_ENV
+          echo "BUILD_NUMBER=${{ github.run_id }}" >> $GITHUB_ENV
+          echo "ATTEMPT_NUM=${{ github.run_attempt }}" >> $GITHUB_ENV
+          echo "RUN_NUMBER=${{ github.run_number }}" >> $GITHUB_ENV
+          echo "EVENT_TYPE=${{ github.event_name }}" >> $GITHUB_ENV
+          echo "CURRENT_BRANCH=${{ github.head_ref || github.ref_name }}" >> $GITHUB_ENV
+      - name: Check on success
+        if: always() && steps.netStandard16_build.outcome == 'success' && ${{ env.CURRENT_BRANCH }} == ${{ env.RELEASE_BRANCH }} && ${{ env.EVENT_TYPE }} == "push"
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.OFTA_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.OFTA_SECRET }}
+          AWS_DEFAULT_REGION: ${{ secrets.OFTA_REGION }}
+        run: |
+          (AWS_ACCESS_KEY_ID=${{ env.AWS_ACCESS_KEY_ID }} AWS_SECRET_ACCESS_KEY=${{ env.AWS_SECRET_ACCESS_KEY }} AWS_DEFAULT_REGION=${{ env.AWS_DEFAULT_REGION }} aws s3 cp ./OptimizelySDK.NetStandard16/bin/Release/netstandard1.6/OptimizelySDK.NetStandard16.dll s3://optly-fs-travisci-artifacts/${{ env.REPO_SLUG }}/${{ env.BUILD_NUMBER }}/${{ env.RUN_NUMBER }}/${{ env.ATTEMPT_NUM }}/OptimizelySDK.NetStandard16.dll-unsigned)
+
+  netStandard20:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: 3.1.x
+      - name: Restore dependencies
+        run: dotnet restore OptimizelySDK.NetStandard20/OptimizelySDK.NetStandard20.csproj
+      - name: Build
+        id: netStandard20_build
+        run: |
+          # strongname signing is taken care of in build step
+          dotnet build OptimizelySDK.NetStandard20/OptimizelySDK.NetStandard20.csproj /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=D:\a\csharp-sdk\csharp-sdk\keypair.snk -c Release
+          # TODO: no dotnet test yet for NetStandard20
+      - name: Set the env
+        if: always() && steps.netStandard20_build.outcome == 'success'
+        run: |
+          echo "REPO_SLUG=${{ github.repository }}" >> $GITHUB_ENV
+          echo "BUILD_NUMBER=${{ github.run_id }}" >> $GITHUB_ENV
+          echo "ATTEMPT_NUM=${{ github.run_attempt }}" >> $GITHUB_ENV
+          echo "RUN_NUMBER=${{ github.run_number }}" >> $GITHUB_ENV
+          echo "EVENT_TYPE=${{ github.event_name }}" >> $GITHUB_ENV
+          echo "CURRENT_BRANCH=${{ github.head_ref || github.ref_name }}" >> $GITHUB_ENV
+      - name: Check on success
+        if: always() && steps.netStandard20_build.outcome == 'success' && ${{ env.CURRENT_BRANCH }} == ${{ env.RELEASE_BRANCH }} && ${{ env.EVENT_TYPE }} == "push"
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.OFTA_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.OFTA_SECRET }}
+          AWS_DEFAULT_REGION: ${{ secrets.OFTA_REGION }}
+        run: |
+          (AWS_ACCESS_KEY_ID=${{ env.AWS_ACCESS_KEY_ID }} AWS_SECRET_ACCESS_KEY=${{ env.AWS_SECRET_ACCESS_KEY }} AWS_DEFAULT_REGION=${{ env.AWS_DEFAULT_REGION }} aws s3 cp ./OptimizelySDK.NetStandard20/bin/Release/netstandard2.0/OptimizelySDK.NetStandard20.dll s3://optly-fs-travisci-artifacts/${{ env.REPO_SLUG }}/${{ env.BUILD_NUMBER }}/${{ env.RUN_NUMBER }}/${{ env.ATTEMPT_NUM }}/OptimizelySDK.NetStandard20.dll-unsigned)
