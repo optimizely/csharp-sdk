@@ -50,7 +50,7 @@ namespace OptimizelySDK
         {
         }
 
-        public OptimizelyUserContext(Optimizely optimizely, string userId, UserAttributes userAttributes, ForcedDecisionsStore forcedDecisionsStore, IErrorHandler errorHandler, ILogger logger)
+        public OptimizelyUserContext(Optimizely optimizely, string userId, UserAttributes userAttributes, ForcedDecisionsStore forcedDecisionsStore, IErrorHandler errorHandler, ILogger logger, List<string> qualifiedSegments = null)
         {
             ErrorHandler = errorHandler;
             Logger = logger;
@@ -58,10 +58,10 @@ namespace OptimizelySDK
             Attributes = userAttributes ?? new UserAttributes();
             ForcedDecisionsStore = forcedDecisionsStore ?? new ForcedDecisionsStore();
             UserId = userId;
-            QualifiedSegments = new List<string>();
+            QualifiedSegments = qualifiedSegments ?? new List<string>();
         }
 
-        private OptimizelyUserContext Copy() => new OptimizelyUserContext(Optimizely, UserId, GetAttributes(), GetForcedDecisionsStore(), ErrorHandler, Logger);
+        private OptimizelyUserContext Copy() => new OptimizelyUserContext(Optimizely, UserId, GetAttributes(), GetForcedDecisionsStore(), ErrorHandler, Logger, QualifiedSegments);
         
         /// <summary>
         /// Returns true if the user is qualified for the given segment name
