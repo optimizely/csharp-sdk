@@ -6,39 +6,12 @@ on:
     branches: [master]
   pull_request:
     branches: [master]
+    
+env:
+  RELEASE_BRANCH: "3.3.x"
 
 jobs:
-  lint_code_base:
-    runs-on: ubuntu-latest
-    name: Lint Code Base
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
-        with:
-          # Full git history is needed to get a proper list of changed files
-          fetch-depth: 0
-      - name: Lint Code Base
-        uses: github/super-linter@v4
-        env:
-          VALIDATE_ALL_CODEBASE: false
-          DEFAULT_BRANCH: master
-          VALIDATE_CSHARP: true
-          VALIDATE_MARKDOWN: true
 
-  integration_tests:
-    uses: optimizely/csharp-sdk/.github/workflows/integration_test.yml@master
-    secrets:
-      CI_USER_TOKEN: ${{ secrets.CI_USER_TOKEN }}
-      TRAVIS_COM_TOKEN: ${{ secrets.TRAVIS_COM_TOKEN }}
-      
-  fullstack_production_suite:
-    uses: optimizely/csharp-sdk/.github/workflows/integration_test.yml@master
-    with:
-      FULLSTACK_TEST_REPO: ProdTesting
-    secrets:
-      CI_USER_TOKEN: ${{ secrets.CI_USER_TOKEN }}
-      TRAVIS_COM_TOKEN: ${{ secrets.TRAVIS_COM_TOKEN }}
-  
   unit_test:
     runs-on: ubuntu-latest
     steps:
@@ -60,36 +33,20 @@ jobs:
       - name: find and sign dll
         run: |
           sudo find . -path './OptimizelySDK*bin/Release/OptimizelySDK*.dll' -not -regex '.*Tests.*' -print0 | while IFS= read -r -d '' file; do sn -R $file ./keypair.snk; done
-
-    
-  netStandard16:
-    runs-on: windows-2022
-    steps:
-      - uses: actions/checkout@v3
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v2
-        with:
-          dotnet-version: 3.1.x
-      - name: Restore dependencies
-        run: dotnet restore OptimizelySDK.NetStandard16/OptimizelySDK.NetStandard16.csproj
-      - name: Build
+      - name: Set the env
+        if: always() && steps.integration_testing.outcome == 'success'
         run: |
-          # strongname signing is taken care of in build step
-          dotnet build OptimizelySDK.NetStandard16/OptimizelySDK.NetStandard16.csproj /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=D:\a\csharp-sdk\csharp-sdk\keypair.snk -c Release
-          # TODO: no dotnet test yet for NetStandard16
-
-  netStandard20:
-    runs-on: windows-2022
-    steps:
-      - uses: actions/checkout@v3
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v2
-        with:
-          dotnet-version: 3.1.x
-      - name: Restore dependencies
-        run: dotnet restore OptimizelySDK.NetStandard20/OptimizelySDK.NetStandard20.csproj
-      - name: Build
+          echo "REPO_SLUG=${{ github.repository }}" >> $GITHUB_ENV
+          echo "BUILD_NUMBER=${{ github.run_id }}" >> $GITHUB_ENV
+          echo "ATTEMPT_NUM=${{ github.run_attempt }}" >> $GITHUB_ENV
+          echo "RUN_NUMBER=${{ github.run_number }}" >> $GITHUB_ENV
+          echo "EVENT_TYPE=${{ github.event_name }}" >> $GITHUB_ENV
+      - name: Check on success
+        if: always() && steps.integration_testing.outcome == 'success'
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.OFTA_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.OFTA_SECRET }}
+          AWS_DEFAULT_REGION: ${{ secrets.OFTA_REGION }}
         run: |
-          # strongname signing is taken care of in build step
-          dotnet build OptimizelySDK.NetStandard20/OptimizelySDK.NetStandard20.csproj /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=D:\a\csharp-sdk\csharp-sdk\keypair.snk -c Release
-          # TODO: no dotnet test yet for NetStandard16
+          ([ ${GITHUB_REF##*/} = "$RELEASE_BRANCH" ] && [ ${EVENT_TYPE} = "push" ]) && find . -path './OptimizelySDK*bin/Release/OptimizelySDK*.dll' -not -regex '.*Tests.*' -print0 | while IFS= read -r -d '' file; do (AWS_ACCESS_KEY_ID=$OFTA_KEY AWS_SECRET_ACCESS_KEY=$OFTA_SECRET AWS_DEFAULT_REGION=$OFTA_REGION aws s3 cp $file s3://optly-fs-travisci-artifacts/${REPO_SLUG}/${BUILD_NUMBER}/${RUN_NUMBER}/${ATTEMPT_NUM}/$(basename $file)-unsigned); done
+ 
