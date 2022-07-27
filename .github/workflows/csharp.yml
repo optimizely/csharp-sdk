@@ -11,7 +11,37 @@ env:
   RELEASE_BRANCH: "3.3.x"
 
 jobs:
+  lint_code_base:
+    runs-on: ubuntu-latest
+    name: Lint Code Base
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+        with:
+          # Full git history is needed to get a proper list of changed files
+          fetch-depth: 0
+      - name: Lint Code Base
+        uses: github/super-linter@v4
+        env:
+          VALIDATE_ALL_CODEBASE: false
+          DEFAULT_BRANCH: master
+          VALIDATE_CSHARP: true
+          VALIDATE_MARKDOWN: true
 
+  integration_tests:
+    uses: optimizely/csharp-sdk/.github/workflows/integration_test.yml@master
+    secrets:
+      CI_USER_TOKEN: ${{ secrets.CI_USER_TOKEN }}
+      TRAVIS_COM_TOKEN: ${{ secrets.TRAVIS_COM_TOKEN }}
+      
+  fullstack_production_suite:
+    uses: optimizely/csharp-sdk/.github/workflows/integration_test.yml@master
+    with:
+      FULLSTACK_TEST_REPO: ProdTesting
+    secrets:
+      CI_USER_TOKEN: ${{ secrets.CI_USER_TOKEN }}
+      TRAVIS_COM_TOKEN: ${{ secrets.TRAVIS_COM_TOKEN }}
+      
   unit_test:
     runs-on: ubuntu-latest
     env:
