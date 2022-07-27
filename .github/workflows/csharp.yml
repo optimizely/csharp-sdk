@@ -69,6 +69,13 @@ jobs:
           dotnet build OptimizelySDK.NetStandard16/OptimizelySDK.NetStandard16.csproj /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=D:\a\csharp-sdk\csharp-sdk\keypair.snk -c Release
           # TODO: no dotnet test yet for NetStandard16
       - name: Set the env
+        env:
+          REPO_SLUG: ${{ github.repository }}
+          BUILD_NUMBER: ${{ github.run_id }}
+          ATTEMPT_NUM: ${{ github.run_attempt }}
+          RUN_NUMBER: ${{ github.run_number }}
+          EVENT_TYPE: ${{ github.event_name }}
+          CURRENT_BRANCH: ${{ github.head_ref || github.ref_name }}
         run: |
           echo "REPO_SLUG=${{ github.repository }}" >> $GITHUB_ENV
           echo "BUILD_NUMBER=${{ github.run_id }}" >> $GITHUB_ENV
@@ -79,6 +86,12 @@ jobs:
       - name: Check on success
         if: steps.netStandard16_build.outcome == 'success' && ${{ env.CURRENT_BRANCH }} == ${{ env.RELEASE_BRANCH }} && ${{ env.EVENT_TYPE }} == "push"
         env:
+          REPO_SLUG: ${{ github.repository }}
+          BUILD_NUMBER: ${{ github.run_id }}
+          ATTEMPT_NUM: ${{ github.run_attempt }}
+          RUN_NUMBER: ${{ github.run_number }}
+          EVENT_TYPE: ${{ github.event_name }}
+          CURRENT_BRANCH: ${{ github.head_ref || github.ref_name }}
           AWS_ACCESS_KEY_ID: ${{ secrets.OFTA_KEY }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.OFTA_SECRET }}
           AWS_DEFAULT_REGION: ${{ secrets.OFTA_REGION }}
@@ -103,6 +116,13 @@ jobs:
           # TODO: no dotnet test yet for NetStandard20
       - name: Set the env
         if: steps.netStandard20_build.outcome == 'success'
+        env:
+          REPO_SLUG: ${{ github.repository }}
+          BUILD_NUMBER: ${{ github.run_id }}
+          ATTEMPT_NUM: ${{ github.run_attempt }}
+          RUN_NUMBER: ${{ github.run_number }}
+          EVENT_TYPE: ${{ github.event_name }}
+          CURRENT_BRANCH: ${{ github.head_ref || github.ref_name }}
         run: |
           echo "REPO_SLUG=${{ github.repository }}" >> $GITHUB_ENV
           echo "BUILD_NUMBER=${{ github.run_id }}" >> $GITHUB_ENV
@@ -113,6 +133,12 @@ jobs:
       - name: Check on success
         if: steps.netStandard20_build.outcome == 'success' && ${{ env.CURRENT_BRANCH }} == ${{ env.RELEASE_BRANCH }} && ${{ env.EVENT_TYPE }} == "push"
         env:
+          REPO_SLUG: ${{ github.repository }}
+          BUILD_NUMBER: ${{ github.run_id }}
+          ATTEMPT_NUM: ${{ github.run_attempt }}
+          RUN_NUMBER: ${{ github.run_number }}
+          EVENT_TYPE: ${{ github.event_name }}
+          CURRENT_BRANCH: ${{ github.head_ref || github.ref_name }}
           AWS_ACCESS_KEY_ID: ${{ secrets.OFTA_KEY }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.OFTA_SECRET }}
           AWS_DEFAULT_REGION: ${{ secrets.OFTA_REGION }}
