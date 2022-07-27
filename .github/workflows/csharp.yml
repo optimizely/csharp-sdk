@@ -8,7 +8,7 @@ on:
     branches: [master]
     
 env:
-  RELEASE_BRANCH: "3.3.x"
+  RELEASE_BRANCH: "master"
 
 jobs:
   lint_code_base:
