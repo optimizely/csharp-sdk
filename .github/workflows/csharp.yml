@@ -84,7 +84,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.OFTA_SECRET }}
           AWS_DEFAULT_REGION: ${{ secrets.OFTA_REGION }}
         run: |
-          (AWS_ACCESS_KEY_ID=${{ env.AWS_ACCESS_KEY_ID }} AWS_SECRET_ACCESS_KEY=${{ env.AWS_SECRET_ACCESS_KEY }} AWS_DEFAULT_REGION=${{ env.AWS_DEFAULT_REGION }} aws s3 cp ./OptimizelySDK.NetStandard16/bin/Release/netstandard1.6/OptimizelySDK.NetStandard16.dll s3://optly-fs-travisci-artifacts/${{ env.REPO_SLUG }}/${{ env.BUILD_NUMBER }}/${{ env.RUN_NUMBER }}/${{ env.ATTEMPT_NUM }}/OptimizelySDK.NetStandard16.dll-unsigned)
+          aws s3 cp ./OptimizelySDK.NetStandard16/bin/Release/netstandard1.6/OptimizelySDK.NetStandard16.dll s3://optly-fs-travisci-artifacts/${{ env.REPO_SLUG }}/${{ env.BUILD_NUMBER }}/${{ env.RUN_NUMBER }}/${{ env.ATTEMPT_NUM }}/OptimizelySDK.NetStandard16.dll-unsigned
 
   netStandard20:
     runs-on: windows-2022
@@ -118,4 +118,4 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.OFTA_SECRET }}
           AWS_DEFAULT_REGION: ${{ secrets.OFTA_REGION }}
         run: |
-          (AWS_ACCESS_KEY_ID=${{ env.AWS_ACCESS_KEY_ID }} AWS_SECRET_ACCESS_KEY=${{ env.AWS_SECRET_ACCESS_KEY }} AWS_DEFAULT_REGION=${{ env.AWS_DEFAULT_REGION }} aws s3 cp ./OptimizelySDK.NetStandard20/bin/Release/netstandard2.0/OptimizelySDK.NetStandard20.dll s3://optly-fs-travisci-artifacts/${{ env.REPO_SLUG }}/${{ env.BUILD_NUMBER }}/${{ env.RUN_NUMBER }}/${{ env.ATTEMPT_NUM }}/OptimizelySDK.NetStandard20.dll-unsigned)
+          aws s3 cp ./OptimizelySDK.NetStandard20/bin/Release/netstandard2.0/OptimizelySDK.NetStandard20.dll s3://optly-fs-travisci-artifacts/${{ env.REPO_SLUG }}/${{ env.BUILD_NUMBER }}/${{ env.RUN_NUMBER }}/${{ env.ATTEMPT_NUM }}/OptimizelySDK.NetStandard20.dll-unsigned
