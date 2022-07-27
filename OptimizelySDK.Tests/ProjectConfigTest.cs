@@ -868,5 +868,32 @@ namespace OptimizelySDK.Tests
             Assert.IsNull(rollout.Experiments);
             Assert.IsNull(rollout.Id);
         }
+
+        [Test]
+        public void TestGetOptimizelyConfigWithOdpIntegration()
+        {
+            var datafileProjectConfig = DatafileProjectConfig.Create(TestData.TypedAudienceDatafile, new NoOpLogger(), new ErrorHandler.NoOpErrorHandler());
+
+            Assert.AreEqual("https://api.zaius.com", datafileProjectConfig.HostForOdp);
+            Assert.AreEqual("W4WzcEs-ABgXorzY7h1LCQ", datafileProjectConfig.PublicKeyForOdp);
+        }
+        
+        [Test]
+        public void TestGetOptimizelyConfigWithEmptyIntegrationCollection()
+        {
+            var datafileProjectConfig = DatafileProjectConfig.Create(TestData.EmptyDatafile, new NoOpLogger(), new ErrorHandler.NoOpErrorHandler());
+
+            Assert.IsNull(datafileProjectConfig.HostForOdp);
+            Assert.IsNull(datafileProjectConfig.PublicKeyForOdp);
+        }
+        
+        [Test]
+        public void TestGetOptimizelyConfigWithOtherIntegrationsInCollection()
+        {
+            var datafileProjectConfig = DatafileProjectConfig.Create(TestData.EmptyRolloutDatafile, new NoOpLogger(), new ErrorHandler.NoOpErrorHandler());
+
+            Assert.IsNull(datafileProjectConfig.HostForOdp);
+            Assert.IsNull(datafileProjectConfig.PublicKeyForOdp);
+        }
     }
 }
