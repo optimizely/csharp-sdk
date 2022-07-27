@@ -31,10 +31,11 @@ jobs:
           xbuild /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=$(pwd)/keypair.snk /p:Configuration=Release ./OptimizelySDK.Travis.sln
           mono ./testrunner/NUnit.Runners.2.6.4/tools/nunit-console.exe ./OptimizelySDK.Tests/bin/Release/OptimizelySDK.Tests.dll
       - name: find and sign dll
+        id: unit_tests
         run: |
           sudo find . -path './OptimizelySDK*bin/Release/OptimizelySDK*.dll' -not -regex '.*Tests.*' -print0 | while IFS= read -r -d '' file; do sn -R $file ./keypair.snk; done
       - name: Set the env
-        if: always() && steps.integration_testing.outcome == 'success'
+        if: always() && steps.unit_tests.outcome == 'success'
         run: |
           echo "REPO_SLUG=${{ github.repository }}" >> $GITHUB_ENV
           echo "BUILD_NUMBER=${{ github.run_id }}" >> $GITHUB_ENV
@@ -42,7 +43,7 @@ jobs:
           echo "RUN_NUMBER=${{ github.run_number }}" >> $GITHUB_ENV
           echo "EVENT_TYPE=${{ github.event_name }}" >> $GITHUB_ENV
       - name: Check on success
-        if: always() && steps.integration_testing.outcome == 'success'
+        if: always() && steps.unit_tests.outcome == 'success'
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.OFTA_KEY }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.OFTA_SECRET }}
