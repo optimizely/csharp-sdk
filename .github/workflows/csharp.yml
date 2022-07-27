@@ -42,7 +42,7 @@ jobs:
         run: |
           sudo find . -path './OptimizelySDK*bin/Release/OptimizelySDK*.dll' -not -regex '.*Tests.*' -print0 | while IFS= read -r -d '' file; do sn -R $file ./keypair.snk; done
       - name: Check on success
-        if: steps.unit_tests.outcome == 'success' && env.CURRENT_BRANCH == env.RELEASE_BRANCH && env.EVENT_TYPE == "push"
+        if: steps.unit_tests.outcome == 'success' && env.CURRENT_BRANCH == env.RELEASE_BRANCH && env.EVENT_TYPE == 'push'
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.OFTA_KEY }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.OFTA_SECRET }}
@@ -74,7 +74,7 @@ jobs:
           dotnet build OptimizelySDK.NetStandard16/OptimizelySDK.NetStandard16.csproj /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=D:\a\csharp-sdk\csharp-sdk\keypair.snk -c Release
           # TODO: no dotnet test yet for NetStandard16
       - name: Check on success
-        if: steps.netStandard16_build.outcome == 'success' && env.CURRENT_BRANCH == env.RELEASE_BRANCH && env.EVENT_TYPE == "push"
+        if: steps.netStandard16_build.outcome == 'success' && env.CURRENT_BRANCH == env.RELEASE_BRANCH && env.EVENT_TYPE == 'push'
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.OFTA_KEY }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.OFTA_SECRET }}
@@ -106,7 +106,7 @@ jobs:
           dotnet build OptimizelySDK.NetStandard20/OptimizelySDK.NetStandard20.csproj /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=D:\a\csharp-sdk\csharp-sdk\keypair.snk -c Release
           # TODO: no dotnet test yet for NetStandard20
       - name: Check on success
-        if: steps.netStandard20_build.outcome == 'success' && env.CURRENT_BRANCH == env.RELEASE_BRANCH && env.EVENT_TYPE == "push"
+        if: steps.netStandard20_build.outcome == 'success' && env.CURRENT_BRANCH == env.RELEASE_BRANCH && env.EVENT_TYPE == 'push'
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.OFTA_KEY }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.OFTA_SECRET }}
