@@ -869,13 +869,25 @@ namespace OptimizelySDK.Tests
             Assert.IsNull(rollout.Id);
         }
 
+        private const string ZAIUS_HOST = "https://api.zaius.com";
+        private const string ZAIUS_PUBLIC_KEY = "W4WzcEs-ABgXorzY7h1LCQ";
+        
         [Test]
         public void TestGetOptimizelyConfigWithOdpIntegration()
         {
             var datafileProjectConfig = DatafileProjectConfig.Create(TestData.OdpIntegrationDatafile, new NoOpLogger(), new ErrorHandler.NoOpErrorHandler());
 
-            Assert.AreEqual("https://api.zaius.com", datafileProjectConfig.HostForOdp);
-            Assert.AreEqual("W4WzcEs-ABgXorzY7h1LCQ", datafileProjectConfig.PublicKeyForOdp);
+            Assert.AreEqual(ZAIUS_HOST, datafileProjectConfig.HostForOdp);
+            Assert.AreEqual(ZAIUS_PUBLIC_KEY, datafileProjectConfig.PublicKeyForOdp);
+        }
+        
+        [Test]
+        public void TestGetOptimizelyConfigWithOdpIntegrationIncludesOtherFields()
+        {
+            var datafileProjectConfig = DatafileProjectConfig.Create(TestData.OdpIntegrationWithOtherFieldsDatafile, new NoOpLogger(), new ErrorHandler.NoOpErrorHandler());
+
+            Assert.AreEqual(ZAIUS_HOST, datafileProjectConfig.HostForOdp);
+            Assert.AreEqual(ZAIUS_PUBLIC_KEY, datafileProjectConfig.PublicKeyForOdp);
         }
         
         [Test]

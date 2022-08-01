@@ -128,6 +128,7 @@
     <EmbeddedResource Include="IntegrationEmptyDatafile.json" />
     <EmbeddedResource Include="IntegrationNonOdpDatafile.json" />
     <EmbeddedResource Include="IntegrationOdpDatafile.json" />
+    <EmbeddedResource Include="IntegrationOdpWithOtherFieldsDatafile.json" />
     <EmbeddedResource Include="TestData.json" />
     <EmbeddedResource Include="simple_ab_experiments.json" />
     <EmbeddedResource Include="EmptyRolloutRule.json" />

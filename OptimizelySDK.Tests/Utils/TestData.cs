@@ -35,6 +35,7 @@ namespace OptimizelySDK.Tests
         private static string emptyIntegrationDatafile = null;
         private static string nonOdpIntegrationDatafile = null;
         private static string odpIntegrationDatafile = null;
+        private static string odpIntegrationWithOtherFieldsDatafile = null;
 
         public static string Datafile
         {
@@ -85,20 +86,30 @@ namespace OptimizelySDK.Tests
         }
         
         public static string EmptyIntegrationDatafile {
-            get {
+            get 
+            {
                 return emptyIntegrationDatafile ?? (emptyIntegrationDatafile = LoadJsonData("IntegrationEmptyDatafile.json"));
             }
         }
         
         public static string NonOdpIntegrationDatafile {
-            get {
+            get 
+            {
                 return nonOdpIntegrationDatafile ?? (nonOdpIntegrationDatafile = LoadJsonData("IntegrationNonOdpDatafile.json"));
             }
         }
         
         public static string OdpIntegrationDatafile {
-            get {
+            get 
+            {
                 return odpIntegrationDatafile ?? (odpIntegrationDatafile = LoadJsonData("IntegrationOdpDatafile.json"));
+            }
+        }
+        
+        public static string OdpIntegrationWithOtherFieldsDatafile {
+            get 
+            {
+                return odpIntegrationWithOtherFieldsDatafile ?? (odpIntegrationWithOtherFieldsDatafile = LoadJsonData("IntegrationOdpWithOtherFieldsDatafile.json"));
             }
         }
 
