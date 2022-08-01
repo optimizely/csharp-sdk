@@ -38,6 +38,7 @@ namespace OptimizelySDK
         // user attributes for Optimizely user context.
         private UserAttributes Attributes;
         
+        // set of qualified segments
         private readonly List<string> QualifiedSegments;
 
         // Optimizely object to be used.
@@ -68,7 +69,8 @@ namespace OptimizelySDK
         /// </summary>
         /// <param name="segment">A String segment key which will be check in qualified segments list that if it exist then user is qualified.</param>
         /// <returns>Is user qualified for a segment.</returns>
-        public bool IsQualifiedFor(string segment) {
+        public bool IsQualifiedFor(string segment) 
+        { 
             return QualifiedSegments.Contains(segment);
         }
 
