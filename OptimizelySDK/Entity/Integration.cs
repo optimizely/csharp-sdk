@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+using System.Text;
+
 namespace OptimizelySDK.Entity
 {
     public class Integration : IdKeyEntity
@@ -24,7 +26,22 @@ namespace OptimizelySDK.Entity
 
         public override string ToString()
         {
-            return $"Integration{{key='{Key}', host='{Host}', publicKey='{PublicKey}'}}";
+            var sb = new StringBuilder();
+            sb.AppendFormat("Integration{{key='{0}'", Key);
+            
+            if (!string.IsNullOrEmpty(Host))
+            {
+                sb.AppendFormat(", host='{0}'", Host);
+            }
+
+            if (!string.IsNullOrEmpty(PublicKey))
+            {
+                sb.AppendFormat(", publicKey='{0}'", PublicKey);
+            }
+
+            sb.Append("}");
+            
+            return sb.ToString();
         }
     }
 }

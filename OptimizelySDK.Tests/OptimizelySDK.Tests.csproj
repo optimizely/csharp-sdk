@@ -78,6 +78,7 @@
     <Compile Include="ConfigTest\FallbackProjectConfigManagerTest.cs" />
     <Compile Include="DecisionServiceTest.cs" />
     <Compile Include="DefaultErrorHandlerTest.cs" />
+    <Compile Include="EntityTests\IntegrationTest.cs" />
     <Compile Include="EventTests\EventProcessorProps.cs" />
     <Compile Include="OptimizelyConfigTests\OptimizelyConfigTest.cs" />
     <Compile Include="OptimizelyDecisions\OptimizelyDecisionTest.cs" />
