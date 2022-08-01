@@ -21,6 +21,7 @@ using OptimizelySDK.Entity;
 using OptimizelySDK.Logger;
 using OptimizelySDK.Tests.Utils;
 using System;
+using System.Collections.Generic;
 
 namespace OptimizelySDK.Tests.AudienceConditionsTests
 {
@@ -654,6 +655,68 @@ namespace OptimizelySDK.Tests.AudienceConditionsTests
             }
         }
 
+        #endregion
+        
+        #region Qualified Tests
+
+        private const string QUALIFIED = "qualified";
+        private const string CUSTOM_ATTRIBUTE = "custom_attribute";
+
+        [Test]
+        public void QualifiedConditionWithNonStringValueShouldFail()
+        {
+            var condition = new BaseCondition()
+            {
+                Type = CUSTOM_ATTRIBUTE,
+                Match = QUALIFIED,
+                Value = 100,
+            };
+
+            var result = condition.Evaluate(null, null, Logger);
+            
+            Assert.That(result, Is.Null);
+            LoggerMock.Verify(l => l.Log(LogLevel.WARN, $@"Audience condition ""{condition}"" has a qualified match but invalid value."), Times.Once);
+        }
+        
+        
+        private const string QUALIFIED_VALUE = "part-of-the-rebellion";
+        private readonly List<string> _qualifiedSegments = new List<string>()
+        {
+            QUALIFIED_VALUE,
+        };
+
+        [Test]
+        public void QualifiedConditionWithMatchingValueShouldBeTrue()
+        {
+            var condition = new BaseCondition()
+            {
+                Type = CUSTOM_ATTRIBUTE,
+                Match = QUALIFIED,
+                Value = QUALIFIED_VALUE,
+            };
+
+            var result = condition.Evaluate(null, _qualifiedSegments.ToUserContext(), Logger);
+            
+            Assert.True(result.HasValue && result.Value);
+            LoggerMock.Verify(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()), Times.Never);
+        }
+
+        [Test]
+        public void QualifiedConditionWithNonMatchingValueShouldBeFalse()
+        {
+            var condition = new BaseCondition()
+            {
+                Type = CUSTOM_ATTRIBUTE,
+                Match = QUALIFIED,
+                Value = "empire-star-system",
+            };
+
+            var result = condition.Evaluate(null, _qualifiedSegments.ToUserContext(), Logger);
+            
+            Assert.True(result.HasValue && result.Value == false);
+            LoggerMock.Verify(l => l.Log( It.IsAny<LogLevel>(), It.IsAny<string>()), Times.Never);
+        }
+        
         #endregion
     }
 }

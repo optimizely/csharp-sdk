@@ -19,6 +19,7 @@ using OptimizelySDK.Config;
 using OptimizelySDK.Entity;
 using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Logger;
+using System.Collections.Generic;
 
 namespace OptimizelySDK.Tests.Utils
 {
@@ -39,6 +40,23 @@ namespace OptimizelySDK.Tests.Utils
             
             return new OptimizelyUserContext(optimizely, "any-user", attributes, errorHandler,
                 mockLogger.Object);
+        }
+
+        public static OptimizelyUserContext ToUserContext(this List<string> qualifiedSegments)
+        {
+            var mockLogger = new Mock<ILogger>();
+            mockLogger.Setup(i => i.Log(It.IsAny<LogLevel>(), It.IsAny<string>()));
+            
+            var errorHandler = new NoOpErrorHandler();
+            var config = DatafileProjectConfig.Create(
+                content: TestData.Datafile,
+                logger: mockLogger.Object,
+                errorHandler: errorHandler);
+            var configManager = new FallbackProjectConfigManager(config);
+            var optimizely = new Optimizely(configManager);
+            
+            return new OptimizelyUserContext(optimizely, "any-user", new UserAttributes(), null, errorHandler,
+                mockLogger.Object, qualifiedSegments);
         }
     }
 }

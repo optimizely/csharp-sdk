@@ -69,15 +69,6 @@ namespace OptimizelySDK.AudienceConditions
                 return null;
             }
 
-            var userAttributes = userContext.GetAttributes();
-            
-            object attributeValue = null;
-            if (userAttributes.TryGetValue(Name, out attributeValue) == false && Match != AttributeMatchTypes.EXIST)
-            {
-                logger.Log(LogLevel.DEBUG, $@"Audience condition {this} evaluated to UNKNOWN because no value was passed for user attribute ""{Name}"".");
-                return null;
-            }
-
             if (Match == QUALIFIED)
             {
                 if (Value is string)
@@ -86,6 +77,14 @@ namespace OptimizelySDK.AudienceConditions
                 }
                 
                 logger.Log(LogLevel.WARN, $@"Audience condition ""{this}"" has a qualified match but invalid value.");
+                return null;
+            }
+            
+            var userAttributes = userContext.GetAttributes();
+            object attributeValue = null;
+            if (userAttributes.TryGetValue(Name, out attributeValue) == false && Match != AttributeMatchTypes.EXIST)
+            {
+                logger.Log(LogLevel.DEBUG, $@"Audience condition {this} evaluated to UNKNOWN because no value was passed for user attribute ""{Name}"".");
                 return null;
             }
 
