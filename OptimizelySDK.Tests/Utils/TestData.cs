@@ -32,6 +32,10 @@ namespace OptimizelySDK.Tests
         private static string duplicateExpKeysDatafile = null;
         private static string duplicateRuleKeysDatafile = null;
 
+        private static string emptyIntegrationDatafile = null;
+        private static string nonOdpIntegrationDatafile = null;
+        private static string odpIntegrationDatafile = null;
+
         public static string Datafile
         {
             get
@@ -77,6 +81,24 @@ namespace OptimizelySDK.Tests
         public static string EmptyDatafile {
             get {
                 return emptyDatafile ?? (emptyDatafile = LoadJsonData("emptydatafile.json"));
+            }
+        }
+        
+        public static string EmptyIntegrationDatafile {
+            get {
+                return emptyIntegrationDatafile ?? (emptyIntegrationDatafile = LoadJsonData("IntegrationEmptyDatafile.json"));
+            }
+        }
+        
+        public static string NonOdpIntegrationDatafile {
+            get {
+                return nonOdpIntegrationDatafile ?? (nonOdpIntegrationDatafile = LoadJsonData("IntegrationNonOdpDatafile.json"));
+            }
+        }
+        
+        public static string OdpIntegrationDatafile {
+            get {
+                return odpIntegrationDatafile ?? (odpIntegrationDatafile = LoadJsonData("IntegrationOdpDatafile.json"));
             }
         }
 
