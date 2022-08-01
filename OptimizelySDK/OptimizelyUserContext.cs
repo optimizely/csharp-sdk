@@ -37,21 +37,24 @@ namespace OptimizelySDK
 
         // user attributes for Optimizely user context.
         private UserAttributes Attributes;
-        
+
         // set of qualified segments
-        private readonly List<string> QualifiedSegments;
+        public List<string> QualifiedSegments { get; }
 
         // Optimizely object to be used.
         private Optimizely Optimizely;
 
         private ForcedDecisionsStore ForcedDecisionsStore { get; set; }
 
-        public OptimizelyUserContext(Optimizely optimizely, string userId, UserAttributes userAttributes, IErrorHandler errorHandler, ILogger logger) :
-            this(optimizely, userId, userAttributes, null, errorHandler, logger)
-        {
-        }
+        public OptimizelyUserContext(Optimizely optimizely, string userId,
+            UserAttributes userAttributes, IErrorHandler errorHandler, ILogger logger
+        ) :
+            this(optimizely, userId, userAttributes, null, errorHandler, logger) { }
 
-        public OptimizelyUserContext(Optimizely optimizely, string userId, UserAttributes userAttributes, ForcedDecisionsStore forcedDecisionsStore, IErrorHandler errorHandler, ILogger logger, List<string> qualifiedSegments = null)
+        public OptimizelyUserContext(Optimizely optimizely, string userId,
+            UserAttributes userAttributes, ForcedDecisionsStore forcedDecisionsStore,
+            IErrorHandler errorHandler, ILogger logger, List<string> qualifiedSegments = null
+        )
         {
             ErrorHandler = errorHandler;
             Logger = logger;
@@ -62,16 +65,21 @@ namespace OptimizelySDK
             QualifiedSegments = qualifiedSegments ?? new List<string>();
         }
 
-        private OptimizelyUserContext Copy() => new OptimizelyUserContext(Optimizely, UserId, GetAttributes(), GetForcedDecisionsStore(), ErrorHandler, Logger, QualifiedSegments);
-        
+        private OptimizelyUserContext Copy() =>
+            new OptimizelyUserContext(Optimizely, UserId, GetAttributes(),
+                GetForcedDecisionsStore(), ErrorHandler, Logger, QualifiedSegments);
+
         /// <summary>
         /// Returns true if the user is qualified for the given segment name
         /// </summary>
         /// <param name="segment">A String segment key which will be check in qualified segments list that if it exist then user is qualified.</param>
         /// <returns>Is user qualified for a segment.</returns>
-        public bool IsQualifiedFor(string segment) 
-        { 
-            return QualifiedSegments.Contains(segment);
+        public bool IsQualifiedFor(string segment)
+        {
+            lock (mutex)
+            {
+                return QualifiedSegments.Contains(segment);
+            }
         }
 
         /// <summary>
@@ -119,7 +127,8 @@ namespace OptimizelySDK
                 if (ForcedDecisionsStore.Count == 0)
                 {
                     copiedForcedDecisionsStore = ForcedDecisionsStore.NullForcedDecision();
-                } else
+                }
+                else
                 {
                     copiedForcedDecisionsStore = new ForcedDecisionsStore(ForcedDecisionsStore);
                 }
@@ -158,7 +167,8 @@ namespace OptimizelySDK
         /// <returns>A decision result.</returns>
         public virtual OptimizelyDecision Decide(string key)
         {
-            return Decide(key, new OptimizelyDecideOption[] { });
+            return Decide(key, new OptimizelyDecideOption[]
+                { });
         }
 
         /// <summary>
@@ -171,7 +181,8 @@ namespace OptimizelySDK
         /// <param name="options">A list of options for decision-making.</param>
         /// <returns>A decision result.</returns>
         public virtual OptimizelyDecision Decide(string key,
-            OptimizelyDecideOption[] options)
+            OptimizelyDecideOption[] options
+        )
         {
             var optimizelyUserContext = Copy();
             return Optimizely.Decide(optimizelyUserContext, key, options);
@@ -182,7 +193,9 @@ namespace OptimizelySDK
         /// </summary>
         /// <param name="keys">list of flag keys for which a decision will be made.</param>
         /// <returns>A dictionary of all decision results, mapped by flag keys.</returns>
-        public virtual Dictionary<string, OptimizelyDecision> DecideForKeys(string[] keys, OptimizelyDecideOption[] options)
+        public virtual Dictionary<string, OptimizelyDecision> DecideForKeys(string[] keys,
+            OptimizelyDecideOption[] options
+        )
         {
             var optimizelyUserContext = Copy();
             return Optimizely.DecideForKeys(optimizelyUserContext, keys, options);
@@ -195,7 +208,8 @@ namespace OptimizelySDK
         /// <returns>A dictionary of all decision results, mapped by flag keys.</returns>
         public virtual Dictionary<string, OptimizelyDecision> DecideForKeys(string[] keys)
         {
-            return DecideForKeys(keys, new OptimizelyDecideOption[] { });
+            return DecideForKeys(keys, new OptimizelyDecideOption[]
+                { });
         }
 
         /// <summary>
@@ -204,7 +218,8 @@ namespace OptimizelySDK
         /// <returns>A dictionary of all decision results, mapped by flag keys.</returns>
         public virtual Dictionary<string, OptimizelyDecision> DecideAll()
         {
-            return DecideAll(new OptimizelyDecideOption[] { });
+            return DecideAll(new OptimizelyDecideOption[]
+                { });
         }
 
         /// <summary>
@@ -212,7 +227,9 @@ namespace OptimizelySDK
         /// </summary>
         /// <param name="options">A list of options for decision-making.</param>
         /// <returns>All decision results mapped by flag keys.</returns>
-        public virtual Dictionary<string, OptimizelyDecision> DecideAll(OptimizelyDecideOption[] options)
+        public virtual Dictionary<string, OptimizelyDecision> DecideAll(
+            OptimizelyDecideOption[] options
+        )
         {
             var optimizelyUserContext = Copy();
             return Optimizely.DecideAll(optimizelyUserContext, options);
@@ -233,7 +250,8 @@ namespace OptimizelySDK
         /// <param name="eventName">The event name.</param>
         /// <param name="eventTags">A map of event tag names to event tag values.</param>
         public virtual void TrackEvent(string eventName,
-            EventTags eventTags)
+            EventTags eventTags
+        )
         {
             Optimizely.Track(eventName, UserId, Attributes, eventTags);
         }
@@ -244,7 +262,9 @@ namespace OptimizelySDK
         /// <param name="context">The context object containing flag and rule key.</param>
         /// <param name="decision">OptimizelyForcedDecision object containing variation key.</param>
         /// <returns></returns>
-        public bool SetForcedDecision(OptimizelyDecisionContext context, OptimizelyForcedDecision decision)
+        public bool SetForcedDecision(OptimizelyDecisionContext context,
+            OptimizelyForcedDecision decision
+        )
         {
             lock (mutex)
             {
@@ -278,6 +298,7 @@ namespace OptimizelySDK
             {
                 decision = ForcedDecisionsStore[context];
             }
+
             return decision;
         }
 
@@ -293,7 +314,7 @@ namespace OptimizelySDK
                 Logger.Log(LogLevel.WARN, "FlagKey cannot be null");
                 return false;
             }
-            
+
             lock (mutex)
             {
                 return ForcedDecisionsStore.Remove(context);
@@ -310,6 +331,7 @@ namespace OptimizelySDK
             {
                 ForcedDecisionsStore.RemoveAll();
             }
+
             return true;
         }
     }
