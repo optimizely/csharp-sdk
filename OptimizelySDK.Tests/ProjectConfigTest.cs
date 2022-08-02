@@ -873,7 +873,7 @@ namespace OptimizelySDK.Tests
         private const string ZAIUS_PUBLIC_KEY = "W4WzcEs-ABgXorzY7h1LCQ";
         
         [Test]
-        public void TestGetOptimizelyConfigWithOdpIntegration()
+        public void TestProjectConfigWithOdpIntegration()
         {
             var datafileProjectConfig = DatafileProjectConfig.Create(TestData.OdpIntegrationDatafile, new NoOpLogger(), new ErrorHandler.NoOpErrorHandler());
 
