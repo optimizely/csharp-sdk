@@ -55,8 +55,8 @@ namespace OptimizelySDK.Tests.Utils
             var configManager = new FallbackProjectConfigManager(config);
             var optimizely = new Optimizely(configManager);
             
-            return new OptimizelyUserContext(optimizely, "any-user", new UserAttributes(), null, errorHandler,
-                mockLogger.Object, qualifiedSegments);
+            return new OptimizelyUserContext(optimizely, "any-user", new UserAttributes(), null, qualifiedSegments, errorHandler,
+                mockLogger.Object);
         }
     }
 }
