@@ -45,7 +45,7 @@ namespace OptimizelySDK
 
         private ForcedDecisionsStore ForcedDecisionsStore { get; set; }
 
-        public OptimizelyUserContext(Optimizely optimizely, string userId,butes userAttributes, IErrorHandler errorHandler, ILogger logger) :
+        public OptimizelyUserContext(Optimizely optimizely, string userId, UserAttributes userAttributes, IErrorHandler errorHandler, ILogger logger) :
             this(optimizely, userId, userAttributes, null, null, errorHandler, logger) { }
 
         public OptimizelyUserContext(Optimizely optimizely, string userId, UserAttributes userAttributes, ForcedDecisionsStore forcedDecisionsStore, List<string> qualifiedSegments, IErrorHandler errorHandler, ILogger logger)
@@ -199,8 +199,8 @@ namespace OptimizelySDK
         /// <param name="options">A list of options for decision-making.</param>
         /// <returns>A decision result.</returns>
         public virtual OptimizelyDecision Decide(string key,
-            OptimizelyDecideOption[] options
-        )
+            OptimizelyDecideOption[] options)
+        {
             var optimizelyUserContext = Copy();
             return Optimizely.Decide(optimizelyUserContext, key, options);
         }
