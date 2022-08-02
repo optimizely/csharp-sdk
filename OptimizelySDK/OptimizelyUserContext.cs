@@ -52,8 +52,7 @@ namespace OptimizelySDK
             this(optimizely, userId, userAttributes, null, errorHandler, logger) { }
 
         public OptimizelyUserContext(Optimizely optimizely, string userId,
-            UserAttributes userAttributes, ForcedDecisionsStore forcedDecisionsStore,
-            IErrorHandler errorHandler, ILogger logger, List<string> qualifiedSegments = null
+            UserAttributes userAttributes, ForcedDecisionsStore forcedDecisionsStore, List<string> qualifiedSegments, IErrorHandler errorHandler, ILogger logger
         )
         {
             ErrorHandler = errorHandler;
