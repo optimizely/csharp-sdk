@@ -30,22 +30,22 @@ namespace OptimizelySDK.AudienceConditions
         /// <summary>
         /// String constant representing custom attribute condition type.
         /// </summary>
-        private const string CUSTOM_ATTRIBUTE = "custom_attribute";
+        public const string CUSTOM_ATTRIBUTE = "custom_attribute";
         
         /// <summary>
         /// String constant representing a third-party condition type.
         /// </summary>
-        private const string THIRD_PARTY_DIMENSION = "third_party_dimension";
+        public const string THIRD_PARTY_DIMENSION = "third_party_dimension";
 
         /// <summary>
         /// String constant to match status of qualified segments.  
         /// </summary>
-        private const string QUALIFIED = "qualified";
+        public const string QUALIFIED = "qualified";
 
         /// <summary>
         /// Valid types allowed for validation
         /// </summary>
-        private static readonly string[] validTypes = {
+        public static readonly string[] ValidTypes = {
             CUSTOM_ATTRIBUTE, THIRD_PARTY_DIMENSION,
         };
 
@@ -63,7 +63,7 @@ namespace OptimizelySDK.AudienceConditions
 
         public bool? Evaluate(ProjectConfig config, OptimizelyUserContext userContext, ILogger logger)
         {
-            if (!validTypes.Contains(Type))
+            if (!ValidTypes.Contains(Type))
             {
                 logger.Log(LogLevel.WARN, $@"Audience condition ""{this}"" uses an unknown condition type. You may need to upgrade to a newer release of the Optimizely SDK.");
                 return null;

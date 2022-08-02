@@ -659,16 +659,13 @@ namespace OptimizelySDK.Tests.AudienceConditionsTests
         
         #region Qualified Tests
 
-        private const string QUALIFIED = "qualified";
-        private const string CUSTOM_ATTRIBUTE = "custom_attribute";
-
         [Test]
         public void QualifiedConditionWithNonStringValueShouldFail()
         {
             var condition = new BaseCondition()
             {
-                Type = CUSTOM_ATTRIBUTE,
-                Match = QUALIFIED,
+                Type = BaseCondition.THIRD_PARTY_DIMENSION,
+                Match = BaseCondition.QUALIFIED,
                 Value = 100,
             };
 
@@ -690,8 +687,8 @@ namespace OptimizelySDK.Tests.AudienceConditionsTests
         {
             var condition = new BaseCondition()
             {
-                Type = CUSTOM_ATTRIBUTE,
-                Match = QUALIFIED,
+                Type = BaseCondition.THIRD_PARTY_DIMENSION,
+                Match = BaseCondition.QUALIFIED,
                 Value = QUALIFIED_VALUE,
             };
 
@@ -706,8 +703,8 @@ namespace OptimizelySDK.Tests.AudienceConditionsTests
         {
             var condition = new BaseCondition()
             {
-                Type = CUSTOM_ATTRIBUTE,
-                Match = QUALIFIED,
+                Type = BaseCondition.THIRD_PARTY_DIMENSION,
+                Match = BaseCondition.QUALIFIED,
                 Value = "empire-star-system",
             };
 
