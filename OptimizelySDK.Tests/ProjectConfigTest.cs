@@ -882,7 +882,7 @@ namespace OptimizelySDK.Tests
         }
         
         [Test]
-        public void TestGetOptimizelyConfigWithOdpIntegrationIncludesOtherFields()
+        public void TestProjectConfigWithOdpIntegrationIncludesOtherFields()
         {
             var datafileProjectConfig = DatafileProjectConfig.Create(TestData.OdpIntegrationWithOtherFieldsDatafile, new NoOpLogger(), new ErrorHandler.NoOpErrorHandler());
 
@@ -891,7 +891,7 @@ namespace OptimizelySDK.Tests
         }
         
         [Test]
-        public void TestGetOptimizelyConfigWithEmptyIntegrationCollection()
+        public void TestProjectConfigWithEmptyIntegrationCollection()
         {
             var datafileProjectConfig = DatafileProjectConfig.Create(TestData.EmptyIntegrationDatafile, new NoOpLogger(), new ErrorHandler.NoOpErrorHandler());
 
@@ -900,7 +900,7 @@ namespace OptimizelySDK.Tests
         }
         
         [Test]
-        public void TestGetOptimizelyConfigWithOtherIntegrationsInCollection()
+        public void TestProjectConfigWithOtherIntegrationsInCollection()
         {
             var datafileProjectConfig = DatafileProjectConfig.Create(TestData.NonOdpIntegrationDatafile, new NoOpLogger(), new ErrorHandler.NoOpErrorHandler());
 
