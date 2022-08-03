@@ -5,10 +5,6 @@ namespace OptimizelySDK.Odp
 {
     public interface IGraphQLManager
     {
-        string[] FetchSegments(string apiKey, string apiHost, string userKey, string userValue,
-            List<string> segmentToCheck
-        );
-        
-        Response ParseJson(string jsonResponse);
+        Response ParseSegmentsResponseJson(string jsonResponse);
     }
 }

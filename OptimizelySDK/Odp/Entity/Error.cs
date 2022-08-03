@@ -9,5 +9,10 @@
         public string[] Path { get; set; }
         
         public Extension Extensions { get; set; }
+
+        public override string ToString()
+        {
+            return $"{Message}";
+        }
     }
 }

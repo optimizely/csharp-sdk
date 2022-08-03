@@ -50,7 +50,7 @@ namespace OptimizelySDK.Tests.OdpTests
 
             var manager = new GraphQLManager(MockLogger.Object);
 
-            var response = manager.ParseJson(responseJson);
+            var response = manager.ParseSegmentsResponseJson(responseJson);
 
             Assert.IsNull(response.Errors);
             Assert.IsNotNull(response.Data);
@@ -60,10 +60,10 @@ namespace OptimizelySDK.Tests.OdpTests
             Assert.IsTrue(response.Data.Customer.Audiences.Edges.Length == 2);
             var node = response.Data.Customer.Audiences.Edges[0].Node;
             Assert.IsTrue(node.Name == "has_email");
-            Assert.IsTrue(node.State == "qualified");
+            Assert.IsTrue(node.State == "qualified"); // TODO: replace w/ constant
             node = response.Data.Customer.Audiences.Edges[1].Node;
             Assert.IsTrue(node.Name == "has_email_opted_in");
-            Assert.IsTrue(node.State == "qualified");
+            Assert.IsTrue(node.State == "qualified"); // TODO: replace w/ constant
         }
 
         [Test]
@@ -99,7 +99,7 @@ namespace OptimizelySDK.Tests.OdpTests
 
             var manager = new GraphQLManager(MockLogger.Object);
 
-            var response = manager.ParseJson(responseJson);
+            var response = manager.ParseSegmentsResponseJson(responseJson);
 
             Assert.IsNull(response.Data.Customer);
             Assert.IsNotNull(response.Errors);

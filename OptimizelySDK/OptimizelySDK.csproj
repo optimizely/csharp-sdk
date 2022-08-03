@@ -87,6 +87,10 @@
     <Compile Include="Entity\Group.cs" />
     <Compile Include="Entity\IdKeyEntity.cs" />
     <Compile Include="Event\Entity\DecisionMetadata.cs" />
+    <Compile Include="Odp\Client\HttpClientOdpClient.cs" />
+    <Compile Include="Odp\Client\IOdpClient.cs" />
+    <Compile Include="Odp\Client\OdpClient.cs" />
+    <Compile Include="Odp\Client\WebRequestOdpClient.cs" />
     <Compile Include="Odp\Entity\Audience.cs" />
     <Compile Include="Odp\Entity\Customer.cs" />
     <Compile Include="Odp\Entity\Data.cs" />
@@ -95,6 +99,7 @@
     <Compile Include="Odp\Entity\Location.cs" />
     <Compile Include="Odp\Entity\Extension.cs" />
     <Compile Include="Odp\Entity\Node.cs" />
+    <Compile Include="Odp\Entity\QuerySegmentsParameters.cs" />
     <Compile Include="Odp\Entity\Response.cs" />
     <Compile Include="Odp\GraphQLManager.cs" />
     <Compile Include="Odp\IGraphQLManager.cs" />
@@ -184,9 +189,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Odp\Client" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
