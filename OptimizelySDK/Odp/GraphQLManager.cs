@@ -24,7 +24,7 @@ namespace OptimizelySDK.Odp
 
         public string FetchSegments(string apiKey, string apiHost, string userKey, string userValue, List<string> segmentToCheck)
         {
-            
+            return string.Empty;
         }
     }
 }
