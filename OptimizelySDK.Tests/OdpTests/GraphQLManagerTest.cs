@@ -1,9 +1,7 @@
 ﻿using Moq;
 using NUnit.Framework;
-using OptimizelySDK.AudienceConditions;
 using OptimizelySDK.Logger;
 using OptimizelySDK.Odp;
-using System.Security;
 
 namespace OptimizelySDK.Tests.OdpTests
 {
@@ -115,6 +113,54 @@ namespace OptimizelySDK.Tests.OdpTests
             Assert.IsTrue(error.Path.Length == 1);
             Assert.IsTrue(error.Path[0] == "customer");
             Assert.IsTrue(error.Extensions.Classification=="InvalidIdentifierException");
+        }
+
+        [Test]
+        public void ShouldFetchValidQualifiedSegments()
+        {
+            
+        }
+
+        [Test]
+        public void ShouldHandleEmptyQualifiedSegments()
+        {
+            
+        }
+
+        [Test]
+        public void ShouldHandleErrorWithInvalidIdentifier()
+        {
+            
+        }
+
+        [Test]
+        public void ShouldHandleOtherException()
+        {
+            
+        }
+        
+        [Test]
+        public void ShouldHandleBadResponse()
+        {
+            
+        }
+        
+        [Test]
+        public void ShouldHandleNetworkError()
+        {
+            
+        }
+        
+        [Test]
+        public void ShouldHandle400HttpCode()
+        {
+            
+        }
+        
+        [Test]
+        public void ShouldHandle500HttpCode()
+        {
+            
         }
     }
 }
