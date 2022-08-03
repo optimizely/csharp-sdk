@@ -79,6 +79,7 @@
     <Compile Include="DecisionServiceTest.cs" />
     <Compile Include="DefaultErrorHandlerTest.cs" />
     <Compile Include="EventTests\EventProcessorProps.cs" />
+    <Compile Include="OdpTests\GraphQLManagerTest.cs" />
     <Compile Include="OptimizelyConfigTests\OptimizelyConfigTest.cs" />
     <Compile Include="OptimizelyDecisions\OptimizelyDecisionTest.cs" />
     <Compile Include="OptimizelyJSONTest.cs" />
@@ -136,7 +137,6 @@
       <Name>OptimizelySDK</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
     <None Include="packages.config" />
     <EmbeddedResource Include="unsupported_version_datafile.json" />
