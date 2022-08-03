@@ -2,24 +2,23 @@
 using NUnit.Framework;
 using OptimizelySDK.Logger;
 using OptimizelySDK.Odp;
-using System;
 
 namespace OptimizelySDK.Tests.OdpTests
 {
     [TestFixture]
     public class GraphQLManagerTest
     {
-        private Mock<ILogger> LoggerMock;
+        private Mock<ILogger> MockLogger;
         
         [SetUp]
         public void Setup()
         {
-            LoggerMock = new Mock<ILogger>();
-            LoggerMock.Setup(i => i.Log(It.IsAny<LogLevel>(), It.IsAny<string>()));
+            MockLogger = new Mock<ILogger>();
+            MockLogger.Setup(i => i.Log(It.IsAny<LogLevel>(), It.IsAny<string>()));
         }
 
         [Test]
-        public void ShouldParseSuccessfulResponseData()
+        public void ShouldParseSuccessfulResponse()
         {
             #region const string responseJson
             const string responseJson = @"
@@ -40,14 +39,13 @@ namespace OptimizelySDK.Tests.OdpTests
                         ""state"": ""qualified"",
                     }
                 },
-                ...
-                    ]
+              ]
             }
         }
     }
 }";
             #endregion
-            var manager = new GraphQLManager(LoggerMock.Object);
+            var manager = new GraphQLManager(MockLogger.Object);
 
             var response = manager.ParseResponse(responseJson);
             
@@ -56,7 +54,7 @@ namespace OptimizelySDK.Tests.OdpTests
         }
         
         [Test]
-        public void ShouldParseErrorResponseWithNullData()
+        public void ShouldParseErrorResponse()
         {
             #region const string responseJson
             const string responseJson = @"
@@ -65,10 +63,10 @@ namespace OptimizelySDK.Tests.OdpTests
         {
             ""message"": ""Exception while fetching data (/customer) : java.lang.RuntimeException: could not resolve _fs_user_id = asdsdaddddd"",
             ""locations"": [
-            {
-                ""line"": 2,
-                ""column"": 3
-            }
+                {
+                    ""line"": 2,
+                    ""column"": 3
+                }
             ],
             ""path"": [
             ""customer""
@@ -83,11 +81,11 @@ namespace OptimizelySDK.Tests.OdpTests
     }
 }";
             #endregion
-            var manager = new GraphQLManager(LoggerMock.Object);
+            var manager = new GraphQLManager(MockLogger.Object);
 
             var response = manager.ParseResponse(responseJson);
             
-            Assert.IsNull(response.Data);
+            Assert.IsNull(response.Data.Customer);
             Assert.IsNotNull(response.Errors);
         }
     }
