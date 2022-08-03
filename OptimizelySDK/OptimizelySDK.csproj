@@ -87,6 +87,16 @@
     <Compile Include="Entity\Group.cs" />
     <Compile Include="Entity\IdKeyEntity.cs" />
     <Compile Include="Event\Entity\DecisionMetadata.cs" />
+    <Compile Include="Odp\Entities\Audience.cs" />
+    <Compile Include="Odp\Entities\Customer.cs" />
+    <Compile Include="Odp\Entities\Data.cs" />
+    <Compile Include="Odp\Entities\Edge.cs" />
+    <Compile Include="Odp\Entities\Error.cs" />
+    <Compile Include="Odp\Entities\Location.cs" />
+    <Compile Include="Odp\Entities\Extension.cs" />
+    <Compile Include="Odp\Entities\Node.cs" />
+    <Compile Include="Odp\Entities\Response.cs" />
+    <Compile Include="Odp\GraphQLManager.cs" />
     <Compile Include="OptimizelyDecisions\DecisionMessage.cs" />
     <Compile Include="OptimizelyDecisions\DecisionReasons.cs" />
     <Compile Include="OptimizelyDecisions\OptimizelyDecideOption.cs" />
@@ -174,8 +184,6 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup />
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
