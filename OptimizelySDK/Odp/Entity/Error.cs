@@ -1,4 +1,4 @@
-﻿namespace OptimizelySDK.Odp.Entities
+﻿namespace OptimizelySDK.Odp.Entity
 {
     public class Error
     {

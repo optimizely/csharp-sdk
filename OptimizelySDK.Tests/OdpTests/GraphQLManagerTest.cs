@@ -50,7 +50,7 @@ namespace OptimizelySDK.Tests.OdpTests
 
             var manager = new GraphQLManager(MockLogger.Object);
 
-            var response = manager.ParseResponse(responseJson);
+            var response = manager.ParseJson(responseJson);
 
             Assert.IsNull(response.Errors);
             Assert.IsNotNull(response.Data);
@@ -99,7 +99,7 @@ namespace OptimizelySDK.Tests.OdpTests
 
             var manager = new GraphQLManager(MockLogger.Object);
 
-            var response = manager.ParseResponse(responseJson);
+            var response = manager.ParseJson(responseJson);
 
             Assert.IsNull(response.Data.Customer);
             Assert.IsNotNull(response.Errors);

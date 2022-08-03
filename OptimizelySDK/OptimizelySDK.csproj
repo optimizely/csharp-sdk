@@ -87,15 +87,15 @@
     <Compile Include="Entity\Group.cs" />
     <Compile Include="Entity\IdKeyEntity.cs" />
     <Compile Include="Event\Entity\DecisionMetadata.cs" />
-    <Compile Include="Odp\Entities\Audience.cs" />
-    <Compile Include="Odp\Entities\Customer.cs" />
-    <Compile Include="Odp\Entities\Data.cs" />
-    <Compile Include="Odp\Entities\Edge.cs" />
-    <Compile Include="Odp\Entities\Error.cs" />
-    <Compile Include="Odp\Entities\Location.cs" />
-    <Compile Include="Odp\Entities\Extension.cs" />
-    <Compile Include="Odp\Entities\Node.cs" />
-    <Compile Include="Odp\Entities\Response.cs" />
+    <Compile Include="Odp\Entity\Audience.cs" />
+    <Compile Include="Odp\Entity\Customer.cs" />
+    <Compile Include="Odp\Entity\Data.cs" />
+    <Compile Include="Odp\Entity\Edge.cs" />
+    <Compile Include="Odp\Entity\Error.cs" />
+    <Compile Include="Odp\Entity\Location.cs" />
+    <Compile Include="Odp\Entity\Extension.cs" />
+    <Compile Include="Odp\Entity\Node.cs" />
+    <Compile Include="Odp\Entity\Response.cs" />
     <Compile Include="Odp\GraphQLManager.cs" />
     <Compile Include="Odp\IGraphQLManager.cs" />
     <Compile Include="OptimizelyDecisions\DecisionMessage.cs" />
@@ -184,6 +184,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Odp\Client" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
