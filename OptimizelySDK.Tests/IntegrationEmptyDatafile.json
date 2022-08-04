@@ -1,0 +1,18 @@
+﻿{
+  "version": "4",
+  "rollouts": [],
+  "anonymizeIP": true,
+  "projectId": "20441150641",
+  "variables": [],
+  "featureFlags": [],
+  "experiments": [],
+  "audiences": [],
+  "groups": [],
+  "integrations": [],
+  "attributes": [],
+  "accountId": "11467598500",
+  "events": [],
+  "revision": "241",
+  "sdkKey": "EmptyIntegrationDatafile",
+  "environmentKey": "Production"
+}

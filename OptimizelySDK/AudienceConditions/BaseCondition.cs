@@ -1,11 +1,11 @@
 ﻿/* 
- * Copyright 2019-2020, Optimizely
+ * Copyright 2019-2022, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,10 +15,10 @@
  */
 
 using Newtonsoft.Json;
-using OptimizelySDK.Entity;
 using OptimizelySDK.Logger;
 using OptimizelySDK.Utils;
 using System;
+using System.Linq;
 
 namespace OptimizelySDK.AudienceConditions
 {
@@ -28,9 +28,26 @@ namespace OptimizelySDK.AudienceConditions
     public class BaseCondition : ICondition
     {
         /// <summary>
-        /// String constant representing custome attribute condition type.
+        /// String constant representing custom attribute condition type.
         /// </summary>
-        public const string CUSTOM_ATTRIBUTE_CONDITION_TYPE = "custom_attribute";
+        public const string CUSTOM_ATTRIBUTE = "custom_attribute";
+        
+        /// <summary>
+        /// String constant representing a third-party condition type.
+        /// </summary>
+        public const string THIRD_PARTY_DIMENSION = "third_party_dimension";
+
+        /// <summary>
+        /// String constant to match status of qualified segments.  
+        /// </summary>
+        public const string QUALIFIED = "qualified";
+
+        /// <summary>
+        /// Valid types allowed for validation
+        /// </summary>
+        public static readonly string[] ValidTypes = {
+            CUSTOM_ATTRIBUTE, THIRD_PARTY_DIMENSION,
+        };
 
         [JsonProperty("type")]
         public string Type { get; set; }
@@ -44,14 +61,26 @@ namespace OptimizelySDK.AudienceConditions
         [JsonProperty("value")]
         public object Value { get; set; }
 
-        public bool? Evaluate(ProjectConfig config, UserAttributes userAttributes, ILogger logger)
+        public bool? Evaluate(ProjectConfig config, OptimizelyUserContext userContext, ILogger logger)
         {
-            if (Type == null || Type != CUSTOM_ATTRIBUTE_CONDITION_TYPE)
+            if (!ValidTypes.Contains(Type))
             {
                 logger.Log(LogLevel.WARN, $@"Audience condition ""{this}"" uses an unknown condition type. You may need to upgrade to a newer release of the Optimizely SDK.");
                 return null;
             }
+
+            if (Match == QUALIFIED)
+            {
+                if (Value is string)
+                {
+                    return userContext.IsQualifiedFor(Value.ToString());
+                }
+                
+                logger.Log(LogLevel.WARN, $@"Audience condition ""{this}"" has a qualified match but invalid value.");
+                return null;
+            }
             
+            var userAttributes = userContext.GetAttributes();
             object attributeValue = null;
             if (userAttributes.TryGetValue(Name, out attributeValue) == false && Match != AttributeMatchTypes.EXIST)
             {

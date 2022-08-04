@@ -1,11 +1,11 @@
 ﻿/* 
- * Copyright 2019-2020, Optimizely
+ * Copyright 2019-2022, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,28 +14,25 @@
  * limitations under the License.
  */
 
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using OptimizelySDK.Entity;
 using OptimizelySDK.Logger;
 
 namespace OptimizelySDK.AudienceConditions
 {
     /// <summary>
-    /// Represents Audiece Id condition for audience evaluation.
+    /// Represents Audience Id condition for audience evaluation.
     /// </summary>
     public class AudienceIdCondition : ICondition
     {
         public string AudienceId { get; set; }
         
-        public bool? Evaluate(ProjectConfig config, UserAttributes attributes, ILogger logger)
+        public bool? Evaluate(ProjectConfig config, OptimizelyUserContext userContext, ILogger logger)
         {
             var audience = config?.GetAudience(AudienceId);
             if (audience == null || string.IsNullOrEmpty(audience.Id))
                 return null;
 
             logger.Log(LogLevel.DEBUG, $@"Starting to evaluate audience ""{AudienceId}"" with conditions: {audience.ConditionsString}");
-            var result = audience.ConditionList.Evaluate(config, attributes, logger);
+            var result = audience.ConditionList.Evaluate(config, userContext, logger);
             var resultText = result?.ToString().ToUpper() ?? "UNKNOWN";
             logger.Log(LogLevel.DEBUG, $@"Audience ""{AudienceId}"" evaluated to {resultText}");
 

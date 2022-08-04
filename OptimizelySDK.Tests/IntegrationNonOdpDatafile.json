@@ -1,0 +1,65 @@
+﻿{
+  "version": "4",
+  "rollouts": [
+    {
+      "experiments": [
+      ],
+      "id": "18309384009"
+    }
+  ],
+  "typedAudiences": [],
+  "anonymizeIP": true,
+  "projectId": "18326250003",
+  "variables": [],
+  "featureFlags": [
+    {
+      "experimentIds": [],
+      "rolloutId": "18309384009",
+      "variables": [
+        {
+          "defaultValue": "",
+          "type": "string",
+          "id": "18323951833",
+          "key": "var_1"
+        }
+      ],
+      "id": "18244658520",
+      "key": "empty_rollout"
+    },
+    {
+      "experimentIds": [],
+      "rolloutId": "",
+      "variables": [
+        {
+          "defaultValue": "",
+          "type": "string",
+          "id": "2832355113",
+          "key": "var_2"
+        }
+      ],
+      "id": "24246538512",
+      "key": "empty_rollout_id"
+    }
+  ],
+  "experiments": [],
+  "audiences": [
+    {
+      "conditions": "[\"or\", {\"match\": \"exact\", \"name\": \"$opt_dummy_attribute\", \"type\": \"custom_attribute\", \"value\": \"$opt_dummy_value\"}]",
+      "id": "$opt_dummy_audience",
+      "name": "Optimizely-Generated Audience for Backwards Compatibility"
+    }
+  ],
+  "groups": [],
+  "integrations": [
+    {
+      "key": "not-odp",
+      "host": "https://example.com",
+      "publicKey": "CleAr1y-!a-R3a7-pUbl1c-k3y"
+    }
+  ],
+  "attributes": [],
+  "botFiltering": false,
+  "accountId": "8272261422",
+  "events": [],
+  "revision": "2"
+}

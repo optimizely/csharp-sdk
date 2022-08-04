@@ -1,11 +1,11 @@
 ﻿/*
- * Copyright 2020-2021, Optimizely
+ * Copyright 2020-2022, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,7 +19,6 @@ using System.Collections.Generic;
 using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Entity;
 using OptimizelySDK.OptimizelyDecisions;
-using System;
 
 namespace OptimizelySDK
 {
@@ -38,17 +37,26 @@ namespace OptimizelySDK
         // user attributes for Optimizely user context.
         private UserAttributes Attributes;
 
+        // set of qualified segments
+        private List<string> QualifiedSegments;
+
         // Optimizely object to be used.
         private Optimizely Optimizely;
 
         private ForcedDecisionsStore ForcedDecisionsStore { get; set; }
 
+
         public OptimizelyUserContext(Optimizely optimizely, string userId, UserAttributes userAttributes, IErrorHandler errorHandler, ILogger logger) :
-            this(optimizely, userId, userAttributes, null, errorHandler, logger)
+            this(optimizely, userId, userAttributes, null, null, errorHandler, logger)
         {
         }
 
-        public OptimizelyUserContext(Optimizely optimizely, string userId, UserAttributes userAttributes, ForcedDecisionsStore forcedDecisionsStore, IErrorHandler errorHandler, ILogger logger)
+        public OptimizelyUserContext(Optimizely optimizely, string userId, UserAttributes userAttributes, ForcedDecisionsStore forcedDecisionsStore, IErrorHandler errorHandler, ILogger logger) :
+            this(optimizely, userId, userAttributes, forcedDecisionsStore, null, errorHandler, logger)
+        {
+        }
+
+        public OptimizelyUserContext(Optimizely optimizely, string userId, UserAttributes userAttributes, ForcedDecisionsStore forcedDecisionsStore, List<string> qualifiedSegments, IErrorHandler errorHandler, ILogger logger)
         {
             ErrorHandler = errorHandler;
             Logger = logger;
@@ -56,9 +64,10 @@ namespace OptimizelySDK
             Attributes = userAttributes ?? new UserAttributes();
             ForcedDecisionsStore = forcedDecisionsStore ?? new ForcedDecisionsStore();
             UserId = userId;
+            QualifiedSegments = qualifiedSegments ?? new List<string>();
         }
 
-        private OptimizelyUserContext Copy() => new OptimizelyUserContext(Optimizely, UserId, GetAttributes(), GetForcedDecisionsStore(), ErrorHandler, Logger);
+        private OptimizelyUserContext Copy() => new OptimizelyUserContext(Optimizely, UserId, GetAttributes(), GetForcedDecisionsStore(), GetQualifiedSegments(), ErrorHandler, Logger);
 
         /// <summary>
         /// Returns Optimizely instance associated with the UserContext.
@@ -76,6 +85,47 @@ namespace OptimizelySDK
         public virtual string GetUserId()
         {
             return UserId;
+        }
+
+        /// <summary>
+        /// Returns a copy of the current list of qualified segments 
+        /// </summary>
+        /// <returns>List of qualified segments</returns>
+        public List<string> GetQualifiedSegments()
+        {
+            List<string> qualifiedSegmentsCopy;
+            lock (mutex)
+            {
+                qualifiedSegmentsCopy = new List<string>(QualifiedSegments);
+            }
+
+            return qualifiedSegmentsCopy;
+        }
+
+        /// <summary>
+        /// Clears and adds a collection of qualified segments
+        /// </summary>
+        /// <param name="qualifiedSegments">List of segments to replace current segments</param>
+        public void SetQualifiedSegments(List<string> qualifiedSegments)
+        {
+            lock (mutex)
+            {
+                QualifiedSegments.Clear();
+                QualifiedSegments.AddRange(qualifiedSegments);
+            }
+        }
+        
+        /// <summary>
+        /// Returns true if the user is qualified for the given segment name
+        /// </summary>
+        /// <param name="segment">A String segment key which will be check in qualified segments list that if it exist then user is qualified.</param>
+        /// <returns>Is user qualified for a segment.</returns>
+        public bool IsQualifiedFor(string segment)
+        {
+            lock (mutex)
+            {
+                return QualifiedSegments.Contains(segment);
+            }
         }
 
         /// <summary>
@@ -264,6 +314,7 @@ namespace OptimizelySDK
             {
                 decision = ForcedDecisionsStore[context];
             }
+
             return decision;
         }
 
@@ -279,7 +330,7 @@ namespace OptimizelySDK
                 Logger.Log(LogLevel.WARN, "FlagKey cannot be null");
                 return false;
             }
-            
+
             lock (mutex)
             {
                 return ForcedDecisionsStore.Remove(context);
@@ -296,6 +347,7 @@ namespace OptimizelySDK
             {
                 ForcedDecisionsStore.RemoveAll();
             }
+
             return true;
         }
     }

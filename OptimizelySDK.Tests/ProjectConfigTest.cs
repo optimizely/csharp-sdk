@@ -868,5 +868,44 @@ namespace OptimizelySDK.Tests
             Assert.IsNull(rollout.Experiments);
             Assert.IsNull(rollout.Id);
         }
+
+        private const string ZAIUS_HOST = "https://api.zaius.com";
+        private const string ZAIUS_PUBLIC_KEY = "W4WzcEs-ABgXorzY7h1LCQ";
+        
+        [Test]
+        public void TestProjectConfigWithOdpIntegration()
+        {
+            var datafileProjectConfig = DatafileProjectConfig.Create(TestData.OdpIntegrationDatafile, new NoOpLogger(), new ErrorHandler.NoOpErrorHandler());
+
+            Assert.AreEqual(ZAIUS_HOST, datafileProjectConfig.HostForOdp);
+            Assert.AreEqual(ZAIUS_PUBLIC_KEY, datafileProjectConfig.PublicKeyForOdp);
+        }
+        
+        [Test]
+        public void TestProjectConfigWithOdpIntegrationIncludesOtherFields()
+        {
+            var datafileProjectConfig = DatafileProjectConfig.Create(TestData.OdpIntegrationWithOtherFieldsDatafile, new NoOpLogger(), new ErrorHandler.NoOpErrorHandler());
+
+            Assert.AreEqual(ZAIUS_HOST, datafileProjectConfig.HostForOdp);
+            Assert.AreEqual(ZAIUS_PUBLIC_KEY, datafileProjectConfig.PublicKeyForOdp);
+        }
+        
+        [Test]
+        public void TestProjectConfigWithEmptyIntegrationCollection()
+        {
+            var datafileProjectConfig = DatafileProjectConfig.Create(TestData.EmptyIntegrationDatafile, new NoOpLogger(), new ErrorHandler.NoOpErrorHandler());
+
+            Assert.IsNull(datafileProjectConfig.HostForOdp);
+            Assert.IsNull(datafileProjectConfig.PublicKeyForOdp);
+        }
+        
+        [Test]
+        public void TestProjectConfigWithOtherIntegrationsInCollection()
+        {
+            var datafileProjectConfig = DatafileProjectConfig.Create(TestData.NonOdpIntegrationDatafile, new NoOpLogger(), new ErrorHandler.NoOpErrorHandler());
+
+            Assert.IsNull(datafileProjectConfig.HostForOdp);
+            Assert.IsNull(datafileProjectConfig.PublicKeyForOdp);
+        }
     }
 }

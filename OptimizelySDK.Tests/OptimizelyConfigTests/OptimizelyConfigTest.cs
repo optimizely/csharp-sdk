@@ -1,11 +1,11 @@
 /*
- * Copyright 2020-2021, Optimizely
+ * Copyright 2020-2022, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,7 +18,6 @@ using Moq;
 using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 using OptimizelySDK.Config;
-using OptimizelySDK.Entity;
 using OptimizelySDK.Logger;
 using OptimizelySDK.OptlyConfig;
 using OptimizelySDK.Tests.UtilsTests;
