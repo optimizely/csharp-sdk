@@ -1,7 +1,10 @@
-﻿using OptimizelySDK.Logger;
+﻿using Newtonsoft.Json;
+using OptimizelySDK.Logger;
 using OptimizelySDK.Odp.Entity;
 using System;
 using System.Net.Http;
+using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace OptimizelySDK.Odp.Client
@@ -10,12 +13,7 @@ namespace OptimizelySDK.Odp.Client
     {
         public ILogger Logger { get; set; } = new DefaultLogger();
 
-        private static readonly HttpClient Client;
-
-        public static HttpClientOdpClient()
-        {
-            Client = new HttpClient();
-        }
+        private readonly HttpClient Client = new HttpClient();
 
         public string QuerySegments(QuerySegmentsParameters parameters)
         {
@@ -24,6 +22,18 @@ namespace OptimizelySDK.Odp.Client
 
         private async Task<string> QuerySegmentsAsync(QuerySegmentsParameters parameters)
         {
+            var request = BuildRequestMessage(parameters.ToJson(), parameters);
+
+            var response = await Client.SendAsync(request);
+            response.EnsureSuccessStatusCode();
+
+            return await response.Content.ReadAsStringAsync();
+        }
+
+        private HttpRequestMessage BuildRequestMessage(string jsonQuery,
+            QuerySegmentsParameters parameters
+        )
+        {
             var request = new HttpRequestMessage
             {
                 RequestUri = new Uri(parameters.ApiHost),
@@ -31,19 +41,13 @@ namespace OptimizelySDK.Odp.Client
                 Headers =
                 {
                     {
-                        "Content-Type", "application/json"
-                    },
-                    {
                         "x-api-key", parameters.ApiKey
                     },
                 },
-                Content = new StringContent(json, System.Text.Encoding.UTF8, "application/json"),
+                Content = new StringContent(jsonQuery, Encoding.UTF8, "application/json"),
             };
 
-            var response = await Client.SendAsync(request);
-            response.EnsureSuccessStatusCode();
-
-            return await response.Content.ReadAsStringAsync();
+            return request;
         }
     }
 }

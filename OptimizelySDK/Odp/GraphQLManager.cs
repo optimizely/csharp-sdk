@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using OptimizelySDK.AudienceConditions;
 using OptimizelySDK.Logger;
 using OptimizelySDK.Odp.Client;
 using OptimizelySDK.Odp.Entity;
@@ -12,12 +13,10 @@ namespace OptimizelySDK.Odp
     public class GraphQLManager : IGraphQLManager
     {
         private readonly ILogger Logger;
-        private readonly IOdpClient OdpClient;
 
-        public GraphQLManager(ILogger logger)
+        public GraphQLManager(ILogger logger = null)
         {
-            Logger = logger;
-            OdpClient = new OdpClient(logger);
+            Logger = logger ?? new DefaultLogger();
         }
 
         public string[] FetchSegments(string apiKey, string apiHost, string userKey,
@@ -36,7 +35,8 @@ namespace OptimizelySDK.Odp
             string segmentsResponseJson;
             try
             {
-                segmentsResponseJson = OdpClient.QuerySegments(parameters);
+                var client = new OdpClient(Logger);
+                segmentsResponseJson = client.QuerySegments(parameters);
             }
             catch (Exception ex)
             {
@@ -56,7 +56,7 @@ namespace OptimizelySDK.Odp
             }
 
             return response.Data?.Customer?.Audiences?.Edges?.
-                Where(e => e.Node.State == "qualified"). // TODO: replace w/ constant
+                Where(e => e.Node.State == BaseCondition.QUALIFIED).
                 Select(e => e.Node.Name).ToArray();
         }
 
