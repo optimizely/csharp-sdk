@@ -13,10 +13,12 @@ namespace OptimizelySDK.Odp
     public class GraphQLManager : IGraphQLManager
     {
         private readonly ILogger Logger;
+        private readonly IOdpClient OdpClient;
 
-        public GraphQLManager(ILogger logger = null)
+        public GraphQLManager(ILogger logger = null, IOdpClient odpClient = null)
         {
             Logger = logger ?? new DefaultLogger();
+            OdpClient = odpClient ?? new OdpClient(Logger);
         }
 
         public string[] FetchSegments(string apiKey, string apiHost, string userKey,
@@ -35,8 +37,7 @@ namespace OptimizelySDK.Odp
             string segmentsResponseJson;
             try
             {
-                var client = new OdpClient(Logger);
-                segmentsResponseJson = client.QuerySegments(parameters);
+                segmentsResponseJson = OdpClient.QuerySegments(parameters);
             }
             catch (Exception ex)
             {
@@ -46,6 +47,13 @@ namespace OptimizelySDK.Odp
             }
 
             var response = ParseSegmentsResponseJson(segmentsResponseJson);
+
+            if (response is null)
+            {
+                Logger.Log(LogLevel.WARN, "Error while parsing response.");
+
+                return new string[0];
+            }
 
             if (response.HasErrors)
             {

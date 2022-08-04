@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System.Collections.Generic;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace OptimizelySDK.Odp.Entity
@@ -14,23 +15,18 @@ namespace OptimizelySDK.Odp.Entity
         
         public string ToJson()
         {
-            var json = @$"
-{{ 
-    ""query"" : ""
-        query {{ 
-            customer({UserKey}: ""{UserValue}"") {{
-                audiences(subset: {JsonConvert.SerializeObject(SegmentToCheck)}) {{
-                    edges {{
-                        node {{
-                            name 
-                            state
-                        }}
-                    }}
-                }}
-            }}
-        }}""
-}}";
-            return Regex.Replace(json, @"\s", string.Empty);
+            var segmentsArryJson =
+                JsonConvert.SerializeObject(SegmentToCheck).Replace("\"", "\\\"");
+            var userValueWithEscapedQuotes = $"\\\"{UserValue}\\\"";
+
+            var json = new StringBuilder();
+            json.Append("{\"query\" : \"query {customer");
+            json.Append($"({UserKey} : {userValueWithEscapedQuotes}) ");
+            json.Append("{audiences");
+            json.Append($"(subset: {segmentsArryJson})");
+            json.Append("{edges {node {name state}}}}}\"}");
+
+            return json.ToString();
         }
     }
 }

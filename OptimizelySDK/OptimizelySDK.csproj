@@ -14,7 +14,7 @@
     <TargetFrameworkProfile />
     <ReleaseVersion>1.2.1</ReleaseVersion>
     <AssemblyOriginatorKeyFile>..\keypair.snk</AssemblyOriginatorKeyFile>
-    <LangVersion>8</LangVersion>
+    <LangVersion>7.3</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -89,10 +89,8 @@
     <Compile Include="Entity\IdKeyEntity.cs" />
     <Compile Include="Entity\Integration.cs" />
     <Compile Include="Event\Entity\DecisionMetadata.cs" />
-    <Compile Include="Odp\Client\HttpClientOdpClient.cs" />
     <Compile Include="Odp\Client\IOdpClient.cs" />
     <Compile Include="Odp\Client\OdpClient.cs" />
-    <Compile Include="Odp\Client\WebRequestOdpClient.cs" />
     <Compile Include="Odp\Entity\Audience.cs" />
     <Compile Include="Odp\Entity\Customer.cs" />
     <Compile Include="Odp\Entity\Data.cs" />
