@@ -1,11 +1,11 @@
 ﻿/* 
- * Copyright 2019, Optimizely
+ * Copyright 2019-2022, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -41,11 +41,11 @@ namespace OptimizelySDK.Tests.AudienceConditionsTests
         public void Initialize()
         {
             TrueConditionMock = new Mock<ICondition>();
-            TrueConditionMock.Setup(condition => condition.Evaluate(It.IsAny<ProjectConfig>(), It.IsAny<UserAttributes>(), It.IsAny<ILogger>())).Returns(true);
+            TrueConditionMock.Setup(condition => condition.Evaluate(It.IsAny<ProjectConfig>(), It.IsAny<OptimizelyUserContext>(), It.IsAny<ILogger>())).Returns(true);
             FalseConditionMock = new Mock<ICondition>();
-            FalseConditionMock.Setup(condition => condition.Evaluate(It.IsAny<ProjectConfig>(), It.IsAny<UserAttributes>(), It.IsAny<ILogger>())).Returns(false);
+            FalseConditionMock.Setup(condition => condition.Evaluate(It.IsAny<ProjectConfig>(), It.IsAny<OptimizelyUserContext>(), It.IsAny<ILogger>())).Returns(false);
             NullConditionMock = new Mock<ICondition>();
-            NullConditionMock.Setup(condition => condition.Evaluate(It.IsAny<ProjectConfig>(), It.IsAny<UserAttributes>(), It.IsAny<ILogger>())).Returns((bool?)null);
+            NullConditionMock.Setup(condition => condition.Evaluate(It.IsAny<ProjectConfig>(), It.IsAny<OptimizelyUserContext>(), It.IsAny<ILogger>())).Returns((bool?)null);
 
             TrueCondition = TrueConditionMock.Object;
             FalseCondition = FalseConditionMock.Object;
@@ -76,7 +76,7 @@ namespace OptimizelySDK.Tests.AudienceConditionsTests
             Assert.That(andCondition.Evaluate(null, null, Logger), Is.False);
 
             // Should not be called due to short circuiting.
-            TrueConditionMock.Verify(condition => condition.Evaluate(It.IsAny<ProjectConfig>(), It.IsAny<UserAttributes>(), Logger), Times.Never);
+            TrueConditionMock.Verify(condition => condition.Evaluate(It.IsAny<ProjectConfig>(), It.IsAny<OptimizelyUserContext>(), Logger), Times.Never);
         }
 
         [Test]

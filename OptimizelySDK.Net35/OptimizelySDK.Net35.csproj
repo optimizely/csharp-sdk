@@ -233,6 +233,9 @@
     <Compile Include="..\OptimizelySDK\Config\DatafileProjectConfig.cs">
       <Link>Config\DatafileProjectConfig</Link>
     </Compile>
+    <Compile Include="..\OptimizelySDK\Entity\Integration.cs">
+      <Link>Entity\Integration</Link>
+    </Compile>
     <Compile Include="..\OptimizelySDK\Config\ProjectConfigManager.cs">
       <Link>Config\ProjectConfigManager</Link>
     </Compile>

@@ -78,6 +78,7 @@
     <Compile Include="ConfigTest\FallbackProjectConfigManagerTest.cs" />
     <Compile Include="DecisionServiceTest.cs" />
     <Compile Include="DefaultErrorHandlerTest.cs" />
+    <Compile Include="EntityTests\IntegrationTest.cs" />
     <Compile Include="EventTests\EventProcessorProps.cs" />
     <Compile Include="OdpTests\GraphQLManagerTest.cs" />
     <Compile Include="OptimizelyConfigTests\OptimizelyConfigTest.cs" />
@@ -107,6 +108,7 @@
     <Compile Include="UtilsTests\ExperimentUtilsTest.cs" />
     <Compile Include="UtilsTests\PrivateObject.cs" />
     <Compile Include="UtilsTests\ValidatorTest.cs" />
+    <Compile Include="Utils\TestConversionExtensions.cs" />
     <Compile Include="ValidEventDispatcher.cs" />
     <Compile Include="ConfigTest\TestPollingProjectConfigManager.cs" />
     <Compile Include="EntityTests\FeatureVariableTest.cs" />
@@ -124,6 +126,10 @@
     <Content Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="IntegrationEmptyDatafile.json" />
+    <EmbeddedResource Include="IntegrationNonOdpDatafile.json" />
+    <EmbeddedResource Include="IntegrationOdpDatafile.json" />
+    <EmbeddedResource Include="IntegrationOdpWithOtherFieldsDatafile.json" />
     <EmbeddedResource Include="TestData.json" />
     <EmbeddedResource Include="simple_ab_experiments.json" />
     <EmbeddedResource Include="EmptyRolloutRule.json" />
@@ -145,7 +151,6 @@
   <ItemGroup>
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.

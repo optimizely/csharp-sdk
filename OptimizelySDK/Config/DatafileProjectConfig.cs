@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -97,6 +97,16 @@ namespace OptimizelySDK.Config
         /// Raw datafile
         /// </summary>
         public string Datafile { get; set; }
+
+        /// <summary>
+        /// Configured host name for the Optimizely Data Platform. 
+        /// </summary>
+        public string HostForOdp { get; private set; }
+        
+        /// <summary>
+        /// Configured public key from the Optimizely Data Platform.
+        /// </summary>
+        public string PublicKeyForOdp { get; private set; }
 
         /// <summary>
         /// Supported datafile versions list.
@@ -263,6 +273,11 @@ namespace OptimizelySDK.Config
         /// Associative list of Rollouts.
         /// </summary>
         public Rollout[] Rollouts { get; set; }
+        
+        /// <summary>
+        /// Associative list of Integrations.
+        /// </summary>
+        public Integration[] Integrations { get; set; }
 
         //========================= Initialization ===========================
 
@@ -280,6 +295,7 @@ namespace OptimizelySDK.Config
             TypedAudiences = TypedAudiences ?? new Audience[0];
             FeatureFlags = FeatureFlags ?? new FeatureFlag[0];
             Rollouts = Rollouts ?? new Rollout[0];
+            Integrations = Integrations ?? new Integration[0];
             _ExperimentKeyMap = new Dictionary<string, Experiment>();
 
             _GroupIdMap = ConfigParser<Group>.GenerateMap(entities: Groups, getKey: g => g.Id.ToString(), clone: true);
@@ -353,6 +369,10 @@ namespace OptimizelySDK.Config
                     }
                 }
             }
+
+            var integration = Integrations.FirstOrDefault(i => i.Key.ToLower() == "odp");
+            HostForOdp = integration?.Host;
+            PublicKeyForOdp = integration?.PublicKey;
 
             var flagToVariationsMap = new Dictionary<string, Dictionary<string, Variation>>();
             // Adding experiments in experiment-feature map and flag variation map to use.

@@ -115,6 +115,9 @@
     <Compile Include="..\OptimizelySDK\Entity\Group.cs">
       <Link>Entity\Group.cs</Link>
     </Compile>
+    <Compile Include="..\OptimizelySDK\Entity\Integration.cs">
+      <Link>Entity\Integration.cs</Link>
+    </Compile>
     <Compile Include="..\OptimizelySDK\Entity\IdKeyEntity.cs">
       <Link>Entity\IdKeyEntity.cs</Link>
     </Compile>

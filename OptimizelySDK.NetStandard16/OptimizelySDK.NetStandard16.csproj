@@ -76,6 +76,7 @@
 			<Compile Include="..\OptimizelySDK\Bucketing\UserProfileUtil.cs" />
 			<Compile Include="..\OptimizelySDK\ProjectConfig.cs" />
 			<Compile Include="..\OptimizelySDK\Config\DatafileProjectConfig.cs" />
+			<Compile Include="..\OptimizelySDK\Entity\Integration.cs" />
 			<Compile Include="..\OptimizelySDK\Config\ProjectConfigManager.cs" />
 			<Compile Include="..\OptimizelySDK\Config\PollingProjectConfigManager.cs" />
 			<Compile Include="..\OptimizelySDK\Config\HttpProjectConfigManager.cs" />
@@ -159,5 +160,4 @@
         <PackageReference Include="NJsonSchema" Version="8.33.6323.36213" />
         <PackageReference Include="murmurhash-signed" Version="1.0.2" />
     </ItemGroup>
-
 </Project>

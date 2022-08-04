@@ -1,11 +1,11 @@
 ﻿/*
- * Copyright 2017-2021, Optimizely
+ * Copyright 2017-2022, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -191,34 +191,6 @@ namespace OptimizelySDK
             DecisionService = new DecisionService(Bucketer, ErrorHandler, userProfileService, Logger);
             EventProcessor = eventProcessor ?? new ForwardingEventProcessor(EventDispatcher, NotificationCenter, Logger);
             DefaultDecideOptions = defaultDecideOptions ?? new OptimizelyDecideOption[] { };
-        }
-
-        /// <summary>
-        /// Helper function to validate all required conditions before performing activate or track.
-        /// </summary>
-        /// <param name="experiment">Experiment Object representing experiment</param>
-        /// <param name="userId">string ID for user</param>
-        /// <param name="userAttributes">associative array of Attributes for the user</param>
-        private bool ValidatePreconditions(Experiment experiment, string userId, ProjectConfig config, UserAttributes userAttributes = null)
-        {
-            if (!experiment.IsExperimentRunning)
-            {
-                Logger.Log(LogLevel.INFO, string.Format("Experiment {0} is not running.", experiment.Key));
-                return false;
-            }
-
-            if (experiment.IsUserInForcedVariation(userId))
-            {
-                return true;
-            }
-
-            if (!ExperimentUtils.DoesUserMeetAudienceConditions(config, experiment, userAttributes, "experiment", experiment.Key, Logger).ResultObject)
-            {
-                Logger.Log(LogLevel.INFO, string.Format("User \"{0}\" does not meet conditions to be in experiment \"{1}\".", userId, experiment.Key));
-                return false;
-            }
-
-            return true;
         }
 
         /// <summary>
