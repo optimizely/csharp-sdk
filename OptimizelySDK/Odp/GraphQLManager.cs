@@ -15,10 +15,10 @@ namespace OptimizelySDK.Odp
         private readonly ILogger Logger;
         private readonly IOdpClient OdpClient;
 
-        public GraphQLManager(ILogger logger = null, IOdpClient odpClient = null)
+        public GraphQLManager(ILogger logger = null, IOdpClient client = null)
         {
             Logger = logger ?? new DefaultLogger();
-            OdpClient = odpClient ?? new OdpClient(Logger);
+            OdpClient = client ?? new OdpClient(Logger);
         }
 
         public string[] FetchSegments(string apiKey, string apiHost, string userKey,
@@ -70,6 +70,11 @@ namespace OptimizelySDK.Odp
 
         public Response ParseSegmentsResponseJson(string jsonResponse)
         {
+            if (string.IsNullOrWhiteSpace(jsonResponse))
+            {
+                return default;
+            }
+            
             var json = Regex.Replace(jsonResponse, @"\s+", string.Empty);
 
             return JsonConvert.DeserializeObject<Response>(json);

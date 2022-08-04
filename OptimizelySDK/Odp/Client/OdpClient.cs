@@ -28,18 +28,10 @@ namespace OptimizelySDK.Odp.Client
         {
             var request = BuildRequestMessage(parameters.ToJson(), parameters);
 
-            try
-            {
-                var response = await _client.SendAsync(request);
-                response.EnsureSuccessStatusCode();
+            var response = await _client.SendAsync(request);
+            response.EnsureSuccessStatusCode();
 
-                return await response.Content.ReadAsStringAsync();
-            }
-            catch (Exception ex)
-            {
-                _logger.Log(LogLevel.WARN, $"Unable to query ODP: {ex.Message}");
-                return string.Empty;
-            }
+            return await response.Content.ReadAsStringAsync();
         }
 
         private HttpRequestMessage BuildRequestMessage(string jsonQuery,

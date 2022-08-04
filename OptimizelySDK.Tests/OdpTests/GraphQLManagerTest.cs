@@ -1,4 +1,5 @@
 ﻿using Moq;
+using Moq.Protected;
 using NUnit.Framework;
 using OptimizelySDK.AudienceConditions;
 using OptimizelySDK.Logger;
@@ -6,6 +7,11 @@ using OptimizelySDK.Odp;
 using OptimizelySDK.Odp.Client;
 using OptimizelySDK.Odp.Entity;
 using System.Collections.Generic;
+using System.Net;
+using System.Net.Http;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace OptimizelySDK.Tests.OdpTests
 {
@@ -13,6 +19,15 @@ namespace OptimizelySDK.Tests.OdpTests
     public class GraphQLManagerTest
     {
         private const string VALID_ODP_PUBLIC_KEY = "W4WzcEs-ABgXorzY7h1LCQ";
+        private const string ODP_GRAPHQL_URL = "https://api.zaius.com/v3/graphql";
+        private const string FS_USER_ID = "fs_user_id";
+
+        private readonly List<string> _segmentsToCheck = new List<string>()
+        {
+            "has_email",
+            "has_email_opted_in",
+            "push_on_sale",
+        };
 
         private Mock<ILogger> _mockLogger;
         private Mock<IOdpClient> _mockOdpClient;
@@ -29,8 +44,6 @@ namespace OptimizelySDK.Tests.OdpTests
         [Test]
         public void ShouldParseSuccessfulResponse()
         {
-            #region const string responseJson
-
             var responseJson = @"
 {
     ""data"": {
@@ -54,9 +67,6 @@ namespace OptimizelySDK.Tests.OdpTests
         }
     }
 }";
-
-            #endregion
-
             var manager = new GraphQLManager(_mockLogger.Object);
 
             var response = manager.ParseSegmentsResponseJson(responseJson);
@@ -78,8 +88,6 @@ namespace OptimizelySDK.Tests.OdpTests
         [Test]
         public void ShouldParseErrorResponse()
         {
-            #region const string responseJson
-
             const string responseJson = @"
 {
    ""errors"": [
@@ -103,9 +111,6 @@ namespace OptimizelySDK.Tests.OdpTests
         ""customer"": null
     }
 }";
-
-            #endregion
-
             var manager = new GraphQLManager(_mockLogger.Object);
 
             var response = manager.ParseSegmentsResponseJson(responseJson);
@@ -127,26 +132,21 @@ namespace OptimizelySDK.Tests.OdpTests
         [Test]
         public void ShouldFetchValidQualifiedSegments()
         {
-            var expectedResponseJson = "{\"data\":{\"customer\":{\"audiences\":" +
-                                       "{\"edges\":[{\"node\":{\"name\":\"has_email\"," +
-                                       "\"state\":\"qualified\"}},{\"node\":{\"name\":" +
-                                       "\"has_email_opted_in\",\"state\":\"qualified\"}}]}}}}";
+            var responseData = "{\"data\":{\"customer\":{\"audiences\":" +
+                               "{\"edges\":[{\"node\":{\"name\":\"has_email\"," +
+                               "\"state\":\"qualified\"}},{\"node\":{\"name\":" +
+                               "\"has_email_opted_in\",\"state\":\"qualified\"}}]}}}}";
             _mockOdpClient.Setup(
                     c => c.QuerySegments(It.IsAny<QuerySegmentsParameters>())).
-                Returns(expectedResponseJson);
+                Returns(responseData);
             var manager = new GraphQLManager(_mockLogger.Object, _mockOdpClient.Object);
 
             var segments = manager.FetchSegments(
                 VALID_ODP_PUBLIC_KEY,
-                "https://api.zaius.com/v3/graphql",
-                "fs_user_id",
+                ODP_GRAPHQL_URL,
+                FS_USER_ID,
                 "tester-101",
-                new List<string>()
-                {
-                    "has_email",
-                    "has_email_opted_in",
-                    "push_on_sale",
-                });
+                _segmentsToCheck);
 
             Assert.IsTrue(segments.Length == 2);
             Assert.Contains("has_email", segments);
@@ -155,51 +155,143 @@ namespace OptimizelySDK.Tests.OdpTests
         }
 
         [Test]
-        public void ShouldHandleEmptyQualifiedSegments() { }
+        public void ShouldHandleEmptyQualifiedSegments()
+        {
+            var responseData = "{\"data\":{\"customer\":{\"audiences\":" +
+                               "{\"edges\":[ ]}}}}";
+            _mockOdpClient.Setup(
+                    c => c.QuerySegments(It.IsAny<QuerySegmentsParameters>())).
+                Returns(responseData);
+            var manager = new GraphQLManager(_mockLogger.Object, _mockOdpClient.Object);
+
+            var segments = manager.FetchSegments(
+                VALID_ODP_PUBLIC_KEY,
+                ODP_GRAPHQL_URL,
+                FS_USER_ID,
+                "tester-101",
+                _segmentsToCheck);
+
+            Assert.IsTrue(segments.Length == 0);
+            _mockLogger.Verify(l => l.Log(LogLevel.WARN, It.IsAny<string>()), Times.Never);
+        }
 
         [Test]
         public void ShouldHandleErrorWithInvalidIdentifier()
         {
-            var expectedResponseJson = "{\"errors\":[{\"message\":" +
-                                       "\"Exception while fetching data (/customer) : " +
-                                       "java.lang.RuntimeException: could not resolve _fs_user_id = invalid-user\"," +
-                                       "\"locations\":[{\"line\":1,\"column\":8}],\"path\":[\"customer\"]," +
-                                       "\"extensions\":{\"classification\":\"DataFetchingException\"}}]," +
-                                       "\"data\":{\"customer\":null}}";
+            var responseData = "{\"errors\":[{\"message\":" +
+                               "\"Exception while fetching data (/customer) : " +
+                               "java.lang.RuntimeException: could not resolve _fs_user_id = invalid-user\"," +
+                               "\"locations\":[{\"line\":1,\"column\":8}],\"path\":[\"customer\"]," +
+                               "\"extensions\":{\"classification\":\"DataFetchingException\"}}]," +
+                               "\"data\":{\"customer\":null}}";
             _mockOdpClient.Setup(
                     c => c.QuerySegments(It.IsAny<QuerySegmentsParameters>())).
-                Returns(expectedResponseJson);
+                Returns(responseData);
             var manager = new GraphQLManager(_mockLogger.Object);
 
             var segments = manager.FetchSegments(
                 VALID_ODP_PUBLIC_KEY,
-                "https://api.zaius.com/v3/graphql",
-                "fs_user_id",
+                ODP_GRAPHQL_URL,
+                FS_USER_ID,
                 "invalid-user", // invalid user
-                new List<string>()
-                {
-                    "has_email",
-                    "has_email_opted_in",
-                    "push_on_sale",
-                });
+                _segmentsToCheck);
 
             Assert.IsTrue(segments.Length == 0);
             _mockLogger.Verify(l => l.Log(LogLevel.WARN, It.IsAny<string>()), Times.Once);
         }
 
         [Test]
-        public void ShouldHandleOtherException() { }
+        public void ShouldHandleOtherException()
+        {
+            var responseData = "{\"errors\":[{\"message\":\"Validation error of type " +
+                               "UnknownArgument: Unknown field argument not_real_userKey @ " +
+                               "'customer'\",\"locations\":[{\"line\":1,\"column\":17}]," +
+                               "\"extensions\":{\"classification\":\"ValidationError\"}}]}";
+
+            _mockOdpClient.Setup(
+                    c => c.QuerySegments(It.IsAny<QuerySegmentsParameters>())).
+                Returns(responseData);
+            var manager = new GraphQLManager(_mockLogger.Object, _mockOdpClient.Object);
+
+            var segments = manager.FetchSegments(
+                VALID_ODP_PUBLIC_KEY,
+                ODP_GRAPHQL_URL,
+                "not_real_userKey",
+                "tester-101",
+                _segmentsToCheck);
+
+            Assert.IsTrue(segments.Length == 0);
+            _mockLogger.Verify(l => l.Log(LogLevel.WARN, It.IsAny<string>()), Times.Once);
+        }
 
         [Test]
-        public void ShouldHandleBadResponse() { }
+        public void ShouldHandleBadResponse()
+        {
+            var responseData = "{\"data\":{ }}";
+            _mockOdpClient.Setup(
+                    c => c.QuerySegments(It.IsAny<QuerySegmentsParameters>())).
+                Returns(responseData);
+            var manager = new GraphQLManager(_mockLogger.Object, _mockOdpClient.Object);
+
+            var segments = manager.FetchSegments(
+                VALID_ODP_PUBLIC_KEY,
+                ODP_GRAPHQL_URL,
+                "not_real_userKey",
+                "tester-101",
+                _segmentsToCheck);
+
+            Assert.IsNull(segments);
+            _mockLogger.Verify(l => l.Log(LogLevel.WARN, It.IsAny<string>()), Times.Never);
+        }
 
         [Test]
         public void ShouldHandleNetworkError() { }
 
         [Test]
-        public void ShouldHandle400HttpCode() { }
+        public void ShouldHandle400HttpCode()
+        {
+            var odpClient = new OdpClient(_mockLogger.Object,
+                GetHttpClientThatReturnsStatus(HttpStatusCode.BadRequest));
+            var manager = new GraphQLManager(_mockLogger.Object, odpClient);
+
+            var segments = manager.FetchSegments(
+                VALID_ODP_PUBLIC_KEY,
+                ODP_GRAPHQL_URL,
+                FS_USER_ID,
+                "tester-101",
+                _segmentsToCheck);
+
+            Assert.IsTrue(segments.Length == 0);
+            _mockLogger.Verify(l => l.Log(LogLevel.WARN, It.IsAny<string>()), Times.Once);
+        }
 
         [Test]
-        public void ShouldHandle500HttpCode() { }
+        public void ShouldHandle500HttpCode()
+        {
+            var odpClient = new OdpClient(_mockLogger.Object,
+                GetHttpClientThatReturnsStatus(HttpStatusCode.InternalServerError));
+            var manager = new GraphQLManager(_mockLogger.Object, odpClient);
+
+            var segments = manager.FetchSegments(
+                VALID_ODP_PUBLIC_KEY,
+                ODP_GRAPHQL_URL,
+                FS_USER_ID,
+                "tester-101",
+                _segmentsToCheck);
+
+            Assert.IsTrue(segments.Length == 0);
+            _mockLogger.Verify(l => l.Log(LogLevel.WARN, It.IsAny<string>()), Times.Once);
+        }
+
+        private HttpClient GetHttpClientThatReturnsStatus(HttpStatusCode statusCode)
+        {
+            var mockedHandler = new Mock<HttpMessageHandler>();
+            mockedHandler.Protected().Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>()).
+                ReturnsAsync(() => new HttpResponseMessage(statusCode));
+            return new HttpClient(mockedHandler.Object);
+        }
     }
 }
