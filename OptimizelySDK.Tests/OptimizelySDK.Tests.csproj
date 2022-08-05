@@ -80,6 +80,7 @@
     <Compile Include="DefaultErrorHandlerTest.cs" />
     <Compile Include="EntityTests\IntegrationTest.cs" />
     <Compile Include="EventTests\EventProcessorProps.cs" />
+    <Compile Include="OdpTests\CollectionExtensions.cs" />
     <Compile Include="OdpTests\LruCacheTest.cs" />
     <Compile Include="OptimizelyConfigTests\OptimizelyConfigTest.cs" />
     <Compile Include="OptimizelyDecisions\OptimizelyDecisionTest.cs" />
