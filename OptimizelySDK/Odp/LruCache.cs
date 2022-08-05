@@ -1,26 +1,30 @@
 ﻿using OptimizelySDK.Logger;
 using System;
 using System.Collections.Specialized;
+using System.Runtime.CompilerServices;
+
+[assembly: InternalsVisibleTo("OptimizelySDK.Tests")]
 
 namespace OptimizelySDK.Odp
 {
     public class LruCache<T> : ILruCache<T>
     {
-        private const int DEFAULT_MAX_SIZE = 10000;
-        private const int DEFAULT_TIMEOUT_SECONDS = 600;
+        public const int DEFAULT_MAX_SIZE = 10000;
+        public const int DEFAULT_TIMEOUT_SECONDS = 600;
 
         private readonly ILogger _logger;
         private readonly object _mutex = new object();
         private int _maxSize;
         private long _timeoutMilliseconds;
-        private readonly OrderedDictionary _orderedDictionary = new OrderedDictionary();
+        internal OrderedDictionary _orderedDictionary = new OrderedDictionary();
 
         public LruCache() : this(DEFAULT_MAX_SIZE, DEFAULT_TIMEOUT_SECONDS, null) { }
 
         public LruCache(ILogger logger) :
             this(DEFAULT_MAX_SIZE, DEFAULT_TIMEOUT_SECONDS, logger) { }
 
-        public LruCache(int maxSize, int timeoutSeconds, ILogger logger)
+
+        public LruCache(int maxSize, int timeoutSeconds, ILogger logger = null)
         {
             _maxSize = maxSize < 0 ? default(int) : maxSize;
             _timeoutMilliseconds = (timeoutSeconds < 0) ? 0 : (timeoutSeconds * 1000L);
@@ -91,11 +95,10 @@ namespace OptimizelySDK.Odp
                 }
 
                 ItemWrapper item = (ItemWrapper)_orderedDictionary[key];
-                var nowMs = DateTime.Now.Millisecond;
+                var nowMs = DateTime.Now.ToUnixTimeMilliseconds();
 
                 // ttl = 0 means items never expire.
-                if (_timeoutMilliseconds == 0 ||
-                    (nowMs - item.Timestamp < _timeoutMilliseconds))
+                if (_timeoutMilliseconds == 0 || (nowMs - item.Timestamp < _timeoutMilliseconds))
                 {
                     return item.Value;
                 }
@@ -116,16 +119,16 @@ namespace OptimizelySDK.Odp
 
         private class ItemWrapper
         {
-            public T Value;
-            public long Timestamp;
+            public readonly T Value;
+            public readonly long Timestamp;
 
             public ItemWrapper(T value)
             {
                 Value = value;
-                Timestamp = Convert.ToInt64(
-                    DateTime.Now.Subtract(new DateTime(1970, 1, 1)).
-                        TotalMilliseconds);
+                Timestamp = DateTime.Now.ToUnixTimeMilliseconds();
             }
         }
+
+       
     }
 }
