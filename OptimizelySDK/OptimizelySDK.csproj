@@ -88,6 +88,7 @@
     <Compile Include="Entity\IdKeyEntity.cs" />
     <Compile Include="Entity\Integration.cs" />
     <Compile Include="Event\Entity\DecisionMetadata.cs" />
+    <Compile Include="Odp\LruCache.cs" />
     <Compile Include="OptimizelyDecisions\DecisionMessage.cs" />
     <Compile Include="OptimizelyDecisions\DecisionReasons.cs" />
     <Compile Include="OptimizelyDecisions\OptimizelyDecideOption.cs" />
@@ -175,7 +176,6 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
