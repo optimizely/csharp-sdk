@@ -30,7 +30,7 @@ namespace OptimizelySDK.Odp.Entity
         
         public string ToJson()
         {
-            var segmentsArryJson =
+            var segmentsArrayJson =
                 JsonConvert.SerializeObject(SegmentToCheck).Replace("\"", "\\\"");
             var userValueWithEscapedQuotes = $"\\\"{UserValue}\\\"";
 
@@ -38,7 +38,7 @@ namespace OptimizelySDK.Odp.Entity
             json.Append("{\"query\" : \"query {customer");
             json.Append($"({UserKey} : {userValueWithEscapedQuotes}) ");
             json.Append("{audiences");
-            json.Append($"(subset: {segmentsArryJson})");
+            json.Append($"(subset: {segmentsArrayJson})");
             json.Append("{edges {node {name state}}}}}\"}");
 
             return json.ToString();

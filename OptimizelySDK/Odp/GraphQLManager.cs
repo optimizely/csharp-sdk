@@ -22,7 +22,6 @@ using OptimizelySDK.Odp.Entity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 
 namespace OptimizelySDK.Odp
 {
@@ -91,9 +90,7 @@ namespace OptimizelySDK.Odp
                 return default;
             }
             
-            var json = Regex.Replace(jsonResponse, @"\s+", string.Empty);
-
-            return JsonConvert.DeserializeObject<Response>(json);
+            return JsonConvert.DeserializeObject<Response>(jsonResponse);
         }
     }
 }
