@@ -26,7 +26,7 @@ namespace OptimizelySDK.Odp
 
         public LruCache(int maxSize, int timeoutSeconds, ILogger logger = null)
         {
-            _maxSize = maxSize < 0 ? default(int) : maxSize;
+            _maxSize = maxSize < 0 ? default : maxSize;
             _timeoutMilliseconds = (timeoutSeconds < 0) ? 0 : (timeoutSeconds * 1000L);
             _logger = logger ?? new DefaultLogger();
         }
@@ -73,6 +73,11 @@ namespace OptimizelySDK.Odp
                 return;
             }
 
+            if (_orderedDictionary.Count >= _maxSize)
+            {
+                _orderedDictionary.RemoveAt(0);
+            }
+
             lock (_mutex)
             {
                 _orderedDictionary.Add(key, new ItemWrapper(value));
@@ -94,7 +99,7 @@ namespace OptimizelySDK.Odp
                     return default;
                 }
 
-                ItemWrapper item = (ItemWrapper)_orderedDictionary[key];
+                var item = (ItemWrapper)_orderedDictionary[key];
                 var nowMs = DateTime.Now.ToUnixTimeMilliseconds();
 
                 // ttl = 0 means items never expire.
@@ -128,7 +133,5 @@ namespace OptimizelySDK.Odp
                 Timestamp = DateTime.Now.ToUnixTimeMilliseconds();
             }
         }
-
-       
     }
 }
