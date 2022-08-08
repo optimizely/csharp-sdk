@@ -61,14 +61,14 @@ namespace OptimizelySDK.Tests.OdpTests
             cache.Save("user2", _segments3And4);
             cache.Save("user3", _segments5And6);
 
-            var itemKeys = cache._orderedDictionary.Keys.ToKeyCollection();
+            var itemKeys = cache.ReadCurrentCache().Keys.ToKeyCollection();
             Assert.AreEqual("user1", itemKeys[0]);
             Assert.AreEqual("user2", itemKeys[1]);
             Assert.AreEqual("user3", itemKeys[2]);
 
             Assert.AreEqual(_segments1And2, cache.Lookup("user1"));
 
-            itemKeys = cache._orderedDictionary.Keys.ToKeyCollection();
+            itemKeys = cache.ReadCurrentCache().Keys.ToKeyCollection();
             // Lookup should move user1 to bottom of the list and push up others.
             Assert.AreEqual("user2", itemKeys[0]);
             Assert.AreEqual("user3", itemKeys[1]);
@@ -76,7 +76,7 @@ namespace OptimizelySDK.Tests.OdpTests
 
             Assert.AreEqual(_segments3And4, cache.Lookup("user2"));
 
-            itemKeys = cache._orderedDictionary.Keys.ToKeyCollection();
+            itemKeys = cache.ReadCurrentCache().Keys.ToKeyCollection();
             // Lookup should move user2 to bottom of the list and push up others.
             Assert.AreEqual("user3", itemKeys[0]);
             Assert.AreEqual("user1", itemKeys[1]);
@@ -84,7 +84,7 @@ namespace OptimizelySDK.Tests.OdpTests
 
             Assert.AreEqual(_segments5And6, cache.Lookup("user3"));
 
-            itemKeys = cache._orderedDictionary.Keys.ToKeyCollection();
+            itemKeys = cache.ReadCurrentCache().Keys.ToKeyCollection();
             // Lookup should move user3 to bottom of the list and push up others.
             Assert.AreEqual("user1", itemKeys[0]);
             Assert.AreEqual("user2", itemKeys[1]);
@@ -100,14 +100,14 @@ namespace OptimizelySDK.Tests.OdpTests
             cache.Save("user2", _segments3And4);
             cache.Save("user3", _segments5And6);
 
-            var itemKeys = cache._orderedDictionary.Keys.ToKeyCollection();
+            var itemKeys = cache.ReadCurrentCache().Keys.ToKeyCollection();
             Assert.AreEqual("user1", itemKeys[0]);
             Assert.AreEqual("user2", itemKeys[1]);
             Assert.AreEqual("user3", itemKeys[2]);
 
             cache.Save("user1", _segments1And2);
 
-            itemKeys = cache._orderedDictionary.Keys.ToKeyCollection();
+            itemKeys = cache.ReadCurrentCache().Keys.ToKeyCollection();
             // save should move user1 to bottom of the list and push up others.
             Assert.AreEqual("user2", itemKeys[0]);
             Assert.AreEqual("user3", itemKeys[1]);
@@ -115,7 +115,7 @@ namespace OptimizelySDK.Tests.OdpTests
 
             cache.Save("user2", _segments3And4);
 
-            itemKeys = cache._orderedDictionary.Keys.ToKeyCollection();
+            itemKeys = cache.ReadCurrentCache().Keys.ToKeyCollection();
             // save should move user2 to bottom of the list and push up others.
             Assert.AreEqual("user3", itemKeys[0]);
             Assert.AreEqual("user1", itemKeys[1]);
@@ -123,7 +123,7 @@ namespace OptimizelySDK.Tests.OdpTests
 
             cache.Save("user3", _segments5And6);
 
-            itemKeys = cache._orderedDictionary.Keys.ToKeyCollection();
+            itemKeys = cache.ReadCurrentCache().Keys.ToKeyCollection();
             // save should move user3 to bottom of the list and push up others.
             Assert.AreEqual("user1", itemKeys[0]);
             Assert.AreEqual("user2", itemKeys[1]);
@@ -152,12 +152,12 @@ namespace OptimizelySDK.Tests.OdpTests
             cache.Save("user1", _segments1And2);
 
             Assert.AreEqual(_segments1And2, cache.Lookup("user1"));
-            Assert.AreEqual(1, cache._orderedDictionary.Count);
+            Assert.AreEqual(1, cache.ReadCurrentCache().Count);
 
             Thread.Sleep(1200);
 
             Assert.IsNull(cache.Lookup("user1"));
-            Assert.AreEqual(0, cache._orderedDictionary.Count);
+            Assert.AreEqual(0, cache.ReadCurrentCache().Count);
         }
 
         [Test]
@@ -169,7 +169,7 @@ namespace OptimizelySDK.Tests.OdpTests
             cache.Save("user2", _segments3And4);
             cache.Save("user3", _segments5And6);
 
-            Assert.AreEqual(2, cache._orderedDictionary.Count);
+            Assert.AreEqual(2, cache.ReadCurrentCache().Count);
 
             Assert.AreEqual(_segments5And6, cache.Lookup("user3"));
             Assert.AreEqual(_segments3And4, cache.Lookup("user2"));
@@ -188,7 +188,7 @@ namespace OptimizelySDK.Tests.OdpTests
             Assert.AreEqual(_segments3And4, cache.Lookup("user2"));
             Assert.AreEqual(_segments5And6, cache.Lookup("user3"));
 
-            Assert.AreEqual(3, cache._orderedDictionary.Count);
+            Assert.AreEqual(3, cache.ReadCurrentCache().Count);
 
             cache.Reset();
 
@@ -196,6 +196,6 @@ namespace OptimizelySDK.Tests.OdpTests
             Assert.IsNull(cache.Lookup("user2"));
             Assert.IsNull(cache.Lookup("user3"));
 
-            Assert.AreEqual(0, cache._orderedDictionary.Count);}
+            Assert.AreEqual(0, cache.ReadCurrentCache().Count);}
     }
 }

@@ -17,9 +17,6 @@
 using OptimizelySDK.Logger;
 using System;
 using System.Collections.Specialized;
-using System.Runtime.CompilerServices;
-
-[assembly: InternalsVisibleTo("OptimizelySDK.Tests")]
 
 namespace OptimizelySDK.Odp
 {
@@ -32,7 +29,7 @@ namespace OptimizelySDK.Odp
         private readonly object _mutex = new object();
         private int _maxSize;
         private long _timeoutMilliseconds;
-        internal OrderedDictionary _orderedDictionary = new OrderedDictionary();
+        private OrderedDictionary _orderedDictionary = new OrderedDictionary();
 
         public LruCache() : this(DEFAULT_MAX_SIZE, DEFAULT_TIMEOUT_SECONDS, null) { }
 
@@ -150,6 +147,14 @@ namespace OptimizelySDK.Odp
             {
                 Value = value;
                 Timestamp = DateTime.Now.ToUnixTimeMilliseconds();
+            }
+        }
+
+        public OrderedDictionary ReadCurrentCache()
+        {
+            lock (_mutex)
+            {
+                return _orderedDictionary;
             }
         }
     }
