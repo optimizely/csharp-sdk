@@ -60,11 +60,6 @@ namespace OptimizelySDK.Odp
             }
         }
 
-        public void SetTimeout(long timeoutSeconds)
-        {
-            _timeoutMilliseconds = timeoutSeconds * 1000;
-        }
-
         public void Save(string key, T value)
         {
             if (_maxSize == 0)
@@ -73,13 +68,18 @@ namespace OptimizelySDK.Odp
                 return;
             }
 
-            if (_orderedDictionary.Count >= _maxSize)
-            {
-                _orderedDictionary.RemoveAt(0);
-            }
-
             lock (_mutex)
             {
+                if (_orderedDictionary.Contains(key))
+                {
+                    _orderedDictionary.Remove(key);
+                }
+
+                if (_orderedDictionary.Count >= _maxSize)
+                {
+                    _orderedDictionary.RemoveAt(0);
+                }
+
                 _orderedDictionary.Add(key, new ItemWrapper(value));
             }
         }
@@ -105,6 +105,9 @@ namespace OptimizelySDK.Odp
                 // ttl = 0 means items never expire.
                 if (_timeoutMilliseconds == 0 || (nowMs - item.Timestamp < _timeoutMilliseconds))
                 {
+                    _orderedDictionary.Remove(key);
+                    _orderedDictionary.Add(key, item);
+
                     return item.Value;
                 }
 

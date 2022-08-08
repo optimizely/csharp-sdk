@@ -1,5 +1,4 @@
 ﻿using NUnit.Framework;
-using OptimizelySDK.Entity;
 using OptimizelySDK.Odp;
 using System.Collections.Generic;
 using System.Threading;
@@ -9,26 +8,23 @@ namespace OptimizelySDK.Tests.OdpTests
     [TestFixture]
     public class LruCacheTest
     {
-        private List<string> _segments1And2 = new List<string>
+        private readonly List<string> _segments1And2 = new List<string>
         {
             "segment1",
             "segment2",
         };
 
-        private List<string> _segments3And4 = new List<string>
+        private readonly List<string> _segments3And4 = new List<string>
         {
             "segment3",
             "segment4",
         };
 
-        private List<string> _segments5And6 = new List<string>
+        private readonly List<string> _segments5And6 = new List<string>
         {
             "segment5",
             "segment6",
         };
-
-        [SetUp]
-        public void Setup() { }
 
         [Test]
         public void ShouldCreateSaveAndLookupOneItem()
