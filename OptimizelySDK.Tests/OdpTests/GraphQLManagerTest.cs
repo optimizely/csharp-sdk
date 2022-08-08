@@ -212,7 +212,7 @@ namespace OptimizelySDK.Tests.OdpTests
                 _segmentsToCheck);
 
             Assert.IsTrue(segments.Length == 0);
-            _mockLogger.Verify(l => l.Log(LogLevel.WARN, It.IsAny<string>()), Times.Once);
+            _mockLogger.Verify(l => l.Log(LogLevel.ERROR, It.IsAny<string>()), Times.Once);
         }
 
         [Test]
@@ -236,7 +236,7 @@ namespace OptimizelySDK.Tests.OdpTests
                 _segmentsToCheck);
 
             Assert.IsTrue(segments.Length == 0);
-            _mockLogger.Verify(l => l.Log(LogLevel.WARN, It.IsAny<string>()), Times.Once);
+            _mockLogger.Verify(l => l.Log(LogLevel.ERROR, It.IsAny<string>()), Times.Once);
         }
 
         [Test]
@@ -255,12 +255,30 @@ namespace OptimizelySDK.Tests.OdpTests
                 "tester-101",
                 _segmentsToCheck);
 
-            Assert.IsNull(segments);
-            _mockLogger.Verify(l => l.Log(LogLevel.WARN, It.IsAny<string>()), Times.Never);
+            Assert.IsTrue(segments.Length == 0);
+            _mockLogger.Verify(l => l.Log(LogLevel.ERROR, "Audience segments fetch failed (decode error)"), Times.Once);
         }
 
         [Test]
-        public void ShouldHandleNetworkError() { }
+        public void ShouldHandleUnrecognizedJsonResponse()
+        {
+            var responseData = "{\"unExpectedObject\":{ \"withSome\": \"value\", \"thatIsNotParseable\": \"true\" }}";
+            _mockOdpClient.Setup(
+                    c => c.QuerySegments(It.IsAny<QuerySegmentsParameters>())).
+                Returns(responseData);
+            var manager = new GraphQLManager(_mockLogger.Object, _mockOdpClient.Object);
+
+            var segments = manager.FetchSegments(
+                VALID_ODP_PUBLIC_KEY,
+                ODP_GRAPHQL_URL,
+                "not_real_userKey",
+                "tester-101",
+                _segmentsToCheck);
+
+            Assert.IsTrue(segments.Length == 0);
+            _mockLogger.Verify(l => l.Log(LogLevel.ERROR, "Audience segments fetch failed (decode error)"), Times.Once);
+            
+        }
 
         [Test]
         public void ShouldHandle400HttpCode()
@@ -277,7 +295,7 @@ namespace OptimizelySDK.Tests.OdpTests
                 _segmentsToCheck);
 
             Assert.IsTrue(segments.Length == 0);
-            _mockLogger.Verify(l => l.Log(LogLevel.WARN, It.IsAny<string>()), Times.Once);
+            _mockLogger.Verify(l => l.Log(LogLevel.ERROR, "Audience segments fetch failed (network error)"), Times.Once);
         }
 
         [Test]
@@ -295,7 +313,7 @@ namespace OptimizelySDK.Tests.OdpTests
                 _segmentsToCheck);
 
             Assert.IsTrue(segments.Length == 0);
-            _mockLogger.Verify(l => l.Log(LogLevel.WARN, It.IsAny<string>()), Times.Once);
+            _mockLogger.Verify(l => l.Log(LogLevel.ERROR, "Audience segments fetch failed (network error)"), Times.Once);
         }
 
         private HttpClient GetHttpClientThatReturnsStatus(HttpStatusCode statusCode)

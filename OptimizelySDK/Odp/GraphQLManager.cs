@@ -27,13 +27,13 @@ namespace OptimizelySDK.Odp
 {
     public class GraphQLManager : IGraphQLManager
     {
-        private readonly ILogger Logger;
-        private readonly IOdpClient OdpClient;
+        private readonly ILogger _logger;
+        private readonly IOdpClient _odpClient;
 
         public GraphQLManager(ILogger logger = null, IOdpClient client = null)
         {
-            Logger = logger ?? new DefaultLogger();
-            OdpClient = client ?? new OdpClient(Logger);
+            _logger = logger ?? new DefaultLogger();
+            _odpClient = client ?? new OdpClient(_logger);
         }
 
         public string[] FetchSegments(string apiKey, string apiHost, string userKey,
@@ -49,36 +49,30 @@ namespace OptimizelySDK.Odp
                 SegmentToCheck = segmentToCheck
             };
 
-            string segmentsResponseJson;
-            try
+            var segmentsResponseJson = _odpClient.QuerySegments(parameters);
+            if (string.IsNullOrWhiteSpace(segmentsResponseJson))
             {
-                segmentsResponseJson = OdpClient.QuerySegments(parameters);
+                return new string[0];
             }
-            catch (Exception ex)
+
+            var parsedSegments = ParseSegmentsResponseJson(segmentsResponseJson);
+            if (parsedSegments?.Data?.Customer?.Audiences?.Edges is null)
             {
-                Logger.Log(LogLevel.WARN, ex.Message);
+                _logger.Log(LogLevel.ERROR, "Audience segments fetch failed (decode error)");
 
                 return new string[0];
             }
 
-            var response = ParseSegmentsResponseJson(segmentsResponseJson);
-
-            if (response is null)
+            if (parsedSegments.HasErrors)
             {
-                Logger.Log(LogLevel.WARN, "Error while parsing response.");
+                var errors = string.Join(";", parsedSegments.Errors.Select(e => e.ToString()));
+
+                _logger.Log(LogLevel.ERROR, $"Audience segments fetch failed ({errors})");
 
                 return new string[0];
             }
 
-            if (response.HasErrors)
-            {
-                var message = string.Join(";", response.Errors.Select(e => e.ToString()));
-                Logger.Log(LogLevel.WARN, message);
-
-                return new string[0];
-            }
-
-            return response.Data?.Customer?.Audiences?.Edges?.
+            return parsedSegments.Data?.Customer?.Audiences?.Edges?.
                 Where(e => e.Node.State == BaseCondition.QUALIFIED).
                 Select(e => e.Node.Name).ToArray();
         }
@@ -89,7 +83,7 @@ namespace OptimizelySDK.Odp
             {
                 return default;
             }
-            
+
             return JsonConvert.DeserializeObject<Response>(jsonResponse);
         }
     }

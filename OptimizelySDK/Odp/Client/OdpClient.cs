@@ -17,7 +17,10 @@
 using OptimizelySDK.Logger;
 using OptimizelySDK.Odp.Entity;
 using System;
+using System.CodeDom;
+using System.Net;
 using System.Net.Http;
+using System.Runtime.Remoting.Messaging;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -37,17 +40,36 @@ namespace OptimizelySDK.Odp.Client
 
         public string QuerySegments(QuerySegmentsParameters parameters)
         {
-            return Task.Run(() => QuerySegmentsAsync(parameters)).GetAwaiter().GetResult();
+            HttpResponseMessage response;
+            try
+            {
+                response = Task.Run(() => QuerySegmentsAsync(parameters)).GetAwaiter().GetResult();
+            }
+            catch (Exception ex)
+            {
+                _logger.Log(LogLevel.ERROR, "Audience segments fetch failed");
+                return default;
+            }
+
+            var responseStatusCode = (int)response.StatusCode;
+            if (responseStatusCode >= 400 && responseStatusCode < 600)
+            {
+                _logger.Log(LogLevel.ERROR, "Audience segments fetch failed (network error)");
+                return default;
+            }
+
+            return response.Content.ReadAsStringAsync().Result;
         }
 
-        private async Task<string> QuerySegmentsAsync(QuerySegmentsParameters parameters)
+        private async Task<HttpResponseMessage> QuerySegmentsAsync(
+            QuerySegmentsParameters parameters
+        )
         {
             var request = BuildRequestMessage(parameters.ToJson(), parameters);
 
             var response = await _client.SendAsync(request);
-            response.EnsureSuccessStatusCode();
 
-            return await response.Content.ReadAsStringAsync();
+            return response;
         }
 
         private HttpRequestMessage BuildRequestMessage(string jsonQuery,
