@@ -27,50 +27,17 @@ namespace OptimizelySDK.Odp
 
         private readonly ILogger _logger;
         private readonly object _mutex = new object();
-        private int _maxSize;
-        private long _timeoutMilliseconds;
-        private OrderedDictionary _orderedDictionary = new OrderedDictionary();
+        private readonly int _maxSize;
+        private readonly long _timeoutMilliseconds;
+        private readonly OrderedDictionary _orderedDictionary = new OrderedDictionary();
 
         public LruCache() : this(DEFAULT_MAX_SIZE, DEFAULT_TIMEOUT_SECONDS, null) { }
-
-        public LruCache(ILogger logger) :
-            this(DEFAULT_MAX_SIZE, DEFAULT_TIMEOUT_SECONDS, logger) { }
-
 
         public LruCache(int maxSize, int timeoutSeconds, ILogger logger = null)
         {
             _maxSize = maxSize < 0 ? default : maxSize;
             _timeoutMilliseconds = (timeoutSeconds < 0) ? 0 : (timeoutSeconds * 1000L);
             _logger = logger ?? new DefaultLogger();
-        }
-
-        public void SetMaxSize(int size)
-        {
-            lock (_mutex)
-            {
-                if (_orderedDictionary.Count > 0)
-                {
-                    if (size >= _orderedDictionary.Count)
-                    {
-                        _maxSize = size;
-                    }
-                    else
-                    {
-                        _logger.Log(LogLevel.WARN,
-                            "Cannot set max cache size less than current size.");
-                    }
-                }
-                else
-                {
-                    var sizeToSet = size;
-                    if (size < 0)
-                    {
-                        sizeToSet = 0;
-                    }
-
-                    _maxSize = sizeToSet;
-                }
-            }
         }
 
         public void Save(string key, T value)
