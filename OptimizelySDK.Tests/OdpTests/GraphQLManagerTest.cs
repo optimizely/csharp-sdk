@@ -74,8 +74,7 @@ namespace OptimizelySDK.Tests.OdpTests
                 {
                     ""node"": {
                         ""name"": ""has_email_opted_in"",
-                        ""state"": ""qualified"",
-                        ""unexpected"": ""node value for testing"",
+                        ""state"": ""not-qualified""
                     }
                 },
               ]
