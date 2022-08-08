@@ -132,15 +132,6 @@ namespace OptimizelySDK.Tests.OdpTests
 
             Assert.IsNull(response.Data.Customer);
             Assert.IsNotNull(response.Errors);
-            Assert.IsTrue(response.Errors.Length == 1);
-            var error = response.Errors[0];
-            Assert.IsTrue(error.Message.Contains("asdsdaddddd"));
-            Assert.IsTrue(error.Locations.Length == 1);
-            var location = error.Locations[0];
-            Assert.IsTrue(location.Line == 2);
-            Assert.IsTrue(location.Column == 3);
-            Assert.IsTrue(error.Path.Length == 1);
-            Assert.IsTrue(error.Path[0] == "customer");
             Assert.IsTrue(error.Extensions.Classification == "InvalidIdentifierException");
         }
 
