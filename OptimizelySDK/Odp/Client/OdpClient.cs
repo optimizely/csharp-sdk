@@ -47,7 +47,7 @@ namespace OptimizelySDK.Odp.Client
             }
             catch (Exception ex)
             {
-                _logger.Log(LogLevel.ERROR, "Audience segments fetch failed");
+                _logger.Log(LogLevel.ERROR, "Audience segments fetch failed (network error)");
                 return default;
             }
 
