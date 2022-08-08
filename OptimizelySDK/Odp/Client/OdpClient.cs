@@ -54,7 +54,7 @@ namespace OptimizelySDK.Odp.Client
             var responseStatusCode = (int)response.StatusCode;
             if (responseStatusCode >= 400 && responseStatusCode < 600)
             {
-                _logger.Log(LogLevel.ERROR, "Audience segments fetch failed (<response.statusCode or statusMessage here>)");
+                _logger.Log(LogLevel.ERROR, $"Audience segments fetch failed ({responseStatusCode})");
                 return default;
             }
 

@@ -97,7 +97,7 @@ namespace OptimizelySDK.Tests.OdpTests
             Assert.IsTrue(node.State == BaseCondition.QUALIFIED);
             node = response.Data.Customer.Audiences.Edges[1].Node;
             Assert.IsTrue(node.Name == "has_email_opted_in");
-            Assert.IsTrue(node.State == BaseCondition.QUALIFIED);
+            Assert.IsTrue(node.State != BaseCondition.QUALIFIED);
         }
 
         [Test]
@@ -203,7 +203,7 @@ namespace OptimizelySDK.Tests.OdpTests
                 _segmentsToCheck);
 
             Assert.IsTrue(segments.Length == 0);
-            _mockLogger.Verify(l => l.Log(LogLevel.ERROR, It.IsAny<string>()), Times.Once);
+            _mockLogger.Verify(l => l.Log(LogLevel.WARN, It.IsAny<string>()), Times.Once);
         }
 
         [Test]
@@ -227,7 +227,7 @@ namespace OptimizelySDK.Tests.OdpTests
                 _segmentsToCheck);
 
             Assert.IsTrue(segments.Length == 0);
-            _mockLogger.Verify(l => l.Log(LogLevel.ERROR, It.IsAny<string>()), Times.Once);
+            _mockLogger.Verify(l => l.Log(LogLevel.WARN, It.IsAny<string>()), Times.Once);
         }
 
         [Test]
@@ -286,7 +286,7 @@ namespace OptimizelySDK.Tests.OdpTests
                 _segmentsToCheck);
 
             Assert.IsTrue(segments.Length == 0);
-            _mockLogger.Verify(l => l.Log(LogLevel.ERROR, "Audience segments fetch failed (network error)"), Times.Once);
+            _mockLogger.Verify(l => l.Log(LogLevel.ERROR, "Audience segments fetch failed (400)"), Times.Once);
         }
 
         [Test]
@@ -304,7 +304,7 @@ namespace OptimizelySDK.Tests.OdpTests
                 _segmentsToCheck);
 
             Assert.IsTrue(segments.Length == 0);
-            _mockLogger.Verify(l => l.Log(LogLevel.ERROR, "Audience segments fetch failed (network error)"), Times.Once);
+            _mockLogger.Verify(l => l.Log(LogLevel.ERROR, "Audience segments fetch failed (500)"), Times.Once);
         }
 
         private HttpClient GetHttpClientThatReturnsStatus(HttpStatusCode statusCode)

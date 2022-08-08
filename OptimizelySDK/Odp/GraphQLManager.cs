@@ -56,18 +56,19 @@ namespace OptimizelySDK.Odp
             }
 
             var parsedSegments = ParseSegmentsResponseJson(segmentsResponseJson);
-            if (parsedSegments?.Data?.Customer?.Audiences?.Edges is null)
-            {
-                _logger.Log(LogLevel.ERROR, "Audience segments fetch failed (decode error)");
-
-                return new string[0];
-            }
-
+            
             if (parsedSegments.HasErrors)
             {
                 var errors = string.Join(";", parsedSegments.Errors.Select(e => e.ToString()));
 
-                _logger.Log(LogLevel.ERROR, $"Audience segments fetch failed ({errors})");
+                _logger.Log(LogLevel.WARN, $"Audience segments fetch failed ({errors})");
+
+                return new string[0];
+            }
+
+            if (parsedSegments?.Data?.Customer?.Audiences?.Edges is null)
+            {
+                _logger.Log(LogLevel.ERROR, "Audience segments fetch failed (decode error)");
 
                 return new string[0];
             }
