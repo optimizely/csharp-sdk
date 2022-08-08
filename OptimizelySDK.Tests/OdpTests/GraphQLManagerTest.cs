@@ -75,10 +75,11 @@ namespace OptimizelySDK.Tests.OdpTests
                     ""node"": {
                         ""name"": ""has_email_opted_in"",
                         ""state"": ""qualified"",
+                        ""unexpected"": ""node value for testing"",
                     }
                 },
               ]
-            }
+            },
         }
     }
 }";
@@ -131,8 +132,8 @@ namespace OptimizelySDK.Tests.OdpTests
             var response = manager.ParseSegmentsResponseJson(responseJson);
 
             Assert.IsNull(response.Data.Customer);
-            Assert.IsNotNull(response.Errors);
-            Assert.IsTrue(error.Extensions.Classification == "InvalidIdentifierException");
+            Assert.IsNotNull(response.Errors);            
+            Assert.IsTrue(response.Errors[0].Extensions.Classification == "InvalidIdentifierException");
         }
 
         [Test]
