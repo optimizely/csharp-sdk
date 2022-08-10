@@ -28,18 +28,20 @@ namespace OptimizelySDK.Odp
         public const int DEFAULT_TIMEOUT_SECONDS = 600;
 
         private readonly ILogger _logger;
-        private readonly object _mutex = new object();
+        private readonly object _mutex;
         private readonly int _maxSize;
         private readonly long _timeoutMilliseconds;
-        private readonly OrderedDictionary _orderedDictionary = new OrderedDictionary();
+        private readonly OrderedDictionary _orderedDictionary;
 
         public LruCache(int maxSize = DEFAULT_MAX_SIZE,
             int timeoutSeconds = DEFAULT_TIMEOUT_SECONDS, ILogger logger = null
         )
         {
+            _mutex  = new object();
             _maxSize = Math.Max(0, maxSize);
             _timeoutMilliseconds = Math.Max(0, timeoutSeconds) * 1000L;
             _logger = logger ?? new DefaultLogger();
+            _orderedDictionary = new OrderedDictionary();
         }
 
         public void Save(string key, T value)
