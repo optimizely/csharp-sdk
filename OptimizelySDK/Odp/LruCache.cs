@@ -81,16 +81,18 @@ namespace OptimizelySDK.Odp
                     return default;
                 }
 
-                var item = (ItemWrapper)_orderedDictionary[key];
-                var nowMs = DateTime.Now.MillisecondsSince1970();
-
-                // ttl = 0 means items never expire.
-                if (_timeoutMilliseconds == 0 || (nowMs - item.Timestamp < _timeoutMilliseconds))
+                var currentTimestamp = DateTime.Now.MillisecondsSince1970();
+                if (_orderedDictionary[key] is ItemWrapper item)
                 {
-                    _orderedDictionary.Remove(key);
-                    _orderedDictionary.Add(key, item);
+                    // ttl = 0 means items never expire.
+                    if (_timeoutMilliseconds == 0 ||
+                        (currentTimestamp - item.Timestamp < _timeoutMilliseconds))
+                    {
+                        _orderedDictionary.Remove(key);
+                        _orderedDictionary.Add(key, item);
 
-                    return item.Value;
+                        return item.Value;
+                    }
                 }
 
                 _orderedDictionary.Remove(key);
