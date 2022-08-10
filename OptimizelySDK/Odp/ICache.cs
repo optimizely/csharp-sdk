@@ -16,7 +16,8 @@
 
 namespace OptimizelySDK.Odp
 {
-    public interface ICache<T>
+    public interface ICache<T> 
+        where T : class
     {
         void Save(string key, T value);
         T Lookup(string key);

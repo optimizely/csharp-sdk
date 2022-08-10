@@ -15,12 +15,14 @@
  */
 
 using OptimizelySDK.Logger;
+using OptimizelySDK.Utils;
 using System;
 using System.Collections.Specialized;
 
 namespace OptimizelySDK.Odp
 {
     public class LruCache<T> : ICache<T>
+        where T : class
     {
         public const int DEFAULT_MAX_SIZE = 10000;
         public const int DEFAULT_TIMEOUT_SECONDS = 600;
@@ -31,12 +33,12 @@ namespace OptimizelySDK.Odp
         private readonly long _timeoutMilliseconds;
         private readonly OrderedDictionary _orderedDictionary = new OrderedDictionary();
 
-        public LruCache() : this(DEFAULT_MAX_SIZE, DEFAULT_TIMEOUT_SECONDS, null) { }
-
-        public LruCache(int maxSize, int timeoutSeconds, ILogger logger = null)
+        public LruCache(int maxSize = DEFAULT_MAX_SIZE,
+            int timeoutSeconds = DEFAULT_TIMEOUT_SECONDS, ILogger logger = null
+        )
         {
-            _maxSize = maxSize < 0 ? 0 : maxSize;
-            _timeoutMilliseconds = timeoutSeconds < 0 ? 0 : timeoutSeconds * 1000L;
+            _maxSize = Math.Max(0, maxSize);
+            _timeoutMilliseconds = Math.Max(0, timeoutSeconds) * 1000L;
             _logger = logger ?? new DefaultLogger();
         }
 
@@ -80,7 +82,7 @@ namespace OptimizelySDK.Odp
                 }
 
                 var item = (ItemWrapper)_orderedDictionary[key];
-                var nowMs = DateTime.Now.ToUnixTimeMilliseconds();
+                var nowMs = DateTime.Now.MillisecondsSince1970();
 
                 // ttl = 0 means items never expire.
                 if (_timeoutMilliseconds == 0 || (nowMs - item.Timestamp < _timeoutMilliseconds))
@@ -113,16 +115,13 @@ namespace OptimizelySDK.Odp
             public ItemWrapper(T value)
             {
                 Value = value;
-                Timestamp = DateTime.Now.ToUnixTimeMilliseconds();
+                Timestamp = DateTime.Now.MillisecondsSince1970();
             }
         }
 
         public OrderedDictionary ReadCurrentCache()
         {
-            lock (_mutex)
-            {
-                return _orderedDictionary;
-            }
+            return _orderedDictionary;
         }
     }
 }

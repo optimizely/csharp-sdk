@@ -21,26 +21,31 @@ using System.Threading;
 
 namespace OptimizelySDK.Tests.OdpTests
 {
-    [TestFixture]
     public class LruCacheTest
     {
-        private readonly List<string> _segments1And2 = new List<string>
-        {
-            "segment1",
-            "segment2",
-        };
+        private List<string> _segments1And2;
+        private List<string> _segments3And4;
+        private List<string> _segments5And6;
 
-        private readonly List<string> _segments3And4 = new List<string>
+        [SetUp]
+        public void SetUp()
         {
-            "segment3",
-            "segment4",
-        };
-
-        private readonly List<string> _segments5And6 = new List<string>
-        {
-            "segment5",
-            "segment6",
-        };
+            _segments1And2 = new List<string>
+            {
+                "segment1",
+                "segment2",
+            };
+            _segments3And4 = new List<string>
+            {
+                "segment3",
+                "segment4",
+            };
+            _segments5And6 = new List<string>
+            {
+                "segment5",
+                "segment6",
+            };
+        }
 
         [Test]
         public void ShouldCreateSaveAndLookupOneItem()
@@ -61,14 +66,16 @@ namespace OptimizelySDK.Tests.OdpTests
             cache.Save("user2", _segments3And4);
             cache.Save("user3", _segments5And6);
 
-            var itemKeys = cache.ReadCurrentCache().Keys.ToKeyCollection();
+            var itemKeys = new string[3];
+
+            cache.ReadCurrentCache().Keys.CopyTo(itemKeys, 0);
             Assert.AreEqual("user1", itemKeys[0]);
             Assert.AreEqual("user2", itemKeys[1]);
             Assert.AreEqual("user3", itemKeys[2]);
 
             Assert.AreEqual(_segments1And2, cache.Lookup("user1"));
 
-            itemKeys = cache.ReadCurrentCache().Keys.ToKeyCollection();
+            cache.ReadCurrentCache().Keys.CopyTo(itemKeys, 0);
             // Lookup should move user1 to bottom of the list and push up others.
             Assert.AreEqual("user2", itemKeys[0]);
             Assert.AreEqual("user3", itemKeys[1]);
@@ -76,7 +83,7 @@ namespace OptimizelySDK.Tests.OdpTests
 
             Assert.AreEqual(_segments3And4, cache.Lookup("user2"));
 
-            itemKeys = cache.ReadCurrentCache().Keys.ToKeyCollection();
+            cache.ReadCurrentCache().Keys.CopyTo(itemKeys, 0);
             // Lookup should move user2 to bottom of the list and push up others.
             Assert.AreEqual("user3", itemKeys[0]);
             Assert.AreEqual("user1", itemKeys[1]);
@@ -84,7 +91,7 @@ namespace OptimizelySDK.Tests.OdpTests
 
             Assert.AreEqual(_segments5And6, cache.Lookup("user3"));
 
-            itemKeys = cache.ReadCurrentCache().Keys.ToKeyCollection();
+            cache.ReadCurrentCache().Keys.CopyTo(itemKeys, 0);
             // Lookup should move user3 to bottom of the list and push up others.
             Assert.AreEqual("user1", itemKeys[0]);
             Assert.AreEqual("user2", itemKeys[1]);
@@ -95,19 +102,21 @@ namespace OptimizelySDK.Tests.OdpTests
         public void ShouldReorderListOnSave()
         {
             var cache = new LruCache<List<string>>();
-            
+
             cache.Save("user1", _segments1And2);
             cache.Save("user2", _segments3And4);
             cache.Save("user3", _segments5And6);
 
-            var itemKeys = cache.ReadCurrentCache().Keys.ToKeyCollection();
+            var itemKeys = new string[3];
+
+            cache.ReadCurrentCache().Keys.CopyTo(itemKeys, 0);
             Assert.AreEqual("user1", itemKeys[0]);
             Assert.AreEqual("user2", itemKeys[1]);
             Assert.AreEqual("user3", itemKeys[2]);
 
             cache.Save("user1", _segments1And2);
 
-            itemKeys = cache.ReadCurrentCache().Keys.ToKeyCollection();
+            cache.ReadCurrentCache().Keys.CopyTo(itemKeys, 0);
             // save should move user1 to bottom of the list and push up others.
             Assert.AreEqual("user2", itemKeys[0]);
             Assert.AreEqual("user3", itemKeys[1]);
@@ -115,7 +124,7 @@ namespace OptimizelySDK.Tests.OdpTests
 
             cache.Save("user2", _segments3And4);
 
-            itemKeys = cache.ReadCurrentCache().Keys.ToKeyCollection();
+            cache.ReadCurrentCache().Keys.CopyTo(itemKeys, 0);
             // save should move user2 to bottom of the list and push up others.
             Assert.AreEqual("user3", itemKeys[0]);
             Assert.AreEqual("user1", itemKeys[1]);
@@ -123,7 +132,7 @@ namespace OptimizelySDK.Tests.OdpTests
 
             cache.Save("user3", _segments5And6);
 
-            itemKeys = cache.ReadCurrentCache().Keys.ToKeyCollection();
+            cache.ReadCurrentCache().Keys.CopyTo(itemKeys, 0);
             // save should move user3 to bottom of the list and push up others.
             Assert.AreEqual("user1", itemKeys[0]);
             Assert.AreEqual("user2", itemKeys[1]);
@@ -177,9 +186,10 @@ namespace OptimizelySDK.Tests.OdpTests
         }
 
         [Test]
-        public void ShouldHandleWhenCacheIsReset() { 
+        public void ShouldHandleWhenCacheIsReset()
+        {
             var cache = new LruCache<List<string>>();
-            
+
             cache.Save("user1", _segments1And2);
             cache.Save("user2", _segments3And4);
             cache.Save("user3", _segments5And6);
@@ -196,6 +206,7 @@ namespace OptimizelySDK.Tests.OdpTests
             Assert.IsNull(cache.Lookup("user2"));
             Assert.IsNull(cache.Lookup("user3"));
 
-            Assert.AreEqual(0, cache.ReadCurrentCache().Count);}
+            Assert.AreEqual(0, cache.ReadCurrentCache().Count);
+        }
     }
 }

@@ -88,7 +88,6 @@
     <Compile Include="Entity\IdKeyEntity.cs" />
     <Compile Include="Entity\Integration.cs" />
     <Compile Include="Event\Entity\DecisionMetadata.cs" />
-    <Compile Include="Odp\DateTimeExtension.cs" />
     <Compile Include="Odp\ICache.cs" />
     <Compile Include="Odp\LruCache.cs" />
     <Compile Include="OptimizelyDecisions\DecisionMessage.cs" />
