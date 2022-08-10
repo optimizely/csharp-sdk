@@ -16,7 +16,7 @@
 
 namespace OptimizelySDK.Odp
 {
-    public interface ILruCache<T>
+    public interface ICache<T>
     {
         void Save(string key, T value);
         T Lookup(string key);

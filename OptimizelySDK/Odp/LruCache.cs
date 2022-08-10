@@ -20,7 +20,7 @@ using System.Collections.Specialized;
 
 namespace OptimizelySDK.Odp
 {
-    public class LruCache<T> : ILruCache<T>
+    public class LruCache<T> : ICache<T>
     {
         public const int DEFAULT_MAX_SIZE = 10000;
         public const int DEFAULT_TIMEOUT_SECONDS = 600;
@@ -35,8 +35,8 @@ namespace OptimizelySDK.Odp
 
         public LruCache(int maxSize, int timeoutSeconds, ILogger logger = null)
         {
-            _maxSize = maxSize < 0 ? default : maxSize;
-            _timeoutMilliseconds = (timeoutSeconds < 0) ? 0 : (timeoutSeconds * 1000L);
+            _maxSize = maxSize < 0 ? 0 : maxSize;
+            _timeoutMilliseconds = timeoutSeconds < 0 ? 0 : timeoutSeconds * 1000L;
             _logger = logger ?? new DefaultLogger();
         }
 
