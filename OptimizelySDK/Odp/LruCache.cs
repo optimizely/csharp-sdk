@@ -34,18 +34,32 @@ namespace OptimizelySDK.Odp
             TimeSpan? timeout = null, ILogger logger = null
         )
         {
-            int defaultMaxSize = 10000;
-            TimeSpan defaultTimeout = TimeSpan.FromMinutes(10);
+            var defaultMaxSize = 10000;
+            var defaultTimeout = TimeSpan.FromMinutes(10);
 
             _mutex = new object();
-            _maxSize = !maxSize.HasValue || maxSize < 0 ? defaultMaxSize : maxSize.Value;
-            
+
+            if (maxSize is null)
+            {
+                _maxSize = defaultMaxSize;
+            }
+            else if (maxSize < 0)
+            {
+                // Cache is disabled when maxSize = 0
+                _maxSize = 0;
+            }
+            else
+            {
+                _maxSize = maxSize.Value;
+            }
+
             if (timeout is null)
             {
                 _timeout = defaultTimeout;
             }
             else if (timeout?.TotalMilliseconds < 0)
             {
+                // ttl = 0 means items never expire.
                 _timeout = TimeSpan.Zero;
             }
             else
@@ -54,6 +68,7 @@ namespace OptimizelySDK.Odp
             }
 
             _logger = logger ?? new DefaultLogger();
+
             _orderedDictionary = new OrderedDictionary();
         }
 
@@ -61,7 +76,6 @@ namespace OptimizelySDK.Odp
         {
             if (_maxSize == 0)
             {
-                // Cache is disabled when maxSize = 0
                 return;
             }
 
@@ -85,7 +99,6 @@ namespace OptimizelySDK.Odp
         {
             if (_maxSize == 0)
             {
-                // Cache is disabled when maxSize = 0
                 return default;
             }
 
@@ -99,7 +112,6 @@ namespace OptimizelySDK.Odp
                 var currentTimestamp = DateTime.Now.MillisecondsSince1970();
                 if (_orderedDictionary[key] is ItemWrapper item)
                 {
-                    // ttl = 0 means items never expire.
                     if (_timeout == TimeSpan.Zero ||
                         (currentTimestamp - item.Timestamp < _timeout.TotalMilliseconds))
                     {
@@ -138,7 +150,7 @@ namespace OptimizelySDK.Odp
 
         public OrderedDictionary _readCurrentCache()
         {
-            _logger.Log(LogLevel.WARN, "_ReadCurrentCache used for non-testing purpose");
+            _logger.Log(LogLevel.WARN, "_readCurrentCache used for non-testing purpose");
             return _orderedDictionary;
         }
     }
