@@ -24,22 +24,35 @@ namespace OptimizelySDK.Odp
     public class LruCache<T> : ICache<T>
         where T : class
     {
-        public const int DEFAULT_MAX_SIZE = 10000;
-        public const int DEFAULT_TIMEOUT_SECONDS = 600;
-
         private readonly ILogger _logger;
         private readonly object _mutex;
         private readonly int _maxSize;
-        private readonly long _timeoutMilliseconds;
+        private readonly TimeSpan _timeout;
         private readonly OrderedDictionary _orderedDictionary;
 
-        public LruCache(int maxSize = DEFAULT_MAX_SIZE,
-            int timeoutSeconds = DEFAULT_TIMEOUT_SECONDS, ILogger logger = null
+        public LruCache(int? maxSize = null,
+            TimeSpan? timeout = null, ILogger logger = null
         )
         {
-            _mutex  = new object();
-            _maxSize = Math.Max(0, maxSize);
-            _timeoutMilliseconds = Math.Max(0, timeoutSeconds) * 1000L;
+            int defaultMaxSize = 10000;
+            TimeSpan defaultTimeout = TimeSpan.FromMinutes(10);
+
+            _mutex = new object();
+            _maxSize = !maxSize.HasValue || maxSize < 0 ? defaultMaxSize : maxSize.Value;
+            
+            if (timeout is null)
+            {
+                _timeout = defaultTimeout;
+            }
+            else if (timeout?.TotalMilliseconds < 0)
+            {
+                _timeout = TimeSpan.Zero;
+            }
+            else
+            {
+                _timeout = timeout.Value;
+            }
+
             _logger = logger ?? new DefaultLogger();
             _orderedDictionary = new OrderedDictionary();
         }
@@ -87,8 +100,8 @@ namespace OptimizelySDK.Odp
                 if (_orderedDictionary[key] is ItemWrapper item)
                 {
                     // ttl = 0 means items never expire.
-                    if (_timeoutMilliseconds == 0 ||
-                        (currentTimestamp - item.Timestamp < _timeoutMilliseconds))
+                    if (_timeout == TimeSpan.Zero ||
+                        (currentTimestamp - item.Timestamp < _timeout.TotalMilliseconds))
                     {
                         _orderedDictionary.Remove(key);
                         _orderedDictionary.Add(key, item);
@@ -123,8 +136,9 @@ namespace OptimizelySDK.Odp
             }
         }
 
-        public OrderedDictionary ReadCurrentCache()
+        public OrderedDictionary _readCurrentCache()
         {
+            _logger.Log(LogLevel.WARN, "_ReadCurrentCache used for non-testing purpose");
             return _orderedDictionary;
         }
     }
