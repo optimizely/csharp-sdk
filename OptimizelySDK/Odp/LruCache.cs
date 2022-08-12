@@ -17,59 +17,62 @@
 using OptimizelySDK.Logger;
 using OptimizelySDK.Utils;
 using System;
-using System.Collections.Specialized;
+using System.Collections.Generic;
 
 namespace OptimizelySDK.Odp
 {
     public class LruCache<T> : ICache<T>
         where T : class
     {
-        private readonly ILogger _logger;
-        private readonly object _mutex;
         private readonly int _maxSize;
+        private readonly object _mutex;
         private readonly TimeSpan _timeout;
-        private readonly OrderedDictionary _orderedDictionary;
+        private readonly TimeSpan _timeoutDisabled = TimeSpan.Zero;
+        private readonly ILogger _logger;
+        private readonly Dictionary<string, (LinkedListNode<string> node, ItemWrapper value)> _cache;
+        private readonly LinkedList<string> _list;
 
         public LruCache(int? maxSize = null,
-            TimeSpan? timeout = null, ILogger logger = null
+            TimeSpan? itemTimeout = null, ILogger logger = null
         )
         {
-            var defaultMaxSize = 10000;
+            const int DEFAULT_MAX_SIZE = 10000;
+            const int CACHE_DISABLED = 0;
             var defaultTimeout = TimeSpan.FromMinutes(10);
 
             _mutex = new object();
 
             if (maxSize is null)
             {
-                _maxSize = defaultMaxSize;
+                _maxSize = DEFAULT_MAX_SIZE;
             }
             else if (maxSize < 0)
             {
-                // Cache is disabled when maxSize = 0
-                _maxSize = 0;
+                _maxSize = CACHE_DISABLED;
             }
             else
             {
                 _maxSize = maxSize.Value;
             }
 
-            if (timeout is null)
+            if (itemTimeout is null)
             {
                 _timeout = defaultTimeout;
             }
-            else if (timeout?.TotalMilliseconds < 0)
+            else if (itemTimeout?.TotalMilliseconds < 0)
             {
-                // ttl = 0 means items never expire.
-                _timeout = TimeSpan.Zero;
+                _timeout = _timeoutDisabled;
             }
             else
             {
-                _timeout = timeout.Value;
+                _timeout = itemTimeout.Value;
             }
 
             _logger = logger ?? new DefaultLogger();
 
-            _orderedDictionary = new OrderedDictionary();
+            _cache =
+                new Dictionary<string, (LinkedListNode<string> node, ItemWrapper value)>(_maxSize);
+            _list = new LinkedList<string>();
         }
 
         public void Save(string key, T value)
@@ -81,17 +84,24 @@ namespace OptimizelySDK.Odp
 
             lock (_mutex)
             {
-                if (_orderedDictionary.Contains(key))
+                if (_cache.ContainsKey(key))
                 {
-                    _orderedDictionary.Remove(key);
+                    (LinkedListNode<string> node, ItemWrapper item) = _cache[key];
+                    _list.Remove(node);
+                    _list.AddFirst(node);
+                    _cache[key] = (node, item);
                 }
-
-                if (_orderedDictionary.Count >= _maxSize)
+                else
                 {
-                    _orderedDictionary.RemoveAt(0);
-                }
+                    if (_cache.Count >= _maxSize)
+                    {
+                        var removeKey = _list.Last.Value;
+                        _cache.Remove(removeKey);
+                        _list.RemoveLast();
+                    }
 
-                _orderedDictionary.Add(key, new ItemWrapper(value));
+                    _cache.Add(key, (_list.AddFirst(key), new ItemWrapper(value)));
+                }
             }
         }
 
@@ -104,25 +114,28 @@ namespace OptimizelySDK.Odp
 
             lock (_mutex)
             {
-                if (!_orderedDictionary.Contains(key))
+                if (!_cache.ContainsKey(key))
                 {
                     return default;
                 }
 
-                var currentTimestamp = DateTime.Now.MillisecondsSince1970();
-                if (_orderedDictionary[key] is ItemWrapper item)
-                {
-                    if (_timeout == TimeSpan.Zero ||
-                        (currentTimestamp - item.Timestamp < _timeout.TotalMilliseconds))
-                    {
-                        _orderedDictionary.Remove(key);
-                        _orderedDictionary.Add(key, item);
+                (LinkedListNode<string> node, ItemWrapper item) = _cache[key];
 
-                        return item.Value;
-                    }
+                var currentTimestamp = DateTime.Now.MillisecondsSince1970();
+
+                if (_timeout == _timeoutDisabled ||
+                    (currentTimestamp - item.CreationTimestamp < _timeout.TotalMilliseconds))
+                {
+                    _list.Remove(node);
+                    _list.AddFirst(node);
+
+                    _cache[key] = (node, item);
+
+                    return item.Value;
                 }
 
-                _orderedDictionary.Remove(key);
+                _cache.Remove(key);
+                _list.Remove(node);
 
                 return default;
             }
@@ -132,26 +145,27 @@ namespace OptimizelySDK.Odp
         {
             lock (_mutex)
             {
-                _orderedDictionary.Clear();
+                _cache.Clear();
+                _list.Clear();
             }
         }
 
         private class ItemWrapper
         {
             public readonly T Value;
-            public readonly long Timestamp;
+            public readonly long CreationTimestamp;
 
             public ItemWrapper(T value)
             {
                 Value = value;
-                Timestamp = DateTime.Now.MillisecondsSince1970();
+                CreationTimestamp = DateTime.Now.MillisecondsSince1970();
             }
         }
 
-        public OrderedDictionary _readCurrentCache()
+        public LinkedList<string> _readCurrentCacheKeys()
         {
-            _logger.Log(LogLevel.WARN, "_readCurrentCache used for non-testing purpose");
-            return _orderedDictionary;
+            _logger.Log(LogLevel.WARN, "_readCurrentCacheKeys used for non-testing purpose");
+            return _list;
         }
     }
 }
