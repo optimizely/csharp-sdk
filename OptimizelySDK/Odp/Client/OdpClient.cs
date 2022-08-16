@@ -26,10 +26,19 @@ using System.Threading.Tasks;
 
 namespace OptimizelySDK.Odp.Client
 {
+    /// <summary>
+    /// Http implementation for sending requests and handling responses to Optimizely Data Platform
+    /// </summary>
     public class OdpClient : IOdpClient
     {
+        /// <summary>
+        /// Logger used to record messages that occur within the ODP client 
+        /// </summary>
         private readonly ILogger _logger;
 
+        /// <summary>
+        /// Http client used for handling requests and responses over HTTP
+        /// </summary>
         private readonly HttpClient _client;
 
         public OdpClient(ILogger logger, HttpClient client = null)
@@ -38,6 +47,11 @@ namespace OptimizelySDK.Odp.Client
             _client = client ?? new HttpClient();
         }
 
+        /// <summary>
+        /// Synchronous handler for querying the ODP GraphQL endpoint 
+        /// </summary>
+        /// <param name="parameters">Parameters inputs to send to ODP</param>
+        /// <returns>JSON response from ODP</returns>
         public string QuerySegments(QuerySegmentsParameters parameters)
         {
             HttpResponseMessage response;
@@ -54,13 +68,19 @@ namespace OptimizelySDK.Odp.Client
             var responseStatusCode = (int)response.StatusCode;
             if (responseStatusCode >= 400 && responseStatusCode < 600)
             {
-                _logger.Log(LogLevel.ERROR, $"Audience segments fetch failed ({responseStatusCode})");
+                _logger.Log(LogLevel.ERROR,
+                    $"Audience segments fetch failed ({responseStatusCode})");
                 return default;
             }
 
             return response.Content.ReadAsStringAsync().Result;
         }
 
+        /// <summary>
+        /// Asynchronous handler for querying the ODP GraphQL endpoint
+        /// </summary>
+        /// <param name="parameters">Parameters inputs to send to ODP</param>
+        /// <returns>JSON response from ODP</returns>
         private async Task<HttpResponseMessage> QuerySegmentsAsync(
             QuerySegmentsParameters parameters
         )
@@ -72,6 +92,12 @@ namespace OptimizelySDK.Odp.Client
             return response;
         }
 
+        /// <summary>
+        /// Produces the request GraphQL query payload 
+        /// </summary>
+        /// <param name="jsonQuery">JSON GraphQL query</param>
+        /// <param name="parameters">Configuration used to connect to ODP</param>
+        /// <returns>Formed HTTP request message ready to be transmitted</returns>
         private HttpRequestMessage BuildRequestMessage(string jsonQuery,
             QuerySegmentsParameters parameters
         )

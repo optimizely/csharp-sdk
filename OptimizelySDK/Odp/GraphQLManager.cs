@@ -25,6 +25,9 @@ using System.Linq;
 
 namespace OptimizelySDK.Odp
 {
+    /// <summary>
+    /// Manager for communicating with the Optimizely Data Platform GraphQL endpoint
+    /// </summary>
     public class GraphQLManager : IGraphQLManager
     {
         private readonly ILogger _logger;
@@ -36,6 +39,15 @@ namespace OptimizelySDK.Odp
             _odpClient = client ?? new OdpClient(_logger);
         }
 
+        /// <summary>
+        /// Retrieves the audience segments from ODP
+        /// </summary>
+        /// <param name="apiKey">Public key use</param>
+        /// <param name="apiHost">Fully-qualified URL of ODP</param>
+        /// <param name="userKey">vuid or fs_user_id key</param>
+        /// <param name="userValue">Associated value to query for the user key</param>
+        /// <param name="segmentToCheck">Audience segments to check for experiment inclusion</param>
+        /// <returns>Array of audience segments</returns>
         public string[] FetchSegments(string apiKey, string apiHost, string userKey,
             string userValue, List<string> segmentToCheck
         )
@@ -78,6 +90,11 @@ namespace OptimizelySDK.Odp
                 Select(e => e.Node.Name).ToArray();
         }
 
+        /// <summary>
+        /// Parses JSON response
+        /// </summary>
+        /// <param name="jsonResponse">JSON response from ODP</param>
+        /// <returns>Strongly-typed ODP Response object</returns>
         public Response ParseSegmentsResponseJson(string jsonResponse)
         {
             if (string.IsNullOrWhiteSpace(jsonResponse))
