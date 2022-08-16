@@ -24,50 +24,65 @@ namespace OptimizelySDK.Odp
     public class LruCache<T> : ICache<T>
         where T : class
     {
+        /// <summary>
+        /// Default maximum number of elements to store
+        /// </summary>
+        private const int DEFAULT_MAX_SIZE = 10000;
+
+        /// <summary>
+        /// The maximum number of elements that should be stored
+        /// </summary>
         private readonly int _maxSize;
+        
+        /// <summary>
+        /// An object for obtaining a mutually exclusive lock for thread safety
+        /// </summary>
         private readonly object _mutex;
+        
+        /// <summary>
+        /// The maximum age of an object in the cache
+        /// </summary>
         private readonly TimeSpan _timeout;
+        
+        /// <summary>
+        /// Indication that timeout is disabled and objects should remain in cache indefinitely
+        /// </summary>
         private readonly TimeSpan _timeoutDisabled = TimeSpan.Zero;
+        
+        /// <summary>
+        /// Implementation used for recording LRU events or errors 
+        /// </summary>
         private readonly ILogger _logger;
+        
+        /// <summary>
+        /// Indexed data held in the cache 
+        /// </summary>
         private readonly Dictionary<string, (LinkedListNode<string> node, ItemWrapper value)> _cache;
+        
+        /// <summary>
+        /// Ordered list of objects being held in the cache 
+        /// </summary>
         private readonly LinkedList<string> _list;
 
-        public LruCache(int? maxSize = null,
-            TimeSpan? itemTimeout = null, ILogger logger = null
+        /// <summary>
+        /// A Least Recently Used in-memory cache
+        /// </summary>
+        /// <param name="maxSize">Maximum number of elements to allow in the cache</param>
+        /// <param name="itemTimeout">Timeout or time to live for each item</param>
+        /// <param name="logger">Implementation used for recording LRU events or errors</param>
+        public LruCache(int maxSize = DEFAULT_MAX_SIZE,
+            TimeSpan? itemTimeout = default, ILogger logger = null
         )
         {
-            const int DEFAULT_MAX_SIZE = 10000;
             const int CACHE_DISABLED = 0;
-            var defaultTimeout = TimeSpan.FromMinutes(10);
 
             _mutex = new object();
 
-            if (maxSize is null)
-            {
-                _maxSize = DEFAULT_MAX_SIZE;
-            }
-            else if (maxSize < 0)
-            {
-                _maxSize = CACHE_DISABLED;
-            }
-            else
-            {
-                _maxSize = maxSize.Value;
-            }
+            _maxSize = Math.Max(CACHE_DISABLED, maxSize);
 
-            if (itemTimeout is null)
-            {
-                _timeout = defaultTimeout;
-            }
-            else if (itemTimeout?.TotalMilliseconds < 0)
-            {
-                _timeout = _timeoutDisabled;
-            }
-            else
-            {
-                _timeout = itemTimeout.Value;
-            }
-
+            _timeout = TimeSpan.FromTicks(Math.Max(_timeoutDisabled.Ticks,
+                (itemTimeout ?? TimeSpan.FromMinutes(10)).Ticks));
+            
             _logger = logger ?? new DefaultLogger();
 
             _cache =
@@ -75,6 +90,11 @@ namespace OptimizelySDK.Odp
             _list = new LinkedList<string>();
         }
 
+        /// <summary>
+        /// Saves a new element into the cache
+        /// </summary>
+        /// <param name="key">Key of the element used for future retrieval</param>
+        /// <param name="value">Strongly-typed value to store against the key</param>
         public void Save(string key, T value)
         {
             if (_maxSize == 0)
@@ -105,6 +125,11 @@ namespace OptimizelySDK.Odp
             }
         }
 
+        /// <summary>
+        /// Retrieves an element from the cache, reordering the elements
+        /// </summary>
+        /// <param name="key">Key of element to find and retrieve</param>
+        /// <returns>Strongly-typed value from the cache</returns>
         public T Lookup(string key)
         {
             if (_maxSize == 0)
@@ -141,6 +166,9 @@ namespace OptimizelySDK.Odp
             }
         }
 
+        /// <summary>
+        /// Clears all the elements from the cache 
+        /// </summary>
         public void Reset()
         {
             lock (_mutex)
@@ -150,11 +178,25 @@ namespace OptimizelySDK.Odp
             }
         }
 
+        /// <summary>
+        /// Wrapping class around a generic value stored in the cache
+        /// </summary>
         private class ItemWrapper
         {
+            /// <summary>
+            /// Value of the item
+            /// </summary>
             public readonly T Value;
+            
+            /// <summary>
+            /// Unix timestamp of when the item was added  
+            /// </summary>
             public readonly long CreationTimestamp;
 
+            /// <summary>
+            /// Initialize the wrapper
+            /// </summary>
+            /// <param name="value">Item to be stored</param>
             public ItemWrapper(T value)
             {
                 Value = value;
@@ -162,6 +204,10 @@ namespace OptimizelySDK.Odp
             }
         }
 
+        /// <summary>
+        /// Read the current cache index/linked list for unit testing
+        /// </summary>
+        /// <returns></returns>
         public LinkedList<string> _readCurrentCacheKeys()
         {
             _logger.Log(LogLevel.WARN, "_readCurrentCacheKeys used for non-testing purpose");
