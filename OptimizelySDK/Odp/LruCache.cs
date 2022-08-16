@@ -33,32 +33,28 @@ namespace OptimizelySDK.Odp
         /// The maximum number of elements that should be stored
         /// </summary>
         private readonly int _maxSize;
-        
+
         /// <summary>
         /// An object for obtaining a mutually exclusive lock for thread safety
         /// </summary>
         private readonly object _mutex;
-        
+
         /// <summary>
         /// The maximum age of an object in the cache
         /// </summary>
         private readonly TimeSpan _timeout;
-        
-        /// <summary>
-        /// Indication that timeout is disabled and objects should remain in cache indefinitely
-        /// </summary>
-        private readonly TimeSpan _timeoutDisabled = TimeSpan.Zero;
-        
+
         /// <summary>
         /// Implementation used for recording LRU events or errors 
         /// </summary>
         private readonly ILogger _logger;
-        
+
         /// <summary>
         /// Indexed data held in the cache 
         /// </summary>
-        private readonly Dictionary<string, (LinkedListNode<string> node, ItemWrapper value)> _cache;
-        
+        private readonly Dictionary<string, (LinkedListNode<string> node, ItemWrapper value)>
+            _cache;
+
         /// <summary>
         /// Ordered list of objects being held in the cache 
         /// </summary>
@@ -74,15 +70,13 @@ namespace OptimizelySDK.Odp
             TimeSpan? itemTimeout = default, ILogger logger = null
         )
         {
-            const int CACHE_DISABLED = 0;
-
             _mutex = new object();
 
-            _maxSize = Math.Max(CACHE_DISABLED, maxSize);
+            _maxSize = Math.Max(0, maxSize);
 
-            _timeout = TimeSpan.FromTicks(Math.Max(_timeoutDisabled.Ticks,
-                (itemTimeout ?? TimeSpan.FromMinutes(10)).Ticks));
-            
+            _timeout =
+                TimeSpan.FromTicks(Math.Max(0, (itemTimeout ?? TimeSpan.FromMinutes(10)).Ticks));
+
             _logger = logger ?? new DefaultLogger();
 
             _cache =
@@ -99,6 +93,7 @@ namespace OptimizelySDK.Odp
         {
             if (_maxSize == 0)
             {
+                _logger.Log(LogLevel.WARN, "Unable to Save(). LRU Cache is disabled. Set maxSize > 0 to enable.");
                 return;
             }
 
@@ -134,6 +129,7 @@ namespace OptimizelySDK.Odp
         {
             if (_maxSize == 0)
             {
+                _logger.Log(LogLevel.WARN, "Unable to Lookup(). LRU Cache is disabled. Set maxSize > 0 to enable.");
                 return default;
             }
 
@@ -148,7 +144,7 @@ namespace OptimizelySDK.Odp
 
                 var currentTimestamp = DateTime.Now.MillisecondsSince1970();
 
-                if (_timeout == _timeoutDisabled ||
+                if (_timeout == TimeSpan.Zero ||
                     (currentTimestamp - item.CreationTimestamp < _timeout.TotalMilliseconds))
                 {
                     _list.Remove(node);
@@ -187,7 +183,7 @@ namespace OptimizelySDK.Odp
             /// Value of the item
             /// </summary>
             public readonly T Value;
-            
+
             /// <summary>
             /// Unix timestamp of when the item was added  
             /// </summary>
