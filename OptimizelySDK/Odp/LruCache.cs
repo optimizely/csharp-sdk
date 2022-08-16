@@ -18,6 +18,7 @@ using OptimizelySDK.Logger;
 using OptimizelySDK.Utils;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace OptimizelySDK.Odp
 {
@@ -52,13 +53,12 @@ namespace OptimizelySDK.Odp
         /// <summary>
         /// Indexed data held in the cache 
         /// </summary>
-        private readonly Dictionary<string, (LinkedListNode<string> node, ItemWrapper value)>
-            _cache;
+        private readonly Dictionary<string, ItemWrapper> _cache;
 
         /// <summary>
         /// Ordered list of objects being held in the cache 
         /// </summary>
-        private readonly LinkedList<string> _list;
+        private readonly LinkedList<ItemWrapper> _list;
 
         /// <summary>
         /// A Least Recently Used in-memory cache
@@ -66,22 +66,27 @@ namespace OptimizelySDK.Odp
         /// <param name="maxSize">Maximum number of elements to allow in the cache</param>
         /// <param name="itemTimeout">Timeout or time to live for each item</param>
         /// <param name="logger">Implementation used for recording LRU events or errors</param>
-        public LruCache(int maxSize = DEFAULT_MAX_SIZE,
-            TimeSpan? itemTimeout = default, ILogger logger = null
+        public LruCache(int maxSize = DEFAULT_MAX_SIZE, TimeSpan? itemTimeout = default,
+            ILogger logger = null
         )
         {
             _mutex = new object();
 
             _maxSize = Math.Max(0, maxSize);
 
-            _timeout =
-                TimeSpan.FromTicks(Math.Max(0, (itemTimeout ?? TimeSpan.FromMinutes(10)).Ticks));
-
             _logger = logger ?? new DefaultLogger();
 
-            _cache =
-                new Dictionary<string, (LinkedListNode<string> node, ItemWrapper value)>(_maxSize);
-            _list = new LinkedList<string>();
+            _timeout = itemTimeout ?? TimeSpan.FromMinutes(10);
+            if (_timeout < TimeSpan.Zero)
+            {
+                _logger.Log(LogLevel.WARN,
+                    "Negative item timeout provided. Items will not expire in cache.");
+                _timeout = TimeSpan.Zero;
+            }
+
+            _cache = new Dictionary<string, ItemWrapper>(_maxSize);
+
+            _list = new LinkedList<ItemWrapper>();
         }
 
         /// <summary>
@@ -93,7 +98,8 @@ namespace OptimizelySDK.Odp
         {
             if (_maxSize == 0)
             {
-                _logger.Log(LogLevel.WARN, "Unable to Save(). LRU Cache is disabled. Set maxSize > 0 to enable.");
+                _logger.Log(LogLevel.WARN,
+                    "Unable to Save(). LRU Cache is disabled. Set maxSize > 0 to enable.");
                 return;
             }
 
@@ -101,21 +107,32 @@ namespace OptimizelySDK.Odp
             {
                 if (_cache.ContainsKey(key))
                 {
-                    (LinkedListNode<string> node, ItemWrapper item) = _cache[key];
-                    _list.Remove(node);
-                    _list.AddFirst(node);
-                    _cache[key] = (node, item);
+                    var item = _cache[key];
+                    _list.Remove(item);
+                    _list.AddFirst(item);
+                    _cache[key] = item;
                 }
                 else
                 {
                     if (_cache.Count >= _maxSize)
                     {
-                        var removeKey = _list.Last.Value;
-                        _cache.Remove(removeKey);
-                        _list.RemoveLast();
+                        var leastRecentlyUsedItem = _list.Last;
+
+                        var leastRecentlyUsedItemKey = (from cacheItem in _cache
+                            where cacheItem.Value == leastRecentlyUsedItem.Value
+                            select cacheItem.Key).FirstOrDefault();
+
+                        if (leastRecentlyUsedItemKey != null)
+                        {
+                            _cache.Remove(leastRecentlyUsedItemKey);
+                        }
+
+                        _list.Remove(leastRecentlyUsedItem);
                     }
 
-                    _cache.Add(key, (_list.AddFirst(key), new ItemWrapper(value)));
+                    var item = new ItemWrapper(value);
+                    _list.AddFirst(item);
+                    _cache.Add(key, item);
                 }
             }
         }
@@ -129,7 +146,8 @@ namespace OptimizelySDK.Odp
         {
             if (_maxSize == 0)
             {
-                _logger.Log(LogLevel.WARN, "Unable to Lookup(). LRU Cache is disabled. Set maxSize > 0 to enable.");
+                _logger.Log(LogLevel.WARN,
+                    "Unable to Lookup(). LRU Cache is disabled. Set maxSize > 0 to enable.");
                 return default;
             }
 
@@ -140,25 +158,26 @@ namespace OptimizelySDK.Odp
                     return default;
                 }
 
-                (LinkedListNode<string> node, ItemWrapper item) = _cache[key];
+                ItemWrapper item = _cache[key];
 
                 var currentTimestamp = DateTime.Now.MillisecondsSince1970();
 
+                var itemReturn = default(T);
                 if (_timeout == TimeSpan.Zero ||
                     (currentTimestamp - item.CreationTimestamp < _timeout.TotalMilliseconds))
                 {
-                    _list.Remove(node);
-                    _list.AddFirst(node);
+                    _list.Remove(item);
+                    _list.AddFirst(item);
 
-                    _cache[key] = (node, item);
-
-                    return item.Value;
+                    itemReturn = item.Value;
+                }
+                else
+                {
+                    _cache.Remove(key);
+                    _list.Remove(item);
                 }
 
-                _cache.Remove(key);
-                _list.Remove(node);
-
-                return default;
+                return itemReturn;
             }
         }
 
@@ -177,7 +196,7 @@ namespace OptimizelySDK.Odp
         /// <summary>
         /// Wrapping class around a generic value stored in the cache
         /// </summary>
-        private class ItemWrapper
+        public class ItemWrapper
         {
             /// <summary>
             /// Value of the item
@@ -204,10 +223,13 @@ namespace OptimizelySDK.Odp
         /// Read the current cache index/linked list for unit testing
         /// </summary>
         /// <returns></returns>
-        public LinkedList<string> _readCurrentCacheKeys()
+        public string[] _readCurrentCacheKeys()
         {
             _logger.Log(LogLevel.WARN, "_readCurrentCacheKeys used for non-testing purpose");
-            return _list;
+
+            return (from listItem in _list
+                join cacheItem in _cache on listItem equals cacheItem.Value
+                select cacheItem.Key).ToArray();
         }
     }
 }
