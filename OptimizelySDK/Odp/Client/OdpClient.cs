@@ -98,7 +98,7 @@ namespace OptimizelySDK.Odp.Client
         /// <param name="jsonQuery">JSON GraphQL query</param>
         /// <param name="parameters">Configuration used to connect to ODP</param>
         /// <returns>Formed HTTP request message ready to be transmitted</returns>
-        private HttpRequestMessage BuildRequestMessage(string jsonQuery,
+        private static HttpRequestMessage BuildRequestMessage(string jsonQuery,
             QuerySegmentsParameters parameters
         )
         {
