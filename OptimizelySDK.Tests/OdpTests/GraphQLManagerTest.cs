@@ -59,7 +59,7 @@ namespace OptimizelySDK.Tests.OdpTests
         [Test]
         public void ShouldParseSuccessfulResponse()
         {
-            var responseJson = @"
+            const string RESPONSE_JSON = @"
 {
     ""data"": {
         ""customer"": {
@@ -82,9 +82,8 @@ namespace OptimizelySDK.Tests.OdpTests
         }
     }
 }";
-            var manager = new GraphQLManager(_mockLogger.Object);
 
-            var response = manager.ParseSegmentsResponseJson(responseJson);
+            var response = GraphQLManager.ParseSegmentsResponseJson(RESPONSE_JSON);
 
             Assert.IsNull(response.Errors);
             Assert.IsNotNull(response.Data);
@@ -103,7 +102,7 @@ namespace OptimizelySDK.Tests.OdpTests
         [Test]
         public void ShouldParseErrorResponse()
         {
-            const string responseJson = @"
+            const string RESPONSE_JSON = @"
 {
    ""errors"": [
         {
@@ -126,9 +125,8 @@ namespace OptimizelySDK.Tests.OdpTests
         ""customer"": null
     }
 }";
-            var manager = new GraphQLManager(_mockLogger.Object);
 
-            var response = manager.ParseSegmentsResponseJson(responseJson);
+            var response = GraphQLManager.ParseSegmentsResponseJson(RESPONSE_JSON);
 
             Assert.IsNull(response.Data.Customer);
             Assert.IsNotNull(response.Errors);            
@@ -138,13 +136,13 @@ namespace OptimizelySDK.Tests.OdpTests
         [Test]
         public void ShouldFetchValidQualifiedSegments()
         {
-            var responseData = "{\"data\":{\"customer\":{\"audiences\":" +
-                               "{\"edges\":[{\"node\":{\"name\":\"has_email\"," +
-                               "\"state\":\"qualified\"}},{\"node\":{\"name\":" +
-                               "\"has_email_opted_in\",\"state\":\"qualified\"}}]}}}}";
+            const string RESPONSE_DATA = "{\"data\":{\"customer\":{\"audiences\":" +
+                                        "{\"edges\":[{\"node\":{\"name\":\"has_email\"," +
+                                        "\"state\":\"qualified\"}},{\"node\":{\"name\":" +
+                                        "\"has_email_opted_in\",\"state\":\"qualified\"}}]}}}}";
             _mockOdpClient.Setup(
                     c => c.QuerySegments(It.IsAny<QuerySegmentsParameters>())).
-                Returns(responseData);
+                Returns(RESPONSE_DATA);
             var manager = new GraphQLManager(_mockLogger.Object, _mockOdpClient.Object);
 
             var segments = manager.FetchSegments(
@@ -163,11 +161,11 @@ namespace OptimizelySDK.Tests.OdpTests
         [Test]
         public void ShouldHandleEmptyQualifiedSegments()
         {
-            var responseData = "{\"data\":{\"customer\":{\"audiences\":" +
-                               "{\"edges\":[ ]}}}}";
+            const string RESPONSE_DATA = "{\"data\":{\"customer\":{\"audiences\":" +
+                                        "{\"edges\":[ ]}}}}";
             _mockOdpClient.Setup(
                     c => c.QuerySegments(It.IsAny<QuerySegmentsParameters>())).
-                Returns(responseData);
+                Returns(RESPONSE_DATA);
             var manager = new GraphQLManager(_mockLogger.Object, _mockOdpClient.Object);
 
             var segments = manager.FetchSegments(
@@ -184,15 +182,15 @@ namespace OptimizelySDK.Tests.OdpTests
         [Test]
         public void ShouldHandleErrorWithInvalidIdentifier()
         {
-            var responseData = "{\"errors\":[{\"message\":" +
-                               "\"Exception while fetching data (/customer) : " +
-                               "java.lang.RuntimeException: could not resolve _fs_user_id = invalid-user\"," +
-                               "\"locations\":[{\"line\":1,\"column\":8}],\"path\":[\"customer\"]," +
-                               "\"extensions\":{\"classification\":\"DataFetchingException\"}}]," +
-                               "\"data\":{\"customer\":null}}";
+            const string RESPONSE_DATA = "{\"errors\":[{\"message\":" +
+                                        "\"Exception while fetching data (/customer) : " +
+                                        "java.lang.RuntimeException: could not resolve _fs_user_id = invalid-user\"," +
+                                        "\"locations\":[{\"line\":1,\"column\":8}],\"path\":[\"customer\"]," +
+                                        "\"extensions\":{\"classification\":\"DataFetchingException\"}}]," +
+                                        "\"data\":{\"customer\":null}}";
             _mockOdpClient.Setup(
                     c => c.QuerySegments(It.IsAny<QuerySegmentsParameters>())).
-                Returns(responseData);
+                Returns(RESPONSE_DATA);
             var manager = new GraphQLManager(_mockLogger.Object);
 
             var segments = manager.FetchSegments(
@@ -209,14 +207,14 @@ namespace OptimizelySDK.Tests.OdpTests
         [Test]
         public void ShouldHandleOtherException()
         {
-            var responseData = "{\"errors\":[{\"message\":\"Validation error of type " +
-                               "UnknownArgument: Unknown field argument not_real_userKey @ " +
-                               "'customer'\",\"locations\":[{\"line\":1,\"column\":17}]," +
-                               "\"extensions\":{\"classification\":\"ValidationError\"}}]}";
+            const string RESPONSE_DATA = "{\"errors\":[{\"message\":\"Validation error of type " +
+                                        "UnknownArgument: Unknown field argument not_real_userKey @ " +
+                                        "'customer'\",\"locations\":[{\"line\":1,\"column\":17}]," +
+                                        "\"extensions\":{\"classification\":\"ValidationError\"}}]}";
 
             _mockOdpClient.Setup(
                     c => c.QuerySegments(It.IsAny<QuerySegmentsParameters>())).
-                Returns(responseData);
+                Returns(RESPONSE_DATA);
             var manager = new GraphQLManager(_mockLogger.Object, _mockOdpClient.Object);
 
             var segments = manager.FetchSegments(
@@ -233,10 +231,10 @@ namespace OptimizelySDK.Tests.OdpTests
         [Test]
         public void ShouldHandleBadResponse()
         {
-            var responseData = "{\"data\":{ }}";
+            const string RESPONSE_DATA = "{\"data\":{ }}";
             _mockOdpClient.Setup(
                     c => c.QuerySegments(It.IsAny<QuerySegmentsParameters>())).
-                Returns(responseData);
+                Returns(RESPONSE_DATA);
             var manager = new GraphQLManager(_mockLogger.Object, _mockOdpClient.Object);
 
             var segments = manager.FetchSegments(
@@ -253,10 +251,10 @@ namespace OptimizelySDK.Tests.OdpTests
         [Test]
         public void ShouldHandleUnrecognizedJsonResponse()
         {
-            var responseData = "{\"unExpectedObject\":{ \"withSome\": \"value\", \"thatIsNotParseable\": \"true\" }}";
+            const string RESPONSE_DATA = "{\"unExpectedObject\":{ \"withSome\": \"value\", \"thatIsNotParseable\": \"true\" }}";
             _mockOdpClient.Setup(
                     c => c.QuerySegments(It.IsAny<QuerySegmentsParameters>())).
-                Returns(responseData);
+                Returns(RESPONSE_DATA);
             var manager = new GraphQLManager(_mockLogger.Object, _mockOdpClient.Object);
 
             var segments = manager.FetchSegments(
@@ -307,7 +305,7 @@ namespace OptimizelySDK.Tests.OdpTests
             _mockLogger.Verify(l => l.Log(LogLevel.ERROR, "Audience segments fetch failed (500)"), Times.Once);
         }
 
-        private HttpClient GetHttpClientThatReturnsStatus(HttpStatusCode statusCode)
+        private static HttpClient GetHttpClientThatReturnsStatus(HttpStatusCode statusCode)
         {
             var mockedHandler = new Mock<HttpMessageHandler>();
             mockedHandler.Protected().Setup<Task<HttpResponseMessage>>(

@@ -68,7 +68,7 @@ namespace OptimizelySDK.Odp
             }
 
             var parsedSegments = ParseSegmentsResponseJson(segmentsResponseJson);
-            
+
             if (parsedSegments.HasErrors)
             {
                 var errors = string.Join(";", parsedSegments.Errors.Select(e => e.ToString()));
@@ -95,14 +95,11 @@ namespace OptimizelySDK.Odp
         /// </summary>
         /// <param name="jsonResponse">JSON response from ODP</param>
         /// <returns>Strongly-typed ODP Response object</returns>
-        public Response ParseSegmentsResponseJson(string jsonResponse)
+        public static Response ParseSegmentsResponseJson(string jsonResponse)
         {
-            if (string.IsNullOrWhiteSpace(jsonResponse))
-            {
-                return default;
-            }
-
-            return JsonConvert.DeserializeObject<Response>(jsonResponse);
+            return string.IsNullOrWhiteSpace(jsonResponse) ?
+                default :
+                JsonConvert.DeserializeObject<Response>(jsonResponse);
         }
     }
 }
