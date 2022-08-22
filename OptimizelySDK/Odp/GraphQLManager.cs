@@ -42,9 +42,9 @@ namespace OptimizelySDK.Odp
         /// <summary>
         /// Retrieves the audience segments from ODP
         /// </summary>
-        /// <param name="apiKey">Public key use</param>
+        /// <param name="apiKey">ODP public key</param>
         /// <param name="apiHost">Fully-qualified URL of ODP</param>
-        /// <param name="userKey">vuid or fs_user_id key</param>
+        /// <param name="userKey">'vuid' or 'fs_user_id key'</param>
         /// <param name="userValue">Associated value to query for the user key</param>
         /// <param name="segmentsToCheck">Audience segments to check for experiment inclusion</param>
         /// <returns>Array of audience segments</returns>
