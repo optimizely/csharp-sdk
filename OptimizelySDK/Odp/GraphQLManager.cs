@@ -35,7 +35,7 @@ namespace OptimizelySDK.Odp
 
         public GraphQLManager(ILogger logger = null, IOdpClient client = null)
         {
-            _logger = logger ?? new DefaultLogger();
+            _logger = logger ?? new NoOpLogger();
             _odpClient = client ?? new OdpClient(_logger);
         }
 
@@ -46,25 +46,28 @@ namespace OptimizelySDK.Odp
         /// <param name="apiHost">Fully-qualified URL of ODP</param>
         /// <param name="userKey">vuid or fs_user_id key</param>
         /// <param name="userValue">Associated value to query for the user key</param>
-        /// <param name="segmentToCheck">Audience segments to check for experiment inclusion</param>
+        /// <param name="segmentsToCheck">Audience segments to check for experiment inclusion</param>
         /// <returns>Array of audience segments</returns>
         public string[] FetchSegments(string apiKey, string apiHost, string userKey,
-            string userValue, List<string> segmentToCheck
+            string userValue, List<string> segmentsToCheck
         )
         {
+            var emptySegments = new string[0];
+            
             var parameters = new QuerySegmentsParameters
             {
                 ApiKey = apiKey,
                 ApiHost = apiHost,
                 UserKey = userKey,
                 UserValue = userValue,
-                SegmentToCheck = segmentToCheck
+                SegmentToCheck = segmentsToCheck,
             };
 
             var segmentsResponseJson = _odpClient.QuerySegments(parameters);
-            if (string.IsNullOrWhiteSpace(segmentsResponseJson))
+            if (CanBeJsonParsed(segmentsResponseJson))
             {
-                return new string[0];
+                _logger.Log(LogLevel.WARN, $"Audience segments fetch failed");
+                return emptySegments;
             }
 
             var parsedSegments = ParseSegmentsResponseJson(segmentsResponseJson);
@@ -75,17 +78,17 @@ namespace OptimizelySDK.Odp
 
                 _logger.Log(LogLevel.WARN, $"Audience segments fetch failed ({errors})");
 
-                return new string[0];
+                return emptySegments;
             }
 
             if (parsedSegments?.Data?.Customer?.Audiences?.Edges is null)
             {
                 _logger.Log(LogLevel.ERROR, "Audience segments fetch failed (decode error)");
 
-                return new string[0];
+                return emptySegments;
             }
 
-            return parsedSegments.Data?.Customer?.Audiences?.Edges?.
+            return parsedSegments.Data.Customer.Audiences.Edges.
                 Where(e => e.Node.State == BaseCondition.QUALIFIED).
                 Select(e => e.Node.Name).ToArray();
         }
@@ -97,9 +100,19 @@ namespace OptimizelySDK.Odp
         /// <returns>Strongly-typed ODP Response object</returns>
         public static Response ParseSegmentsResponseJson(string jsonResponse)
         {
-            return string.IsNullOrWhiteSpace(jsonResponse) ?
+            return CanBeJsonParsed(jsonResponse) ?
                 default :
                 JsonConvert.DeserializeObject<Response>(jsonResponse);
+        }
+
+        /// <summary>
+        /// Ensure a string has content that can be parsed from JSON to an object
+        /// </summary>
+        /// <param name="jsonToValidate">Value containing possible JSON</param>
+        /// <returns>True if content could be interpreted as JSON else False</returns>
+        private static bool CanBeJsonParsed(string jsonToValidate)
+        {
+            return string.IsNullOrWhiteSpace(jsonToValidate);
         }
     }
 }

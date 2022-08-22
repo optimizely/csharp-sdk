@@ -56,9 +56,9 @@ namespace OptimizelySDK.Odp.Entity
         /// <returns>GraphQL JSON payload</returns>
         public string ToJson()
         {
+            var userValueWithEscapedQuotes = $"\\\"{UserValue}\\\"";
             var segmentsArrayJson =
                 JsonConvert.SerializeObject(SegmentToCheck).Replace("\"", "\\\"");
-            var userValueWithEscapedQuotes = $"\\\"{UserValue}\\\"";
 
             var json = new StringBuilder();
             json.Append("{\"query\" : \"query {customer");

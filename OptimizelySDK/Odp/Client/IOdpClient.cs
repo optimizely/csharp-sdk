@@ -18,8 +18,16 @@ using OptimizelySDK.Odp.Entity;
 
 namespace OptimizelySDK.Odp.Client
 {
+    /// <summary>
+    /// An implementation for sending requests and handling responses to Optimizely Data Platform
+    /// </summary>
     public interface IOdpClient
     {
+        /// <summary>
+        /// Synchronous handler for querying the ODP GraphQL endpoint 
+        /// </summary>
+        /// <param name="parameters">Parameters inputs to send to ODP</param>
+        /// <returns>JSON response from ODP</returns>
         string QuerySegments(QuerySegmentsParameters parameters);
     }
 }

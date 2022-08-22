@@ -41,9 +41,9 @@ namespace OptimizelySDK.Odp.Client
         /// </summary>
         private readonly HttpClient _client;
 
-        public OdpClient(ILogger logger, HttpClient client = null)
+        public OdpClient(ILogger logger = null, HttpClient client = null)
         {
-            _logger = logger;
+            _logger = logger ?? new NoOpLogger();
             _client = client ?? new HttpClient();
         }
 
@@ -102,6 +102,8 @@ namespace OptimizelySDK.Odp.Client
             QuerySegmentsParameters parameters
         )
         {
+            const string API_HEADER_KEY = "x-api-key";
+            const string CONTENT_TYPE = "application/json";
             var request = new HttpRequestMessage
             {
                 RequestUri = new Uri(parameters.ApiHost),
@@ -109,10 +111,10 @@ namespace OptimizelySDK.Odp.Client
                 Headers =
                 {
                     {
-                        "x-api-key", parameters.ApiKey
+                        API_HEADER_KEY, parameters.ApiKey
                     },
                 },
-                Content = new StringContent(jsonQuery, Encoding.UTF8, "application/json"),
+                Content = new StringContent(jsonQuery, Encoding.UTF8, CONTENT_TYPE),
             };
 
             return request;

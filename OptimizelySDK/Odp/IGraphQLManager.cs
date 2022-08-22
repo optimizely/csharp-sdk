@@ -24,7 +24,7 @@ namespace OptimizelySDK.Odp
             string apiHost,
             string userKey,
             string userValue,
-            List<string> segmentToCheck
+            List<string> segmentsToCheck
         );
     }
 }

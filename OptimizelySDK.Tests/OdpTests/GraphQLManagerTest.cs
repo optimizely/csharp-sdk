@@ -33,11 +33,11 @@ namespace OptimizelySDK.Tests.OdpTests
     [TestFixture]
     public class GraphQLManagerTest
     {
-        private const string VALID_ODP_PUBLIC_KEY = "W4WzcEs-ABgXorzY7h1LCQ";
-        private const string ODP_GRAPHQL_URL = "https://api.zaius.com/v3/graphql";
+        private const string VALID_ODP_PUBLIC_KEY = "not-real-odp-public-key";
+        private const string ODP_GRAPHQL_URL = "https://example.com/endpoint";
         private const string FS_USER_ID = "fs_user_id";
 
-        private readonly List<string> _segmentsToCheck = new List<string>()
+        private readonly List<string> _segmentsToCheck = new List<string>
         {
             "has_email",
             "has_email_opted_in",
@@ -92,11 +92,11 @@ namespace OptimizelySDK.Tests.OdpTests
             Assert.IsNotNull(response.Data.Customer.Audiences.Edges);
             Assert.IsTrue(response.Data.Customer.Audiences.Edges.Length == 2);
             var node = response.Data.Customer.Audiences.Edges[0].Node;
-            Assert.IsTrue(node.Name == "has_email");
-            Assert.IsTrue(node.State == BaseCondition.QUALIFIED);
+            Assert.AreEqual(node.Name, "has_email");
+            Assert.AreEqual(node.State, BaseCondition.QUALIFIED);
             node = response.Data.Customer.Audiences.Edges[1].Node;
-            Assert.IsTrue(node.Name == "has_email_opted_in");
-            Assert.IsTrue(node.State != BaseCondition.QUALIFIED);
+            Assert.AreEqual(node.Name, "has_email_opted_in");
+            Assert.AreNotEqual(node.State, BaseCondition.QUALIFIED);
         }
 
         [Test]
@@ -106,7 +106,7 @@ namespace OptimizelySDK.Tests.OdpTests
 {
    ""errors"": [
         {
-            ""message"": ""Exception while fetching data (/customer) : java.lang.RuntimeException: could not resolve _fs_user_id = asdsdaddddd"",
+            ""message"": ""Exception while fetching data (/customer) : Exception: could not resolve _fs_user_id = asdsdaddddd"",
             ""locations"": [
                 {
                     ""line"": 2,
@@ -129,17 +129,18 @@ namespace OptimizelySDK.Tests.OdpTests
             var response = GraphQLManager.ParseSegmentsResponseJson(RESPONSE_JSON);
 
             Assert.IsNull(response.Data.Customer);
-            Assert.IsNotNull(response.Errors);            
-            Assert.IsTrue(response.Errors[0].Extensions.Classification == "InvalidIdentifierException");
+            Assert.IsNotNull(response.Errors);
+            Assert.AreEqual(response.Errors[0].Extensions.Classification,
+                "InvalidIdentifierException");
         }
 
         [Test]
         public void ShouldFetchValidQualifiedSegments()
         {
             const string RESPONSE_DATA = "{\"data\":{\"customer\":{\"audiences\":" +
-                                        "{\"edges\":[{\"node\":{\"name\":\"has_email\"," +
-                                        "\"state\":\"qualified\"}},{\"node\":{\"name\":" +
-                                        "\"has_email_opted_in\",\"state\":\"qualified\"}}]}}}}";
+                                         "{\"edges\":[{\"node\":{\"name\":\"has_email\"," +
+                                         "\"state\":\"qualified\"}},{\"node\":{\"name\":" +
+                                         "\"has_email_opted_in\",\"state\":\"qualified\"}}]}}}}";
             _mockOdpClient.Setup(
                     c => c.QuerySegments(It.IsAny<QuerySegmentsParameters>())).
                 Returns(RESPONSE_DATA);
@@ -162,7 +163,7 @@ namespace OptimizelySDK.Tests.OdpTests
         public void ShouldHandleEmptyQualifiedSegments()
         {
             const string RESPONSE_DATA = "{\"data\":{\"customer\":{\"audiences\":" +
-                                        "{\"edges\":[ ]}}}}";
+                                         "{\"edges\":[ ]}}}}";
             _mockOdpClient.Setup(
                     c => c.QuerySegments(It.IsAny<QuerySegmentsParameters>())).
                 Returns(RESPONSE_DATA);
@@ -183,11 +184,11 @@ namespace OptimizelySDK.Tests.OdpTests
         public void ShouldHandleErrorWithInvalidIdentifier()
         {
             const string RESPONSE_DATA = "{\"errors\":[{\"message\":" +
-                                        "\"Exception while fetching data (/customer) : " +
-                                        "java.lang.RuntimeException: could not resolve _fs_user_id = invalid-user\"," +
-                                        "\"locations\":[{\"line\":1,\"column\":8}],\"path\":[\"customer\"]," +
-                                        "\"extensions\":{\"classification\":\"DataFetchingException\"}}]," +
-                                        "\"data\":{\"customer\":null}}";
+                                         "\"Exception while fetching data (/customer) : " +
+                                         "Exception: could not resolve _fs_user_id = invalid-user\"," +
+                                         "\"locations\":[{\"line\":1,\"column\":8}],\"path\":[\"customer\"]," +
+                                         "\"extensions\":{\"classification\":\"DataFetchingException\"}}]," +
+                                         "\"data\":{\"customer\":null}}";
             _mockOdpClient.Setup(
                     c => c.QuerySegments(It.IsAny<QuerySegmentsParameters>())).
                 Returns(RESPONSE_DATA);
@@ -197,20 +198,21 @@ namespace OptimizelySDK.Tests.OdpTests
                 VALID_ODP_PUBLIC_KEY,
                 ODP_GRAPHQL_URL,
                 FS_USER_ID,
-                "invalid-user", // invalid user
+                "invalid-user",
                 _segmentsToCheck);
 
             Assert.IsTrue(segments.Length == 0);
-            _mockLogger.Verify(l => l.Log(LogLevel.WARN, It.IsAny<string>()), Times.Once);
+            _mockLogger.Verify(l => l.Log(LogLevel.WARN, "Audience segments fetch failed"),
+                Times.Once);
         }
 
         [Test]
         public void ShouldHandleOtherException()
         {
             const string RESPONSE_DATA = "{\"errors\":[{\"message\":\"Validation error of type " +
-                                        "UnknownArgument: Unknown field argument not_real_userKey @ " +
-                                        "'customer'\",\"locations\":[{\"line\":1,\"column\":17}]," +
-                                        "\"extensions\":{\"classification\":\"ValidationError\"}}]}";
+                                         "UnknownArgument: Unknown field argument not_real_userKey @ " +
+                                         "'customer'\",\"locations\":[{\"line\":1,\"column\":17}]," +
+                                         "\"extensions\":{\"classification\":\"ValidationError\"}}]}";
 
             _mockOdpClient.Setup(
                     c => c.QuerySegments(It.IsAny<QuerySegmentsParameters>())).
@@ -245,13 +247,16 @@ namespace OptimizelySDK.Tests.OdpTests
                 _segmentsToCheck);
 
             Assert.IsTrue(segments.Length == 0);
-            _mockLogger.Verify(l => l.Log(LogLevel.ERROR, "Audience segments fetch failed (decode error)"), Times.Once);
+            _mockLogger.Verify(
+                l => l.Log(LogLevel.ERROR, "Audience segments fetch failed (decode error)"),
+                Times.Once);
         }
 
         [Test]
         public void ShouldHandleUnrecognizedJsonResponse()
         {
-            const string RESPONSE_DATA = "{\"unExpectedObject\":{ \"withSome\": \"value\", \"thatIsNotParseable\": \"true\" }}";
+            const string RESPONSE_DATA =
+                "{\"unExpectedObject\":{ \"withSome\": \"value\", \"thatIsNotParseable\": \"true\" }}";
             _mockOdpClient.Setup(
                     c => c.QuerySegments(It.IsAny<QuerySegmentsParameters>())).
                 Returns(RESPONSE_DATA);
@@ -265,8 +270,9 @@ namespace OptimizelySDK.Tests.OdpTests
                 _segmentsToCheck);
 
             Assert.IsTrue(segments.Length == 0);
-            _mockLogger.Verify(l => l.Log(LogLevel.ERROR, "Audience segments fetch failed (decode error)"), Times.Once);
-            
+            _mockLogger.Verify(
+                l => l.Log(LogLevel.ERROR, "Audience segments fetch failed (decode error)"),
+                Times.Once);
         }
 
         [Test]
@@ -284,7 +290,8 @@ namespace OptimizelySDK.Tests.OdpTests
                 _segmentsToCheck);
 
             Assert.IsTrue(segments.Length == 0);
-            _mockLogger.Verify(l => l.Log(LogLevel.ERROR, "Audience segments fetch failed (400)"), Times.Once);
+            _mockLogger.Verify(l => l.Log(LogLevel.ERROR, "Audience segments fetch failed (400)"),
+                Times.Once);
         }
 
         [Test]
@@ -302,7 +309,8 @@ namespace OptimizelySDK.Tests.OdpTests
                 _segmentsToCheck);
 
             Assert.IsTrue(segments.Length == 0);
-            _mockLogger.Verify(l => l.Log(LogLevel.ERROR, "Audience segments fetch failed (500)"), Times.Once);
+            _mockLogger.Verify(l => l.Log(LogLevel.ERROR, "Audience segments fetch failed (500)"),
+                Times.Once);
         }
 
         private static HttpClient GetHttpClientThatReturnsStatus(HttpStatusCode statusCode)
