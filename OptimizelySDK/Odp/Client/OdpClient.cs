@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Logger;
 using OptimizelySDK.Odp.Entity;
 using System;
@@ -29,6 +30,11 @@ namespace OptimizelySDK.Odp.Client
     public class OdpClient : IOdpClient
     {
         /// <summary>
+        /// Error handler used to record errors
+        /// </summary>
+        private readonly IErrorHandler _errorHandler;
+
+        /// <summary>
         /// Logger used to record messages that occur within the ODP client 
         /// </summary>
         private readonly ILogger _logger;
@@ -41,10 +47,14 @@ namespace OptimizelySDK.Odp.Client
         /// <summary>
         /// An implementation for sending requests and handling responses to Optimizely Data Platform (ODP)
         /// </summary>
+        /// <param name="errorHandler">Handler to record exceptions</param>
         /// <param name="logger">Collect and record events/errors for this ODP client</param>
         /// <param name="client">Client implementation to send/receive requests over HTTP</param>
-        public OdpClient(ILogger logger = null, HttpClient client = null)
+        public OdpClient(IErrorHandler errorHandler = null, ILogger logger = null,
+            HttpClient client = null
+        )
         {
+            _errorHandler = errorHandler ?? new NoOpErrorHandler();
             _logger = logger ?? new NoOpLogger();
             _client = client ?? new HttpClient();
         }
@@ -59,10 +69,11 @@ namespace OptimizelySDK.Odp.Client
             HttpResponseMessage response;
             try
             {
-                response = Task.Run(() => QuerySegmentsAsync(parameters)).GetAwaiter().GetResult();
+                response = Task.Run(() => QuerySegmentsAsync(parameters)).Result;
             }
             catch (Exception ex)
             {
+                _errorHandler.HandleError(ex);
                 _logger.Log(LogLevel.ERROR, "Audience segments fetch failed (network error)");
                 return default;
             }

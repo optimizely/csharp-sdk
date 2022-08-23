@@ -16,6 +16,7 @@
 
 using Newtonsoft.Json;
 using OptimizelySDK.AudienceConditions;
+using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Logger;
 using OptimizelySDK.Odp.Client;
 using OptimizelySDK.Odp.Entity;
@@ -35,12 +36,13 @@ namespace OptimizelySDK.Odp
         /// <summary>
         /// Retrieves the audience segments from the Optimizely Data Platform (ODP)
         /// </summary>
+        /// <param name="errorHandler">Handler to record exceptions</param>
         /// <param name="logger">Collect and record events/errors for this GraphQL implementation</param>
         /// <param name="client">Client to use to send queries to ODP</param>
-        public GraphQLManager(ILogger logger = null, IOdpClient client = null)
+        public GraphQLManager(IErrorHandler errorHandler = null, ILogger logger = null, IOdpClient client = null)
         {
             _logger = logger ?? new NoOpLogger();
-            _odpClient = client ?? new OdpClient(_logger);
+            _odpClient = client ?? new OdpClient(errorHandler ?? new NoOpErrorHandler(), _logger);
         }
 
         /// <summary>
@@ -70,7 +72,6 @@ namespace OptimizelySDK.Odp
             }
 
             var parsedSegments = ParseSegmentsResponseJson(segmentsResponseJson);
-
             if (parsedSegments.HasErrors)
             {
                 var errors = string.Join(";", parsedSegments.Errors.Select(e => e.ToString()));
