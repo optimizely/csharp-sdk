@@ -16,14 +16,29 @@
 
 namespace OptimizelySDK.Odp.Entity
 {
+    /// <summary>
+    /// GraphQL response from an errant query
+    /// </summary>
     public class Error
     {
+        /// <summary>
+        /// Human-readable message from the error
+        /// </summary>
         public string Message { get; set; }
         
+        /// <summary>
+        /// Points of failure producing the error
+        /// </summary>
         public Location[] Locations { get; set; }
         
+        /// <summary>
+        /// Files or urls producing the error
+        /// </summary>
         public string[] Path { get; set; }
         
+        /// <summary>
+        /// Additional technical error information 
+        /// </summary>
         public Extension Extensions { get; set; }
 
         public override string ToString()

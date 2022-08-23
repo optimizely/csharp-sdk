@@ -16,12 +16,24 @@
 
 namespace OptimizelySDK.Odp.Entity
 {
+    /// <summary>
+    /// Wrapper around valid data and error responses 
+    /// </summary>
     public class Response
     {
+        /// <summary>
+        /// Valid query response information
+        /// </summary>
         public Data Data { get; set; }
 
+        /// <summary>
+        /// Set of errors produced while querying
+        /// </summary>
         public Error[] Errors { get; set; }
 
+        /// <summary>
+        /// Determines if an error exists
+        /// </summary>
         public bool HasErrors
         {
             get

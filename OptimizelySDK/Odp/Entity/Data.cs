@@ -16,8 +16,14 @@
 
 namespace OptimizelySDK.Odp.Entity
 {
+    /// <summary>
+    /// GraphQL response data returned from a valid query
+    /// </summary>
     public class Data
     {
+        /// <summary>
+        /// Grouping of audiences within an overall customer base
+        /// </summary>
         public Customer Customer { get; set; }
     }
 }

@@ -16,10 +16,19 @@
 
 namespace OptimizelySDK.Odp.Entity
 {
+    /// <summary>
+    /// Atomic grouping an audience
+    /// </summary>
     public class Node
     {
+        /// <summary>
+        /// Descriptive label of a node
+        /// </summary>
         public string Name { get; set; }
         
+        /// <summary>
+        /// Status of the node
+        /// </summary>
         public string State { get; set; }
     }
 }

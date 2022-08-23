@@ -16,8 +16,14 @@
 
 namespace OptimizelySDK.Odp.Entity
 {
+    /// <summary>
+    /// Segment of a customer base
+    /// </summary>
     public class Audience
     {
+        /// <summary>
+        /// Collection of nodes within audience
+        /// </summary>
         public Edge[] Edges { get; set; }
     }
 }

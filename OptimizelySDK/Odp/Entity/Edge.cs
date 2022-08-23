@@ -16,8 +16,14 @@
 
 namespace OptimizelySDK.Odp.Entity
 {
+    /// <summary>
+    /// Grouping of nodes within an audience
+    /// </summary>
     public class Edge
     {
+        /// <summary>
+        /// Atomic portions of a audience
+        /// </summary>
         public Node Node { get; set; }
     }
 }

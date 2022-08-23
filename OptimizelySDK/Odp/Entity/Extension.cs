@@ -16,8 +16,14 @@
 
 namespace OptimizelySDK.Odp.Entity
 {
+    /// <summary>
+    /// Extended error information 
+    /// </summary>
     public class Extension
     {
+        /// <summary>
+        /// Named exception type from the error
+        /// </summary>
         public string Classification { get; set; }
     }
 }

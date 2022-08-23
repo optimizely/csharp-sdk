@@ -16,10 +16,19 @@
 
 namespace OptimizelySDK.Odp.Entity
 {
+    /// <summary>
+    /// Specifies the precise place in code or data where the error occurred
+    /// </summary>
     public class Location
     {
+        /// <summary>
+        /// Code or data line number 
+        /// </summary>
         public int Line { get; set; }
         
+        /// <summary>
+        /// Code or data column number
+        /// </summary>
         public int Column { get; set; }
     }
 }

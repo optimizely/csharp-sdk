@@ -16,8 +16,14 @@
 
 namespace OptimizelySDK.Odp.Entity
 {
+    /// <summary>
+    /// Profile used to group/segment an addressable market 
+    /// </summary>
     public class Customer
     {
+        /// <summary>
+        /// Segment of a customer base
+        /// </summary>
         public Audience Audiences { get; set; }
     }
 }
