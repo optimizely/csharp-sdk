@@ -17,10 +17,7 @@
 using OptimizelySDK.Logger;
 using OptimizelySDK.Odp.Entity;
 using System;
-using System.CodeDom;
-using System.Net;
 using System.Net.Http;
-using System.Runtime.Remoting.Messaging;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -85,7 +82,7 @@ namespace OptimizelySDK.Odp.Client
             QuerySegmentsParameters parameters
         )
         {
-            var request = BuildRequestMessage(parameters.ToJson(), parameters);
+            var request = BuildRequestMessage(parameters.ToGraphQLJson(), parameters);
 
             var response = await _client.SendAsync(request);
 

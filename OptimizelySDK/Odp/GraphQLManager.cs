@@ -19,7 +19,6 @@ using OptimizelySDK.AudienceConditions;
 using OptimizelySDK.Logger;
 using OptimizelySDK.Odp.Client;
 using OptimizelySDK.Odp.Entity;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -53,15 +52,10 @@ namespace OptimizelySDK.Odp
         )
         {
             var emptySegments = new string[0];
-            
-            var parameters = new QuerySegmentsParameters
-            {
-                ApiKey = apiKey,
-                ApiHost = apiHost,
-                UserKey = userKey,
-                UserValue = userValue,
-                SegmentToCheck = segmentsToCheck,
-            };
+
+            var parameters = new QuerySegmentsParameters.Builder(_logger).WithApiKey(apiKey).
+                WithApiHost(apiHost).WithUserKey(userKey).WithUserValue(userValue).
+                WithSegmentsToCheck(segmentsToCheck).Build();
 
             var segmentsResponseJson = _odpClient.QuerySegments(parameters);
             if (CanBeJsonParsed(segmentsResponseJson))
