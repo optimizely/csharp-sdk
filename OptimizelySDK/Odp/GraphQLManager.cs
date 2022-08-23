@@ -32,6 +32,11 @@ namespace OptimizelySDK.Odp
         private readonly ILogger _logger;
         private readonly IOdpClient _odpClient;
 
+        /// <summary>
+        /// Retrieves the audience segments from the Optimizely Data Platform (ODP)
+        /// </summary>
+        /// <param name="logger">Collect and record events/errors for this GraphQL implementation</param>
+        /// <param name="client">Client to use to send queries to ODP</param>
         public GraphQLManager(ILogger logger = null, IOdpClient client = null)
         {
             _logger = logger ?? new NoOpLogger();

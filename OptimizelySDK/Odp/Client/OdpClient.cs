@@ -38,6 +38,11 @@ namespace OptimizelySDK.Odp.Client
         /// </summary>
         private readonly HttpClient _client;
 
+        /// <summary>
+        /// An implementation for sending requests and handling responses to Optimizely Data Platform (ODP)
+        /// </summary>
+        /// <param name="logger">Collect and record events/errors for this ODP client</param>
+        /// <param name="client">Client implementation to send/receive requests over HTTP</param>
         public OdpClient(ILogger logger = null, HttpClient client = null)
         {
             _logger = logger ?? new NoOpLogger();
