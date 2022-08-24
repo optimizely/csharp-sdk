@@ -69,7 +69,7 @@ namespace OptimizelySDK.Odp.Client
             HttpResponseMessage response;
             try
             {
-                response = Task.Run(() => QuerySegmentsAsync(parameters)).Result;
+                response = QuerySegmentsAsync(parameters).GetAwaiter().GetResult();
             }
             catch (Exception ex)
             {
