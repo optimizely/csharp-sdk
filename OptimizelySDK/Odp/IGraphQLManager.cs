@@ -31,7 +31,7 @@ namespace OptimizelySDK.Odp
         /// <returns>Array of audience segments</returns>
         string[] FetchSegments(string apiKey,
             string apiHost,
-            string userKey,
+            OdpUserKeyType userKey,
             string userValue,
             List<string> segmentsToCheck
         );

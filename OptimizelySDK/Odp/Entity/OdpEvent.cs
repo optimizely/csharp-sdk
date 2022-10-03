@@ -14,20 +14,25 @@
  * limitations under the License.
  */
 
-using OptimizelySDK.Odp.Entity;
+using System.Collections.Generic;
 
-namespace OptimizelySDK.Odp.Client
+namespace OptimizelySDK.Odp.Entity
 {
-    /// <summary>
-    /// An implementation for sending requests and handling responses to Optimizely Data Platform
-    /// </summary>
-    public interface IOdpClient
+    public class OdpEvent
     {
-        /// <summary>
-        /// Synchronous handler for querying the ODP GraphQL endpoint 
-        /// </summary>
-        /// <param name="parameters">Parameters inputs to send to ODP</param>
-        /// <returns>JSON response from ODP</returns>
-        string QuerySegments(QuerySegmentsParameters parameters);
+        public string Type;
+
+        public string Action;
+
+        public Dictionary<string,string> Identifiers;
+
+        public Dictionary<string,object> Data;
+
+        public OdpEvent(string type, string action, Dictionary<string, string> identifiers, Dictionary<string, object> data) {
+            Type = type;
+            Action = action;
+            Identifiers = identifiers ?? new Dictionary<string, string>();
+            Data = data ?? new Dictionary<string, object>();
+        }
     }
 }

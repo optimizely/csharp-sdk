@@ -287,7 +287,7 @@ namespace OptimizelySDK.Tests.OdpTests
         [Test]
         public void ShouldHandle400HttpCode()
         {
-            var odpClient = new OdpClient(_mockErrorHandler.Object, _mockLogger.Object,
+            var odpClient = new OdpClient(_mockLogger.Object,
                 GetHttpClientThatReturnsStatus(HttpStatusCode.BadRequest));
             var manager =
                 new GraphQLManager(_mockErrorHandler.Object, _mockLogger.Object, odpClient);
@@ -307,7 +307,7 @@ namespace OptimizelySDK.Tests.OdpTests
         [Test]
         public void ShouldHandle500HttpCode()
         {
-            var odpClient = new OdpClient(_mockErrorHandler.Object, _mockLogger.Object,
+            var odpClient = new OdpClient(_mockLogger.Object,
                 GetHttpClientThatReturnsStatus(HttpStatusCode.InternalServerError));
             var manager =
                 new GraphQLManager(_mockErrorHandler.Object, _mockLogger.Object, odpClient);

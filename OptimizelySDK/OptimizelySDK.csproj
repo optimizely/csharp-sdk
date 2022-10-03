@@ -88,8 +88,6 @@
     <Compile Include="Entity\IdKeyEntity.cs" />
     <Compile Include="Entity\Integration.cs" />
     <Compile Include="Event\Entity\DecisionMetadata.cs" />
-    <Compile Include="Odp\Client\IOdpClient.cs" />
-    <Compile Include="Odp\Client\OdpClient.cs" />
     <Compile Include="Odp\Entity\Audience.cs" />
     <Compile Include="Odp\Entity\Customer.cs" />
     <Compile Include="Odp\Entity\Data.cs" />
@@ -98,12 +96,15 @@
     <Compile Include="Odp\Entity\Location.cs" />
     <Compile Include="Odp\Entity\Extension.cs" />
     <Compile Include="Odp\Entity\Node.cs" />
-    <Compile Include="Odp\Entity\QuerySegmentsParameters.cs" />
+    <Compile Include="Odp\Entity\OdpEvent.cs" />
     <Compile Include="Odp\Entity\Response.cs" />
+    <Compile Include="Odp\Enums.cs" />
     <Compile Include="Odp\GraphQLManager.cs" />
     <Compile Include="Odp\IGraphQLManager.cs" />
     <Compile Include="Odp\ICache.cs" />
+    <Compile Include="Odp\IRestApiManager.cs" />
     <Compile Include="Odp\LruCache.cs" />
+    <Compile Include="Odp\RestApiManager.cs" />
     <Compile Include="OptimizelyDecisions\DecisionMessage.cs" />
     <Compile Include="OptimizelyDecisions\DecisionReasons.cs" />
     <Compile Include="OptimizelyDecisions\OptimizelyDecideOption.cs" />
