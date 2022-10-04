@@ -33,7 +33,7 @@ namespace OptimizelySDK.Tests.OdpTests
     public class GraphQLManagerTest
     {
         private const string VALID_ODP_PUBLIC_KEY = "not-real-odp-public-key";
-        private const string ODP_GRAPHQL_URL = "https://example.com/endpoint";
+        private const string ODP_GRAPHQL_HOST = "https://graph.example.com";
 
         private readonly List<string> _segmentsToCheck = new List<string>
         {
@@ -138,13 +138,13 @@ namespace OptimizelySDK.Tests.OdpTests
                                          "{\"edges\":[{\"node\":{\"name\":\"has_email\"," +
                                          "\"state\":\"qualified\"}},{\"node\":{\"name\":" +
                                          "\"has_email_opted_in\",\"state\":\"qualified\"}}]}}}}";
-            var httpClient = MakeHttpClient(HttpStatusCode.OK, RESPONSE_DATA);
+            var httpClient = HttpClientTestUtil.MakeHttpClient(HttpStatusCode.OK, RESPONSE_DATA);
             var manager =
                 new GraphQLManager(_mockLogger.Object, _mockErrorHandler.Object, httpClient);
 
             var segments = manager.FetchSegments(
                 VALID_ODP_PUBLIC_KEY,
-                ODP_GRAPHQL_URL,
+                ODP_GRAPHQL_HOST,
                 OdpUserKeyType.FS_USER_KEY,
                 "tester-101",
                 _segmentsToCheck);
@@ -160,13 +160,13 @@ namespace OptimizelySDK.Tests.OdpTests
         {
             const string RESPONSE_DATA = "{\"data\":{\"customer\":{\"audiences\":" +
                                          "{\"edges\":[ ]}}}}";
-            var httpClient = MakeHttpClient(HttpStatusCode.OK, RESPONSE_DATA);
+            var httpClient = HttpClientTestUtil.MakeHttpClient(HttpStatusCode.OK, RESPONSE_DATA);
             var manager =
                 new GraphQLManager(_mockLogger.Object, _mockErrorHandler.Object, httpClient);
 
             var segments = manager.FetchSegments(
                 VALID_ODP_PUBLIC_KEY,
-                ODP_GRAPHQL_URL,
+                ODP_GRAPHQL_HOST,
                 OdpUserKeyType.FS_USER_KEY,
                 "tester-101",
                 _segmentsToCheck);
@@ -184,13 +184,13 @@ namespace OptimizelySDK.Tests.OdpTests
                                          "\"locations\":[{\"line\":1,\"column\":8}],\"path\":[\"customer\"]," +
                                          "\"extensions\":{\"classification\":\"DataFetchingException\"}}]," +
                                          "\"data\":{\"customer\":null}}";
-            var httpClient = MakeHttpClient(HttpStatusCode.OK, RESPONSE_DATA);
+            var httpClient = HttpClientTestUtil.MakeHttpClient(HttpStatusCode.OK, RESPONSE_DATA);
             var manager =
                 new GraphQLManager(_mockLogger.Object, _mockErrorHandler.Object, httpClient);
 
             var segments = manager.FetchSegments(
                 VALID_ODP_PUBLIC_KEY,
-                ODP_GRAPHQL_URL,
+                ODP_GRAPHQL_HOST,
                 OdpUserKeyType.FS_USER_KEY,
                 "invalid-user",
                 _segmentsToCheck);
@@ -204,13 +204,13 @@ namespace OptimizelySDK.Tests.OdpTests
         public void ShouldHandleBadResponse()
         {
             const string RESPONSE_DATA = "{\"data\":{ }}";
-            var httpClient = MakeHttpClient(HttpStatusCode.OK, RESPONSE_DATA);
+            var httpClient = HttpClientTestUtil.MakeHttpClient(HttpStatusCode.OK, RESPONSE_DATA);
             var manager =
                 new GraphQLManager(_mockLogger.Object, _mockErrorHandler.Object, httpClient);
 
             var segments = manager.FetchSegments(
                 VALID_ODP_PUBLIC_KEY,
-                ODP_GRAPHQL_URL,
+                ODP_GRAPHQL_HOST,
                 OdpUserKeyType.FS_USER_KEY,
                 "tester-101",
                 _segmentsToCheck);
@@ -226,13 +226,13 @@ namespace OptimizelySDK.Tests.OdpTests
         {
             const string RESPONSE_DATA =
                 "{\"unExpectedObject\":{ \"withSome\": \"value\", \"thatIsNotParseable\": \"true\" }}";
-            var httpClient = MakeHttpClient(HttpStatusCode.OK, RESPONSE_DATA);
+            var httpClient = HttpClientTestUtil.MakeHttpClient(HttpStatusCode.OK, RESPONSE_DATA);
             var manager =
                 new GraphQLManager(_mockLogger.Object, _mockErrorHandler.Object, httpClient);
 
             var segments = manager.FetchSegments(
                 VALID_ODP_PUBLIC_KEY,
-                ODP_GRAPHQL_URL,
+                ODP_GRAPHQL_HOST,
                 OdpUserKeyType.FS_USER_KEY,
                 "tester-101",
                 _segmentsToCheck);
@@ -246,13 +246,13 @@ namespace OptimizelySDK.Tests.OdpTests
         [Test]
         public void ShouldHandle400HttpCode()
         {
-            var httpClient = MakeHttpClient(HttpStatusCode.BadRequest);
+            var httpClient = HttpClientTestUtil.MakeHttpClient(HttpStatusCode.BadRequest);
             var manager =
                 new GraphQLManager(_mockLogger.Object, _mockErrorHandler.Object, httpClient);
 
             var segments = manager.FetchSegments(
                 VALID_ODP_PUBLIC_KEY,
-                ODP_GRAPHQL_URL,
+                ODP_GRAPHQL_HOST,
                 OdpUserKeyType.FS_USER_KEY,
                 "tester-101",
                 _segmentsToCheck);
@@ -265,13 +265,13 @@ namespace OptimizelySDK.Tests.OdpTests
         [Test]
         public void ShouldHandle500HttpCode()
         {
-            var httpClient = MakeHttpClient(HttpStatusCode.InternalServerError);
+            var httpClient = HttpClientTestUtil.MakeHttpClient(HttpStatusCode.InternalServerError);
             var manager =
                 new GraphQLManager(_mockLogger.Object, _mockErrorHandler.Object, httpClient);
             
             var segments = manager.FetchSegments(
                 VALID_ODP_PUBLIC_KEY,
-                ODP_GRAPHQL_URL,
+                ODP_GRAPHQL_HOST,
                 OdpUserKeyType.FS_USER_KEY,
                 "tester-101",
                 _segmentsToCheck);
@@ -279,32 +279,6 @@ namespace OptimizelySDK.Tests.OdpTests
             Assert.IsNull(segments);
             _mockLogger.Verify(l => l.Log(LogLevel.ERROR, "Audience segments fetch failed (500)"),
                 Times.Once);
-        }
-
-        /// <summary>
-        /// Create an HttpClient instance that returns an expected response
-        /// </summary>
-        /// <param name="statusCode">Http Status Code to return</param>
-        /// <param name="content">Message body content to return</param>
-        /// <returns>HttpClient instance that will return desired HttpResponseMessage</returns>
-        private static HttpClient MakeHttpClient(HttpStatusCode statusCode,
-            string content = default
-        )
-        {
-            var response = new HttpResponseMessage(statusCode);
-            
-            if (!string.IsNullOrWhiteSpace(content))
-            {
-                response.Content = new StringContent(content);
-            }
-
-            var mockedHandler = new Mock<HttpMessageHandler>();
-            mockedHandler.Protected().Setup<Task<HttpResponseMessage>>(
-                    "SendAsync",
-                    ItExpr.IsAny<HttpRequestMessage>(),
-                    ItExpr.IsAny<CancellationToken>()).
-                ReturnsAsync(response);
-            return new HttpClient(mockedHandler.Object);
         }
     }
 }
