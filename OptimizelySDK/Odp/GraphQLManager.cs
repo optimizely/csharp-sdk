@@ -55,9 +55,9 @@ namespace OptimizelySDK.Odp
         private readonly HttpClient _httpClient;
 
         /// <summary>
-        /// Retrieves the audience segments from the Optimizely Data Platform (ODP)
+        /// Manager for communicating with the Optimizely Data Platform (ODP) GraphQL endpoint
         /// </summary>
-        /// <param name="logger">Collect and record events/errors for this GraphQL implementation</param>
+        /// <param name="logger">Collect and record events to log</param>
         /// <param name="errorHandler">Handler to record exceptions</param>
         /// <param name="httpClient">HttpClient to use to send queries to ODP</param>
         public GraphQLManager(ILogger logger = null, IErrorHandler errorHandler = null,

@@ -26,6 +26,9 @@ using System.Threading.Tasks;
 
 namespace OptimizelySDK.Odp
 {
+    /// <summary>
+    /// Manager for communicating with ODP's REST API endpoint
+    /// </summary>
     public class RestApiManager : IRestApiManager
     {
         private const string EVENT_SENDING_FAILURE_MESSAGE = "ODP event send failed";
@@ -45,6 +48,12 @@ namespace OptimizelySDK.Odp
         /// </summary>
         private readonly HttpClient _httpClient;
 
+        /// <summary>
+        /// Manager for communicating with ODP's REST API endpoint
+        /// </summary>
+        /// <param name="logger">Collect and record events to log</param>
+        /// <param name="errorHandler">Handler to record exceptions</param>
+        /// <param name="httpClient">HttpClient to use to send ODP events</param>
         public RestApiManager(ILogger logger = null, IErrorHandler errorHandler = null,
             HttpClient httpClient = null
         )
@@ -54,6 +63,13 @@ namespace OptimizelySDK.Odp
             _httpClient = httpClient ?? new HttpClient();
         }
 
+        /// <summary>
+        /// Send events to ODP's RESTful API
+        /// </summary>
+        /// <param name="apiKey">ODP public key</param>
+        /// <param name="apiHost">Host of ODP endpoint</param>
+        /// <param name="events">ODP events to send</param>
+        /// <returns>Retry is true - if network or server error (5xx), otherwise false</returns>
         public bool SendEvents(string apiKey, string apiHost, List<OdpEvent> events)
         {
             if (string.IsNullOrWhiteSpace(apiKey) || string.IsNullOrWhiteSpace(apiHost))
@@ -100,6 +116,13 @@ namespace OptimizelySDK.Odp
             return shouldRetry;
         }
 
+        /// <summary>
+        /// Async call to send the event data to ODP
+        /// </summary>
+        /// <param name="apiKey">ODP public key</param>
+        /// <param name="endpoint">Fully-qualified ODP REST API endpoint</param>
+        /// <param name="data">JSON string version of ODP event data</param>
+        /// <returns>HTTP response endpoint</returns>
         private async Task<HttpResponseMessage> SendEventsAsync(string apiKey, string endpoint,
             string data
         )
@@ -111,6 +134,13 @@ namespace OptimizelySDK.Odp
             return response;
         }
 
+        /// <summary>
+        /// Build an HTTP request message
+        /// </summary>
+        /// <param name="apiKey">ODP public key</param>
+        /// <param name="endpoint">Fully-qualified ODP REST API endpoint</param>
+        /// <param name="data">JSON string version of ODP event data</param>
+        /// <returns>Ready request message to send</returns>
         private static HttpRequestMessage BuildRequestMessage(string apiKey, string endpoint,
             string data
         )
