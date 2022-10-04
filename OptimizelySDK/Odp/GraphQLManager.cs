@@ -25,6 +25,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace OptimizelySDK.Odp
@@ -176,7 +177,7 @@ namespace OptimizelySDK.Odp
                 return default;
             }
 
-            var responseStatusCode = int.Parse(response.StatusCode.ToString());
+            var responseStatusCode = (int)response.StatusCode;
             if (responseStatusCode >= 400 && responseStatusCode < 600)
             {
                 _logger.Log(LogLevel.ERROR,
