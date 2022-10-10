@@ -1,5 +1,6 @@
 ﻿using Moq;
 using Moq.Protected;
+using System;
 using System.Net;
 using System.Net.Http;
 using System.Threading;
@@ -32,6 +33,21 @@ namespace OptimizelySDK.Tests.OdpTests
                     ItExpr.IsAny<HttpRequestMessage>(),
                     ItExpr.IsAny<CancellationToken>()).
                 ReturnsAsync(response);
+            return new HttpClient(mockedHandler.Object);
+        }
+        
+        /// <summary>
+        /// Create an HttpClient instance that will timeout for SendAsync calls
+        /// </summary>
+        /// <returns>HttpClient instance that throw TimeoutException</returns>
+        public static HttpClient MakeHttpClientWithTimeout()
+        {
+            var mockedHandler = new Mock<HttpMessageHandler>();
+            mockedHandler.Protected().Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>()).
+                Throws<TimeoutException>();
             return new HttpClient(mockedHandler.Object);
         }
     }

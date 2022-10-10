@@ -15,18 +15,13 @@
  */
 
 using Moq;
-using Moq.Protected;
 using NUnit.Framework;
-using OptimizelySDK.AudienceConditions;
 using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Logger;
 using OptimizelySDK.Odp;
 using OptimizelySDK.Odp.Entity;
 using System.Collections.Generic;
 using System.Net;
-using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace OptimizelySDK.Tests.OdpTests
 {
@@ -36,12 +31,12 @@ namespace OptimizelySDK.Tests.OdpTests
         private const string VALID_ODP_PUBLIC_KEY = "a-valid-odp-public-key";
         private const string ODP_REST_API_HOST = "https://api.example.com";
 
-        private List<OdpEvent> _odpEvents = new List<OdpEvent>();
+        private readonly List<OdpEvent> _odpEvents = new List<OdpEvent>();
 
         private Mock<IErrorHandler> _mockErrorHandler;
         private Mock<ILogger> _mockLogger;
 
-        [SetUp]
+        [TestFixtureSetUp]
         public void Setup()
         {
             _mockErrorHandler = new Mock<IErrorHandler>();
@@ -54,7 +49,8 @@ namespace OptimizelySDK.Tests.OdpTests
                     {
                         "id-key-1", "id-value-1"
                     },
-                }, new Dictionary<string, object>
+                },
+                new Dictionary<string, object>
                 {
                     {
                         "key11", "value-1"
@@ -63,14 +59,15 @@ namespace OptimizelySDK.Tests.OdpTests
                         "key12", true
                     },
                     {
-                        "key12", 3.5
+                        "key13", 3.5
                     },
                     {
                         "key14", null
                     },
                 }
             ));
-            _odpEvents.Add(new OdpEvent("t2", "a2", new Dictionary<string, string>
+            _odpEvents.Add(new OdpEvent("t2", "a2",
+                new Dictionary<string, string>
                 {
                     {
                         "id-key-2", "id-value-2"
@@ -85,7 +82,7 @@ namespace OptimizelySDK.Tests.OdpTests
         }
 
         [Test]
-        public void ShouldSendEventsSuccessfullyAnyNotSuggestRetry()
+        public void ShouldSendEventsSuccessfullyAndNotSuggestRetry()
         {
             var httpClient = HttpClientTestUtil.MakeHttpClient(HttpStatusCode.OK);
             var manger =
@@ -98,12 +95,40 @@ namespace OptimizelySDK.Tests.OdpTests
         }
 
         [Test]
-        public void ShouldSuggestRetryFor400HttpResponse() { }
+        public void ShouldNotSuggestRetryFor400HttpResponse()
+        {
+            var httpClient = HttpClientTestUtil.MakeHttpClient(HttpStatusCode.BadRequest);
+            var manger =
+                new RestApiManager(_mockLogger.Object, _mockErrorHandler.Object, httpClient);
+
+            var shouldRetry = manger.SendEvents(VALID_ODP_PUBLIC_KEY, ODP_REST_API_HOST,
+                _odpEvents);
+
+            Assert.IsFalse(shouldRetry);
+        }
 
         [Test]
-        public void ShouldSuggestRetryFor500HttpResponse() { }
+        public void ShouldSuggestRetryFor500HttpResponse()
+        {
+            var httpClient = HttpClientTestUtil.MakeHttpClient(HttpStatusCode.InternalServerError);
+            var manger =
+                new RestApiManager(_mockLogger.Object, _mockErrorHandler.Object, httpClient);
+
+            var shouldRetry = manger.SendEvents(VALID_ODP_PUBLIC_KEY, ODP_REST_API_HOST,
+                _odpEvents);
+
+            Assert.IsTrue(shouldRetry);
+        }
 
         [Test]
-        public void ShouldSuggestRetryForNetworkTimeout() { }
+        public void ShouldSuggestRetryForNetworkTimeout() { 
+            var httpClient = HttpClientTestUtil.MakeHttpClientWithTimeout();
+            var manger =
+                new RestApiManager(_mockLogger.Object, _mockErrorHandler.Object, httpClient);
+
+            var shouldRetry = manger.SendEvents(VALID_ODP_PUBLIC_KEY, ODP_REST_API_HOST,
+                _odpEvents);
+
+            Assert.IsTrue(shouldRetry);}
     }
 }

@@ -101,7 +101,7 @@ namespace OptimizelySDK.Odp
                 shouldRetry = true;
             }
 
-            var responseStatusCode = int.Parse(response?.StatusCode.ToString() ?? "0");
+            var responseStatusCode = response == null ? 0 : (int)response.StatusCode;
             if (responseStatusCode >= 400)
             {
                 _logger.Log(LogLevel.ERROR,
