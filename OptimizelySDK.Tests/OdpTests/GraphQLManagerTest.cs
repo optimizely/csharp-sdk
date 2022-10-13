@@ -15,7 +15,6 @@
  */
 
 using Moq;
-using Moq.Protected;
 using NUnit.Framework;
 using OptimizelySDK.AudienceConditions;
 using OptimizelySDK.ErrorHandler;
@@ -23,9 +22,6 @@ using OptimizelySDK.Logger;
 using OptimizelySDK.Odp;
 using System.Collections.Generic;
 using System.Net;
-using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace OptimizelySDK.Tests.OdpTests
 {
