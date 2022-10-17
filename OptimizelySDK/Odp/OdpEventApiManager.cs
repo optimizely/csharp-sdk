@@ -29,7 +29,7 @@ namespace OptimizelySDK.Odp
     /// <summary>
     /// Manager for communicating with ODP's REST API endpoint
     /// </summary>
-    public class RestApiManager : IRestApiManager
+    public class OdpEventApiManager : IOdpEventApiManager
     {
         private const string EVENT_SENDING_FAILURE_MESSAGE = "ODP event send failed";
 
@@ -54,7 +54,7 @@ namespace OptimizelySDK.Odp
         /// <param name="logger">Collect and record events to log</param>
         /// <param name="errorHandler">Handler to record exceptions</param>
         /// <param name="httpClient">HttpClient to use to send ODP events</param>
-        public RestApiManager(ILogger logger = null, IErrorHandler errorHandler = null,
+        public OdpEventApiManager(ILogger logger = null, IErrorHandler errorHandler = null,
             HttpClient httpClient = null
         )
         {
@@ -127,21 +127,19 @@ namespace OptimizelySDK.Odp
             string data
         )
         {
-            var request = BuildRequestMessage(apiKey, endpoint, data);
+            var request = BuildOdpEventMessage(apiKey, endpoint, data);
 
-            var response = await _httpClient.SendAsync(request);
-
-            return response;
+            return await _httpClient.SendAsync(request);
         }
 
         /// <summary>
-        /// Build an HTTP request message
+        /// Build an HTTP request message to send the ODP events
         /// </summary>
         /// <param name="apiKey">ODP public key</param>
         /// <param name="endpoint">Fully-qualified ODP REST API endpoint</param>
         /// <param name="data">JSON string version of ODP event data</param>
         /// <returns>Ready request message to send</returns>
-        private static HttpRequestMessage BuildRequestMessage(string apiKey, string endpoint,
+        private static HttpRequestMessage BuildOdpEventMessage(string apiKey, string endpoint,
             string data
         )
         {

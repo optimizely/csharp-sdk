@@ -26,7 +26,7 @@ using System.Net;
 namespace OptimizelySDK.Tests.OdpTests
 {
     [TestFixture]
-    public class RestApiManagerTest
+    public class OdpEventApiManagerTest
     {
         private const string VALID_ODP_PUBLIC_KEY = "a-valid-odp-public-key";
         private const string ODP_REST_API_HOST = "https://api.example.com";
@@ -86,7 +86,7 @@ namespace OptimizelySDK.Tests.OdpTests
         {
             var httpClient = HttpClientTestUtil.MakeHttpClient(HttpStatusCode.OK);
             var manger =
-                new RestApiManager(_mockLogger.Object, _mockErrorHandler.Object, httpClient);
+                new OdpEventApiManager(_mockLogger.Object, _mockErrorHandler.Object, httpClient);
 
             var shouldRetry = manger.SendEvents(VALID_ODP_PUBLIC_KEY, ODP_REST_API_HOST,
                 _odpEvents);
@@ -99,7 +99,7 @@ namespace OptimizelySDK.Tests.OdpTests
         {
             var httpClient = HttpClientTestUtil.MakeHttpClient(HttpStatusCode.BadRequest);
             var manger =
-                new RestApiManager(_mockLogger.Object, _mockErrorHandler.Object, httpClient);
+                new OdpEventApiManager(_mockLogger.Object, _mockErrorHandler.Object, httpClient);
 
             var shouldRetry = manger.SendEvents(VALID_ODP_PUBLIC_KEY, ODP_REST_API_HOST,
                 _odpEvents);
@@ -112,7 +112,7 @@ namespace OptimizelySDK.Tests.OdpTests
         {
             var httpClient = HttpClientTestUtil.MakeHttpClient(HttpStatusCode.InternalServerError);
             var manger =
-                new RestApiManager(_mockLogger.Object, _mockErrorHandler.Object, httpClient);
+                new OdpEventApiManager(_mockLogger.Object, _mockErrorHandler.Object, httpClient);
 
             var shouldRetry = manger.SendEvents(VALID_ODP_PUBLIC_KEY, ODP_REST_API_HOST,
                 _odpEvents);
@@ -124,7 +124,7 @@ namespace OptimizelySDK.Tests.OdpTests
         public void ShouldSuggestRetryForNetworkTimeout() { 
             var httpClient = HttpClientTestUtil.MakeHttpClientWithTimeout();
             var manger =
-                new RestApiManager(_mockLogger.Object, _mockErrorHandler.Object, httpClient);
+                new OdpEventApiManager(_mockLogger.Object, _mockErrorHandler.Object, httpClient);
 
             var shouldRetry = manger.SendEvents(VALID_ODP_PUBLIC_KEY, ODP_REST_API_HOST,
                 _odpEvents);

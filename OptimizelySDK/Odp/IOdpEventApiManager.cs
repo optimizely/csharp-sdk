@@ -19,7 +19,7 @@ using System.Collections.Generic;
 
 namespace OptimizelySDK.Odp
 {
-    public interface IRestApiManager
+    public interface IOdpEventApiManager
     {
         bool SendEvents(string apiKey, string apiHost, List<OdpEvent> events);
     }

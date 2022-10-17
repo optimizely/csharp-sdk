@@ -18,21 +18,46 @@ using System.Collections.Generic;
 
 namespace OptimizelySDK.Odp.Entity
 {
+    /// <summary>
+    /// Event data object targeted to requirements of the Optimizely Data Platform
+    /// </summary>
     public class OdpEvent
     {
-        public string Type;
+        /// <summary>
+        /// Type of event (typically `fullstack` from SDK events)
+        /// </summary>
+        public string Type { get; }
 
-        public string Action;
+        /// <summary>
+        /// Subcategory of the event type
+        /// </summary>
+        public string Action { get; }
 
-        public Dictionary<string,string> Identifiers;
+        /// <summary>
+        /// Key-value map of user identifiers
+        /// </summary>
+        public Dictionary<string, string> Identifiers { get;  }
 
-        public Dictionary<string,object> Data;
+        /// <summary>
+        /// Event data in a key-value pair format
+        /// </summary>
+        public Dictionary<string, object> Data { get; }
 
-        public OdpEvent(string type, string action, Dictionary<string, string> identifiers, Dictionary<string, object> data) {
+        /// <summary>
+        /// Event to be sent and stored in the Optimizely Data Platform
+        /// </summary>
+        /// <param name="type">Type of event (typically `fullstack` from SDK events)</param>
+        /// <param name="action">Subcategory of the event type</param>
+        /// <param name="identifiers">Key-value map of user identifiers</param>
+        /// <param name="data">Event data in a key-value pair format</param>
+        public OdpEvent(string type, string action, Dictionary<string, string> identifiers,
+            Dictionary<string, dynamic> data
+        )
+        {
             Type = type;
             Action = action;
             Identifiers = identifiers ?? new Dictionary<string, string>();
-            Data = data ?? new Dictionary<string, object>();
+            Data = data ?? new Dictionary<string, dynamic>();
         }
     }
 }

@@ -32,12 +32,17 @@ namespace OptimizelySDK.Odp
     /// <summary>
     /// Manager for communicating with the Optimizely Data Platform GraphQL endpoint
     /// </summary>
-    public class GraphQLManager : IGraphQLManager
+    public class OdpSegmentApiManager : IOdpSegmentApiManager
     {
         /// <summary>
         /// Standard message for audience querying fetch errors
         /// </summary>
         private const string AUDIENCE_FETCH_FAILURE_MESSAGE = "Audience segments fetch failed";
+
+        /// <summary>
+        /// Specific key for designating the ODP API public key 
+        /// </summary>
+        private const string HEADER_API_KEY = "x-api-key";
 
         /// <summary>
         /// Error handler used to record errors
@@ -60,7 +65,7 @@ namespace OptimizelySDK.Odp
         /// <param name="logger">Collect and record events to log</param>
         /// <param name="errorHandler">Handler to record exceptions</param>
         /// <param name="httpClient">HttpClient to use to send queries to ODP</param>
-        public GraphQLManager(ILogger logger = null, IErrorHandler errorHandler = null,
+        public OdpSegmentApiManager(ILogger logger = null, IErrorHandler errorHandler = null,
             HttpClient httpClient = null
         )
         {
@@ -95,7 +100,8 @@ namespace OptimizelySDK.Odp
             }
 
             var endpoint = $"{apiHost}/v3/graphql";
-            var query = ToGraphQLJson(userKey.ToString(), userValue, segmentsToCheck);
+            var query =
+                BuildGetSegmentsGraphQLQuery(userKey.ToString().ToLower(), userValue, segmentsToCheck);
 
             var segmentsResponseJson = QuerySegments(apiKey, endpoint, query);
             if (CanBeJsonParsed(segmentsResponseJson))
@@ -108,8 +114,8 @@ namespace OptimizelySDK.Odp
             var parsedSegments = ParseSegmentsResponseJson(segmentsResponseJson);
             if (parsedSegments is null)
             {
-                _logger.Log(LogLevel.ERROR,
-                    $"{AUDIENCE_FETCH_FAILURE_MESSAGE} (decode error)");
+                var message = $"{AUDIENCE_FETCH_FAILURE_MESSAGE} (decode error)";
+                _logger.Log(LogLevel.ERROR, message);
                 return null;
             }
 
@@ -122,7 +128,7 @@ namespace OptimizelySDK.Odp
                 return null;
             }
 
-            if (parsedSegments.Data?.Customer?.Audiences?.Edges is null)
+            if (parsedSegments.Data?.Customer?.Audiences?.Edges == null)
             {
                 _logger.Log(LogLevel.ERROR, $"{AUDIENCE_FETCH_FAILURE_MESSAGE} (decode error)");
 
@@ -135,30 +141,49 @@ namespace OptimizelySDK.Odp
         }
 
         /// <summary>
-        /// Converts the current QuerySegmentsParameters into a GraphQL query string
+        /// Build GraphQL query for getting segments 
         /// </summary>
-        /// <returns>GraphQL payload</returns>
-        private static string ToGraphQLJson(string userKey, string userValue,
+        /// <param name="userKey">'vuid' or 'fs_user_id key'</param>
+        /// <param name="userValue">Associated value to query for the user key</param>
+        /// <param name="segmentsToCheck">Audience segments to check for experiment inclusion</param>
+        /// <returns>GraphQL string payload</returns>
+        private static string BuildGetSegmentsGraphQLQuery(string userKey, string userValue,
             IEnumerable segmentsToCheck
         )
         {
+            // make `example-user-4213` into `\"example-user-4213\"`
             var userValueWithEscapedQuotes = $"\\\"{userValue}\\\"";
+
+            // serialize collection of `"has_cart_items", "has_seen_promo"` into
+            // JSON array with quotation marks `[\"has_cart_items\", \"has_seen_promo\"]
             var segmentsArrayJson =
                 JsonConvert.SerializeObject(segmentsToCheck).Replace("\"", "\\\"");
 
-            var json = new StringBuilder();
-            json.Append("{\"query\" : \"query {customer");
-            json.Append($"({userKey} : {userValueWithEscapedQuotes}) ");
-            json.Append("{audiences");
-            json.Append($"(subset: {segmentsArrayJson})");
-            json.Append("{edges {node {name state}}}}}\"}");
-
-            return json.ToString();
+            // Under C# 11 we can use $$""" ... """ for multiline string interpolation and
+            // surround code with double {{ }} 
+            return
+                "{\"query\" : " +
+                "   \"query {" +
+                $"      customer({userKey} : {userValueWithEscapedQuotes}) {{" +
+                $"          audiences(subset: {segmentsArrayJson}) {{" +
+                "               edges {" +
+                "                   node {" +
+                "                       name" +
+                "                       state" +
+                "                   }" +
+                "               }" +
+                "           }" +
+                "       }" +
+                "   \"}" +
+                "}";
         }
 
         /// <summary>
-        /// Synchronous handler for querying the ODP GraphQL endpoint 
+        /// Synchronous handler for querying the ODP GraphQL endpoint
         /// </summary>
+        /// <param name="apiKey">ODP public API key</param>
+        /// <param name="endpoint">Fully-qualified ODP GraphQL Endpoint</param>
+        /// <param name="query">GraphQL query string to send</param>
         /// <returns>JSON response from ODP</returns>
         private string QuerySegments(string apiKey, string endpoint,
             string query
@@ -176,11 +201,10 @@ namespace OptimizelySDK.Odp
                 return default;
             }
 
-            var responseStatusCode = (int)response.StatusCode;
-            if (responseStatusCode >= 400 && responseStatusCode < 600)
+            if (!response.IsSuccessStatusCode)
             {
                 _logger.Log(LogLevel.ERROR,
-                    $"{AUDIENCE_FETCH_FAILURE_MESSAGE} ({responseStatusCode})");
+                    $"{AUDIENCE_FETCH_FAILURE_MESSAGE} ({(int)response.StatusCode})");
                 return default;
             }
 
@@ -200,9 +224,7 @@ namespace OptimizelySDK.Odp
         {
             var request = BuildRequestMessage(apiKey, endpoint, query);
 
-            var response = await _httpClient.SendAsync(request);
-
-            return response;
+            return await _httpClient.SendAsync(request);
         }
 
         /// <summary>
@@ -223,7 +245,7 @@ namespace OptimizelySDK.Odp
                 Headers =
                 {
                     {
-                        "x-api-key", apiKey
+                        HEADER_API_KEY, apiKey
                     },
                 },
                 Content = new StringContent(query, Encoding.UTF8, "application/json"),

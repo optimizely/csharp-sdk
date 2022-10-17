@@ -24,6 +24,9 @@ using System.Threading.Tasks;
 
 namespace OptimizelySDK.Tests.OdpTests
 {
+    /// <summary>
+    /// Shared utility methods used for stubbing HttpClient instances
+    /// </summary>
     public static class HttpClientTestUtil
     {
         /// <summary>
