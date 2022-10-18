@@ -23,6 +23,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
@@ -39,10 +40,6 @@ namespace OptimizelySDK.Odp
         /// </summary>
         private const string AUDIENCE_FETCH_FAILURE_MESSAGE = "Audience segments fetch failed";
 
-        /// <summary>
-        /// Specific key for designating the ODP API public key 
-        /// </summary>
-        private const string HEADER_API_KEY = "x-api-key";
 
         /// <summary>
         /// Error handler used to record errors
@@ -101,7 +98,8 @@ namespace OptimizelySDK.Odp
 
             var endpoint = $"{apiHost}/v3/graphql";
             var query =
-                BuildGetSegmentsGraphQLQuery(userKey.ToString().ToLower(), userValue, segmentsToCheck);
+                BuildGetSegmentsGraphQLQuery(userKey.ToString().ToLower(), userValue,
+                    segmentsToCheck);
 
             var segmentsResponseJson = QuerySegments(apiKey, endpoint, query);
             if (CanBeJsonParsed(segmentsResponseJson))
@@ -151,32 +149,18 @@ namespace OptimizelySDK.Odp
             IEnumerable segmentsToCheck
         )
         {
-            // make `example-user-4213` into `\"example-user-4213\"`
-            var userValueWithEscapedQuotes = $"\\\"{userValue}\\\"";
+            var query =
+                "query($userId: String, $audiences: [String]) {customer(|userKey|: $userId){audiences(subset: $audiences) {edges {node {name state}}}}}".
+                    Replace("|userKey|", userKey);
 
-            // serialize collection of `"has_cart_items", "has_seen_promo"` into
-            // JSON array with quotation marks `[\"has_cart_items\", \"has_seen_promo\"]
-            var segmentsArrayJson =
-                JsonConvert.SerializeObject(segmentsToCheck).Replace("\"", "\\\"");
+            var variables =
+                "\"variables\": { \"userId\": \"|userValue|\", \"audiences\": |audiences| }".
+                    Replace("|userValue|", userValue).
+                    Replace("|audiences|", JsonConvert.SerializeObject(segmentsToCheck));
 
-            // Under C# 11 we can use $$""" ... """ for multiline string interpolation and
-            // surround code with double {{ }} 
-            return
-                "{\"query\" : " +
-                "   \"query {" +
-                $"      customer({userKey} : {userValueWithEscapedQuotes}) {{" +
-                $"          audiences(subset: {segmentsArrayJson}) {{" +
-                "               edges {" +
-                "                   node {" +
-                "                       name" +
-                "                       state" +
-                "                   }" +
-                "               }" +
-                "           }" +
-                "       }" +
-                "   \"}" +
-                "}";
+            return $"{{ \"query\": \"{query}\", {variables} }}";
         }
+
 
         /// <summary>
         /// Synchronous handler for querying the ODP GraphQL endpoint
@@ -224,6 +208,8 @@ namespace OptimizelySDK.Odp
         {
             var request = BuildRequestMessage(apiKey, endpoint, query);
 
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+
             return await _httpClient.SendAsync(request);
         }
 
@@ -245,7 +231,7 @@ namespace OptimizelySDK.Odp
                 Headers =
                 {
                     {
-                        HEADER_API_KEY, apiKey
+                        Constants.HEADER_API_KEY, apiKey
                     },
                 },
                 Content = new StringContent(query, Encoding.UTF8, "application/json"),

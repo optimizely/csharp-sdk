@@ -20,6 +20,7 @@ using OptimizelySDK.Logger;
 using OptimizelySDK.Odp.Entity;
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
@@ -31,6 +32,9 @@ namespace OptimizelySDK.Odp
     /// </summary>
     public class OdpEventApiManager : IOdpEventApiManager
     {
+        /// <summary>
+        /// Standard message for ODP event sending errors
+        /// </summary>
         private const string EVENT_SENDING_FAILURE_MESSAGE = "ODP event send failed";
 
         /// <summary>
@@ -129,6 +133,8 @@ namespace OptimizelySDK.Odp
         {
             var request = BuildOdpEventMessage(apiKey, endpoint, data);
 
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+
             return await _httpClient.SendAsync(request);
         }
 
@@ -150,7 +156,7 @@ namespace OptimizelySDK.Odp
                 Headers =
                 {
                     {
-                        "x-api-key", apiKey
+                        Constants.HEADER_API_KEY, apiKey
                     },
                 },
                 Content = new StringContent(data, Encoding.UTF8, "application/json"),

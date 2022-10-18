@@ -141,7 +141,7 @@ namespace OptimizelySDK.Tests.OdpTests
             var segments = manager.FetchSegments(
                 VALID_ODP_PUBLIC_KEY,
                 ODP_GRAPHQL_HOST,
-                OdpUserKeyType.FS_USER_KEY,
+                OdpUserKeyType.FS_USER_ID,
                 "tester-101",
                 _segmentsToCheck);
 
@@ -163,7 +163,7 @@ namespace OptimizelySDK.Tests.OdpTests
             var segments = manager.FetchSegments(
                 VALID_ODP_PUBLIC_KEY,
                 ODP_GRAPHQL_HOST,
-                OdpUserKeyType.FS_USER_KEY,
+                OdpUserKeyType.FS_USER_ID,
                 "tester-101",
                 _segmentsToCheck);
 
@@ -187,7 +187,7 @@ namespace OptimizelySDK.Tests.OdpTests
             var segments = manager.FetchSegments(
                 VALID_ODP_PUBLIC_KEY,
                 ODP_GRAPHQL_HOST,
-                OdpUserKeyType.FS_USER_KEY,
+                OdpUserKeyType.FS_USER_ID,
                 "invalid-user",
                 _segmentsToCheck);
 
@@ -207,7 +207,7 @@ namespace OptimizelySDK.Tests.OdpTests
             var segments = manager.FetchSegments(
                 VALID_ODP_PUBLIC_KEY,
                 ODP_GRAPHQL_HOST,
-                OdpUserKeyType.FS_USER_KEY,
+                OdpUserKeyType.FS_USER_ID,
                 "tester-101",
                 _segmentsToCheck);
 
@@ -229,7 +229,7 @@ namespace OptimizelySDK.Tests.OdpTests
             var segments = manager.FetchSegments(
                 VALID_ODP_PUBLIC_KEY,
                 ODP_GRAPHQL_HOST,
-                OdpUserKeyType.FS_USER_KEY,
+                OdpUserKeyType.FS_USER_ID,
                 "tester-101",
                 _segmentsToCheck);
 
@@ -249,7 +249,7 @@ namespace OptimizelySDK.Tests.OdpTests
             var segments = manager.FetchSegments(
                 VALID_ODP_PUBLIC_KEY,
                 ODP_GRAPHQL_HOST,
-                OdpUserKeyType.FS_USER_KEY,
+                OdpUserKeyType.FS_USER_ID,
                 "tester-101",
                 _segmentsToCheck);
 
@@ -268,7 +268,7 @@ namespace OptimizelySDK.Tests.OdpTests
             var segments = manager.FetchSegments(
                 VALID_ODP_PUBLIC_KEY,
                 ODP_GRAPHQL_HOST,
-                OdpUserKeyType.FS_USER_KEY,
+                OdpUserKeyType.FS_USER_ID,
                 "tester-101",
                 _segmentsToCheck);
 

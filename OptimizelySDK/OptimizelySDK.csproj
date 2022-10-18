@@ -88,6 +88,7 @@
     <Compile Include="Entity\IdKeyEntity.cs" />
     <Compile Include="Entity\Integration.cs" />
     <Compile Include="Event\Entity\DecisionMetadata.cs" />
+    <Compile Include="Odp\Constants.cs" />
     <Compile Include="Odp\Entity\Audience.cs" />
     <Compile Include="Odp\Entity\Customer.cs" />
     <Compile Include="Odp\Entity\Data.cs" />
