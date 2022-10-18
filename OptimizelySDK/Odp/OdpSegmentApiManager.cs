@@ -40,7 +40,6 @@ namespace OptimizelySDK.Odp
         /// </summary>
         private const string AUDIENCE_FETCH_FAILURE_MESSAGE = "Audience segments fetch failed";
 
-
         /// <summary>
         /// Error handler used to record errors
         /// </summary>
