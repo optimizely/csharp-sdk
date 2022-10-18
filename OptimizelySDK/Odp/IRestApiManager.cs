@@ -16,11 +16,12 @@
 
 using OptimizelySDK.Odp.Entity;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace OptimizelySDK.Odp
 {
     public interface IRestApiManager
     {
-        bool SendEvents(string apiKey, string apiHost, List<OdpEvent> events);
+        Task<bool> SendEvents(string apiKey, string apiHost, List<OdpEvent> events);
     }
 }

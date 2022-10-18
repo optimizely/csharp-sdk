@@ -21,6 +21,8 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace OptimizelySDK.Odp
 {
@@ -40,6 +42,8 @@ namespace OptimizelySDK.Odp
         private const string TYPE = "fullstack";
 
         private ExecutionState State { get; set; } = ExecutionState.Stopped;
+
+        private CancellationTokenSource _timeoutToken;
 
         private OdpConfig _odpConfig;
 
@@ -75,6 +79,7 @@ namespace OptimizelySDK.Odp
             _flushInterval = flushInterval;
 
             _queue = new ConcurrentQueue<OdpEvent>();
+            _timeoutToken = new CancellationTokenSource();
         }
 
         public void UpdateSettings(OdpConfig odpConfig)
@@ -93,7 +98,7 @@ namespace OptimizelySDK.Odp
 
             // process queue with flush
             ProcessQueue(true);
-            
+
             State = ExecutionState.Stopped;
             _logger.Log(LogLevel.DEBUG, $"Stopped. Queue Count: {_queue.Count}");
         }
@@ -181,34 +186,75 @@ namespace OptimizelySDK.Odp
                 return;
             }
 
-            // Flush interval occurred & queue has items
             if (shouldFlush)
             {
-                // clear the queue completely
-                // this.clearCurrentTimeout();
+                ClearCurrentTimeout();
 
                 State = ExecutionState.Processing;
 
                 while (QueueContainsItems())
                 {
-                    // this.makeAndSend1Batch();
+                    MakeAndSend1Batch();
                 }
             }
-            // Check if queue has a full batch available
             else if (QueueHasBatches())
             {
-                // this.clearCurrentTimeout();
+                ClearCurrentTimeout();
 
                 State = ExecutionState.Processing;
 
                 while (QueueHasBatches())
                 {
-                    // this.makeAndSend1Batch();
+                    MakeAndSend1Batch();
                 }
             }
 
             State = ExecutionState.Running;
-            // this.setNewTimeout();
+            SetNewTimeout();
+        }
+
+        private void MakeAndSend1Batch()
+        {
+            var batch = new List<OdpEvent>(_batchSize);
+
+            // remove a batch from the queue
+            for (int i = 0; i < _batchSize && _queue.Count > 0; i += 1)
+            {
+                if (_queue.TryDequeue(out OdpEvent dequeuedOdpEvent))
+                {
+                    batch.Add(dequeuedOdpEvent);
+                }
+            }
+
+            if (batch.Count > 0)
+            {
+                Task.Run(async () =>
+                {
+                    var shouldRetry = false;
+                    var attemptNumber = 0;
+                    do
+                    {
+                        shouldRetry = await _apiManager.SendEvents(_odpConfig.ApiKey,
+                            _odpConfig.ApiHost, batch);
+                        attemptNumber += 1;
+                    } while (shouldRetry && attemptNumber < MAX_RETRIES);
+                }).Start();
+            }
+        }
+        
+        private void SetNewTimeout() {
+            _timeoutToken = new CancellationTokenSource();
+            var ct = _timeoutToken.Token;
+            Task.Run(() => {
+                Thread.Sleep(_flushInterval);
+                if (!ct.IsCancellationRequested)
+                    ProcessQueue(true);
+            }, ct);
+        }
+        
+        private void ClearCurrentTimeout() {
+            _timeoutToken.Cancel();
+            _timeoutToken = new CancellationTokenSource();
         }
 
         private bool IsOdpConfigurationReady()

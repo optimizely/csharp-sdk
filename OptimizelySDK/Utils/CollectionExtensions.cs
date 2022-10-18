@@ -29,13 +29,5 @@ namespace OptimizelySDK.Utils
 
             return left;
         }
-
-        public static IEnumerable<T> DequeueChunk<T>(this Queue<T> queue, int chunkSize)
-        {
-            for (int i = 0; i < chunkSize && queue.Count > 0; i += 1)
-            {
-                yield return queue.Dequeue();
-            }
-        }
     }
 }
