@@ -133,7 +133,7 @@ namespace OptimizelySDK.Odp
         {
             var request = BuildOdpEventMessage(apiKey, endpoint, data);
 
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+            ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
 
             return await _httpClient.SendAsync(request);
         }
