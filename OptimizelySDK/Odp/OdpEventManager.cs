@@ -83,12 +83,14 @@ namespace OptimizelySDK.Odp
 
         public void UpdateSettings(OdpConfig odpConfig)
         {
-            _odpConfig.Update( odpConfig.ApiKey, odpConfig.ApiHost, odpConfig.SegmentsToCheck);
+            _odpConfig.Update(odpConfig.ApiKey, odpConfig.ApiHost, odpConfig.SegmentsToCheck);
         }
 
         public void Start()
         {
             State = ExecutionState.Running;
+            
+            SetNewTimeout();
         }
 
         public void Stop()
@@ -175,6 +177,8 @@ namespace OptimizelySDK.Odp
 
         private void ProcessQueue(bool shouldFlush = false)
         {
+            _logger.Log(LogLevel.DEBUG,
+                $"Processing Queue {(shouldFlush ? "(flush)" : string.Empty)}");
             if (State != ExecutionState.Running)
             {
                 return;
@@ -237,7 +241,7 @@ namespace OptimizelySDK.Odp
                             _odpConfig.ApiHost, batch);
                         attemptNumber += 1;
                     } while (shouldRetry && attemptNumber < MAX_RETRIES);
-                }).Start();
+                });
             }
         }
 
