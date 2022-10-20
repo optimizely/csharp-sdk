@@ -18,29 +18,22 @@ using System.Collections.Generic;
 
 namespace OptimizelySDK.Odp
 {
-    public class OdpConfig : IOdpConfig
+    public interface IOdpConfig
     {
         /// <summary>
         /// Public API key for the ODP account from which the audience segments will be fetched (optional).
         /// </summary>
-        public string ApiKey { get; private set; }
-        
+        string ApiKey { get; }
+
         /// <summary>
         /// Host of ODP audience segments API.
         /// </summary>
-        public string ApiHost { get; private set; }
-        
+        string ApiHost { get; }
+
         /// <summary>
         /// All ODP segments used in the current datafile (associated with apiHost/apiKey).
         /// </summary>
-        public List<string> SegmentsToCheck { get; private set; }
-
-        public OdpConfig(string apiKey, string apiHost, List<string> segmentsToCheck)
-        {
-            ApiKey = apiKey;
-            ApiHost = apiHost;
-            SegmentsToCheck = segmentsToCheck ?? new List<string>(0);
-        }
+        List<string> SegmentsToCheck { get; }
 
         /// <summary>
         /// Update the ODP configuration details
@@ -49,27 +42,12 @@ namespace OptimizelySDK.Odp
         /// <param name="apiHost">Host of ODP audience segments API</param>
         /// <param name="segmentsToCheck">Audience segments</param>
         /// <returns>true if configuration was updated successfully otherwise false</returns>
-        public bool Update(string apiKey, string apiHost, List<string> segmentsToCheck)
-        {
-            if (ApiKey == apiKey && ApiHost == apiHost && SegmentsToCheck == segmentsToCheck)
-            {
-                return false;
-            }
-
-            ApiKey = apiKey;
-            ApiHost = apiHost;
-            SegmentsToCheck = segmentsToCheck;
-
-            return true;
-        }
+        bool Update(string apiKey, string apiHost, List<string> segmentsToCheck);
 
         /// <summary>
         /// Determines if ODP configuration has the minimum amount of information
         /// </summary>
         /// <returns>true if ODP configuration can be used otherwise false</returns>
-        public bool IsReady()
-        {
-            return !string.IsNullOrWhiteSpace(ApiKey) && !string.IsNullOrWhiteSpace(ApiHost);
-        }
+        bool IsReady();
     }
 }

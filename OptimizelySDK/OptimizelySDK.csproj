@@ -106,6 +106,7 @@
     <Compile Include="Odp\GraphQLManager.cs" />
     <Compile Include="Odp\IGraphQLManager.cs" />
     <Compile Include="Odp\ICache.cs" />
+    <Compile Include="Odp\IOdpConfig.cs" />
     <Compile Include="Odp\IOdpEventManager.cs" />
     <Compile Include="Odp\IRestApiManager.cs" />
     <Compile Include="Odp\LruCache.cs" />

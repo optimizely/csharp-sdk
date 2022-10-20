@@ -45,8 +45,7 @@ namespace OptimizelySDK.Odp
 
         private CancellationTokenSource _timeoutToken;
 
-        private OdpConfig _odpConfig;
-
+        private readonly IOdpConfig _odpConfig;
         private readonly IRestApiManager _apiManager;
         private readonly ILogger _logger;
         private readonly int _queueSize;
@@ -55,18 +54,18 @@ namespace OptimizelySDK.Odp
 
         private readonly List<string> _validOdpDataTypes = new List<string>()
         {
-            "string",
-            "int",
-            "decimal",
-            "long",
-            "char",
-            "float",
-            "double",
+            "String",
+            "Int16",
+            "Int32",
+            "Decimal",
+            "Char",
+            "Double",
+            "Boolean",
         };
 
         private ConcurrentQueue<OdpEvent> _queue;
 
-        public OdpEventManager(OdpConfig odpConfig, IRestApiManager apiManager, ILogger logger,
+        public OdpEventManager(IOdpConfig odpConfig, IRestApiManager apiManager, ILogger logger,
             int queueSize = DEFAULT_SERVER_QUEUE_SIZE, int batchSize = DEFAULT_BATCH_SIZE,
             int flushInterval = DEFAULT_FLUSH_INTERVAL_MSECS
         )
@@ -84,7 +83,7 @@ namespace OptimizelySDK.Odp
 
         public void UpdateSettings(OdpConfig odpConfig)
         {
-            _odpConfig = odpConfig;
+            _odpConfig.Update( odpConfig.ApiKey, odpConfig.ApiHost, odpConfig.SegmentsToCheck);
         }
 
         public void Start()
@@ -241,18 +240,21 @@ namespace OptimizelySDK.Odp
                 }).Start();
             }
         }
-        
-        private void SetNewTimeout() {
+
+        private void SetNewTimeout()
+        {
             _timeoutToken = new CancellationTokenSource();
             var ct = _timeoutToken.Token;
-            Task.Run(() => {
+            Task.Run(() =>
+            {
                 Thread.Sleep(_flushInterval);
                 if (!ct.IsCancellationRequested)
                     ProcessQueue(true);
             }, ct);
         }
-        
-        private void ClearCurrentTimeout() {
+
+        private void ClearCurrentTimeout()
+        {
             _timeoutToken.Cancel();
             _timeoutToken = new CancellationTokenSource();
         }
@@ -282,7 +284,10 @@ namespace OptimizelySDK.Odp
 
         private bool InvalidDataFound(Dictionary<string, dynamic> data)
         {
-            return data.Any(item => !_validOdpDataTypes.Contains(item.Value.GetType()));
+            return data.Any(item =>
+                item.Value != null &&
+                !_validOdpDataTypes.Contains(item.Value.GetType().Name)
+            );
         }
 
         private static Dictionary<string, dynamic> AugmentCommonData(
