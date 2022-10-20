@@ -22,5 +22,25 @@ namespace OptimizelySDK.Odp
         /// Specific key for designating the ODP API public key 
         /// </summary>
         public const string HEADER_API_KEY = "x-api-key";
+
+        /// <summary>
+        /// Media type for json requests
+        /// </summary>
+        public const string APPLICATION_JSON_MEDIA_TYPE = "application/json";
+
+        /// <summary>
+        /// Path to ODP REST events API
+        /// </summary>
+        public const string ODP_EVENTS_API_ENDPOINT_PATH = "/v3/events";
+
+        /// <summary>
+        /// Path to ODP GraphQL API
+        /// </summary>
+        public const string ODP_GRAPHQL_API_ENDPOINT_PATH = "/v3/graphql";
+
+        /// <summary>
+        /// Default message when numeric HTTP status code is not available
+        /// </summary>
+        public const string NETWORK_ERROR_REASON = "network error";
     }
 }

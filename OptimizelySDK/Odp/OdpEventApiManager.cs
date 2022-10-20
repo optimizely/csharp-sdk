@@ -89,7 +89,7 @@ namespace OptimizelySDK.Odp
                 return false;
             }
 
-            var endpoint = $"{apiHost}/v3/events";
+            var endpoint = $"{apiHost}{Constants.ODP_EVENTS_API_ENDPOINT_PATH}";
             var data = JsonConvert.SerializeObject(events);
             var shouldRetry = false;
 
@@ -97,23 +97,25 @@ namespace OptimizelySDK.Odp
             try
             {
                 response = SendEventsAsync(apiKey, endpoint, data).GetAwaiter().GetResult();
+                response.EnsureSuccessStatusCode();
+            }
+            catch (HttpRequestException ex)
+            {
+                _errorHandler.HandleError(ex);
+
+                var statusCode = response == null ? 0 : (int)response.StatusCode;
+
+                _logger.Log(LogLevel.ERROR,
+                    $"{EVENT_SENDING_FAILURE_MESSAGE} ({(statusCode == 0 ? Constants.NETWORK_ERROR_REASON : statusCode.ToString())})");
+
+                shouldRetry = statusCode >= 500;
             }
             catch (Exception ex)
             {
                 _errorHandler.HandleError(ex);
-                _logger.Log(LogLevel.ERROR, $"{EVENT_SENDING_FAILURE_MESSAGE} (network error)");
-                shouldRetry = true;
-            }
 
-            var responseStatusCode = response == null ? 0 : (int)response.StatusCode;
-            if (responseStatusCode >= 400)
-            {
-                _logger.Log(LogLevel.ERROR,
-                    $"{EVENT_SENDING_FAILURE_MESSAGE} (${responseStatusCode})");
-            }
+                _logger.Log(LogLevel.ERROR, $"{EVENT_SENDING_FAILURE_MESSAGE} ({Constants.NETWORK_ERROR_REASON})");
 
-            if (responseStatusCode >= 500)
-            {
                 shouldRetry = true;
             }
 
@@ -127,13 +129,13 @@ namespace OptimizelySDK.Odp
         /// <param name="endpoint">Fully-qualified ODP REST API endpoint</param>
         /// <param name="data">JSON string version of ODP event data</param>
         /// <returns>HTTP response endpoint</returns>
-        private async Task<HttpResponseMessage> SendEventsAsync(string apiKey, string endpoint,
+        private Task<HttpResponseMessage> SendEventsAsync(string apiKey, string endpoint,
             string data
         )
         {
             var request = BuildOdpEventMessage(apiKey, endpoint, data);
 
-            return await _httpClient.SendAsync(request);
+            return _httpClient.SendAsync(request);
         }
 
         /// <summary>
@@ -157,7 +159,8 @@ namespace OptimizelySDK.Odp
                         Constants.HEADER_API_KEY, apiKey
                     },
                 },
-                Content = new StringContent(data, Encoding.UTF8, "application/json"),
+                Content = new StringContent(data, Encoding.UTF8,
+                    Constants.APPLICATION_JSON_MEDIA_TYPE),
             };
 
             return request;

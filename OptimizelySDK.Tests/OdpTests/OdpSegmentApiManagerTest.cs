@@ -76,7 +76,7 @@ namespace OptimizelySDK.Tests.OdpTests
     }
 }";
 
-            var response = OdpSegmentApiManager.ParseSegmentsResponseJson(RESPONSE_JSON);
+            var response = OdpSegmentApiManager.DeserializeSegmentsFromJson(RESPONSE_JSON);
 
             Assert.IsNull(response.Errors);
             Assert.IsNotNull(response.Data);
@@ -119,7 +119,7 @@ namespace OptimizelySDK.Tests.OdpTests
     }
 }";
 
-            var response = OdpSegmentApiManager.ParseSegmentsResponseJson(RESPONSE_JSON);
+            var response = OdpSegmentApiManager.DeserializeSegmentsFromJson(RESPONSE_JSON);
 
             Assert.IsNull(response.Data.Customer);
             Assert.IsNotNull(response.Errors);
