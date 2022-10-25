@@ -107,31 +107,31 @@ namespace OptimizelySDK.Odp
                 return null;
             }
 
-            var parsedSegments = DeserializeSegmentsFromJson(segmentsResponseJson);
-            if (parsedSegments == null)
+            var segments = DeserializeSegmentsFromJson(segmentsResponseJson);
+            if (segments == null)
             {
                 var message = $"{AUDIENCE_FETCH_FAILURE_MESSAGE} (decode error)";
                 _logger.Log(LogLevel.ERROR, message);
                 return null;
             }
 
-            if (parsedSegments.HasErrors)
+            if (segments.HasErrors)
             {
-                var errors = string.Join(";", parsedSegments.Errors.Select(e => e.ToString()));
+                var errors = string.Join(";", segments.Errors.Select(e => e.ToString()));
 
                 _logger.Log(LogLevel.ERROR, $"{AUDIENCE_FETCH_FAILURE_MESSAGE} ({errors})");
 
                 return null;
             }
 
-            if (parsedSegments.Data?.Customer?.Audiences?.Edges == null)
+            if (segments.Data?.Customer?.Audiences?.Edges == null)
             {
                 _logger.Log(LogLevel.ERROR, $"{AUDIENCE_FETCH_FAILURE_MESSAGE} (decode error)");
 
                 return null;
             }
 
-            return parsedSegments.Data.Customer.Audiences.Edges
+            return segments.Data.Customer.Audiences.Edges
                 .Where(e => e.Node.State == BaseCondition.QUALIFIED)
                 .Select(e => e.Node.Name)
                 .ToArray();
@@ -267,7 +267,14 @@ namespace OptimizelySDK.Odp
         /// <returns>Strongly-typed ODP Response object</returns>
         public static Response DeserializeSegmentsFromJson(string jsonResponse)
         {
-            return JsonConvert.DeserializeObject<Response>(jsonResponse);
+            try
+            {
+                return JsonConvert.DeserializeObject<Response>(jsonResponse);
+            }
+            catch (Exception ex)
+            {
+                return default;
+            }
         }
     }
 }

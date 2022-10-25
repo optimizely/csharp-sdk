@@ -91,6 +91,22 @@ namespace OptimizelySDK.Tests.OdpTests
             Assert.AreEqual(node.Name, "has_email_opted_in");
             Assert.AreNotEqual(node.State, BaseCondition.QUALIFIED);
         }
+        
+        [Test]
+        public void ShouldHandleAttemptToDeserializeInvalidJsonResponse()
+        {
+            const string VALID_ARRAY_JSON = "[\"item-1\", \"item-2\", \"item-3\"]";
+            const string KEY_WITHOUT_VALUE = "{ \"keyWithoutValue\": }";
+            const string VALUE_WITHOUT_KEY = "{ : \"valueWithoutKey\" }";
+            const string STRING_ONLY = "\"just some text\"";
+            const string MISSING_BRACE = "{ \"goodKeyWith\": \"goodValueButMissingBraceHere\" ";
+
+            Assert.IsNull(OdpSegmentApiManager.DeserializeSegmentsFromJson(VALID_ARRAY_JSON));
+            Assert.IsNull(OdpSegmentApiManager.DeserializeSegmentsFromJson(KEY_WITHOUT_VALUE));
+            Assert.IsNull(OdpSegmentApiManager.DeserializeSegmentsFromJson(VALUE_WITHOUT_KEY));
+            Assert.IsNull(OdpSegmentApiManager.DeserializeSegmentsFromJson(STRING_ONLY));
+            Assert.IsNull(OdpSegmentApiManager.DeserializeSegmentsFromJson(MISSING_BRACE));
+        }
 
         [Test]
         public void ShouldParseErrorResponse()
