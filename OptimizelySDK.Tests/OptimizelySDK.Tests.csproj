@@ -80,8 +80,10 @@
     <Compile Include="DefaultErrorHandlerTest.cs" />
     <Compile Include="EntityTests\IntegrationTest.cs" />
     <Compile Include="EventTests\EventProcessorProps.cs" />
-    <Compile Include="OdpTests\GraphQLManagerTest.cs" />
+    <Compile Include="OdpTests\OdpSegmentApiManagerTest.cs" />
+    <Compile Include="OdpTests\HttpClientTestUtil.cs" />
     <Compile Include="OdpTests\LruCacheTest.cs" />
+    <Compile Include="OdpTests\OdpEventApiManagerTest.cs" />
     <Compile Include="OptimizelyConfigTests\OptimizelyConfigTest.cs" />
     <Compile Include="OptimizelyDecisions\OptimizelyDecisionTest.cs" />
     <Compile Include="OptimizelyJSONTest.cs" />

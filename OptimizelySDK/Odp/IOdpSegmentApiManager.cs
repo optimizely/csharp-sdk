@@ -18,7 +18,7 @@ using System.Collections.Generic;
 
 namespace OptimizelySDK.Odp
 {
-    public interface IGraphQLManager
+    public interface IOdpSegmentApiManager
     {
         /// <summary>
         /// Retrieves the audience segments from ODP
@@ -31,7 +31,7 @@ namespace OptimizelySDK.Odp
         /// <returns>Array of audience segments</returns>
         string[] FetchSegments(string apiKey,
             string apiHost,
-            string userKey,
+            OdpUserKeyType userKey,
             string userValue,
             List<string> segmentsToCheck
         );

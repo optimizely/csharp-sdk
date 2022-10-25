@@ -14,20 +14,13 @@
  * limitations under the License.
  */
 
-using OptimizelySDK.Odp.Entity;
-
-namespace OptimizelySDK.Odp.Client
+namespace OptimizelySDK.Odp
 {
-    /// <summary>
-    /// An implementation for sending requests and handling responses to Optimizely Data Platform
-    /// </summary>
-    public interface IOdpClient
+    public enum OdpUserKeyType
     {
-        /// <summary>
-        /// Synchronous handler for querying the ODP GraphQL endpoint 
-        /// </summary>
-        /// <param name="parameters">Parameters inputs to send to ODP</param>
-        /// <returns>JSON response from ODP</returns>
-        string QuerySegments(QuerySegmentsParameters parameters);
+        // ReSharper disable InconsistentNaming
+        // ODP expects these names; .ToString() used
+        VUID = 0,
+        FS_USER_ID = 1,
     }
 }
