@@ -14,7 +14,6 @@
     <TargetFrameworkProfile />
     <ReleaseVersion>1.2.1</ReleaseVersion>
     <AssemblyOriginatorKeyFile>..\keypair.snk</AssemblyOriginatorKeyFile>
-    <LangVersion>7.3</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -90,8 +89,7 @@
     <Compile Include="Entity\IdKeyEntity.cs" />
     <Compile Include="Entity\Integration.cs" />
     <Compile Include="Event\Entity\DecisionMetadata.cs" />
-    <Compile Include="Odp\Client\IOdpClient.cs" />
-    <Compile Include="Odp\Client\OdpClient.cs" />
+    <Compile Include="Odp\Constants.cs" />
     <Compile Include="Odp\Entity\Audience.cs" />
     <Compile Include="Odp\Entity\Customer.cs" />
     <Compile Include="Odp\Entity\Data.cs" />
@@ -101,11 +99,12 @@
     <Compile Include="Odp\Entity\Extension.cs" />
     <Compile Include="Odp\Entity\Node.cs" />
     <Compile Include="Odp\Entity\OdpEvent.cs" />
-    <Compile Include="Odp\Entity\QuerySegmentsParameters.cs" />
     <Compile Include="Odp\Entity\Response.cs" />
-    <Compile Include="Odp\GraphQLManager.cs" />
-    <Compile Include="Odp\IGraphQLManager.cs" />
+    <Compile Include="Odp\Enums.cs" />
+    <Compile Include="Odp\OdpSegmentApiManager.cs" />
+    <Compile Include="Odp\IOdpSegmentApiManager.cs" />
     <Compile Include="Odp\ICache.cs" />
+    <Compile Include="Odp\IOdpEventApiManager.cs" />
     <Compile Include="Odp\IOdpConfig.cs" />
     <Compile Include="Odp\IOdpEventManager.cs" />
     <Compile Include="Odp\IRestApiManager.cs" />
@@ -113,6 +112,7 @@
     <Compile Include="Odp\OdpConfig.cs" />
     <Compile Include="Odp\OdpEventManager.cs" />
     <Compile Include="Odp\OdpUserKeyType.cs" />
+    <Compile Include="Odp\OdpEventApiManager.cs" />
     <Compile Include="OptimizelyDecisions\DecisionMessage.cs" />
     <Compile Include="OptimizelyDecisions\DecisionReasons.cs" />
     <Compile Include="OptimizelyDecisions\OptimizelyDecideOption.cs" />
@@ -160,7 +160,6 @@
     <Compile Include="OptlyConfig\OptimizelyVariable.cs" />
     <Compile Include="OptlyConfig\OptimizelyVariation.cs" />
     <Compile Include="Utils\AttributeMatchTypes.cs" />
-    <Compile Include="Utils\CollectionExtensions.cs" />
     <Compile Include="Utils\ConditionParser.cs" />
     <Compile Include="Utils\DecisionInfoTypes.cs" />
     <Compile Include="Utils\EventTagUtils.cs" />
