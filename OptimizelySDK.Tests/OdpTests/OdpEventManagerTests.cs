@@ -16,7 +16,6 @@
 
 using Moq;
 using NUnit.Framework;
-using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Logger;
 using OptimizelySDK.Odp;
 using OptimizelySDK.Odp.Entity;
@@ -131,21 +130,29 @@ namespace OptimizelySDK.Tests.OdpTests
             }),
         };
 
-        private IErrorHandler _errorHandler;
         private OdpConfig _odpConfig;
 
         private Mock<ILogger> _mockLogger;
         private Mock<IRestApiManager> _mockApiManager;
 
-        [SetUp]
-        public void Setup()
+        [TestFixtureSetUp]
+        public void RunBeforeAll()
         {
             _odpConfig = new OdpConfig(API_KEY, API_HOST, new List<string>());
-            _errorHandler = new Mock<IErrorHandler>().Object;
+
+            _mockApiManager = new Mock<IRestApiManager>();
 
             _mockLogger = new Mock<ILogger>();
             _mockLogger.Setup(i => i.Log(It.IsAny<LogLevel>(), It.IsAny<string>()));
-            _mockApiManager = new Mock<IRestApiManager>();
+            Console.WriteLine("RunBeforeAll");
+        }
+
+        [SetUp]
+        public void RunBeforeEach()
+        {
+            _mockApiManager.ResetCalls();
+            _mockLogger.ResetCalls();
+            Console.WriteLine("RunBeforeEach");
         }
 
         [Test]
@@ -153,8 +160,8 @@ namespace OptimizelySDK.Tests.OdpTests
         {
             var eventManager =
                 new OdpEventManager(_odpConfig, _mockApiManager.Object, _mockLogger.Object);
-            // since we've not called start() then...
 
+            // since we've not called start() then...
             eventManager.SendEvent(_testEvents[0]);
 
             // ...we should get a notice after trying to send an event
@@ -214,8 +221,10 @@ namespace OptimizelySDK.Tests.OdpTests
                     },
                 });
 
+            eventManager.Start();
             eventManager.SendEvent(eventWithAnArray);
             eventManager.SendEvent(eventWithADate);
+            eventManager.Stop();
 
             _mockLogger.Verify(l => l.Log(LogLevel.ERROR, "Event data found to be invalid."),
                 Times.Exactly(2));
@@ -291,8 +300,8 @@ namespace OptimizelySDK.Tests.OdpTests
         {
             _mockApiManager.Setup(a =>
                     a.SendEvents(It.IsAny<string>(), It.IsAny<string>(),
-                        It.IsAny<List<OdpEvent>>())).
-                ReturnsAsync(false);
+                        It.IsAny<List<OdpEvent>>()))
+                .ReturnsAsync(false);
             var eventManager =
                 new OdpEventManager(_odpConfig, _mockApiManager.Object, _mockLogger.Object, 10, 10,
                     250);
@@ -300,7 +309,7 @@ namespace OptimizelySDK.Tests.OdpTests
             eventManager.Start();
             for (int i = 0; i < 25; i++)
             {
-                eventManager.SendEvent(makeEvent(i));
+                eventManager.SendEvent(MakeEvent(i));
             }
 
             Thread.Sleep(1500);
@@ -319,8 +328,8 @@ namespace OptimizelySDK.Tests.OdpTests
             var eventCollector = new List<List<OdpEvent>>();
             _mockApiManager.Setup(a =>
                     a.SendEvents(Capture.In(apiKeyCollector), Capture.In(apiHostCollector),
-                        Capture.In(eventCollector))).
-                ReturnsAsync(false);
+                        Capture.In(eventCollector)))
+                .ReturnsAsync(false);
             var eventManager =
                 new OdpEventManager(_odpConfig, _mockApiManager.Object, _mockLogger.Object, 10, 10,
                     100);
@@ -334,11 +343,9 @@ namespace OptimizelySDK.Tests.OdpTests
             _mockApiManager.Verify(a =>
                 a.SendEvents(It.IsAny<string>(), It.IsAny<string>(),
                     It.IsAny<List<OdpEvent>>()), Times.Once);
-            var collectedApiKey = apiKeyCollector[0];
-            var collectedApiHost = apiHostCollector[0];
+            Assert.AreEqual(API_KEY, apiKeyCollector[0]);
+            Assert.AreEqual(API_HOST, apiHostCollector[0]);
             var collectedEventBatch = eventCollector[0];
-            Assert.AreEqual(API_KEY, collectedApiKey);
-            Assert.AreEqual(API_HOST, collectedApiHost);
             Assert.AreEqual(_testEvents.Count, collectedEventBatch.Count);
             Assert.AreEqual(collectedEventBatch[0].Identifiers, _processedEvents[0].Identifiers);
             Assert.AreEqual(collectedEventBatch[0].Data.Count, _processedEvents[0].Data.Count);
@@ -351,8 +358,8 @@ namespace OptimizelySDK.Tests.OdpTests
         {
             _mockApiManager.Setup(a =>
                     a.SendEvents(It.IsAny<string>(), It.IsAny<string>(),
-                        It.IsAny<List<OdpEvent>>())).
-                ReturnsAsync(true);
+                        It.IsAny<List<OdpEvent>>()))
+                .ReturnsAsync(true);
             var eventManager =
                 new OdpEventManager(_odpConfig, _mockApiManager.Object, _mockLogger.Object, 10, 2,
                     100);
@@ -360,7 +367,7 @@ namespace OptimizelySDK.Tests.OdpTests
             eventManager.Start();
             for (int i = 0; i < 4; i++)
             {
-                eventManager.SendEvent(makeEvent(i));
+                eventManager.SendEvent(MakeEvent(i));
             }
 
             Thread.Sleep(1500);
@@ -372,10 +379,7 @@ namespace OptimizelySDK.Tests.OdpTests
         }
 
         [Test]
-        public void ShouldFlushAllScheduledEventsBeforeStopping()
-        {
-            
-        }
+        public void ShouldFlushAllScheduledEventsBeforeStopping() { }
 
         [Test]
         public void ShouldPrepareCorrectPayloadForRegisterVuid() { }
@@ -386,7 +390,7 @@ namespace OptimizelySDK.Tests.OdpTests
         [Test]
         public void ShouldApplyUpdatedOdpConfigurationWhenAvailable() { }
 
-        private OdpEvent makeEvent(int id) =>
+        private OdpEvent MakeEvent(int id) =>
             new OdpEvent($"test-type-{id}", $"test-action-{id}", new Dictionary<string, string>
             {
                 {

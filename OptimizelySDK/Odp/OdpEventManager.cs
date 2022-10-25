@@ -137,6 +137,19 @@ namespace OptimizelySDK.Odp
 
         public void SendEvent(OdpEvent odpEvent)
         {
+            if (State == ExecutionState.Stopped)
+            {
+                _logger.Log(LogLevel.WARN,
+                    "Failed to Process ODP Event. ODPEventManager is not running.");
+                return;
+            }
+
+            if (!_odpConfig.IsReady())
+            {
+                _logger.Log(LogLevel.DEBUG, "Unable to Process ODP Event. ODPConfig is not ready.");
+                return;
+            }
+            
             if (InvalidDataFound(odpEvent.Data))
             {
                 _logger.Log(LogLevel.ERROR, "Event data found to be invalid.");
@@ -150,19 +163,6 @@ namespace OptimizelySDK.Odp
 
         private void Enqueue(OdpEvent odpEvent)
         {
-            if (State == ExecutionState.Stopped)
-            {
-                _logger.Log(LogLevel.WARN,
-                    "Failed to Process ODP Event. ODPEventManager is not running.");
-                return;
-            }
-
-            if (!_odpConfig.IsReady())
-            {
-                _logger.Log(LogLevel.DEBUG, "Unable to Process ODP Event. ODPConfig is not ready.");
-                return;
-            }
-
             if (_queue.Count >= _queueSize)
             {
                 _logger.Log(LogLevel.WARN,
