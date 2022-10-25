@@ -36,12 +36,12 @@ namespace OptimizelySDK.Odp.Entity
         /// <summary>
         /// Key-value map of user identifiers
         /// </summary>
-        public Dictionary<string, string> Identifiers { get;  }
+        public Dictionary<string, string> Identifiers { get; }
 
         /// <summary>
         /// Event data in a key-value pair format
         /// </summary>
-        public Dictionary<string, object> Data { get; }
+        public Dictionary<string, object> Data { get; set; }
 
         /// <summary>
         /// Event to be sent and stored in the Optimizely Data Platform
@@ -51,7 +51,7 @@ namespace OptimizelySDK.Odp.Entity
         /// <param name="identifiers">Key-value map of user identifiers</param>
         /// <param name="data">Event data in a key-value pair format</param>
         public OdpEvent(string type, string action, Dictionary<string, string> identifiers,
-            Dictionary<string, dynamic> data
+            Dictionary<string, dynamic> data = null
         )
         {
             Type = type;

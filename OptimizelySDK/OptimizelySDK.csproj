@@ -111,7 +111,6 @@
     <Compile Include="Odp\LruCache.cs" />
     <Compile Include="Odp\OdpConfig.cs" />
     <Compile Include="Odp\OdpEventManager.cs" />
-    <Compile Include="Odp\OdpUserKeyType.cs" />
     <Compile Include="Odp\OdpEventApiManager.cs" />
     <Compile Include="OptimizelyDecisions\DecisionMessage.cs" />
     <Compile Include="OptimizelyDecisions\DecisionReasons.cs" />
@@ -160,6 +159,7 @@
     <Compile Include="OptlyConfig\OptimizelyVariable.cs" />
     <Compile Include="OptlyConfig\OptimizelyVariation.cs" />
     <Compile Include="Utils\AttributeMatchTypes.cs" />
+    <Compile Include="Utils\CollectionExtensions.cs" />
     <Compile Include="Utils\ConditionParser.cs" />
     <Compile Include="Utils\DecisionInfoTypes.cs" />
     <Compile Include="Utils\EventTagUtils.cs" />

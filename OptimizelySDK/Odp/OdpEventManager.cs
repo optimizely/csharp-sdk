@@ -122,7 +122,7 @@ namespace OptimizelySDK.Odp
             var identifiers = new Dictionary<string, string>
             {
                 {
-                    OdpUserKeyType.FS_USER_KEY.ToString(), userId
+                    OdpUserKeyType.FS_USER_ID.ToString(), userId
                 },
             };
 
@@ -313,7 +313,7 @@ namespace OptimizelySDK.Odp
                     "data_source_version", Optimizely.SDK_VERSION
                 },
             };
-
+            
             return commonData.MergeInPlace(sourceData);
         }
     }
