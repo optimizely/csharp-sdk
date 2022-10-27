@@ -107,7 +107,6 @@
     <Compile Include="Odp\IOdpEventApiManager.cs" />
     <Compile Include="Odp\IOdpConfig.cs" />
     <Compile Include="Odp\IOdpEventManager.cs" />
-    <Compile Include="Odp\IRestApiManager.cs" />
     <Compile Include="Odp\LruCache.cs" />
     <Compile Include="Odp\OdpConfig.cs" />
     <Compile Include="Odp\OdpEventManager.cs" />

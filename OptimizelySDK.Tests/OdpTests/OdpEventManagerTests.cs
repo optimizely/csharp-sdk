@@ -21,6 +21,7 @@ using OptimizelySDK.Odp;
 using OptimizelySDK.Odp.Entity;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 
 namespace OptimizelySDK.Tests.OdpTests
@@ -133,26 +134,17 @@ namespace OptimizelySDK.Tests.OdpTests
         private OdpConfig _odpConfig;
 
         private Mock<ILogger> _mockLogger;
-        private Mock<IRestApiManager> _mockApiManager;
+        private Mock<IOdpEventApiManager> _mockApiManager;
 
-        [TestFixtureSetUp]
-        public void RunBeforeAll()
+        [SetUp]
+        public void Setup()
         {
             _odpConfig = new OdpConfig(API_KEY, API_HOST, new List<string>());
 
-            _mockApiManager = new Mock<IRestApiManager>();
+            _mockApiManager = new Mock<IOdpEventApiManager>();
 
             _mockLogger = new Mock<ILogger>();
             _mockLogger.Setup(i => i.Log(It.IsAny<LogLevel>(), It.IsAny<string>()));
-            Console.WriteLine("RunBeforeAll");
-        }
-
-        [SetUp]
-        public void RunBeforeEach()
-        {
-            _mockApiManager.ResetCalls();
-            _mockLogger.ResetCalls();
-            Console.WriteLine("RunBeforeEach");
         }
 
         [Test]
@@ -262,8 +254,9 @@ namespace OptimizelySDK.Tests.OdpTests
             Thread.Sleep(500);
             eventManager.Stop();
             var eventsSentToApi = eventsCollector[0];
-            var actualEvent = eventsSentToApi[0];
+            var actualEvent = eventsSentToApi.FirstOrDefault();
 
+            Assert.IsNotNull(actualEvent);
             Assert.AreEqual(expectedEvent.Type, actualEvent.Type);
             Assert.AreEqual(expectedEvent.Action, actualEvent.Action);
             Assert.AreEqual(expectedEvent.Identifiers, actualEvent.Identifiers);
@@ -301,7 +294,7 @@ namespace OptimizelySDK.Tests.OdpTests
             _mockApiManager.Setup(a =>
                     a.SendEvents(It.IsAny<string>(), It.IsAny<string>(),
                         It.IsAny<List<OdpEvent>>()))
-                .ReturnsAsync(false);
+                .Returns(false);
             var eventManager =
                 new OdpEventManager(_odpConfig, _mockApiManager.Object, _mockLogger.Object, 10, 10,
                     250);
@@ -329,7 +322,7 @@ namespace OptimizelySDK.Tests.OdpTests
             _mockApiManager.Setup(a =>
                     a.SendEvents(Capture.In(apiKeyCollector), Capture.In(apiHostCollector),
                         Capture.In(eventCollector)))
-                .ReturnsAsync(false);
+                .Returns(false);
             var eventManager =
                 new OdpEventManager(_odpConfig, _mockApiManager.Object, _mockLogger.Object, 10, 10,
                     100);
@@ -359,7 +352,7 @@ namespace OptimizelySDK.Tests.OdpTests
             _mockApiManager.Setup(a =>
                     a.SendEvents(It.IsAny<string>(), It.IsAny<string>(),
                         It.IsAny<List<OdpEvent>>()))
-                .ReturnsAsync(true);
+                .Returns(true);
             var eventManager =
                 new OdpEventManager(_odpConfig, _mockApiManager.Object, _mockLogger.Object, 10, 2,
                     100);
@@ -379,18 +372,91 @@ namespace OptimizelySDK.Tests.OdpTests
         }
 
         [Test]
-        public void ShouldFlushAllScheduledEventsBeforeStopping() { }
+        public void ShouldFlushAllScheduledEventsBeforeStopping()
+        {
+            var eventManager =
+                new OdpEventManager(_odpConfig, _mockApiManager.Object, _mockLogger.Object, 100,
+                    2, // small batch size
+                    2000); // long flush interval
+
+            eventManager.Start();
+            for (int i = 0; i < 25; i++)
+            {
+                eventManager.SendEvent(MakeEvent(i));
+            }
+
+            // short wait here
+            Thread.Sleep(100);
+            // then stop to get the queue flushed in batches
+            eventManager.Stop();
+
+            _mockLogger.Verify(l => l.Log(LogLevel.DEBUG, "Stop requested."), Times.Once);
+            _mockLogger.Verify(l => l.Log(LogLevel.DEBUG, "Stopped. Queue Count: 0."), Times.Once);
+        }
 
         [Test]
-        public void ShouldPrepareCorrectPayloadForRegisterVuid() { }
+        public void ShouldPrepareCorrectPayloadForRegisterVuid()
+        {
+            var eventsCollector = new List<List<OdpEvent>>();
+            _mockApiManager.Setup(api => api.SendEvents(It.IsAny<string>(), It.IsAny<string>(),
+                Capture.In(eventsCollector)));
+            var eventManager =
+                new OdpEventManager(_odpConfig, _mockApiManager.Object, _mockLogger.Object, 10, 10,
+                    100);
+            const string VUID = "vuid_330e05cad15746d9af8a75b8d10";
+
+            eventManager.Start();
+            eventManager.RegisterVuid(VUID);
+            Thread.Sleep(1000);
+            eventManager.Stop();
+
+            var eventsSentToApi = eventsCollector.FirstOrDefault();
+            var actualEvent = eventsSentToApi?.FirstOrDefault();
+
+            Assert.IsNotNull(actualEvent);
+            Assert.AreEqual(OdpEventManager.TYPE, actualEvent.Type);
+            Assert.AreEqual("client_initialized", actualEvent.Action);
+            Assert.AreEqual(VUID, actualEvent.Identifiers[OdpUserKeyType.VUID.ToString()]);
+            Assert.False(actualEvent.Identifiers.ContainsKey(OdpUserKeyType.FS_USER_ID.ToString()));
+            var eventData = actualEvent.Data;
+            Assert.AreEqual(Guid.NewGuid().ToString().Length, eventData["idempotence_id"].ToString().Length);
+            Assert.AreEqual("sdk", eventData["data_source_type"]);
+            Assert.AreEqual("csharp-sdk", eventData["data_source"]);
+            Assert.IsNotNull(eventData["data_source_version"]);
+        }
 
         [Test]
         public void ShouldPrepareCorrectPayloadForIdentifyUser() { }
 
         [Test]
-        public void ShouldApplyUpdatedOdpConfigurationWhenAvailable() { }
+        public void ShouldApplyUpdatedOdpConfigurationWhenAvailable()
+        {
+            var apiKey = "testing-api-key";
+            var apiKeyCollector = new List<string>();
+            var apiHost = "https://some.other.example.com";
+            var apiHostCollector = new List<string>();
+            var segmentsToCheck = new List<string>
+            {
+                "empty-cart",
+                "1-item-cart",
+            };
+            var segmentsToCheckCollector = new List<List<string>>();
+            var mockOdpConfig = new Mock<IOdpConfig>();
+            mockOdpConfig.Setup(m => m.Update(Capture.In(apiKeyCollector),
+                Capture.In(apiHostCollector), Capture.In(segmentsToCheckCollector)));
+            var differentOdpConfig = new OdpConfig(apiKey, apiHost, segmentsToCheck);
+            var eventManager =
+                new OdpEventManager(mockOdpConfig.Object, _mockApiManager.Object,
+                    _mockLogger.Object);
 
-        private OdpEvent MakeEvent(int id) =>
+            eventManager.UpdateSettings(differentOdpConfig);
+
+            Assert.AreEqual(apiKey, apiKeyCollector[0]);
+            Assert.AreEqual(apiHost, apiHostCollector[0]);
+            Assert.AreEqual(segmentsToCheck, segmentsToCheckCollector[0]);
+        }
+
+        private static OdpEvent MakeEvent(int id) =>
             new OdpEvent($"test-type-{id}", $"test-action-{id}", new Dictionary<string, string>
             {
                 {

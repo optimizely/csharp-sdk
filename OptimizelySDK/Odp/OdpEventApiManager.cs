@@ -113,7 +113,8 @@ namespace OptimizelySDK.Odp
             {
                 _errorHandler.HandleError(ex);
 
-                _logger.Log(LogLevel.ERROR, $"{EVENT_SENDING_FAILURE_MESSAGE} ({Constants.NETWORK_ERROR_REASON})");
+                _logger.Log(LogLevel.ERROR,
+                    $"{EVENT_SENDING_FAILURE_MESSAGE} ({Constants.NETWORK_ERROR_REASON})");
 
                 shouldRetry = true;
             }

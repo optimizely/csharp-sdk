@@ -39,14 +39,14 @@ namespace OptimizelySDK.Odp
         private const int DEFAULT_BATCH_SIZE = 10;
         private const int DEFAULT_FLUSH_INTERVAL_MSECS = 1000;
         private const int DEFAULT_SERVER_QUEUE_SIZE = 10000;
-        private const string TYPE = "fullstack";
+        public const string TYPE = "fullstack";
 
         private ExecutionState State { get; set; } = ExecutionState.Stopped;
 
         private CancellationTokenSource _timeoutToken;
 
         private readonly IOdpConfig _odpConfig;
-        private readonly IRestApiManager _apiManager;
+        private readonly IOdpEventApiManager _odpEventApiManager;
         private readonly ILogger _logger;
         private readonly int _queueSize;
         private readonly int _batchSize;
@@ -65,13 +65,13 @@ namespace OptimizelySDK.Odp
 
         private ConcurrentQueue<OdpEvent> _queue;
 
-        public OdpEventManager(IOdpConfig odpConfig, IRestApiManager apiManager, ILogger logger,
+        public OdpEventManager(IOdpConfig odpConfig, IOdpEventApiManager odpEventApiManager, ILogger logger,
             int queueSize = DEFAULT_SERVER_QUEUE_SIZE, int batchSize = DEFAULT_BATCH_SIZE,
             int flushInterval = DEFAULT_FLUSH_INTERVAL_MSECS
         )
         {
             _odpConfig = odpConfig;
-            _apiManager = apiManager;
+            _odpEventApiManager = odpEventApiManager;
             _logger = logger;
             _queueSize = queueSize;
             _batchSize = batchSize;
@@ -95,13 +95,13 @@ namespace OptimizelySDK.Odp
 
         public void Stop()
         {
-            _logger.Log(LogLevel.DEBUG, "Stop requested");
+            _logger.Log(LogLevel.DEBUG, "Stop requested.");
 
             // process queue with flush
             ProcessQueue(true);
 
             State = ExecutionState.Stopped;
-            _logger.Log(LogLevel.DEBUG, $"Stopped. Queue Count: {_queue.Count}");
+            _logger.Log(LogLevel.DEBUG, $"Stopped. Queue Count: {_queue.Count}.");
         }
 
         public void RegisterVuid(string vuid)
@@ -144,9 +144,8 @@ namespace OptimizelySDK.Odp
                 return;
             }
 
-            if (!_odpConfig.IsReady())
+            if (!IsOdpConfigurationReady())
             {
-                _logger.Log(LogLevel.DEBUG, "Unable to Process ODP Event. ODPConfig is not ready.");
                 return;
             }
             
@@ -231,13 +230,13 @@ namespace OptimizelySDK.Odp
 
             if (batch.Count > 0)
             {
-                Task.Run(async () =>
+                Task.Run(() =>
                 {
                     var shouldRetry = false;
                     var attemptNumber = 0;
                     do
                     {
-                        shouldRetry = await _apiManager.SendEvents(_odpConfig.ApiKey,
+                        shouldRetry = _odpEventApiManager.SendEvents(_odpConfig.ApiKey,
                             _odpConfig.ApiHost, batch);
                         attemptNumber += 1;
                     } while (shouldRetry && attemptNumber < MAX_RETRIES);
