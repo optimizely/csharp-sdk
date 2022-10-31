@@ -28,6 +28,9 @@ namespace OptimizelySDK.Odp
 {
     public class OdpEventManager : IOdpEventManager
     {
+        /// <summary>
+        /// Enumeration of acceptable states of the Event Manager
+        /// </summary>
         private enum ExecutionState
         {
             Stopped = 0,
@@ -41,17 +44,44 @@ namespace OptimizelySDK.Odp
         private const int DEFAULT_SERVER_QUEUE_SIZE = 10000;
         public const string TYPE = "fullstack";
 
+        /// <summary>
+        /// Current state of the event processor
+        /// </summary>
         private ExecutionState State { get; set; } = ExecutionState.Stopped;
 
+        /// <summary>
+        /// Identifier of the currently running timeout
+        /// </summary>
         private CancellationTokenSource _timeoutToken;
 
+        /// <summary>
+        /// ODP configuration settings in used
+        /// </summary>
         private readonly IOdpConfig _odpConfig;
+        /// <summary>
+        /// REST API Manager used to send the events
+        /// </summary>
         private readonly IOdpEventApiManager _odpEventApiManager;
+        /// <summary>
+        /// Handler for recording execution logs
+        /// </summary>
         private readonly ILogger _logger;
+        /// <summary>
+        /// Maximum queue size
+        /// </summary>
         private readonly int _queueSize;
+        /// <summary>
+        /// Maximum number of events to process at once
+        /// </summary>
         private readonly int _batchSize;
+        /// <summary>
+        /// Milliseconds between setTimeout() to process new batches
+        /// </summary>
         private readonly int _flushInterval;
 
+        /// <summary>
+        /// Valid C# types for ODP Data entries 
+        /// </summary>
         private readonly List<string> _validOdpDataTypes = new List<string>()
         {
             "String",
@@ -64,6 +94,9 @@ namespace OptimizelySDK.Odp
             "Guid",
         };
 
+        /// <summary>
+        /// Queue for holding all events to be eventually dispatched
+        /// </summary>
         private ConcurrentQueue<OdpEvent> _queue;
 
         public OdpEventManager(IOdpConfig odpConfig, IOdpEventApiManager odpEventApiManager,
@@ -83,11 +116,18 @@ namespace OptimizelySDK.Odp
             _timeoutToken = new CancellationTokenSource();
         }
 
+        /// <summary>
+        /// Update ODP configuration settings
+        /// </summary>
+        /// <param name="odpConfig">Configuration object containing new values</param>
         public void UpdateSettings(OdpConfig odpConfig)
         {
             _odpConfig.Update(odpConfig.ApiKey, odpConfig.ApiHost, odpConfig.SegmentsToCheck);
         }
 
+        /// <summary>
+        /// Start processing events in the queue
+        /// </summary>
         public void Start()
         {
             State = ExecutionState.Running;
@@ -95,6 +135,9 @@ namespace OptimizelySDK.Odp
             SetNewTimeout();
         }
 
+        /// <summary>
+        /// Drain the queue sending all remaining events in batches then stop processing
+        /// </summary>
         public void Stop()
         {
             _logger.Log(LogLevel.DEBUG, "Stop requested.");
@@ -106,6 +149,10 @@ namespace OptimizelySDK.Odp
             _logger.Log(LogLevel.DEBUG, $"Stopped. Queue Count: {_queue.Count}.");
         }
 
+        /// <summary>
+        /// Register a new visitor user id (VUID) in ODP
+        /// </summary>
+        /// <param name="vuid">Visitor ID to register</param>
         public void RegisterVuid(string vuid)
         {
             var identifiers = new Dictionary<string, string>
@@ -119,6 +166,11 @@ namespace OptimizelySDK.Odp
             SendEvent(odpEvent);
         }
 
+        /// <summary>
+        /// Associate a full-stack userid with an established VUID
+        /// </summary>
+        /// <param name="userId">Full-stack User ID</param>
+        /// <param name="vuid">Visitor User ID</param>
         public void IdentifyUser(string userId, string vuid)
         {
             var identifiers = new Dictionary<string, string>
@@ -137,6 +189,10 @@ namespace OptimizelySDK.Odp
             SendEvent(odpEvent);
         }
 
+        /// <summary>
+        /// Send an event to ODP via dispatch queue
+        /// </summary>
+        /// <param name="odpEvent">ODP Event to forward</param>
         public void SendEvent(OdpEvent odpEvent)
         {
             if (State == ExecutionState.Stopped)
@@ -162,6 +218,10 @@ namespace OptimizelySDK.Odp
             }
         }
 
+        /// <summary>
+        /// Add a new ODP event to the queue
+        /// </summary>
+        /// <param name="odpEvent"></param>
         private void Enqueue(OdpEvent odpEvent)
         {
             if (_queue.Count >= _queueSize)
@@ -176,6 +236,10 @@ namespace OptimizelySDK.Odp
             ProcessQueue();
         }
 
+        /// <summary>
+        /// Process the queue
+        /// </summary>
+        /// <param name="shouldFlush">True if complete flush of queue is needed</param>
         private void ProcessQueue(bool shouldFlush = false)
         {
             if (State != ExecutionState.Running)
@@ -218,6 +282,9 @@ namespace OptimizelySDK.Odp
             SetNewTimeout();
         }
 
+        /// <summary>
+        /// Make a single batch and send it
+        /// </summary>
         private void MakeAndSend1Batch()
         {
             var batch = new List<OdpEvent>(_batchSize);
@@ -247,6 +314,9 @@ namespace OptimizelySDK.Odp
             }
         }
 
+        /// <summary>
+        /// Start a new timer to begin the next flush interval
+        /// </summary>
         private void SetNewTimeout()
         {
             _timeoutToken = new CancellationTokenSource();
@@ -259,12 +329,19 @@ namespace OptimizelySDK.Odp
             }, ct);
         }
 
+        /// <summary>
+        /// Clear the running timer/flush interval
+        /// </summary>
         private void ClearCurrentTimeout()
         {
             _timeoutToken.Cancel();
             _timeoutToken = new CancellationTokenSource();
         }
 
+        /// <summary>
+        /// Determines if the ODP configuration is ready
+        /// </summary>
+        /// <returns>True if required parameters are available otherwise False</returns>
         private bool IsOdpConfigurationReady()
         {
             if (_odpConfig.IsReady())
@@ -279,16 +356,29 @@ namespace OptimizelySDK.Odp
             return false;
         }
 
+        /// <summary>
+        /// Queue count has enough items to send at least one batche
+        /// </summary>
+        /// <returns>True if even batches exist otherwise False</returns>
         private bool QueueHasBatches()
         {
             return QueueContainsItems() && _queue.Count % _batchSize == 0;
         }
 
+        /// <summary>
+        /// Queue contains a items
+        /// </summary>
+        /// <returns>True if count is > 0 otherwise False</returns>
         private bool QueueContainsItems()
         {
             return _queue.Count > 0;
         }
 
+        /// <summary>
+        /// ODP event data has invalid types
+        /// </summary>
+        /// <param name="data">Data to be analyzed</param>
+        /// <returns>True if a type is not a valid type or is not null otherwise False</returns>
         private bool InvalidDataFound(Dictionary<string, dynamic> data)
         {
             return data.Any(item =>
@@ -297,6 +387,11 @@ namespace OptimizelySDK.Odp
             );
         }
 
+        /// <summary>
+        /// Add additional common data including an idempotent ID and execution context to event data
+        /// </summary>
+        /// <param name="sourceData">Existing event data to augment</param>
+        /// <returns>Updated Dictionary with new key-values added</returns>
         private static Dictionary<string, dynamic> AugmentCommonData(
             Dictionary<string, dynamic> sourceData
         )
