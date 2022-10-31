@@ -37,7 +37,7 @@ namespace OptimizelySDK.Tests.AudienceConditionsTests
         private ILogger Logger;
         private Mock<ILogger> MockLogger;
 
-        [OneTimeSetUp]
+        [TestFixtureSetUp]
         public void Initialize()
         {
             TrueConditionMock = new Mock<ICondition>();

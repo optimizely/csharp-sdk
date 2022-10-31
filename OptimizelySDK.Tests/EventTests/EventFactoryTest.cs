@@ -34,7 +34,7 @@ namespace OptimizelySDK.Tests.EventTests
         private ProjectConfig Config;
         private ILogger Logger;
 
-        [OneTimeSetUp]
+        [TestFixtureSetUp]
         public void Setup()
         {
             TestUserId = "testUserId";

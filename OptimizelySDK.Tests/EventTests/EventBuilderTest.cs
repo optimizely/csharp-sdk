@@ -35,7 +35,7 @@ namespace OptimizelySDK.Tests.EventTests
 
         private EventBuilder EventBuilder;
 
-        [OneTimeSetUp]
+        [TestFixtureSetUp]
         public void Setup()
         {
             TestUserId = "testUserId";

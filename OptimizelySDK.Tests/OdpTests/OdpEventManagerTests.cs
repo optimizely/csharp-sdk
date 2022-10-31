@@ -26,7 +26,7 @@ using System.Threading;
 
 namespace OptimizelySDK.Tests.OdpTests
 {
-    [TestFixture, SingleThreaded]
+    [TestFixture]
     public class OdpEventManagerTests
     {
         private const string API_KEY = "N0tReAlAp1K3y";

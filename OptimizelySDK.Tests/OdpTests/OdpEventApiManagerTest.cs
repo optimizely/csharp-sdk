@@ -36,7 +36,7 @@ namespace OptimizelySDK.Tests.OdpTests
         private Mock<IErrorHandler> _mockErrorHandler;
         private Mock<ILogger> _mockLogger;
 
-        [OneTimeSetUp]
+        [TestFixtureSetUp]
         public void Setup()
         {
             _mockErrorHandler = new Mock<IErrorHandler>();

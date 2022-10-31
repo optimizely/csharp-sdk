@@ -29,7 +29,7 @@ namespace OptimizelySDK.Tests.UtilsTests
         JToken AudienceConditions;
         JToken NoOpAudienceConditions;
 
-        [OneTimeSetUp]
+        [TestFixtureSetUp]
         public void Initialize()
         {
             string conditionStr = @"[""and"", [""or"", [""or"", {""name"": ""device_type"", ""type"": ""custom_attribute"", ""value"": ""iPhone"", ""match"": ""substring""}]]]";

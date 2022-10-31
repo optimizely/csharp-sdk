@@ -37,7 +37,7 @@ namespace OptimizelySDK.Tests.EventTests
             return JToken.DeepEquals(jtoken1, jtoken2);
         }
 
-        [OneTimeSetUp]
+        [TestFixtureSetUp]
         public void Setup()
         {
             LogEvent = new LogEvent(
