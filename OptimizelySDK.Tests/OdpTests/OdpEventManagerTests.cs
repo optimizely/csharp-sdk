@@ -26,13 +26,14 @@ using System.Threading;
 
 namespace OptimizelySDK.Tests.OdpTests
 {
-    [TestFixture]
+    [TestFixture, SingleThreaded]
     public class OdpEventManagerTests
     {
         private const string API_KEY = "N0tReAlAp1K3y";
         private const string API_HOST = "https://odp-events.example.com";
         private const string MOCK_IDEMPOTENCE_ID = "7d2fc936-8e3b-4e46-aff1-6ccc6fcd1394";
         private const string FS_USER_ID = "fs_user_id";
+        private const string VUID = "vuid_330e05cad15746d9af8a75b8d10";
 
         private readonly List<OdpEvent> _testEvents = new List<OdpEvent>
         {
@@ -172,12 +173,13 @@ namespace OptimizelySDK.Tests.OdpTests
                     _mockLogger.Object);
 
             eventManager.Start();
-            eventManager.SendEvent(_testEvents[0]);
-            eventManager.Stop();
+            eventManager.SendEvent(_testEvents[0]); // Warning on enqueue
+            eventManager.Stop(); // Warning on final flush during stop
 
             _mockLogger.Verify(
-                l => l.Log(LogLevel.DEBUG, "Unable to Process ODP Event. ODPConfig is not ready."),
-                Times.Once);
+                l => l.Log(LogLevel.WARN,
+                    "Unable to Process ODP Event. ODPConfig not ready. Discarding events in queue."),
+                Times.Exactly(2));
         }
 
         [Test]
@@ -401,32 +403,57 @@ namespace OptimizelySDK.Tests.OdpTests
             _mockApiManager.Setup(api => api.SendEvents(It.IsAny<string>(), It.IsAny<string>(),
                 Capture.In(eventsCollector)));
             var eventManager =
-                new OdpEventManager(_odpConfig, _mockApiManager.Object, _mockLogger.Object, 10, 10,
-                    100);
-            const string VUID = "vuid_330e05cad15746d9af8a75b8d10";
-
+                new OdpEventManager(_odpConfig, _mockApiManager.Object, _mockLogger.Object, 1, 1);
+        
             eventManager.Start();
             eventManager.RegisterVuid(VUID);
-            Thread.Sleep(1000);
+            Thread.Sleep(2000);
             eventManager.Stop();
-
+        
             var eventsSentToApi = eventsCollector.FirstOrDefault();
             var actualEvent = eventsSentToApi?.FirstOrDefault();
-
             Assert.IsNotNull(actualEvent);
             Assert.AreEqual(OdpEventManager.TYPE, actualEvent.Type);
             Assert.AreEqual("client_initialized", actualEvent.Action);
             Assert.AreEqual(VUID, actualEvent.Identifiers[OdpUserKeyType.VUID.ToString()]);
             Assert.False(actualEvent.Identifiers.ContainsKey(OdpUserKeyType.FS_USER_ID.ToString()));
             var eventData = actualEvent.Data;
-            Assert.AreEqual(Guid.NewGuid().ToString().Length, eventData["idempotence_id"].ToString().Length);
+            Assert.AreEqual(Guid.NewGuid().ToString().Length,
+                eventData["idempotence_id"].ToString().Length);
             Assert.AreEqual("sdk", eventData["data_source_type"]);
             Assert.AreEqual("csharp-sdk", eventData["data_source"]);
             Assert.IsNotNull(eventData["data_source_version"]);
         }
 
         [Test]
-        public void ShouldPrepareCorrectPayloadForIdentifyUser() { }
+        public void ShouldPrepareCorrectPayloadForIdentifyUser()
+        {
+            var eventsCollector = new List<List<OdpEvent>>();
+            _mockApiManager.Setup(api => api.SendEvents(It.IsAny<string>(), It.IsAny<string>(),
+                Capture.In(eventsCollector)));
+            var eventManager =
+                new OdpEventManager(_odpConfig, _mockApiManager.Object, _mockLogger.Object, 1, 1);
+            const string USER_ID = "test_fs_user_id";
+
+            eventManager.Start();
+            eventManager.IdentifyUser(USER_ID, VUID);
+            Thread.Sleep(2000);
+            eventManager.Stop();
+
+            var eventsSentToApi = eventsCollector.FirstOrDefault();
+            var actualEvent = eventsSentToApi?.FirstOrDefault();
+            Assert.IsNotNull(actualEvent);
+            Assert.AreEqual(OdpEventManager.TYPE, actualEvent.Type);
+            Assert.AreEqual("identified", actualEvent.Action);
+            Assert.AreEqual(USER_ID, actualEvent.Identifiers[OdpUserKeyType.FS_USER_ID.ToString()]);
+            Assert.AreEqual(VUID, actualEvent.Identifiers[OdpUserKeyType.VUID.ToString()]);
+            var eventData = actualEvent.Data;
+            Assert.AreEqual(Guid.NewGuid().ToString().Length,
+                eventData["idempotence_id"].ToString().Length);
+            Assert.AreEqual("sdk", eventData["data_source_type"]);
+            Assert.AreEqual("csharp-sdk", eventData["data_source"]);
+            Assert.IsNotNull(eventData["data_source_version"]);
+        }
 
         [Test]
         public void ShouldApplyUpdatedOdpConfigurationWhenAvailable()

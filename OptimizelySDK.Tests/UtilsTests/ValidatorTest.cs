@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Logger;
 using OptimizelySDK.Utils;
@@ -30,7 +31,7 @@ namespace OptimizelySDK.Tests.UtilsTests
         private IErrorHandler ErrorHandler;
         private ProjectConfig Config;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Setup()
         {
             Logger = new DefaultLogger();

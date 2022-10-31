@@ -61,11 +61,13 @@ namespace OptimizelySDK.Odp
             "Char",
             "Double",
             "Boolean",
+            "Guid",
         };
 
         private ConcurrentQueue<OdpEvent> _queue;
 
-        public OdpEventManager(IOdpConfig odpConfig, IOdpEventApiManager odpEventApiManager, ILogger logger,
+        public OdpEventManager(IOdpConfig odpConfig, IOdpEventApiManager odpEventApiManager,
+            ILogger logger,
             int queueSize = DEFAULT_SERVER_QUEUE_SIZE, int batchSize = DEFAULT_BATCH_SIZE,
             int flushInterval = DEFAULT_FLUSH_INTERVAL_MSECS
         )
@@ -89,7 +91,7 @@ namespace OptimizelySDK.Odp
         public void Start()
         {
             State = ExecutionState.Running;
-            
+
             SetNewTimeout();
         }
 
@@ -148,7 +150,7 @@ namespace OptimizelySDK.Odp
             {
                 return;
             }
-            
+
             if (InvalidDataFound(odpEvent.Data))
             {
                 _logger.Log(LogLevel.ERROR, "Event data found to be invalid.");
@@ -176,8 +178,6 @@ namespace OptimizelySDK.Odp
 
         private void ProcessQueue(bool shouldFlush = false)
         {
-            _logger.Log(LogLevel.DEBUG,
-                $"Processing Queue {(shouldFlush ? "(flush)" : string.Empty)}");
             if (State != ExecutionState.Running)
             {
                 return;
@@ -187,6 +187,9 @@ namespace OptimizelySDK.Odp
             {
                 return;
             }
+            
+            _logger.Log(LogLevel.DEBUG,
+                $"Processing Queue {(shouldFlush ? "(flush)" : string.Empty)}");
 
             if (shouldFlush)
             {
@@ -269,7 +272,8 @@ namespace OptimizelySDK.Odp
                 return true;
             }
 
-            _logger.Log(LogLevel.WARN, "ODPConfig not ready. Discarding events in queue.");
+            _logger.Log(LogLevel.WARN,
+                "Unable to Process ODP Event. ODPConfig not ready. Discarding events in queue.");
             _queue = new ConcurrentQueue<OdpEvent>();
 
             return false;
@@ -312,7 +316,7 @@ namespace OptimizelySDK.Odp
                     "data_source_version", Optimizely.SDK_VERSION
                 },
             };
-            
+
             return commonData.MergeInPlace(sourceData);
         }
     }

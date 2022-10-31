@@ -1,6 +1,6 @@
-﻿/**
+﻿/*
  *
- *    Copyright 2019-2020, Optimizely and contributors
+ *    Copyright 2019-2020, 2022 Optimizely and contributors
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -17,11 +17,9 @@
 
 using System;
 using System.Collections.Generic;
-using Moq;
 using NUnit.Framework;
 using OptimizelySDK.Config;
 using OptimizelySDK.Entity;
-using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Event;
 using OptimizelySDK.Logger;
 using OptimizelySDK.Utils;
@@ -36,7 +34,7 @@ namespace OptimizelySDK.Tests.EventTests
         private ProjectConfig Config;
         private ILogger Logger;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Setup()
         {
             TestUserId = "testUserId";
