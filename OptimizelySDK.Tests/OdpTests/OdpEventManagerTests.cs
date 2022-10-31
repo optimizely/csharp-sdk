@@ -299,15 +299,14 @@ namespace OptimizelySDK.Tests.OdpTests
                 .Returns(false);
             var eventManager =
                 new OdpEventManager(_odpConfig, _mockApiManager.Object, _mockLogger.Object, 10, 10,
-                    250);
+                    100);
 
             eventManager.Start();
             for (int i = 0; i < 25; i++)
             {
                 eventManager.SendEvent(MakeEvent(i));
             }
-
-            Thread.Sleep(1500);
+            Thread.Sleep(3000);
             eventManager.Stop();
 
             _mockApiManager.Verify(a =>
@@ -331,7 +330,7 @@ namespace OptimizelySDK.Tests.OdpTests
 
             eventManager.Start();
             _testEvents.ForEach(e => eventManager.SendEvent(e));
-            Thread.Sleep(1000);
+            Thread.Sleep(3000);
             eventManager.Stop();
 
             // sending 1 batch of 2 events after flushInterval since batchSize is 10
@@ -365,7 +364,7 @@ namespace OptimizelySDK.Tests.OdpTests
                 eventManager.SendEvent(MakeEvent(i));
             }
 
-            Thread.Sleep(1500);
+            Thread.Sleep(3000);
 
             // retry 3x (default) for 2 batches or 6 calls to attempt to process
             _mockApiManager.Verify(
@@ -407,7 +406,7 @@ namespace OptimizelySDK.Tests.OdpTests
         
             eventManager.Start();
             eventManager.RegisterVuid(VUID);
-            Thread.Sleep(2000);
+            Thread.Sleep(3000);
             eventManager.Stop();
         
             var eventsSentToApi = eventsCollector.FirstOrDefault();
@@ -437,7 +436,7 @@ namespace OptimizelySDK.Tests.OdpTests
 
             eventManager.Start();
             eventManager.IdentifyUser(USER_ID, VUID);
-            Thread.Sleep(2000);
+            Thread.Sleep(3000);
             eventManager.Stop();
 
             var eventsSentToApi = eventsCollector.FirstOrDefault();
