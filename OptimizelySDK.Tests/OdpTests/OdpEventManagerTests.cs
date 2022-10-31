@@ -255,9 +255,9 @@ namespace OptimizelySDK.Tests.OdpTests
             eventManager.SendEvent(_testEvents[0]);
             Thread.Sleep(500);
             eventManager.Stop();
-            var eventsSentToApi = eventsCollector[0];
-            var actualEvent = eventsSentToApi.FirstOrDefault();
-
+            
+            var eventsSentToApi = eventsCollector.FirstOrDefault();
+            var actualEvent = eventsSentToApi?.FirstOrDefault();
             Assert.IsNotNull(actualEvent);
             Assert.AreEqual(expectedEvent.Type, actualEvent.Type);
             Assert.AreEqual(expectedEvent.Action, actualEvent.Action);
@@ -309,6 +309,7 @@ namespace OptimizelySDK.Tests.OdpTests
             Thread.Sleep(4000);
             eventManager.Stop();
 
+            // Batch #1 & #2 with 10 in each should send then Batch #3 of 5 should send at flush interval
             _mockApiManager.Verify(a =>
                 a.SendEvents(It.IsAny<string>(), It.IsAny<string>(),
                     It.IsAny<List<OdpEvent>>()), Times.Exactly(3));
