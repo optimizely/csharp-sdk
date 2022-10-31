@@ -1,6 +1,6 @@
-﻿/*
+﻿/**
  *
- *    Copyright 2017, 2022 Optimizely and contributors
+ *    Copyright 2017, Optimizely and contributors
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -14,11 +14,14 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-
+using System;
+using System.Collections.Generic;
 using Moq;
 using OptimizelySDK.Logger;
 using OptimizelySDK.ErrorHandler;
+using OptimizelySDK.Entity;
 using NUnit.Framework;
+using OptimizelySDK.Bucketing;
 using OptimizelySDK.Exceptions;
 
 namespace OptimizelySDK.Tests
@@ -39,12 +42,11 @@ namespace OptimizelySDK.Tests
         {
             DefaultErrorHandler = new DefaultErrorHandler(LoggerMock.Object, false);
             string testingException = "Testing exception";
-
             try
             {
-                throw new OptimizelyException(testingException);
+                throw new OptimizelyException("Testing exception");
             }
-            catch (OptimizelyException ex)
+            catch(OptimizelyException ex)
             {
                 DefaultErrorHandler.HandleError(ex);
             }
@@ -53,22 +55,23 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
+        [ExpectedException]
         public void TestErrorHandlerMessageWithThrowException()
         {
             DefaultErrorHandler = new DefaultErrorHandler(LoggerMock.Object, true);
             string testingException = "Testing and throwing exception";
-
             try
             {
-                throw new OptimizelyException(testingException);
+                throw new OptimizelyException("Testing exception");
             }
             catch (OptimizelyException ex)
             {
                 //have to throw exception. 
-                Assert.Throws<OptimizelyException>(() => DefaultErrorHandler.HandleError(ex));
+                DefaultErrorHandler.HandleError(ex);
             }
 
             LoggerMock.Verify(log => log.Log(LogLevel.ERROR, testingException), Times.Once);
         }
+
     }
 }
