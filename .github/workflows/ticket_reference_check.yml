@@ -6,6 +6,7 @@ on:
 
 jobs:
   jira_ticket_reference_check:
+    name: Jira Ticket Reference Check
     runs-on: ubuntu-latest
     steps:
       - name: Check for Jira ticket reference
