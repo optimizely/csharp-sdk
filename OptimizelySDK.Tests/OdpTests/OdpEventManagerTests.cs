@@ -33,7 +33,6 @@ namespace OptimizelySDK.Tests.OdpTests
         private const string API_HOST = "https://odp-events.example.com";
         private const string MOCK_IDEMPOTENCE_ID = "7d2fc936-8e3b-4e46-aff1-6ccc6fcd1394";
         private const string FS_USER_ID = "fs_user_id";
-        private const string VUID = "vuid_330e05cad15746d9af8a75b8d10";
 
         private readonly List<OdpEvent> _testEvents = new List<OdpEvent>
         {
@@ -160,7 +159,7 @@ namespace OptimizelySDK.Tests.OdpTests
             // ...we should get a notice after trying to send an event
             _mockLogger.Verify(
                 l => l.Log(LogLevel.WARN,
-                    "Failed to Process ODP Event. ODPEventManager is not running."), Times.Once);
+                    "ODP is not enabled."), Times.Once);
         }
 
         [Test]
@@ -177,8 +176,8 @@ namespace OptimizelySDK.Tests.OdpTests
             eventManager.Stop(); // Warning on final flush during stop
 
             _mockLogger.Verify(
-                l => l.Log(LogLevel.WARN,
-                    "Unable to Process ODP Event. ODPConfig not ready. Discarding events in queue."),
+                l => l.Log(LogLevel.DEBUG,
+                    "ODP is not integrated."),
                 Times.Exactly(2));
         }
 
@@ -220,7 +219,7 @@ namespace OptimizelySDK.Tests.OdpTests
             eventManager.SendEvent(eventWithADate);
             eventManager.Stop();
 
-            _mockLogger.Verify(l => l.Log(LogLevel.ERROR, "Event data found to be invalid."),
+            _mockLogger.Verify(l => l.Log(LogLevel.ERROR, "ODP data is not valid."),
                 Times.Exactly(2));
         }
 
@@ -236,7 +235,7 @@ namespace OptimizelySDK.Tests.OdpTests
 
             _mockLogger.Verify(
                 l => l.Log(LogLevel.WARN,
-                    "Failed to Process ODP Event. Event Queue full. queueSize = 1."),
+                    "ODP event send failed (queueSize = 1)."),
                 Times.Once);
         }
 
@@ -405,37 +404,6 @@ namespace OptimizelySDK.Tests.OdpTests
         }
 
         [Test]
-        public void ShouldPrepareCorrectPayloadForRegisterVuid()
-        {
-            var cde = new CountdownEvent(1);
-            var eventsCollector = new List<List<OdpEvent>>();
-            _mockApiManager.Setup(api => api.SendEvents(It.IsAny<string>(), It.IsAny<string>(),
-                    Capture.In(eventsCollector)))
-                .Callback(() => cde.Signal());
-            var eventManager =
-                new OdpEventManager(_odpConfig, _mockApiManager.Object, _mockLogger.Object, 1, 1);
-
-            eventManager.Start();
-            eventManager.RegisterVuid(VUID);
-            cde.Wait();
-            eventManager.Stop();
-
-            var eventsSentToApi = eventsCollector.FirstOrDefault();
-            var actualEvent = eventsSentToApi?.FirstOrDefault();
-            Assert.IsNotNull(actualEvent);
-            Assert.AreEqual(OdpEventManager.TYPE, actualEvent.Type);
-            Assert.AreEqual("client_initialized", actualEvent.Action);
-            Assert.AreEqual(VUID, actualEvent.Identifiers[OdpUserKeyType.VUID.ToString()]);
-            Assert.False(actualEvent.Identifiers.ContainsKey(OdpUserKeyType.FS_USER_ID.ToString()));
-            var eventData = actualEvent.Data;
-            Assert.AreEqual(Guid.NewGuid().ToString().Length,
-                eventData["idempotence_id"].ToString().Length);
-            Assert.AreEqual("sdk", eventData["data_source_type"]);
-            Assert.AreEqual("csharp-sdk", eventData["data_source"]);
-            Assert.IsNotNull(eventData["data_source_version"]);
-        }
-
-        [Test]
         public void ShouldPrepareCorrectPayloadForIdentifyUser()
         {
             var cde = new CountdownEvent(1);
@@ -448,7 +416,7 @@ namespace OptimizelySDK.Tests.OdpTests
             const string USER_ID = "test_fs_user_id";
 
             eventManager.Start();
-            eventManager.IdentifyUser(USER_ID, VUID);
+            eventManager.IdentifyUser(USER_ID);
             cde.Wait();
             eventManager.Stop();
 
@@ -458,7 +426,6 @@ namespace OptimizelySDK.Tests.OdpTests
             Assert.AreEqual(OdpEventManager.TYPE, actualEvent.Type);
             Assert.AreEqual("identified", actualEvent.Action);
             Assert.AreEqual(USER_ID, actualEvent.Identifiers[OdpUserKeyType.FS_USER_ID.ToString()]);
-            Assert.AreEqual(VUID, actualEvent.Identifiers[OdpUserKeyType.VUID.ToString()]);
             var eventData = actualEvent.Data;
             Assert.AreEqual(Guid.NewGuid().ToString().Length,
                 eventData["idempotence_id"].ToString().Length);

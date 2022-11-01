@@ -37,17 +37,10 @@ namespace OptimizelySDK.Odp
         void Stop();
 
         /// <summary>
-        /// Register a new visitor user id (VUID) in ODP
-        /// </summary>
-        /// <param name="vuid">Visitor ID to register</param>
-        void RegisterVuid(string vuid);
-
-        /// <summary>
         /// Associate a full-stack userid with an established VUID
         /// </summary>
         /// <param name="userId">Full-stack User ID</param>
-        /// <param name="vuid">Visitor User ID</param>
-        void IdentifyUser(string userId, string vuid);
+        void IdentifyUser(string userId);
 
         /// <summary>
         /// Send an event to ODP via dispatch queue

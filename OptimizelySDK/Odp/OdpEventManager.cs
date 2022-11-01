@@ -58,22 +58,27 @@ namespace OptimizelySDK.Odp
         /// ODP configuration settings in used
         /// </summary>
         private readonly IOdpConfig _odpConfig;
+
         /// <summary>
         /// REST API Manager used to send the events
         /// </summary>
         private readonly IOdpEventApiManager _odpEventApiManager;
+
         /// <summary>
         /// Handler for recording execution logs
         /// </summary>
         private readonly ILogger _logger;
+
         /// <summary>
         /// Maximum queue size
         /// </summary>
         private readonly int _queueSize;
+
         /// <summary>
         /// Maximum number of events to process at once
         /// </summary>
         private readonly int _batchSize;
+
         /// <summary>
         /// Milliseconds between setTimeout() to process new batches
         /// </summary>
@@ -84,12 +89,14 @@ namespace OptimizelySDK.Odp
         /// </summary>
         private readonly List<string> _validOdpDataTypes = new List<string>()
         {
+            "Char",
             "String",
             "Int16",
             "Int32",
-            "Decimal",
-            "Char",
+            "Int64",
+            "Single",
             "Double",
+            "Decimal",
             "Boolean",
             "Guid",
         };
@@ -150,28 +157,10 @@ namespace OptimizelySDK.Odp
         }
 
         /// <summary>
-        /// Register a new visitor user id (VUID) in ODP
-        /// </summary>
-        /// <param name="vuid">Visitor ID to register</param>
-        public void RegisterVuid(string vuid)
-        {
-            var identifiers = new Dictionary<string, string>
-            {
-                {
-                    OdpUserKeyType.VUID.ToString(), vuid
-                },
-            };
-
-            var odpEvent = new OdpEvent(TYPE, "client_initialized", identifiers);
-            SendEvent(odpEvent);
-        }
-
-        /// <summary>
         /// Associate a full-stack userid with an established VUID
         /// </summary>
         /// <param name="userId">Full-stack User ID</param>
-        /// <param name="vuid">Visitor User ID</param>
-        public void IdentifyUser(string userId, string vuid)
+        public void IdentifyUser(string userId)
         {
             var identifiers = new Dictionary<string, string>
             {
@@ -179,11 +168,6 @@ namespace OptimizelySDK.Odp
                     OdpUserKeyType.FS_USER_ID.ToString(), userId
                 },
             };
-
-            if (!string.IsNullOrWhiteSpace(vuid))
-            {
-                identifiers.Add(OdpUserKeyType.VUID.ToString(), vuid);
-            }
 
             var odpEvent = new OdpEvent(TYPE, "identified", identifiers);
             SendEvent(odpEvent);
@@ -198,7 +182,7 @@ namespace OptimizelySDK.Odp
             if (State == ExecutionState.Stopped)
             {
                 _logger.Log(LogLevel.WARN,
-                    "Failed to Process ODP Event. ODPEventManager is not running.");
+                    "ODP is not enabled.");
                 return;
             }
 
@@ -209,13 +193,12 @@ namespace OptimizelySDK.Odp
 
             if (InvalidDataFound(odpEvent.Data))
             {
-                _logger.Log(LogLevel.ERROR, "Event data found to be invalid.");
+                _logger.Log(LogLevel.ERROR, "ODP data is not valid.");
+                return;
             }
-            else
-            {
-                odpEvent.Data = AugmentCommonData(odpEvent.Data);
-                Enqueue(odpEvent);
-            }
+
+            odpEvent.Data = AugmentCommonData(odpEvent.Data);
+            Enqueue(odpEvent);
         }
 
         /// <summary>
@@ -227,7 +210,7 @@ namespace OptimizelySDK.Odp
             if (_queue.Count >= _queueSize)
             {
                 _logger.Log(LogLevel.WARN,
-                    $"Failed to Process ODP Event. Event Queue full. queueSize = {_queue.Count}.");
+                    $"ODP event send failed (queueSize = {_queue.Count}).");
                 return;
             }
 
@@ -251,7 +234,7 @@ namespace OptimizelySDK.Odp
             {
                 return;
             }
-            
+
             _logger.Log(LogLevel.DEBUG,
                 $"Processing Queue {(shouldFlush ? "(flush)" : string.Empty)}");
 
@@ -349,8 +332,8 @@ namespace OptimizelySDK.Odp
                 return true;
             }
 
-            _logger.Log(LogLevel.WARN,
-                "Unable to Process ODP Event. ODPConfig not ready. Discarding events in queue.");
+            _logger.Log(LogLevel.DEBUG,
+                "ODP is not integrated.");
             _queue = new ConcurrentQueue<OdpEvent>();
 
             return false;
@@ -412,7 +395,7 @@ namespace OptimizelySDK.Odp
                 },
             };
 
-            return commonData.MergeInPlace(sourceData);
+            return sourceData.MergeInPlace(commonData);
         }
     }
 }
