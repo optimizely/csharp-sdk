@@ -24,12 +24,12 @@ namespace OptimizelySDK.Odp
         /// Public API key for the ODP account from which the audience segments will be fetched (optional).
         /// </summary>
         public string ApiKey { get; private set; }
-        
+
         /// <summary>
         /// Host of ODP audience segments API.
         /// </summary>
         public string ApiHost { get; private set; }
-        
+
         /// <summary>
         /// All ODP segments used in the current datafile (associated with apiHost/apiKey).
         /// </summary>
