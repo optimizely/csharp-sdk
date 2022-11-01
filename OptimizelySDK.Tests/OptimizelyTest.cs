@@ -118,7 +118,7 @@ namespace OptimizelySDK.Tests
             GroupVariation = Config.GetVariationFromKey("group_experiment_1", "group_exp_1_var_2");
         }
 
-        [TearDown]
+        [TestFixtureTearDown]
         public void Cleanup()
         {
             LoggerMock = null;

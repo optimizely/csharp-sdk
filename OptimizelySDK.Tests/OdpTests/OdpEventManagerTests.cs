@@ -173,12 +173,11 @@ namespace OptimizelySDK.Tests.OdpTests
 
             eventManager.Start();
             eventManager.SendEvent(_testEvents[0]); // Warning on enqueue
-            eventManager.Stop(); // Warning on final flush during stop
 
             _mockLogger.Verify(
                 l => l.Log(LogLevel.DEBUG,
                     "ODP is not integrated."),
-                Times.Exactly(2));
+                Times.Once);
         }
 
         [Test]
@@ -217,7 +216,6 @@ namespace OptimizelySDK.Tests.OdpTests
             eventManager.Start();
             eventManager.SendEvent(eventWithAnArray);
             eventManager.SendEvent(eventWithADate);
-            eventManager.Stop();
 
             _mockLogger.Verify(l => l.Log(LogLevel.ERROR, "ODP data is not valid."),
                 Times.Exactly(2));
@@ -231,7 +229,6 @@ namespace OptimizelySDK.Tests.OdpTests
 
             eventManager.Start();
             _testEvents.ForEach(e => eventManager.SendEvent(e));
-            eventManager.Stop();
 
             _mockLogger.Verify(
                 l => l.Log(LogLevel.WARN,
@@ -255,7 +252,6 @@ namespace OptimizelySDK.Tests.OdpTests
             eventManager.Start();
             eventManager.SendEvent(_testEvents[0]);
             cde.Wait();
-            eventManager.Stop();
 
             var eventsSentToApi = eventsCollector.FirstOrDefault();
             var actualEvent = eventsSentToApi?.FirstOrDefault();
@@ -311,7 +307,6 @@ namespace OptimizelySDK.Tests.OdpTests
             }
 
             cde.Wait();
-            eventManager.Stop();
 
             // Batch #1 & #2 with 10 in each should send then Batch #3 of 5 should send at flush interval
             _mockApiManager.Verify(a =>
@@ -337,9 +332,8 @@ namespace OptimizelySDK.Tests.OdpTests
             eventManager.Start();
             _testEvents.ForEach(e => eventManager.SendEvent(e));
             cde.Wait();
-            eventManager.Stop();
 
-            // sending 1 batch of 2 events after flushInterval since batchSize is 10
+            // sending 1 batch of 2 events after 1s flush interval since batchSize is 10
             _mockApiManager.Verify(a =>
                 a.SendEvents(It.IsAny<string>(), It.IsAny<string>(),
                     It.IsAny<List<OdpEvent>>()), Times.Once);
@@ -418,7 +412,6 @@ namespace OptimizelySDK.Tests.OdpTests
             eventManager.Start();
             eventManager.IdentifyUser(USER_ID);
             cde.Wait();
-            eventManager.Stop();
 
             var eventsSentToApi = eventsCollector.FirstOrDefault();
             var actualEvent = eventsSentToApi?.FirstOrDefault();
