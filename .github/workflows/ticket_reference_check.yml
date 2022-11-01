@@ -5,10 +5,8 @@ on:
      types: [opened, edited, reopened, synchronize]
 
 jobs:
-
   jira_ticket_reference_check:
     runs-on: ubuntu-latest
-
     steps:
       - name: Check for Jira ticket reference
         uses: optimizely/github-action-ticket-reference-checker-public@master
