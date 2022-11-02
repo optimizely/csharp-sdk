@@ -47,7 +47,7 @@ jobs:
 
   unit_test:
     name: Build and Run Unit Tests
-    runs-on: windows-2022
+    runs-on: windows-2019
     env:
       REPO_SLUG: ${{ github.repository }}
       BUILD_NUMBER: ${{ github.run_id }}
