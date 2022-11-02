@@ -58,18 +58,12 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v1
-        with:
-          dotnet-version: 4.5.x
       - name: Add msbuild to PATH
         uses: microsoft/setup-msbuild@v1
       - name: Setup NuGet
         uses: NuGet/setup-nuget@v1
-      - name: Restore SDK NuGet packages
-        run: nuget restore ./OptimizelySDK/OptimizelySDK.csproj
-      - name: Restore Tests NuGet packages
-        run: nuget restore ./OptimizelySDK.Tests/OptimizelySDK.Tests.csproj
+      - name: Restore NuGet packages
+        run: nuget restore ./OptimizelySDK.Travis.sln
       - name: Build solution
         run: msbuild /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=$(pwd)/keypair.snk /p:Configuration=Release ./OptimizelySDK.Travis.sln
       - name: Install NUnit.ConsoleRunner
