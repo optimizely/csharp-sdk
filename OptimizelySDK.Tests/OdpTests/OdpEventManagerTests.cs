@@ -23,6 +23,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace OptimizelySDK.Tests.OdpTests
 {
@@ -281,7 +282,7 @@ namespace OptimizelySDK.Tests.OdpTests
 
             eventManager.Start();
             // do not add events to the queue, but allow for...
-            Thread.Sleep(400); // at least 3 flush intervals executions (giving a little longer)
+            Task.Delay(400).Wait(); // at least 3 flush intervals executions (giving a little longer)
 
             _mockLogger.Verify(l => l.Log(LogLevel.DEBUG, "Processing Queue (flush)"),
                 Times.AtLeast(3));
@@ -290,11 +291,9 @@ namespace OptimizelySDK.Tests.OdpTests
         [Test]
         public void ShouldDispatchEventsInCorrectNumberOfBatches()
         {
-            //var cde = new CountdownEvent(3);
             _mockApiManager.Setup(a =>
                     a.SendEvents(It.IsAny<string>(), It.IsAny<string>(),
                         It.IsAny<List<OdpEvent>>()))
-                //.Callback(() => cde.Signal())
                 .Returns(false);
             var eventManager =
                 new OdpEventManager(_odpConfig, _mockApiManager.Object, _mockLogger.Object, 10, 10,
@@ -305,14 +304,10 @@ namespace OptimizelySDK.Tests.OdpTests
             {
                 eventManager.SendEvent(MakeEvent(i));
             }
+            Task.Delay(1000).Wait();
 
-            System.Threading.Tasks.Task.Delay(200).Wait();
-            _mockApiManager.Verify(a =>
-                a.SendEvents(It.IsAny<string>(), It.IsAny<string>(),
-                    It.IsAny<List<OdpEvent>>()), Times.Exactly(3));
-            //cde.Wait();
-            System.Threading.Tasks.Task.Delay(800).Wait();
-            // Batch #1 & #2 with 10 in each should send then Batch #3 of 5 should send at flush interval
+            // Batch #1 & #2 with 10 in each should send immediately then...
+            // Batch #3 of 5 should send after flush interval
             _mockApiManager.Verify(a =>
                 a.SendEvents(It.IsAny<string>(), It.IsAny<string>(),
                     It.IsAny<List<OdpEvent>>()), Times.Exactly(3));
@@ -393,7 +388,7 @@ namespace OptimizelySDK.Tests.OdpTests
             }
 
             // short wait here
-            Thread.Sleep(100);
+            Task.Delay(100).Wait();
             // then stop to get the queue flushed in batches
             eventManager.Stop();
 
