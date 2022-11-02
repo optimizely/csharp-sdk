@@ -47,7 +47,7 @@ jobs:
 
   unit_test:
     name: Build and Run Unit Tests
-    runs-on: windows-2019
+    runs-on: windows-2022
     env:
       REPO_SLUG: ${{ github.repository }}
       BUILD_NUMBER: ${{ github.run_id }}
@@ -69,7 +69,7 @@ jobs:
       - name: Install NUnit.Runners
         run: nuget install NUnit.Runners -Version 2.6.4 -DirectDownload -OutputDirectory .
       - name: Run NUnit tests
-        run: ./NUnit.Runners.2.6.4/tools/nunit-console.exe ./OptimizelySDK.Tests/bin/Release/OptimizelySDK.Tests.dll
+        run: ./NUnit.Runners.2.6.4/tools/nunit-console.exe ./OptimizelySDK.Tests/bin/Release/OptimizelySDK.Tests.dll /framework:net-4.5
       - name: Find and sign all DLLs
         run: |
           sudo find . -path './OptimizelySDK*bin/Release/OptimizelySDK*.dll' -not -regex '.*Tests.*' -print0 | while IFS= read -r -d '' file; do sn -R $file ./keypair.snk; done
