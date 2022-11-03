@@ -291,9 +291,11 @@ namespace OptimizelySDK.Tests.OdpTests
         [Test]
         public void ShouldDispatchEventsInCorrectNumberOfBatches()
         {
+            var cde = new CountdownEvent(3);
             _mockApiManager.Setup(a =>
                     a.SendEvents(It.IsAny<string>(), It.IsAny<string>(),
                         It.IsAny<List<OdpEvent>>()))
+                .Callback(()=>cde.Signal())
                 .Returns(false);
             var eventManager =
                 new OdpEventManager(_odpConfig, _mockApiManager.Object, _mockLogger.Object, 10, 10,
@@ -304,7 +306,8 @@ namespace OptimizelySDK.Tests.OdpTests
             {
                 eventManager.SendEvent(MakeEvent(i));
             }
-            Task.Delay(1000).Wait();
+
+            cde.Wait();
 
             // Batch #1 & #2 with 10 in each should send immediately then...
             // Batch #3 of 5 should send after flush interval
