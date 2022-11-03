@@ -47,7 +47,7 @@ jobs:
 
   unit_test:
     name: Build and Run Unit Tests
-    runs-on: windows-2019
+    runs-on: windows-2019 # required version for Framework 4.0
     env:
       REPO_SLUG: ${{ github.repository }}
       BUILD_NUMBER: ${{ github.run_id }}
@@ -66,10 +66,10 @@ jobs:
         run: nuget restore ./OptimizelySDK.Travis.sln
       - name: Build solution
         run: msbuild /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=$(pwd)/keypair.snk /p:Configuration=Release ./OptimizelySDK.Travis.sln
-      - name: Install NUnit.Runners
-        run: nuget install NUnit.Runners -Version 2.6.4 -DirectDownload -OutputDirectory .
+      - name: Install NUnit Console
+        run: nuget install NUnit.Console -Version 3.15.2 -DirectDownload -OutputDirectory .
       - name: Run NUnit tests
-        run: ./NUnit.Runners.2.6.4/tools/nunit-console.exe ./OptimizelySDK.Tests/bin/Release/OptimizelySDK.Tests.dll /framework:net-4.5
+        run: ./NUnit.ConsoleRunner.3.15.2\tools\nunit3-console.exe ./OptimizelySDK.Tests/bin/Release/OptimizelySDK.Tests.dll
       - name: Find and sign all DLLs
         run: |
           sudo find . -path './OptimizelySDK*bin/Release/OptimizelySDK*.dll' -not -regex '.*Tests.*' -print0 | while IFS= read -r -d '' file; do sn -R $file ./keypair.snk; done
