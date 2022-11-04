@@ -19,8 +19,13 @@ namespace OptimizelySDK.Odp
     public enum OdpUserKeyType
     {
         // ReSharper disable InconsistentNaming
-        // ODP expects these names; .ToString() used
+        // ODP expects these names in UPPERCASE; .ToString() used
         VUID = 0,
         FS_USER_ID = 1,
+    }
+    public enum OdpSegmentOption
+    {
+        IgnoreCache = 0,
+        ResetCache = 1,
     }
 }

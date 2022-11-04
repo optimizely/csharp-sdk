@@ -26,11 +26,6 @@ namespace OptimizelySDK.Odp
         where T : class
     {
         /// <summary>
-        /// Default maximum number of elements to store
-        /// </summary>
-        private const int DEFAULT_MAX_SIZE = 10000;
-
-        /// <summary>
         /// The maximum number of elements that should be stored
         /// </summary>
         private readonly int _maxSize;
@@ -66,7 +61,7 @@ namespace OptimizelySDK.Odp
         /// <param name="maxSize">Maximum number of elements to allow in the cache</param>
         /// <param name="itemTimeout">Timeout or time to live for each item</param>
         /// <param name="logger">Implementation used for recording LRU events or errors</param>
-        public LruCache(int maxSize = DEFAULT_MAX_SIZE, TimeSpan? itemTimeout = default,
+        public LruCache(int maxSize = Constants.DEFAULT_MAX_CACHE_SIZE, TimeSpan? itemTimeout = default,
             ILogger logger = null
         )
         {
@@ -76,7 +71,7 @@ namespace OptimizelySDK.Odp
 
             _logger = logger ?? new DefaultLogger();
 
-            _timeout = itemTimeout ?? TimeSpan.FromMinutes(10);
+            _timeout = itemTimeout ?? TimeSpan.FromMinutes(Constants.DEFAULT_CACHE_MINUTES);
             if (_timeout < TimeSpan.Zero)
             {
                 _logger.Log(LogLevel.WARN,

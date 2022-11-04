@@ -42,5 +42,15 @@ namespace OptimizelySDK.Odp
         /// Default message when numeric HTTP status code is not available
         /// </summary>
         public const string NETWORK_ERROR_REASON = "network error";
+        
+        /// <summary>
+        /// Default maximum number of elements to cache
+        /// </summary>
+        public const int DEFAULT_MAX_CACHE_SIZE = 10000;
+        
+        /// <summary>
+        /// Default number of minutes to cache
+        /// </summary>
+        public const int DEFAULT_CACHE_MINUTES = 10;
     }
 }
