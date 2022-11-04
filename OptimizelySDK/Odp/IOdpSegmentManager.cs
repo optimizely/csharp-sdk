@@ -2,10 +2,8 @@
 
 namespace OptimizelySDK.Odp
 {
-    public class IOdpSegmentManager
+    public interface IOdpSegmentManager
     {
-        public List<string> GetQualifiedSegments(string fsUserId,
-            List<OdpSegmentOption> options = null
-        );
+        List<string> GetQualifiedSegments(string fsUserId, List<OdpSegmentOption> options = null);
     }
 }

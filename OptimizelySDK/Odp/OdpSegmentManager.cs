@@ -50,7 +50,7 @@ namespace OptimizelySDK.Odp
             List<string> qualifiedSegments;
             var cacheKey = GetCacheKey(OdpUserKeyType.FS_USER_ID.ToString().ToLower(), fsUserId);
 
-            if (options?.Contains(OdpSegmentOption.ResetCache))
+            if (options.Contains(OdpSegmentOption.ResetCache))
             {
                 _segmentsCache.reset();
             }
@@ -66,11 +66,12 @@ namespace OptimizelySDK.Odp
 
             _logger.Log(LogLevel.DEBUG, "ODP Cache Miss. Making a call to ODP Server.");
 
-            var parser = ResponseJsonParserFactory.getParser();
             var qualifiedSegmentsResponse = _apiManager.FetchSegments(
                 _odpConfig.ApiKey,
                 _odpConfig.ApiHost + Constants.ODP_GRAPHQL_API_ENDPOINT_PATH,
                 OdpUserKeyType.FS_USER_ID, fsUserId, _odpConfig.SegmentsToCheck);
+            
+            var parser = ResponseJsonParserFactory.getParser();
             qualifiedSegments = parser.parseQualifiedSegments(qualifiedSegmentsResponse);
 
             if (qualifiedSegments != null && !options.Contains(OdpSegmentOption.IgnoreCache))
