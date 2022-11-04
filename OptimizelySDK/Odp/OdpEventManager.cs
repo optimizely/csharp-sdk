@@ -50,11 +50,6 @@ namespace OptimizelySDK.Odp
         private ExecutionState State { get; set; } = ExecutionState.Stopped;
 
         /// <summary>
-        /// Identifier of the currently running timeout
-        /// </summary>
-        private CancellationTokenSource _timeoutToken;
-
-        /// <summary>
         /// ODP configuration settings in used
         /// </summary>
         private readonly IOdpConfig _odpConfig;
@@ -75,14 +70,29 @@ namespace OptimizelySDK.Odp
         private readonly int _queueSize;
 
         /// <summary>
+        /// Queue for holding all events to be eventually dispatched
+        /// </summary>
+        private ConcurrentQueue<OdpEvent> _queue;
+
+        /// <summary>
         /// Maximum number of events to process at once
         /// </summary>
         private readonly int _batchSize;
 
         /// <summary>
-        /// Milliseconds between setTimeout() to process new batches
+        /// Milliseconds between processing all events in queue
         /// </summary>
         private readonly int _flushInterval;
+
+        /// <summary>
+        /// Task to regularly flush the queue
+        /// </summary>
+        private readonly Task _flushQueueRegularly;
+
+        /// <summary>
+        /// Identifier to interrupt the flush task
+        /// </summary>
+        private readonly CancellationTokenSource _flushIntervalCancellation;
 
         /// <summary>
         /// Valid C# types for ODP Data entries 
@@ -101,11 +111,6 @@ namespace OptimizelySDK.Odp
             "Guid",
         };
 
-        /// <summary>
-        /// Queue for holding all events to be eventually dispatched
-        /// </summary>
-        private ConcurrentQueue<OdpEvent> _queue;
-
         public OdpEventManager(IOdpConfig odpConfig, IOdpEventApiManager odpEventApiManager,
             ILogger logger,
             int queueSize = DEFAULT_SERVER_QUEUE_SIZE, int batchSize = DEFAULT_BATCH_SIZE,
@@ -120,7 +125,8 @@ namespace OptimizelySDK.Odp
             _flushInterval = flushInterval;
 
             _queue = new ConcurrentQueue<OdpEvent>();
-            _timeoutToken = new CancellationTokenSource();
+            _flushIntervalCancellation = new CancellationTokenSource();
+            _flushQueueRegularly = new Task(RegularlyFlushQueue, _flushIntervalCancellation.Token);
         }
 
         /// <summary>
@@ -137,9 +143,14 @@ namespace OptimizelySDK.Odp
         /// </summary>
         public void Start()
         {
+            if (!IsOdpConfigurationReady())
+            {
+                return;
+            }
+            
             State = ExecutionState.Running;
 
-            SetNewTimeout();
+            _flushQueueRegularly.Start();
         }
 
         /// <summary>
@@ -147,12 +158,25 @@ namespace OptimizelySDK.Odp
         /// </summary>
         public void Stop()
         {
+            if (!IsOdpConfigurationReady())
+            {
+                return;
+            }
+            
+            if (State == ExecutionState.Stopped)
+            {
+                return;
+            }
+            
             _logger.Log(LogLevel.DEBUG, "Stop requested.");
 
-            // process queue with flush
-            ProcessQueue(true);
+            _flushIntervalCancellation.Cancel();
+
+            // one final time
+            FlushQueue();
 
             State = ExecutionState.Stopped;
+
             _logger.Log(LogLevel.DEBUG, $"Stopped. Queue Count: {_queue.Count}.");
         }
 
@@ -162,6 +186,11 @@ namespace OptimizelySDK.Odp
         /// <param name="userId">Full-stack User ID</param>
         public void IdentifyUser(string userId)
         {
+            if (!IsOdpConfigurationReady())
+            {
+                return;
+            }
+            
             var identifiers = new Dictionary<string, string>
             {
                 {
@@ -174,20 +203,19 @@ namespace OptimizelySDK.Odp
         }
 
         /// <summary>
-        /// Send an event to ODP via dispatch queue
+        /// Send an event to ODP
         /// </summary>
         /// <param name="odpEvent">ODP Event to forward</param>
         public void SendEvent(OdpEvent odpEvent)
         {
-            if (State == ExecutionState.Stopped)
-            {
-                _logger.Log(LogLevel.WARN,
-                    "ODP is not enabled.");
-                return;
-            }
-
             if (!IsOdpConfigurationReady())
             {
+                return;
+            }
+            
+            if (State == ExecutionState.Stopped)
+            {
+                _logger.Log(LogLevel.WARN, "ODP is not enabled.");
                 return;
             }
 
@@ -209,8 +237,7 @@ namespace OptimizelySDK.Odp
         {
             if (_queue.Count >= _queueSize)
             {
-                _logger.Log(LogLevel.WARN,
-                    $"ODP event send failed (queueSize = {_queue.Count}).");
+                _logger.Log(LogLevel.WARN, $"ODP event send failed (queueSize = {_queue.Count}).");
                 return;
             }
 
@@ -222,57 +249,58 @@ namespace OptimizelySDK.Odp
         /// <summary>
         /// Process the queue
         /// </summary>
-        /// <param name="shouldFlush">True if complete flush of queue is needed</param>
-        private void ProcessQueue(bool shouldFlush = false)
+        private void ProcessQueue()
         {
             if (State != ExecutionState.Running)
             {
                 return;
             }
 
-            if (!IsOdpConfigurationReady())
+            _logger.Log(LogLevel.DEBUG, $"Processing Queue.");
+
+            State = ExecutionState.Processing;
+            while (QueueHasBatches())
+            {
+                DequeueSendSingleBatch();
+            }
+
+            State = ExecutionState.Running;
+        }
+
+        private void RegularlyFlushQueue()
+        {
+            while (!_flushIntervalCancellation.IsCancellationRequested)
+            {
+                Task.Delay(_flushInterval).ContinueWith(_ => FlushQueue()).Wait();
+            }
+        }
+
+        private void FlushQueue()
+        {
+            if (State != ExecutionState.Running)
             {
                 return;
             }
 
-            _logger.Log(LogLevel.DEBUG,
-                $"Processing Queue {(shouldFlush ? "(flush)" : string.Empty)}");
+            _logger.Log(LogLevel.DEBUG, $"Flushing Queue.");
 
-            if (shouldFlush)
+            State = ExecutionState.Processing;
+            while (QueueContainsItems())
             {
-                ClearCurrentTimeout();
-
-                State = ExecutionState.Processing;
-
-                while (QueueContainsItems())
-                {
-                    MakeAndSend1Batch();
-                }
-            }
-            else if (QueueHasBatches())
-            {
-                ClearCurrentTimeout();
-
-                State = ExecutionState.Processing;
-
-                while (QueueHasBatches())
-                {
-                    MakeAndSend1Batch();
-                }
+                DequeueSendSingleBatch();
             }
 
             State = ExecutionState.Running;
-            SetNewTimeout();
         }
 
         /// <summary>
-        /// Make a single batch and send it
+        /// Dequeue a single batch and send it
         /// </summary>
-        private void MakeAndSend1Batch()
+        private void DequeueSendSingleBatch()
         {
             var batch = new List<OdpEvent>(_batchSize);
 
-            // remove a batch from the queue
+            // dequeue a batch 
             for (int i = 0; i < _batchSize && _queue.Count > 0; i += 1)
             {
                 if (_queue.TryDequeue(out OdpEvent dequeuedOdpEvent))
@@ -285,7 +313,7 @@ namespace OptimizelySDK.Odp
             {
                 Task.Run(() =>
                 {
-                    var shouldRetry = false;
+                    bool shouldRetry;
                     var attemptNumber = 0;
                     do
                     {
@@ -295,30 +323,6 @@ namespace OptimizelySDK.Odp
                     } while (shouldRetry && attemptNumber < MAX_RETRIES);
                 });
             }
-        }
-
-        /// <summary>
-        /// Start a new timer to begin the next flush interval
-        /// </summary>
-        private void SetNewTimeout()
-        {
-            _timeoutToken = new CancellationTokenSource();
-            var ct = _timeoutToken.Token;
-            Task.Run(() =>
-            {
-                Thread.Sleep(_flushInterval);
-                if (!ct.IsCancellationRequested)
-                    ProcessQueue(true);
-            }, ct);
-        }
-
-        /// <summary>
-        /// Clear the running timer/flush interval
-        /// </summary>
-        private void ClearCurrentTimeout()
-        {
-            _timeoutToken.Cancel();
-            _timeoutToken = new CancellationTokenSource();
         }
 
         /// <summary>
@@ -332,15 +336,16 @@ namespace OptimizelySDK.Odp
                 return true;
             }
 
-            _logger.Log(LogLevel.DEBUG,
-                "ODP is not integrated.");
+            _logger.Log(LogLevel.DEBUG, "ODP is not integrated.");
+
+            // ensure empty queue
             _queue = new ConcurrentQueue<OdpEvent>();
 
             return false;
         }
 
         /// <summary>
-        /// Queue count has enough items to send at least one batche
+        /// Queue count has enough items to send at least one batch
         /// </summary>
         /// <returns>True if even batches exist otherwise False</returns>
         private bool QueueHasBatches()

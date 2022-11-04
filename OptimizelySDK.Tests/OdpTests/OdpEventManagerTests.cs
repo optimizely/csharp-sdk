@@ -34,6 +34,7 @@ namespace OptimizelySDK.Tests.OdpTests
         private const string API_HOST = "https://odp-events.example.com";
         private const string MOCK_IDEMPOTENCE_ID = "7d2fc936-8e3b-4e46-aff1-6ccc6fcd1394";
         private const string FS_USER_ID = "fs_user_id";
+        private const int MAX_COUNTDOWNEVENT_WAIT_MS = 2000;
 
         private readonly List<OdpEvent> _testEvents = new List<OdpEvent>
         {
@@ -172,9 +173,43 @@ namespace OptimizelySDK.Tests.OdpTests
                 new OdpEventManager(mockOdpConfig.Object, _mockApiManager.Object,
                     _mockLogger.Object);
 
-            eventManager.Start();
-            eventManager.SendEvent(_testEvents[0]); // Warning on enqueue
+            eventManager.Start(); // Log when Start() called
+            eventManager.SendEvent(_testEvents[0]); // Log when enqueue attempted
 
+            _mockLogger.Verify(
+                l => l.Log(LogLevel.DEBUG,
+                    "ODP is not integrated."),
+                Times.Exactly(2));
+        }
+        
+        [Test]
+        public void ShouldLogWhenOdpNotIntegratedAndIdentifyUserCalled()
+        {
+            var mockOdpConfig = new Mock<IOdpConfig>();
+            mockOdpConfig.Setup(o => o.IsReady()).Returns(false);
+            var eventManager =
+                new OdpEventManager(mockOdpConfig.Object, _mockApiManager.Object,
+                    _mockLogger.Object);
+            
+            eventManager.Start();
+            
+            _mockLogger.Verify(
+                l => l.Log(LogLevel.DEBUG,
+                    "ODP is not integrated."),
+                Times.Once);
+        }
+
+        [Test]
+        public void ShouldLogWhenOdpNotIntegratedAndStartCalled()
+        {
+            var mockOdpConfig = new Mock<IOdpConfig>();
+            mockOdpConfig.Setup(o => o.IsReady()).Returns(false);
+            var eventManager =
+                new OdpEventManager(mockOdpConfig.Object, _mockApiManager.Object,
+                    _mockLogger.Object);
+            
+            eventManager.IdentifyUser(FS_USER_ID);
+            
             _mockLogger.Verify(
                 l => l.Log(LogLevel.DEBUG,
                     "ODP is not integrated."),
@@ -252,7 +287,7 @@ namespace OptimizelySDK.Tests.OdpTests
 
             eventManager.Start();
             eventManager.SendEvent(_testEvents[0]);
-            cde.Wait();
+            cde.Wait(MAX_COUNTDOWNEVENT_WAIT_MS);
 
             var eventsSentToApi = eventsCollector.FirstOrDefault();
             var actualEvent = eventsSentToApi?.FirstOrDefault();
@@ -281,11 +316,12 @@ namespace OptimizelySDK.Tests.OdpTests
                     100);
 
             eventManager.Start();
-            // do not add events to the queue, but allow for...
-            Task.Delay(400)
-                .Wait(); // at least 3 flush intervals executions (giving a little longer)
+            // do not add events to the queue, but allow for
+            // at least 3 flush intervals executions (giving a little longer)
+            Task.Delay(400).Wait();
+            eventManager.Stop();
 
-            _mockLogger.Verify(l => l.Log(LogLevel.DEBUG, "Processing Queue (flush)"),
+            _mockLogger.Verify(l => l.Log(LogLevel.DEBUG, "Flushing Queue."),
                 Times.AtLeast(3));
         }
 
@@ -332,7 +368,7 @@ namespace OptimizelySDK.Tests.OdpTests
 
             eventManager.Start();
             _testEvents.ForEach(e => eventManager.SendEvent(e));
-            cde.Wait();
+            cde.Wait(MAX_COUNTDOWNEVENT_WAIT_MS);
 
             // sending 1 batch of 2 events after 1s flush interval since batchSize is 10
             _mockApiManager.Verify(a =>
@@ -367,7 +403,7 @@ namespace OptimizelySDK.Tests.OdpTests
                 eventManager.SendEvent(MakeEvent(i));
             }
 
-            cde.Wait();
+            cde.Wait(MAX_COUNTDOWNEVENT_WAIT_MS);
 
             // retry 3x (default) for 2 batches or 6 calls to attempt to process
             _mockApiManager.Verify(
@@ -412,7 +448,7 @@ namespace OptimizelySDK.Tests.OdpTests
 
             eventManager.Start();
             eventManager.IdentifyUser(USER_ID);
-            cde.Wait();
+            cde.Wait(MAX_COUNTDOWNEVENT_WAIT_MS);
 
             var eventsSentToApi = eventsCollector.FirstOrDefault();
             var actualEvent = eventsSentToApi?.FirstOrDefault();
