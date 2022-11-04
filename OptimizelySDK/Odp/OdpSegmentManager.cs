@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace OptimizelySDK.Odp
 {
-    public class OdpSegmentManager
+    public class OdpSegmentManager: IOdpSegmentManager
     {
         private readonly ILogger _logger;
         private readonly IOdpSegmentApiManager _apiManager;
