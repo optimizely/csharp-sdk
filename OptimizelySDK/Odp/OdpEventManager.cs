@@ -206,8 +206,23 @@ namespace OptimizelySDK.Odp
 
             _logger.Log(LogLevel.DEBUG, "Stop requested.");
 
-
             _flushIntervalCancellation.Cancel();
+            try
+            {
+                _flushQueueRegularly.ConfigureAwait(false).GetAwaiter().GetResult();
+            }
+            catch (OperationCanceledException)
+            {
+                // exception raised by design from .Cancel()
+            }
+            catch (Exception)
+            {
+                // other exceptions should be ignored
+            }
+            finally
+            {
+                _flushIntervalCancellation.Dispose();
+            }
 
             // one final time
             FlushQueue();
