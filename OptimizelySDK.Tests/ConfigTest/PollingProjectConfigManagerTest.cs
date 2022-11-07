@@ -66,7 +66,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
             var config = configManager.GetConfig();
             stopwatch.Stop();
 
-            Assert.True(stopwatch.Elapsed.TotalMilliseconds >= 500);
+            Assert.True(stopwatch.Elapsed.TotalMilliseconds >= 1000);
             configManager.Dispose();
         }
 

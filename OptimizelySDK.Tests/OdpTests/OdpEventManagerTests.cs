@@ -181,7 +181,7 @@ namespace OptimizelySDK.Tests.OdpTests
                     "ODP is not integrated."),
                 Times.Exactly(2));
         }
-        
+
         [Test]
         public void ShouldLogWhenOdpNotIntegratedAndIdentifyUserCalled()
         {
@@ -190,9 +190,9 @@ namespace OptimizelySDK.Tests.OdpTests
             var eventManager =
                 new OdpEventManager(mockOdpConfig.Object, _mockApiManager.Object,
                     _mockLogger.Object);
-            
+
             eventManager.Start();
-            
+
             _mockLogger.Verify(
                 l => l.Log(LogLevel.DEBUG,
                     "ODP is not integrated."),
@@ -207,9 +207,9 @@ namespace OptimizelySDK.Tests.OdpTests
             var eventManager =
                 new OdpEventManager(mockOdpConfig.Object, _mockApiManager.Object,
                     _mockLogger.Object);
-            
+
             eventManager.IdentifyUser(FS_USER_ID);
-            
+
             _mockLogger.Verify(
                 l => l.Log(LogLevel.DEBUG,
                     "ODP is not integrated."),
@@ -317,8 +317,8 @@ namespace OptimizelySDK.Tests.OdpTests
 
             eventManager.Start();
             // do not add events to the queue, but allow for
-            // at least 3 flush intervals executions (giving a little longer)
-            Task.Delay(400).Wait();
+            // at least 3 flush intervals executions
+            Task.Delay(1000).Wait();
             eventManager.Stop();
 
             _mockLogger.Verify(l => l.Log(LogLevel.DEBUG, "Flushing Queue."),
