@@ -71,8 +71,8 @@ jobs:
       - name: Run NUnit tests
         run: ./NUnit.ConsoleRunner.3.15.2\tools\nunit3-console.exe ./OptimizelySDK.Tests/bin/Release/OptimizelySDK.Tests.dll
       - name: Find and sign all DLLs
-        run: |
-          sudo find . -path './OptimizelySDK*bin/Release/OptimizelySDK*.dll' -not -regex '.*Tests.*' -print0 | while IFS= read -r -d '' file; do sn -R $file ./keypair.snk; done
+        id: unit_tests
+        run: Get-ChildItem -Recurse -Exclude '.*Tests.*' -include 'OptimizelySDK*.dll' | Where-Object { $_.DirectoryName -match '\\bin\\Release' } | Foreach-Object { sn -R $_.FullName ./keypair.snk }
       - name: Check on success
         if: steps.unit_tests.outcome == 'success' && env.CURRENT_BRANCH == env.RELEASE_BRANCH && env.EVENT_TYPE == 'push'
         env:
