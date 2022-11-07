@@ -26,7 +26,7 @@ using System.Threading.Tasks;
 
 namespace OptimizelySDK.Odp
 {
-    public class OdpEventManager : IOdpEventManager
+    public class OdpEventManager : IOdpEventManager, IDisposable
     {
         /// <summary>
         /// Enumeration of acceptable states of the Event Manager
@@ -206,14 +206,8 @@ namespace OptimizelySDK.Odp
 
             _logger.Log(LogLevel.DEBUG, "Stop requested.");
 
-            try
-            {
-                _flushIntervalCancellation.Cancel();
-            }
-            catch
-            {
-                _flushIntervalCancellation.Dispose();
-            }
+
+            _flushIntervalCancellation.Cancel();
 
             // one final time
             FlushQueue();
@@ -428,6 +422,12 @@ namespace OptimizelySDK.Odp
         )
         {
             return sourceData.MergeInPlace<string, object>(_commonData);
+        }
+
+        public void Dispose()
+        {
+            _flushQueueRegularly?.Dispose();
+            _flushIntervalCancellation?.Dispose();
         }
     }
 }
