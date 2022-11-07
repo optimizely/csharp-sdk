@@ -14,16 +14,14 @@
  * limitations under the License.
  */
 
-using System;
-using System.Collections.Generic;
 using Moq;
+using NUnit.Framework;
 using OptimizelySDK.Logger;
 using OptimizelySDK.Event.Dispatcher;
 using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Exceptions;
 using OptimizelySDK.Event;
 using OptimizelySDK.Entity;
-using NUnit.Framework;
 using OptimizelySDK.Tests.UtilsTests;
 using OptimizelySDK.Bucketing;
 using OptimizelySDK.Notifications;
@@ -31,10 +29,14 @@ using OptimizelySDK.Tests.NotificationTests;
 using OptimizelySDK.Utils;
 using OptimizelySDK.Config;
 using OptimizelySDK.Event.Entity;
-using System.Globalization;
-using System.Threading;
 using OptimizelySDK.Tests.Utils;
 using OptimizelySDK.OptimizelyDecisions;
+using OptimizelySDK.OptlyConfig;
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace OptimizelySDK.Tests
 {
@@ -81,10 +83,10 @@ namespace OptimizelySDK.Tests
 
             EventProcessorMock.Setup(b => b.Process(It.IsAny<UserEvent>()));
             DecisionReasons = new DecisionReasons();
-            var config = DatafileProjectConfig.Create(
-                content: TestData.Datafile,
-                logger: LoggerMock.Object,
-                errorHandler: new NoOpErrorHandler());
+            ProjectConfig config = DatafileProjectConfig.Create(
+                TestData.Datafile,
+                LoggerMock.Object,
+                new NoOpErrorHandler());
             ConfigManager = new FallbackProjectConfigManager(config);
             Config = ConfigManager.GetConfig();
             EventDispatcherMock = new Mock<IEventDispatcher>();
@@ -105,7 +107,7 @@ namespace OptimizelySDK.Tests
             OptimizelyMock = new Mock<Optimizely>(TestData.Datafile, EventDispatcherMock.Object,
                 LoggerMock.Object, ErrorHandlerMock.Object, null, false, null, null)
             {
-                CallBase = true
+                CallBase = true,
             };
 
             DecisionServiceMock = new Mock<DecisionService>(new Bucketer(LoggerMock.Object),
@@ -136,7 +138,7 @@ namespace OptimizelySDK.Tests
             private static Type[] ParameterTypes =
             {
                 typeof(string), typeof(IEventDispatcher), typeof(ILogger), typeof(IErrorHandler),
-                typeof(bool), typeof(EventProcessor)
+                typeof(bool), typeof(EventProcessor),
             };
 
             public static Dictionary<string, object> SingleParameter =
@@ -144,7 +146,7 @@ namespace OptimizelySDK.Tests
                 {
                     {
                         "param1", "val1"
-                    }
+                    },
                 };
 
             public static UserAttributes UserAttributes = new UserAttributes
@@ -157,7 +159,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
 
             // NullUserAttributes extends copy of UserAttributes with key-value
@@ -181,7 +183,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "bad_food", null
-                }
+                },
             };
 
             public string Datafile { get; set; }
@@ -200,7 +202,7 @@ namespace OptimizelySDK.Tests
                     new object[]
                     {
                         Datafile, EventDispatcher, Logger, ErrorHandler, UserProfileService,
-                        SkipJsonValidation, EventProcessor, DefaultDecideOptions
+                        SkipJsonValidation, EventProcessor, DefaultDecideOptions,
                     });
             }
         }
@@ -212,16 +214,17 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestCreateUserContext()
         {
-            var attribute = new UserAttributes
+            UserAttributes attribute = new UserAttributes
             {
                 {
                     "device_type", "iPhone"
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
-            var optlyUserContext = Optimizely.CreateUserContext(TestUserId, attribute);
+            OptimizelyUserContext optlyUserContext =
+                Optimizely.CreateUserContext(TestUserId, attribute);
             Assert.AreEqual(TestUserId, optlyUserContext.GetUserId());
             Assert.AreEqual(Optimizely, optlyUserContext.GetOptimizely());
             Assert.AreEqual(attribute, optlyUserContext.GetAttributes());
@@ -230,7 +233,7 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestCreateUserContextWithoutAttributes()
         {
-            var optlyUserContext = Optimizely.CreateUserContext(TestUserId);
+            OptimizelyUserContext optlyUserContext = Optimizely.CreateUserContext(TestUserId);
             Assert.AreEqual(TestUserId, optlyUserContext.GetUserId());
             Assert.AreEqual(Optimizely, optlyUserContext.GetOptimizely());
             Assert.IsTrue(optlyUserContext.GetAttributes().Count == 0);
@@ -239,27 +242,29 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestCreateUserContextMultipleAttribute()
         {
-            var attribute1 = new UserAttributes
+            UserAttributes attribute1 = new UserAttributes
             {
                 {
                     "device_type", "iPhone"
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
-            var optlyUserContext1 = Optimizely.CreateUserContext("userId1", attribute1);
+            OptimizelyUserContext optlyUserContext1 =
+                Optimizely.CreateUserContext("userId1", attribute1);
 
-            var attribute2 = new UserAttributes
+            UserAttributes attribute2 = new UserAttributes
             {
                 {
                     "device_type2", "Samsung"
                 },
                 {
                     "location2", "California"
-                }
+                },
             };
-            var optlyUserContext2 = Optimizely.CreateUserContext("userId2", attribute2);
+            OptimizelyUserContext optlyUserContext2 =
+                Optimizely.CreateUserContext("userId2", attribute2);
 
             Assert.AreEqual("userId1", optlyUserContext1.GetUserId());
             Assert.AreEqual(Optimizely, optlyUserContext1.GetOptimizely());
@@ -273,20 +278,21 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestDecisionNotificationSentWhenSendFlagDecisionsFalseAndFeature()
         {
-            var featureKey = "boolean_feature";
-            var variables = Optimizely.GetAllFeatureVariables(featureKey, TestUserId);
-            var userAttributes = new UserAttributes
+            string featureKey = "boolean_feature";
+            OptimizelyJSON variables = Optimizely.GetAllFeatureVariables(featureKey, TestUserId);
+            UserAttributes userAttributes = new UserAttributes
             {
                 {
                     "device_type", "iPhone"
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
             Config.SendFlagDecisions = false;
-            var fallbackConfigManager = new FallbackProjectConfigManager(Config);
-            var optimizely = new Optimizely(fallbackConfigManager,
+            FallbackProjectConfigManager fallbackConfigManager =
+                new FallbackProjectConfigManager(Config);
+            Optimizely optimizely = new Optimizely(fallbackConfigManager,
                 NotificationCenter,
                 EventDispatcherMock.Object,
                 LoggerMock.Object,
@@ -304,7 +310,8 @@ namespace OptimizelySDK.Tests
                 NotificationCenter.NotificationType.Decision,
                 NotificationCallbackMock.Object.TestDecisionCallback);
 
-            var optimizelyUserContext = optimizely.CreateUserContext(TestUserId, userAttributes);
+            OptimizelyUserContext optimizelyUserContext =
+                optimizely.CreateUserContext(TestUserId, userAttributes);
             optimizelyUserContext.Decide(featureKey);
             NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(
                 DecisionNotificationTypes.FLAG, TestUserId, userAttributes,
@@ -331,7 +338,7 @@ namespace OptimizelySDK.Tests
                         },
                         {
                             "decisionEventDispatched", true
-                        }
+                        },
                     }))), Times.Once);
             EventDispatcherMock.Verify(dispatcher => dispatcher.DispatchEvent(It.IsAny<LogEvent>()),
                 Times.Once);
@@ -340,19 +347,20 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestDecisionNotificationSentWhenSendFlagDecisionsTrueAndFeature()
         {
-            var featureKey = "boolean_feature";
-            var variables = Optimizely.GetAllFeatureVariables(featureKey, TestUserId);
-            var userAttributes = new UserAttributes
+            string featureKey = "boolean_feature";
+            OptimizelyJSON variables = Optimizely.GetAllFeatureVariables(featureKey, TestUserId);
+            UserAttributes userAttributes = new UserAttributes
             {
                 {
                     "device_type", "iPhone"
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
-            var fallbackConfigManager = new FallbackProjectConfigManager(Config);
-            var optimizely = new Optimizely(fallbackConfigManager,
+            FallbackProjectConfigManager fallbackConfigManager =
+                new FallbackProjectConfigManager(Config);
+            Optimizely optimizely = new Optimizely(fallbackConfigManager,
                 NotificationCenter,
                 EventDispatcherMock.Object,
                 LoggerMock.Object,
@@ -370,7 +378,8 @@ namespace OptimizelySDK.Tests
                 NotificationCenter.NotificationType.Decision,
                 NotificationCallbackMock.Object.TestDecisionCallback);
 
-            var optimizelyUserContext = optimizely.CreateUserContext(TestUserId, userAttributes);
+            OptimizelyUserContext optimizelyUserContext =
+                optimizely.CreateUserContext(TestUserId, userAttributes);
             optimizelyUserContext.Decide(featureKey);
             NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(
                 DecisionNotificationTypes.FLAG, TestUserId, userAttributes,
@@ -397,7 +406,7 @@ namespace OptimizelySDK.Tests
                         },
                         {
                             "decisionEventDispatched", true
-                        }
+                        },
                     }))), Times.Once);
             EventDispatcherMock.Verify(dispatcher => dispatcher.DispatchEvent(It.IsAny<LogEvent>()),
                 Times.Once);
@@ -406,24 +415,25 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestDecisionNotificationNotSentWhenSendFlagDecisionsFalseAndRollout()
         {
-            var featureKey = "boolean_single_variable_feature";
-            var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
-            var variables = Optimizely.GetAllFeatureVariables(featureKey, TestUserId);
-            var userAttributes = new UserAttributes
+            string featureKey = "boolean_single_variable_feature";
+            FeatureFlag featureFlag = Config.GetFeatureFlagFromKey(featureKey);
+            OptimizelyJSON variables = Optimizely.GetAllFeatureVariables(featureKey, TestUserId);
+            UserAttributes userAttributes = new UserAttributes
             {
                 {
                     "device_type", "iPhone"
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
-            var experiment = Config.GetRolloutFromId("166660").Experiments[1];
-            var ruleKey = experiment.Key;
-            var variation = Config.GetVariationFromKey(experiment.Key, "177773");
+            Experiment experiment = Config.GetRolloutFromId("166660").Experiments[1];
+            string ruleKey = experiment.Key;
+            Variation variation = Config.GetVariationFromKey(experiment.Key, "177773");
             Config.SendFlagDecisions = false;
-            var fallbackConfigManager = new FallbackProjectConfigManager(Config);
-            var optimizely = new Optimizely(fallbackConfigManager,
+            FallbackProjectConfigManager fallbackConfigManager =
+                new FallbackProjectConfigManager(Config);
+            Optimizely optimizely = new Optimizely(fallbackConfigManager,
                 NotificationCenter,
                 EventDispatcherMock.Object,
                 LoggerMock.Object,
@@ -441,7 +451,8 @@ namespace OptimizelySDK.Tests
                 NotificationCenter.NotificationType.Decision,
                 NotificationCallbackMock.Object.TestDecisionCallback);
 
-            var optimizelyUserContext = optimizely.CreateUserContext(TestUserId, userAttributes);
+            OptimizelyUserContext optimizelyUserContext =
+                optimizely.CreateUserContext(TestUserId, userAttributes);
             optimizelyUserContext.Decide(featureKey);
             NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(
                 DecisionNotificationTypes.FLAG, TestUserId, userAttributes,
@@ -468,7 +479,7 @@ namespace OptimizelySDK.Tests
                         },
                         {
                             "decisionEventDispatched", false
-                        }
+                        },
                     }))), Times.Once);
             EventDispatcherMock.Verify(dispatcher => dispatcher.DispatchEvent(It.IsAny<LogEvent>()),
                 Times.Never);
@@ -477,24 +488,25 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestDecisionNotificationSentWhenSendFlagDecisionsTrueAndRollout()
         {
-            var featureKey = "boolean_single_variable_feature";
-            var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
-            var variables = Optimizely.GetAllFeatureVariables(featureKey, TestUserId);
-            var userAttributes = new UserAttributes
+            string featureKey = "boolean_single_variable_feature";
+            FeatureFlag featureFlag = Config.GetFeatureFlagFromKey(featureKey);
+            OptimizelyJSON variables = Optimizely.GetAllFeatureVariables(featureKey, TestUserId);
+            UserAttributes userAttributes = new UserAttributes
             {
                 {
                     "device_type", "iPhone"
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
-            var experiment = Config.GetRolloutFromId("166660").Experiments[1];
-            var ruleKey = experiment.Key;
-            var variation = Config.GetVariationFromKey(experiment.Key, "177773");
+            Experiment experiment = Config.GetRolloutFromId("166660").Experiments[1];
+            string ruleKey = experiment.Key;
+            Variation variation = Config.GetVariationFromKey(experiment.Key, "177773");
             Config.SendFlagDecisions = true;
-            var fallbackConfigManager = new FallbackProjectConfigManager(Config);
-            var optimizely = new Optimizely(fallbackConfigManager,
+            FallbackProjectConfigManager fallbackConfigManager =
+                new FallbackProjectConfigManager(Config);
+            Optimizely optimizely = new Optimizely(fallbackConfigManager,
                 NotificationCenter,
                 EventDispatcherMock.Object,
                 LoggerMock.Object,
@@ -512,7 +524,8 @@ namespace OptimizelySDK.Tests
                 NotificationCenter.NotificationType.Decision,
                 NotificationCallbackMock.Object.TestDecisionCallback);
 
-            var optimizelyUserContext = optimizely.CreateUserContext(TestUserId, userAttributes);
+            OptimizelyUserContext optimizelyUserContext =
+                optimizely.CreateUserContext(TestUserId, userAttributes);
             optimizelyUserContext.Decide(featureKey);
             NotificationCallbackMock.Verify(nc => nc.TestDecisionCallback(
                 DecisionNotificationTypes.FLAG, TestUserId, userAttributes,
@@ -539,7 +552,7 @@ namespace OptimizelySDK.Tests
                         },
                         {
                             "decisionEventDispatched", true
-                        }
+                        },
                     }))), Times.Once);
             EventDispatcherMock.Verify(dispatcher => dispatcher.DispatchEvent(It.IsAny<LogEvent>()),
                 Times.Once);
@@ -548,17 +561,18 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestChangeAttributeDoesNotEffectValues()
         {
-            var userId = "testUserId";
-            var attribute = new UserAttributes
+            string userId = "testUserId";
+            UserAttributes attribute = new UserAttributes
             {
                 {
                     "device_type", "iPhone"
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
-            var optlyUserContext = Optimizely.CreateUserContext(userId, attribute);
+            OptimizelyUserContext optlyUserContext =
+                Optimizely.CreateUserContext(userId, attribute);
             Assert.AreEqual(TestUserId, optlyUserContext.GetUserId());
             Assert.AreEqual(Optimizely, optlyUserContext.GetOptimizely());
             Assert.AreEqual(attribute, optlyUserContext.GetAttributes());
@@ -573,7 +587,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
             Assert.AreEqual("testUserId", optlyUserContext.GetUserId());
             Assert.AreEqual(Optimizely, optlyUserContext.GetOptimizely());
@@ -588,7 +602,7 @@ namespace OptimizelySDK.Tests
         public void TestInvalidInstanceLogMessages()
         {
             string datafile = "{\"name\":\"optimizely\"}";
-            var optimizely = new Optimizely(datafile, null, LoggerMock.Object);
+            Optimizely optimizely = new Optimizely(datafile, null, LoggerMock.Object);
 
             Assert.IsNull(optimizely.GetVariation(string.Empty, string.Empty));
             Assert.IsNull(optimizely.Activate(string.Empty, string.Empty));
@@ -665,7 +679,7 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestErrorHandlingWithNullDatafile()
         {
-            var optimizelyNullDatafile = new Optimizely(null, null, LoggerMock.Object,
+            Optimizely optimizelyNullDatafile = new Optimizely(null, null, LoggerMock.Object,
                 ErrorHandlerMock.Object, null, true);
             LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Unable to parse null datafile."),
                 Times.Once);
@@ -677,7 +691,7 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestErrorHandlingWithEmptyDatafile()
         {
-            var optimizelyEmptyDatafile = new Optimizely("", null, LoggerMock.Object,
+            Optimizely optimizelyEmptyDatafile = new Optimizely("", null, LoggerMock.Object,
                 ErrorHandlerMock.Object, null, true);
             LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Unable to parse empty datafile."),
                 Times.Once);
@@ -689,7 +703,8 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestErrorHandlingWithUnsupportedConfigVersion()
         {
-            var optimizelyUnsupportedVersion = new Optimizely(TestData.UnsupportedVersionDatafile,
+            Optimizely optimizelyUnsupportedVersion = new Optimizely(
+                TestData.UnsupportedVersionDatafile,
                 null, LoggerMock.Object, ErrorHandlerMock.Object, null, true);
             LoggerMock.Verify(
                 l => l.Log(LogLevel.ERROR,
@@ -705,17 +720,18 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestValidatePreconditionsUserNotInForcedVariationInExperiment()
         {
-            var attributes = new UserAttributes
+            UserAttributes attributes = new UserAttributes
             {
                 {
                     "device_type", "iPhone"
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
 
-            var variation = Optimizely.GetVariation("test_experiment", "test_user", attributes);
+            Variation variation =
+                Optimizely.GetVariation("test_experiment", "test_user", attributes);
 
             LoggerMock.Verify(
                 l => l.Log(LogLevel.DEBUG,
@@ -739,7 +755,7 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestActivateInvalidOptimizelyObject()
         {
-            var optly = new Optimizely("Random datafile", null, LoggerMock.Object);
+            Optimizely optly = new Optimizely("Random datafile", null, LoggerMock.Object);
             LoggerMock.Verify(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Provided 'datafile' has invalid schema."),
                 Times.Once);
@@ -766,9 +782,9 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestActivateUserInNoVariation()
         {
-            var optly = Helper.CreatePrivateOptimizely();
+            PrivateObject optly = Helper.CreatePrivateOptimizely();
 
-            var result = optly.Invoke("Activate", "test_experiment", "not_in_variation_user",
+            object result = optly.Invoke("Activate", "test_experiment", "not_in_variation_user",
                 OptimizelyHelper.UserAttributes);
 
             LoggerMock.Verify(
@@ -788,20 +804,20 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestActivateNoAudienceNoAttributes()
         {
-            var parameters = new Dictionary<string, object>
+            Dictionary<string, object> parameters = new Dictionary<string, object>
             {
                 {
                     "param1", "val1"
                 },
                 {
                     "param2", "val2"
-                }
+                },
             };
 
-            var optly = Helper.CreatePrivateOptimizely();
+            PrivateObject optly = Helper.CreatePrivateOptimizely();
             optly.SetFieldOrProperty("EventProcessor", EventProcessorMock.Object);
 
-            var variation =
+            Variation variation =
                 (Variation)optly.Invoke("Activate", "group_experiment_1", "user_1", null);
 
             EventProcessorMock.Verify(ep => ep.Process(It.IsAny<ImpressionEvent>()), Times.Once);
@@ -836,9 +852,9 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestActivateAudienceNoAttributes()
         {
-            var optly = Helper.CreatePrivateOptimizely();
+            PrivateObject optly = Helper.CreatePrivateOptimizely();
 
-            var variationkey = optly.Invoke("Activate", "test_experiment", "test_user", null);
+            object variationkey = optly.Invoke("Activate", "test_experiment", "test_user", null);
 
             LoggerMock.Verify(
                 l => l.Log(LogLevel.INFO,
@@ -853,10 +869,11 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestActivateWithAttributes()
         {
-            var optly = Helper.CreatePrivateOptimizely();
+            PrivateObject optly = Helper.CreatePrivateOptimizely();
             optly.SetFieldOrProperty("EventProcessor", EventProcessorMock.Object);
 
-            var variation = (Variation)optly.Invoke("Activate", "test_experiment", "test_user",
+            Variation variation = (Variation)optly.Invoke("Activate", "test_experiment",
+                "test_user",
                 OptimizelyHelper.UserAttributes);
 
             EventProcessorMock.Verify(ep => ep.Process(It.IsAny<ImpressionEvent>()), Times.Once);
@@ -884,10 +901,11 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestActivateWithNullAttributes()
         {
-            var optly = Helper.CreatePrivateOptimizely();
+            PrivateObject optly = Helper.CreatePrivateOptimizely();
             optly.SetFieldOrProperty("EventProcessor", EventProcessorMock.Object);
 
-            var variation = (Variation)optly.Invoke("Activate", "test_experiment", "test_user",
+            Variation variation = (Variation)optly.Invoke("Activate", "test_experiment",
+                "test_user",
                 OptimizelyHelper.NullUserAttributes);
 
             EventProcessorMock.Verify(ep => ep.Process(It.IsAny<ImpressionEvent>()), Times.Once);
@@ -914,9 +932,9 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestActivateExperimentNotRunning()
         {
-            var optly = Helper.CreatePrivateOptimizely();
+            PrivateObject optly = Helper.CreatePrivateOptimizely();
 
-            var variationkey = optly.Invoke("Activate", "paused_experiment", "test_user", null);
+            object variationkey = optly.Invoke("Activate", "paused_experiment", "test_user", null);
 
             LoggerMock.Verify(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()),
                 Times.Exactly(2));
@@ -932,7 +950,7 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestActivateWithTypedAttributes()
         {
-            var userAttributes = new UserAttributes
+            UserAttributes userAttributes = new UserAttributes
             {
                 {
                     "device_type", "iPhone"
@@ -948,13 +966,14 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "double_key", 3.14
-                }
+                },
             };
 
-            var optly = Helper.CreatePrivateOptimizely();
+            PrivateObject optly = Helper.CreatePrivateOptimizely();
             optly.SetFieldOrProperty("EventProcessor", EventProcessorMock.Object);
 
-            var variation = (Variation)optly.Invoke("Activate", "test_experiment", "test_user",
+            Variation variation = (Variation)optly.Invoke("Activate", "test_experiment",
+                "test_user",
                 userAttributes);
 
             EventProcessorMock.Verify(ep => ep.Process(It.IsAny<ImpressionEvent>()), Times.Once);
@@ -981,8 +1000,8 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestGetVariationInvalidOptimizelyObject()
         {
-            var optly = new Optimizely("Random datafile", null, LoggerMock.Object);
-            var variationkey = optly.Activate("some_experiment", "some_user");
+            Optimizely optly = new Optimizely("Random datafile", null, LoggerMock.Object);
+            Variation variationkey = optly.Activate("some_experiment", "some_user");
             LoggerMock.Verify(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()),
                 Times.Exactly(2));
             LoggerMock.Verify(
@@ -1010,17 +1029,18 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestGetVariationAudienceMatch()
         {
-            var attributes = new UserAttributes
+            UserAttributes attributes = new UserAttributes
             {
                 {
                     "device_type", "iPhone"
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
 
-            var variation = Optimizely.GetVariation("test_experiment", "test_user", attributes);
+            Variation variation =
+                Optimizely.GetVariation("test_experiment", "test_user", attributes);
 
             LoggerMock.Verify(
                 l => l.Log(LogLevel.DEBUG,
@@ -1041,7 +1061,7 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestGetVariationAudienceNoMatch()
         {
-            var variation = Optimizely.Activate("test_experiment", "test_user");
+            Variation variation = Optimizely.Activate("test_experiment", "test_user");
             LoggerMock.Verify(
                 l => l.Log(LogLevel.INFO,
                     "User \"test_user\" does not meet conditions to be in experiment \"test_experiment\"."),
@@ -1052,7 +1072,7 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestGetVariationExperimentNotRunning()
         {
-            var variation = Optimizely.Activate("paused_experiment", "test_user");
+            Variation variation = Optimizely.Activate("paused_experiment", "test_user");
             LoggerMock.Verify(
                 l => l.Log(LogLevel.INFO, "Experiment \"paused_experiment\" is not running."),
                 Times.Once);
@@ -1062,7 +1082,7 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestTrackInvalidOptimizelyObject()
         {
-            var optly = new Optimizely("Random datafile", null, LoggerMock.Object);
+            Optimizely optly = new Optimizely("Random datafile", null, LoggerMock.Object);
             optly.Track("some_event", "some_user");
             LoggerMock.Verify(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()),
                 Times.Exactly(2));
@@ -1078,11 +1098,11 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestTrackInvalidAttributes()
         {
-            var attributes = new UserAttributes
+            UserAttributes attributes = new UserAttributes
             {
                 {
                     "abc", "43"
-                }
+                },
             };
 
             Optimizely.Track("purchase", TestUserId, attributes);
@@ -1095,7 +1115,7 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestTrackNoAttributesNoEventValue()
         {
-            var optly = Helper.CreatePrivateOptimizely();
+            PrivateObject optly = Helper.CreatePrivateOptimizely();
             optly.SetFieldOrProperty("EventProcessor", EventProcessorMock.Object);
 
             optly.Invoke("Track", "purchase", "test_user", null, null);
@@ -1110,7 +1130,7 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestTrackWithAttributesNoEventValue()
         {
-            var optly = Helper.CreatePrivateOptimizely();
+            PrivateObject optly = Helper.CreatePrivateOptimizely();
             optly.SetFieldOrProperty("EventProcessor", EventProcessorMock.Object);
 
             optly.Invoke("Track", "purchase", "test_user", OptimizelyHelper.UserAttributes, null);
@@ -1137,14 +1157,14 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestTrackNoAttributesWithEventValue()
         {
-            var optly = Helper.CreatePrivateOptimizely();
+            PrivateObject optly = Helper.CreatePrivateOptimizely();
             optly.SetFieldOrProperty("EventProcessor", EventProcessorMock.Object);
 
             optly.Invoke("Track", "purchase", "test_user", null, new EventTags
             {
                 {
                     "revenue", 42
-                }
+                },
             });
             EventProcessorMock.Verify(ep => ep.Process(It.IsAny<ConversionEvent>()), Times.Once);
 
@@ -1156,7 +1176,7 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestTrackWithAttributesWithEventValue()
         {
-            var attributes = new UserAttributes
+            UserAttributes attributes = new UserAttributes
             {
                 {
                     "device_type", "iPhone"
@@ -1166,14 +1186,14 @@ namespace OptimizelySDK.Tests
                 },
             };
 
-            var optly = Helper.CreatePrivateOptimizely();
+            PrivateObject optly = Helper.CreatePrivateOptimizely();
             optly.SetFieldOrProperty("EventProcessor", EventProcessorMock.Object);
 
             optly.Invoke("Track", "purchase", "test_user", attributes, new EventTags
             {
                 {
                     "revenue", 42
-                }
+                },
             });
 
             EventProcessorMock.Verify(ep => ep.Process(It.IsAny<ConversionEvent>()), Times.Once);
@@ -1186,7 +1206,7 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestTrackWithNullAttributesWithNullEventValue()
         {
-            var optly = Helper.CreatePrivateOptimizely();
+            PrivateObject optly = Helper.CreatePrivateOptimizely();
             optly.SetFieldOrProperty("EventProcessor", EventProcessorMock.Object);
 
             optly.Invoke("Track", "purchase", "test_user", OptimizelyHelper.NullUserAttributes,
@@ -1197,7 +1217,7 @@ namespace OptimizelySDK.Tests
                     },
                     {
                         "wont_send_null", null
-                    }
+                    },
                 });
 
             EventProcessorMock.Verify(ep => ep.Process(It.IsAny<ConversionEvent>()), Times.Once);
@@ -1215,10 +1235,11 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestInvalidDispatchImpressionEvent()
         {
-            var optly = Helper.CreatePrivateOptimizely();
+            PrivateObject optly = Helper.CreatePrivateOptimizely();
             optly.SetFieldOrProperty("EventDispatcher", new InvalidEventDispatcher());
 
-            var variation = (Variation)optly.Invoke("Activate", "test_experiment", "test_user",
+            Variation variation = (Variation)optly.Invoke("Activate", "test_experiment",
+                "test_user",
                 OptimizelyHelper.UserAttributes);
 
             EventDispatcherMock.Verify(dispatcher => dispatcher.DispatchEvent(It.IsAny<LogEvent>()),
@@ -1245,7 +1266,7 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestInvalidDispatchConversionEvent()
         {
-            var optly = Helper.CreatePrivateOptimizely();
+            PrivateObject optly = Helper.CreatePrivateOptimizely();
             optly.SetFieldOrProperty("EventDispatcher", new InvalidEventDispatcher());
 
             optly.Invoke("Track", "purchase", "test_user", null, null);
@@ -1266,14 +1287,14 @@ namespace OptimizelySDK.Tests
 
         public void TestTrackNoAttributesWithInvalidEventValue()
         {
-            var optly = Helper.CreatePrivateOptimizely();
+            PrivateObject optly = Helper.CreatePrivateOptimizely();
             optly.SetFieldOrProperty("EventDispatcher", new ValidEventDispatcher());
 
             optly.Invoke("Track", "purchase", "test_user", null, new Dictionary<string, object>
             {
                 {
                     "revenue", 4200
-                }
+                },
             });
         }
 
@@ -1282,28 +1303,29 @@ namespace OptimizelySDK.Tests
             /* Note: This case is not applicable, C# only accepts what the datatype we provide.
              * In this case, int value can't be casted implicitly into Dictionary */
 
-            var optly = Helper.CreatePrivateOptimizely();
+            PrivateObject optly = Helper.CreatePrivateOptimizely();
             optly.SetFieldOrProperty("EventDispatcher", new ValidEventDispatcher());
             optly.Invoke("Track", "purchase", "test_user", null, new Dictionary<string, object>
             {
                 {
                     "revenue", 42
-                }
+                },
             });
         }
 
         [Test]
         public void TestForcedVariationPreceedsWhitelistedVariation()
         {
-            var optimizely = new Optimizely(TestData.Datafile, EventDispatcherMock.Object,
+            Optimizely optimizely = new Optimizely(TestData.Datafile, EventDispatcherMock.Object,
                 LoggerMock.Object, ErrorHandlerMock.Object);
-            var projectConfig = DatafileProjectConfig.Create(TestData.Datafile, LoggerMock.Object,
+            ProjectConfig projectConfig = DatafileProjectConfig.Create(TestData.Datafile,
+                LoggerMock.Object,
                 ErrorHandlerMock.Object);
             Variation expectedVariation1 = projectConfig.GetVariationFromKey("etag3", "vtag5");
             Variation expectedVariation2 = projectConfig.GetVariationFromKey("etag3", "vtag6");
 
             //Check whitelisted experiment
-            var variation = optimizely.GetVariation("etag3", "testUser1");
+            Variation variation = optimizely.GetVariation("etag3", "testUser1");
             Assert.IsTrue(TestData.CompareObjects(expectedVariation1, variation));
 
             //Set forced variation
@@ -1348,38 +1370,39 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestForcedVariationPreceedsUserProfile()
         {
-            var userProfileServiceMock = new Mock<UserProfileService>();
-            var experimentKey = "etag1";
-            var userId = "testUser3";
-            var variationKey = "vtag2";
-            var fbVariationKey = "vtag1";
+            Mock<UserProfileService> userProfileServiceMock = new Mock<UserProfileService>();
+            string experimentKey = "etag1";
+            string userId = "testUser3";
+            string variationKey = "vtag2";
+            string fbVariationKey = "vtag1";
 
             UserProfile userProfile = new UserProfile(userId,
                 new Dictionary<string, Bucketing.Decision>
                 {
                     {
                         experimentKey, new Bucketing.Decision(variationKey)
-                    }
+                    },
                 });
 
             userProfileServiceMock.Setup(_ => _.Lookup(userId)).Returns(userProfile.ToMap());
 
-            var optimizely = new Optimizely(TestData.Datafile, EventDispatcherMock.Object,
+            Optimizely optimizely = new Optimizely(TestData.Datafile, EventDispatcherMock.Object,
                 LoggerMock.Object, ErrorHandlerMock.Object, userProfileServiceMock.Object);
-            var projectConfig = DatafileProjectConfig.Create(TestData.Datafile, LoggerMock.Object,
+            ProjectConfig projectConfig = DatafileProjectConfig.Create(TestData.Datafile,
+                LoggerMock.Object,
                 ErrorHandlerMock.Object);
             Variation expectedFbVariation =
                 projectConfig.GetVariationFromKey(experimentKey, fbVariationKey);
             Variation expectedVariation =
                 projectConfig.GetVariationFromKey(experimentKey, variationKey);
 
-            var variationUserProfile = optimizely.GetVariation(experimentKey, userId);
+            Variation variationUserProfile = optimizely.GetVariation(experimentKey, userId);
             Assert.IsTrue(TestData.CompareObjects(expectedVariation, variationUserProfile));
 
             //assign same user with different variation, forced variation have higher priority
             Assert.IsTrue(optimizely.SetForcedVariation(experimentKey, userId, fbVariationKey));
 
-            var variation2 = optimizely.GetVariation(experimentKey, userId);
+            Variation variation2 = optimizely.GetVariation(experimentKey, userId);
             Assert.IsTrue(TestData.CompareObjects(expectedFbVariation, variation2));
 
             //remove forced variation and re-check userprofile
@@ -1431,17 +1454,17 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestSetForcedVariationNullVariation()
         {
-            var expectedForcedVariationKey = "variation";
-            var experimentKey = "test_experiment";
+            string expectedForcedVariationKey = "variation";
+            string experimentKey = "test_experiment";
 
-            var userAttributes = new UserAttributes
+            UserAttributes userAttributes = new UserAttributes
             {
                 {
                     "device_type", "iPhone"
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
 
             Optimizely.Activate(experimentKey, TestUserId, userAttributes);
@@ -1451,7 +1474,7 @@ namespace OptimizelySDK.Tests
                 Optimizely.SetForcedVariation(experimentKey, TestUserId,
                     expectedForcedVariationKey), "Set forced variation to variation failed.");
 
-            var actualForcedVariation =
+            Variation actualForcedVariation =
                 Optimizely.GetVariation(experimentKey, TestUserId, userAttributes);
             Assert.IsTrue(TestData.CompareObjects(VariationWithKeyVariation, actualForcedVariation),
                 string.Format(@"Forced variation key should be variation, but got ""{0}"".",
@@ -1461,7 +1484,7 @@ namespace OptimizelySDK.Tests
             Assert.IsTrue(Optimizely.SetForcedVariation(experimentKey, TestUserId, null),
                 "Clear forced variation failed.");
 
-            var actualVariation =
+            Variation actualVariation =
                 Optimizely.GetVariation("test_experiment", "test_user", userAttributes);
             Assert.IsTrue(TestData.CompareObjects(VariationWithKeyControl, actualVariation),
                 string.Format(@"Variation key should be control, but got ""{0}"".",
@@ -1472,17 +1495,17 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestSetForcedVariation()
         {
-            var experimentKey = "test_experiment";
-            var expectedForcedVariationKey = "variation";
+            string experimentKey = "test_experiment";
+            string expectedForcedVariationKey = "variation";
 
-            var userAttributes = new UserAttributes
+            UserAttributes userAttributes = new UserAttributes
             {
                 {
                     "device_type", "iPhone"
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
 
             Optimizely.Activate(experimentKey, TestUserId, userAttributes);
@@ -1492,7 +1515,8 @@ namespace OptimizelySDK.Tests
                 Optimizely.SetForcedVariation("bad_experiment", TestUserId, "bad_control"),
                 "Set variation to 'variation' should have failed  because of invalid experiment.");
 
-            var variation = Optimizely.GetVariation(experimentKey, TestUserId, userAttributes);
+            Variation variation =
+                Optimizely.GetVariation(experimentKey, TestUserId, userAttributes);
             Assert.IsTrue(TestData.CompareObjects(VariationWithKeyControl, variation));
 
             // test invalid variation -. normal bucketing should occur
@@ -1508,7 +1532,7 @@ namespace OptimizelySDK.Tests
                 Optimizely.SetForcedVariation(experimentKey, TestUserId,
                     expectedForcedVariationKey), "Set variation to 'variation' failed.");
 
-            var actualForcedVariation =
+            Variation actualForcedVariation =
                 Optimizely.GetVariation(experimentKey, TestUserId, userAttributes);
             Assert.IsTrue(TestData.CompareObjects(VariationWithKeyVariation,
                 actualForcedVariation));
@@ -1534,8 +1558,8 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestSetForcedVariationWithInvalidExperimentKey()
         {
-            var userId = "test_user";
-            var variation = "variation";
+            string userId = "test_user";
+            string variation = "variation";
 
             Assert.False(Optimizely.SetForcedVariation("test_experiment_not_in_datafile", userId,
                 variation));
@@ -1546,8 +1570,8 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestSetForcedVariationWithInvalidVariationKey()
         {
-            var userId = "test_user";
-            var experimentKey = "test_experiment";
+            string userId = "test_user";
+            string experimentKey = "test_experiment";
 
             Assert.False(Optimizely.SetForcedVariation(experimentKey, userId,
                 "variation_not_in_datafile"));
@@ -1558,25 +1582,25 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestGetForcedVariation()
         {
-            var experimentKey = "test_experiment";
-            var expectedForcedVariation = new Variation
+            string experimentKey = "test_experiment";
+            Variation expectedForcedVariation = new Variation
             {
                 Key = "variation",
-                Id = "7721010009"
+                Id = "7721010009",
             };
-            var expectedForcedVariation2 = new Variation
+            Variation expectedForcedVariation2 = new Variation
             {
                 Key = "variation",
-                Id = "7721010509"
+                Id = "7721010509",
             };
-            var userAttributes = new UserAttributes
+            UserAttributes userAttributes = new UserAttributes
             {
                 {
                     "device_type", "iPhone"
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
 
             Optimizely.Activate(experimentKey, TestUserId, userAttributes);
@@ -1586,7 +1610,7 @@ namespace OptimizelySDK.Tests
                     expectedForcedVariation.Key), "Set variation to 'variation' failed.");
 
             // call getForcedVariation with valid experiment key and valid user ID
-            var actualForcedVariation =
+            Variation actualForcedVariation =
                 Optimizely.GetForcedVariation("test_experiment", TestUserId);
             Assert.IsTrue(TestData.CompareObjects(expectedForcedVariation, actualForcedVariation));
 
@@ -1619,7 +1643,7 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestGetForcedVariationWithInvalidUserID()
         {
-            var experimentKey = "test_experiment";
+            string experimentKey = "test_experiment";
             Optimizely.SetForcedVariation(experimentKey, "test_user", "test_variation");
 
             Assert.Null(Optimizely.GetForcedVariation(experimentKey, null));
@@ -1629,8 +1653,8 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestGetForcedVariationWithInvalidExperimentKey()
         {
-            var userId = "test_user";
-            var experimentKey = "test_experiment";
+            string userId = "test_user";
+            string experimentKey = "test_experiment";
             Optimizely.SetForcedVariation(experimentKey, userId, "test_variation");
 
             Assert.Null(Optimizely.GetForcedVariation("test_experiment", userId));
@@ -1641,25 +1665,25 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestGetVariationAudienceMatchAfterSetForcedVariation()
         {
-            var userId = "test_user";
-            var experimentKey = "test_experiment";
-            var experimentId = "7716830082";
-            var variationKey = "control";
-            var variationId = "7722370027";
+            string userId = "test_user";
+            string experimentKey = "test_experiment";
+            string experimentId = "7716830082";
+            string variationKey = "control";
+            string variationId = "7722370027";
 
-            var attributes = new UserAttributes
+            UserAttributes attributes = new UserAttributes
             {
                 {
                     "device_type", "iPhone"
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
 
             Assert.True(Optimizely.SetForcedVariation(experimentKey, userId, variationKey),
                 "Set variation for paused experiment should have failed.");
-            var variation = Optimizely.GetVariation(experimentKey, userId, attributes);
+            Variation variation = Optimizely.GetVariation(experimentKey, userId, attributes);
 
             LoggerMock.Verify(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()),
                 Times.Exactly(2));
@@ -1678,25 +1702,25 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestGetVariationExperimentNotRunningAfterSetForceVariation()
         {
-            var userId = "test_user";
-            var experimentKey = "paused_experiment";
-            var experimentId = "7716830585";
-            var variationKey = "control";
-            var variationId = "7722370427";
+            string userId = "test_user";
+            string experimentKey = "paused_experiment";
+            string experimentId = "7716830585";
+            string variationKey = "control";
+            string variationId = "7722370427";
 
-            var attributes = new UserAttributes
+            UserAttributes attributes = new UserAttributes
             {
                 {
                     "device_type", "iPhone"
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
 
             Assert.True(Optimizely.SetForcedVariation(experimentKey, userId, variationKey),
                 "Set variation for paused experiment should have failed.");
-            var variation = Optimizely.GetVariation(experimentKey, userId, attributes);
+            Variation variation = Optimizely.GetVariation(experimentKey, userId, attributes);
 
             LoggerMock.Verify(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()),
                 Times.Exactly(2));
@@ -1713,15 +1737,15 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestGetVariationWhitelistedUserAfterSetForcedVariation()
         {
-            var userId = "user1";
-            var experimentKey = "test_experiment";
-            var experimentId = "7716830082";
-            var variationKey = "variation";
-            var variationId = "7721010009";
+            string userId = "user1";
+            string experimentKey = "test_experiment";
+            string experimentId = "7716830082";
+            string variationKey = "variation";
+            string variationId = "7721010009";
 
             Assert.True(Optimizely.SetForcedVariation(experimentKey, userId, variationKey),
                 "Set variation for paused experiment should have passed.");
-            var variation = Optimizely.GetVariation(experimentKey, userId);
+            Variation variation = Optimizely.GetVariation(experimentKey, userId);
 
             LoggerMock.Verify(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()),
                 Times.Exactly(2));
@@ -1740,25 +1764,25 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestActivateNoAudienceNoAttributesAfterSetForcedVariation()
         {
-            var userId = "test_user";
-            var experimentKey = "test_experiment";
-            var experimentId = "7716830082";
-            var variationKey = "control";
-            var variationId = "7722370027";
-            var parameters = new Dictionary<string, object>
+            string userId = "test_user";
+            string experimentKey = "test_experiment";
+            string experimentId = "7716830082";
+            string variationKey = "control";
+            string variationId = "7722370027";
+            Dictionary<string, object> parameters = new Dictionary<string, object>
             {
                 {
                     "param1", "val1"
                 },
                 {
                     "param2", "val2"
-                }
+                },
             };
 
             Experiment experiment = new Experiment();
             experiment.Key = "group_experiment_1";
 
-            var optly = Helper.CreatePrivateOptimizely();
+            PrivateObject optly = Helper.CreatePrivateOptimizely();
             optly.SetFieldOrProperty("ProjectConfigManager", ConfigManager);
 
             // Set forced variation
@@ -1767,7 +1791,7 @@ namespace OptimizelySDK.Tests
                 "Set variation for paused experiment should have failed.");
 
             // Activate
-            var variation =
+            Variation variation =
                 (Variation)optly.Invoke("Activate", "group_experiment_1", "user_1", null);
 
             EventDispatcherMock.Verify(dispatcher => dispatcher.DispatchEvent(It.IsAny<LogEvent>()),
@@ -1811,19 +1835,19 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestTrackNoAttributesNoEventValueAfterSetForcedVariation()
         {
-            var userId = "test_user";
-            var experimentKey = "test_experiment";
-            var experimentId = "7716830082";
-            var variationKey = "control";
-            var variationId = "7722370027";
-            var parameters = new Dictionary<string, object>
+            string userId = "test_user";
+            string experimentKey = "test_experiment";
+            string experimentId = "7716830082";
+            string variationKey = "control";
+            string variationId = "7722370027";
+            Dictionary<string, object> parameters = new Dictionary<string, object>
             {
                 {
                     "param1", "val1"
-                }
+                },
             };
 
-            var optly = Helper.CreatePrivateOptimizely();
+            PrivateObject optly = Helper.CreatePrivateOptimizely();
 
             // Set forced variation
             Assert.True(
@@ -1848,13 +1872,13 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestGetVariationBucketingIdAttribute()
         {
-            var testBucketingIdControl =
+            string testBucketingIdControl =
                 "testBucketingIdControl!"; // generates bucketing number 3741
-            var testBucketingIdVariation = "123456789"; // generates bucketing number 4567
-            var userId = "test_user";
-            var experimentKey = "test_experiment";
+            string testBucketingIdVariation = "123456789"; // generates bucketing number 4567
+            string userId = "test_user";
+            string experimentKey = "test_experiment";
 
-            var userAttributes = new UserAttributes
+            UserAttributes userAttributes = new UserAttributes
             {
                 {
                     "device_type", "iPhone"
@@ -1864,10 +1888,10 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
 
-            var userAttributesWithBucketingId = new UserAttributes
+            UserAttributes userAttributesWithBucketingId = new UserAttributes
             {
                 {
                     "device_type", "iPhone"
@@ -1880,11 +1904,12 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     ControlAttributes.BUCKETING_ID_ATTRIBUTE, testBucketingIdVariation
-                }
+                },
             };
 
             // confirm that a valid variation is bucketed without the bucketing ID
-            var actualVariation = Optimizely.GetVariation(experimentKey, userId, userAttributes);
+            Variation actualVariation =
+                Optimizely.GetVariation(experimentKey, userId, userAttributes);
             Assert.IsTrue(TestData.CompareObjects(VariationWithKeyControl, actualVariation),
                 string.Format("Invalid variation key \"{0}\" for getVariation.",
                     actualVariation?.Key));
@@ -1920,12 +1945,12 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestGetFeatureVariableBooleanReturnsCorrectValue()
         {
-            var featureKey = "featureKey";
-            var variableKeyTrue = "varTrue";
-            var variableKeyFalse = "varFalse";
-            var variableKeyNonBoolean = "varNonBoolean";
-            var variableKeyNull = "varNull";
-            var featureVariableType = "boolean";
+            string featureKey = "featureKey";
+            string variableKeyTrue = "varTrue";
+            string variableKeyFalse = "varFalse";
+            string variableKeyNonBoolean = "varNonBoolean";
+            string variableKeyNull = "varNull";
+            string featureVariableType = "boolean";
 
             OptimizelyMock.Setup(om => om.GetFeatureVariableValueForType<bool?>(It.IsAny<string>(),
                     variableKeyTrue, It.IsAny<string>(),
@@ -1962,17 +1987,19 @@ namespace OptimizelySDK.Tests
         public void TestGetFeatureVariableDoubleFRCulture()
         {
             SetCulture("en-US");
-            var fallbackConfigManager = new FallbackProjectConfigManager(Config);
+            FallbackProjectConfigManager fallbackConfigManager =
+                new FallbackProjectConfigManager(Config);
 
-            var optimizely = new Optimizely(fallbackConfigManager);
+            Optimizely optimizely = new Optimizely(fallbackConfigManager);
 
-            var doubleValue = optimizely.GetFeatureVariableDouble("double_single_variable_feature",
+            double? doubleValue = optimizely.GetFeatureVariableDouble(
+                "double_single_variable_feature",
                 "double_variable", "testUser1");
 
             Assert.AreEqual(doubleValue, 14.99);
 
             SetCulture("fr-FR");
-            var doubleValueFR =
+            double? doubleValueFR =
                 optimizely.GetFeatureVariableDouble("double_single_variable_feature",
                     "double_variable", "testUser1");
             Assert.AreEqual(doubleValueFR, 14.99);
@@ -1982,18 +2009,19 @@ namespace OptimizelySDK.Tests
         public void TestGetFeatureVariableIntegerFRCulture()
         {
             SetCulture("en-US");
-            var fallbackConfigManager = new FallbackProjectConfigManager(Config);
+            FallbackProjectConfigManager fallbackConfigManager =
+                new FallbackProjectConfigManager(Config);
 
-            var optimizely = new Optimizely(fallbackConfigManager);
+            Optimizely optimizely = new Optimizely(fallbackConfigManager);
 
-            var integerValue =
+            int? integerValue =
                 optimizely.GetFeatureVariableInteger("integer_single_variable_feature",
                     "integer_variable", "testUser1");
 
             Assert.AreEqual(integerValue, 13);
 
             SetCulture("fr-FR");
-            var integerValueFR =
+            int? integerValueFR =
                 optimizely.GetFeatureVariableInteger("integer_single_variable_feature",
                     "integer_variable", "testUser1");
             Assert.AreEqual(integerValueFR, 13);
@@ -2003,18 +2031,19 @@ namespace OptimizelySDK.Tests
         public void TestGetFeatureVariableBooleanFRCulture()
         {
             SetCulture("en-US");
-            var fallbackConfigManager = new FallbackProjectConfigManager(Config);
+            FallbackProjectConfigManager fallbackConfigManager =
+                new FallbackProjectConfigManager(Config);
 
-            var optimizely = new Optimizely(fallbackConfigManager);
+            Optimizely optimizely = new Optimizely(fallbackConfigManager);
 
-            var booleanValue =
+            bool? booleanValue =
                 optimizely.GetFeatureVariableBoolean("boolean_single_variable_feature",
                     "boolean_variable", "testUser1");
 
             Assert.AreEqual(booleanValue, false);
 
             SetCulture("fr-FR");
-            var booleanValueFR =
+            bool? booleanValueFR =
                 optimizely.GetFeatureVariableBoolean("boolean_single_variable_feature",
                     "boolean_variable", "testUser1");
             Assert.AreEqual(booleanValueFR, false);
@@ -2024,17 +2053,19 @@ namespace OptimizelySDK.Tests
         public void TestGetFeatureVariableStringFRCulture()
         {
             SetCulture("en-US");
-            var fallbackConfigManager = new FallbackProjectConfigManager(Config);
+            FallbackProjectConfigManager fallbackConfigManager =
+                new FallbackProjectConfigManager(Config);
 
-            var optimizely = new Optimizely(fallbackConfigManager);
+            Optimizely optimizely = new Optimizely(fallbackConfigManager);
 
-            var stringValue = optimizely.GetFeatureVariableString("string_single_variable_feature",
+            string stringValue = optimizely.GetFeatureVariableString(
+                "string_single_variable_feature",
                 "string_variable", "testUser1");
 
             Assert.AreEqual(stringValue, "cta_1");
 
             SetCulture("fr-FR");
-            var stringValueFR =
+            string stringValueFR =
                 optimizely.GetFeatureVariableString("string_single_variable_feature",
                     "string_variable", "testUser1");
             Assert.AreEqual(stringValueFR, "cta_1");
@@ -2043,22 +2074,23 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestGetFeatureVariableJSONFRCulture()
         {
-            var fallbackConfigManager = new FallbackProjectConfigManager(Config);
+            FallbackProjectConfigManager fallbackConfigManager =
+                new FallbackProjectConfigManager(Config);
 
-            var expectedDict = new Dictionary<string, object>()
+            Dictionary<string, object> expectedDict = new Dictionary<string, object>()
             {
                 {
                     "int_var", 1
                 },
                 {
                     "boolean_key", false
-                }
+                },
             };
 
             SetCulture("en-US");
-            var optimizely = new Optimizely(fallbackConfigManager);
+            Optimizely optimizely = new Optimizely(fallbackConfigManager);
 
-            var optimizelyJsonValue =
+            OptimizelyJSON optimizelyJsonValue =
                 optimizely.GetFeatureVariableJSON("string_single_variable_feature", "json_var",
                     "testUser1");
 
@@ -2070,7 +2102,7 @@ namespace OptimizelySDK.Tests
                 expectedDict));
 
             SetCulture("fr-FR");
-            var optimizelyJsonValueFR =
+            OptimizelyJSON optimizelyJsonValueFR =
                 optimizely.GetFeatureVariableJSON("string_single_variable_feature", "json_var",
                     "testUser1");
 
@@ -2085,12 +2117,12 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestGetFeatureVariableDoubleReturnsCorrectValue()
         {
-            var featureKey = "featureKey";
-            var variableKeyDouble = "varDouble";
-            var variableKeyInt = "varInt";
-            var variableKeyNonDouble = "varNonDouble";
-            var variableKeyNull = "varNull";
-            var featureVariableType = "double";
+            string featureKey = "featureKey";
+            string variableKeyDouble = "varDouble";
+            string variableKeyInt = "varInt";
+            string variableKeyNonDouble = "varNonDouble";
+            string variableKeyNull = "varNull";
+            string featureVariableType = "double";
 
             OptimizelyMock.Setup(om => om.GetFeatureVariableValueForType<double?>(
                     It.IsAny<string>(), variableKeyDouble, It.IsAny<string>(),
@@ -2126,11 +2158,11 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestGetFeatureVariableIntegerReturnsCorrectValue()
         {
-            var featureKey = "featureKey";
-            var variableKeyInt = "varInt";
-            var variableNonInt = "varNonInt";
-            var variableKeyNull = "varNull";
-            var featureVariableType = "integer";
+            string featureKey = "featureKey";
+            string variableKeyInt = "varInt";
+            string variableNonInt = "varNonInt";
+            string variableKeyNull = "varNull";
+            string featureVariableType = "integer";
 
             OptimizelyMock.Setup(om => om.GetFeatureVariableValueForType<int?>(It.IsAny<string>(),
                     variableKeyInt, It.IsAny<string>(),
@@ -2158,11 +2190,11 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestGetFeatureVariableStringReturnsCorrectValue()
         {
-            var featureKey = "featureKey";
-            var variableKeyString = "varString1";
-            var variableKeyIntString = "varString2";
-            var variableKeyNull = "varNull";
-            var featureVariableType = "string";
+            string featureKey = "featureKey";
+            string variableKeyString = "varString1";
+            string variableKeyIntString = "varString2";
+            string variableKeyNull = "varNull";
+            string featureVariableType = "string";
 
             OptimizelyMock.Setup(om => om.GetFeatureVariableValueForType<string>(It.IsAny<string>(),
                     variableKeyString, It.IsAny<string>(),
@@ -2191,12 +2223,12 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestGetFeatureVariableJSONReturnsCorrectValue()
         {
-            var featureKey = "featureKey";
-            var variableKeyString = "varJSONString1";
-            var variableKeyIntString = "varJSONString2";
-            var variableKeyDouble = "varJSONDouble";
-            var variableKeyNull = "varNull";
-            var featureVariableType = "json";
+            string featureKey = "featureKey";
+            string variableKeyString = "varJSONString1";
+            string variableKeyIntString = "varJSONString2";
+            string variableKeyDouble = "varJSONDouble";
+            string variableKeyNull = "varNull";
+            string featureVariableType = "json";
 
             OptimizelyMock.Setup(om => om.GetFeatureVariableValueForType<OptimizelyJSON>(
                     It.IsAny<string>(), variableKeyString, It.IsAny<string>(),
@@ -2240,37 +2272,37 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestGetFeatureVariableJSONReturnsCorrectValueWhenInitializedUsingDictionary()
         {
-            var featureKey = "featureKey";
-            var variableKeyString = "varJSONString1";
-            var variableKeyIntString = "varJSONString2";
-            var variableKeyDouble = "varJSONDouble";
-            var variableKeyBoolean = "varJSONBoolean";
-            var variableKeyNull = "varNull";
-            var featureVariableType = "json";
+            string featureKey = "featureKey";
+            string variableKeyString = "varJSONString1";
+            string variableKeyIntString = "varJSONString2";
+            string variableKeyDouble = "varJSONDouble";
+            string variableKeyBoolean = "varJSONBoolean";
+            string variableKeyNull = "varNull";
+            string featureVariableType = "json";
 
-            var expectedStringDict = new Dictionary<string, object>()
+            Dictionary<string, object> expectedStringDict = new Dictionary<string, object>()
             {
                 {
                     "string", "Test String"
-                }
+                },
             };
-            var expectedIntegerDict = new Dictionary<string, object>()
+            Dictionary<string, object> expectedIntegerDict = new Dictionary<string, object>()
             {
                 {
                     "integer", 123
-                }
+                },
             };
-            var expectedDoubleDict = new Dictionary<string, object>()
+            Dictionary<string, object> expectedDoubleDict = new Dictionary<string, object>()
             {
                 {
                     "double", 123.28
-                }
+                },
             };
-            var expectedBooleanDict = new Dictionary<string, object>()
+            Dictionary<string, object> expectedBooleanDict = new Dictionary<string, object>()
             {
                 {
                     "boolean", true
-                }
+                },
             };
 
             OptimizelyMock.Setup(om => om.GetFeatureVariableValueForType<OptimizelyJSON>(
@@ -2343,13 +2375,14 @@ namespace OptimizelySDK.Tests
         public void
             TestGetFeatureVariableDoubleReturnsRightValueWhenUserBuckedIntoFeatureExperimentAndVariationIsToggleOn()
         {
-            var featureKey = "double_single_variable_feature";
-            var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
-            var variableKey = "double_variable";
-            var expectedValue = 42.42;
-            var experiment = Config.GetExperimentFromKey("test_experiment_double_feature");
-            var variation = Config.GetVariationFromKey("test_experiment_double_feature", "control");
-            var decision = Result<FeatureDecision>.NewResult(
+            string featureKey = "double_single_variable_feature";
+            FeatureFlag featureFlag = Config.GetFeatureFlagFromKey(featureKey);
+            string variableKey = "double_variable";
+            double expectedValue = 42.42;
+            Experiment experiment = Config.GetExperimentFromKey("test_experiment_double_feature");
+            Variation variation =
+                Config.GetVariationFromKey("test_experiment_double_feature", "control");
+            Result<FeatureDecision> decision = Result<FeatureDecision>.NewResult(
                 new FeatureDecision(experiment, variation,
                     FeatureDecision.DECISION_SOURCE_FEATURE_TEST), DecisionReasons);
 
@@ -2359,11 +2392,11 @@ namespace OptimizelySDK.Tests
                         Config))
                 .Returns(decision);
 
-            var optly = Helper.CreatePrivateOptimizely();
+            PrivateObject optly = Helper.CreatePrivateOptimizely();
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
             optly.SetFieldOrProperty("ProjectConfigManager", ConfigManager);
 
-            var variableValue = (double)optly.Invoke("GetFeatureVariableDouble", featureKey,
+            double variableValue = (double)optly.Invoke("GetFeatureVariableDouble", featureKey,
                 variableKey, TestUserId, null);
             Assert.AreEqual(expectedValue, variableValue);
 
@@ -2376,17 +2409,17 @@ namespace OptimizelySDK.Tests
         public void
             TestGetFeatureVariableIntegerReturnsRightValueWhenUserBuckedIntoFeatureExperimentAndVariationIsToggleOn()
         {
-            var featureKey = "integer_single_variable_feature";
-            var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
-            var variableKey = "integer_variable";
-            var expectedValue = 13;
-            var experiment = Config.GetExperimentFromKey("test_experiment_integer_feature");
-            var variation =
+            string featureKey = "integer_single_variable_feature";
+            FeatureFlag featureFlag = Config.GetFeatureFlagFromKey(featureKey);
+            string variableKey = "integer_variable";
+            int expectedValue = 13;
+            Experiment experiment = Config.GetExperimentFromKey("test_experiment_integer_feature");
+            Variation variation =
                 Config.GetVariationFromKey("test_experiment_integer_feature", "variation");
-            var decision = Result<FeatureDecision>.NewResult(
+            Result<FeatureDecision> decision = Result<FeatureDecision>.NewResult(
                 new FeatureDecision(experiment, variation,
                     FeatureDecision.DECISION_SOURCE_FEATURE_TEST), DecisionReasons);
-            var userAttributes = new UserAttributes
+            UserAttributes userAttributes = new UserAttributes
             {
                 {
                     "device_type", "iPhone"
@@ -2396,7 +2429,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
 
             DecisionServiceMock
@@ -2405,11 +2438,11 @@ namespace OptimizelySDK.Tests
                         Config))
                 .Returns(decision);
 
-            var optly = Helper.CreatePrivateOptimizely();
+            PrivateObject optly = Helper.CreatePrivateOptimizely();
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
             optly.SetFieldOrProperty("ProjectConfigManager", ConfigManager);
 
-            var variableValue = (int)optly.Invoke("GetFeatureVariableInteger", featureKey,
+            int variableValue = (int)optly.Invoke("GetFeatureVariableInteger", featureKey,
                 variableKey, TestUserId, userAttributes);
             Assert.AreEqual(expectedValue, variableValue);
 
@@ -2422,14 +2455,14 @@ namespace OptimizelySDK.Tests
         public void
             TestGetFeatureVariableDoubleReturnsDefaultValueWhenUserBuckedIntoFeatureExperimentAndVariationIsToggleOff()
         {
-            var featureKey = "double_single_variable_feature";
-            var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
-            var variableKey = "double_variable";
-            var expectedValue = 14.99;
-            var experiment = Config.GetExperimentFromKey("test_experiment_double_feature");
-            var variation =
+            string featureKey = "double_single_variable_feature";
+            FeatureFlag featureFlag = Config.GetFeatureFlagFromKey(featureKey);
+            string variableKey = "double_variable";
+            double expectedValue = 14.99;
+            Experiment experiment = Config.GetExperimentFromKey("test_experiment_double_feature");
+            Variation variation =
                 Config.GetVariationFromKey("test_experiment_double_feature", "variation");
-            var decision = Result<FeatureDecision>.NewResult(
+            Result<FeatureDecision> decision = Result<FeatureDecision>.NewResult(
                 new FeatureDecision(experiment, variation,
                     FeatureDecision.DECISION_SOURCE_FEATURE_TEST), DecisionReasons);
 
@@ -2439,11 +2472,11 @@ namespace OptimizelySDK.Tests
                         Config))
                 .Returns(decision);
 
-            var optly = Helper.CreatePrivateOptimizely();
+            PrivateObject optly = Helper.CreatePrivateOptimizely();
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
             optly.SetFieldOrProperty("ProjectConfigManager", ConfigManager);
 
-            var variableValue = (double)optly.Invoke("GetFeatureVariableDouble", featureKey,
+            double variableValue = (double)optly.Invoke("GetFeatureVariableDouble", featureKey,
                 variableKey, TestUserId, null);
             Assert.AreEqual(expectedValue, variableValue);
 
@@ -2456,17 +2489,17 @@ namespace OptimizelySDK.Tests
         public void
             TestGetFeatureVariableIntegerReturnsDefaultValueWhenUserBuckedIntoFeatureExperimentAndVariationIsToggleOff()
         {
-            var featureKey = "integer_single_variable_feature";
-            var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
-            var variableKey = "integer_variable";
-            var expectedValue = 7;
-            var experiment = Config.GetExperimentFromKey("test_experiment_integer_feature");
-            var variation =
+            string featureKey = "integer_single_variable_feature";
+            FeatureFlag featureFlag = Config.GetFeatureFlagFromKey(featureKey);
+            string variableKey = "integer_variable";
+            int expectedValue = 7;
+            Experiment experiment = Config.GetExperimentFromKey("test_experiment_integer_feature");
+            Variation variation =
                 Config.GetVariationFromKey("test_experiment_integer_feature", "control");
-            var decision = Result<FeatureDecision>.NewResult(
+            Result<FeatureDecision> decision = Result<FeatureDecision>.NewResult(
                 new FeatureDecision(experiment, variation,
                     FeatureDecision.DECISION_SOURCE_FEATURE_TEST), DecisionReasons);
-            var userAttributes = new UserAttributes
+            UserAttributes userAttributes = new UserAttributes
             {
                 {
                     "device_type", "iPhone"
@@ -2476,7 +2509,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
 
             DecisionServiceMock
@@ -2485,11 +2518,11 @@ namespace OptimizelySDK.Tests
                         Config))
                 .Returns(decision);
 
-            var optly = Helper.CreatePrivateOptimizely();
+            PrivateObject optly = Helper.CreatePrivateOptimizely();
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
             optly.SetFieldOrProperty("ProjectConfigManager", ConfigManager);
 
-            var variableValue = (int)optly.Invoke("GetFeatureVariableInteger", featureKey,
+            int variableValue = (int)optly.Invoke("GetFeatureVariableInteger", featureKey,
                 variableKey, TestUserId, userAttributes);
             Assert.AreEqual(expectedValue, variableValue);
 
@@ -2502,13 +2535,13 @@ namespace OptimizelySDK.Tests
         public void
             TestGetFeatureVariableBooleanReturnsRightValueWhenUserBuckedIntoRolloutAndVariationIsToggleOn()
         {
-            var featureKey = "boolean_single_variable_feature";
-            var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
-            var variableKey = "boolean_variable";
-            var expectedValue = true;
-            var experiment = Config.GetRolloutFromId("166660").Experiments[0];
-            var variation = Config.GetVariationFromKey(experiment.Key, "177771");
-            var decision = Result<FeatureDecision>.NewResult(
+            string featureKey = "boolean_single_variable_feature";
+            FeatureFlag featureFlag = Config.GetFeatureFlagFromKey(featureKey);
+            string variableKey = "boolean_variable";
+            bool expectedValue = true;
+            Experiment experiment = Config.GetRolloutFromId("166660").Experiments[0];
+            Variation variation = Config.GetVariationFromKey(experiment.Key, "177771");
+            Result<FeatureDecision> decision = Result<FeatureDecision>.NewResult(
                 new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT),
                 DecisionReasons);
 
@@ -2518,10 +2551,10 @@ namespace OptimizelySDK.Tests
                         Config))
                 .Returns(decision);
 
-            var optly = Helper.CreatePrivateOptimizely();
+            PrivateObject optly = Helper.CreatePrivateOptimizely();
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
             optly.SetFieldOrProperty("ProjectConfigManager", ConfigManager);
-            var variableValue = (bool)optly.Invoke("GetFeatureVariableBoolean", featureKey,
+            bool variableValue = (bool)optly.Invoke("GetFeatureVariableBoolean", featureKey,
                 variableKey, TestUserId, null);
             Assert.AreEqual(expectedValue, variableValue);
 
@@ -2534,17 +2567,17 @@ namespace OptimizelySDK.Tests
         public void
             TestGetFeatureVariableJSONReturnsRightValueWhenUserBucketIntoRolloutAndVariationIsToggleOn()
         {
-            var featureKey = "string_single_variable_feature";
-            var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
-            var variableKey = "json_var";
-            var expectedStringValue = "cta_4";
-            var expectedIntValue = 4;
-            var experiment = Config.GetRolloutFromId("166661").Experiments[0];
-            var variation = Config.GetVariationFromKey(experiment.Key, "177775");
-            var decision = Result<FeatureDecision>.NewResult(
+            string featureKey = "string_single_variable_feature";
+            FeatureFlag featureFlag = Config.GetFeatureFlagFromKey(featureKey);
+            string variableKey = "json_var";
+            string expectedStringValue = "cta_4";
+            int expectedIntValue = 4;
+            Experiment experiment = Config.GetRolloutFromId("166661").Experiments[0];
+            Variation variation = Config.GetVariationFromKey(experiment.Key, "177775");
+            Result<FeatureDecision> decision = Result<FeatureDecision>.NewResult(
                 new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT),
                 DecisionReasons);
-            var userAttributes = new UserAttributes
+            UserAttributes userAttributes = new UserAttributes
             {
                 {
                     "device_type", "iPhone"
@@ -2554,7 +2587,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
 
             DecisionServiceMock
@@ -2563,12 +2596,13 @@ namespace OptimizelySDK.Tests
                         Config))
                 .Returns(decision);
 
-            var optly = Helper.CreatePrivateOptimizely();
+            PrivateObject optly = Helper.CreatePrivateOptimizely();
 
             optly.SetFieldOrProperty("ProjectConfigManager", ConfigManager);
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
 
-            var variableValue = (OptimizelyJSON)optly.Invoke("GetFeatureVariableJSON", featureKey,
+            OptimizelyJSON variableValue = (OptimizelyJSON)optly.Invoke("GetFeatureVariableJSON",
+                featureKey,
                 variableKey, TestUserId, userAttributes);
             Assert.AreEqual(expectedIntValue, variableValue.GetValue<long>("int_var"));
             Assert.AreEqual(expectedStringValue, variableValue.GetValue<string>("string_var"));
@@ -2582,17 +2616,17 @@ namespace OptimizelySDK.Tests
         public void
             TestGetFeatureVariableJSONReturnsRightValueWhenUserBucketIntoRolloutAndVariationIsToggleOnTypeIsJson()
         {
-            var featureKey = "string_single_variable_feature";
-            var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
-            var variableKey = "true_json_var";
-            var expectedStringValue = "cta_5";
-            var expectedIntValue = 5;
-            var experiment = Config.GetRolloutFromId("166661").Experiments[0];
-            var variation = Config.GetVariationFromKey(experiment.Key, "177775");
-            var decision = Result<FeatureDecision>.NewResult(
+            string featureKey = "string_single_variable_feature";
+            FeatureFlag featureFlag = Config.GetFeatureFlagFromKey(featureKey);
+            string variableKey = "true_json_var";
+            string expectedStringValue = "cta_5";
+            int expectedIntValue = 5;
+            Experiment experiment = Config.GetRolloutFromId("166661").Experiments[0];
+            Variation variation = Config.GetVariationFromKey(experiment.Key, "177775");
+            Result<FeatureDecision> decision = Result<FeatureDecision>.NewResult(
                 new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT),
                 DecisionReasons);
-            var userAttributes = new UserAttributes
+            UserAttributes userAttributes = new UserAttributes
             {
                 {
                     "device_type", "iPhone"
@@ -2602,7 +2636,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
 
             DecisionServiceMock
@@ -2611,12 +2645,13 @@ namespace OptimizelySDK.Tests
                         Config))
                 .Returns(decision);
 
-            var optly = Helper.CreatePrivateOptimizely();
+            PrivateObject optly = Helper.CreatePrivateOptimizely();
 
             optly.SetFieldOrProperty("ProjectConfigManager", ConfigManager);
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
 
-            var variableValue = (OptimizelyJSON)optly.Invoke("GetFeatureVariableJSON", featureKey,
+            OptimizelyJSON variableValue = (OptimizelyJSON)optly.Invoke("GetFeatureVariableJSON",
+                featureKey,
                 variableKey, TestUserId, userAttributes);
             Assert.AreEqual(expectedIntValue, variableValue.GetValue<long>("int_var"));
             Assert.AreEqual(expectedStringValue, variableValue.GetValue<string>("string_var"));
@@ -2630,16 +2665,16 @@ namespace OptimizelySDK.Tests
         public void
             TestGetFeatureVariableStringReturnsRightValueWhenUserBuckedIntoRolloutAndVariationIsToggleOn()
         {
-            var featureKey = "string_single_variable_feature";
-            var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
-            var variableKey = "string_variable";
-            var expectedValue = "cta_4";
-            var experiment = Config.GetRolloutFromId("166661").Experiments[0];
-            var variation = Config.GetVariationFromKey(experiment.Key, "177775");
-            var decision = Result<FeatureDecision>.NewResult(
+            string featureKey = "string_single_variable_feature";
+            FeatureFlag featureFlag = Config.GetFeatureFlagFromKey(featureKey);
+            string variableKey = "string_variable";
+            string expectedValue = "cta_4";
+            Experiment experiment = Config.GetRolloutFromId("166661").Experiments[0];
+            Variation variation = Config.GetVariationFromKey(experiment.Key, "177775");
+            Result<FeatureDecision> decision = Result<FeatureDecision>.NewResult(
                 new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT),
                 DecisionReasons);
-            var userAttributes = new UserAttributes
+            UserAttributes userAttributes = new UserAttributes
             {
                 {
                     "device_type", "iPhone"
@@ -2649,7 +2684,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
 
             DecisionServiceMock
@@ -2658,12 +2693,12 @@ namespace OptimizelySDK.Tests
                         Config))
                 .Returns(decision);
 
-            var optly = Helper.CreatePrivateOptimizely();
+            PrivateObject optly = Helper.CreatePrivateOptimizely();
 
             optly.SetFieldOrProperty("ProjectConfigManager", ConfigManager);
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
 
-            var variableValue = (string)optly.Invoke("GetFeatureVariableString", featureKey,
+            string variableValue = (string)optly.Invoke("GetFeatureVariableString", featureKey,
                 variableKey, TestUserId, userAttributes);
             Assert.AreEqual(expectedValue, variableValue);
 
@@ -2676,13 +2711,13 @@ namespace OptimizelySDK.Tests
         public void
             TestGetFeatureVariableBooleanReturnsDefaultValueWhenUserBuckedIntoRolloutAndVariationIsToggleOff()
         {
-            var featureKey = "boolean_single_variable_feature";
-            var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
-            var variableKey = "boolean_variable";
-            var expectedValue = true;
-            var experiment = Config.GetRolloutFromId("166660").Experiments[3];
-            var variation = Config.GetVariationFromKey(experiment.Key, "177782");
-            var decision = Result<FeatureDecision>.NewResult(
+            string featureKey = "boolean_single_variable_feature";
+            FeatureFlag featureFlag = Config.GetFeatureFlagFromKey(featureKey);
+            string variableKey = "boolean_variable";
+            bool expectedValue = true;
+            Experiment experiment = Config.GetRolloutFromId("166660").Experiments[3];
+            Variation variation = Config.GetVariationFromKey(experiment.Key, "177782");
+            Result<FeatureDecision> decision = Result<FeatureDecision>.NewResult(
                 new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT),
                 DecisionReasons);
 
@@ -2692,10 +2727,10 @@ namespace OptimizelySDK.Tests
                         Config))
                 .Returns(decision);
 
-            var optly = Helper.CreatePrivateOptimizely();
+            PrivateObject optly = Helper.CreatePrivateOptimizely();
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
             optly.SetFieldOrProperty("ProjectConfigManager", ConfigManager);
-            var variableValue = (bool)optly.Invoke("GetFeatureVariableBoolean", featureKey,
+            bool variableValue = (bool)optly.Invoke("GetFeatureVariableBoolean", featureKey,
                 variableKey, TestUserId, null);
             Assert.AreEqual(expectedValue, variableValue);
             LoggerMock.Verify(l => l.Log(LogLevel.INFO,
@@ -2707,16 +2742,16 @@ namespace OptimizelySDK.Tests
         public void
             TestGetFeatureVariableStringReturnsDefaultValueWhenUserBuckedIntoRolloutAndVariationIsToggleOff()
         {
-            var featureKey = "string_single_variable_feature";
-            var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
-            var variableKey = "string_variable";
-            var expectedValue = "wingardium leviosa";
-            var experiment = Config.GetRolloutFromId("166661").Experiments[2];
-            var variation = Config.GetVariationFromKey(experiment.Key, "177784");
-            var decision = Result<FeatureDecision>.NewResult(
+            string featureKey = "string_single_variable_feature";
+            FeatureFlag featureFlag = Config.GetFeatureFlagFromKey(featureKey);
+            string variableKey = "string_variable";
+            string expectedValue = "wingardium leviosa";
+            Experiment experiment = Config.GetRolloutFromId("166661").Experiments[2];
+            Variation variation = Config.GetVariationFromKey(experiment.Key, "177784");
+            Result<FeatureDecision> decision = Result<FeatureDecision>.NewResult(
                 new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT),
                 DecisionReasons);
-            var userAttributes = new UserAttributes
+            UserAttributes userAttributes = new UserAttributes
             {
                 {
                     "device_type", "iPhone"
@@ -2726,7 +2761,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
 
             DecisionServiceMock
@@ -2735,11 +2770,11 @@ namespace OptimizelySDK.Tests
                         Config))
                 .Returns(decision);
 
-            var optly = Helper.CreatePrivateOptimizely();
+            PrivateObject optly = Helper.CreatePrivateOptimizely();
             optly.SetFieldOrProperty("ProjectConfigManager", ConfigManager);
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
 
-            var variableValue = (string)optly.Invoke("GetFeatureVariableString", featureKey,
+            string variableValue = (string)optly.Invoke("GetFeatureVariableString", featureKey,
                 variableKey, TestUserId, userAttributes);
             Assert.AreEqual(expectedValue, variableValue);
 
@@ -2752,11 +2787,12 @@ namespace OptimizelySDK.Tests
         public void
             TestGetFeatureVariableDoubleReturnsDefaultValueWhenUserNotBuckedIntoBothFeatureExperimentAndRollout()
         {
-            var featureKey = "double_single_variable_feature";
-            var featureFlag = Config.GetFeatureFlagFromKey("double_single_variable_feature");
-            var variableKey = "double_variable";
-            var expectedValue = 14.99;
-            var decision = Result<FeatureDecision>.NewResult(
+            string featureKey = "double_single_variable_feature";
+            FeatureFlag featureFlag =
+                Config.GetFeatureFlagFromKey("double_single_variable_feature");
+            string variableKey = "double_variable";
+            double expectedValue = 14.99;
+            Result<FeatureDecision> decision = Result<FeatureDecision>.NewResult(
                 new FeatureDecision(null, null, FeatureDecision.DECISION_SOURCE_ROLLOUT),
                 DecisionReasons);
 
@@ -2766,11 +2802,11 @@ namespace OptimizelySDK.Tests
                         Config))
                 .Returns(decision);
 
-            var optly = Helper.CreatePrivateOptimizely();
+            PrivateObject optly = Helper.CreatePrivateOptimizely();
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
             optly.SetFieldOrProperty("ProjectConfigManager", ConfigManager);
 
-            var variableValue = (double)optly.Invoke("GetFeatureVariableDouble", featureKey,
+            double variableValue = (double)optly.Invoke("GetFeatureVariableDouble", featureKey,
                 variableKey, TestUserId, null);
             Assert.AreEqual(expectedValue, variableValue);
 
@@ -2789,9 +2825,9 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestGetFeatureVariableValueForTypeGivenNullOrEmptyArguments()
         {
-            var featureKey = "featureKey";
-            var variableKey = "variableKey";
-            var variableType = "boolean";
+            string featureKey = "featureKey";
+            string variableKey = "variableKey";
+            string variableType = "boolean";
 
             // Passing null and empty feature key.
             Assert.IsNull(Optimizely.GetFeatureVariableValueForType<bool?>(null, variableKey,
@@ -2825,11 +2861,11 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestGetFeatureVariableValueForTypeGivenFeatureKeyOrVariableKeyNotFound()
         {
-            var featureKey =
+            string featureKey =
                 "this_feature_should_never_be_found_in_the_datafile_unless_the_datafile_creator_got_insane";
-            var variableKey =
+            string variableKey =
                 "this_variable_should_never_be_found_in_the_datafile_unless_the_datafile_creator_got_insane";
-            var variableType = "boolean";
+            string variableType = "boolean";
 
             Assert.IsNull(Optimizely.GetFeatureVariableValueForType<bool?>(featureKey, variableKey,
                 TestUserId, null, variableType));
@@ -2847,10 +2883,10 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestGetFeatureVariableValueForTypeGivenInvalidVariableType()
         {
-            var variableTypeBool = "boolean";
-            var variableTypeInt = "integer";
-            var variableTypeDouble = "double";
-            var variableTypeString = "string";
+            string variableTypeBool = "boolean";
+            string variableTypeInt = "integer";
+            string variableTypeDouble = "double";
+            string variableTypeString = "string";
 
             Assert.IsNull(Optimizely.GetFeatureVariableValueForType<double?>(
                 "double_single_variable_feature", "double_variable", TestUserId, null,
@@ -2884,12 +2920,12 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestUnsupportedVariableType()
         {
-            var featureVariableStringRandomType =
+            string featureVariableStringRandomType =
                 Optimizely.GetFeatureVariableString("", "any_key", TestUserId);
             Assert.IsNull(featureVariableStringRandomType);
 
             // This is to test that only json subtype is parsing and all other will subtype will be stringify
-            var featureVariableStringRegexSubType =
+            string featureVariableStringRegexSubType =
                 Optimizely.GetFeatureVariableString("unsupported_variabletype", "string_regex_key",
                     TestUserId);
             Assert.AreEqual(featureVariableStringRegexSubType, "^\\d+(\\.\\d+)?");
@@ -2899,16 +2935,17 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestGetFeatureVariableValueForTypeGivenFeatureFlagIsNotEnabledForUser()
         {
-            var featureKey = "double_single_variable_feature";
-            var featureFlag = Config.GetFeatureFlagFromKey("double_single_variable_feature");
-            var experiment = Config.GetExperimentFromKey("test_experiment_double_feature");
-            var variation =
+            string featureKey = "double_single_variable_feature";
+            FeatureFlag featureFlag =
+                Config.GetFeatureFlagFromKey("double_single_variable_feature");
+            Experiment experiment = Config.GetExperimentFromKey("test_experiment_double_feature");
+            Variation variation =
                 Config.GetVariationFromKey("test_experiment_double_feature", "variation");
-            var variableKey = "double_variable";
-            var variableType = "double";
-            var expectedValue = 14.99;
+            string variableKey = "double_variable";
+            string variableType = "double";
+            double expectedValue = 14.99;
 
-            var decision = Result<FeatureDecision>.NewResult(
+            Result<FeatureDecision> decision = Result<FeatureDecision>.NewResult(
                 new FeatureDecision(experiment, variation,
                     FeatureDecision.DECISION_SOURCE_FEATURE_TEST), DecisionReasons);
 
@@ -2918,15 +2955,15 @@ namespace OptimizelySDK.Tests
                         Config))
                 .Returns(decision);
 
-            var optly = Helper.CreatePrivateOptimizely();
+            PrivateObject optly = Helper.CreatePrivateOptimizely();
 
             optly.SetFieldOrProperty("ProjectConfigManager", ConfigManager);
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
 
-            var variableValue = (double?)optly.InvokeGeneric("GetFeatureVariableValueForType",
+            double? variableValue = (double?)optly.InvokeGeneric("GetFeatureVariableValueForType",
                 new Type[]
                 {
-                    typeof(double?)
+                    typeof(double?),
                 }, featureKey, variableKey, TestUserId, null, variableType);
             Assert.AreEqual(expectedValue, variableValue);
 
@@ -2941,17 +2978,18 @@ namespace OptimizelySDK.Tests
         public void
             TestGetFeatureVariableValueForTypeGivenFeatureFlagIsEnabledForUserAndVaribaleNotInVariation()
         {
-            var featureKey = "double_single_variable_feature";
-            var featureFlag = Config.GetFeatureFlagFromKey("double_single_variable_feature");
-            var experiment = Config.GetExperimentFromKey("test_experiment_integer_feature");
-            var differentVariation =
+            string featureKey = "double_single_variable_feature";
+            FeatureFlag featureFlag =
+                Config.GetFeatureFlagFromKey("double_single_variable_feature");
+            Experiment experiment = Config.GetExperimentFromKey("test_experiment_integer_feature");
+            Variation differentVariation =
                 Config.GetVariationFromKey("test_experiment_integer_feature", "control");
-            var expectedDecision = Result<FeatureDecision>.NewResult(
+            Result<FeatureDecision> expectedDecision = Result<FeatureDecision>.NewResult(
                 new FeatureDecision(experiment, differentVariation,
                     FeatureDecision.DECISION_SOURCE_FEATURE_TEST), DecisionReasons);
-            var variableKey = "double_variable";
-            var variableType = "double";
-            var expectedValue = 14.99;
+            string variableKey = "double_variable";
+            string variableType = "double";
+            double expectedValue = 14.99;
 
             // Mock GetVariationForFeature method to return variation of different feature.
             DecisionServiceMock
@@ -2960,15 +2998,15 @@ namespace OptimizelySDK.Tests
                         Config))
                 .Returns(expectedDecision);
 
-            var optly = Helper.CreatePrivateOptimizely();
+            PrivateObject optly = Helper.CreatePrivateOptimizely();
 
             optly.SetFieldOrProperty("ProjectConfigManager", ConfigManager);
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
 
-            var variableValue = (double?)optly.InvokeGeneric("GetFeatureVariableValueForType",
+            double? variableValue = (double?)optly.InvokeGeneric("GetFeatureVariableValueForType",
                 new Type[]
                 {
-                    typeof(double?)
+                    typeof(double?),
                 }, featureKey, variableKey, TestUserId, null, variableType);
             Assert.AreEqual(expectedValue, variableValue);
 
@@ -2984,14 +3022,16 @@ namespace OptimizelySDK.Tests
         public void
             TestGetFeatureVariableValueForTypeGivenFeatureFlagIsEnabledForUserAndVaribaleIsInVariation()
         {
-            var featureKey = "double_single_variable_feature";
-            var featureFlag = Config.GetFeatureFlagFromKey("double_single_variable_feature");
-            var variableKey = "double_variable";
-            var variableType = "double";
-            var expectedValue = 42.42;
-            var experiment = Config.GetExperimentFromKey("test_experiment_double_feature");
-            var variation = Config.GetVariationFromKey("test_experiment_double_feature", "control");
-            var decision = Result<FeatureDecision>.NewResult(
+            string featureKey = "double_single_variable_feature";
+            FeatureFlag featureFlag =
+                Config.GetFeatureFlagFromKey("double_single_variable_feature");
+            string variableKey = "double_variable";
+            string variableType = "double";
+            double expectedValue = 42.42;
+            Experiment experiment = Config.GetExperimentFromKey("test_experiment_double_feature");
+            Variation variation =
+                Config.GetVariationFromKey("test_experiment_double_feature", "control");
+            Result<FeatureDecision> decision = Result<FeatureDecision>.NewResult(
                 new FeatureDecision(experiment, variation,
                     FeatureDecision.DECISION_SOURCE_FEATURE_TEST), DecisionReasons);
 
@@ -3001,15 +3041,15 @@ namespace OptimizelySDK.Tests
                         Config))
                 .Returns(decision);
 
-            var optly = Helper.CreatePrivateOptimizely();
+            PrivateObject optly = Helper.CreatePrivateOptimizely();
 
             optly.SetFieldOrProperty("ProjectConfigManager", ConfigManager);
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
 
-            var variableValue = (double?)optly.InvokeGeneric("GetFeatureVariableValueForType",
+            double? variableValue = (double?)optly.InvokeGeneric("GetFeatureVariableValueForType",
                 new Type[]
                 {
-                    typeof(double?)
+                    typeof(double?),
                 }, featureKey, variableKey, TestUserId, null, variableType);
             Assert.AreEqual(expectedValue, variableValue);
 
@@ -3022,16 +3062,16 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestGetFeatureVariableValueForTypeWithRolloutRule()
         {
-            var featureKey = "boolean_single_variable_feature";
-            var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
-            var variableKey = "boolean_variable";
+            string featureKey = "boolean_single_variable_feature";
+            FeatureFlag featureFlag = Config.GetFeatureFlagFromKey(featureKey);
+            string variableKey = "boolean_variable";
             //experimentid - 177772
-            var experiment = Config.Rollouts[0].Experiments[1];
-            var variation = Config.GetVariationFromId(experiment.Key, "177773");
-            var decision = Result<FeatureDecision>.NewResult(
+            Experiment experiment = Config.Rollouts[0].Experiments[1];
+            Variation variation = Config.GetVariationFromId(experiment.Key, "177773");
+            Result<FeatureDecision> decision = Result<FeatureDecision>.NewResult(
                 new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT),
                 DecisionReasons);
-            var expectedVariableValue = false;
+            bool expectedVariableValue = false;
 
             DecisionServiceMock
                 .Setup(ds =>
@@ -3039,13 +3079,13 @@ namespace OptimizelySDK.Tests
                         Config))
                 .Returns(decision);
 
-            var optly = Helper.CreatePrivateOptimizely();
+            PrivateObject optly = Helper.CreatePrivateOptimizely();
 
             optly.SetFieldOrProperty("ProjectConfigManager", ConfigManager);
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
 
             // Calling GetFeatureVariableBoolean to get GetFeatureVariableValueForType returned value casted in bool.
-            var actualVariableValue = (bool?)optly.Invoke("GetFeatureVariableBoolean", featureKey,
+            bool? actualVariableValue = (bool?)optly.Invoke("GetFeatureVariableBoolean", featureKey,
                 variableKey, TestUserId, null);
 
             // Verify that variable value 'false' has been returned from GetFeatureVariableValueForType as it is the value
@@ -3061,7 +3101,7 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestIsFeatureEnabledGivenNullOrEmptyArguments()
         {
-            var featureKey = "featureKey";
+            string featureKey = "featureKey";
 
             Assert.IsFalse(Optimizely.IsFeatureEnabled(featureKey, null, null));
             Assert.IsFalse(Optimizely.IsFeatureEnabled(featureKey, "", null));
@@ -3080,7 +3120,7 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestIsFeatureEnabledGivenFeatureFlagNotFound()
         {
-            var featureKey = "feature_not_found";
+            string featureKey = "feature_not_found";
             Assert.IsFalse(Optimizely.IsFeatureEnabled(featureKey, TestUserId, null));
 
             LoggerMock.Verify(l =>
@@ -3091,18 +3131,20 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestIsFeatureEnabledGivenFeatureFlagContainsInvalidExperiment()
         {
-            var tempConfig = DatafileProjectConfig.Create(TestData.Datafile, LoggerMock.Object,
+            ProjectConfig tempConfig = DatafileProjectConfig.Create(TestData.Datafile,
+                LoggerMock.Object,
                 new NoOpErrorHandler());
-            var tempConfigManager = new FallbackProjectConfigManager(tempConfig);
-            var featureFlag = tempConfig.GetFeatureFlagFromKey("multi_variate_feature");
+            FallbackProjectConfigManager tempConfigManager =
+                new FallbackProjectConfigManager(tempConfig);
+            FeatureFlag featureFlag = tempConfig.GetFeatureFlagFromKey("multi_variate_feature");
 
-            var optly = Helper.CreatePrivateOptimizely();
+            PrivateObject optly = Helper.CreatePrivateOptimizely();
             optly.SetFieldOrProperty("ProjectConfigManager", tempConfigManager);
 
             // Set such an experiment to the list of experiment ids, that does not belong to the feature.
             featureFlag.ExperimentIds = new List<string>
             {
-                "4209211"
+                "4209211",
             };
 
             // Should return false when the experiment in feature flag does not get found in the datafile.
@@ -3117,12 +3159,13 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestIsFeatureEnabledGivenFeatureFlagIsNotEnabledForUser()
         {
-            var featureKey = "double_single_variable_feature";
-            var featureFlag = Config.GetFeatureFlagFromKey("double_single_variable_feature");
-            var experiment = Config.GetExperimentFromKey("test_experiment_double_feature");
-            var variation =
+            string featureKey = "double_single_variable_feature";
+            FeatureFlag featureFlag =
+                Config.GetFeatureFlagFromKey("double_single_variable_feature");
+            Experiment experiment = Config.GetExperimentFromKey("test_experiment_double_feature");
+            Variation variation =
                 Config.GetVariationFromKey("test_experiment_double_feature", "variation");
-            var decision = Result<FeatureDecision>.NewResult(
+            Result<FeatureDecision> decision = Result<FeatureDecision>.NewResult(
                 new FeatureDecision(experiment, variation,
                     FeatureDecision.DECISION_SOURCE_FEATURE_TEST), DecisionReasons);
 
@@ -3132,7 +3175,7 @@ namespace OptimizelySDK.Tests
                         Config))
                 .Returns(decision);
 
-            var optly = Helper.CreatePrivateOptimizely();
+            PrivateObject optly = Helper.CreatePrivateOptimizely();
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
             optly.SetFieldOrProperty("ProjectConfigManager", ConfigManager);
 
@@ -3148,12 +3191,12 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestIsFeatureEnabledGivenFeatureFlagIsEnabledAndUserIsNotBeingExperimented()
         {
-            var featureKey = "boolean_single_variable_feature";
-            var rollout = Config.GetRolloutFromId("166660");
-            var experiment = rollout.Experiments[0];
-            var variation = experiment.Variations[0];
-            var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
-            var decision = Result<FeatureDecision>.NewResult(
+            string featureKey = "boolean_single_variable_feature";
+            Rollout rollout = Config.GetRolloutFromId("166660");
+            Experiment experiment = rollout.Experiments[0];
+            Variation variation = experiment.Variations[0];
+            FeatureFlag featureFlag = Config.GetFeatureFlagFromKey(featureKey);
+            Result<FeatureDecision> decision = Result<FeatureDecision>.NewResult(
                 new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT),
                 DecisionReasons);
 
@@ -3163,7 +3206,7 @@ namespace OptimizelySDK.Tests
                         Config))
                 .Returns(decision);
 
-            var optly = Helper.CreatePrivateOptimizely();
+            PrivateObject optly = Helper.CreatePrivateOptimizely();
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
             optly.SetFieldOrProperty("ProjectConfigManager", ConfigManager);
 
@@ -3184,11 +3227,12 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestIsFeatureEnabledGivenFeatureFlagIsEnabledAndUserIsBeingExperimented()
         {
-            var featureKey = "double_single_variable_feature";
-            var experiment = Config.GetExperimentFromKey("test_experiment_double_feature");
-            var variation = Config.GetVariationFromKey("test_experiment_double_feature", "control");
-            var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
-            var decision = Result<FeatureDecision>.NewResult(
+            string featureKey = "double_single_variable_feature";
+            Experiment experiment = Config.GetExperimentFromKey("test_experiment_double_feature");
+            Variation variation =
+                Config.GetVariationFromKey("test_experiment_double_feature", "control");
+            FeatureFlag featureFlag = Config.GetFeatureFlagFromKey(featureKey);
+            Result<FeatureDecision> decision = Result<FeatureDecision>.NewResult(
                 new FeatureDecision(experiment, variation,
                     FeatureDecision.DECISION_SOURCE_FEATURE_TEST), DecisionReasons);
 
@@ -3198,7 +3242,7 @@ namespace OptimizelySDK.Tests
                         Config))
                 .Returns(decision);
 
-            var optly = Helper.CreatePrivateOptimizely();
+            PrivateObject optly = Helper.CreatePrivateOptimizely();
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
             optly.SetFieldOrProperty("ProjectConfigManager", ConfigManager);
 
@@ -3219,12 +3263,12 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestIsFeatureEnabledGivenFeatureFlagIsNotEnabledAndUserIsBeingExperimented()
         {
-            var featureKey = "double_single_variable_feature";
-            var experiment = Config.GetExperimentFromKey("test_experiment_double_feature");
-            var variation =
+            string featureKey = "double_single_variable_feature";
+            Experiment experiment = Config.GetExperimentFromKey("test_experiment_double_feature");
+            Variation variation =
                 Config.GetVariationFromKey("test_experiment_double_feature", "variation");
-            var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
-            var decision = Result<FeatureDecision>.NewResult(
+            FeatureFlag featureFlag = Config.GetFeatureFlagFromKey(featureKey);
+            Result<FeatureDecision> decision = Result<FeatureDecision>.NewResult(
                 new FeatureDecision(experiment, variation,
                     FeatureDecision.DECISION_SOURCE_FEATURE_TEST), DecisionReasons);
 
@@ -3234,7 +3278,7 @@ namespace OptimizelySDK.Tests
                         Config))
                 .Returns(decision);
 
-            var optly = Helper.CreatePrivateOptimizely();
+            PrivateObject optly = Helper.CreatePrivateOptimizely();
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
             optly.SetFieldOrProperty("ProjectConfigManager", ConfigManager);
 
@@ -3257,15 +3301,15 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestIsFeatureEnabledGivenVariationNotFoundInFeatureExperimentButInRolloutRule()
         {
-            var featureKey = "boolean_single_variable_feature";
-            var userAttributes = new UserAttributes
+            string featureKey = "boolean_single_variable_feature";
+            UserAttributes userAttributes = new UserAttributes
             {
                 {
                     "device_type", "iPhone"
                 },
                 {
                     "company", "Optimizely"
-                }
+                },
             };
 
             Assert.True(Optimizely.IsFeatureEnabled(featureKey, TestUserId, userAttributes));
@@ -3302,18 +3346,18 @@ namespace OptimizelySDK.Tests
 
         public void TestIsFeatureEnabledWithFeatureEnabledPropertyGivenFeatureExperiment()
         {
-            var userId = "testUserId2";
-            var featureKey = "double_single_variable_feature";
-            var experiment = Config.GetExperimentFromKey("test_experiment_double_feature");
-            var featureEnabledTrue =
+            string userId = "testUserId2";
+            string featureKey = "double_single_variable_feature";
+            Experiment experiment = Config.GetExperimentFromKey("test_experiment_double_feature");
+            Variation featureEnabledTrue =
                 Config.GetVariationFromKey("test_experiment_double_feature", "control");
-            var featureEnabledFalse =
+            Variation featureEnabledFalse =
                 Config.GetVariationFromKey("test_experiment_double_feature", "variation");
-            var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
-            var decisionTrue = Result<FeatureDecision>.NewResult(
+            FeatureFlag featureFlag = Config.GetFeatureFlagFromKey(featureKey);
+            Result<FeatureDecision> decisionTrue = Result<FeatureDecision>.NewResult(
                 new FeatureDecision(experiment, featureEnabledTrue,
                     FeatureDecision.DECISION_SOURCE_FEATURE_TEST), DecisionReasons);
-            var decisionFalse = Result<FeatureDecision>.NewResult(
+            Result<FeatureDecision> decisionFalse = Result<FeatureDecision>.NewResult(
                 new FeatureDecision(experiment, featureEnabledFalse,
                     FeatureDecision.DECISION_SOURCE_FEATURE_TEST), DecisionReasons);
 
@@ -3329,7 +3373,7 @@ namespace OptimizelySDK.Tests
                         Config))
                 .Returns(decisionFalse);
 
-            var optly = Helper.CreatePrivateOptimizely();
+            PrivateObject optly = Helper.CreatePrivateOptimizely();
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
 
             // Verify that IsFeatureEnabled returns true when feature experiment variation's 'featureEnabled' property is true.
@@ -3343,8 +3387,8 @@ namespace OptimizelySDK.Tests
 
         public void TestIsFeatureEnabledWithFeatureEnabledPropertyGivenRolloutRule()
         {
-            var featureKey = "boolean_single_variable_feature";
-            var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
+            string featureKey = "boolean_single_variable_feature";
+            FeatureFlag featureFlag = Config.GetFeatureFlagFromKey(featureKey);
 
             // Verify that IsFeatureEnabled returns true when user is bucketed into the rollout rule's variation.
             Assert.True(Optimizely.IsFeatureEnabled("boolean_single_variable_feature", TestUserId));
@@ -3354,7 +3398,7 @@ namespace OptimizelySDK.Tests
                     ds.GetVariationForFeature(featureFlag, It.IsAny<OptimizelyUserContext>(),
                         Config))
                 .Returns<FeatureDecision>(null);
-            var optly = Helper.CreatePrivateOptimizely();
+            PrivateObject optly = Helper.CreatePrivateOptimizely();
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
 
             // Verify that IsFeatureEnabled returns false when user does not get bucketed into the rollout rule's variation.
@@ -3375,7 +3419,7 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestActivateListenerWithAttributes()
         {
-            var userAttributes = new UserAttributes
+            UserAttributes userAttributes = new UserAttributes
             {
                 {
                     "device_type", "iPhone"
@@ -3385,7 +3429,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
 
             TestActivateListener(userAttributes);
@@ -3393,15 +3437,15 @@ namespace OptimizelySDK.Tests
 
         public void TestActivateListener(UserAttributes userAttributes)
         {
-            var experimentKey = "group_experiment_1";
-            var variationKey = "group_exp_1_var_1";
-            var featureKey = "boolean_feature";
-            var experiment = Config.GetExperimentFromKey(experimentKey);
-            var variation =
+            string experimentKey = "group_experiment_1";
+            string variationKey = "group_exp_1_var_1";
+            string featureKey = "boolean_feature";
+            Experiment experiment = Config.GetExperimentFromKey(experimentKey);
+            Result<Variation> variation =
                 Result<Variation>.NewResult(Config.GetVariationFromKey(experimentKey, variationKey),
                     DecisionReasons);
-            var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
-            var decision = Result<FeatureDecision>.NewResult(
+            FeatureFlag featureFlag = Config.GetFeatureFlagFromKey(featureKey);
+            Result<FeatureDecision> decision = Result<FeatureDecision>.NewResult(
                 new FeatureDecision(experiment, variation.ResultObject,
                     FeatureDecision.DECISION_SOURCE_FEATURE_TEST), DecisionReasons);
 
@@ -3428,11 +3472,12 @@ namespace OptimizelySDK.Tests
                     It.IsAny<OptimizelyUserContext>(), It.IsAny<ProjectConfig>()))
                 .Returns(decision);
 
-            var optly = Helper.CreatePrivateOptimizely();
-            var optStronglyTyped = optly.GetObject() as Optimizely;
+            PrivateObject optly = Helper.CreatePrivateOptimizely();
+            Optimizely optStronglyTyped = optly.GetObject() as Optimizely;
 
             // Adding notification listeners.
-            var notificationType = NotificationCenter.NotificationType.Activate;
+            NotificationCenter.NotificationType notificationType =
+                NotificationCenter.NotificationType.Activate;
             optStronglyTyped.NotificationCenter.AddNotification(notificationType,
                 NotificationCallbackMock.Object.TestActivateCallback);
             optStronglyTyped.NotificationCenter.AddNotification(notificationType,
@@ -3465,7 +3510,7 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestTrackListenerWithAttributesWithoutEventTags()
         {
-            var userAttributes = new UserAttributes
+            UserAttributes userAttributes = new UserAttributes
             {
                 {
                     "device_type", "iPhone"
@@ -3475,7 +3520,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
 
             TestTrackListener(userAttributes, null);
@@ -3484,7 +3529,7 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestTrackListenerWithAttributesAndEventTags()
         {
-            var userAttributes = new UserAttributes
+            UserAttributes userAttributes = new UserAttributes
             {
                 {
                     "device_type", "iPhone"
@@ -3494,14 +3539,14 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
 
-            var eventTags = new EventTags
+            EventTags eventTags = new EventTags
             {
                 {
                     "revenue", 42
-                }
+                },
             };
 
             TestTrackListener(userAttributes, eventTags);
@@ -3509,20 +3554,20 @@ namespace OptimizelySDK.Tests
 
         public void TestTrackListener(UserAttributes userAttributes, EventTags eventTags)
         {
-            var experimentKey = "test_experiment";
-            var variationKey = "control";
-            var eventKey = "purchase";
-            var experiment = Config.GetExperimentFromKey(experimentKey);
-            var variation =
+            string experimentKey = "test_experiment";
+            string variationKey = "control";
+            string eventKey = "purchase";
+            Experiment experiment = Config.GetExperimentFromKey(experimentKey);
+            Result<Variation> variation =
                 Result<Variation>.NewResult(Config.GetVariationFromKey(experimentKey, variationKey),
                     DecisionReasons);
-            var logEvent = new LogEvent("https://logx.optimizely.com/v1/events",
+            LogEvent logEvent = new LogEvent("https://logx.optimizely.com/v1/events",
                 OptimizelyHelper.SingleParameter,
                 "POST", new Dictionary<string, string>
                     { });
 
-            var optly = Helper.CreatePrivateOptimizely();
-            var optStronglyTyped = optly.GetObject() as Optimizely;
+            PrivateObject optly = Helper.CreatePrivateOptimizely();
+            Optimizely optStronglyTyped = optly.GetObject() as Optimizely;
 
             // Mocking objects.
             NotificationCallbackMock.Setup(nc => nc.TestTrackCallback(It.IsAny<string>(),
@@ -3542,7 +3587,8 @@ namespace OptimizelySDK.Tests
                 .Returns(variation);
 
             // Adding notification listeners.
-            var notificationType = NotificationCenter.NotificationType.Track;
+            NotificationCenter.NotificationType notificationType =
+                NotificationCenter.NotificationType.Track;
             optStronglyTyped.NotificationCenter.AddNotification(notificationType,
                 NotificationCallbackMock.Object.TestTrackCallback);
             optStronglyTyped.NotificationCenter.AddNotification(notificationType,
@@ -3569,13 +3615,13 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestActivateSendsDecisionNotificationWithActualVariationKey()
         {
-            var experimentKey = "test_experiment";
-            var variationKey = "variation";
-            var experiment = Config.GetExperimentFromKey(experimentKey);
-            var variation =
+            string experimentKey = "test_experiment";
+            string variationKey = "variation";
+            Experiment experiment = Config.GetExperimentFromKey(experimentKey);
+            Result<Variation> variation =
                 Result<Variation>.NewResult(Config.GetVariationFromKey(experimentKey, variationKey),
                     DecisionReasons);
-            var userAttributes = new UserAttributes
+            UserAttributes userAttributes = new UserAttributes
             {
                 {
                     "device_type", "iPhone"
@@ -3585,7 +3631,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
 
             // Mocking objects.
@@ -3597,9 +3643,9 @@ namespace OptimizelySDK.Tests
                 .Setup(ds => ds.GetVariation(experiment, It.IsAny<OptimizelyUserContext>(), Config))
                 .Returns(variation);
 
-            var optly = Helper.CreatePrivateOptimizely();
+            PrivateObject optly = Helper.CreatePrivateOptimizely();
             optly.SetFieldOrProperty("ProjectConfigManager", ConfigManager);
-            var optStronglyTyped = optly.GetObject() as Optimizely;
+            Optimizely optStronglyTyped = optly.GetObject() as Optimizely;
 
             optStronglyTyped.NotificationCenter.AddNotification(
                 NotificationCenter.NotificationType.Decision,
@@ -3607,7 +3653,7 @@ namespace OptimizelySDK.Tests
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
 
             optly.Invoke("Activate", experimentKey, TestUserId, userAttributes);
-            var decisionInfo = new Dictionary<string, object>
+            Dictionary<string, object> decisionInfo = new Dictionary<string, object>
             {
                 {
                     "experimentKey", experimentKey
@@ -3626,13 +3672,13 @@ namespace OptimizelySDK.Tests
         public void
             TestActivateSendsDecisionNotificationWithVariationKeyAndTypeFeatureTestForFeatureExperiment()
         {
-            var experimentKey = "group_experiment_1";
-            var variationKey = "group_exp_1_var_1";
-            var experiment = Config.GetExperimentFromKey(experimentKey);
-            var variation =
+            string experimentKey = "group_experiment_1";
+            string variationKey = "group_exp_1_var_1";
+            Experiment experiment = Config.GetExperimentFromKey(experimentKey);
+            Result<Variation> variation =
                 Result<Variation>.NewResult(Config.GetVariationFromKey(experimentKey, variationKey),
                     DecisionReasons);
-            var userAttributes = new UserAttributes
+            UserAttributes userAttributes = new UserAttributes
             {
                 {
                     "device_type", "iPhone"
@@ -3642,7 +3688,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
 
             // Mocking objects.
@@ -3654,9 +3700,9 @@ namespace OptimizelySDK.Tests
                 .Setup(ds => ds.GetVariation(experiment, It.IsAny<OptimizelyUserContext>(), Config))
                 .Returns(variation);
 
-            var optly = Helper.CreatePrivateOptimizely();
+            PrivateObject optly = Helper.CreatePrivateOptimizely();
             optly.SetFieldOrProperty("ProjectConfigManager", ConfigManager);
-            var optStronglyTyped = optly.GetObject() as Optimizely;
+            Optimizely optStronglyTyped = optly.GetObject() as Optimizely;
 
             optStronglyTyped.NotificationCenter.AddNotification(
                 NotificationCenter.NotificationType.Decision,
@@ -3664,7 +3710,7 @@ namespace OptimizelySDK.Tests
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
 
             optly.Invoke("Activate", experimentKey, TestUserId, userAttributes);
-            var decisionInfo = new Dictionary<string, object>
+            Dictionary<string, object> decisionInfo = new Dictionary<string, object>
             {
                 {
                     "experimentKey", experimentKey
@@ -3682,11 +3728,11 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestActivateSendsDecisionNotificationWithNullVariationKey()
         {
-            var experimentKey = "test_experiment";
-            var experiment = Config.GetExperimentFromKey(experimentKey);
+            string experimentKey = "test_experiment";
+            Experiment experiment = Config.GetExperimentFromKey(experimentKey);
 
-            var optly = Helper.CreatePrivateOptimizely();
-            var optStronglyTyped = optly.GetObject() as Optimizely;
+            PrivateObject optly = Helper.CreatePrivateOptimizely();
+            Optimizely optStronglyTyped = optly.GetObject() as Optimizely;
 
             NotificationCallbackMock.Setup(nc => nc.TestDecisionCallback(It.IsAny<string>(),
                 It.IsAny<string>(),
@@ -3703,7 +3749,7 @@ namespace OptimizelySDK.Tests
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
 
             optly.Invoke("Activate", experimentKey, TestUserId, null);
-            var decisionInfo = new Dictionary<string, object>
+            Dictionary<string, object> decisionInfo = new Dictionary<string, object>
             {
                 {
                     "experimentKey", experimentKey
@@ -3721,13 +3767,13 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestGetVariationSendsDecisionNotificationWithActualVariationKey()
         {
-            var experimentKey = "test_experiment";
-            var variationKey = "variation";
-            var experiment = Config.GetExperimentFromKey(experimentKey);
-            var variation =
+            string experimentKey = "test_experiment";
+            string variationKey = "variation";
+            Experiment experiment = Config.GetExperimentFromKey(experimentKey);
+            Result<Variation> variation =
                 Result<Variation>.NewResult(Config.GetVariationFromKey(experimentKey, variationKey),
                     DecisionReasons);
-            var userAttributes = new UserAttributes
+            UserAttributes userAttributes = new UserAttributes
             {
                 {
                     "device_type", "iPhone"
@@ -3737,13 +3783,13 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
 
-            var optly = Helper.CreatePrivateOptimizely();
+            PrivateObject optly = Helper.CreatePrivateOptimizely();
 
             optly.SetFieldOrProperty("ProjectConfigManager", ConfigManager);
-            var optStronglyTyped = optly.GetObject() as Optimizely;
+            Optimizely optStronglyTyped = optly.GetObject() as Optimizely;
 
             // Mocking objects.
             NotificationCallbackMock.Setup(nc => nc.TestDecisionCallback(It.IsAny<string>(),
@@ -3765,7 +3811,7 @@ namespace OptimizelySDK.Tests
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
 
             optly.Invoke("GetVariation", experimentKey, TestUserId, userAttributes);
-            var decisionInfo = new Dictionary<string, object>
+            Dictionary<string, object> decisionInfo = new Dictionary<string, object>
             {
                 {
                     "experimentKey", experimentKey
@@ -3784,13 +3830,13 @@ namespace OptimizelySDK.Tests
         public void
             TestGetVariationSendsDecisionNotificationWithVariationKeyAndTypeFeatureTestForFeatureExperiment()
         {
-            var experimentKey = "group_experiment_1";
-            var variationKey = "group_exp_1_var_1";
-            var experiment = Config.GetExperimentFromKey(experimentKey);
-            var variation =
+            string experimentKey = "group_experiment_1";
+            string variationKey = "group_exp_1_var_1";
+            Experiment experiment = Config.GetExperimentFromKey(experimentKey);
+            Result<Variation> variation =
                 Result<Variation>.NewResult(Config.GetVariationFromKey(experimentKey, variationKey),
                     DecisionReasons);
-            var userAttributes = new UserAttributes
+            UserAttributes userAttributes = new UserAttributes
             {
                 {
                     "device_type", "iPhone"
@@ -3800,11 +3846,11 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
 
-            var optly = Helper.CreatePrivateOptimizely();
-            var optStronglyTyped = optly.GetObject() as Optimizely;
+            PrivateObject optly = Helper.CreatePrivateOptimizely();
+            Optimizely optStronglyTyped = optly.GetObject() as Optimizely;
 
             // Mocking objects.
             NotificationCallbackMock.Setup(nc => nc.TestDecisionCallback(It.IsAny<string>(),
@@ -3827,7 +3873,7 @@ namespace OptimizelySDK.Tests
             optly.SetFieldOrProperty("ProjectConfigManager", ConfigManager);
 
             optly.Invoke("GetVariation", experimentKey, TestUserId, userAttributes);
-            var decisionInfo = new Dictionary<string, object>
+            Dictionary<string, object> decisionInfo = new Dictionary<string, object>
             {
                 {
                     "experimentKey", experimentKey
@@ -3845,11 +3891,11 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestGetVariationSendsDecisionNotificationWithNullVariationKey()
         {
-            var experimentKey = "test_experiment";
-            var experiment = Config.GetExperimentFromKey(experimentKey);
+            string experimentKey = "test_experiment";
+            Experiment experiment = Config.GetExperimentFromKey(experimentKey);
 
-            var optly = Helper.CreatePrivateOptimizely();
-            var optStronglyTyped = optly.GetObject() as Optimizely;
+            PrivateObject optly = Helper.CreatePrivateOptimizely();
+            Optimizely optStronglyTyped = optly.GetObject() as Optimizely;
 
             NotificationCallbackMock.Setup(nc => nc.TestDecisionCallback(It.IsAny<string>(),
                 It.IsAny<string>(),
@@ -3867,7 +3913,7 @@ namespace OptimizelySDK.Tests
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
 
             optly.Invoke("GetVariation", experimentKey, TestUserId, null);
-            var decisionInfo = new Dictionary<string, object>
+            Dictionary<string, object> decisionInfo = new Dictionary<string, object>
             {
                 {
                     "experimentKey", experimentKey
@@ -3885,13 +3931,13 @@ namespace OptimizelySDK.Tests
         public void
             TestIsFeatureEnabledSendsDecisionNotificationWithFeatureEnabledTrueForFeatureExperiment()
         {
-            var featureKey = "double_single_variable_feature";
-            var experiment = Config.GetExperimentFromKey("test_experiment_double_feature");
-            var variation = Result<Variation>.NewResult(
+            string featureKey = "double_single_variable_feature";
+            Experiment experiment = Config.GetExperimentFromKey("test_experiment_double_feature");
+            Result<Variation> variation = Result<Variation>.NewResult(
                 Config.GetVariationFromKey("test_experiment_double_feature", "control"),
                 DecisionReasons);
-            var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
-            var decision = Result<FeatureDecision>.NewResult(
+            FeatureFlag featureFlag = Config.GetFeatureFlagFromKey(featureKey);
+            Result<FeatureDecision> decision = Result<FeatureDecision>.NewResult(
                 new FeatureDecision(experiment, variation.ResultObject,
                     FeatureDecision.DECISION_SOURCE_FEATURE_TEST), DecisionReasons);
 
@@ -3908,8 +3954,8 @@ namespace OptimizelySDK.Tests
                     It.IsAny<OptimizelyUserContext>(), ConfigManager.GetConfig(), null))
                 .Returns(variation);
 
-            var optly = Helper.CreatePrivateOptimizely();
-            var optStronglyTyped = optly.GetObject() as Optimizely;
+            PrivateObject optly = Helper.CreatePrivateOptimizely();
+            Optimizely optStronglyTyped = optly.GetObject() as Optimizely;
 
             optStronglyTyped.NotificationCenter.AddNotification(
                 NotificationCenter.NotificationType.Decision,
@@ -3919,7 +3965,7 @@ namespace OptimizelySDK.Tests
             bool result = (bool)optly.Invoke("IsFeatureEnabled", featureKey, TestUserId, null);
             Assert.True(result);
 
-            var decisionInfo = new Dictionary<string, object>
+            Dictionary<string, object> decisionInfo = new Dictionary<string, object>
             {
                 {
                     "featureKey", featureKey
@@ -3947,13 +3993,13 @@ namespace OptimizelySDK.Tests
         public void
             TestIsFeatureEnabledSendsDecisionNotificationWithFeatureEnabledFalseForFeatureExperiment()
         {
-            var featureKey = "double_single_variable_feature";
-            var experiment = Config.GetExperimentFromKey("test_experiment_double_feature");
-            var variation = Result<Variation>.NewResult(
+            string featureKey = "double_single_variable_feature";
+            Experiment experiment = Config.GetExperimentFromKey("test_experiment_double_feature");
+            Result<Variation> variation = Result<Variation>.NewResult(
                 Config.GetVariationFromKey("test_experiment_double_feature", "variation"),
                 DecisionReasons);
-            var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
-            var decision = Result<FeatureDecision>.NewResult(
+            FeatureFlag featureFlag = Config.GetFeatureFlagFromKey(featureKey);
+            Result<FeatureDecision> decision = Result<FeatureDecision>.NewResult(
                 new FeatureDecision(experiment, variation.ResultObject,
                     FeatureDecision.DECISION_SOURCE_FEATURE_TEST), DecisionReasons);
 
@@ -3971,8 +4017,8 @@ namespace OptimizelySDK.Tests
                     ds.GetVariation(experiment, It.IsAny<OptimizelyUserContext>(), Config, null))
                 .Returns(variation);
 
-            var optly = Helper.CreatePrivateOptimizely();
-            var optStronglyTyped = optly.GetObject() as Optimizely;
+            PrivateObject optly = Helper.CreatePrivateOptimizely();
+            Optimizely optStronglyTyped = optly.GetObject() as Optimizely;
 
             optStronglyTyped.NotificationCenter.AddNotification(
                 NotificationCenter.NotificationType.Decision,
@@ -3983,7 +4029,7 @@ namespace OptimizelySDK.Tests
             bool result = (bool)optly.Invoke("IsFeatureEnabled", featureKey, TestUserId, null);
             Assert.False(result);
 
-            var decisionInfo = new Dictionary<string, object>
+            Dictionary<string, object> decisionInfo = new Dictionary<string, object>
             {
                 {
                     "featureKey", featureKey
@@ -4018,20 +4064,20 @@ namespace OptimizelySDK.Tests
         public void
             TestIsFeatureEnabledSendsDecisionNotificationWithFeatureEnabledTrueForFeatureRollout()
         {
-            var featureKey = "boolean_single_variable_feature";
-            var userAttributes = new UserAttributes
+            string featureKey = "boolean_single_variable_feature";
+            UserAttributes userAttributes = new UserAttributes
             {
                 {
                     "device_type", "iPhone"
                 },
                 {
                     "company", "Optimizely"
-                }
+                },
             };
-            var experiment = Config.GetRolloutFromId("166660").Experiments[0];
-            var variation = Config.GetVariationFromKey("177770", "177771");
-            var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
-            var decision = Result<FeatureDecision>.NewResult(
+            Experiment experiment = Config.GetRolloutFromId("166660").Experiments[0];
+            Variation variation = Config.GetVariationFromKey("177770", "177771");
+            FeatureFlag featureFlag = Config.GetFeatureFlagFromKey(featureKey);
+            Result<FeatureDecision> decision = Result<FeatureDecision>.NewResult(
                 new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT),
                 DecisionReasons);
 
@@ -4044,9 +4090,9 @@ namespace OptimizelySDK.Tests
                 It.IsAny<string>(),
                 It.IsAny<UserAttributes>(), It.IsAny<Dictionary<string, object>>()));
 
-            var optly = Helper.CreatePrivateOptimizely();
+            PrivateObject optly = Helper.CreatePrivateOptimizely();
             optly.SetFieldOrProperty("ProjectConfigManager", ConfigManager);
-            var optStronglyTyped = optly.GetObject() as Optimizely;
+            Optimizely optStronglyTyped = optly.GetObject() as Optimizely;
 
             optStronglyTyped.NotificationCenter.AddNotification(
                 NotificationCenter.NotificationType.Decision,
@@ -4057,7 +4103,7 @@ namespace OptimizelySDK.Tests
                 userAttributes);
             Assert.True(result);
 
-            var decisionInfo = new Dictionary<string, object>
+            Dictionary<string, object> decisionInfo = new Dictionary<string, object>
             {
                 {
                     "featureKey", featureKey
@@ -4084,20 +4130,20 @@ namespace OptimizelySDK.Tests
         public void
             TestIsFeatureEnabledSendsDecisionNotificationWithFeatureEnabledFalseForFeatureRollout()
         {
-            var featureKey = "boolean_single_variable_feature";
-            var userAttributes = new UserAttributes
+            string featureKey = "boolean_single_variable_feature";
+            UserAttributes userAttributes = new UserAttributes
             {
                 {
                     "device_type", "iPhone"
                 },
                 {
                     "company", "Optimizely"
-                }
+                },
             };
-            var experiment = Config.GetRolloutFromId("166660").Experiments[3];
-            var variation = Config.GetVariationFromKey("188880", "188881");
-            var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
-            var decision = Result<FeatureDecision>.NewResult(
+            Experiment experiment = Config.GetRolloutFromId("166660").Experiments[3];
+            Variation variation = Config.GetVariationFromKey("188880", "188881");
+            FeatureFlag featureFlag = Config.GetFeatureFlagFromKey(featureKey);
+            Result<FeatureDecision> decision = Result<FeatureDecision>.NewResult(
                 new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT),
                 DecisionReasons);
 
@@ -4110,8 +4156,8 @@ namespace OptimizelySDK.Tests
                 It.IsAny<string>(),
                 It.IsAny<UserAttributes>(), It.IsAny<Dictionary<string, object>>()));
 
-            var optly = Helper.CreatePrivateOptimizely();
-            var optStronglyTyped = optly.GetObject() as Optimizely;
+            PrivateObject optly = Helper.CreatePrivateOptimizely();
+            Optimizely optStronglyTyped = optly.GetObject() as Optimizely;
 
             optStronglyTyped.NotificationCenter.AddNotification(
                 NotificationCenter.NotificationType.Decision,
@@ -4123,7 +4169,7 @@ namespace OptimizelySDK.Tests
                 userAttributes);
             Assert.False(result);
 
-            var decisionInfo = new Dictionary<string, object>
+            Dictionary<string, object> decisionInfo = new Dictionary<string, object>
             {
                 {
                     "featureKey", featureKey
@@ -4150,9 +4196,9 @@ namespace OptimizelySDK.Tests
         public void
             TestIsFeatureEnabledSendsDecisionNotificationWithFeatureEnabledFalseWhenUserIsNotBucketed()
         {
-            var featureKey = "boolean_single_variable_feature";
-            var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
-            var decision = Result<FeatureDecision>.NewResult(
+            string featureKey = "boolean_single_variable_feature";
+            FeatureFlag featureFlag = Config.GetFeatureFlagFromKey(featureKey);
+            Result<FeatureDecision> decision = Result<FeatureDecision>.NewResult(
                 new FeatureDecision(null, null, FeatureDecision.DECISION_SOURCE_ROLLOUT),
                 DecisionReasons);
 
@@ -4165,8 +4211,8 @@ namespace OptimizelySDK.Tests
                 It.IsAny<string>(),
                 It.IsAny<UserAttributes>(), It.IsAny<Dictionary<string, object>>()));
 
-            var optly = Helper.CreatePrivateOptimizely();
-            var optStronglyTyped = optly.GetObject() as Optimizely;
+            PrivateObject optly = Helper.CreatePrivateOptimizely();
+            Optimizely optStronglyTyped = optly.GetObject() as Optimizely;
 
             optStronglyTyped.NotificationCenter.AddNotification(
                 NotificationCenter.NotificationType.Decision,
@@ -4177,7 +4223,7 @@ namespace OptimizelySDK.Tests
             bool result = (bool)optly.Invoke("IsFeatureEnabled", featureKey, TestUserId, null);
             Assert.False(result);
 
-            var decisionInfo = new Dictionary<string, object>
+            Dictionary<string, object> decisionInfo = new Dictionary<string, object>
             {
                 {
                     "featureKey", featureKey
@@ -4207,17 +4253,17 @@ namespace OptimizelySDK.Tests
             string[] enabledFeatures =
             {
                 "double_single_variable_feature", "boolean_single_variable_feature",
-                "string_single_variable_feature"
+                "string_single_variable_feature",
             };
 
-            var userAttributes = new UserAttributes
+            UserAttributes userAttributes = new UserAttributes
             {
                 {
                     "device_type", "iPhone"
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
 
             NotificationCallbackMock.Setup(nc => nc.TestDecisionCallback(It.IsAny<string>(),
@@ -4227,7 +4273,7 @@ namespace OptimizelySDK.Tests
                 NotificationCenter.NotificationType.Decision,
                 NotificationCallbackMock.Object.TestDecisionCallback);
 
-            var actualFeaturesList =
+            List<string> actualFeaturesList =
                 OptimizelyMock.Object.GetEnabledFeatures(TestUserId, userAttributes);
             CollectionAssert.AreEquivalent(enabledFeatures, actualFeaturesList);
 
@@ -4279,7 +4325,7 @@ namespace OptimizelySDK.Tests
                                 },
                                 {
                                     "variationKey", "control"
-                                }
+                                },
                             }
                         },
                     }))), Times.Once);
@@ -4439,13 +4485,14 @@ namespace OptimizelySDK.Tests
         public void
             TestGetFeatureVariableDoubleSendsNotificationWhenUserBuckedIntoFeatureExperimentAndVariationIsToggleOn()
         {
-            var featureKey = "double_single_variable_feature";
-            var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
-            var variableKey = "double_variable";
-            var expectedValue = 42.42;
-            var experiment = Config.GetExperimentFromKey("test_experiment_double_feature");
-            var variation = Config.GetVariationFromKey("test_experiment_double_feature", "control");
-            var decision = Result<FeatureDecision>.NewResult(
+            string featureKey = "double_single_variable_feature";
+            FeatureFlag featureFlag = Config.GetFeatureFlagFromKey(featureKey);
+            string variableKey = "double_variable";
+            double expectedValue = 42.42;
+            Experiment experiment = Config.GetExperimentFromKey("test_experiment_double_feature");
+            Variation variation =
+                Config.GetVariationFromKey("test_experiment_double_feature", "control");
+            Result<FeatureDecision> decision = Result<FeatureDecision>.NewResult(
                 new FeatureDecision(experiment, variation,
                     FeatureDecision.DECISION_SOURCE_FEATURE_TEST), DecisionReasons);
 
@@ -4458,8 +4505,8 @@ namespace OptimizelySDK.Tests
                 It.IsAny<string>(), It.IsAny<UserAttributes>(),
                 It.IsAny<Dictionary<string, object>>()));
 
-            var optly = Helper.CreatePrivateOptimizely();
-            var optStronglyTyped = optly.GetObject() as Optimizely;
+            PrivateObject optly = Helper.CreatePrivateOptimizely();
+            Optimizely optStronglyTyped = optly.GetObject() as Optimizely;
 
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
             optly.SetFieldOrProperty("ProjectConfigManager", ConfigManager);
@@ -4468,10 +4515,10 @@ namespace OptimizelySDK.Tests
                 NotificationCenter.NotificationType.Decision,
                 NotificationCallbackMock.Object.TestDecisionCallback);
 
-            var variableValue = (double)optly.Invoke("GetFeatureVariableDouble", featureKey,
+            double variableValue = (double)optly.Invoke("GetFeatureVariableDouble", featureKey,
                 variableKey, TestUserId, null);
             Assert.AreEqual(expectedValue, variableValue);
-            var decisionInfo = new Dictionary<string, object>
+            Dictionary<string, object> decisionInfo = new Dictionary<string, object>
             {
                 {
                     "featureKey", featureKey
@@ -4515,24 +4562,24 @@ namespace OptimizelySDK.Tests
         public void
             TestGetFeatureVariableJsonSendsNotificationWhenUserBuckedIntoFeatureExperimentAndVariationIsToggleOn()
         {
-            var featureKey = "string_single_variable_feature";
-            var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
-            var variableKey = "json_var";
-            var expectedDict = new Dictionary<string, object>()
+            string featureKey = "string_single_variable_feature";
+            FeatureFlag featureFlag = Config.GetFeatureFlagFromKey(featureKey);
+            string variableKey = "json_var";
+            Dictionary<string, object> expectedDict = new Dictionary<string, object>()
             {
                 {
                     "int_var", 4
                 },
                 {
                     "string_var", "cta_4"
-                }
+                },
             };
-            var experiment = Config.GetRolloutFromId("166661").Experiments[0];
-            var variation = Config.GetVariationFromKey(experiment.Key, "177775");
-            var decision = Result<FeatureDecision>.NewResult(
+            Experiment experiment = Config.GetRolloutFromId("166661").Experiments[0];
+            Variation variation = Config.GetVariationFromKey(experiment.Key, "177775");
+            Result<FeatureDecision> decision = Result<FeatureDecision>.NewResult(
                 new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT),
                 DecisionReasons);
-            var userAttributes = new UserAttributes
+            UserAttributes userAttributes = new UserAttributes
             {
                 {
                     "device_type", "iPhone"
@@ -4542,7 +4589,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
 
             DecisionServiceMock
@@ -4554,20 +4601,21 @@ namespace OptimizelySDK.Tests
                 It.IsAny<string>(), It.IsAny<UserAttributes>(),
                 It.IsAny<Dictionary<string, object>>()));
 
-            var optly = Helper.CreatePrivateOptimizely();
+            PrivateObject optly = Helper.CreatePrivateOptimizely();
 
             optly.SetFieldOrProperty("ProjectConfigManager", ConfigManager);
-            var optStronglyTyped = optly.GetObject() as Optimizely;
+            Optimizely optStronglyTyped = optly.GetObject() as Optimizely;
 
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
             optStronglyTyped.NotificationCenter.AddNotification(
                 NotificationCenter.NotificationType.Decision,
                 NotificationCallbackMock.Object.TestDecisionCallback);
 
-            var variableValue = (OptimizelyJSON)optly.Invoke("GetFeatureVariableJSON", featureKey,
+            OptimizelyJSON variableValue = (OptimizelyJSON)optly.Invoke("GetFeatureVariableJSON",
+                featureKey,
                 variableKey, TestUserId, userAttributes);
             Assert.IsTrue(TestData.CompareObjects(expectedDict, variableValue.ToDictionary()));
-            var decisionInfo = new Dictionary<string, object>
+            Dictionary<string, object> decisionInfo = new Dictionary<string, object>
             {
                 {
                     "featureKey", featureKey
@@ -4603,17 +4651,17 @@ namespace OptimizelySDK.Tests
         public void
             TestGetFeatureVariableIntegerSendsNotificationWhenUserBuckedIntoFeatureExperimentAndVariationIsToggleOn()
         {
-            var featureKey = "integer_single_variable_feature";
-            var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
-            var variableKey = "integer_variable";
-            var expectedValue = 13;
-            var experiment = Config.GetExperimentFromKey("test_experiment_integer_feature");
-            var variation =
+            string featureKey = "integer_single_variable_feature";
+            FeatureFlag featureFlag = Config.GetFeatureFlagFromKey(featureKey);
+            string variableKey = "integer_variable";
+            int expectedValue = 13;
+            Experiment experiment = Config.GetExperimentFromKey("test_experiment_integer_feature");
+            Variation variation =
                 Config.GetVariationFromKey("test_experiment_integer_feature", "variation");
-            var decision = Result<FeatureDecision>.NewResult(
+            Result<FeatureDecision> decision = Result<FeatureDecision>.NewResult(
                 new FeatureDecision(experiment, variation,
                     FeatureDecision.DECISION_SOURCE_FEATURE_TEST), DecisionReasons);
-            var userAttributes = new UserAttributes
+            UserAttributes userAttributes = new UserAttributes
             {
                 {
                     "device_type", "iPhone"
@@ -4623,7 +4671,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
 
             DecisionServiceMock
@@ -4635,20 +4683,20 @@ namespace OptimizelySDK.Tests
                 It.IsAny<string>(), It.IsAny<UserAttributes>(),
                 It.IsAny<Dictionary<string, object>>()));
 
-            var optly = Helper.CreatePrivateOptimizely();
+            PrivateObject optly = Helper.CreatePrivateOptimizely();
             optly.SetFieldOrProperty("ProjectConfigManager", ConfigManager);
 
-            var optStronglyTyped = optly.GetObject() as Optimizely;
+            Optimizely optStronglyTyped = optly.GetObject() as Optimizely;
 
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
             optStronglyTyped.NotificationCenter.AddNotification(
                 NotificationCenter.NotificationType.Decision,
                 NotificationCallbackMock.Object.TestDecisionCallback);
 
-            var variableValue = (int)optly.Invoke("GetFeatureVariableInteger", featureKey,
+            int variableValue = (int)optly.Invoke("GetFeatureVariableInteger", featureKey,
                 variableKey, TestUserId, userAttributes);
             Assert.AreEqual(expectedValue, variableValue);
-            var decisionInfo = new Dictionary<string, object>
+            Dictionary<string, object> decisionInfo = new Dictionary<string, object>
             {
                 {
                     "featureKey", featureKey
@@ -4692,14 +4740,14 @@ namespace OptimizelySDK.Tests
         public void
             TestGetFeatureVariableDoubleSendsNotificationWhenUserBuckedIntoFeatureExperimentAndVariationIsToggleOff()
         {
-            var featureKey = "double_single_variable_feature";
-            var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
-            var variableKey = "double_variable";
-            var expectedValue = 14.99;
-            var experiment = Config.GetExperimentFromKey("test_experiment_double_feature");
-            var variation =
+            string featureKey = "double_single_variable_feature";
+            FeatureFlag featureFlag = Config.GetFeatureFlagFromKey(featureKey);
+            string variableKey = "double_variable";
+            double expectedValue = 14.99;
+            Experiment experiment = Config.GetExperimentFromKey("test_experiment_double_feature");
+            Variation variation =
                 Config.GetVariationFromKey("test_experiment_double_feature", "variation");
-            var decision = Result<FeatureDecision>.NewResult(
+            Result<FeatureDecision> decision = Result<FeatureDecision>.NewResult(
                 new FeatureDecision(experiment, variation,
                     FeatureDecision.DECISION_SOURCE_FEATURE_TEST), DecisionReasons);
 
@@ -4712,8 +4760,8 @@ namespace OptimizelySDK.Tests
                 It.IsAny<string>(), It.IsAny<UserAttributes>(),
                 It.IsAny<Dictionary<string, object>>()));
 
-            var optly = Helper.CreatePrivateOptimizely();
-            var optStronglyTyped = optly.GetObject() as Optimizely;
+            PrivateObject optly = Helper.CreatePrivateOptimizely();
+            Optimizely optStronglyTyped = optly.GetObject() as Optimizely;
 
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
             optly.SetFieldOrProperty("ProjectConfigManager", ConfigManager);
@@ -4721,10 +4769,10 @@ namespace OptimizelySDK.Tests
                 NotificationCenter.NotificationType.Decision,
                 NotificationCallbackMock.Object.TestDecisionCallback);
 
-            var variableValue = (double)optly.Invoke("GetFeatureVariableDouble", featureKey,
+            double variableValue = (double)optly.Invoke("GetFeatureVariableDouble", featureKey,
                 variableKey, TestUserId, null);
             Assert.AreEqual(expectedValue, variableValue);
-            var decisionInfo = new Dictionary<string, object>
+            Dictionary<string, object> decisionInfo = new Dictionary<string, object>
             {
                 {
                     "featureKey", featureKey
@@ -4768,17 +4816,17 @@ namespace OptimizelySDK.Tests
         public void
             TestGetFeatureVariableIntegerSendsNotificationWhenUserBuckedIntoFeatureExperimentAndVariationIsToggleOff()
         {
-            var featureKey = "integer_single_variable_feature";
-            var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
-            var variableKey = "integer_variable";
-            var expectedValue = 7;
-            var experiment = Config.GetExperimentFromKey("test_experiment_integer_feature");
-            var variation =
+            string featureKey = "integer_single_variable_feature";
+            FeatureFlag featureFlag = Config.GetFeatureFlagFromKey(featureKey);
+            string variableKey = "integer_variable";
+            int expectedValue = 7;
+            Experiment experiment = Config.GetExperimentFromKey("test_experiment_integer_feature");
+            Variation variation =
                 Config.GetVariationFromKey("test_experiment_integer_feature", "control");
-            var decision = Result<FeatureDecision>.NewResult(
+            Result<FeatureDecision> decision = Result<FeatureDecision>.NewResult(
                 new FeatureDecision(experiment, variation,
                     FeatureDecision.DECISION_SOURCE_FEATURE_TEST), DecisionReasons);
-            var userAttributes = new UserAttributes
+            UserAttributes userAttributes = new UserAttributes
             {
                 {
                     "device_type", "iPhone"
@@ -4788,7 +4836,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
 
             DecisionServiceMock
@@ -4800,19 +4848,19 @@ namespace OptimizelySDK.Tests
                 It.IsAny<string>(), It.IsAny<UserAttributes>(),
                 It.IsAny<Dictionary<string, object>>()));
 
-            var optly = Helper.CreatePrivateOptimizely();
+            PrivateObject optly = Helper.CreatePrivateOptimizely();
             optly.SetFieldOrProperty("ProjectConfigManager", ConfigManager);
-            var optStronglyTyped = optly.GetObject() as Optimizely;
+            Optimizely optStronglyTyped = optly.GetObject() as Optimizely;
 
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
             optStronglyTyped.NotificationCenter.AddNotification(
                 NotificationCenter.NotificationType.Decision,
                 NotificationCallbackMock.Object.TestDecisionCallback);
 
-            var variableValue = (int)optly.Invoke("GetFeatureVariableInteger", featureKey,
+            int variableValue = (int)optly.Invoke("GetFeatureVariableInteger", featureKey,
                 variableKey, TestUserId, userAttributes);
             Assert.AreEqual(expectedValue, variableValue);
-            var decisionInfo = new Dictionary<string, object>
+            Dictionary<string, object> decisionInfo = new Dictionary<string, object>
             {
                 {
                     "featureKey", featureKey
@@ -4856,13 +4904,13 @@ namespace OptimizelySDK.Tests
         public void
             TestGetFeatureVariableBooleanSendsNotificationWhenUserBuckedIntoRolloutAndVariationIsToggleOn()
         {
-            var featureKey = "boolean_single_variable_feature";
-            var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
-            var variableKey = "boolean_variable";
-            var expectedValue = true;
-            var experiment = Config.GetRolloutFromId("166660").Experiments[0];
-            var variation = Config.GetVariationFromKey(experiment.Key, "177771");
-            var decision = Result<FeatureDecision>.NewResult(
+            string featureKey = "boolean_single_variable_feature";
+            FeatureFlag featureFlag = Config.GetFeatureFlagFromKey(featureKey);
+            string variableKey = "boolean_variable";
+            bool expectedValue = true;
+            Experiment experiment = Config.GetRolloutFromId("166660").Experiments[0];
+            Variation variation = Config.GetVariationFromKey(experiment.Key, "177771");
+            Result<FeatureDecision> decision = Result<FeatureDecision>.NewResult(
                 new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT),
                 DecisionReasons);
 
@@ -4875,19 +4923,19 @@ namespace OptimizelySDK.Tests
                 It.IsAny<string>(), It.IsAny<UserAttributes>(),
                 It.IsAny<Dictionary<string, object>>()));
 
-            var optly = Helper.CreatePrivateOptimizely();
+            PrivateObject optly = Helper.CreatePrivateOptimizely();
             optly.SetFieldOrProperty("ProjectConfigManager", ConfigManager);
-            var optStronglyTyped = optly.GetObject() as Optimizely;
+            Optimizely optStronglyTyped = optly.GetObject() as Optimizely;
 
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
             optStronglyTyped.NotificationCenter.AddNotification(
                 NotificationCenter.NotificationType.Decision,
                 NotificationCallbackMock.Object.TestDecisionCallback);
 
-            var variableValue = (bool)optly.Invoke("GetFeatureVariableBoolean", featureKey,
+            bool variableValue = (bool)optly.Invoke("GetFeatureVariableBoolean", featureKey,
                 variableKey, TestUserId, null);
             Assert.AreEqual(expectedValue, variableValue);
-            var decisionInfo = new Dictionary<string, object>
+            Dictionary<string, object> decisionInfo = new Dictionary<string, object>
             {
                 {
                     "featureKey", featureKey
@@ -4923,16 +4971,16 @@ namespace OptimizelySDK.Tests
         public void
             TestGetFeatureVariableStringSendsNotificationWhenUserBuckedIntoRolloutAndVariationIsToggleOn()
         {
-            var featureKey = "string_single_variable_feature";
-            var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
-            var variableKey = "string_variable";
-            var expectedValue = "cta_4";
-            var experiment = Config.GetRolloutFromId("166661").Experiments[0];
-            var variation = Config.GetVariationFromKey(experiment.Key, "177775");
-            var decision = Result<FeatureDecision>.NewResult(
+            string featureKey = "string_single_variable_feature";
+            FeatureFlag featureFlag = Config.GetFeatureFlagFromKey(featureKey);
+            string variableKey = "string_variable";
+            string expectedValue = "cta_4";
+            Experiment experiment = Config.GetRolloutFromId("166661").Experiments[0];
+            Variation variation = Config.GetVariationFromKey(experiment.Key, "177775");
+            Result<FeatureDecision> decision = Result<FeatureDecision>.NewResult(
                 new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT),
                 DecisionReasons);
-            var userAttributes = new UserAttributes
+            UserAttributes userAttributes = new UserAttributes
             {
                 {
                     "device_type", "iPhone"
@@ -4942,7 +4990,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
 
             DecisionServiceMock
@@ -4954,20 +5002,20 @@ namespace OptimizelySDK.Tests
                 It.IsAny<string>(), It.IsAny<UserAttributes>(),
                 It.IsAny<Dictionary<string, object>>()));
 
-            var optly = Helper.CreatePrivateOptimizely();
+            PrivateObject optly = Helper.CreatePrivateOptimizely();
 
             optly.SetFieldOrProperty("ProjectConfigManager", ConfigManager);
-            var optStronglyTyped = optly.GetObject() as Optimizely;
+            Optimizely optStronglyTyped = optly.GetObject() as Optimizely;
 
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
             optStronglyTyped.NotificationCenter.AddNotification(
                 NotificationCenter.NotificationType.Decision,
                 NotificationCallbackMock.Object.TestDecisionCallback);
 
-            var variableValue = (string)optly.Invoke("GetFeatureVariableString", featureKey,
+            string variableValue = (string)optly.Invoke("GetFeatureVariableString", featureKey,
                 variableKey, TestUserId, userAttributes);
             Assert.AreEqual(expectedValue, variableValue);
-            var decisionInfo = new Dictionary<string, object>
+            Dictionary<string, object> decisionInfo = new Dictionary<string, object>
             {
                 {
                     "featureKey", featureKey
@@ -5003,13 +5051,13 @@ namespace OptimizelySDK.Tests
         public void
             TestGetFeatureVariableBooleanSendsNotificationWhenUserBuckedIntoRolloutAndVariationIsToggleOff()
         {
-            var featureKey = "boolean_single_variable_feature";
-            var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
-            var variableKey = "boolean_variable";
-            var expectedValue = true;
-            var experiment = Config.GetRolloutFromId("166660").Experiments[3];
-            var variation = Config.GetVariationFromKey(experiment.Key, "177782");
-            var decision = Result<FeatureDecision>.NewResult(
+            string featureKey = "boolean_single_variable_feature";
+            FeatureFlag featureFlag = Config.GetFeatureFlagFromKey(featureKey);
+            string variableKey = "boolean_variable";
+            bool expectedValue = true;
+            Experiment experiment = Config.GetRolloutFromId("166660").Experiments[3];
+            Variation variation = Config.GetVariationFromKey(experiment.Key, "177782");
+            Result<FeatureDecision> decision = Result<FeatureDecision>.NewResult(
                 new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT),
                 DecisionReasons);
 
@@ -5022,8 +5070,8 @@ namespace OptimizelySDK.Tests
                 It.IsAny<string>(), It.IsAny<UserAttributes>(),
                 It.IsAny<Dictionary<string, object>>()));
 
-            var optly = Helper.CreatePrivateOptimizely();
-            var optStronglyTyped = optly.GetObject() as Optimizely;
+            PrivateObject optly = Helper.CreatePrivateOptimizely();
+            Optimizely optStronglyTyped = optly.GetObject() as Optimizely;
 
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
             optly.SetFieldOrProperty("ProjectConfigManager", ConfigManager);
@@ -5031,10 +5079,10 @@ namespace OptimizelySDK.Tests
                 NotificationCenter.NotificationType.Decision,
                 NotificationCallbackMock.Object.TestDecisionCallback);
 
-            var variableValue = (bool)optly.Invoke("GetFeatureVariableBoolean", featureKey,
+            bool variableValue = (bool)optly.Invoke("GetFeatureVariableBoolean", featureKey,
                 variableKey, TestUserId, null);
             Assert.AreEqual(expectedValue, variableValue);
-            var decisionInfo = new Dictionary<string, object>
+            Dictionary<string, object> decisionInfo = new Dictionary<string, object>
             {
                 {
                     "featureKey", featureKey
@@ -5070,16 +5118,16 @@ namespace OptimizelySDK.Tests
         public void
             TestGetFeatureVariableStringSendsNotificationWhenUserBuckedIntoRolloutAndVariationIsToggleOff()
         {
-            var featureKey = "string_single_variable_feature";
-            var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
-            var variableKey = "string_variable";
-            var expectedValue = "wingardium leviosa";
-            var experiment = Config.GetRolloutFromId("166661").Experiments[2];
-            var variation = Config.GetVariationFromKey(experiment.Key, "177784");
-            var decision = Result<FeatureDecision>.NewResult(
+            string featureKey = "string_single_variable_feature";
+            FeatureFlag featureFlag = Config.GetFeatureFlagFromKey(featureKey);
+            string variableKey = "string_variable";
+            string expectedValue = "wingardium leviosa";
+            Experiment experiment = Config.GetRolloutFromId("166661").Experiments[2];
+            Variation variation = Config.GetVariationFromKey(experiment.Key, "177784");
+            Result<FeatureDecision> decision = Result<FeatureDecision>.NewResult(
                 new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT),
                 DecisionReasons);
-            var userAttributes = new UserAttributes
+            UserAttributes userAttributes = new UserAttributes
             {
                 {
                     "device_type", "iPhone"
@@ -5089,7 +5137,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
 
             DecisionServiceMock
@@ -5101,19 +5149,19 @@ namespace OptimizelySDK.Tests
                 It.IsAny<string>(), It.IsAny<UserAttributes>(),
                 It.IsAny<Dictionary<string, object>>()));
 
-            var optly = Helper.CreatePrivateOptimizely();
+            PrivateObject optly = Helper.CreatePrivateOptimizely();
             optly.SetFieldOrProperty("ProjectConfigManager", ConfigManager);
-            var optStronglyTyped = optly.GetObject() as Optimizely;
+            Optimizely optStronglyTyped = optly.GetObject() as Optimizely;
 
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
             optStronglyTyped.NotificationCenter.AddNotification(
                 NotificationCenter.NotificationType.Decision,
                 NotificationCallbackMock.Object.TestDecisionCallback);
 
-            var variableValue = (string)optly.Invoke("GetFeatureVariableString", featureKey,
+            string variableValue = (string)optly.Invoke("GetFeatureVariableString", featureKey,
                 variableKey, TestUserId, userAttributes);
             Assert.AreEqual(expectedValue, variableValue);
-            var decisionInfo = new Dictionary<string, object>
+            Dictionary<string, object> decisionInfo = new Dictionary<string, object>
             {
                 {
                     "featureKey", featureKey
@@ -5149,11 +5197,12 @@ namespace OptimizelySDK.Tests
         public void
             TestGetFeatureVariableDoubleSendsNotificationWhenUserNotBuckedIntoBothFeatureExperimentAndRollout()
         {
-            var featureKey = "double_single_variable_feature";
-            var featureFlag = Config.GetFeatureFlagFromKey("double_single_variable_feature");
-            var variableKey = "double_variable";
-            var expectedValue = 14.99;
-            var decision = Result<FeatureDecision>.NewResult(
+            string featureKey = "double_single_variable_feature";
+            FeatureFlag featureFlag =
+                Config.GetFeatureFlagFromKey("double_single_variable_feature");
+            string variableKey = "double_variable";
+            double expectedValue = 14.99;
+            Result<FeatureDecision> decision = Result<FeatureDecision>.NewResult(
                 new FeatureDecision(null, null, FeatureDecision.DECISION_SOURCE_ROLLOUT),
                 DecisionReasons);
 
@@ -5166,8 +5215,8 @@ namespace OptimizelySDK.Tests
                 It.IsAny<string>(), It.IsAny<UserAttributes>(),
                 It.IsAny<Dictionary<string, object>>()));
 
-            var optly = Helper.CreatePrivateOptimizely();
-            var optStronglyTyped = optly.GetObject() as Optimizely;
+            PrivateObject optly = Helper.CreatePrivateOptimizely();
+            Optimizely optStronglyTyped = optly.GetObject() as Optimizely;
 
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
             optly.SetFieldOrProperty("ProjectConfigManager", ConfigManager);
@@ -5175,10 +5224,10 @@ namespace OptimizelySDK.Tests
                 NotificationCenter.NotificationType.Decision,
                 NotificationCallbackMock.Object.TestDecisionCallback);
 
-            var variableValue = (double)optly.Invoke("GetFeatureVariableDouble", featureKey,
+            double variableValue = (double)optly.Invoke("GetFeatureVariableDouble", featureKey,
                 variableKey, TestUserId, null);
             Assert.AreEqual(expectedValue, variableValue);
-            var decisionInfo = new Dictionary<string, object>
+            Dictionary<string, object> decisionInfo = new Dictionary<string, object>
             {
                 {
                     "featureKey", featureKey
@@ -5214,9 +5263,9 @@ namespace OptimizelySDK.Tests
         public void
             TestGetAllFeatureVariablesSendsNotificationWhenUserBucketIntoRolloutAndVariationIsToggleOn()
         {
-            var featureKey = "string_single_variable_feature";
-            var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
-            var expectedValue = new Dictionary<string, object>()
+            string featureKey = "string_single_variable_feature";
+            FeatureFlag featureFlag = Config.GetFeatureFlagFromKey(featureKey);
+            Dictionary<string, object> expectedValue = new Dictionary<string, object>()
             {
                 {
                     "string_variable", "cta_4"
@@ -5229,7 +5278,7 @@ namespace OptimizelySDK.Tests
                         },
                         {
                             "string_var", "cta_4"
-                        }
+                        },
                     }
                 },
                 {
@@ -5240,16 +5289,16 @@ namespace OptimizelySDK.Tests
                         },
                         {
                             "string_var", "cta_5"
-                        }
+                        },
                     }
-                }
+                },
             };
-            var experiment = Config.GetRolloutFromId("166661").Experiments[0];
-            var variation = Config.GetVariationFromKey(experiment.Key, "177775");
-            var decision = Result<FeatureDecision>.NewResult(
+            Experiment experiment = Config.GetRolloutFromId("166661").Experiments[0];
+            Variation variation = Config.GetVariationFromKey(experiment.Key, "177775");
+            Result<FeatureDecision> decision = Result<FeatureDecision>.NewResult(
                 new FeatureDecision(experiment, variation, FeatureDecision.DECISION_SOURCE_ROLLOUT),
                 DecisionReasons);
-            var userAttributes = new UserAttributes
+            UserAttributes userAttributes = new UserAttributes
             {
                 {
                     "device_type", "iPhone"
@@ -5259,7 +5308,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
 
             DecisionServiceMock
@@ -5271,20 +5320,21 @@ namespace OptimizelySDK.Tests
                 It.IsAny<string>(), It.IsAny<UserAttributes>(),
                 It.IsAny<Dictionary<string, object>>()));
 
-            var optly = Helper.CreatePrivateOptimizely();
+            PrivateObject optly = Helper.CreatePrivateOptimizely();
 
             optly.SetFieldOrProperty("ProjectConfigManager", ConfigManager);
-            var optStronglyTyped = optly.GetObject() as Optimizely;
+            Optimizely optStronglyTyped = optly.GetObject() as Optimizely;
 
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
             optStronglyTyped.NotificationCenter.AddNotification(
                 NotificationCenter.NotificationType.Decision,
                 NotificationCallbackMock.Object.TestDecisionCallback);
 
-            var variableValues = (OptimizelyJSON)optly.Invoke("GetAllFeatureVariables", featureKey,
+            OptimizelyJSON variableValues = (OptimizelyJSON)optly.Invoke("GetAllFeatureVariables",
+                featureKey,
                 TestUserId, userAttributes);
             Assert.IsTrue(TestData.CompareObjects(variableValues.ToDictionary(), expectedValue));
-            var decisionInfo = new Dictionary<string, object>
+            Dictionary<string, object> decisionInfo = new Dictionary<string, object>
             {
                 {
                     "featureKey", featureKey
@@ -5317,7 +5367,7 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestGetAllFeatureVariablesReturnsNullScenarios()
         {
-            var userAttributes = new UserAttributes
+            UserAttributes userAttributes = new UserAttributes
             {
                 {
                     "device_type", "iPhone"
@@ -5327,13 +5377,14 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
-            var optimizely = new Optimizely(TestData.Datafile, EventDispatcherMock.Object,
+            Optimizely optimizely = new Optimizely(TestData.Datafile, EventDispatcherMock.Object,
                 LoggerMock.Object, ErrorHandlerMock.Object);
 
             // Null Feature flag key
-            var result = optimizely.GetAllFeatureVariables(null, TestUserId, userAttributes);
+            OptimizelyJSON result =
+                optimizely.GetAllFeatureVariables(null, TestUserId, userAttributes);
             Assert.Null(result);
 
             LoggerMock.Verify(
@@ -5341,7 +5392,8 @@ namespace OptimizelySDK.Tests
                 Times.Once);
 
             // Null User ID
-            var result2 = optimizely.GetAllFeatureVariables("string_single_variable_feature", null,
+            OptimizelyJSON result2 = optimizely.GetAllFeatureVariables(
+                "string_single_variable_feature", null,
                 userAttributes);
             Assert.Null(result2);
 
@@ -5349,9 +5401,10 @@ namespace OptimizelySDK.Tests
                 log => log.Log(LogLevel.WARN, "The userId parameter must be nonnull."), Times.Once);
 
             // Invalid featureKey
-            var featureKey = "InvalidFeatureKey";
+            string featureKey = "InvalidFeatureKey";
 
-            var result3 = optimizely.GetAllFeatureVariables(featureKey, TestUserId, userAttributes);
+            OptimizelyJSON result3 =
+                optimizely.GetAllFeatureVariables(featureKey, TestUserId, userAttributes);
             Assert.Null(result3);
 
             LoggerMock.Verify(
@@ -5359,9 +5412,9 @@ namespace OptimizelySDK.Tests
                     "No feature flag was found for key \"" + featureKey + "\"."), Times.Once);
 
             // Null Optimizely config
-            var invalidOptly = new Optimizely("Random datafile", null, LoggerMock.Object);
+            Optimizely invalidOptly = new Optimizely("Random datafile", null, LoggerMock.Object);
 
-            var result4 =
+            OptimizelyJSON result4 =
                 invalidOptly.GetAllFeatureVariables("validFeatureKey", TestUserId, userAttributes);
 
             Assert.Null(result4);
@@ -5375,10 +5428,10 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestGetAllFeatureVariablesRollout()
         {
-            var featureKey = "string_single_variable_feature";
-            var experiment = Config.GetRolloutFromId("166661").Experiments[0];
+            string featureKey = "string_single_variable_feature";
+            Experiment experiment = Config.GetRolloutFromId("166661").Experiments[0];
 
-            var userAttributes = new UserAttributes
+            UserAttributes userAttributes = new UserAttributes
             {
                 {
                     "device_type", "iPhone"
@@ -5388,12 +5441,12 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
 
-            var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
+            FeatureFlag featureFlag = Config.GetFeatureFlagFromKey(featureKey);
 
-            var decision = Result<FeatureDecision>.NewResult(
+            Result<FeatureDecision> decision = Result<FeatureDecision>.NewResult(
                 new FeatureDecision(experiment, null, FeatureDecision.DECISION_SOURCE_ROLLOUT),
                 DecisionReasons);
 
@@ -5403,11 +5456,12 @@ namespace OptimizelySDK.Tests
                         Config))
                 .Returns(decision);
 
-            var optly = Helper.CreatePrivateOptimizely();
+            PrivateObject optly = Helper.CreatePrivateOptimizely();
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
             optly.SetFieldOrProperty("ProjectConfigManager", ConfigManager);
 
-            var result = (OptimizelyJSON)optly.Invoke("GetAllFeatureVariables", featureKey,
+            OptimizelyJSON result = (OptimizelyJSON)optly.Invoke("GetAllFeatureVariables",
+                featureKey,
                 TestUserId, userAttributes);
             Assert.NotNull(result);
             LoggerMock.Verify(
@@ -5424,18 +5478,19 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestGetAllFeatureVariablesSourceFeatureTest()
         {
-            var featureKey = "double_single_variable_feature";
-            var expectedValue = new Dictionary<string, object>()
+            string featureKey = "double_single_variable_feature";
+            Dictionary<string, object> expectedValue = new Dictionary<string, object>()
             {
                 {
                     "double_variable", 42.42
-                }
+                },
             };
 
-            var optimizely = new Optimizely(TestData.Datafile, EventDispatcherMock.Object,
+            Optimizely optimizely = new Optimizely(TestData.Datafile, EventDispatcherMock.Object,
                 LoggerMock.Object, ErrorHandlerMock.Object);
 
-            var variableValues = optimizely.GetAllFeatureVariables(featureKey, TestUserId, null);
+            OptimizelyJSON variableValues =
+                optimizely.GetAllFeatureVariables(featureKey, TestUserId, null);
             Assert.IsTrue(TestData.CompareObjects(variableValues.ToDictionary(), expectedValue));
             LoggerMock.Verify(
                 log => log.Log(LogLevel.INFO,
@@ -5455,9 +5510,10 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestDFMNotificationWhenProjectConfigIsUpdated()
         {
-            var cde = new CountdownEvent(1);
-            var httpClientMock = new Mock<HttpProjectConfigManager.HttpClient>();
-            var t = TestHttpProjectConfigManagerUtil.MockSendAsync(httpClientMock,
+            CountdownEvent cde = new CountdownEvent(1);
+            Mock<HttpProjectConfigManager.HttpClient> httpClientMock =
+                new Mock<HttpProjectConfigManager.HttpClient>();
+            Task t = TestHttpProjectConfigManagerUtil.MockSendAsync(httpClientMock,
                 TestData.Datafile, TimeSpan.FromMilliseconds(300));
             TestHttpProjectConfigManagerUtil.SetClientFieldValue(httpClientMock.Object);
 
@@ -5465,7 +5521,7 @@ namespace OptimizelySDK.Tests
             NotificationCallbackMock.Setup(notification => notification.TestConfigUpdateCallback())
                 .Callback(() => cde.Signal());
 
-            var httpManager = new HttpProjectConfigManager.Builder()
+            HttpProjectConfigManager httpManager = new HttpProjectConfigManager.Builder()
                 .WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z")
                 .WithLogger(LoggerMock.Object)
                 .WithPollingInterval(TimeSpan.FromMilliseconds(1000))
@@ -5474,7 +5530,7 @@ namespace OptimizelySDK.Tests
                 .WithNotificationCenter(notificationCenter)
                 .Build(true);
 
-            var optimizely = new Optimizely(httpManager, notificationCenter);
+            Optimizely optimizely = new Optimizely(httpManager, notificationCenter);
             optimizely.NotificationCenter.AddNotification(
                 NotificationCenter.NotificationType.OptimizelyConfigUpdate,
                 NotificationCallbackMock.Object.TestConfigUpdateCallback);
@@ -5490,10 +5546,11 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestDFMWhenDatafileProvidedDoesNotNotifyWithoutStart()
         {
-            var httpClientMock = new Mock<HttpProjectConfigManager.HttpClient>();
+            Mock<HttpProjectConfigManager.HttpClient> httpClientMock =
+                new Mock<HttpProjectConfigManager.HttpClient>();
             TestHttpProjectConfigManagerUtil.SetClientFieldValue(httpClientMock.Object);
 
-            var httpManager = new HttpProjectConfigManager.Builder()
+            HttpProjectConfigManager httpManager = new HttpProjectConfigManager.Builder()
                 .WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z")
                 .WithDatafile(TestData.Datafile)
                 .WithLogger(LoggerMock.Object)
@@ -5501,7 +5558,7 @@ namespace OptimizelySDK.Tests
                 .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(500))
                 .Build();
 
-            var optimizely = new Optimizely(httpManager);
+            Optimizely optimizely = new Optimizely(httpManager);
             optimizely.NotificationCenter.AddNotification(
                 NotificationCenter.NotificationType.OptimizelyConfigUpdate,
                 NotificationCallbackMock.Object.TestConfigUpdateCallback);
@@ -5522,7 +5579,7 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestGetEnabledFeaturesWithInvalidDatafile()
         {
-            var optly = new Optimizely("Random datafile", null, LoggerMock.Object);
+            Optimizely optly = new Optimizely("Random datafile", null, LoggerMock.Object);
 
             Assert.IsEmpty(optly.GetEnabledFeatures("some_user", null));
 
@@ -5534,14 +5591,14 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestGetEnabledFeaturesWithNoFeatureEnabledForUser()
         {
-            var userAttributes = new UserAttributes
+            UserAttributes userAttributes = new UserAttributes
             {
                 {
                     "device_type", "iPhone"
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
 
             OptimizelyMock.Setup(om =>
@@ -5556,21 +5613,21 @@ namespace OptimizelySDK.Tests
             string[] enabledFeatures =
             {
                 "boolean_feature", "double_single_variable_feature",
-                "string_single_variable_feature", "multi_variate_feature", "empty_feature"
+                "string_single_variable_feature", "multi_variate_feature", "empty_feature",
             };
             string[] notEnabledFeatures =
             {
                 "integer_single_variable_feature", "boolean_single_variable_feature",
-                "mutex_group_feature", "no_rollout_experiment_feature"
+                "mutex_group_feature", "no_rollout_experiment_feature",
             };
-            var userAttributes = new UserAttributes
+            UserAttributes userAttributes = new UserAttributes
             {
                 {
                     "device_type", "iPhone"
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
 
             OptimizelyMock.Setup(om => om.IsFeatureEnabled(It.IsIn<string>(enabledFeatures),
@@ -5582,7 +5639,7 @@ namespace OptimizelySDK.Tests
                     It.IsAny<UserAttributes>()))
                 .Returns(false);
 
-            var actualFeaturesList =
+            List<string> actualFeaturesList =
                 OptimizelyMock.Object.GetEnabledFeatures(TestUserId, userAttributes);
 
             // Verify that the returned feature list contains only enabledFeatures.
@@ -5598,13 +5655,13 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestValidateStringInputsWithValidValues()
         {
-            var optly = Helper.CreatePrivateOptimizely();
+            PrivateObject optly = Helper.CreatePrivateOptimizely();
 
             bool result = (bool)optly.Invoke("ValidateStringInputs", new Dictionary<string, string>
             {
                 {
                     Optimizely.EXPERIMENT_KEY, "test_experiment"
-                }
+                },
             });
             Assert.True(result);
 
@@ -5612,7 +5669,7 @@ namespace OptimizelySDK.Tests
             {
                 {
                     Optimizely.EVENT_KEY, "buy_now_event"
-                }
+                },
             });
             Assert.True(result);
         }
@@ -5620,13 +5677,13 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestValidateStringInputsWithInvalidValues()
         {
-            var optly = Helper.CreatePrivateOptimizely();
+            PrivateObject optly = Helper.CreatePrivateOptimizely();
 
             bool result = (bool)optly.Invoke("ValidateStringInputs", new Dictionary<string, string>
             {
                 {
                     Optimizely.EXPERIMENT_KEY, ""
-                }
+                },
             });
             Assert.False(result);
 
@@ -5634,7 +5691,7 @@ namespace OptimizelySDK.Tests
             {
                 {
                     Optimizely.EVENT_KEY, null
-                }
+                },
             });
             Assert.False(result);
         }
@@ -5642,13 +5699,13 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestValidateStringInputsWithUserId()
         {
-            var optly = Helper.CreatePrivateOptimizely();
+            PrivateObject optly = Helper.CreatePrivateOptimizely();
 
             bool result = (bool)optly.Invoke("ValidateStringInputs", new Dictionary<string, string>
             {
                 {
                     Optimizely.USER_ID, "testUser"
-                }
+                },
             });
             Assert.True(result);
 
@@ -5656,7 +5713,7 @@ namespace OptimizelySDK.Tests
             {
                 {
                     Optimizely.USER_ID, ""
-                }
+                },
             });
             Assert.True(result);
 
@@ -5664,7 +5721,7 @@ namespace OptimizelySDK.Tests
             {
                 {
                     Optimizely.USER_ID, null
-                }
+                },
             });
             Assert.False(result);
         }
@@ -5673,7 +5730,7 @@ namespace OptimizelySDK.Tests
         public void TestActivateValidateInputValues()
         {
             // Verify that ValidateStringInputs does not log error for valid values.
-            var variation = Optimizely.Activate("test_experiment", "test_user");
+            Variation variation = Optimizely.Activate("test_experiment", "test_user");
             LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Provided User Id is in invalid format."),
                 Times.Never);
             LoggerMock.Verify(
@@ -5693,7 +5750,7 @@ namespace OptimizelySDK.Tests
         public void TestGetVariationValidateInputValues()
         {
             // Verify that ValidateStringInputs does not log error for valid values.
-            var variation = Optimizely.GetVariation("test_experiment", "test_user");
+            Variation variation = Optimizely.GetVariation("test_experiment", "test_user");
             LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Provided User Id is in invalid format."),
                 Times.Never);
             LoggerMock.Verify(
@@ -5735,12 +5792,12 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestActivateWithTypedAudiences()
         {
-            var variation = OptimizelyWithTypedAudiences.Activate("typed_audience_experiment",
+            Variation variation = OptimizelyWithTypedAudiences.Activate("typed_audience_experiment",
                 "user1", new UserAttributes
                 {
                     {
                         "house", "Gryffindor"
-                    }
+                    },
                 });
 
             Assert.AreEqual("A", variation.Key);
@@ -5752,7 +5809,7 @@ namespace OptimizelySDK.Tests
                 {
                     {
                         "lasers", 45.5
-                    }
+                    },
                 });
 
             Assert.AreEqual("A", variation.Key);
@@ -5763,12 +5820,12 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestActivateExcludeUserFromExperimentWithTypedAudiences()
         {
-            var variation = OptimizelyWithTypedAudiences.Activate("typed_audience_experiment",
+            Variation variation = OptimizelyWithTypedAudiences.Activate("typed_audience_experiment",
                 "user1", new UserAttributes
                 {
                     {
                         "house", "Hufflepuff"
-                    }
+                    },
                 });
 
             Assert.Null(variation);
@@ -5783,7 +5840,7 @@ namespace OptimizelySDK.Tests
             {
                 {
                     "house", "Welcome to Slytherin!"
-                }
+                },
             });
 
             EventDispatcherMock.Verify(dispatcher => dispatcher.DispatchEvent(It.IsAny<LogEvent>()),
@@ -5798,7 +5855,7 @@ namespace OptimizelySDK.Tests
             {
                 {
                     "house", "Hufflepuff"
-                }
+                },
             });
 
             EventDispatcherMock.Verify(dispatcher => dispatcher.DispatchEvent(It.IsAny<LogEvent>()),
@@ -5808,12 +5865,12 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestIsFeatureEnabledWithTypedAudiences()
         {
-            var featureEnabled = OptimizelyWithTypedAudiences.IsFeatureEnabled("feat_no_vars",
+            bool featureEnabled = OptimizelyWithTypedAudiences.IsFeatureEnabled("feat_no_vars",
                 "user1", new UserAttributes
                 {
                     {
                         "favorite_ice_cream", "chocolate"
-                    }
+                    },
                 });
 
             Assert.True(featureEnabled);
@@ -5823,7 +5880,7 @@ namespace OptimizelySDK.Tests
                 {
                     {
                         "lasers", 45.5
-                    }
+                    },
                 });
 
             Assert.True(featureEnabled);
@@ -5832,7 +5889,7 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestIsFeatureEnabledExcludeUserFromExperimentWithTypedAudiences()
         {
-            var featureEnabled = OptimizelyWithTypedAudiences.IsFeatureEnabled("feat", "user1",
+            bool featureEnabled = OptimizelyWithTypedAudiences.IsFeatureEnabled("feat", "user1",
                 new UserAttributes
                     { });
             Assert.False(featureEnabled);
@@ -5841,12 +5898,12 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestGetFeatureVariableStringReturnVariableValueWithTypedAudiences()
         {
-            var variableValue = OptimizelyWithTypedAudiences.GetFeatureVariableString(
+            string variableValue = OptimizelyWithTypedAudiences.GetFeatureVariableString(
                 "feat_with_var", "x", "user1", new UserAttributes
                 {
                     {
                         "lasers", 71
-                    }
+                    },
                 });
 
             Assert.AreEqual(variableValue, "xyz");
@@ -5856,7 +5913,7 @@ namespace OptimizelySDK.Tests
                 {
                     {
                         "should_do_it", true
-                    }
+                    },
                 });
 
             Assert.AreEqual(variableValue, "xyz");
@@ -5865,12 +5922,12 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestGetFeatureVariableStringReturnDefaultVariableValueWithTypedAudiences()
         {
-            var variableValue = OptimizelyWithTypedAudiences.GetFeatureVariableString(
+            string variableValue = OptimizelyWithTypedAudiences.GetFeatureVariableString(
                 "feat_with_var", "x", "user1", new UserAttributes
                 {
                     {
                         "lasers", 50
-                    }
+                    },
                 });
 
             Assert.AreEqual(variableValue, "x");
@@ -5883,18 +5940,18 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestActivateIncludesUserInExperimentWithComplexAudienceConditions()
         {
-            var userAttributes = new UserAttributes
+            UserAttributes userAttributes = new UserAttributes
             {
                 {
                     "house", "Welcome to Slytherin!"
                 },
                 {
                     "lasers", 45.5
-                }
+                },
             };
 
             // Should be included via substring match string audience with id '3988293898' and exact match number audience with id '3468206646'
-            var variation =
+            Variation variation =
                 OptimizelyWithTypedAudiences.Activate("audience_combinations_experiment", "user1",
                     userAttributes);
             Assert.AreEqual("A", variation.Key);
@@ -5906,18 +5963,18 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestActivateExcludesUserFromExperimentWithComplexAudienceConditions()
         {
-            var userAttributes = new UserAttributes
+            UserAttributes userAttributes = new UserAttributes
             {
                 {
                     "house", "Hufflepuff"
                 },
                 {
                     "lasers", 45.5
-                }
+                },
             };
 
             // Should be excluded as substring audience with id '3988293898' does not match, so the overall conditions fail.
-            var variation =
+            Variation variation =
                 OptimizelyWithTypedAudiences.Activate("audience_combinations_experiment", "user1",
                     userAttributes);
             Assert.Null(variation);
@@ -5929,14 +5986,14 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestTrackIncludesUserInExperimentWithComplexAudienceConditions()
         {
-            var userAttributes = new UserAttributes
+            UserAttributes userAttributes = new UserAttributes
             {
                 {
                     "house", "Gryffindor"
                 },
                 {
                     "should_do_it", true
-                }
+                },
             };
 
             // Should be included via exact match string audience with id '3468206642' and exact match boolean audience with id '3468206646'
@@ -5950,14 +6007,14 @@ namespace OptimizelySDK.Tests
         public void
             TestTrackDoesNotExcludesUserFromExperimentWhenAttributesMismatchWithAudienceConditions()
         {
-            var userAttributes = new UserAttributes
+            UserAttributes userAttributes = new UserAttributes
             {
                 {
                     "house", "Gryffindor"
                 },
                 {
                     "should_do_it", false
-                }
+                },
             };
 
             // Should be excluded as exact match boolean audience with id '3468206643' does not match so the overall conditions fail.
@@ -5970,18 +6027,18 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestIsFeatureEnabledIncludesUserInRolloutWithComplexAudienceConditions()
         {
-            var userAttributes = new UserAttributes
+            UserAttributes userAttributes = new UserAttributes
             {
                 {
                     "house", "Welcome to Slytherin!"
                 },
                 {
                     "favorite_ice_cream", "walls"
-                }
+                },
             };
 
             // Should be included via substring match string audience with id '3988293898' and exists audience with id '3988293899'
-            var result =
+            bool result =
                 OptimizelyWithTypedAudiences.IsFeatureEnabled("feat2", "user1", userAttributes);
             Assert.True(result);
         }
@@ -5989,19 +6046,19 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestIsFeatureEnabledExcludesUserFromRolloutWithComplexAudienceConditions()
         {
-            var userAttributes = new UserAttributes
+            UserAttributes userAttributes = new UserAttributes
             {
                 {
                     "house", "Ravenclaw"
                 },
                 {
                     "lasers", 45.5
-                }
+                },
             };
 
             // Should be excluded - substring match string audience with id '3988293898' does not match,
             // and no audience in the other branch of the 'and' matches either
-            var result =
+            bool result =
                 OptimizelyWithTypedAudiences.IsFeatureEnabled("audience_combinations_experiment",
                     "user1", userAttributes);
             Assert.False(result);
@@ -6010,18 +6067,18 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestGetFeatureVariableIntegerReturnsVariableValueWithComplexAudienceConditions()
         {
-            var userAttributes = new UserAttributes
+            UserAttributes userAttributes = new UserAttributes
             {
                 {
                     "house", "Gryffindor"
                 },
                 {
                     "lasers", 700
-                }
+                },
             };
 
             // Should be included via substring match string audience with id '3988293898' and exists audience with id '3988293899'
-            var value =
+            int? value =
                 OptimizelyWithTypedAudiences.GetFeatureVariableInteger("feat2_with_var", "z",
                     "user1", userAttributes);
             Assert.AreEqual(150, value);
@@ -6030,11 +6087,11 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestGetFeatureVariableIntegerReturnsDefaultValueWithComplexAudienceConditions()
         {
-            var userAttributes = new UserAttributes
+            UserAttributes userAttributes = new UserAttributes
                 { };
 
             // Should be excluded - no audiences match with no attributes.
-            var value =
+            int? value =
                 OptimizelyWithTypedAudiences.GetFeatureVariableInteger("feat2_with_var", "z",
                     "user1", userAttributes);
             Assert.AreEqual(10, value);
@@ -6047,13 +6104,13 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestOptimizelyDisposeAlsoDisposedConfigManager()
         {
-            var httpManager = new HttpProjectConfigManager.Builder()
+            HttpProjectConfigManager httpManager = new HttpProjectConfigManager.Builder()
                 .WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z")
                 .WithLogger(LoggerMock.Object)
                 .WithPollingInterval(TimeSpan.FromMilliseconds(5000))
                 .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(500))
                 .Build();
-            var optimizely = new Optimizely(httpManager);
+            Optimizely optimizely = new Optimizely(httpManager);
             optimizely.Dispose();
 
             Assert.True(optimizely.Disposed);
@@ -6063,13 +6120,13 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestDisposeInvalidateObject()
         {
-            var httpManager = new HttpProjectConfigManager.Builder()
+            HttpProjectConfigManager httpManager = new HttpProjectConfigManager.Builder()
                 .WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z")
                 .WithLogger(LoggerMock.Object)
                 .WithPollingInterval(TimeSpan.FromMilliseconds(5000))
                 .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(500))
                 .Build();
-            var optimizely = new Optimizely(httpManager);
+            Optimizely optimizely = new Optimizely(httpManager);
             optimizely.Dispose();
 
             Assert.False(optimizely.IsValid);
@@ -6078,27 +6135,16 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestAfterDisposeAPIsNoLongerValid()
         {
-            var httpManager = new HttpProjectConfigManager.Builder()
+            HttpProjectConfigManager httpManager = new HttpProjectConfigManager.Builder()
                 .WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z")
                 .WithDatafile(TestData.Datafile)
                 .WithLogger(LoggerMock.Object)
                 .WithPollingInterval(TimeSpan.FromMilliseconds(50000))
                 .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(500))
                 .Build(true);
-            var optimizely = new Optimizely(httpManager);
+            Optimizely optimizely = new Optimizely(httpManager);
             httpManager.Start();
-            var activate = optimizely.Activate("test_experiment", TestUserId, new UserAttributes()
-            {
-                {
-                    "device_type", "iPhone"
-                },
-                {
-                    "location", "San Francisco"
-                }
-            });
-            Assert.NotNull(activate);
-            optimizely.Dispose();
-            var activateAfterDispose = optimizely.Activate("test_experiment", TestUserId,
+            Variation activate = optimizely.Activate("test_experiment", TestUserId,
                 new UserAttributes()
                 {
                     {
@@ -6106,7 +6152,19 @@ namespace OptimizelySDK.Tests
                     },
                     {
                         "location", "San Francisco"
-                    }
+                    },
+                });
+            Assert.NotNull(activate);
+            optimizely.Dispose();
+            Variation activateAfterDispose = optimizely.Activate("test_experiment", TestUserId,
+                new UserAttributes()
+                {
+                    {
+                        "device_type", "iPhone"
+                    },
+                    {
+                        "location", "San Francisco"
+                    },
                 });
             Assert.Null(activateAfterDispose);
             httpManager.Dispose();
@@ -6115,9 +6173,10 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestNonDisposableConfigManagerDontCrash()
         {
-            var fallbackConfigManager = new FallbackProjectConfigManager(Config);
+            FallbackProjectConfigManager fallbackConfigManager =
+                new FallbackProjectConfigManager(Config);
 
-            var optimizely = new Optimizely(fallbackConfigManager);
+            Optimizely optimizely = new Optimizely(fallbackConfigManager);
             optimizely.Dispose();
             Assert.True(optimizely.Disposed);
         }
@@ -6125,9 +6184,10 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestAfterDisposeAPIsShouldNotCrash()
         {
-            var fallbackConfigManager = new FallbackProjectConfigManager(Config);
+            FallbackProjectConfigManager fallbackConfigManager =
+                new FallbackProjectConfigManager(Config);
 
-            var optimizely = new Optimizely(fallbackConfigManager);
+            Optimizely optimizely = new Optimizely(fallbackConfigManager);
             optimizely.Dispose();
             Assert.True(optimizely.Disposed);
 
@@ -6153,8 +6213,8 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestGetOptimizelyConfigNullConfig()
         {
-            var optly = new Optimizely(new FallbackProjectConfigManager(null));
-            var optimizelyConfig = optly.GetOptimizelyConfig();
+            Optimizely optly = new Optimizely(new FallbackProjectConfigManager(null));
+            OptimizelyConfig optimizelyConfig = optly.GetOptimizelyConfig();
 
             Assert.IsNull(optimizelyConfig);
         }
@@ -6163,7 +6223,7 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestGetOptimizelyConfigDatafile()
         {
-            var optimizelyConfig = Optimizely.GetOptimizelyConfig();
+            OptimizelyConfig optimizelyConfig = Optimizely.GetOptimizelyConfig();
             Assert.AreEqual(optimizelyConfig.GetDatafile(), TestData.Datafile);
         }
 
@@ -6173,7 +6233,7 @@ namespace OptimizelySDK.Tests
 
         public static void SetCulture(string culture)
         {
-            var ci1 = new CultureInfo(culture);
+            CultureInfo ci1 = new CultureInfo(culture);
             Thread.CurrentThread.CurrentCulture = ci1;
             Thread.CurrentThread.CurrentUICulture = ci1;
         }
