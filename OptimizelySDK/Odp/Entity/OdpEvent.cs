@@ -51,13 +51,13 @@ namespace OptimizelySDK.Odp.Entity
         /// <param name="identifiers">Key-value map of user identifiers</param>
         /// <param name="data">Event data in a key-value pair format</param>
         public OdpEvent(string type, string action, Dictionary<string, string> identifiers,
-            Dictionary<string, dynamic> data = null
+            Dictionary<string, object> data = null
         )
         {
             Type = type;
             Action = action;
             Identifiers = identifiers ?? new Dictionary<string, string>();
-            Data = data ?? new Dictionary<string, dynamic>();
+            Data = data ?? new Dictionary<string, object>();
         }
     }
 }

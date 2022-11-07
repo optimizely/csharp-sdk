@@ -47,7 +47,27 @@ namespace OptimizelySDK.Odp
         /// <summary>
         /// Current state of the event processor
         /// </summary>
-        private ExecutionState State { get; set; } = ExecutionState.Stopped;
+        private ExecutionState CurrentState
+        {
+            get
+            {
+                lock (lockObject)
+                {
+                    return _state;
+                }
+            }
+            set
+            {
+                lock (lockObject)
+                {
+                    _state = value;
+                }
+            }
+        }
+
+        private ExecutionState _state = ExecutionState.Stopped;
+
+        private static readonly object lockObject = new object();
 
         /// <summary>
         /// ODP configuration settings in used
@@ -111,6 +131,22 @@ namespace OptimizelySDK.Odp
             "Guid",
         };
 
+        private readonly Dictionary<string, object> _commonData = new Dictionary<string, object>
+        {
+            {
+                "idempotence_id", Guid.NewGuid()
+            },
+            {
+                "data_source_type", "sdk"
+            },
+            {
+                "data_source", Optimizely.SDK_TYPE
+            },
+            {
+                "data_source_version", Optimizely.SDK_VERSION
+            },
+        };
+
         public OdpEventManager(IOdpConfig odpConfig, IOdpEventApiManager odpEventApiManager,
             ILogger logger,
             int queueSize = DEFAULT_SERVER_QUEUE_SIZE, int batchSize = DEFAULT_BATCH_SIZE,
@@ -147,8 +183,8 @@ namespace OptimizelySDK.Odp
             {
                 return;
             }
-            
-            State = ExecutionState.Running;
+
+            CurrentState = ExecutionState.Running;
 
             _flushQueueRegularly.Start();
         }
@@ -162,20 +198,27 @@ namespace OptimizelySDK.Odp
             {
                 return;
             }
-            
-            if (State == ExecutionState.Stopped)
+
+            if (CurrentState == ExecutionState.Stopped)
             {
                 return;
             }
-            
+
             _logger.Log(LogLevel.DEBUG, "Stop requested.");
 
-            _flushIntervalCancellation.Cancel();
+            try
+            {
+                _flushIntervalCancellation.Cancel();
+            }
+            catch
+            {
+                _flushIntervalCancellation.Dispose();
+            }
 
             // one final time
             FlushQueue();
 
-            State = ExecutionState.Stopped;
+            CurrentState = ExecutionState.Stopped;
 
             _logger.Log(LogLevel.DEBUG, $"Stopped. Queue Count: {_queue.Count}.");
         }
@@ -190,7 +233,7 @@ namespace OptimizelySDK.Odp
             {
                 return;
             }
-            
+
             var identifiers = new Dictionary<string, string>
             {
                 {
@@ -212,8 +255,8 @@ namespace OptimizelySDK.Odp
             {
                 return;
             }
-            
-            if (State == ExecutionState.Stopped)
+
+            if (CurrentState == ExecutionState.Stopped)
             {
                 _logger.Log(LogLevel.WARN, "ODP is not enabled.");
                 return;
@@ -251,20 +294,20 @@ namespace OptimizelySDK.Odp
         /// </summary>
         private void ProcessQueue()
         {
-            if (State != ExecutionState.Running)
+            if (CurrentState != ExecutionState.Running)
             {
                 return;
             }
 
             _logger.Log(LogLevel.DEBUG, $"Processing Queue.");
 
-            State = ExecutionState.Processing;
+            CurrentState = ExecutionState.Processing;
             while (QueueHasBatches())
             {
                 DequeueSendSingleBatch();
             }
 
-            State = ExecutionState.Running;
+            CurrentState = ExecutionState.Running;
         }
 
         private void RegularlyFlushQueue()
@@ -277,20 +320,20 @@ namespace OptimizelySDK.Odp
 
         private void FlushQueue()
         {
-            if (State != ExecutionState.Running)
+            if (CurrentState != ExecutionState.Running)
             {
                 return;
             }
 
             _logger.Log(LogLevel.DEBUG, $"Flushing Queue.");
 
-            State = ExecutionState.Processing;
+            CurrentState = ExecutionState.Processing;
             while (QueueContainsItems())
             {
                 DequeueSendSingleBatch();
             }
 
-            State = ExecutionState.Running;
+            CurrentState = ExecutionState.Running;
         }
 
         /// <summary>
@@ -380,27 +423,11 @@ namespace OptimizelySDK.Odp
         /// </summary>
         /// <param name="sourceData">Existing event data to augment</param>
         /// <returns>Updated Dictionary with new key-values added</returns>
-        private static Dictionary<string, dynamic> AugmentCommonData(
+        private Dictionary<string, dynamic> AugmentCommonData(
             Dictionary<string, dynamic> sourceData
         )
         {
-            var commonData = new Dictionary<string, dynamic>
-            {
-                {
-                    "idempotence_id", Guid.NewGuid()
-                },
-                {
-                    "data_source_type", "sdk"
-                },
-                {
-                    "data_source", Optimizely.SDK_TYPE
-                },
-                {
-                    "data_source_version", Optimizely.SDK_VERSION
-                },
-            };
-
-            return sourceData.MergeInPlace(commonData);
+            return sourceData.MergeInPlace<string, object>(_commonData);
         }
     }
 }
