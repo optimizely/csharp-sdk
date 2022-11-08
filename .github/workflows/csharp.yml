@@ -69,18 +69,20 @@ jobs:
       - name: Install NUnit Console
         run: nuget install NUnit.Console -Version 3.15.2 -DirectDownload -OutputDirectory .
       - name: Run NUnit tests
-        run: ./NUnit.ConsoleRunner.3.15.2\tools\nunit3-console.exe ./OptimizelySDK.Tests/bin/Release/OptimizelySDK.Tests.dll
+        run: ./NUnit.ConsoleRunner.3.15.2\tools\nunit3-console.exe /timeout 10000 /process Separate ./OptimizelySDK.Tests/bin/Release/OptimizelySDK.Tests.dll
       - name: Find and sign all DLLs
         id: unit_tests
         run: Get-ChildItem -Recurse -Exclude '.*Tests.*' -include 'OptimizelySDK*.dll' | Where-Object { $_.DirectoryName -match '\\bin\\Release' } | Foreach-Object { sn -R $_.FullName ./keypair.snk }
-      - name: Check on success
+      - name: Install AWS CLI on successful tests & for release
+        if: steps.unit_tests.outcome == 'success' && env.CURRENT_BRANCH == env.RELEASE_BRANCH && env.EVENT_TYPE == 'push'
+        run: Install-Module -Name AWS.Tools.Installer -Force; Install-AWSToolsModule AWS.Tools.S3 -Force -CleanUp
+      - name: Deploy to S3 on successful tests & for release
         if: steps.unit_tests.outcome == 'success' && env.CURRENT_BRANCH == env.RELEASE_BRANCH && env.EVENT_TYPE == 'push'
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.OFTA_KEY }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.OFTA_SECRET }}
           AWS_DEFAULT_REGION: ${{ secrets.OFTA_REGION }}
-        run: |
-          find . -path './OptimizelySDK*bin/Release/OptimizelySDK*.dll' -not -regex '.*Tests.*' -print0 | while IFS= read -r -d '' file; do (aws s3 cp $file s3://optly-fs-travisci-artifacts/${{ env.REPO_SLUG }}/${{ env.BUILD_NUMBER }}/${{ env.RUN_NUMBER }}/${{ env.ATTEMPT_NUM }}/$(basename $file)-unsigned); done
+        run: Get-ChildItem -Recurse -Exclude '.*Tests.*' -include 'OptimizelySDK*.dll' | Where-Object { $_.DirectoryName -match '\\bin\\Release' } | Foreach-Object { aws s3 cp $_.FullName s3://optly-fs-travisci-artifacts/${{ env.REPO_SLUG }}/${{ env.BUILD_NUMBER }}/${{ env.RUN_NUMBER }}/${{ env.ATTEMPT_NUM }}/$(basename $file)-unsigned }
 
   netStandard16:
     name: Build For .NET Standard 1.6 
