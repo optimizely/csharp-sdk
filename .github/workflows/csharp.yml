@@ -72,8 +72,7 @@ jobs:
 #        run: ./NUnit.ConsoleRunner.3.15.2\tools\nunit3-console.exe /timeout 10000 /process Separate ./OptimizelySDK.Tests/bin/Release/OptimizelySDK.Tests.dll
       - name: Find and sign all DLLs
         id: unit_tests
-        run: |
-          echo Get-ChildItem -Recurse -Path 'C:\Program Files (x86)\Microsoft SDKs\Windows\' -Include 'sn.exe'
+        run: Get-ChildItem -Recurse -Path 'C:\Program Files (x86)\' -Include 'sn.exe'
       - name: Install AWS CLI, deploy to S3 on successful tests & for release
         if: steps.unit_tests.outcome == 'success' && env.CURRENT_BRANCH == env.RELEASE_BRANCH && env.EVENT_TYPE == 'push'
         env:
