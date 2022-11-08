@@ -49,7 +49,7 @@ namespace OptimizelySDK.Odp
 
         public OdpSegmentManager(IOdpConfig odpConfig, IOdpSegmentApiManager apiManager,
             int cacheSize = Constants.DEFAULT_MAX_CACHE_SIZE, TimeSpan? itemTimeout = null,
-            ILogger logger = null
+            ILogger logger = null, ICache<List<string>> cache = null
         )
         {
             _apiManager = apiManager;
@@ -64,7 +64,7 @@ namespace OptimizelySDK.Odp
                 timeout = TimeSpan.Zero;
             }
 
-            _segmentsCache = new LruCache<List<string>>(cacheSize, timeout, logger);
+            _segmentsCache = cache as LruCache<List<string>> ?? new LruCache<List<string>>(cacheSize, timeout, logger);
         }
 
         /// <summary>
