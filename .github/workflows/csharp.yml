@@ -66,16 +66,17 @@ jobs:
         run: nuget restore ./OptimizelySDK.Travis.sln
       - name: Build solution
         run: msbuild /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=$(pwd)/keypair.snk /p:Configuration=Release ./OptimizelySDK.Travis.sln
-      - name: Install NUnit Console
-        run: nuget install NUnit.Console -Version 3.15.2 -DirectDownload -OutputDirectory .
-      - name: Run NUnit tests
-        run: ./NUnit.ConsoleRunner.3.15.2\tools\nunit3-console.exe /timeout 10000 /process Separate ./OptimizelySDK.Tests/bin/Release/OptimizelySDK.Tests.dll
+#      - name: Install NUnit Console
+#        run: nuget install NUnit.Console -Version 3.15.2 -DirectDownload -OutputDirectory .
+#      - name: Run NUnit tests
+#        run: ./NUnit.ConsoleRunner.3.15.2\tools\nunit3-console.exe /timeout 10000 /process Separate ./OptimizelySDK.Tests/bin/Release/OptimizelySDK.Tests.dll
       - name: Find and sign all DLLs
         id: unit_tests
-        run: | 
-          Get-ChildItem -Recurse -Exclude '.*Tests.*' -Include 'OptimizelySDK*.dll' | 
-          Where-Object { $_.DirectoryName -match '\\bin\\Release' } | 
-          Foreach-Object { 'C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.8 Tools\sn.exe' -R $_.FullName ./keypair.snk }
+        run: |
+          $sn = "C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.8 Tools\sn.exe";
+          Get-ChildItem -Recurse -Exclude '.*Tests.*' -Include 'OptimizelySDK*.dll' |
+          Where-Object { $_.DirectoryName -match '\\bin\\Release' } |
+          Foreach-Object { & $sn -R $_.FullName ./keypair.snk }       
       - name: Install AWS CLI, deploy to S3 on successful tests & for release
         if: steps.unit_tests.outcome == 'success' && env.CURRENT_BRANCH == env.RELEASE_BRANCH && env.EVENT_TYPE == 'push'
         env:
@@ -83,8 +84,8 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.OFTA_SECRET }}
           AWS_DEFAULT_REGION: ${{ secrets.OFTA_REGION }}
         run: |
-          Install-Module -Name AWS.Tools.Installer -Force
-          Install-AWSToolsModule AWS.Tools.S3 -Force -CleanUp
+          Install-Module -Name AWS.Tools.Installer -Force;
+          Install-AWSToolsModule AWS.Tools.S3 -Force -CleanUp;
           Get-ChildItem -Recurse -Exclude '.*Tests.*' -include 'OptimizelySDK*.dll' | Where-Object { $_.DirectoryName -match '\\bin\\Release' } | Foreach-Object { aws s3 cp $_.FullName s3://optly-fs-travisci-artifacts/${{ env.REPO_SLUG }}/${{ env.BUILD_NUMBER }}/${{ env.RUN_NUMBER }}/${{ env.ATTEMPT_NUM }}/$(basename $file)-unsigned }
   
   netStandard16:
