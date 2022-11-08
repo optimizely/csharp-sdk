@@ -73,8 +73,8 @@ jobs:
       - name: Find and sign all DLLs
         id: unit_tests
         run: |
-          $sn = (Get-ChildItem -Recurse -Path 'C:\Program Files (x86)\' -Include 'sn.exe' | Select-Object -First 1).FullName
-          Get-ChildItem -Recurse -Exclude '.*Tests.*' -Include 'OptimizelySDK*.dll' | Where-Object { $_.DirectoryName -match '\\bin\\Release' } | Foreach-Object { $sn -R $_.FullName ./keypair.snk }
+          $env:Path += ';'+(Get-ChildItem -Recurse -Path 'C:\Program Files (x86)\' -Include 'sn.exe' | Select-Object -First 1).FullName
+          Get-ChildItem -Recurse -Exclude '.*Tests.*' -Include 'OptimizelySDK*.dll' | Where-Object { $_.DirectoryName -match '\\bin\\Release' } | Foreach-Object { sn -R $_.FullName ./keypair.snk }
       - name: Install AWS CLI, deploy to S3 on successful tests & for release
         if: steps.unit_tests.outcome == 'success' && env.CURRENT_BRANCH == env.RELEASE_BRANCH && env.EVENT_TYPE == 'push'
         env:
