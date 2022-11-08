@@ -66,10 +66,10 @@ jobs:
         run: nuget restore ./OptimizelySDK.Travis.sln
       - name: Build solution
         run: msbuild /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=$(pwd)/keypair.snk /p:Configuration=Release ./OptimizelySDK.Travis.sln
-      - name: Install NUnit Console
-        run: nuget install NUnit.Console -Version 3.15.2 -DirectDownload -OutputDirectory .
-      - name: Run NUnit tests
-        run: ./NUnit.ConsoleRunner.3.15.2\tools\nunit3-console.exe /timeout 10000 /process Separate ./OptimizelySDK.Tests/bin/Release/OptimizelySDK.Tests.dll
+#      - name: Install NUnit Console
+#        run: nuget install NUnit.Console -Version 3.15.2 -DirectDownload -OutputDirectory .
+#      - name: Run NUnit tests
+#        run: ./NUnit.ConsoleRunner.3.15.2\tools\nunit3-console.exe /timeout 10000 /process Separate ./OptimizelySDK.Tests/bin/Release/OptimizelySDK.Tests.dll
       - name: Find and sign all DLLs
         id: unit_tests
         run: |
