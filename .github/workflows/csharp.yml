@@ -69,12 +69,12 @@ jobs:
       - name: Install NUnit Console
         run: nuget install NUnit.Console -Version 3.15.2 -DirectDownload -OutputDirectory .
       - name: Run NUnit tests
-        id: unit_tests
         run: ./NUnit.ConsoleRunner.3.15.2\tools\nunit3-console.exe /timeout 10000 /process Separate ./OptimizelySDK.Tests/bin/Release/OptimizelySDK.Tests.dll
-#      - name: Find and sign all DLLs
-#        run: |
-#          echo (Get-ChildItem -Recurse -Path 'C:\Program Files (x86)\' -Include 'sn.exe' | Select-Object -First 1).FullName >> $GITHUB_PATH
-#          Get-ChildItem -Recurse -Exclude '.*Tests.*' -Include 'OptimizelySDK*.dll' | Where-Object { $_.DirectoryName -match '\\bin\\Release' } | Foreach-Object { sn -R $_.FullName ./keypair.snk }
+      - name: Find and sign all DLLs
+        id: unit_tests
+        run: |
+          echo '(Get-ChildItem -Recurse -Path 'C:\Program Files (x86)\' -Include 'sn.exe' | Select-Object -First 1).FullName' >> $GITHUB_PATH
+          Get-ChildItem -Recurse -Exclude '.*Tests.*' -Include 'OptimizelySDK*.dll' | Where-Object { $_.DirectoryName -match '\\bin\\Release' } | Foreach-Object { sn -R $_.FullName ./keypair.snk }
       - name: Install AWS CLI, deploy to S3 on successful tests & for release
         if: steps.unit_tests.outcome == 'success' && env.CURRENT_BRANCH == env.RELEASE_BRANCH && env.EVENT_TYPE == 'push'
         env:
