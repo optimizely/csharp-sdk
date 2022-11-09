@@ -265,14 +265,15 @@ namespace OptimizelySDK.Odp
         /// </summary>
         /// <param name="jsonResponse">JSON response from ODP</param>
         /// <returns>Strongly-typed ODP Response object</returns>
-        public static Response DeserializeSegmentsFromJson(string jsonResponse)
+        public Response DeserializeSegmentsFromJson(string jsonResponse)
         {
             try
             {
                 return JsonConvert.DeserializeObject<Response>(jsonResponse);
             }
-            catch
+            catch (Exception ex)
             {
+                _errorHandler.HandleError(ex);
                 return default;
             }
         }

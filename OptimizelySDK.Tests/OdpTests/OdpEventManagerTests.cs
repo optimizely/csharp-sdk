@@ -22,6 +22,7 @@ using OptimizelySDK.Odp.Entity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -34,7 +35,7 @@ namespace OptimizelySDK.Tests.OdpTests
         private const string API_HOST = "https://odp-events.example.com";
         private const string MOCK_IDEMPOTENCE_ID = "7d2fc936-8e3b-4e46-aff1-6ccc6fcd1394";
         private const string FS_USER_ID = "fs_user_id";
-        private const int MAX_COUNTDOWNEVENT_WAIT_MS = 2000;
+        private const int MAX_COUNT_DOWN_EVENT_WAIT_MS = 2000;
 
         private readonly List<OdpEvent> _testEvents = new List<OdpEvent>
         {
@@ -133,6 +134,8 @@ namespace OptimizelySDK.Tests.OdpTests
             }),
         };
 
+        private readonly List<string> _emptySegmentsToCheck = new List<string>(0);
+
         private OdpConfig _odpConfig;
 
         private Mock<ILogger> _mockLogger;
@@ -141,7 +144,7 @@ namespace OptimizelySDK.Tests.OdpTests
         [SetUp]
         public void Setup()
         {
-            _odpConfig = new OdpConfig(API_KEY, API_HOST, new List<string>());
+            _odpConfig = new OdpConfig(API_KEY, API_HOST, _emptySegmentsToCheck);
 
             _mockApiManager = new Mock<IOdpEventApiManager>();
 
@@ -167,7 +170,7 @@ namespace OptimizelySDK.Tests.OdpTests
         [Test]
         public void ShouldLogAndDiscardEventsWhenEventManagerConfigNotReady()
         {
-            var mockOdpConfig = new Mock<IOdpConfig>();
+            var mockOdpConfig = new Mock<OdpConfig>(API_KEY, API_HOST, _emptySegmentsToCheck);
             mockOdpConfig.Setup(o => o.IsReady()).Returns(false);
             var eventManager =
                 new OdpEventManager(mockOdpConfig.Object, _mockApiManager.Object,
@@ -185,7 +188,7 @@ namespace OptimizelySDK.Tests.OdpTests
         [Test]
         public void ShouldLogWhenOdpNotIntegratedAndIdentifyUserCalled()
         {
-            var mockOdpConfig = new Mock<IOdpConfig>();
+            var mockOdpConfig = new Mock<OdpConfig>(API_KEY, API_HOST, _emptySegmentsToCheck);
             mockOdpConfig.Setup(o => o.IsReady()).Returns(false);
             var eventManager =
                 new OdpEventManager(mockOdpConfig.Object, _mockApiManager.Object,
@@ -202,7 +205,7 @@ namespace OptimizelySDK.Tests.OdpTests
         [Test]
         public void ShouldLogWhenOdpNotIntegratedAndStartCalled()
         {
-            var mockOdpConfig = new Mock<IOdpConfig>();
+            var mockOdpConfig = new Mock<OdpConfig>(API_KEY, API_HOST, _emptySegmentsToCheck);
             mockOdpConfig.Setup(o => o.IsReady()).Returns(false);
             var eventManager =
                 new OdpEventManager(mockOdpConfig.Object, _mockApiManager.Object,
@@ -210,9 +213,7 @@ namespace OptimizelySDK.Tests.OdpTests
 
             eventManager.IdentifyUser(FS_USER_ID);
 
-            _mockLogger.Verify(
-                l => l.Log(LogLevel.DEBUG,
-                    "ODP is not integrated."),
+            _mockLogger.Verify(l => l.Log(LogLevel.DEBUG, "ODP is not integrated."),
                 Times.Once);
         }
 
@@ -287,7 +288,7 @@ namespace OptimizelySDK.Tests.OdpTests
 
             eventManager.Start();
             eventManager.SendEvent(_testEvents[0]);
-            cde.Wait(MAX_COUNTDOWNEVENT_WAIT_MS);
+            cde.Wait(MAX_COUNT_DOWN_EVENT_WAIT_MS);
 
             var eventsSentToApi = eventsCollector.FirstOrDefault();
             var actualEvent = eventsSentToApi?.FirstOrDefault();
@@ -341,6 +342,7 @@ namespace OptimizelySDK.Tests.OdpTests
             {
                 eventManager.SendEvent(MakeEvent(i));
             }
+
             Task.Delay(1000).Wait();
 
             // Batch #1 & #2 with 10 in each should send immediately then...
@@ -368,7 +370,7 @@ namespace OptimizelySDK.Tests.OdpTests
 
             eventManager.Start();
             _testEvents.ForEach(e => eventManager.SendEvent(e));
-            cde.Wait(MAX_COUNTDOWNEVENT_WAIT_MS);
+            cde.Wait(MAX_COUNT_DOWN_EVENT_WAIT_MS);
 
             // sending 1 batch of 2 events after 1s flush interval since batchSize is 10
             _mockApiManager.Verify(a =>
@@ -403,7 +405,7 @@ namespace OptimizelySDK.Tests.OdpTests
                 eventManager.SendEvent(MakeEvent(i));
             }
 
-            cde.Wait(MAX_COUNTDOWNEVENT_WAIT_MS);
+            cde.Wait(MAX_COUNT_DOWN_EVENT_WAIT_MS);
 
             // retry 3x (default) for 2 batches or 6 calls to attempt to process
             _mockApiManager.Verify(
@@ -448,7 +450,7 @@ namespace OptimizelySDK.Tests.OdpTests
 
             eventManager.Start();
             eventManager.IdentifyUser(USER_ID);
-            cde.Wait(MAX_COUNTDOWNEVENT_WAIT_MS);
+            cde.Wait(MAX_COUNT_DOWN_EVENT_WAIT_MS);
 
             var eventsSentToApi = eventsCollector.FirstOrDefault();
             var actualEvent = eventsSentToApi?.FirstOrDefault();
@@ -477,7 +479,7 @@ namespace OptimizelySDK.Tests.OdpTests
                 "1-item-cart",
             };
             var segmentsToCheckCollector = new List<List<string>>();
-            var mockOdpConfig = new Mock<IOdpConfig>();
+            var mockOdpConfig = new Mock<OdpConfig>(API_KEY, API_HOST, segmentsToCheck);
             mockOdpConfig.Setup(m => m.Update(Capture.In(apiKeyCollector),
                 Capture.In(apiHostCollector), Capture.In(segmentsToCheckCollector)));
             var differentOdpConfig = new OdpConfig(apiKey, apiHost, segmentsToCheck);

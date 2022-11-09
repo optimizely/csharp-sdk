@@ -57,7 +57,7 @@ namespace OptimizelySDK.Odp
         /// <summary>
         /// ODP configuration settings in used
         /// </summary>
-        private readonly IOdpConfig _odpConfig;
+        private readonly OdpConfig _odpConfig;
 
         /// <summary>
         /// REST API Manager used to send the events
@@ -132,7 +132,7 @@ namespace OptimizelySDK.Odp
             },
         };
 
-        public OdpEventManager(IOdpConfig odpConfig, IOdpEventApiManager odpEventApiManager,
+        public OdpEventManager(OdpConfig odpConfig, IOdpEventApiManager odpEventApiManager,
             ILogger logger,
             int queueSize = DEFAULT_SERVER_QUEUE_SIZE, int batchSize = DEFAULT_BATCH_SIZE,
             int flushInterval = DEFAULT_FLUSH_INTERVAL_MSECS
