@@ -45,7 +45,7 @@ namespace OptimizelySDK.Odp
         /// <summary>
         /// Cached segments 
         /// </summary>
-        private readonly LruCache<List<string>> _segmentsCache;
+        private readonly ICache<List<string>> _segmentsCache;
 
         public OdpSegmentManager(IOdpConfig odpConfig, IOdpSegmentApiManager apiManager,
             int cacheSize = Constants.DEFAULT_MAX_CACHE_SIZE, TimeSpan? itemTimeout = null,
@@ -64,7 +64,7 @@ namespace OptimizelySDK.Odp
                 timeout = TimeSpan.Zero;
             }
 
-            _segmentsCache = cache as LruCache<List<string>> ?? new LruCache<List<string>>(cacheSize, timeout, logger);
+            _segmentsCache = cache ?? new LruCache<List<string>>(cacheSize, timeout, logger);
         }
 
         /// <summary>
@@ -114,9 +114,10 @@ namespace OptimizelySDK.Odp
 
             qualifiedSegments = _apiManager.FetchSegments(
                     _odpConfig.ApiKey,
-                    _odpConfig.ApiHost + Constants.ODP_GRAPHQL_API_ENDPOINT_PATH,
-                    OdpUserKeyType.FS_USER_ID, fsUserId, _odpConfig.SegmentsToCheck)
-                .ToList();
+                    _odpConfig.ApiHost,
+                    OdpUserKeyType.FS_USER_ID,
+                    fsUserId,
+                    _odpConfig.SegmentsToCheck)?.ToList();
 
             if (!options.Contains(OdpSegmentOption.IgnoreCache))
             {

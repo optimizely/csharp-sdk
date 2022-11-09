@@ -34,7 +34,9 @@ namespace OptimizelySDK.Tests.OdpTests
         private const string API_HOST = "https://odp-host.example.com";
         private const string FS_USER_ID = "some_valid_user_id";
 
-        private readonly List<string> _segmentsToCheck = new List<string>
+        private static readonly string expectedCacheKey = $"fs_user_id-$-{FS_USER_ID}";
+
+        private static readonly List<string> segmentsToCheck = new List<string>
         {
             "segment1",
             "segment2",
@@ -48,7 +50,7 @@ namespace OptimizelySDK.Tests.OdpTests
         [SetUp]
         public void Setup()
         {
-            _odpConfig = new OdpConfig(API_KEY, API_HOST, _segmentsToCheck);
+            _odpConfig = new OdpConfig(API_KEY, API_HOST, segmentsToCheck);
 
             _mockApiManager = new Mock<IOdpSegmentApiManager>();
 
@@ -66,48 +68,130 @@ namespace OptimizelySDK.Tests.OdpTests
                 .Returns(default(List<string>));
             _mockApiManager.Setup(a => a.FetchSegments(It.IsAny<string>(), It.IsAny<string>(),
                     It.IsAny<OdpUserKeyType>(), It.IsAny<string>(), It.IsAny<List<string>>()))
-                .Returns(_segmentsToCheck.ToArray());
+                .Returns(segmentsToCheck.ToArray());
             var manager = new OdpSegmentManager(_odpConfig, _mockApiManager.Object,
                 Constants.DEFAULT_MAX_CACHE_SIZE, null, _mockLogger.Object, _mockCache.Object);
 
             var segments = manager.FetchQualifiedSegments(FS_USER_ID);
 
             var cacheKey = keyCollector.FirstOrDefault();
-            Assert.AreEqual($"fs_user_id-$-{FS_USER_ID}", cacheKey);
-            _mockApiManager.Verify(a => a.FetchSegments(API_KEY, API_HOST,
-                OdpUserKeyType.FS_USER_ID, FS_USER_ID, _odpConfig.SegmentsToCheck), Times.Once);
+            Assert.AreEqual(expectedCacheKey, cacheKey);
+            _mockCache.Verify(c => c.Reset(), Times.Never);
+            _mockCache.Verify(c => c.Lookup(cacheKey), Times.Once);
             _mockLogger.Verify(l =>
-                l.Log(LogLevel.DEBUG, "ODP Cache Miss. Making a call to ODP Server."));
-            Assert.AreEqual(_segmentsToCheck, segments);
-            // verify(mockApiManager, times(1))
-            //     .fetchQualifiedSegments(odpConfig.getApiKey(),
-            //         odpConfig.getApiHost() + "/v3/graphql", "vuid", "testId",
-            //         Arrays.asList("segment1", "segment2"));
-            // verify(mockCache, times(1))
-            //     .save("vuid-$-testId", Arrays.asList("segment1", "segment2"));
-            // verify(mockCache, times(0)).reset();
-            //
-            //
-            // assertEquals(Arrays.asList("segment1", "segment2"), segments);
+                l.Log(LogLevel.DEBUG, "ODP Cache Miss. Making a call to ODP Server."), Times.Once);
+            _mockApiManager.Verify(
+                a => a.FetchSegments(
+                    API_KEY,
+                    API_HOST,
+                    OdpUserKeyType.FS_USER_ID,
+                    FS_USER_ID,
+                    _odpConfig.SegmentsToCheck), Times.Once);
+            _mockCache.Verify(c => c.Save(cacheKey, It.IsAny<List<string>>()), Times.Once);
+            Assert.AreEqual(segmentsToCheck, segments);
         }
 
         [Test]
-        public void ShouldFetchSegmentsSuccessOnCacheHit() { }
+        public void ShouldFetchSegmentsSuccessOnCacheHit()
+        {
+            var keyCollector = new List<string>();
+            _mockCache.Setup(c => c.Lookup(Capture.In(keyCollector)))
+                .Returns(segmentsToCheck);
+            _mockApiManager.Setup(a => a.FetchSegments(It.IsAny<string>(), It.IsAny<string>(),
+                It.IsAny<OdpUserKeyType>(), It.IsAny<string>(), It.IsAny<List<string>>()));
+            var manager = new OdpSegmentManager(_odpConfig, _mockApiManager.Object,
+                Constants.DEFAULT_MAX_CACHE_SIZE, null, _mockLogger.Object, _mockCache.Object);
+
+            var segments = manager.FetchQualifiedSegments(FS_USER_ID);
+
+            var cacheKey = keyCollector.FirstOrDefault();
+            Assert.AreEqual(expectedCacheKey, cacheKey);
+            _mockCache.Verify(c => c.Reset(), Times.Never);
+            _mockCache.Verify(c => c.Lookup(cacheKey), Times.Once);
+            _mockLogger.Verify(l =>
+                l.Log(LogLevel.DEBUG, "ODP Cache Hit. Returning segments from Cache."), Times.Once);
+            _mockApiManager.Verify(
+                a => a.FetchSegments(It.IsAny<string>(), It.IsAny<string>(),
+                    It.IsAny<OdpUserKeyType>(), It.IsAny<string>(), It.IsAny<List<string>>()),
+                Times.Never);
+            _mockCache.Verify(c => c.Save(expectedCacheKey, It.IsAny<List<string>>()), Times.Never);
+            Assert.AreEqual(segmentsToCheck, segments);
+        }
 
         [Test]
-        public void ShouldHandleFetchSegmentsWithError() { }
+        public void ShouldHandleFetchSegmentsWithError()
+        {
+            // OdpSegmentApiManager.FetchSegments() return null on any error
+            _mockApiManager.Setup(a => a.FetchSegments(It.IsAny<string>(), It.IsAny<string>(),
+                    It.IsAny<OdpUserKeyType>(), It.IsAny<string>(), It.IsAny<List<string>>()))
+                .Returns(null as string[]);
+            var manager = new OdpSegmentManager(_odpConfig, _mockApiManager.Object,
+                Constants.DEFAULT_MAX_CACHE_SIZE, null, _mockLogger.Object, _mockCache.Object);
+
+            var segments = manager.FetchQualifiedSegments(FS_USER_ID);
+
+            _mockCache.Verify(c => c.Reset(), Times.Never);
+            _mockCache.Verify(c => c.Lookup(expectedCacheKey), Times.Once);
+            _mockApiManager.Verify(
+                a => a.FetchSegments(It.IsAny<string>(), It.IsAny<string>(),
+                    It.IsAny<OdpUserKeyType>(), It.IsAny<string>(), It.IsAny<List<string>>()),
+                Times.Once);
+            _mockCache.Verify(c => c.Save(expectedCacheKey, It.IsAny<List<string>>()), Times.Once);
+            Assert.IsNull(segments);
+        }
 
         [Test]
-        public void ShouldIgnoreCache() { }
+        public void ShouldIgnoreCache()
+        {
+            var manager = new OdpSegmentManager(_odpConfig, _mockApiManager.Object,
+                Constants.DEFAULT_MAX_CACHE_SIZE, null, _mockLogger.Object, _mockCache.Object);
+
+            manager.FetchQualifiedSegments(FS_USER_ID, new List<OdpSegmentOption>
+            {
+                OdpSegmentOption.IgnoreCache,
+            });
+
+            _mockCache.Verify(c => c.Reset(), Times.Never);
+            _mockCache.Verify(c => c.Lookup(It.IsAny<string>()), Times.Never);
+            _mockApiManager.Verify(
+                a => a.FetchSegments(It.IsAny<string>(), It.IsAny<string>(),
+                    It.IsAny<OdpUserKeyType>(), It.IsAny<string>(), It.IsAny<List<string>>()),
+                Times.Once);
+            _mockCache.Verify(c => c.Save(expectedCacheKey, It.IsAny<List<string>>()), Times.Never);
+        }
 
         [Test]
-        public void ShouldResetCache() { }
+        public void ShouldResetCache()
+        {
+            var manager = new OdpSegmentManager(_odpConfig, _mockApiManager.Object,
+                Constants.DEFAULT_MAX_CACHE_SIZE, null, _mockLogger.Object, _mockCache.Object);
+
+            manager.FetchQualifiedSegments(FS_USER_ID, new List<OdpSegmentOption>
+            {
+                OdpSegmentOption.ResetCache,
+            });
+
+            _mockCache.Verify(c => c.Reset(), Times.Once);
+            _mockCache.Verify(c => c.Lookup(It.IsAny<string>()), Times.Never);
+            _mockApiManager.Verify(
+                a => a.FetchSegments(It.IsAny<string>(), It.IsAny<string>(),
+                    It.IsAny<OdpUserKeyType>(), It.IsAny<string>(), It.IsAny<List<string>>()),
+                Times.Once);
+            _mockCache.Verify(c => c.Save(expectedCacheKey, It.IsAny<List<string>>()), Times.Once);
+        }
 
         [Test]
-        public void ShouldMakeValidCacheKey() { }
+        public void ShouldMakeValidCacheKey()
+        {
+            var keyCollector = new List<string>();
+            _mockCache.Setup(c => c.Lookup(Capture.In(keyCollector)));
+            var manager = new OdpSegmentManager(_odpConfig, _mockApiManager.Object,
+                Constants.DEFAULT_MAX_CACHE_SIZE, null, _mockLogger.Object, _mockCache.Object);
 
-        private void setCache() { }
+            manager.FetchQualifiedSegments(FS_USER_ID);
 
-        private void peekCache() { }
+            var cacheKey = keyCollector.FirstOrDefault();
+            Assert.AreEqual(expectedCacheKey, cacheKey);
+        }
     }
 }
