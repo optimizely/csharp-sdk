@@ -18,7 +18,7 @@ using System.Collections.Generic;
 
 namespace OptimizelySDK.Odp
 {
-    public class OdpConfig 
+    public class OdpConfig
     {
         /// <summary>
         /// Public API key for the ODP account from which the audience segments will be fetched (optional).
@@ -49,7 +49,7 @@ namespace OptimizelySDK.Odp
         /// <param name="apiHost">Host of ODP audience segments API</param>
         /// <param name="segmentsToCheck">Audience segments</param>
         /// <returns>true if configuration was updated successfully otherwise false</returns>
-        public virtual bool Update(string apiKey, string apiHost, List<string> segmentsToCheck)
+        public bool Update(string apiKey, string apiHost, List<string> segmentsToCheck)
         {
             if (ApiKey == apiKey && ApiHost == apiHost && SegmentsToCheck == segmentsToCheck)
             {
@@ -67,7 +67,7 @@ namespace OptimizelySDK.Odp
         /// Determines if ODP configuration has the minimum amount of information
         /// </summary>
         /// <returns>true if ODP configuration can be used otherwise false</returns>
-        public virtual bool IsReady()
+        public bool IsReady()
         {
             return !string.IsNullOrWhiteSpace(ApiKey) && !string.IsNullOrWhiteSpace(ApiHost);
         }
