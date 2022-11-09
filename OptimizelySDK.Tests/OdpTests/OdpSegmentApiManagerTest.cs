@@ -91,7 +91,7 @@ namespace OptimizelySDK.Tests.OdpTests
             Assert.AreEqual(node.Name, "has_email_opted_in");
             Assert.AreNotEqual(node.State, BaseCondition.QUALIFIED);
         }
-        
+
         [Test]
         public void ShouldHandleAttemptToDeserializeInvalidJsonResponse()
         {
@@ -281,7 +281,7 @@ namespace OptimizelySDK.Tests.OdpTests
             var httpClient = HttpClientTestUtil.MakeHttpClient(HttpStatusCode.InternalServerError);
             var manager =
                 new OdpSegmentApiManager(_mockLogger.Object, _mockErrorHandler.Object, httpClient);
-            
+
             var segments = manager.FetchSegments(
                 VALID_ODP_PUBLIC_KEY,
                 ODP_GRAPHQL_HOST,
