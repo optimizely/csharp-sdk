@@ -47,26 +47,11 @@ namespace OptimizelySDK.Odp
         /// <summary>
         /// Current state of the event processor
         /// </summary>
-        private ExecutionState CurrentState
-        {
-            get
-            {
-                lock (lockObject)
-                {
-                    return _state;
-                }
-            }
-            set
-            {
-                lock (lockObject)
-                {
-                    _state = value;
-                }
-            }
-        }
+        private ExecutionState CurrentState { get; set; } = ExecutionState.Stopped;
 
-        private ExecutionState _state = ExecutionState.Stopped;
-
+        /// <summary>
+        /// Object to ensure thread-safe access
+        /// </summary>
         private static readonly object lockObject = new object();
 
         /// <summary>
@@ -184,7 +169,10 @@ namespace OptimizelySDK.Odp
                 return;
             }
 
-            CurrentState = ExecutionState.Running;
+            lock (lockObject)
+            {
+                CurrentState = ExecutionState.Running;
+            }
 
             _flushQueueRegularly.Start();
         }
@@ -214,10 +202,12 @@ namespace OptimizelySDK.Odp
             catch (OperationCanceledException)
             {
                 // exception raised by design from .Cancel()
+                _logger.Log(LogLevel.DEBUG, "Cancel requested successfully.");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 // other exceptions should be ignored
+                _logger.Log(LogLevel.ERROR, ex.Message);
             }
             finally
             {
@@ -227,7 +217,10 @@ namespace OptimizelySDK.Odp
             // one final time
             FlushQueue();
 
-            CurrentState = ExecutionState.Stopped;
+            lock (lockObject)
+            {
+                CurrentState = ExecutionState.Stopped;
+            }
 
             _logger.Log(LogLevel.DEBUG, $"Stopped. Queue Count: {_queue.Count}.");
         }
@@ -310,13 +303,16 @@ namespace OptimizelySDK.Odp
 
             _logger.Log(LogLevel.DEBUG, $"Processing Queue.");
 
-            CurrentState = ExecutionState.Processing;
-            while (QueueHasBatches())
+            lock (lockObject)
             {
-                DequeueSendSingleBatch();
-            }
+                CurrentState = ExecutionState.Processing;
+                while (QueueHasBatches())
+                {
+                    DequeueSendSingleBatch();
+                }
 
-            CurrentState = ExecutionState.Running;
+                CurrentState = ExecutionState.Running;
+            }
         }
 
         private void RegularlyFlushQueue()
@@ -336,13 +332,16 @@ namespace OptimizelySDK.Odp
 
             _logger.Log(LogLevel.DEBUG, $"Flushing Queue.");
 
-            CurrentState = ExecutionState.Processing;
-            while (QueueContainsItems())
+            lock (lockObject)
             {
-                DequeueSendSingleBatch();
-            }
+                CurrentState = ExecutionState.Processing;
+                while (QueueContainsItems())
+                {
+                    DequeueSendSingleBatch();
+                }
 
-            CurrentState = ExecutionState.Running;
+                CurrentState = ExecutionState.Running;
+            }
         }
 
         /// <summary>
@@ -423,7 +422,8 @@ namespace OptimizelySDK.Odp
         {
             return data.Any(item =>
                 item.Value != null &&
-                !_validOdpDataTypes.Contains(item.Value.GetType().Name)
+                !_validOdpDataTypes.Any(t =>
+                    t.Equals(item.Value.GetType().Name, StringComparison.OrdinalIgnoreCase))
             );
         }
 
