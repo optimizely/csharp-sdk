@@ -401,7 +401,7 @@ namespace OptimizelySDK.Odp
         /// <returns>True if even batches exist otherwise False</returns>
         private bool QueueHasBatches()
         {
-            return QueueContainsItems() && _queue.Count >= _batchSize;
+            return _queue.Count >= _batchSize;
         }
 
         /// <summary>
