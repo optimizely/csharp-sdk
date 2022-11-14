@@ -28,6 +28,12 @@ namespace OptimizelySDK.Odp
 {
     public class OdpEventManager : IOdpEventManager, IDisposable
     {
+        private const int MAX_RETRIES = 3;
+        private const int DEFAULT_BATCH_SIZE = 10;
+        private const int DEFAULT_FLUSH_INTERVAL_MSECS = 1000;
+        private const int DEFAULT_SERVER_QUEUE_SIZE = 10000;
+        public const string TYPE = "fullstack";
+
         /// <summary>
         /// Enumeration of acceptable states of the Event Manager
         /// </summary>
@@ -37,12 +43,6 @@ namespace OptimizelySDK.Odp
             Running = 1,
             Processing = 2,
         }
-
-        private const int MAX_RETRIES = 3;
-        private const int DEFAULT_BATCH_SIZE = 10;
-        private const int DEFAULT_FLUSH_INTERVAL_MSECS = 1000;
-        private const int DEFAULT_SERVER_QUEUE_SIZE = 10000;
-        public const string TYPE = "fullstack";
 
         /// <summary>
         /// Current state of the event processor
@@ -390,7 +390,10 @@ namespace OptimizelySDK.Odp
             _logger.Log(LogLevel.DEBUG, "ODP is not integrated.");
 
             // ensure empty queue
-            _queue = new ConcurrentQueue<OdpEvent>();
+            lock (lockObject)
+            {
+                _queue = new ConcurrentQueue<OdpEvent>();
+            }
 
             return false;
         }
