@@ -13,31 +13,28 @@ env:
 jobs:
   lint_code_base:
     runs-on: ubuntu-latest
-    name: Lint Codebase
+    name: Lint Code Base
     steps:
-      - name: Checkout code
+      - name: Checkout Code
         uses: actions/checkout@v3
         with:
           # Full git history is needed to get a proper list of changed files
           fetch-depth: 0
-      - name: Lint codebase
+      - name: Lint Code Base
         uses: github/super-linter@v4
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VALIDATE_ALL_CODEBASE: false
           DEFAULT_BRANCH: master
           VALIDATE_CSHARP: true
           VALIDATE_MARKDOWN: true
 
   integration_tests:
-    name: Run Integration Tests
     uses: optimizely/csharp-sdk/.github/workflows/integration_test.yml@master
     secrets:
       CI_USER_TOKEN: ${{ secrets.CI_USER_TOKEN }}
       TRAVIS_COM_TOKEN: ${{ secrets.TRAVIS_COM_TOKEN }}
       
   fullstack_production_suite:
-    name: Run Full Stack Compatibility Suite
     uses: optimizely/csharp-sdk/.github/workflows/integration_test.yml@master
     with:
       FULLSTACK_TEST_REPO: ProdTesting
@@ -46,8 +43,7 @@ jobs:
       TRAVIS_COM_TOKEN: ${{ secrets.TRAVIS_COM_TOKEN }}
 
   unit_test:
-    name: Build and Run Unit Tests
-    runs-on: windows-2019 # required version for Framework 4.0
+    runs-on: ubuntu-latest
     env:
       REPO_SLUG: ${{ github.repository }}
       BUILD_NUMBER: ${{ github.run_id }}
@@ -56,40 +52,35 @@ jobs:
       EVENT_TYPE: ${{ github.event_name }}
       CURRENT_BRANCH: ${{ github.head_ref || github.ref_name }}
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-      - name: Add msbuild to PATH
-        uses: microsoft/setup-msbuild@v1
-      - name: Setup NuGet
-        uses: NuGet/setup-nuget@v1
-      - name: Restore NuGet packages
-        run: nuget restore ./OptimizelySDK.Travis.sln
-      - name: Build solution
-        run: msbuild /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=$(pwd)/keypair.snk /p:Configuration=Release ./OptimizelySDK.Travis.sln
-      - name: Install NUnit Console
-        run: nuget install NUnit.Console -Version 3.15.2 -DirectDownload -OutputDirectory .
-      - name: Run NUnit tests
-        run: ./NUnit.ConsoleRunner.3.15.2\tools\nunit3-console.exe /timeout 10000 /process Separate ./OptimizelySDK.Tests/bin/Release/OptimizelySDK.Tests.dll
-      - name: Find and sign all DLLs
+      - uses: actions/checkout@v3
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 5.0.x
+      - name: Restore nuget packages
+        run: |
+          nuget restore OptimizelySDK.Travis.sln
+          nuget install ./OptimizelySDK.Tests/packages.config -OutputDirectory ./packages
+          nuget install NUnit.Runners -Version 2.6.4 -OutputDirectory ./testrunner
+      - name: script
+        run: |
+          ./install_mono.sh
+          xbuild /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=$(pwd)/keypair.snk /p:Configuration=Release ./OptimizelySDK.Travis.sln
+          mono ./testrunner/NUnit.Runners.2.6.4/tools/nunit-console.exe ./OptimizelySDK.Tests/bin/Release/OptimizelySDK.Tests.dll
+      - name: find and sign dll
         id: unit_tests
         run: |
-          $sn = "C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.8 Tools\sn.exe";
-          Get-ChildItem -Recurse -Exclude '.*Tests.*' -Include 'OptimizelySDK*.dll' |
-          Where-Object { $_.DirectoryName -match '\\bin\\Release' } |
-          Foreach-Object { & $sn -R $_.FullName ./keypair.snk }       
-      - name: Install AWS CLI, deploy to S3 on successful tests & for release
+          sudo find . -path './OptimizelySDK*bin/Release/OptimizelySDK*.dll' -not -regex '.*Tests.*' -print0 | while IFS= read -r -d '' file; do sn -R $file ./keypair.snk; done
+      - name: Check on success
         if: steps.unit_tests.outcome == 'success' && env.CURRENT_BRANCH == env.RELEASE_BRANCH && env.EVENT_TYPE == 'push'
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.OFTA_KEY }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.OFTA_SECRET }}
           AWS_DEFAULT_REGION: ${{ secrets.OFTA_REGION }}
         run: |
-          Install-Module -Name AWS.Tools.Installer -Force;
-          Install-AWSToolsModule AWS.Tools.S3 -Force -CleanUp;
-          Get-ChildItem -Recurse -Exclude '.*Tests.*' -include 'OptimizelySDK*.dll' | Where-Object { $_.DirectoryName -match '\\bin\\Release' } | Foreach-Object { aws s3 cp $_.FullName s3://optly-fs-travisci-artifacts/${{ env.REPO_SLUG }}/${{ env.BUILD_NUMBER }}/${{ env.RUN_NUMBER }}/${{ env.ATTEMPT_NUM }}/$(basename $file)-unsigned }
-  
+          find . -path './OptimizelySDK*bin/Release/OptimizelySDK*.dll' -not -regex '.*Tests.*' -print0 | while IFS= read -r -d '' file; do (aws s3 cp $file s3://optly-fs-travisci-artifacts/${{ env.REPO_SLUG }}/${{ env.BUILD_NUMBER }}/${{ env.RUN_NUMBER }}/${{ env.ATTEMPT_NUM }}/$(basename $file)-unsigned); done
+
   netStandard16:
-    name: Build For .NET Standard 1.6 
     runs-on: windows-2022
     env:
       REPO_SLUG: ${{ github.repository }}
@@ -99,8 +90,7 @@ jobs:
       EVENT_TYPE: ${{ github.event_name }}
       CURRENT_BRANCH: ${{ github.head_ref || github.ref_name }}
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
       - name: Setup .NET
         uses: actions/setup-dotnet@v2
         with:
@@ -123,7 +113,6 @@ jobs:
           (aws s3 cp ./OptimizelySDK.NetStandard16/bin/Release/netstandard1.6/OptimizelySDK.NetStandard16.dll s3://optly-fs-travisci-artifacts/${{ env.REPO_SLUG }}/${{ env.BUILD_NUMBER }}/${{ env.RUN_NUMBER }}/${{ env.ATTEMPT_NUM }}/OptimizelySDK.NetStandard16.dll-unsigned)
 
   netStandard20:
-    name: Build For .NET Standard 2.0
     runs-on: windows-2022
     env:
       REPO_SLUG: ${{ github.repository }}
@@ -133,8 +122,7 @@ jobs:
       EVENT_TYPE: ${{ github.event_name }}
       CURRENT_BRANCH: ${{ github.head_ref || github.ref_name }}
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
       - name: Setup .NET
         uses: actions/setup-dotnet@v2
         with:
