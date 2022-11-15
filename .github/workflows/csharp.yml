@@ -66,7 +66,7 @@ jobs:
       - name: Restore NuGet packages
         run: nuget restore ./OptimizelySDK.Travis.sln
       - name: Build solution
-        run: msbuild /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=$(pwd)/keypair.snk /p:Configuration=Release ./OptimizelySDK.sln
+        run: msbuild /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=$(pwd)/keypair.snk /p:Configuration=Release ./OptimizelySDK.Travis.sln
       - name: Install NUnit Console
         run: nuget install NUnit.Console -Version 3.15.2 -DirectDownload -OutputDirectory .
       - name: Run NUnit tests
