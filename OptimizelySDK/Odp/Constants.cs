@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+using System;
+
+// ReSharper disable InconsistentNaming
+
 namespace OptimizelySDK.Odp
 {
     public static class Constants
@@ -42,5 +46,50 @@ namespace OptimizelySDK.Odp
         /// Default message when numeric HTTP status code is not available
         /// </summary>
         public const string NETWORK_ERROR_REASON = "network error";
+
+        /// <summary>
+        /// Default message to log when ODP is not ready or integrated
+        /// </summary>
+        public const string ODP_NOT_INTEGRATED_MESSAGE = "ODP is not enabled.";
+
+        /// <summary>
+        /// Default message to log when an ODP Event contains invalid data
+        /// </summary>
+        public const string ODP_INVALID_DATA_MESSAGE = "ODP data is not valid.";
+
+        /// <summary>
+        /// Default message to log when sending ODP event fails
+        /// </summary>
+        public const string ODP_SEND_FAILURE_MESSAGE = "ODP event send failed";
+
+        /// <summary>
+        /// Maximum attempts to retry ODP communication
+        /// </summary>
+        public const int MAX_RETRIES = 3;
+
+        /// <summary>
+        /// Default ODP batch size
+        /// </summary>
+        public const int DEFAULT_BATCH_SIZE = 10;
+
+        /// <summary>
+        /// Default maximum ODP event queue capacity
+        /// </summary>
+        public const int DEFAULT_QUEUE_CAPACITY = 10000;
+
+        /// <summary>
+        /// Server-side event type to record in ODP
+        /// </summary>
+        public const string ODP_EVENT_TYPE = "fullstack";
+
+        /// <summary>
+        /// Default interval to flush ODP event queue
+        /// </summary>
+        public static readonly TimeSpan DEFAULT_FLUSH_INTERVAL = TimeSpan.FromSeconds(1);
+
+        /// <summary>
+        /// Default amount of time to wait for ODP response
+        /// </summary>
+        public static readonly TimeSpan DEFAULT_TIMEOUT_INTERVAL = TimeSpan.FromSeconds(10);
     }
 }

@@ -20,32 +20,12 @@ namespace OptimizelySDK.Odp
 {
     public interface IOdpEventManager
     {
-        /// <summary>
-        /// Update ODP configuration settings
-        /// </summary>
-        /// <param name="odpConfig">Configuration object containing new values</param>
-        void UpdateSettings(OdpConfig odpConfig);
-
-        /// <summary>
-        /// Start processing events in the queue
-        /// </summary>
         void Start();
-
-        /// <summary>
-        /// Drain the queue sending all remaining events in batches then stop processing
-        /// </summary>
+        void Flush();
         void Stop();
-
-        /// <summary>
-        /// Associate a full-stack userid with an established VUID
-        /// </summary>
-        /// <param name="userId">Full-stack User ID</param>
-        void IdentifyUser(string userId);
-
-        /// <summary>
-        /// Send an event to ODP via dispatch queue
-        /// </summary>
-        /// <param name="odpEvent">ODP Event to forward</param>
         void SendEvent(OdpEvent odpEvent);
+        void Dispose();
+        void IdentifyUser(string userId);
+        void UpdateSettings(OdpConfig odpConfig);
     }
 }

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Logger;
 using OptimizelySDK.Odp.Entity;
 using OptimizelySDK.Utils;
@@ -22,82 +23,31 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace OptimizelySDK.Odp
 {
     public class OdpEventManager : IOdpEventManager, IDisposable
     {
-        private const int MAX_RETRIES = 3;
-        private const int DEFAULT_BATCH_SIZE = 10;
-        private const int DEFAULT_FLUSH_INTERVAL_MSECS = 1000;
-        private const int DEFAULT_SERVER_QUEUE_SIZE = 10000;
-        public const string TYPE = "fullstack";
+        private OdpConfig _odpConfig;
+        private IOdpEventApiManager _odpEventApiManager;
+        private int _batchSize;
+        private TimeSpan _flushInterval;
+        private TimeSpan _timeoutInterval;
+        private ILogger _logger;
+        private IErrorHandler _errorHandler;
+        private BlockingCollection<object> _eventQueue;
 
-        /// <summary>
-        /// Enumeration of acceptable states of the Event Manager
-        /// </summary>
-        private enum ExecutionState
-        {
-            Stopped = 0,
-            Running = 1,
-            Processing = 2,
-        }
+        private readonly object _mutex = new object();
+        private readonly object _shutdownSignal = new object();
+        private readonly object _flushSignal = new object();
 
-        /// <summary>
-        /// Current state of the event processor
-        /// </summary>
-        private ExecutionState CurrentState { get; set; } = ExecutionState.Stopped;
+        public bool Disposed { get; private set; }
+        public bool IsStarted { get; private set; }
 
-        /// <summary>
-        /// Object to ensure thread-safe access
-        /// </summary>
-        private static readonly object lockObject = new object();
+        private Thread _executionThread;
 
-        /// <summary>
-        /// ODP configuration settings in used
-        /// </summary>
-        private readonly OdpConfig _odpConfig;
-
-        /// <summary>
-        /// REST API Manager used to send the events
-        /// </summary>
-        private readonly IOdpEventApiManager _odpEventApiManager;
-
-        /// <summary>
-        /// Handler for recording execution logs
-        /// </summary>
-        private readonly ILogger _logger;
-
-        /// <summary>
-        /// Maximum queue size
-        /// </summary>
-        private readonly int _queueSize;
-
-        /// <summary>
-        /// Queue for holding all events to be eventually dispatched
-        /// </summary>
-        private ConcurrentQueue<OdpEvent> _queue;
-
-        /// <summary>
-        /// Maximum number of events to process at once
-        /// </summary>
-        private readonly int _batchSize;
-
-        /// <summary>
-        /// Milliseconds between processing all events in queue
-        /// </summary>
-        private readonly int _flushInterval;
-
-        /// <summary>
-        /// Task to regularly flush the queue
-        /// </summary>
-        private readonly Task _flushQueueRegularly;
-
-        /// <summary>
-        /// Identifier to interrupt the flush task
-        /// </summary>
-        private readonly CancellationTokenSource _flushIntervalCancellation;
+        private readonly List<OdpEvent> _currentBatch = new List<OdpEvent>();
+        private long _flushingIntervalDeadline;
 
         /// <summary>
         /// Valid C# types for ODP Data entries 
@@ -132,22 +82,240 @@ namespace OptimizelySDK.Odp
             },
         };
 
-        public OdpEventManager(OdpConfig odpConfig, IOdpEventApiManager odpEventApiManager,
-            ILogger logger,
-            int queueSize = DEFAULT_SERVER_QUEUE_SIZE, int batchSize = DEFAULT_BATCH_SIZE,
-            int flushInterval = DEFAULT_FLUSH_INTERVAL_MSECS
-        )
+        private void DropQueue()
         {
-            _odpConfig = odpConfig;
-            _odpEventApiManager = odpEventApiManager;
-            _logger = logger;
-            _queueSize = queueSize;
-            _batchSize = batchSize;
-            _flushInterval = flushInterval;
+            lock (_mutex)
+            {
+                _eventQueue = new BlockingCollection<object>();
+            }
+        }
 
-            _queue = new ConcurrentQueue<OdpEvent>();
-            _flushIntervalCancellation = new CancellationTokenSource();
-            _flushQueueRegularly = new Task(RegularlyFlushQueue, _flushIntervalCancellation.Token);
+        public void Start()
+        {
+            if ((IsStarted && !Disposed) || !_odpConfig.IsReady())
+            {
+                _logger.Log(LogLevel.WARN, Constants.ODP_NOT_INTEGRATED_MESSAGE);
+
+                DropQueue();
+
+                return;
+            }
+            _flushingIntervalDeadline = DateTime.Now.MillisecondsSince1970() +
+                                        (long)_flushInterval.TotalMilliseconds;
+            _executionThread = new Thread(Run);
+            _executionThread.Start();
+            IsStarted = true;
+        }
+
+        /// <summary>
+        /// Scheduler method that periodically runs on provided polling interval.
+        /// </summary>
+        protected virtual void Run()
+        {
+            try
+            {
+                while (true)
+                {
+                    if (DateTime.Now.MillisecondsSince1970() > _flushingIntervalDeadline)
+                    {
+                        _logger.Log(LogLevel.DEBUG, $"Flushing queue.");
+                        FlushQueue();
+                    }
+
+                    if (!_eventQueue.TryTake(out object item, 50))
+                    {
+                        Thread.Sleep(50);
+                        continue;
+                    }
+
+                    if (item == _shutdownSignal)
+                    {
+                        _logger.Log(LogLevel.INFO, "Received shutdown signal.");
+                        break;
+                    }
+
+                    if (item == _flushSignal)
+                    {
+                        _logger.Log(LogLevel.DEBUG, "Received flush signal.");
+                        FlushQueue();
+                        continue;
+                    }
+
+                    if (item is OdpEvent odpEvent)
+                    {
+                        AddToBatch(odpEvent);
+                    }
+                }
+            }
+            catch (InvalidOperationException ioe)
+            {
+                // An InvalidOperationException means that Take() was called on a completed collection
+                _logger.Log(LogLevel.DEBUG,
+                    "Unable to dequeue item from eventQueue: " + ioe.GetAllMessages());
+            }
+            catch (Exception e)
+            {
+                _errorHandler.HandleError(e);
+                _logger.Log(LogLevel.ERROR,
+                    "Uncaught exception processing queue. Error: " + e.GetAllMessages());
+            }
+            finally
+            {
+                _logger.Log(LogLevel.INFO,
+                    "Exiting processing loop. Attempting to flush pending events.");
+                FlushQueue();
+            }
+        }
+
+        /// <summary>
+        /// Immediately send all ODP events in queue
+        /// </summary>
+        public void Flush()
+        {
+            _flushingIntervalDeadline = DateTime.Now.MillisecondsSince1970() +
+                                        (long)_flushInterval.TotalMilliseconds;
+            _eventQueue.Add(_flushSignal);
+        }
+
+        private void FlushQueue()
+        {
+            _flushingIntervalDeadline = DateTime.Now.MillisecondsSince1970() +
+                                        (long)_flushInterval.TotalMilliseconds;
+
+            if (_currentBatch.Count == 0)
+            {
+                return;
+            }
+
+            List<OdpEvent> toProcessBatch;
+            lock (_mutex)
+            {
+                toProcessBatch = new List<OdpEvent>(_currentBatch);
+                _currentBatch.Clear();
+            }
+
+            try
+            {
+                bool shouldRetry;
+                var attemptNumber = 0;
+                do
+                {
+                    shouldRetry = _odpEventApiManager.SendEvents(_odpConfig.ApiKey,
+                        _odpConfig.ApiHost, toProcessBatch);
+                    attemptNumber += 1;
+                } while (shouldRetry && attemptNumber < Constants.MAX_RETRIES);
+            }
+            catch (Exception e)
+            {
+                _errorHandler.HandleError(e);
+                _logger.Log(LogLevel.ERROR, Constants.ODP_SEND_FAILURE_MESSAGE);
+            }
+        }
+
+        /// <summary>
+        /// Stops ODP event processor.
+        /// </summary>
+        public void Stop()
+        {
+            if (Disposed)
+            {
+                _logger.Log(LogLevel.WARN, Constants.ODP_NOT_INTEGRATED_MESSAGE);
+
+                DropQueue();
+
+                return;
+            }
+
+            _eventQueue.Add(_shutdownSignal);
+
+            if (!_executionThread.Join(_timeoutInterval))
+            {
+                _logger.Log(LogLevel.ERROR,
+                    $"Timeout exceeded attempting to close for {_timeoutInterval.Milliseconds} ms");
+            }
+
+            IsStarted = false;
+            _logger.Log(LogLevel.WARN, $"Stopping scheduler.");
+        }
+
+        /// <summary>
+        /// Add event to queue for sending to ODP
+        /// </summary>
+        /// <param name="odpEvent">Event to enqueue</param>
+        public void SendEvent(OdpEvent odpEvent)
+        {
+            if (Disposed || !IsStarted || !_odpConfig.IsReady())
+            {
+                _logger.Log(LogLevel.WARN, Constants.ODP_NOT_INTEGRATED_MESSAGE);
+                return;
+            }
+
+            if (InvalidDataFound(odpEvent.Data))
+            {
+                _logger.Log(LogLevel.ERROR, Constants.ODP_INVALID_DATA_MESSAGE);
+                return;
+            }
+
+            odpEvent.Data = AugmentCommonData(odpEvent.Data);
+            if (!_eventQueue.TryAdd(odpEvent))
+            {
+                _logger.Log(LogLevel.WARN, "Payload not accepted by the queue.");
+            }
+        }
+
+        /// <summary>
+        /// Adds an event to the current batch being created 
+        /// </summary>
+        /// <param name="odpEvent"></param>
+        private void AddToBatch(OdpEvent odpEvent)
+        {
+            lock (_mutex)
+            {
+                // Reset the deadline if starting a new batch.
+                if (_currentBatch.Count == 0)
+                {
+                    _flushingIntervalDeadline = DateTime.Now.MillisecondsSince1970() +
+                                                (long)_flushInterval.TotalMilliseconds;
+                }
+
+                _currentBatch.Add(odpEvent);
+
+                if (_currentBatch.Count >= _batchSize)
+                {
+                    FlushQueue();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Ensures queue processing is stopped marking this instance as disposed 
+        /// </summary>
+        public void Dispose()
+        {
+            if (Disposed)
+            {
+                return;
+            }
+
+            Stop();
+            Disposed = true;
+        }
+
+        /// <summary>
+        /// Associate a full-stack userid with an established VUID
+        /// </summary>
+        /// <param name="userId">Full-stack User ID</param>
+        public void IdentifyUser(string userId)
+        {
+            var identifiers = new Dictionary<string, string>
+            {
+                {
+                    OdpUserKeyType.FS_USER_ID.ToString(), userId
+                },
+            };
+
+            var odpEvent = new OdpEvent(Constants.ODP_EVENT_TYPE, "identified", identifiers);
+            SendEvent(odpEvent);
         }
 
         /// <summary>
@@ -157,263 +325,6 @@ namespace OptimizelySDK.Odp
         public void UpdateSettings(OdpConfig odpConfig)
         {
             _odpConfig.Update(odpConfig.ApiKey, odpConfig.ApiHost, odpConfig.SegmentsToCheck);
-        }
-
-        /// <summary>
-        /// Start processing events in the queue
-        /// </summary>
-        public void Start()
-        {
-            if (!IsOdpConfigurationReady())
-            {
-                return;
-            }
-
-            lock (lockObject)
-            {
-                CurrentState = ExecutionState.Running;
-            }
-
-            _flushQueueRegularly.Start();
-        }
-
-        /// <summary>
-        /// Drain the queue sending all remaining events in batches then stop processing
-        /// </summary>
-        public void Stop()
-        {
-            if (!IsOdpConfigurationReady())
-            {
-                return;
-            }
-
-            if (CurrentState == ExecutionState.Stopped)
-            {
-                return;
-            }
-
-            _logger.Log(LogLevel.DEBUG, "Stop requested.");
-
-            _flushIntervalCancellation.Cancel();
-            try
-            {
-                _flushQueueRegularly.ConfigureAwait(false).GetAwaiter().GetResult();
-            }
-            catch (OperationCanceledException)
-            {
-                // exception raised by design from .Cancel()
-                _logger.Log(LogLevel.DEBUG, "Cancel requested successfully.");
-            }
-            catch (Exception ex)
-            {
-                // other exceptions should be ignored
-                _logger.Log(LogLevel.ERROR, ex.Message);
-            }
-            finally
-            {
-                _flushIntervalCancellation.Dispose();
-            }
-
-            // one final time
-            FlushQueue();
-
-            lock (lockObject)
-            {
-                CurrentState = ExecutionState.Stopped;
-            }
-
-            _logger.Log(LogLevel.DEBUG, $"Stopped. Queue Count: {_queue.Count}.");
-        }
-
-        /// <summary>
-        /// Associate a full-stack userid with an established VUID
-        /// </summary>
-        /// <param name="userId">Full-stack User ID</param>
-        public void IdentifyUser(string userId)
-        {
-            if (!IsOdpConfigurationReady())
-            {
-                return;
-            }
-
-            var identifiers = new Dictionary<string, string>
-            {
-                {
-                    OdpUserKeyType.FS_USER_ID.ToString(), userId
-                },
-            };
-
-            var odpEvent = new OdpEvent(TYPE, "identified", identifiers);
-            SendEvent(odpEvent);
-        }
-
-        /// <summary>
-        /// Send an event to ODP
-        /// </summary>
-        /// <param name="odpEvent">ODP Event to forward</param>
-        public void SendEvent(OdpEvent odpEvent)
-        {
-            if (!IsOdpConfigurationReady())
-            {
-                return;
-            }
-
-            if (CurrentState == ExecutionState.Stopped)
-            {
-                _logger.Log(LogLevel.WARN, "ODP is not enabled.");
-                return;
-            }
-
-            if (InvalidDataFound(odpEvent.Data))
-            {
-                _logger.Log(LogLevel.ERROR, "ODP data is not valid.");
-                return;
-            }
-
-            odpEvent.Data = AugmentCommonData(odpEvent.Data);
-            Enqueue(odpEvent);
-        }
-
-        /// <summary>
-        /// Add a new ODP event to the queue
-        /// </summary>
-        /// <param name="odpEvent"></param>
-        private void Enqueue(OdpEvent odpEvent)
-        {
-            if (_queue.Count >= _queueSize)
-            {
-                _logger.Log(LogLevel.WARN, $"ODP event send failed (queueSize = {_queue.Count}).");
-                return;
-            }
-
-            _queue.Enqueue(odpEvent);
-
-            ProcessQueue();
-        }
-
-        /// <summary>
-        /// Process the queue
-        /// </summary>
-        private void ProcessQueue()
-        {
-            if (CurrentState != ExecutionState.Running)
-            {
-                return;
-            }
-
-            _logger.Log(LogLevel.DEBUG, $"Processing Queue.");
-
-            lock (lockObject)
-            {
-                CurrentState = ExecutionState.Processing;
-                while (QueueHasBatches())
-                {
-                    DequeueSendSingleBatch();
-                }
-
-                CurrentState = ExecutionState.Running;
-            }
-        }
-
-        private void RegularlyFlushQueue()
-        {
-            while (!_flushIntervalCancellation.IsCancellationRequested)
-            {
-                Task.Delay(_flushInterval).ContinueWith(_ => FlushQueue()).Wait();
-            }
-        }
-
-        private void FlushQueue()
-        {
-            if (CurrentState != ExecutionState.Running)
-            {
-                return;
-            }
-
-            _logger.Log(LogLevel.DEBUG, $"Flushing Queue.");
-
-            lock (lockObject)
-            {
-                CurrentState = ExecutionState.Processing;
-                while (QueueContainsItems())
-                {
-                    DequeueSendSingleBatch();
-                }
-
-                CurrentState = ExecutionState.Running;
-            }
-        }
-
-        /// <summary>
-        /// Dequeue a single batch and send it
-        /// </summary>
-        private void DequeueSendSingleBatch()
-        {
-            var batch = new List<OdpEvent>(_batchSize);
-
-            // dequeue a batch 
-            for (int i = 0; i < _batchSize && _queue.Count > 0; i += 1)
-            {
-                if (_queue.TryDequeue(out OdpEvent dequeuedOdpEvent))
-                {
-                    batch.Add(dequeuedOdpEvent);
-                }
-            }
-
-            if (batch.Count > 0)
-            {
-                Task.Run(() =>
-                {
-                    bool shouldRetry;
-                    var attemptNumber = 0;
-                    do
-                    {
-                        shouldRetry = _odpEventApiManager.SendEvents(_odpConfig.ApiKey,
-                            _odpConfig.ApiHost, batch);
-                        attemptNumber += 1;
-                    } while (shouldRetry && attemptNumber < MAX_RETRIES);
-                });
-            }
-        }
-
-        /// <summary>
-        /// Determines if the ODP configuration is ready
-        /// </summary>
-        /// <returns>True if required parameters are available otherwise False</returns>
-        private bool IsOdpConfigurationReady()
-        {
-            if (_odpConfig.IsReady())
-            {
-                return true;
-            }
-
-            _logger.Log(LogLevel.DEBUG, "ODP is not integrated.");
-
-            // ensure empty queue
-            lock (lockObject)
-            {
-                _queue = new ConcurrentQueue<OdpEvent>();
-            }
-
-            return false;
-        }
-
-        /// <summary>
-        /// Queue count has enough items to send at least one batch
-        /// </summary>
-        /// <returns>True if even batches exist otherwise False</returns>
-        private bool QueueHasBatches()
-        {
-            return _queue.Count >= _batchSize;
-        }
-
-        /// <summary>
-        /// Queue contains a items
-        /// </summary>
-        /// <returns>True if count is > 0 otherwise False</returns>
-        private bool QueueContainsItems()
-        {
-            return _queue.Count > 0;
         }
 
         /// <summary>
@@ -442,10 +353,99 @@ namespace OptimizelySDK.Odp
             return sourceData.MergeInPlace<string, object>(_commonData);
         }
 
-        public void Dispose()
+        /// <summary>
+        /// Builder pattern to create an instances of OdpEventManager
+        /// </summary>
+        public class Builder
         {
-            _flushQueueRegularly?.Dispose();
-            _flushIntervalCancellation?.Dispose();
+            private BlockingCollection<object> _eventQueue =
+                new BlockingCollection<object>(Constants.DEFAULT_QUEUE_CAPACITY);
+
+            private OdpConfig _odpConfig;
+            private IOdpEventApiManager _odpEventApiManager;
+            private int _batchSize;
+            private TimeSpan _flushInterval;
+            private TimeSpan _timeoutInterval;
+            private ILogger _logger;
+            private IErrorHandler _errorHandler;
+
+            public Builder WithEventQueue(BlockingCollection<object> eventQueue)
+            {
+                _eventQueue = eventQueue;
+                return this;
+            }
+
+            public Builder WithOdpConfig(OdpConfig odpConfig)
+            {
+                _odpConfig = odpConfig;
+                return this;
+            }
+
+            public Builder WithOdpEventApiManager(IOdpEventApiManager odpEventApiManager)
+            {
+                _odpEventApiManager = odpEventApiManager;
+                return this;
+            }
+
+            public Builder WithBatchSize(int batchSize)
+            {
+                _batchSize = batchSize;
+                return this;
+            }
+
+            public Builder WithFlushInterval(TimeSpan flushInterval)
+            {
+                _flushInterval = flushInterval;
+                return this;
+            }
+
+            public Builder WithTimeoutInterval(TimeSpan timeout)
+            {
+                _timeoutInterval = timeout;
+                return this;
+            }
+
+            public Builder WithLogger(ILogger logger = null)
+            {
+                _logger = logger;
+                return this;
+            }
+
+            public Builder WithErrorHandler(IErrorHandler errorHandler = null)
+            {
+                _errorHandler = errorHandler;
+                return this;
+            }
+
+            /// <summary>
+            /// Build OdpEventManager instance using collected parameters
+            /// </summary>
+            /// <param name="startImmediately">Should start event processor upon initialization</param>
+            /// <returns>OdpEventProcessor instance</returns>
+            public OdpEventManager Build(bool startImmediately = true)
+            {
+                var manager = new OdpEventManager();
+                manager._eventQueue = _eventQueue;
+                manager._odpConfig = _odpConfig;
+                manager._odpEventApiManager = _odpEventApiManager;
+                manager._batchSize =
+                    _batchSize < 1 ? Constants.DEFAULT_BATCH_SIZE : _batchSize;
+                manager._flushInterval = _flushInterval <= TimeSpan.FromSeconds(0) ?
+                    Constants.DEFAULT_FLUSH_INTERVAL :
+                    _flushInterval;
+                manager._timeoutInterval = _timeoutInterval <= TimeSpan.FromSeconds(0) ?
+                    Constants.DEFAULT_TIMEOUT_INTERVAL :
+                    _timeoutInterval;
+                manager._logger = _logger ?? new NoOpLogger();
+                manager._errorHandler = _errorHandler ?? new NoOpErrorHandler();
+
+                if (startImmediately)
+                {
+                    manager.Start();
+                }
+
+                return manager;
+            }
         }
     }
 }
