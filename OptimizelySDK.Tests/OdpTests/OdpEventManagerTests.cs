@@ -264,27 +264,6 @@ namespace OptimizelySDK.Tests.OdpTests
         }
 
         [Test]
-        public void ShouldLogMaxQueueHitAndDiscard()
-        {
-            var eventManager = new OdpEventManager.Builder().WithOdpConfig(_odpConfig).
-                WithOdpEventApiManager(_mockApiManager.Object).
-                WithLogger(_mockLogger.Object).
-                // Bounded/max capacity of 1
-                WithEventQueue(new BlockingCollection<object>(1)).
-                Build();
-
-            // Blast a lot of events into the queue in parallel
-            Parallel.For(0, 100, i =>
-            {
-                eventManager.SendEvent(MakeEvent(i));
-            });
-
-            _mockLogger.Verify(
-                l => l.Log(LogLevel.WARN, "Payload not accepted by the queue."),
-                Times.AtLeastOnce);
-        }
-
-        [Test]
         public void ShouldAddAdditionalInformationToEachEvent()
         {
             var expectedEvent = _processedEvents[0];
