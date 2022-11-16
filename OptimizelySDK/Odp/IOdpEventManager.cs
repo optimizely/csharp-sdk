@@ -19,7 +19,7 @@ using OptimizelySDK.Odp.Entity;
 namespace OptimizelySDK.Odp
 {
     /// <summary>
-    /// Interfacte for a manager responsible for queuing and sending events to the
+    /// Interface for a manager responsible for queuing and sending events to the
     /// Optimizely Data Platform
     /// </summary>
     public interface IOdpEventManager
@@ -28,28 +28,28 @@ namespace OptimizelySDK.Odp
         /// Begin the execution thread to process the queue into bathes and send events
         /// </summary>
         void Start();
-        
+
         /// <summary>
         /// Signal that all ODP events in queue should be sent
         /// </summary>
         void Flush();
-        
+
         /// <summary>
         /// Stops ODP event processor.
         /// </summary>
         void Stop();
-        
+
         /// <summary>
         /// Add event to queue for sending to ODP
         /// </summary>
         /// <param name="odpEvent">Event to enqueue</param>
         void SendEvent(OdpEvent odpEvent);
-        
+
         /// <summary>
         /// Ensures queue processing is stopped marking this instance as disposed 
         /// </summary>
         void Dispose();
-        
+
         /// <summary>
         /// Associate a full-stack userid with an established VUID
         /// </summary>

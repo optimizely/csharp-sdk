@@ -65,7 +65,7 @@ namespace OptimizelySDK.Odp
             {
                 return _segmentsToCheck;
             }
-            
+
             private set
             {
                 _segmentsToCheck = value;

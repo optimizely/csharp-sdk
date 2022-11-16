@@ -51,7 +51,7 @@ namespace OptimizelySDK.Odp
         /// Default message to log when ODP is not ready or integrated
         /// </summary>
         public const string ODP_NOT_INTEGRATED_MESSAGE = "ODP is not integrated.";
-        
+
         /// <summary>
         /// Default message to log when ODP is not enabled
         /// </summary>
