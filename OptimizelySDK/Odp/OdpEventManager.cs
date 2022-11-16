@@ -22,10 +22,15 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading;
 
 namespace OptimizelySDK.Odp
 {
+    /// <summary>
+    /// Concrete implementation of a manager responsible for queuing and sending events to the
+    /// Optimizely Data Platform
+    /// </summary>
     public class OdpEventManager : IOdpEventManager, IDisposable
     {
         private OdpConfig _odpConfig;
@@ -37,51 +42,59 @@ namespace OptimizelySDK.Odp
         private IErrorHandler _errorHandler;
         private BlockingCollection<object> _eventQueue;
 
+        /// <summary>
+        /// Object to ensure mutually exclusive locking for thread safety
+        /// </summary>
         private readonly object _mutex = new object();
+
+        /// <summary>
+        /// Object passed into the queue indicating a need to stop processing 
+        /// </summary>
         private readonly object _shutdownSignal = new object();
+
+        /// <summary>
+        /// Object passed into the queue indicating a need to flush all events from the queue
+        /// </summary>
         private readonly object _flushSignal = new object();
 
+        /// <summary>
+        /// Indicates the ODP Event Manager has been stopped and disposed 
+        /// </summary>
         public bool Disposed { get; private set; }
+
+        /// <summary>
+        /// Indicates the ODP Event Manager instance is in a running state
+        /// </summary>
         public bool IsStarted { get; private set; }
 
+        /// <summary>
+        /// Thread used to execute the loop to process queued and batched events
+        /// </summary>
         private Thread _executionThread;
 
+        /// <summary>
+        /// Separate batch collected from the primary queue
+        /// </summary>
         private readonly List<OdpEvent> _currentBatch = new List<OdpEvent>();
+
+        /// <summary>
+        /// Time when the next flush interval will be hit and a flush is to be executed
+        /// </summary>
         private long _flushingIntervalDeadline;
 
         /// <summary>
-        /// Valid C# types for ODP Data entries 
+        /// Valid C# types for ODP Data entries
         /// </summary>
-        private readonly List<string> _validOdpDataTypes = new List<string>()
-        {
-            "Char",
-            "String",
-            "Int16",
-            "Int32",
-            "Int64",
-            "Single",
-            "Double",
-            "Decimal",
-            "Boolean",
-            "Guid",
-        };
+        private List<string> _validOdpDataTypes;
 
-        private readonly Dictionary<string, object> _commonData = new Dictionary<string, object>
-        {
-            {
-                "idempotence_id", Guid.NewGuid()
-            },
-            {
-                "data_source_type", "sdk"
-            },
-            {
-                "data_source", Optimizely.SDK_TYPE
-            },
-            {
-                "data_source_version", Optimizely.SDK_VERSION
-            },
-        };
+        /// <summary>
+        /// Common data to be added to each ODP event prior to sending
+        /// </summary>
+        private Dictionary<string, object> _commonData;
 
+        /// <summary>
+        /// Clear all entries from the queue
+        /// </summary>
         private void DropQueue()
         {
             lock (_mutex)
@@ -90,9 +103,12 @@ namespace OptimizelySDK.Odp
             }
         }
 
+        /// <summary>
+        /// Begin the execution thread to process the queue into bathes and send events
+        /// </summary>
         public void Start()
         {
-            if ((IsStarted && !Disposed) || !_odpConfig.IsReady())
+            if (!_odpConfig.IsReady())
             {
                 _logger.Log(LogLevel.WARN, Constants.ODP_NOT_INTEGRATED_MESSAGE);
 
@@ -100,6 +116,16 @@ namespace OptimizelySDK.Odp
 
                 return;
             }
+
+            if (IsStarted && !Disposed)
+            {
+                _logger.Log(LogLevel.WARN, Constants.ODP_NOT_ENABLED_MESSAGE);
+
+                DropQueue();
+
+                return;
+            }
+
             _flushingIntervalDeadline = DateTime.Now.MillisecondsSince1970() +
                                         (long)_flushInterval.TotalMilliseconds;
             _executionThread = new Thread(Run);
@@ -168,15 +194,16 @@ namespace OptimizelySDK.Odp
         }
 
         /// <summary>
-        /// Immediately send all ODP events in queue
+        /// Signal that all ODP events in queue should be sent
         /// </summary>
         public void Flush()
         {
-            _flushingIntervalDeadline = DateTime.Now.MillisecondsSince1970() +
-                                        (long)_flushInterval.TotalMilliseconds;
             _eventQueue.Add(_flushSignal);
         }
 
+        /// <summary>
+        /// Send all events in queue
+        /// </summary>
         private void FlushQueue()
         {
             _flushingIntervalDeadline = DateTime.Now.MillisecondsSince1970() +
@@ -187,12 +214,8 @@ namespace OptimizelySDK.Odp
                 return;
             }
 
-            List<OdpEvent> toProcessBatch;
-            lock (_mutex)
-            {
-                toProcessBatch = new List<OdpEvent>(_currentBatch);
-                _currentBatch.Clear();
-            }
+            var toProcessBatch = new List<OdpEvent>(_currentBatch);
+            _currentBatch.Clear();
 
             try
             {
@@ -244,9 +267,15 @@ namespace OptimizelySDK.Odp
         /// <param name="odpEvent">Event to enqueue</param>
         public void SendEvent(OdpEvent odpEvent)
         {
-            if (Disposed || !IsStarted || !_odpConfig.IsReady())
+            if (!_odpConfig.IsReady())
             {
                 _logger.Log(LogLevel.WARN, Constants.ODP_NOT_INTEGRATED_MESSAGE);
+                return;
+            }
+
+            if (Disposed || !IsStarted)
+            {
+                _logger.Log(LogLevel.WARN, Constants.ODP_NOT_ENABLED_MESSAGE);
                 return;
             }
 
@@ -269,21 +298,18 @@ namespace OptimizelySDK.Odp
         /// <param name="odpEvent"></param>
         private void AddToBatch(OdpEvent odpEvent)
         {
-            lock (_mutex)
+            // Reset the deadline if starting a new batch.
+            if (_currentBatch.Count == 0)
             {
-                // Reset the deadline if starting a new batch.
-                if (_currentBatch.Count == 0)
-                {
-                    _flushingIntervalDeadline = DateTime.Now.MillisecondsSince1970() +
-                                                (long)_flushInterval.TotalMilliseconds;
-                }
+                _flushingIntervalDeadline = DateTime.Now.MillisecondsSince1970() +
+                                            (long)_flushInterval.TotalMilliseconds;
+            }
 
-                _currentBatch.Add(odpEvent);
+            _currentBatch.Add(odpEvent);
 
-                if (_currentBatch.Count >= _batchSize)
-                {
-                    FlushQueue();
-                }
+            if (_currentBatch.Count >= _batchSize)
+            {
+                FlushQueue();
             }
         }
 
@@ -332,17 +358,31 @@ namespace OptimizelySDK.Odp
         /// </summary>
         /// <param name="data">Data to be analyzed</param>
         /// <returns>True if a type is not a valid type or is not null otherwise False</returns>
-        private bool InvalidDataFound(Dictionary<string, dynamic> data)
+        private bool InvalidDataFound(Dictionary<string, object> data)
         {
-            return data.Any(item =>
-                item.Value != null &&
-                !_validOdpDataTypes.Any(t =>
-                    t.Equals(item.Value.GetType().Name, StringComparison.OrdinalIgnoreCase))
-            );
+            if (data == null || data.Count <= 0)
+            {
+                return false;
+            }
+
+            foreach (var item in data)
+            {
+                if (item.Value == null)
+                {
+                    return false;
+                }
+
+                var valueTypeName = item.Value.GetType().Name;
+                return !_validOdpDataTypes.Contains(valueTypeName,
+                    StringComparer.OrdinalIgnoreCase);
+            }
+
+            return false;
         }
 
         /// <summary>
-        /// Add additional common data including an idempotent ID and execution context to event data
+        /// Add additional common data including an idempotent ID and execution context to event
+        /// data. Note: sourceData takes precedence over commonData in the event of a key conflict. 
         /// </summary>
         /// <param name="sourceData">Existing event data to augment</param>
         /// <returns>Updated Dictionary with new key-values added</returns>
@@ -438,6 +478,36 @@ namespace OptimizelySDK.Odp
                     _timeoutInterval;
                 manager._logger = _logger ?? new NoOpLogger();
                 manager._errorHandler = _errorHandler ?? new NoOpErrorHandler();
+
+                manager._validOdpDataTypes = new List<string>()
+                {
+                    "Char",
+                    "String",
+                    "Int16",
+                    "Int32",
+                    "Int64",
+                    "Single",
+                    "Double",
+                    "Decimal",
+                    "Boolean",
+                    "Guid",
+                };
+
+                manager._commonData = new Dictionary<string, object>
+                {
+                    {
+                        "idempotence_id", Guid.NewGuid()
+                    },
+                    {
+                        "data_source_type", "sdk"
+                    },
+                    {
+                        "data_source", Optimizely.SDK_TYPE
+                    },
+                    {
+                        "data_source_version", Optimizely.SDK_VERSION
+                    },
+                };
 
                 if (startImmediately)
                 {

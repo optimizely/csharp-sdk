@@ -166,7 +166,7 @@ namespace OptimizelySDK.Tests.OdpTests
 
             // ...we should get a notice after trying to send an event
             _mockLogger.Verify(
-                l => l.Log(LogLevel.WARN, Constants.ODP_NOT_INTEGRATED_MESSAGE),
+                l => l.Log(LogLevel.WARN, Constants.ODP_NOT_ENABLED_MESSAGE),
                 Times.Once);
         }
 
