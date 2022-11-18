@@ -114,9 +114,10 @@ namespace OptimizelySDK.Odp
                     {
                         var leastRecentlyUsedItem = _list.Last;
 
-                        var leastRecentlyUsedItemKey = (from cacheItem in _cache
-                            where cacheItem.Value == leastRecentlyUsedItem.Value
-                            select cacheItem.Key).FirstOrDefault();
+                        var leastRecentlyUsedItemKey =
+                            (from cacheItem in _cache
+                                where cacheItem.Value == leastRecentlyUsedItem.Value
+                                select cacheItem.Key).FirstOrDefault();
 
                         if (leastRecentlyUsedItemKey != null)
                         {
