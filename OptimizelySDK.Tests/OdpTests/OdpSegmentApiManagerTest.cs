@@ -76,7 +76,7 @@ namespace OptimizelySDK.Tests.OdpTests
     }
 }";
 
-            var response = OdpSegmentApiManager.DeserializeSegmentsFromJson(RESPONSE_JSON);
+            var response = new OdpSegmentApiManager().DeserializeSegmentsFromJson(RESPONSE_JSON);
 
             Assert.IsNull(response.Errors);
             Assert.IsNotNull(response.Data);
@@ -91,7 +91,7 @@ namespace OptimizelySDK.Tests.OdpTests
             Assert.AreEqual(node.Name, "has_email_opted_in");
             Assert.AreNotEqual(node.State, BaseCondition.QUALIFIED);
         }
-        
+
         [Test]
         public void ShouldHandleAttemptToDeserializeInvalidJsonResponse()
         {
@@ -101,11 +101,12 @@ namespace OptimizelySDK.Tests.OdpTests
             const string STRING_ONLY = "\"just some text\"";
             const string MISSING_BRACE = "{ \"goodKeyWith\": \"goodValueButMissingBraceHere\" ";
 
-            Assert.IsNull(OdpSegmentApiManager.DeserializeSegmentsFromJson(VALID_ARRAY_JSON));
-            Assert.IsNull(OdpSegmentApiManager.DeserializeSegmentsFromJson(KEY_WITHOUT_VALUE));
-            Assert.IsNull(OdpSegmentApiManager.DeserializeSegmentsFromJson(VALUE_WITHOUT_KEY));
-            Assert.IsNull(OdpSegmentApiManager.DeserializeSegmentsFromJson(STRING_ONLY));
-            Assert.IsNull(OdpSegmentApiManager.DeserializeSegmentsFromJson(MISSING_BRACE));
+            var manager = new OdpSegmentApiManager();
+            Assert.IsNull(manager.DeserializeSegmentsFromJson(VALID_ARRAY_JSON));
+            Assert.IsNull(manager.DeserializeSegmentsFromJson(KEY_WITHOUT_VALUE));
+            Assert.IsNull(manager.DeserializeSegmentsFromJson(VALUE_WITHOUT_KEY));
+            Assert.IsNull(manager.DeserializeSegmentsFromJson(STRING_ONLY));
+            Assert.IsNull(manager.DeserializeSegmentsFromJson(MISSING_BRACE));
         }
 
         [Test]
@@ -115,7 +116,7 @@ namespace OptimizelySDK.Tests.OdpTests
 {
    ""errors"": [
         {
-            ""message"": ""Exception while fetching data (/customer) : Exception: could not resolve _fs_user_id = asdsdaddddd"",
+            ""message"": ""Exception while fetching data (/customer) : Exception: could not resolve _fs_user_id = not-real-user-id"",
             ""locations"": [
                 {
                     ""line"": 2,
@@ -135,7 +136,7 @@ namespace OptimizelySDK.Tests.OdpTests
     }
 }";
 
-            var response = OdpSegmentApiManager.DeserializeSegmentsFromJson(RESPONSE_JSON);
+            var response = new OdpSegmentApiManager().DeserializeSegmentsFromJson(RESPONSE_JSON);
 
             Assert.IsNull(response.Data.Customer);
             Assert.IsNotNull(response.Errors);
@@ -280,7 +281,7 @@ namespace OptimizelySDK.Tests.OdpTests
             var httpClient = HttpClientTestUtil.MakeHttpClient(HttpStatusCode.InternalServerError);
             var manager =
                 new OdpSegmentApiManager(_mockLogger.Object, _mockErrorHandler.Object, httpClient);
-            
+
             var segments = manager.FetchSegments(
                 VALID_ODP_PUBLIC_KEY,
                 ODP_GRAPHQL_HOST,

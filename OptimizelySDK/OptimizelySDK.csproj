@@ -42,6 +42,7 @@
     <!-- <DefineConstants Condition=" $(DefineConstants.Contains(';NET')) ">$(DefineConstants.Remove($(DefineConstants.LastIndexOf(";NET"))));$(TargetFrameworkVersion.Replace("v", "NET").Replace(".", ""))</DefineConstants> -->
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.CSharp" />
     <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
@@ -104,7 +105,10 @@
     <Compile Include="Odp\IOdpSegmentApiManager.cs" />
     <Compile Include="Odp\ICache.cs" />
     <Compile Include="Odp\IOdpEventApiManager.cs" />
+    <Compile Include="Odp\IOdpEventManager.cs" />
     <Compile Include="Odp\LruCache.cs" />
+    <Compile Include="Odp\OdpConfig.cs" />
+    <Compile Include="Odp\OdpEventManager.cs" />
     <Compile Include="Odp\OdpEventApiManager.cs" />
     <Compile Include="OptimizelyDecisions\DecisionMessage.cs" />
     <Compile Include="OptimizelyDecisions\DecisionReasons.cs" />
@@ -153,6 +157,7 @@
     <Compile Include="OptlyConfig\OptimizelyVariable.cs" />
     <Compile Include="OptlyConfig\OptimizelyVariation.cs" />
     <Compile Include="Utils\AttributeMatchTypes.cs" />
+    <Compile Include="Utils\CollectionExtensions.cs" />
     <Compile Include="Utils\ConditionParser.cs" />
     <Compile Include="Utils\DecisionInfoTypes.cs" />
     <Compile Include="Utils\EventTagUtils.cs" />
