@@ -40,21 +40,22 @@ namespace OptimizelySDK.Tests.OdpTests
         )
         {
             var response = new HttpResponseMessage(statusCode);
-            
+
             if (!string.IsNullOrWhiteSpace(content))
             {
                 response.Content = new StringContent(content);
             }
 
             var mockedHandler = new Mock<HttpMessageHandler>();
-            mockedHandler.Protected().Setup<Task<HttpResponseMessage>>(
+            mockedHandler.Protected()
+                .Setup<Task<HttpResponseMessage>>(
                     "SendAsync",
                     ItExpr.IsAny<HttpRequestMessage>(),
-                    ItExpr.IsAny<CancellationToken>()).
-                ReturnsAsync(response);
+                    ItExpr.IsAny<CancellationToken>())
+                .ReturnsAsync(response);
             return new HttpClient(mockedHandler.Object);
         }
-        
+
         /// <summary>
         /// Create an HttpClient instance that will timeout for SendAsync calls
         /// </summary>
@@ -62,11 +63,12 @@ namespace OptimizelySDK.Tests.OdpTests
         public static HttpClient MakeHttpClientWithTimeout()
         {
             var mockedHandler = new Mock<HttpMessageHandler>();
-            mockedHandler.Protected().Setup<Task<HttpResponseMessage>>(
+            mockedHandler.Protected()
+                .Setup<Task<HttpResponseMessage>>(
                     "SendAsync",
                     ItExpr.IsAny<HttpRequestMessage>(),
-                    ItExpr.IsAny<CancellationToken>()).
-                Throws<TimeoutException>();
+                    ItExpr.IsAny<CancellationToken>())
+                .Throws<TimeoutException>();
             return new HttpClient(mockedHandler.Object);
         }
     }

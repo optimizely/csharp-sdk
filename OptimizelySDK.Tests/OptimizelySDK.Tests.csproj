@@ -83,6 +83,7 @@
     <Compile Include="OdpTests\OdpSegmentApiManagerTest.cs" />
     <Compile Include="OdpTests\HttpClientTestUtil.cs" />
     <Compile Include="OdpTests\LruCacheTest.cs" />
+    <Compile Include="OdpTests\OdpEventManagerTests.cs" />
     <Compile Include="OdpTests\OdpEventApiManagerTest.cs" />
     <Compile Include="OdpTests\OdpSegmentManagerTest.cs" />
     <Compile Include="OptimizelyConfigTests\OptimizelyConfigTest.cs" />

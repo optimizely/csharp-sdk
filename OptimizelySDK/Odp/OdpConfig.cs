@@ -18,22 +18,59 @@ using System.Collections.Generic;
 
 namespace OptimizelySDK.Odp
 {
-    public class OdpConfig : IOdpConfig
+    public class OdpConfig
     {
         /// <summary>
         /// Public API key for the ODP account from which the audience segments will be fetched (optional).
         /// </summary>
-        public string ApiKey { get; private set; }
+        private volatile string _apiKey;
+
+        public string ApiKey
+        {
+            get
+            {
+                return _apiKey;
+            }
+            private set
+            {
+                _apiKey = value;
+            }
+        }
 
         /// <summary>
         /// Host of ODP audience segments API.
         /// </summary>
-        public string ApiHost { get; private set; }
+        private volatile string _apiHost;
+
+        public string ApiHost
+        {
+            get
+            {
+                return _apiHost;
+            }
+            private set
+            {
+                _apiHost = value;
+            }
+        }
 
         /// <summary>
         /// All ODP segments used in the current datafile (associated with apiHost/apiKey).
         /// </summary>
-        public List<string> SegmentsToCheck { get; private set; }
+        private volatile List<string> _segmentsToCheck;
+
+        public List<string> SegmentsToCheck
+        {
+            get
+            {
+                return _segmentsToCheck;
+            }
+
+            private set
+            {
+                _segmentsToCheck = value;
+            }
+        }
 
         public OdpConfig(string apiKey, string apiHost, List<string> segmentsToCheck)
         {
@@ -49,7 +86,7 @@ namespace OptimizelySDK.Odp
         /// <param name="apiHost">Host of ODP audience segments API</param>
         /// <param name="segmentsToCheck">Audience segments</param>
         /// <returns>true if configuration was updated successfully otherwise false</returns>
-        public bool Update(string apiKey, string apiHost, List<string> segmentsToCheck)
+        public virtual bool Update(string apiKey, string apiHost, List<string> segmentsToCheck)
         {
             if (ApiKey == apiKey && ApiHost == apiHost && SegmentsToCheck == segmentsToCheck)
             {
@@ -67,9 +104,9 @@ namespace OptimizelySDK.Odp
         /// Determines if ODP configuration has the minimum amount of information
         /// </summary>
         /// <returns>true if ODP configuration can be used otherwise false</returns>
-        public bool IsReady()
+        public virtual bool IsReady()
         {
-            return !string.IsNullOrWhiteSpace(ApiKey) && !string.IsNullOrWhiteSpace(ApiHost);
+            return !(string.IsNullOrWhiteSpace(ApiKey) || string.IsNullOrWhiteSpace(ApiHost));
         }
 
         /// <summary>
