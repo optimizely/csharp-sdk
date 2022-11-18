@@ -115,9 +115,10 @@ namespace OptimizelySDK.Odp
                         var leastRecentlyUsedItem = _list.Last;
 
                         var leastRecentlyUsedItemKey =
-                            (from cacheItem in _cache
-                            where cacheItem.Value == leastRecentlyUsedItem.Value
-                            select cacheItem.Key).FirstOrDefault();
+                            _cache.Where(
+                                    cacheItem => cacheItem.Value == leastRecentlyUsedItem.Value).
+                                Select(cacheItem => cacheItem.Key).
+                                FirstOrDefault();
 
                         if (leastRecentlyUsedItemKey != null)
                         {
@@ -224,9 +225,14 @@ namespace OptimizelySDK.Odp
         {
             _logger.Log(LogLevel.WARN, "_readCurrentCacheKeys used for non-testing purpose");
 
-            return (from listItem in _list
-            join cacheItem in _cache on listItem equals cacheItem.Value
-            select cacheItem.Key).ToArray();
+            lock (_mutex)
+            {
+                return _list.Join(_cache,
+                        listItem => listItem,
+                        cacheItem => cacheItem.Value,
+                        (listItem, cacheItem) => cacheItem.Key).
+                    ToArray();
+            }
         }
     }
 }
