@@ -369,12 +369,14 @@ namespace OptimizelySDK.Odp
             {
                 if (item.Value == null)
                 {
-                    return false;
+                    continue;
                 }
 
                 var valueTypeName = item.Value.GetType().Name;
-                return !_validOdpDataTypes.Contains(valueTypeName,
-                    StringComparer.OrdinalIgnoreCase);
+                if (!_validOdpDataTypes.Contains(valueTypeName, StringComparer.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
             }
 
             return false;

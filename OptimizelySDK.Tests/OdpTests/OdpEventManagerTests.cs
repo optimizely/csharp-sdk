@@ -439,7 +439,9 @@ namespace OptimizelySDK.Tests.OdpTests
             eventManager.Stop();
 
             _mockLogger.Verify(l => l.Log(LogLevel.INFO, "Received shutdown signal."), Times.Once);
-            _mockLogger.Verify(l => l.Log(LogLevel.INFO, "Exiting processing loop. Attempting to flush pending events."), Times.Once);
+            _mockLogger.Verify(
+                l => l.Log(LogLevel.INFO,
+                    "Exiting processing loop. Attempting to flush pending events."), Times.Once);
             _mockLogger.Verify(l => l.Log(LogLevel.WARN, "Stopping scheduler."), Times.Once);
         }
 
