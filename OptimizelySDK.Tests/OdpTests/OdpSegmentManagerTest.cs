@@ -141,6 +141,22 @@ namespace OptimizelySDK.Tests.OdpTests
         }
 
         [Test]
+        public void ShouldLogAndReturnEmptySegmentsListWhenOdpConfigNotReady()
+        {
+            var mockOdpConfig = new Mock<OdpConfig>(API_KEY, API_HOST, new List<string>(0));
+            mockOdpConfig.Setup(o => o.IsReady()).Returns(false);
+            var manager = new OdpSegmentManager(mockOdpConfig.Object, _mockApiManager.Object,
+                Constants.DEFAULT_MAX_CACHE_SIZE, null, _mockLogger.Object, _mockCache.Object);
+
+            var segments = manager.FetchQualifiedSegments(FS_USER_ID);
+
+            Assert.IsTrue(segments.Count == 0);
+            _mockLogger.Verify(
+                l => l.Log(LogLevel.WARN, Constants.ODP_NOT_INTEGRATED_MESSAGE),
+                Times.Once);
+        }
+
+        [Test]
         public void ShouldIgnoreCache()
         {
             var manager = new OdpSegmentManager(_odpConfig, _mockApiManager.Object,

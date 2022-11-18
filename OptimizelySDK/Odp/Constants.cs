@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+using System;
+// ReSharper disable InconsistentNaming
+
 namespace OptimizelySDK.Odp
 {
     public static class Constants

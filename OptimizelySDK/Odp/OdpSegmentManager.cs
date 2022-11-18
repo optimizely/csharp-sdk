@@ -40,14 +40,14 @@ namespace OptimizelySDK.Odp
         /// <summary>
         /// ODP configuration containing the connection parameters
         /// </summary>
-        private readonly IOdpConfig _odpConfig;
+        private readonly OdpConfig _odpConfig;
 
         /// <summary>
         /// Cached segments 
         /// </summary>
         private readonly ICache<List<string>> _segmentsCache;
 
-        public OdpSegmentManager(IOdpConfig odpConfig, IOdpSegmentApiManager apiManager,
+        public OdpSegmentManager(OdpConfig odpConfig, IOdpSegmentApiManager apiManager,
             int cacheSize = Constants.DEFAULT_MAX_CACHE_SIZE, TimeSpan? itemTimeout = null,
             ILogger logger = null, ICache<List<string>> cache = null
         )
@@ -80,7 +80,7 @@ namespace OptimizelySDK.Odp
         {
             if (!_odpConfig.IsReady())
             {
-                _logger.Log(LogLevel.ERROR, "Audience segments fetch failed (ODP is not enabled)");
+                _logger.Log(LogLevel.WARN, Constants.ODP_NOT_INTEGRATED_MESSAGE);
                 return new List<string>();
             }
 
@@ -117,7 +117,8 @@ namespace OptimizelySDK.Odp
                     _odpConfig.ApiHost,
                     OdpUserKeyType.FS_USER_ID,
                     fsUserId,
-                    _odpConfig.SegmentsToCheck)?.ToList();
+                    _odpConfig.SegmentsToCheck)?.
+                ToList();
 
             if (!options.Contains(OdpSegmentOption.IgnoreCache))
             {
