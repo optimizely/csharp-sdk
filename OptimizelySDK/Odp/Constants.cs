@@ -58,6 +58,11 @@ namespace OptimizelySDK.Odp
         public const string ODP_NOT_ENABLED_MESSAGE = "ODP is not enabled.";
 
         /// <summary>
+        /// Default message for when ODP is already running
+        /// </summary>
+        public const string ODP_ALREADY_STARTED = "ODP is already started.";
+
+        /// <summary>
         /// Default message to log when an ODP Event contains invalid data
         /// </summary>
         public const string ODP_INVALID_DATA_MESSAGE = "ODP data is not valid.";

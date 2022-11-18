@@ -22,7 +22,6 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading;
 
 namespace OptimizelySDK.Odp
@@ -119,7 +118,7 @@ namespace OptimizelySDK.Odp
 
             if (IsStarted && !Disposed)
             {
-                _logger.Log(LogLevel.WARN, Constants.ODP_NOT_ENABLED_MESSAGE);
+                _logger.Log(LogLevel.WARN, Constants.ODP_ALREADY_STARTED);
 
                 DropQueue();
 

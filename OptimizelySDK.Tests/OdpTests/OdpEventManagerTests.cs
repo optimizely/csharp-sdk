@@ -20,7 +20,6 @@ using OptimizelySDK.Logger;
 using OptimizelySDK.Odp;
 using OptimizelySDK.Odp.Entity;
 using System;
-using System.CodeDom;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;

@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2019, Optimizely
+ * Copyright 2019, 2022 Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,30 +22,32 @@ using OptimizelySDK.Tests.DatafileManagementTests;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Threading;
 
 namespace OptimizelySDK.Tests.DatafileManagement_Tests
 {
     [TestFixture]
     public class PollingProjectConfigManagerTest
     {
-        private Mock<ILogger> LoggerMock;
-        private ProjectConfig ProjectConfig;
+        private Mock<ILogger> _loggerMock;
+        private ProjectConfig _projectConfig;
 
         [SetUp]
         public void Setup()
-        {            
-            LoggerMock = new Mock<ILogger>();
-            LoggerMock.Setup(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()));
-            ProjectConfig = DatafileProjectConfig.Create(TestData.Datafile, LoggerMock.Object, null);
+        {
+            _loggerMock = new Mock<ILogger>();
+            _loggerMock.Setup(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()));
+            _projectConfig =
+                DatafileProjectConfig.Create(TestData.Datafile, _loggerMock.Object, null);
         }
-        
+
         [Test]
         public void TestPollingConfigManagerDoesNotBlockWhenProjectConfigIsAlreadyProvided()
         {
             var stopwatch = new Stopwatch();
-            var configManager = new TestPollingProjectConfigManager(TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(3), true, LoggerMock.Object, new int[] { });
-            configManager.SetConfig(ProjectConfig);
+            var configManager = new TestPollingProjectConfigManager(TimeSpan.FromSeconds(2),
+                TimeSpan.FromSeconds(3), true, _loggerMock.Object, new int[]
+                    { });
+            configManager.SetConfig(_projectConfig);
 
             stopwatch.Start();
             var config = configManager.GetConfig();
@@ -60,13 +62,17 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         public void TestPollingConfigManagerBlocksWhenProjectConfigIsNotProvided()
         {
             var stopwatch = new Stopwatch();
-            var configManager = new TestPollingProjectConfigManager(TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(2), true, LoggerMock.Object, new int[] {500 });
+            var configManager = new TestPollingProjectConfigManager(TimeSpan.FromSeconds(2),
+                TimeSpan.FromSeconds(2), true, _loggerMock.Object, new []
+                {
+                    500,
+                });
 
             stopwatch.Start();
-            var config = configManager.GetConfig();
+            configManager.GetConfig();
             stopwatch.Stop();
 
-            Assert.True(stopwatch.Elapsed.TotalMilliseconds >= 500);
+            Assert.True(stopwatch.Elapsed.TotalMilliseconds >= 200);
             configManager.Dispose();
         }
 
@@ -75,7 +81,11 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         {
             // period to call is one second
             // Giving response in 1200 milliseconds
-            var configManager = new TestPollingProjectConfigManager(TimeSpan.FromSeconds(1), TimeSpan.FromMilliseconds(1500), true, LoggerMock.Object, new int[] { 1200, 500, 500 });
+            var configManager = new TestPollingProjectConfigManager(TimeSpan.FromSeconds(1),
+                TimeSpan.FromMilliseconds(1500), true, _loggerMock.Object, new []
+                {
+                    1200, 500, 500,
+                });
 
             configManager.Start();
             System.Threading.Tasks.Task.Delay(50).Wait();
@@ -89,45 +99,57 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
             //Thread.Sleep(200);
             Assert.AreEqual(2, configManager.Counter);
             configManager.Dispose();
-
         }
 
         [Test]
-        public void TestTimedoutIfTakingMorethanBlockingTimeout()
+        public void TestTimedOutIfTakingMoreThanBlockingTimeout()
         {
             // period to call is one second
             // Giving response in 1200 milliseconds
-            var configManager = new TestPollingProjectConfigManager(TimeSpan.FromSeconds(3), TimeSpan.FromMilliseconds(1000), true, LoggerMock.Object, new int[] { 1300, 500, 500 });
+            var configManager = new TestPollingProjectConfigManager(TimeSpan.FromSeconds(3),
+                TimeSpan.FromMilliseconds(1000), true, _loggerMock.Object, new []
+                {
+                    1300, 500, 500,
+                });
 
             configManager.Start();
-            var config = configManager.GetConfig();
-            LoggerMock.Verify(l => l.Log(LogLevel.WARN, "Timeout exceeded waiting for ProjectConfig to be set, returning null."));
+            configManager.GetConfig();
+            _loggerMock.Verify(l => l.Log(LogLevel.WARN,
+                "Timeout exceeded waiting for ProjectConfig to be set, returning null."));
             configManager.Dispose();
         }
 
         [Test]
-        public void TestTimedoutOnlyIfSchedulerStarted()
+        public void TestTimedOutOnlyIfSchedulerStarted()
         {
             // period to call is 3 second
-            // Giving response in 1200 milliseconds and timedout should be in 1000 miliseconds
-            var configManager = new TestPollingProjectConfigManager(TimeSpan.FromSeconds(3), TimeSpan.FromMilliseconds(1000), true, LoggerMock.Object, new int[] { 1300, 500, 500 });
+            // Giving response in 1200 milliseconds and timeout should be in 1000 milliseconds
+            var configManager = new TestPollingProjectConfigManager(TimeSpan.FromSeconds(3),
+                TimeSpan.FromMilliseconds(1000), true, _loggerMock.Object, new []
+                {
+                    1300, 500, 500,
+                });
             Stopwatch sw = new Stopwatch();
             sw.Start();
-            var config = configManager.GetConfig();
+            configManager.GetConfig();
             sw.Stop();
             Assert.GreaterOrEqual(sw.Elapsed.TotalMilliseconds, 950);
             configManager.Dispose();
         }
 
         [Test]
-        public void TestDontTimedoutIfSchedulerNotStarted()
+        public void TestDontTimedOutIfSchedulerNotStarted()
         {
             // period to call is 3 second
-            // Giving response in 1200 milliseconds and timedout should be in 1000 miliseconds
-            var configManager = new TestPollingProjectConfigManager(TimeSpan.FromSeconds(3), TimeSpan.FromMilliseconds(1000), true, LoggerMock.Object, new int[] { 1300, 500, 500 });
+            // Giving response in 1200 milliseconds and timeout should be in 1000 milliseconds
+            var configManager = new TestPollingProjectConfigManager(TimeSpan.FromSeconds(3),
+                TimeSpan.FromMilliseconds(1000), true, _loggerMock.Object, new []
+                {
+                    1300, 500, 500,
+                });
             Stopwatch sw = new Stopwatch();
             sw.Start();
-            var config = configManager.GetConfig();
+            configManager.GetConfig();
             sw.Stop();
             Assert.GreaterOrEqual(sw.Elapsed.TotalMilliseconds, 1000);
             configManager.Dispose();
@@ -136,13 +158,26 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         [Test]
         public void TestReturnDatafileImmediatelyOnceGetValidDatafileRemotely()
         {
-            var projConfig =  DatafileProjectConfig.Create(TestData.Datafile, LoggerMock.Object, null);
-            var data = new List<TestPollingData>() {
-                new TestPollingData { PollingTime = 500, ChangeVersion = false, ConfigDatafile = projConfig},
-                new TestPollingData { PollingTime = 500, ChangeVersion = false, ConfigDatafile = projConfig}
+            var projConfig =
+                DatafileProjectConfig.Create(TestData.Datafile, _loggerMock.Object, null);
+            var data = new List<TestPollingData>()
+            {
+                new TestPollingData
+                {
+                    PollingTime = 500,
+                    ChangeVersion = false,
+                    ConfigDatafile = projConfig
+                },
+                new TestPollingData
+                {
+                    PollingTime = 500,
+                    ChangeVersion = false,
+                    ConfigDatafile = projConfig
+                },
             };
 
-            var configManager = new TestPollingProjectConfigManager(TimeSpan.FromSeconds(3), TimeSpan.FromMilliseconds(5000), true, LoggerMock.Object, data.ToArray());
+            var configManager = new TestPollingProjectConfigManager(TimeSpan.FromSeconds(3),
+                TimeSpan.FromMilliseconds(5000), true, _loggerMock.Object, data.ToArray());
 
             var config = configManager.GetConfig();
             Assert.NotNull(config);
@@ -151,7 +186,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         }
 
         [Test]
-        public void TestWaitUntilValidDatfileIsNotGiven()
+        public void TestWaitUntilValidDatafileIsNotGiven()
         {
             // Send invalid datafile. 
             // Wait for one more poll
@@ -159,19 +194,37 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
             // wait for one more poll
             // then send the right datafile
             // see it should release blocking.
-            // blocking timeout must be inifinity.
-            var projConfig = DatafileProjectConfig.Create(TestData.Datafile, LoggerMock.Object, null);
-            var data = new List<TestPollingData>() {
-                new TestPollingData { PollingTime = 50, ChangeVersion = false, ConfigDatafile = null},
-                new TestPollingData { PollingTime = 50, ChangeVersion = false, ConfigDatafile = null},
-                new TestPollingData { PollingTime = 50, ChangeVersion = false, ConfigDatafile = projConfig}
+            // blocking timeout must be infinite.
+            var projConfig =
+                DatafileProjectConfig.Create(TestData.Datafile, _loggerMock.Object, null);
+            var data = new List<TestPollingData>()
+            {
+                new TestPollingData
+                {
+                    PollingTime = 50,
+                    ChangeVersion = false,
+                    ConfigDatafile = null,
+                },
+                new TestPollingData
+                {
+                    PollingTime = 50,
+                    ChangeVersion = false,
+                    ConfigDatafile = null,
+                },
+                new TestPollingData
+                {
+                    PollingTime = 50,
+                    ChangeVersion = false,
+                    ConfigDatafile = projConfig,
+                }
             };
 
 
-            var configManager = new TestPollingProjectConfigManager(TimeSpan.FromMilliseconds(500), TimeSpan.FromMilliseconds(10000), true, LoggerMock.Object, data.ToArray());
+            var configManager = new TestPollingProjectConfigManager(TimeSpan.FromMilliseconds(500),
+                TimeSpan.FromMilliseconds(10000), true, _loggerMock.Object, data.ToArray());
             configManager.Start();
             // after 3rd attempt should get 
-            var config = configManager.GetConfig();
+            configManager.GetConfig();
             //Assert.NotNull(config);
             Assert.AreEqual(3, configManager.Counter);
             configManager.Dispose();
@@ -179,15 +232,32 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
 
 
         [Test]
-        public void TestWaitUntilValidDatafileIsNotGivenOrTimedout()
+        public void TestWaitUntilValidDatafileIsNotGivenOrTimedOut()
         {
-            var data = new List<TestPollingData>() {
-                new TestPollingData { PollingTime = 50, ChangeVersion = false, ConfigDatafile = null},
-                new TestPollingData { PollingTime = 50, ChangeVersion = false, ConfigDatafile = null},
-                new TestPollingData { PollingTime = 50, ChangeVersion = false, ConfigDatafile = null}
+            var data = new List<TestPollingData>()
+            {
+                new TestPollingData
+                {
+                    PollingTime = 50,
+                    ChangeVersion = false,
+                    ConfigDatafile = null,
+                },
+                new TestPollingData
+                {
+                    PollingTime = 50,
+                    ChangeVersion = false,
+                    ConfigDatafile = null,
+                },
+                new TestPollingData
+                {
+                    PollingTime = 50,
+                    ChangeVersion = false,
+                    ConfigDatafile = null,
+                }
             };
 
-            var configManager = new TestPollingProjectConfigManager(TimeSpan.FromMilliseconds(1000), TimeSpan.FromMilliseconds(2500), true, LoggerMock.Object, data.ToArray());
+            var configManager = new TestPollingProjectConfigManager(TimeSpan.FromMilliseconds(1000),
+                TimeSpan.FromMilliseconds(2500), true, _loggerMock.Object, data.ToArray());
             configManager.Start();
             // after 3rd attempt should be released with null.
             var config = configManager.GetConfig();
