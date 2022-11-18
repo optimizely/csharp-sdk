@@ -61,7 +61,8 @@ namespace OptimizelySDK.Odp
         /// <param name="maxSize">Maximum number of elements to allow in the cache</param>
         /// <param name="itemTimeout">Timeout or time to live for each item</param>
         /// <param name="logger">Implementation used for recording LRU events or errors</param>
-        public LruCache(int maxSize = Constants.DEFAULT_MAX_CACHE_SIZE, TimeSpan? itemTimeout = default,
+        public LruCache(int maxSize = Constants.DEFAULT_MAX_CACHE_SIZE,
+            TimeSpan? itemTimeout = default,
             ILogger logger = null
         )
         {
