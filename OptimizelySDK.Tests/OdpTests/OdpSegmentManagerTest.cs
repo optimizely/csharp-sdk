@@ -141,7 +141,7 @@ namespace OptimizelySDK.Tests.OdpTests
         }
 
         [Test]
-        public void ShouldLogAndReturnEmptySegmentsListWhenOdpConfigNotReady()
+        public void ShouldLogAndReturnNullWhenWhenOdpConfigNotReady()
         {
             var mockOdpConfig = new Mock<OdpConfig>(API_KEY, API_HOST, new List<string>(0));
             mockOdpConfig.Setup(o => o.IsReady()).Returns(false);
@@ -150,7 +150,7 @@ namespace OptimizelySDK.Tests.OdpTests
 
             var segments = manager.FetchQualifiedSegments(FS_USER_ID);
 
-            Assert.IsTrue(segments.Count == 0);
+            Assert.IsNull(segments);
             _mockLogger.Verify(
                 l => l.Log(LogLevel.WARN, Constants.ODP_NOT_INTEGRATED_MESSAGE),
                 Times.Once);
