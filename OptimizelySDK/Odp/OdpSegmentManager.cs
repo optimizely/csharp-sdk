@@ -100,7 +100,7 @@ namespace OptimizelySDK.Odp
             {
                 _segmentsCache.Reset();
             }
-            else if (!options.Contains(OdpSegmentOption.IgnoreCache))
+            if (!options.Contains(OdpSegmentOption.IgnoreCache))
             {
                 qualifiedSegments = _segmentsCache.Lookup(cacheKey);
                 if (qualifiedSegments != null)
