@@ -225,14 +225,17 @@ namespace OptimizelySDK.Odp
         {
             _logger.Log(LogLevel.WARN, "_readCurrentCacheKeys used for non-testing purpose");
 
+            string[] cacheKeys;
             lock (_mutex)
             {
-                return _list.Join(_cache,
+                cacheKeys = _list.Join(_cache,
                         listItem => listItem,
                         cacheItem => cacheItem.Value,
                         (listItem, cacheItem) => cacheItem.Key).
                     ToArray();
             }
+
+            return cacheKeys;
         }
     }
 }

@@ -81,7 +81,7 @@ namespace OptimizelySDK.Odp
             if (!_odpConfig.IsReady())
             {
                 _logger.Log(LogLevel.WARN, Constants.ODP_NOT_INTEGRATED_MESSAGE);
-                return new List<string>();
+                return null;
             }
 
             if (!_odpConfig.HasSegments())
