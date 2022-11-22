@@ -64,11 +64,11 @@ namespace OptimizelySDK.Tests.OdpTests
         public void ShouldFetchSegmentsOnCacheMiss()
         {
             var keyCollector = new List<string>();
-            _mockCache.Setup(c => c.Lookup(Capture.In(keyCollector)))
-                .Returns(default(List<string>));
+            _mockCache.Setup(c => c.Lookup(Capture.In(keyCollector))).
+                Returns(default(List<string>));
             _mockApiManager.Setup(a => a.FetchSegments(It.IsAny<string>(), It.IsAny<string>(),
-                    It.IsAny<OdpUserKeyType>(), It.IsAny<string>(), It.IsAny<List<string>>()))
-                .Returns(segmentsToCheck.ToArray());
+                    It.IsAny<OdpUserKeyType>(), It.IsAny<string>(), It.IsAny<List<string>>())).
+                Returns(segmentsToCheck.ToArray());
             var manager = new OdpSegmentManager(_odpConfig, _mockApiManager.Object,
                 Constants.DEFAULT_MAX_CACHE_SIZE, null, _mockLogger.Object, _mockCache.Object);
 
@@ -95,8 +95,7 @@ namespace OptimizelySDK.Tests.OdpTests
         public void ShouldFetchSegmentsSuccessOnCacheHit()
         {
             var keyCollector = new List<string>();
-            _mockCache.Setup(c => c.Lookup(Capture.In(keyCollector)))
-                .Returns(segmentsToCheck);
+            _mockCache.Setup(c => c.Lookup(Capture.In(keyCollector))).Returns(segmentsToCheck);
             _mockApiManager.Setup(a => a.FetchSegments(It.IsAny<string>(), It.IsAny<string>(),
                 It.IsAny<OdpUserKeyType>(), It.IsAny<string>(), It.IsAny<List<string>>()));
             var manager = new OdpSegmentManager(_odpConfig, _mockApiManager.Object,
@@ -123,8 +122,8 @@ namespace OptimizelySDK.Tests.OdpTests
         {
             // OdpSegmentApiManager.FetchSegments() return null on any error
             _mockApiManager.Setup(a => a.FetchSegments(It.IsAny<string>(), It.IsAny<string>(),
-                    It.IsAny<OdpUserKeyType>(), It.IsAny<string>(), It.IsAny<List<string>>()))
-                .Returns(null as string[]);
+                    It.IsAny<OdpUserKeyType>(), It.IsAny<string>(), It.IsAny<List<string>>())).
+                Returns(null as string[]);
             var manager = new OdpSegmentManager(_odpConfig, _mockApiManager.Object,
                 Constants.DEFAULT_MAX_CACHE_SIZE, null, _mockLogger.Object, _mockCache.Object);
 
@@ -136,12 +135,28 @@ namespace OptimizelySDK.Tests.OdpTests
                 a => a.FetchSegments(It.IsAny<string>(), It.IsAny<string>(),
                     It.IsAny<OdpUserKeyType>(), It.IsAny<string>(), It.IsAny<List<string>>()),
                 Times.Once);
-            _mockCache.Verify(c => c.Save(expectedCacheKey, It.IsAny<List<string>>()), Times.Once);
+            _mockCache.Verify(c => c.Save(expectedCacheKey, It.IsAny<List<string>>()), Times.Never);
             Assert.IsNull(segments);
         }
 
         [Test]
-        public void ShouldLogAndReturnNullWhenWhenOdpConfigNotReady()
+        public void ShouldLogAndReturnAnEmptySetWhenNoSegmentsToCheck()
+        {
+            var odpConfig = new OdpConfig(API_KEY, API_HOST, new List<string>(0));
+            var manager = new OdpSegmentManager(odpConfig, _mockApiManager.Object,
+                Constants.DEFAULT_MAX_CACHE_SIZE, null, _mockLogger.Object, _mockCache.Object);
+
+            var segments = manager.FetchQualifiedSegments(FS_USER_ID);
+
+            Assert.IsTrue(segments.Count == 0);
+            _mockLogger.Verify(
+                l => l.Log(LogLevel.DEBUG,
+                    "No Segments are used in the project, Not Fetching segments. Returning empty list."),
+                Times.Once);
+        }
+
+        [Test]
+        public void ShouldLogAndReturnNullWhenOdpConfigNotReady()
         {
             var mockOdpConfig = new Mock<OdpConfig>(API_KEY, API_HOST, new List<string>(0));
             mockOdpConfig.Setup(o => o.IsReady()).Returns(false);
@@ -188,7 +203,7 @@ namespace OptimizelySDK.Tests.OdpTests
             });
 
             _mockCache.Verify(c => c.Reset(), Times.Once);
-            _mockCache.Verify(c => c.Lookup(It.IsAny<string>()), Times.Never);
+            _mockCache.Verify(c => c.Lookup(It.IsAny<string>()), Times.Once);
             _mockApiManager.Verify(
                 a => a.FetchSegments(It.IsAny<string>(), It.IsAny<string>(),
                     It.IsAny<OdpUserKeyType>(), It.IsAny<string>(), It.IsAny<List<string>>()),

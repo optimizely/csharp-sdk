@@ -108,8 +108,8 @@ namespace OptimizelySDK.Odp
         public const int DEFAULT_MAX_CACHE_SIZE = 10000;
 
         /// <summary>
-        /// Default number of minutes to cache
+        /// Default number of seconds to cache
         /// </summary>
-        public const int DEFAULT_CACHE_MINUTES = 10;
+        public const int DEFAULT_CACHE_SECONDS = 600;
     }
 }

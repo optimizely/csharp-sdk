@@ -48,7 +48,7 @@ namespace OptimizelySDK.Odp
         private readonly ICache<List<string>> _segmentsCache;
 
         public OdpSegmentManager(OdpConfig odpConfig, IOdpSegmentApiManager apiManager,
-            int cacheSize = Constants.DEFAULT_MAX_CACHE_SIZE, TimeSpan? itemTimeout = null,
+            int? cacheSize = null, TimeSpan? itemTimeout = null,
             ILogger logger = null, ICache<List<string>> cache = null
         )
         {
@@ -56,15 +56,18 @@ namespace OptimizelySDK.Odp
             _odpConfig = odpConfig;
             _logger = logger ?? new DefaultLogger();
 
-            var timeout = itemTimeout ?? TimeSpan.FromMinutes(Constants.DEFAULT_CACHE_MINUTES);
-            if (timeout < TimeSpan.Zero)
+            itemTimeout = itemTimeout ?? TimeSpan.FromSeconds(Constants.DEFAULT_CACHE_SECONDS);
+            if (itemTimeout < TimeSpan.Zero)
             {
                 _logger.Log(LogLevel.WARN,
                     "Negative item timeout provided. Items will not expire in cache.");
-                timeout = TimeSpan.Zero;
+                itemTimeout = TimeSpan.Zero;
             }
 
-            _segmentsCache = cache ?? new LruCache<List<string>>(cacheSize, timeout, logger);
+            cacheSize = cacheSize ?? Constants.DEFAULT_MAX_CACHE_SIZE;
+
+            _segmentsCache =
+                cache ?? new LruCache<List<string>>(cacheSize.Value, itemTimeout, logger);
         }
 
         /// <summary>
@@ -87,7 +90,7 @@ namespace OptimizelySDK.Odp
             if (!_odpConfig.HasSegments())
             {
                 _logger.Log(LogLevel.DEBUG,
-                    "No Segments are used in the project, Not Fetching segments. Returning empty list");
+                    "No Segments are used in the project, Not Fetching segments. Returning empty list.");
                 return new List<string>();
             }
 
@@ -100,6 +103,7 @@ namespace OptimizelySDK.Odp
             {
                 _segmentsCache.Reset();
             }
+
             if (!options.Contains(OdpSegmentOption.IgnoreCache))
             {
                 qualifiedSegments = _segmentsCache.Lookup(cacheKey);
@@ -120,7 +124,7 @@ namespace OptimizelySDK.Odp
                     _odpConfig.SegmentsToCheck)?.
                 ToList();
 
-            if (!options.Contains(OdpSegmentOption.IgnoreCache))
+            if (qualifiedSegments != null && !options.Contains(OdpSegmentOption.IgnoreCache))
             {
                 _segmentsCache.Save(cacheKey, qualifiedSegments);
             }

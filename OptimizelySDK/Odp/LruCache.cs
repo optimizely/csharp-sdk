@@ -62,7 +62,7 @@ namespace OptimizelySDK.Odp
         /// <param name="itemTimeout">Timeout or time to live for each item</param>
         /// <param name="logger">Implementation used for recording LRU events or errors</param>
         public LruCache(int maxSize = Constants.DEFAULT_MAX_CACHE_SIZE,
-            TimeSpan? itemTimeout = default,
+            TimeSpan? itemTimeout = null,
             ILogger logger = null
         )
         {
@@ -72,7 +72,7 @@ namespace OptimizelySDK.Odp
 
             _logger = logger ?? new DefaultLogger();
 
-            _timeout = itemTimeout ?? TimeSpan.FromMinutes(Constants.DEFAULT_CACHE_MINUTES);
+            _timeout = itemTimeout ?? TimeSpan.FromSeconds(Constants.DEFAULT_CACHE_SECONDS);
             if (_timeout < TimeSpan.Zero)
             {
                 _logger.Log(LogLevel.WARN,
