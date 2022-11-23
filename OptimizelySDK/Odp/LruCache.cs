@@ -112,23 +112,15 @@ namespace OptimizelySDK.Odp
                 {
                     if (_cache.Count >= _maxSize)
                     {
-                        var leastRecentlyUsedItem = _list.Last;
+                        var leastRecentlyUsedItem = _list.Last.Value;
 
-                        var leastRecentlyUsedItemKey =
-                            _cache.Where(
-                                    cacheItem => cacheItem.Value == leastRecentlyUsedItem.Value).
-                                Select(cacheItem => cacheItem.Key).
-                                FirstOrDefault();
-
-                        if (leastRecentlyUsedItemKey != null)
-                        {
-                            _cache.Remove(leastRecentlyUsedItemKey);
-                        }
+                        var leastRecentlyUsedItemKey = leastRecentlyUsedItem.Key;
+                        _cache.Remove(leastRecentlyUsedItemKey);
 
                         _list.Remove(leastRecentlyUsedItem);
                     }
 
-                    var item = new ItemWrapper(value);
+                    var item = new ItemWrapper(key, value);
                     _list.AddFirst(item);
                     _cache.Add(key, item);
                 }
@@ -197,6 +189,11 @@ namespace OptimizelySDK.Odp
         public class ItemWrapper
         {
             /// <summary>
+            /// Key of the item
+            /// </summary>
+            public readonly string Key;
+
+            /// <summary>
             /// Value of the item
             /// </summary>
             public readonly T Value;
@@ -209,9 +206,11 @@ namespace OptimizelySDK.Odp
             /// <summary>
             /// Initialize the wrapper
             /// </summary>
+            /// <param name="key">Key of the item to be stored</param>
             /// <param name="value">Item to be stored</param>
-            public ItemWrapper(T value)
+            public ItemWrapper(string key, T value)
             {
+                Key = key;
                 Value = value;
                 CreationTimestamp = DateTime.Now.MillisecondsSince1970();
             }
