@@ -17,7 +17,7 @@
 using OptimizelySDK.Logger;
 using OptimizelySDK.Utils;
 using System;
-using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 
 namespace OptimizelySDK.Odp
@@ -48,12 +48,7 @@ namespace OptimizelySDK.Odp
         /// <summary>
         /// Indexed data held in the cache 
         /// </summary>
-        private readonly Dictionary<string, ItemWrapper> _cache;
-
-        /// <summary>
-        /// Ordered list of objects being held in the cache 
-        /// </summary>
-        private readonly LinkedList<ItemWrapper> _list;
+        private readonly OrderedDictionary _cache;
 
         /// <summary>
         /// A Least Recently Used in-memory cache
@@ -80,9 +75,7 @@ namespace OptimizelySDK.Odp
                 _timeout = TimeSpan.Zero;
             }
 
-            _cache = new Dictionary<string, ItemWrapper>(_maxSize);
-
-            _list = new LinkedList<ItemWrapper>();
+            _cache = new OrderedDictionary(_maxSize);
         }
 
         /// <summary>
@@ -101,26 +94,20 @@ namespace OptimizelySDK.Odp
 
             lock (_mutex)
             {
-                if (_cache.ContainsKey(key))
+                if (_cache.Contains(key))
                 {
                     var item = _cache[key];
-                    _list.Remove(item);
-                    _list.AddFirst(item);
-                    _cache[key] = item;
+                    _cache.Remove(key);
+                    _cache.Insert(0, key, item);
                 }
                 else
                 {
                     if (_cache.Count >= _maxSize)
                     {
-                        var leastRecentlyUsedItem = _list.Last.Value;
-
-                        _cache.Remove(leastRecentlyUsedItem.Key);
-                        _list.Remove(leastRecentlyUsedItem);
+                        _cache.RemoveAt(_cache.Count - 1);
                     }
 
-                    var item = new ItemWrapper(key, value);
-                    _list.AddFirst(item);
-                    _cache.Add(key, item);
+                    _cache.Insert(0, key, new ItemWrapper(value));
                 }
             }
         }
@@ -141,28 +128,27 @@ namespace OptimizelySDK.Odp
 
             lock (_mutex)
             {
-                if (!_cache.ContainsKey(key))
+                if (!_cache.Contains(key))
                 {
                     return default;
                 }
 
-                ItemWrapper item = _cache[key];
-
                 var currentTimestamp = DateTime.Now.MillisecondsSince1970();
 
+                var item = _cache[key] as ItemWrapper;
                 var itemReturn = default(T);
-                if (_timeout == TimeSpan.Zero ||
-                    (currentTimestamp - item.CreationTimestamp < _timeout.TotalMilliseconds))
+                if (item != null && (_timeout == TimeSpan.Zero ||
+                                     currentTimestamp - item.CreationTimestamp <
+                                     _timeout.TotalMilliseconds))
                 {
-                    _list.Remove(item);
-                    _list.AddFirst(item);
+                    _cache.Remove(key);
+                    _cache.Insert(0, key, item);
 
                     itemReturn = item.Value;
                 }
                 else
                 {
                     _cache.Remove(key);
-                    _list.Remove(item);
                 }
 
                 return itemReturn;
@@ -177,7 +163,6 @@ namespace OptimizelySDK.Odp
             lock (_mutex)
             {
                 _cache.Clear();
-                _list.Clear();
             }
         }
 
@@ -186,11 +171,6 @@ namespace OptimizelySDK.Odp
         /// </summary>
         public class ItemWrapper
         {
-            /// <summary>
-            /// Key of the item
-            /// </summary>
-            public readonly string Key;
-
             /// <summary>
             /// Value of the item
             /// </summary>
@@ -204,11 +184,9 @@ namespace OptimizelySDK.Odp
             /// <summary>
             /// Initialize the wrapper
             /// </summary>
-            /// <param name="key">Key of the item to be stored</param>
             /// <param name="value">Item to be stored</param>
-            public ItemWrapper(string key, T value)
+            public ItemWrapper(T value)
             {
-                Key = key;
                 Value = value;
                 CreationTimestamp = DateTime.Now.MillisecondsSince1970();
             }
@@ -225,11 +203,7 @@ namespace OptimizelySDK.Odp
             string[] cacheKeys;
             lock (_mutex)
             {
-                cacheKeys = _list.Join(_cache,
-                        listItem => listItem,
-                        cacheItem => cacheItem.Value,
-                        (listItem, cacheItem) => cacheItem.Key).
-                    ToArray();
+                cacheKeys = _cache.Keys.Cast<string>().ToArray();
             }
 
             return cacheKeys;
