@@ -142,5 +142,15 @@ namespace OptimizelySDK.Odp
         {
             return $"{userKey}-$-{userValue}";
         }
+
+        public void UpdateSettings(OdpConfig odpConfig)
+        {
+            _odpConfig.Update(odpConfig.ApiKey, odpConfig.ApiHost, odpConfig.SegmentsToCheck);
+        }
+
+        public void ResetCache()
+        {
+            _segmentsCache.Reset();
+        }
     }
 }
