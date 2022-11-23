@@ -16,11 +16,23 @@
 
 namespace OptimizelySDK.Odp
 {
+    /// <summary>
+    /// Type of ODP key used for fetching segments & sending events
+    /// </summary>
     public enum OdpUserKeyType
     {
         // ReSharper disable InconsistentNaming
-        // ODP expects these names; .ToString() used
-        VUID = 0,
+        // ODP expects these names in UPPERCASE; .ToString() used
+        VUID = 0, // kept for SDK consistency and awareness
         FS_USER_ID = 1,
+    }
+
+    /// <summary>
+    /// Options used during segment cache handling
+    /// </summary>
+    public enum OdpSegmentOption
+    {
+        IgnoreCache = 0,
+        ResetCache = 1,
     }
 }

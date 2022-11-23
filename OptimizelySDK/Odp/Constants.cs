@@ -101,5 +101,15 @@ namespace OptimizelySDK.Odp
         /// Default amount of time to wait for ODP response
         /// </summary>
         public static readonly TimeSpan DEFAULT_TIMEOUT_INTERVAL = TimeSpan.FromSeconds(10);
+
+        /// <summary>
+        /// Default maximum number of elements to cache
+        /// </summary>
+        public const int DEFAULT_MAX_CACHE_SIZE = 10000;
+
+        /// <summary>
+        /// Default number of seconds to cache
+        /// </summary>
+        public const int DEFAULT_CACHE_SECONDS = 600;
     }
 }

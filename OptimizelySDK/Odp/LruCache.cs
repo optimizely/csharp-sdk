@@ -17,7 +17,7 @@
 using OptimizelySDK.Logger;
 using OptimizelySDK.Utils;
 using System;
-using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 
 namespace OptimizelySDK.Odp
@@ -25,11 +25,6 @@ namespace OptimizelySDK.Odp
     public class LruCache<T> : ICache<T>
         where T : class
     {
-        /// <summary>
-        /// Default maximum number of elements to store
-        /// </summary>
-        private const int DEFAULT_MAX_SIZE = 10000;
-
         /// <summary>
         /// The maximum number of elements that should be stored
         /// </summary>
@@ -53,12 +48,7 @@ namespace OptimizelySDK.Odp
         /// <summary>
         /// Indexed data held in the cache 
         /// </summary>
-        private readonly Dictionary<string, ItemWrapper> _cache;
-
-        /// <summary>
-        /// Ordered list of objects being held in the cache 
-        /// </summary>
-        private readonly LinkedList<ItemWrapper> _list;
+        private readonly OrderedDictionary _cache;
 
         /// <summary>
         /// A Least Recently Used in-memory cache
@@ -66,17 +56,18 @@ namespace OptimizelySDK.Odp
         /// <param name="maxSize">Maximum number of elements to allow in the cache</param>
         /// <param name="itemTimeout">Timeout or time to live for each item</param>
         /// <param name="logger">Implementation used for recording LRU events or errors</param>
-        public LruCache(int maxSize = DEFAULT_MAX_SIZE, TimeSpan? itemTimeout = default,
+        public LruCache(int? maxSize = null,
+            TimeSpan? itemTimeout = null,
             ILogger logger = null
         )
         {
             _mutex = new object();
 
-            _maxSize = Math.Max(0, maxSize);
+            _maxSize = Math.Max(0, maxSize ?? Constants.DEFAULT_MAX_CACHE_SIZE);
 
             _logger = logger ?? new DefaultLogger();
 
-            _timeout = itemTimeout ?? TimeSpan.FromMinutes(10);
+            _timeout = itemTimeout ?? TimeSpan.FromSeconds(Constants.DEFAULT_CACHE_SECONDS);
             if (_timeout < TimeSpan.Zero)
             {
                 _logger.Log(LogLevel.WARN,
@@ -84,9 +75,7 @@ namespace OptimizelySDK.Odp
                 _timeout = TimeSpan.Zero;
             }
 
-            _cache = new Dictionary<string, ItemWrapper>(_maxSize);
-
-            _list = new LinkedList<ItemWrapper>();
+            _cache = new OrderedDictionary(_maxSize);
         }
 
         /// <summary>
@@ -105,34 +94,20 @@ namespace OptimizelySDK.Odp
 
             lock (_mutex)
             {
-                if (_cache.ContainsKey(key))
+                if (_cache.Contains(key))
                 {
                     var item = _cache[key];
-                    _list.Remove(item);
-                    _list.AddFirst(item);
-                    _cache[key] = item;
+                    _cache.Remove(key);
+                    _cache.Insert(0, key, item);
                 }
                 else
                 {
                     if (_cache.Count >= _maxSize)
                     {
-                        var leastRecentlyUsedItem = _list.Last;
-
-                        var leastRecentlyUsedItemKey = (from cacheItem in _cache
-                            where cacheItem.Value == leastRecentlyUsedItem.Value
-                            select cacheItem.Key).FirstOrDefault();
-
-                        if (leastRecentlyUsedItemKey != null)
-                        {
-                            _cache.Remove(leastRecentlyUsedItemKey);
-                        }
-
-                        _list.Remove(leastRecentlyUsedItem);
+                        _cache.RemoveAt(_cache.Count - 1);
                     }
 
-                    var item = new ItemWrapper(value);
-                    _list.AddFirst(item);
-                    _cache.Add(key, item);
+                    _cache.Insert(0, key, new ItemWrapper(value));
                 }
             }
         }
@@ -153,28 +128,27 @@ namespace OptimizelySDK.Odp
 
             lock (_mutex)
             {
-                if (!_cache.ContainsKey(key))
+                if (!_cache.Contains(key))
                 {
                     return default;
                 }
 
-                ItemWrapper item = _cache[key];
-
                 var currentTimestamp = DateTime.Now.MillisecondsSince1970();
 
+                var item = _cache[key] as ItemWrapper;
                 var itemReturn = default(T);
-                if (_timeout == TimeSpan.Zero ||
-                    (currentTimestamp - item.CreationTimestamp < _timeout.TotalMilliseconds))
+                if (item != null && (_timeout == TimeSpan.Zero ||
+                                     currentTimestamp - item.CreationTimestamp <
+                                     _timeout.TotalMilliseconds))
                 {
-                    _list.Remove(item);
-                    _list.AddFirst(item);
+                    _cache.Remove(key);
+                    _cache.Insert(0, key, item);
 
                     itemReturn = item.Value;
                 }
                 else
                 {
                     _cache.Remove(key);
-                    _list.Remove(item);
                 }
 
                 return itemReturn;
@@ -189,7 +163,6 @@ namespace OptimizelySDK.Odp
             lock (_mutex)
             {
                 _cache.Clear();
-                _list.Clear();
             }
         }
 
@@ -227,9 +200,13 @@ namespace OptimizelySDK.Odp
         {
             _logger.Log(LogLevel.WARN, "_readCurrentCacheKeys used for non-testing purpose");
 
-            return (from listItem in _list
-                join cacheItem in _cache on listItem equals cacheItem.Value
-                select cacheItem.Key).ToArray();
+            string[] cacheKeys;
+            lock (_mutex)
+            {
+                cacheKeys = _cache.Keys.Cast<string>().ToArray();
+            }
+
+            return cacheKeys;
         }
     }
 }

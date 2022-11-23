@@ -108,5 +108,14 @@ namespace OptimizelySDK.Odp
         {
             return !(string.IsNullOrWhiteSpace(ApiKey) || string.IsNullOrWhiteSpace(ApiHost));
         }
+
+        /// <summary>
+        /// Determines if ODP configuration contains segments
+        /// </summary>
+        /// <returns></returns>
+        public bool HasSegments()
+        {
+            return SegmentsToCheck?.Count > 0;
+        }
     }
 }
