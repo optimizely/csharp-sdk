@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+using OptimizelySDK.Logger;
 using System.Collections.Generic;
 
 namespace OptimizelySDK.Odp
@@ -26,13 +27,16 @@ namespace OptimizelySDK.Odp
 
         public OdpEventManager EventManager { get; }
 
+        private ILogger _logger;
+
         public OdpManager(OdpConfig odpConfig, OdpSegmentManager segmentManager,
-            OdpEventManager eventManager
+            OdpEventManager eventManager, ILogger logger = null
         )
         {
             _odpConfig = odpConfig;
             SegmentManager = segmentManager;
             EventManager = eventManager;
+            _logger = logger;
 
             EventManager.Start();
         }
@@ -46,16 +50,17 @@ namespace OptimizelySDK.Odp
             }
 
             _odpConfig = newConfig;
-            
+
             EventManager.UpdateSettings(_odpConfig);
-            
+
             SegmentManager.ResetCache();
             SegmentManager.UpdateSettings(_odpConfig);
-            
+
             return true;
         }
-        
-        public void Close() {
+
+        public void Close()
+        {
             EventManager.Stop();
         }
     }

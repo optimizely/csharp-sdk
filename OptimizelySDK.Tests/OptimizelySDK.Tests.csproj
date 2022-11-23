@@ -80,6 +80,7 @@
     <Compile Include="DefaultErrorHandlerTest.cs" />
     <Compile Include="EntityTests\IntegrationTest.cs" />
     <Compile Include="EventTests\EventProcessorProps.cs" />
+    <Compile Include="OdpTests\OdpManagerTest.cs" />
     <Compile Include="OdpTests\OdpSegmentApiManagerTest.cs" />
     <Compile Include="OdpTests\HttpClientTestUtil.cs" />
     <Compile Include="OdpTests\LruCacheTest.cs" />
