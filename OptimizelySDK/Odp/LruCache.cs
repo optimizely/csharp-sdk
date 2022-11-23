@@ -61,14 +61,14 @@ namespace OptimizelySDK.Odp
         /// <param name="maxSize">Maximum number of elements to allow in the cache</param>
         /// <param name="itemTimeout">Timeout or time to live for each item</param>
         /// <param name="logger">Implementation used for recording LRU events or errors</param>
-        public LruCache(int maxSize = Constants.DEFAULT_MAX_CACHE_SIZE,
+        public LruCache(int? maxSize = null,
             TimeSpan? itemTimeout = null,
             ILogger logger = null
         )
         {
             _mutex = new object();
 
-            _maxSize = Math.Max(0, maxSize);
+            _maxSize = Math.Max(0, maxSize ?? Constants.DEFAULT_MAX_CACHE_SIZE);
 
             _logger = logger ?? new DefaultLogger();
 
@@ -114,9 +114,7 @@ namespace OptimizelySDK.Odp
                     {
                         var leastRecentlyUsedItem = _list.Last.Value;
 
-                        var leastRecentlyUsedItemKey = leastRecentlyUsedItem.Key;
-                        _cache.Remove(leastRecentlyUsedItemKey);
-
+                        _cache.Remove(leastRecentlyUsedItem.Key);
                         _list.Remove(leastRecentlyUsedItem);
                     }
 
