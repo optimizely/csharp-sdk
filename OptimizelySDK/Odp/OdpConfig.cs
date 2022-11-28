@@ -119,6 +119,11 @@ namespace OptimizelySDK.Odp
             return SegmentsToCheck?.Count > 0;
         }
 
+        /// <summary>
+        /// Determine equality between two OdpConfig objects
+        /// </summary>
+        /// <param name="toCompare">OdpConfig object to compare current instance against</param>
+        /// <returns>True if equal otherwise False</returns>
         public bool Equals(OdpConfig toCompare)
         {
             return ApiKey.Equals(toCompare.ApiKey, StringComparison.OrdinalIgnoreCase) &&
