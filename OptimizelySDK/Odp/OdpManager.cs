@@ -23,25 +23,25 @@ namespace OptimizelySDK.Odp
     {
         private volatile OdpConfig _odpConfig;
 
-        public OdpSegmentManager SegmentManager { get; }
+        public IOdpSegmentManager SegmentManager { get; }
 
-        public OdpEventManager EventManager { get; }
+        public IOdpEventManager EventManager { get; }
 
         private ILogger _logger;
 
-        public OdpManager(OdpConfig odpConfig, OdpSegmentManager segmentManager,
-            OdpEventManager eventManager, ILogger logger = null
+        public OdpManager(OdpConfig odpConfig, IOdpSegmentManager segmentManager,
+            IOdpEventManager eventManager, ILogger logger = null
         )
         {
             _odpConfig = odpConfig;
             SegmentManager = segmentManager;
             EventManager = eventManager;
-            _logger = logger;
+            _logger = logger ?? new NoOpLogger();
 
             EventManager.Start();
         }
 
-        public bool UpdateSettings(string apiHost, string apiKey, List<string> segmentsToCheck)
+        public bool UpdateSettings(string apiKey, string apiHost, List<string> segmentsToCheck)
         {
             var newConfig = new OdpConfig(apiKey, apiHost, segmentsToCheck);
             if (_odpConfig.Equals(newConfig))

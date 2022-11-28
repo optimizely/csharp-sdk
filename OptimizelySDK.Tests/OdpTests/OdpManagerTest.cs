@@ -14,70 +14,153 @@
  * limitations under the License.
  */
 
-using Castle.Core.Logging;
 using Moq;
 using NUnit.Framework;
+using OptimizelySDK.Logger;
 using OptimizelySDK.Odp;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace OptimizelySDK.Tests.OdpTests
 {
     [TestFixture]
     public class OdpManagerTest
     {
+        private const string API_KEY = "JUs7AFak3aP1K3y";
+        private const string API_HOST = "https://odp-api.example.com";
+        private const string UPDATED_API_KEY = "D1fF3rEn7kEy";
+        private const string UPDATED_ODP_ENDPOINT = "https://an-updated-odp-endpoint.example.com";
+
+        private readonly List<string> _updatedSegmentsToCheck = new List<string>
+        {
+            "updated-segment-1",
+            "updated-segment-2",
+        };
+
+        private readonly List<string> _emptySegmentsToCheck = new List<string>(0);
+
         private OdpConfig _odpConfig;
         private Mock<ILogger> _mockLogger;
         private Mock<IOdpEventManager> _mockOdpEventManager;
-        private Mock<IOdpSegmentApiManager> _mockSegmentApiManager;
+        private Mock<IOdpSegmentManager> _mockSegmentManager;
 
         [SetUp]
-        public void Setup() { }
+        public void Setup()
+        {
+            _odpConfig = new OdpConfig(API_KEY, API_HOST, _emptySegmentsToCheck);
+            _mockLogger = new Mock<ILogger>();
+            _mockOdpEventManager = new Mock<IOdpEventManager>();
+            _mockSegmentManager = new Mock<IOdpSegmentManager>();
+        }
 
         [Test]
-        public void ShouldStartEventManagerWhenOdpManagerIsInitialized() { }
+        public void ShouldStartEventManagerWhenOdpManagerIsInitialized()
+        {
+            _mockOdpEventManager.Setup(e => e.Start());
+
+            _ = new OdpManager(_odpConfig, _mockSegmentManager.Object,
+                _mockOdpEventManager.Object, _mockLogger.Object);
+
+            _mockOdpEventManager.Verify(e => e.Start(), Times.Once);
+        }
 
         [Test]
-        public void ShouldStopEventManagerWhenCloseIsCalled() { }
+        public void ShouldStopEventManagerWhenCloseIsCalled()
+        {
+            _mockOdpEventManager.Setup(e => e.Stop());
+            var manager = new OdpManager(_odpConfig, _mockSegmentManager.Object,
+                _mockOdpEventManager.Object, _mockLogger.Object);
+
+            manager.Close();
+
+            _mockOdpEventManager.Verify(e => e.Stop(), Times.Once);
+        }
 
         [Test]
-        public void ShouldUseNewSettingsInEventManagerWhenOdpConfigIsUpdated() { }
+        public void ShouldUseNewSettingsInEventManagerWhenOdpConfigIsUpdated()
+        {
+            var eventManagerParameterCollector = new List<OdpConfig>();
+            _mockOdpEventManager.Setup(e =>
+                e.UpdateSettings(Capture.In(eventManagerParameterCollector)));
+            var manager = new OdpManager(_odpConfig, _mockSegmentManager.Object,
+                _mockOdpEventManager.Object, _mockLogger.Object);
+
+            var wasUpdated = manager.UpdateSettings(UPDATED_API_KEY, UPDATED_ODP_ENDPOINT,
+                _updatedSegmentsToCheck);
+
+            Assert.IsTrue(wasUpdated);
+            var configPassedToOdpEventManager = eventManagerParameterCollector.FirstOrDefault();
+            Assert.AreEqual(UPDATED_API_KEY, configPassedToOdpEventManager?.ApiKey);
+            Assert.AreEqual(UPDATED_ODP_ENDPOINT, configPassedToOdpEventManager.ApiHost);
+            Assert.AreEqual(_updatedSegmentsToCheck, configPassedToOdpEventManager.SegmentsToCheck);
+        }
 
         [Test]
-        public void ShouldUseNewSettingsInSegmentManagerWhenOdpConfigIsUpdated() { }
+        public void ShouldUseNewSettingsInSegmentManagerWhenOdpConfigIsUpdated()
+        {
+            var segmentManagerParameterCollector = new List<OdpConfig>();
+            _mockSegmentManager.Setup(s =>
+                s.UpdateSettings(Capture.In(segmentManagerParameterCollector)));
+            var manager = new OdpManager(_odpConfig, _mockSegmentManager.Object,
+                _mockOdpEventManager.Object, _mockLogger.Object);
+
+            var wasUpdated = manager.UpdateSettings(UPDATED_API_KEY, UPDATED_ODP_ENDPOINT,
+                _updatedSegmentsToCheck);
+
+            Assert.IsTrue(wasUpdated);
+            var configPassedToSegmentManager = segmentManagerParameterCollector.FirstOrDefault();
+            Assert.AreEqual(UPDATED_API_KEY, configPassedToSegmentManager?.ApiKey);
+            Assert.AreEqual(UPDATED_ODP_ENDPOINT, configPassedToSegmentManager?.ApiHost);
+            Assert.AreEqual(_updatedSegmentsToCheck, configPassedToSegmentManager.SegmentsToCheck);
+        }
 
         [Test]
-        public void ShouldHandleSettingsNoChange() { }
+        public void ShouldHandleOdpConfigSettingsNoChange()
+        {
+            _mockSegmentManager.Setup(s => s.UpdateSettings(It.IsAny<OdpConfig>()));
+            _mockOdpEventManager.Setup(e => e.UpdateSettings(It.IsAny<OdpConfig>()));
+            var manager = new OdpManager(_odpConfig, _mockSegmentManager.Object,
+                _mockOdpEventManager.Object, _mockLogger.Object);
 
-        [Test]
+            var wasUpdated = manager.UpdateSettings(_odpConfig.ApiKey, _odpConfig.ApiHost,
+                _odpConfig.SegmentsToCheck);
+
+            Assert.IsFalse(wasUpdated);
+            _mockSegmentManager.Verify(s => s.UpdateSettings(It.IsAny<OdpConfig>()), Times.Never);
+            _mockOdpEventManager.Verify(e => e.UpdateSettings(It.IsAny<OdpConfig>()), Times.Never);
+        }
+
+        [Ignore, Test]
         public void ShouldUpdateSettingsWithReset() { }
 
-        [Test]
+        [Ignore, Test]
         public void ShouldGetEventManager() { }
 
-        [Test]
+        [Ignore, Test]
         public void ShouldGetSegmentManager() { }
 
-        [Test]
+        [Ignore, Test]
         public void ShouldFetchQualifiedSegments() { }
 
-        [Test]
+        [Ignore, Test]
         public void ShouldDisableOdpThroughConfiguration() { }
 
-        [Test]
+        [Ignore, Test]
         public void ShouldIdentifyUserWhenDatafileNotReady() { }
 
-        [Test]
+        [Ignore, Test]
         public void ShouldIdentifyUserWhenOdpIsIntegrated() { }
 
-        [Test]
+        [Ignore, Test]
         public void ShouldNotIdentifyUserWhenOdpNotIntegrated() { }
 
-        [Test]
+        [Ignore, Test]
         public void ShouldNotIdentifyUserWhenOdpDisabled() { }
 
-        [Test]
+        [Ignore, Test]
         public void ShouldSendEventWhenOdpIsIntegrated() { }
 
-        [Test]
+        [Ignore, Test]
         public void ShouldNotSendEventOdpNotIntegrated() { }
     }
 }

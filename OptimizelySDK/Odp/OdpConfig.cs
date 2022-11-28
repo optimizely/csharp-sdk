@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+using System;
 using System.Collections.Generic;
 
 namespace OptimizelySDK.Odp
@@ -116,6 +117,14 @@ namespace OptimizelySDK.Odp
         public bool HasSegments()
         {
             return SegmentsToCheck?.Count > 0;
+        }
+
+        public bool Equals(OdpConfig toCompare)
+        {
+            return ApiKey.Equals(toCompare.ApiKey, StringComparison.OrdinalIgnoreCase) &&
+                   ApiHost.Equals(toCompare.ApiHost, StringComparison.OrdinalIgnoreCase) &&
+                   SegmentsToCheck.TrueForAll(
+                       segment => toCompare.SegmentsToCheck.Contains(segment));
         }
     }
 }
