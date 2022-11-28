@@ -18,6 +18,7 @@ using Moq;
 using NUnit.Framework;
 using OptimizelySDK.Logger;
 using OptimizelySDK.Odp;
+using OptimizelySDK.Odp.Entity;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -30,11 +31,38 @@ namespace OptimizelySDK.Tests.OdpTests
         private const string API_HOST = "https://odp-api.example.com";
         private const string UPDATED_API_KEY = "D1fF3rEn7kEy";
         private const string UPDATED_ODP_ENDPOINT = "https://an-updated-odp-endpoint.example.com";
+        private const string TEST_EVENT_TYPE = "event-type";
+        private const string TEST_EVENT_ACTION = "event-action";
+        private const string VALID_FS_USER_ID = "valid-test-fs-user-id";
 
         private readonly List<string> _updatedSegmentsToCheck = new List<string>
         {
             "updated-segment-1",
             "updated-segment-2",
+        };
+
+        private readonly Dictionary<string, string> _testEventIdentifiers =
+            new Dictionary<string, string>
+            {
+                {
+                    "fs_user_id", "id-key-1"
+                },
+            };
+
+        private readonly Dictionary<string, object> _testEventData = new Dictionary<string, object>
+        {
+            {
+                "key-1", "value-1"
+            },
+            {
+                "key-2", null
+            },
+            {
+                "key-3", 3.3
+            },
+            {
+                "key-4", true
+            },
         };
 
         private readonly List<string> _emptySegmentsToCheck = new List<string>(0);
@@ -164,6 +192,39 @@ namespace OptimizelySDK.Tests.OdpTests
         }
 
         [Test]
+        public void ShouldDisableOdpThroughConfiguration()
+        {
+            _mockOdpEventManager.Setup(e => e.SendEvent(It.IsAny<OdpEvent>()));
+            _mockOdpEventManager.Setup(e => e.IsStarted).Returns(true);
+            var manager = new OdpManager.Builder().WithOdpConfig(_odpConfig).
+                WithEventManager(_mockOdpEventManager.Object).
+                WithLogger(_mockLogger.Object).
+                Build(); 
+
+            manager.SendEvent(TEST_EVENT_TYPE, TEST_EVENT_ACTION, _testEventIdentifiers,
+                _testEventData);
+            
+            _mockOdpEventManager.Verify(e => e.SendEvent(It.IsAny<OdpEvent>()), Times.Once);
+            _mockLogger.Verify(l =>
+                l.Log(LogLevel.DEBUG, "ODP event not dispatched (ODP disabled)."), Times.Never);
+            _mockLogger.Verify(l =>
+                l.Log(LogLevel.DEBUG, "ODP event not dispatched (ODP not integrated)."), Times.Never);
+
+            manager.UpdateSettings(string.Empty, string.Empty, _emptySegmentsToCheck);
+            
+            manager.SendEvent(TEST_EVENT_TYPE, TEST_EVENT_ACTION, _testEventIdentifiers,
+                _testEventData);
+            manager.Close();
+
+            // still only once
+            _mockOdpEventManager.Verify(e => e.SendEvent(It.IsAny<OdpEvent>()), Times.Once);
+            _mockLogger.Verify(l =>
+                l.Log(LogLevel.DEBUG, "ODP event not dispatched (ODP disabled)."), Times.Once);
+            _mockLogger.Verify(l =>
+                l.Log(LogLevel.DEBUG, "ODP event not dispatched (ODP not integrated)."), Times.Never);
+        }
+
+        [Test]
         public void ShouldGetEventManager()
         {
             var manager = new OdpManager.Builder().WithOdpConfig(_odpConfig).
@@ -187,25 +248,92 @@ namespace OptimizelySDK.Tests.OdpTests
             Assert.IsNotNull(manager.SegmentManager);
         }
 
-        [Ignore, Test]
-        public void ShouldDisableOdpThroughConfiguration() { }
+        [Test]
+        public void ShouldIdentifyUserWhenOdpIsIntegrated()
+        {
+            _mockOdpEventManager.Setup(e => e.IdentifyUser(It.IsAny<string>()));
+            _mockOdpEventManager.Setup(e => e.IsStarted).Returns(true);
+            var manager = new OdpManager.Builder().WithOdpConfig(_odpConfig).
+                WithEventManager(_mockOdpEventManager.Object).
+                WithLogger(_mockLogger.Object).
+                Build();
 
-        [Ignore, Test]
-        public void ShouldIdentifyUserWhenDatafileNotReady() { }
+            manager.IdentifyUser(VALID_FS_USER_ID);
+            manager.Close();
 
-        [Ignore, Test]
-        public void ShouldIdentifyUserWhenOdpIsIntegrated() { }
+            _mockLogger.Verify(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()), Times.Never);
+            _mockOdpEventManager.Verify(e => e.IdentifyUser(It.IsAny<string>()), Times.Once);
+        }
 
-        [Ignore, Test]
-        public void ShouldNotIdentifyUserWhenOdpNotIntegrated() { }
+        [Test]
+        public void ShouldNotIdentifyUserWhenOdpNotIntegrated()
+        {
+            _mockOdpEventManager.Setup(e => e.IdentifyUser(It.IsAny<string>()));
+            _mockOdpEventManager.Setup(e => e.IsStarted).Returns(false);
+            var manager = new OdpManager.Builder().WithOdpConfig(_odpConfig).
+                WithEventManager(_mockOdpEventManager.Object).
+                WithLogger(_mockLogger.Object).
+                Build();
 
-        [Ignore, Test]
-        public void ShouldNotIdentifyUserWhenOdpDisabled() { }
+            manager.IdentifyUser(VALID_FS_USER_ID);
+            manager.Close();
 
-        [Ignore, Test]
-        public void ShouldSendEventWhenOdpIsIntegrated() { }
+            _mockLogger.Verify(l => l.Log(LogLevel.DEBUG,
+                "ODP identify event not dispatched (ODP not integrated)."));
+            _mockOdpEventManager.Verify(e => e.IdentifyUser(It.IsAny<string>()), Times.Never);
+        }
 
-        [Ignore, Test]
-        public void ShouldNotSendEventOdpNotIntegrated() { }
+        [Test]
+        public void ShouldNotIdentifyUserWhenOdpDisabled()
+        {
+            _mockOdpEventManager.Setup(e => e.IdentifyUser(It.IsAny<string>()));
+            _mockOdpEventManager.Setup(e => e.IsStarted).Returns(true);
+            var manager = new OdpManager.Builder().WithOdpConfig(_odpConfig).
+                WithEventManager(_mockOdpEventManager.Object).
+                WithLogger(_mockLogger.Object).
+                Build(false);
+
+            manager.IdentifyUser(VALID_FS_USER_ID);
+            manager.Close();
+
+            _mockLogger.Verify(l =>
+                l.Log(LogLevel.DEBUG, "ODP identify event not dispatched (ODP disabled)."));
+            _mockOdpEventManager.Verify(e => e.IdentifyUser(It.IsAny<string>()), Times.Never);
+        }
+
+        [Test]
+        public void ShouldSendEventWhenOdpIsIntegrated()
+        {
+            _mockOdpEventManager.Setup(e => e.SendEvent(It.IsAny<OdpEvent>()));
+            _mockOdpEventManager.Setup(e => e.IsStarted).Returns(true);
+            var manager = new OdpManager.Builder().WithOdpConfig(_odpConfig).
+                WithEventManager(_mockOdpEventManager.Object).
+                WithLogger(_mockLogger.Object).
+                Build();
+
+            manager.SendEvent(TEST_EVENT_TYPE, TEST_EVENT_ACTION, _testEventIdentifiers,
+                _testEventData);
+            manager.Close();
+
+            _mockOdpEventManager.Verify(e => e.SendEvent(It.IsAny<OdpEvent>()), Times.Once);
+        }
+
+        [Test]
+        public void ShouldNotSendEventOdpNotIntegrated()
+        {
+            var odpConfig = new OdpConfig(string.Empty, string.Empty, _emptySegmentsToCheck);
+            _mockOdpEventManager.Setup(e => e.SendEvent(It.IsAny<OdpEvent>()));
+            var manager = new OdpManager.Builder().WithOdpConfig(odpConfig).
+                WithLogger(_mockLogger.Object).
+                Build(false); // do not enable
+
+            manager.SendEvent(TEST_EVENT_TYPE, TEST_EVENT_ACTION, _testEventIdentifiers,
+                _testEventData);
+            manager.Close();
+
+            _mockLogger.Verify(l =>
+                l.Log(LogLevel.DEBUG, "ODP event not dispatched (ODP disabled)."), Times.Once);
+            _mockOdpEventManager.Verify(e => e.SendEvent(It.IsAny<OdpEvent>()), Times.Never);
+        }
     }
 }
