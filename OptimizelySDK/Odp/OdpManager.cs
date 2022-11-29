@@ -55,7 +55,7 @@ namespace OptimizelySDK.Odp
 
         public List<string> FetchQualifiedSegments(string userId, List<OdpSegmentOption> options)
         {
-            if (!_enabled || SegmentManager == null)
+            if (!_enabled || SegmentManager == null || !_odpConfig.IsReady())
             {
                 _logger.Log(LogLevel.ERROR, Constants.ODP_NOT_ENABLED_MESSAGE);
                 return null;
@@ -66,7 +66,7 @@ namespace OptimizelySDK.Odp
 
         public void IdentifyUser(string userId)
         {
-            if (!_enabled || EventManager == null)
+            if (!_enabled || EventManager == null || !_odpConfig.IsReady())
             {
                 _logger.Log(LogLevel.DEBUG, "ODP identify event not dispatched (ODP disabled).");
                 return;
@@ -86,7 +86,7 @@ namespace OptimizelySDK.Odp
             Dictionary<string, object> data
         )
         {
-            if (!_enabled || EventManager == null)
+            if (!_enabled || EventManager == null || !_odpConfig.IsReady())
             {
                 _logger.Log(LogLevel.DEBUG, "ODP event not dispatched (ODP disabled).");
                 return;

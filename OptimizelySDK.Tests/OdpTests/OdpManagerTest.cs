@@ -210,14 +210,16 @@ namespace OptimizelySDK.Tests.OdpTests
             _mockLogger.Verify(l =>
                 l.Log(LogLevel.DEBUG, "ODP event not dispatched (ODP not integrated)."), Times.Never);
 
+            _mockOdpEventManager.ResetCalls();
+            _mockLogger.ResetCalls();
+
             manager.UpdateSettings(string.Empty, string.Empty, _emptySegmentsToCheck);
             
             manager.SendEvent(TEST_EVENT_TYPE, TEST_EVENT_ACTION, _testEventIdentifiers,
                 _testEventData);
             manager.Close();
 
-            // still only once
-            _mockOdpEventManager.Verify(e => e.SendEvent(It.IsAny<OdpEvent>()), Times.Once);
+            _mockOdpEventManager.Verify(e => e.SendEvent(It.IsAny<OdpEvent>()), Times.Never);
             _mockLogger.Verify(l =>
                 l.Log(LogLevel.DEBUG, "ODP event not dispatched (ODP disabled)."), Times.Once);
             _mockLogger.Verify(l =>
