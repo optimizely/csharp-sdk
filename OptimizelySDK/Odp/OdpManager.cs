@@ -22,18 +22,43 @@ using System.Collections.Generic;
 
 namespace OptimizelySDK.Odp
 {
+    /// <summary>
+    /// Concrete implementation to orchestrate segment manager, event manager, and ODP config
+    /// </summary>
     public class OdpManager : IOdpManager
     {
+        /// <summary>
+        /// Denotes if ODP Manager is meant to be handling ODP communication
+        /// </summary>
         private bool _enabled;
 
+        /// <summary>
+        /// Configuration used to communicate with ODP
+        /// </summary>
         private volatile OdpConfig _odpConfig;
 
+        /// <summary>
+        /// Manager used to handle audience segment membership
+        /// </summary>
         public IOdpSegmentManager SegmentManager { get; private set; }
 
+        /// <summary>
+        /// Manager used to send events to ODP 
+        /// </summary>
         public IOdpEventManager EventManager { get; private set; }
 
+        /// <summary>
+        /// Logger used to record messages that occur within the ODP client
+        /// </summary>
         private ILogger _logger;
 
+        /// <summary>
+        /// Update the settings being used for ODP configuration and reset/restart dependent processes
+        /// </summary>
+        /// <param name="apiKey">Public API key from ODP</param>
+        /// <param name="apiHost">Host portion of the URL of ODP</param>
+        /// <param name="segmentsToCheck">Audience segments to consider</param>
+        /// <returns>True if settings were update otherwise False</returns>
         public bool UpdateSettings(string apiKey, string apiHost, List<string> segmentsToCheck)
         {
             var newConfig = new OdpConfig(apiKey, apiHost, segmentsToCheck);
@@ -53,6 +78,12 @@ namespace OptimizelySDK.Odp
             return true;
         }
 
+        /// <summary>
+        /// Attempts to fetch and return a list of a user's qualified segments.
+        /// </summary>
+        /// <param name="userId">FS User ID</param>
+        /// <param name="options">Options used during segment cache handling</param>
+        /// <returns>Qualified segments for the user from the cache or the ODP server</returns>
         public List<string> FetchQualifiedSegments(string userId, List<OdpSegmentOption> options)
         {
             if (!_enabled || SegmentManager == null || !_odpConfig.IsReady())
@@ -64,6 +95,10 @@ namespace OptimizelySDK.Odp
             return SegmentManager.FetchQualifiedSegments(userId, options);
         }
 
+        /// <summary>
+        /// Send identification event to ODP for a given full-stack User ID
+        /// </summary>
+        /// <param name="userId">User ID to send</param>
         public void IdentifyUser(string userId)
         {
             if (!_enabled || EventManager == null || !_odpConfig.IsReady())
@@ -82,6 +117,13 @@ namespace OptimizelySDK.Odp
             EventManager.IdentifyUser(userId);
         }
 
+        /// <summary>
+        /// Add event to queue for sending to ODP
+        /// </summary>
+        /// <param name="type">Type of event (typically `fullstack` from server-side SDK events)</param>
+        /// <param name="action">Subcategory of the event type</param>
+        /// <param name="identifiers">Key-value map of user identifiers</param>
+        /// <param name="data">Event data in a key-value pair format</param>
         public void SendEvent(string type, string action, Dictionary<string, string> identifiers,
             Dictionary<string, object> data
         )
@@ -102,6 +144,9 @@ namespace OptimizelySDK.Odp
             EventManager.SendEvent(new OdpEvent(type, action, identifiers, data));
         }
 
+        /// <summary>
+        /// Sends signal to stop Event Manager and clean up ODP Manager use
+        /// </summary>
         public void Close()
         {
             if (!_enabled || EventManager == null)
@@ -219,7 +264,7 @@ namespace OptimizelySDK.Odp
                 {
                     manager.SegmentManager = _segmentManager;
                 }
-                
+
                 manager.EventManager.Start();
 
                 return manager;

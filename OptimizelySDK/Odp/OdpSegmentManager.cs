@@ -143,11 +143,18 @@ namespace OptimizelySDK.Odp
             return $"{userKey}-$-{userValue}";
         }
 
+        /// <summary>
+        /// Update the ODP configuration settings being used by the Segment Manager
+        /// </summary>
+        /// <param name="odpConfig">New ODP Configuration to apply</param>
         public void UpdateSettings(OdpConfig odpConfig)
         {
             _odpConfig.Update(odpConfig.ApiKey, odpConfig.ApiHost, odpConfig.SegmentsToCheck);
         }
 
+        /// <summary>
+        /// Reset/clear the segments cache
+        /// </summary>
         public void ResetCache()
         {
             _segmentsCache.Reset();
