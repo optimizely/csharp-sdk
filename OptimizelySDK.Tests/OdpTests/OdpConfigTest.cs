@@ -87,7 +87,8 @@ namespace OptimizelySDK.Tests.OdpTests
         [Test]
         public void ShouldEqualDespiteCaseDifferenceInApiHost()
         {
-            var apiHostUpperCasedConfig = new OdpConfig(API_KEY, API_HOST.ToUpper(), segmentsToCheck);
+            var apiHostUpperCasedConfig =
+                new OdpConfig(API_KEY, API_HOST.ToUpper(), segmentsToCheck);
 
             Assert.IsTrue(_goodOdpConfig.Equals(apiHostUpperCasedConfig));
             Assert.IsTrue(apiHostUpperCasedConfig.Equals(_goodOdpConfig));
@@ -102,7 +103,7 @@ namespace OptimizelySDK.Tests.OdpTests
                 "LOWER-CASE-AUDIENCE",
             };
             var wrongCaseConfig = new OdpConfig(API_KEY, API_HOST, wrongCaseSegmentsToCheck);
-            
+
             Assert.IsTrue(_goodOdpConfig.Equals(wrongCaseConfig));
             Assert.IsTrue(wrongCaseConfig.Equals(_goodOdpConfig));
         }
