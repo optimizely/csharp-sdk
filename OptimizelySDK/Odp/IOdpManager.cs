@@ -38,7 +38,7 @@ namespace OptimizelySDK.Odp
         /// <param name="userId">FS User ID</param>
         /// <param name="options">Options used during segment cache handling</param>
         /// <returns>Qualified segments for the user from the cache or the ODP server</returns>
-        List<string> FetchQualifiedSegments(string userId, List<OdpSegmentOption> options);
+        string[] FetchQualifiedSegments(string userId, List<OdpSegmentOption> options);
 
         /// <summary>
         /// Send identification event to ODP for a given full-stack User ID

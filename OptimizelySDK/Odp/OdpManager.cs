@@ -88,7 +88,7 @@ namespace OptimizelySDK.Odp
         /// <param name="userId">FS User ID</param>
         /// <param name="options">Options used during segment cache handling</param>
         /// <returns>Qualified segments for the user from the cache or the ODP server</returns>
-        public List<string> FetchQualifiedSegments(string userId, List<OdpSegmentOption> options)
+        public string[] FetchQualifiedSegments(string userId, List<OdpSegmentOption> options)
         {
             if (SegmentManagerOrConfigNotReady())
             {
@@ -96,7 +96,7 @@ namespace OptimizelySDK.Odp
                 return null;
             }
 
-            return SegmentManager.FetchQualifiedSegments(userId, options);
+            return SegmentManager.FetchQualifiedSegments(userId, options).ToArray();
         }
 
         /// <summary>
