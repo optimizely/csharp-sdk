@@ -16,10 +16,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace OptimizelySDK.Odp
 {
-    public class OdpConfig
+    public class OdpConfig : IEquatable<OdpConfig>
     {
         /// <summary>
         /// Public API key for the ODP account from which the audience segments will be fetched (optional).
@@ -120,16 +121,32 @@ namespace OptimizelySDK.Odp
         }
 
         /// <summary>
-        /// Determine equality between two OdpConfig objects
+        /// Determine equality between two OdpConfig objects based on case-insensitive value comparisons
         /// </summary>
-        /// <param name="toCompare">OdpConfig object to compare current instance against</param>
+        /// <param name="otherConfig">OdpConfig object to compare current instance against</param>
         /// <returns>True if equal otherwise False</returns>
-        public bool Equals(OdpConfig toCompare)
+        public bool Equals(OdpConfig otherConfig)
         {
-            return ApiKey.Equals(toCompare.ApiKey, StringComparison.OrdinalIgnoreCase) &&
-                   ApiHost.Equals(toCompare.ApiHost, StringComparison.OrdinalIgnoreCase) &&
-                   SegmentsToCheck.TrueForAll(
-                       segment => toCompare.SegmentsToCheck.Contains(segment));
+            // less expensive equality checks first
+            if (otherConfig == null ||
+                !string.Equals(ApiKey, otherConfig.ApiKey,
+                    StringComparison.Ordinal) || // case-matters
+                !string.Equals(ApiHost, otherConfig.ApiHost, StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+
+            if (SegmentsToCheck == null ||
+                otherConfig.SegmentsToCheck == null ||
+                SegmentsToCheck.Count != otherConfig.SegmentsToCheck.Count)
+            {
+                return false;
+            }
+
+            return SegmentsToCheck.TrueForAll(
+                segment =>
+                    otherConfig.SegmentsToCheck.Contains(segment,
+                        StringComparer.OrdinalIgnoreCase));
         }
     }
 }

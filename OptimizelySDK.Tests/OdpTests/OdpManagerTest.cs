@@ -105,7 +105,7 @@ namespace OptimizelySDK.Tests.OdpTests
                 WithLogger(_mockLogger.Object).
                 Build();
 
-            manager.Close();
+            manager.Dispose();
 
             _mockOdpEventManager.Verify(e => e.Stop(), Times.Once);
         }
@@ -218,7 +218,7 @@ namespace OptimizelySDK.Tests.OdpTests
 
             manager.SendEvent(TEST_EVENT_TYPE, TEST_EVENT_ACTION, _testEventIdentifiers,
                 _testEventData);
-            manager.Close();
+            manager.Dispose();
 
             _mockOdpEventManager.Verify(e => e.SendEvent(It.IsAny<OdpEvent>()), Times.Never);
             _mockLogger.Verify(l =>
@@ -263,7 +263,7 @@ namespace OptimizelySDK.Tests.OdpTests
                 Build();
 
             manager.IdentifyUser(VALID_FS_USER_ID);
-            manager.Close();
+            manager.Dispose();
 
             _mockLogger.Verify(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()), Times.Never);
             _mockOdpEventManager.Verify(e => e.IdentifyUser(It.IsAny<string>()), Times.Once);
@@ -280,7 +280,7 @@ namespace OptimizelySDK.Tests.OdpTests
                 Build();
 
             manager.IdentifyUser(VALID_FS_USER_ID);
-            manager.Close();
+            manager.Dispose();
 
             _mockLogger.Verify(l => l.Log(LogLevel.DEBUG,
                 "ODP identify event not dispatched (ODP not integrated)."));
@@ -298,7 +298,7 @@ namespace OptimizelySDK.Tests.OdpTests
                 Build(false);
 
             manager.IdentifyUser(VALID_FS_USER_ID);
-            manager.Close();
+            manager.Dispose();
 
             _mockLogger.Verify(l =>
                 l.Log(LogLevel.DEBUG, "ODP identify event not dispatched (ODP disabled)."));
@@ -317,7 +317,7 @@ namespace OptimizelySDK.Tests.OdpTests
 
             manager.SendEvent(TEST_EVENT_TYPE, TEST_EVENT_ACTION, _testEventIdentifiers,
                 _testEventData);
-            manager.Close();
+            manager.Dispose();
 
             _mockOdpEventManager.Verify(e => e.SendEvent(It.IsAny<OdpEvent>()), Times.Once);
         }
@@ -333,7 +333,7 @@ namespace OptimizelySDK.Tests.OdpTests
 
             manager.SendEvent(TEST_EVENT_TYPE, TEST_EVENT_ACTION, _testEventIdentifiers,
                 _testEventData);
-            manager.Close();
+            manager.Dispose();
 
             _mockLogger.Verify(l =>
                 l.Log(LogLevel.DEBUG, "ODP event not dispatched (ODP disabled)."), Times.Once);

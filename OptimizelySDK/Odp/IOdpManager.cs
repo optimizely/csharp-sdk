@@ -60,6 +60,6 @@ namespace OptimizelySDK.Odp
         /// <summary>
         /// Sends signal to stop Event Manager and clean up ODP Manager use
         /// </summary>
-        void Close();
+        void Dispose();
     }
 }

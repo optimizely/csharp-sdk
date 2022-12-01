@@ -25,7 +25,7 @@ namespace OptimizelySDK.Odp
     /// <summary>
     /// Concrete implementation to orchestrate segment manager, event manager, and ODP config
     /// </summary>
-    public class OdpManager : IOdpManager
+    public class OdpManager : IOdpManager, IDisposable
     {
         /// <summary>
         /// Denotes if ODP Manager is meant to be handling ODP communication
@@ -69,6 +69,10 @@ namespace OptimizelySDK.Odp
 
             _odpConfig = newConfig;
 
+            // flush old events using old odp publicKey (if exists) before updating odp key.
+            // NOTE: It should be rare but possible that odp public key is changed for the same datafile (sdkKey).
+            // - Try to send all old events with the previous public key.
+            // - If it fails to flush all the old events here (network error), remaining events will be discarded.
             EventManager.Flush();
             EventManager.UpdateSettings(_odpConfig);
 
@@ -86,7 +90,7 @@ namespace OptimizelySDK.Odp
         /// <returns>Qualified segments for the user from the cache or the ODP server</returns>
         public List<string> FetchQualifiedSegments(string userId, List<OdpSegmentOption> options)
         {
-            if (!_enabled || SegmentManager == null || !_odpConfig.IsReady())
+            if (SegmentManagerOrConfigNotReady())
             {
                 _logger.Log(LogLevel.ERROR, Constants.ODP_NOT_ENABLED_MESSAGE);
                 return null;
@@ -101,7 +105,7 @@ namespace OptimizelySDK.Odp
         /// <param name="userId">User ID to send</param>
         public void IdentifyUser(string userId)
         {
-            if (!_enabled || EventManager == null || !_odpConfig.IsReady())
+            if (EventManagerOrConfigNotReady())
             {
                 _logger.Log(LogLevel.DEBUG, "ODP identify event not dispatched (ODP disabled).");
                 return;
@@ -128,7 +132,7 @@ namespace OptimizelySDK.Odp
             Dictionary<string, object> data
         )
         {
-            if (!_enabled || EventManager == null || !_odpConfig.IsReady())
+            if (EventManagerOrConfigNotReady())
             {
                 _logger.Log(LogLevel.DEBUG, "ODP event not dispatched (ODP disabled).");
                 return;
@@ -145,11 +149,29 @@ namespace OptimizelySDK.Odp
         }
 
         /// <summary>
+        /// Determines if the EventManager is ready to be used
+        /// </summary>
+        /// <returns>True if EventManager can process events otherwise False</returns>
+        private bool EventManagerOrConfigNotReady()
+        {
+            return EventManager == null || !_enabled || !_odpConfig.IsReady();
+        }
+
+        /// <summary>
+        /// Determines if the SegmentManager is ready to be used
+        /// </summary>
+        /// <returns>True if SegmentManager can fetch audience segments otherwise False</returns>
+        private bool SegmentManagerOrConfigNotReady()
+        {
+            return SegmentManager == null || !_enabled || !_odpConfig.IsReady();
+        }
+
+        /// <summary>
         /// Sends signal to stop Event Manager and clean up ODP Manager use
         /// </summary>
-        public void Close()
+        public void Dispose()
         {
-            if (!_enabled || EventManager == null)
+            if (EventManager == null || !_enabled)
             {
                 return;
             }
