@@ -149,24 +149,6 @@ namespace OptimizelySDK.Odp
         }
 
         /// <summary>
-        /// Determines if the EventManager is ready to be used
-        /// </summary>
-        /// <returns>True if EventManager can process events otherwise False</returns>
-        private bool EventManagerOrConfigNotReady()
-        {
-            return EventManager == null || !_enabled || !_odpConfig.IsReady();
-        }
-
-        /// <summary>
-        /// Determines if the SegmentManager is ready to be used
-        /// </summary>
-        /// <returns>True if SegmentManager can fetch audience segments otherwise False</returns>
-        private bool SegmentManagerOrConfigNotReady()
-        {
-            return SegmentManager == null || !_enabled || !_odpConfig.IsReady();
-        }
-
-        /// <summary>
         /// Sends signal to stop Event Manager and clean up ODP Manager use
         /// </summary>
         public void Dispose()
@@ -291,6 +273,24 @@ namespace OptimizelySDK.Odp
 
                 return manager;
             }
+        }
+
+        /// <summary>
+        /// Determines if the EventManager is ready to be used
+        /// </summary>
+        /// <returns>True if EventManager can process events otherwise False</returns>
+        private bool EventManagerOrConfigNotReady()
+        {
+            return EventManager == null || !_enabled || !_odpConfig.IsReady();
+        }
+
+        /// <summary>
+        /// Determines if the SegmentManager is ready to be used
+        /// </summary>
+        /// <returns>True if SegmentManager can fetch audience segments otherwise False</returns>
+        private bool SegmentManagerOrConfigNotReady()
+        {
+            return SegmentManager == null || !_enabled || !_odpConfig.IsReady();
         }
     }
 }
