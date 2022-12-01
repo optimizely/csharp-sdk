@@ -80,6 +80,18 @@ namespace OptimizelySDK.Tests.OdpTests
         }
 
         [Test]
+        public void ShouldNotEqualIfCaseDifferenceInApiKey()
+        {
+            const string caseDifferenceInFirstLetterOfApiKey = "urAp1k3Y";
+            ;
+            var apiKeyCaseDifferentConfig =
+                new OdpConfig(caseDifferenceInFirstLetterOfApiKey, API_HOST, segmentsToCheck);
+
+            Assert.IsFalse(_goodOdpConfig.Equals(apiKeyCaseDifferentConfig));
+            Assert.IsFalse(apiKeyCaseDifferentConfig.Equals(_goodOdpConfig));
+        }
+
+        [Test]
         public void ShouldEqualDespiteCaseDifferenceInApiHost()
         {
             var apiHostUpperCasedConfig =
