@@ -111,13 +111,6 @@ namespace OptimizelySDK.Odp
                 return;
             }
 
-            if (!EventManager.IsStarted)
-            {
-                _logger.Log(LogLevel.DEBUG,
-                    "ODP identify event not dispatched (ODP not integrated).");
-                return;
-            }
-
             EventManager.IdentifyUser(userId);
         }
 
@@ -134,14 +127,7 @@ namespace OptimizelySDK.Odp
         {
             if (EventManagerOrConfigNotReady())
             {
-                _logger.Log(LogLevel.DEBUG, "ODP event not dispatched (ODP disabled).");
-                return;
-            }
-
-            if (!EventManager.IsStarted)
-            {
-                _logger.Log(LogLevel.DEBUG,
-                    "ODP event not dispatched (ODP not integrated).");
+                _logger.Log(LogLevel.ERROR, "ODP event not dispatched (ODP disabled).");
                 return;
             }
 
@@ -230,20 +216,33 @@ namespace OptimizelySDK.Odp
             /// <returns>OdpManager instance</returns>
             public OdpManager Build(bool asEnabled = true)
             {
+                _logger = _logger ?? new DefaultLogger();
+                _errorHandler = _errorHandler ?? new NoOpErrorHandler();
+
+                if (_odpConfig == null)
+                {
+                    _logger.Log(LogLevel.ERROR, "ODP Config via WithOdpConfig() required.");
+                    return null;
+                }
+
                 var manager = new OdpManager
                 {
                     _odpConfig = _odpConfig,
-                    _logger = _logger ?? new NoOpLogger(),
+                    _logger = _logger,
                     _enabled = asEnabled,
                 };
 
-                _errorHandler = _errorHandler ?? new NoOpErrorHandler();
+                if (!manager._enabled)
+                {
+                    return manager;
+                }
 
                 if (_eventManager == null)
                 {
                     var eventApiManager = new OdpEventApiManager(_logger, _errorHandler);
 
-                    manager.EventManager = new OdpEventManager.Builder().WithOdpConfig(_odpConfig).
+                    manager.EventManager = new OdpEventManager.Builder().
+                        WithOdpConfig(_odpConfig).
                         WithOdpEventApiManager(eventApiManager).
                         WithLogger(_logger).
                         WithErrorHandler(_errorHandler).

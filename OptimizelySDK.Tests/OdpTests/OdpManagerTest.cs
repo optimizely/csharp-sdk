@@ -206,10 +206,7 @@ namespace OptimizelySDK.Tests.OdpTests
 
             _mockOdpEventManager.Verify(e => e.SendEvent(It.IsAny<OdpEvent>()), Times.Once);
             _mockLogger.Verify(l =>
-                l.Log(LogLevel.DEBUG, "ODP event not dispatched (ODP disabled)."), Times.Never);
-            _mockLogger.Verify(l =>
-                    l.Log(LogLevel.DEBUG, "ODP event not dispatched (ODP not integrated)."),
-                Times.Never);
+                l.Log(LogLevel.ERROR, "ODP event not dispatched (ODP disabled)."), Times.Never);
 
             _mockOdpEventManager.ResetCalls();
             _mockLogger.ResetCalls();
@@ -222,10 +219,7 @@ namespace OptimizelySDK.Tests.OdpTests
 
             _mockOdpEventManager.Verify(e => e.SendEvent(It.IsAny<OdpEvent>()), Times.Never);
             _mockLogger.Verify(l =>
-                l.Log(LogLevel.DEBUG, "ODP event not dispatched (ODP disabled)."), Times.Once);
-            _mockLogger.Verify(l =>
-                    l.Log(LogLevel.DEBUG, "ODP event not dispatched (ODP not integrated)."),
-                Times.Never);
+                l.Log(LogLevel.ERROR, "ODP event not dispatched (ODP disabled)."), Times.Once);
         }
 
         [Test]
@@ -267,24 +261,6 @@ namespace OptimizelySDK.Tests.OdpTests
 
             _mockLogger.Verify(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()), Times.Never);
             _mockOdpEventManager.Verify(e => e.IdentifyUser(It.IsAny<string>()), Times.Once);
-        }
-
-        [Test]
-        public void ShouldNotIdentifyUserWhenOdpNotIntegrated()
-        {
-            _mockOdpEventManager.Setup(e => e.IdentifyUser(It.IsAny<string>()));
-            _mockOdpEventManager.Setup(e => e.IsStarted).Returns(false);
-            var manager = new OdpManager.Builder().WithOdpConfig(_odpConfig).
-                WithEventManager(_mockOdpEventManager.Object).
-                WithLogger(_mockLogger.Object).
-                Build();
-
-            manager.IdentifyUser(VALID_FS_USER_ID);
-            manager.Dispose();
-
-            _mockLogger.Verify(l => l.Log(LogLevel.DEBUG,
-                "ODP identify event not dispatched (ODP not integrated)."));
-            _mockOdpEventManager.Verify(e => e.IdentifyUser(It.IsAny<string>()), Times.Never);
         }
 
         [Test]
@@ -336,7 +312,7 @@ namespace OptimizelySDK.Tests.OdpTests
             manager.Dispose();
 
             _mockLogger.Verify(l =>
-                l.Log(LogLevel.DEBUG, "ODP event not dispatched (ODP disabled)."), Times.Once);
+                l.Log(LogLevel.ERROR, "ODP event not dispatched (ODP disabled)."), Times.Once);
             _mockOdpEventManager.Verify(e => e.SendEvent(It.IsAny<OdpEvent>()), Times.Never);
         }
     }

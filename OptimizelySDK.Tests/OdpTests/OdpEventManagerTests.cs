@@ -480,9 +480,6 @@ namespace OptimizelySDK.Tests.OdpTests
         [Test]
         public void ShouldApplyUpdatedOdpConfigurationWhenAvailable()
         {
-            var apiKeyCollector = new List<string>();
-            var apiHostCollector = new List<string>();
-            var segmentsToCheckCollector = new List<List<string>>();
             var apiKey = "testing-api-key";
             var apiHost = "https://some.other.example.com";
             var segmentsToCheck = new List<string>
@@ -490,20 +487,15 @@ namespace OptimizelySDK.Tests.OdpTests
                 "empty-cart",
                 "1-item-cart",
             };
-            var mockOdpConfig = new Mock<OdpConfig>(API_KEY, API_HOST, segmentsToCheck);
-            mockOdpConfig.Setup(m => m.Update(Capture.In(apiKeyCollector),
-                Capture.In(apiHostCollector), Capture.In(segmentsToCheckCollector)));
             var differentOdpConfig = new OdpConfig(apiKey, apiHost, segmentsToCheck);
-            var eventManager = new OdpEventManager.Builder().WithOdpConfig(mockOdpConfig.Object).
+            var eventManager = new OdpEventManager.Builder().WithOdpConfig(_odpConfig).
                 WithOdpEventApiManager(_mockApiManager.Object).
                 WithLogger(_mockLogger.Object).
                 Build();
 
             eventManager.UpdateSettings(differentOdpConfig);
 
-            Assert.AreEqual(apiKey, apiKeyCollector[0]);
-            Assert.AreEqual(apiHost, apiHostCollector[0]);
-            Assert.AreEqual(segmentsToCheck, segmentsToCheckCollector[0]);
+            Assert.IsFalse(_odpConfig.Equals(eventManager._readOdpConfigForTesting()));
         }
 
         private static OdpEvent MakeEvent(int id) =>

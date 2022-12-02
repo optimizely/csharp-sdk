@@ -349,7 +349,7 @@ namespace OptimizelySDK.Odp
         /// <param name="odpConfig">Configuration object containing new values</param>
         public void UpdateSettings(OdpConfig odpConfig)
         {
-            _odpConfig.Update(odpConfig.ApiKey, odpConfig.ApiHost, odpConfig.SegmentsToCheck);
+            _odpConfig = odpConfig;
         }
 
         /// <summary>
@@ -517,6 +517,11 @@ namespace OptimizelySDK.Odp
 
                 return manager;
             }
+        }
+
+        public OdpConfig _readOdpConfigForTesting()
+        {
+            return _odpConfig;
         }
     }
 }

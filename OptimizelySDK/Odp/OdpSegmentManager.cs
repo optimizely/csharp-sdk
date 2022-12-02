@@ -40,7 +40,7 @@ namespace OptimizelySDK.Odp
         /// <summary>
         /// ODP configuration containing the connection parameters
         /// </summary>
-        private readonly OdpConfig _odpConfig;
+        private OdpConfig _odpConfig;
 
         /// <summary>
         /// Cached segments 
@@ -149,7 +149,7 @@ namespace OptimizelySDK.Odp
         /// <param name="odpConfig">New ODP Configuration to apply</param>
         public void UpdateSettings(OdpConfig odpConfig)
         {
-            _odpConfig.Update(odpConfig.ApiKey, odpConfig.ApiHost, odpConfig.SegmentsToCheck);
+            _odpConfig = odpConfig;
         }
 
         /// <summary>
