@@ -35,7 +35,7 @@ namespace OptimizelySDK.Odp
         /// <summary>
         /// Configuration used to communicate with ODP
         /// </summary>
-        private volatile OdpConfig _odpConfig;
+        private OdpConfig _odpConfig;
 
         /// <summary>
         /// Manager used to handle audience segment membership
@@ -69,11 +69,6 @@ namespace OptimizelySDK.Odp
 
             _odpConfig = newConfig;
 
-            // flush old events using old odp publicKey (if exists) before updating odp key.
-            // NOTE: It should be rare but possible that odp public key is changed for the same datafile (sdkKey).
-            // - Try to send all old events with the previous public key.
-            // - If it fails to flush all the old events here (network error), remaining events will be discarded.
-            EventManager.Flush();
             EventManager.UpdateSettings(_odpConfig);
 
             SegmentManager.ResetCache();
@@ -218,12 +213,7 @@ namespace OptimizelySDK.Odp
             {
                 _logger = _logger ?? new DefaultLogger();
                 _errorHandler = _errorHandler ?? new NoOpErrorHandler();
-
-                if (_odpConfig == null)
-                {
-                    _logger.Log(LogLevel.ERROR, "ODP Config via WithOdpConfig() required.");
-                    return null;
-                }
+                _odpConfig = _odpConfig ?? new OdpConfig();
 
                 var manager = new OdpManager
                 {

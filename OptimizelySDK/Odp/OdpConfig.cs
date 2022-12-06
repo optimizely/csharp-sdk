@@ -25,59 +25,25 @@ namespace OptimizelySDK.Odp
         /// <summary>
         /// Public API key for the ODP account from which the audience segments will be fetched (optional).
         /// </summary>
-        private volatile string _apiKey;
-
-        public string ApiKey
-        {
-            get
-            {
-                return _apiKey;
-            }
-            private set
-            {
-                _apiKey = value;
-            }
-        }
+        public string ApiKey { get; private set; }
 
         /// <summary>
         /// Host of ODP audience segments API.
         /// </summary>
-        private volatile string _apiHost;
-
-        public string ApiHost
-        {
-            get
-            {
-                return _apiHost;
-            }
-            private set
-            {
-                _apiHost = value;
-            }
-        }
+        public string ApiHost { get; private set; }
 
         /// <summary>
         /// All ODP segments used in the current datafile (associated with apiHost/apiKey).
         /// </summary>
-        private volatile List<string> _segmentsToCheck;
+        public List<string> SegmentsToCheck { get; private set; }
 
-        public List<string> SegmentsToCheck
+
+        public OdpConfig(string apiKey = null, string apiHost = null,
+            List<string> segmentsToCheck = null
+        )
         {
-            get
-            {
-                return _segmentsToCheck;
-            }
-
-            private set
-            {
-                _segmentsToCheck = value;
-            }
-        }
-
-        public OdpConfig(string apiKey, string apiHost, List<string> segmentsToCheck)
-        {
-            ApiKey = apiKey;
-            ApiHost = apiHost;
+            ApiKey = apiKey ?? string.Empty;
+            ApiHost = apiHost ?? string.Empty;
             SegmentsToCheck = segmentsToCheck ?? new List<string>(0);
         }
 
