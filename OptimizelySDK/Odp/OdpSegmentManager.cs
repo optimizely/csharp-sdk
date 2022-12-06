@@ -40,7 +40,7 @@ namespace OptimizelySDK.Odp
         /// <summary>
         /// ODP configuration containing the connection parameters
         /// </summary>
-        private OdpConfig _odpConfig;
+        private volatile OdpConfig _odpConfig;
 
         /// <summary>
         /// Cached segments 

@@ -32,7 +32,7 @@ namespace OptimizelySDK.Odp
     /// </summary>
     public class OdpEventManager : IOdpEventManager, IDisposable
     {
-        private OdpConfig _odpConfig;
+        private volatile OdpConfig _odpConfig;
         private IOdpEventApiManager _odpEventApiManager;
         private int _batchSize;
         private TimeSpan _flushInterval;
