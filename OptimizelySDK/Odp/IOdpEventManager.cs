@@ -61,5 +61,15 @@ namespace OptimizelySDK.Odp
         /// </summary>
         /// <param name="odpConfig">Configuration object containing new values</param>
         void UpdateSettings(OdpConfig odpConfig);
+
+        /// <summary>
+        /// Indicates the ODP Event Manager has been stopped and disposed 
+        /// </summary>
+        bool Disposed { get; }
+
+        /// <summary>
+        /// Indicates the ODP Event Manager instance is in a running state
+        /// </summary>
+        bool IsStarted { get; }
     }
 }

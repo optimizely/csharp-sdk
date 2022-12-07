@@ -14,90 +14,37 @@
  * limitations under the License.
  */
 
+using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace OptimizelySDK.Odp
 {
-    public class OdpConfig
+    public class OdpConfig : IEquatable<OdpConfig>
     {
         /// <summary>
         /// Public API key for the ODP account from which the audience segments will be fetched (optional).
         /// </summary>
-        private volatile string _apiKey;
-
-        public string ApiKey
-        {
-            get
-            {
-                return _apiKey;
-            }
-            private set
-            {
-                _apiKey = value;
-            }
-        }
+        public string ApiKey { get; private set; }
 
         /// <summary>
         /// Host of ODP audience segments API.
         /// </summary>
-        private volatile string _apiHost;
-
-        public string ApiHost
-        {
-            get
-            {
-                return _apiHost;
-            }
-            private set
-            {
-                _apiHost = value;
-            }
-        }
+        public string ApiHost { get; private set; }
 
         /// <summary>
         /// All ODP segments used in the current datafile (associated with apiHost/apiKey).
         /// </summary>
-        private volatile List<string> _segmentsToCheck;
+        public List<string> SegmentsToCheck { get; private set; }
 
-        public List<string> SegmentsToCheck
+
+        public OdpConfig(string apiKey = null, string apiHost = null,
+            List<string> segmentsToCheck = null
+        )
         {
-            get
-            {
-                return _segmentsToCheck;
-            }
-
-            private set
-            {
-                _segmentsToCheck = value;
-            }
-        }
-
-        public OdpConfig(string apiKey, string apiHost, List<string> segmentsToCheck)
-        {
-            ApiKey = apiKey;
-            ApiHost = apiHost;
+            ApiKey = apiKey ?? string.Empty;
+            ApiHost = apiHost ?? string.Empty;
             SegmentsToCheck = segmentsToCheck ?? new List<string>(0);
-        }
-
-        /// <summary>
-        /// Update the ODP configuration details
-        /// </summary>
-        /// <param name="apiKey">Public API key for the ODP account</param>
-        /// <param name="apiHost">Host of ODP audience segments API</param>
-        /// <param name="segmentsToCheck">Audience segments</param>
-        /// <returns>true if configuration was updated successfully otherwise false</returns>
-        public virtual bool Update(string apiKey, string apiHost, List<string> segmentsToCheck)
-        {
-            if (ApiKey == apiKey && ApiHost == apiHost && SegmentsToCheck == segmentsToCheck)
-            {
-                return false;
-            }
-
-            ApiKey = apiKey;
-            ApiHost = apiHost;
-            SegmentsToCheck = segmentsToCheck;
-
-            return true;
         }
 
         /// <summary>
@@ -116,6 +63,35 @@ namespace OptimizelySDK.Odp
         public bool HasSegments()
         {
             return SegmentsToCheck?.Count > 0;
+        }
+
+        /// <summary>
+        /// Determine equality between two OdpConfig objects based on case-insensitive value comparisons
+        /// </summary>
+        /// <param name="otherConfig">OdpConfig object to compare current instance against</param>
+        /// <returns>True if equal otherwise False</returns>
+        public bool Equals(OdpConfig otherConfig)
+        {
+            // less expensive equality checks first
+            if (otherConfig == null ||
+                !string.Equals(ApiKey, otherConfig.ApiKey,
+                    StringComparison.Ordinal) || // case-matters
+                !string.Equals(ApiHost, otherConfig.ApiHost, StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+
+            if (SegmentsToCheck == null ||
+                otherConfig.SegmentsToCheck == null ||
+                SegmentsToCheck.Count != otherConfig.SegmentsToCheck.Count)
+            {
+                return false;
+            }
+
+            return SegmentsToCheck.TrueForAll(
+                segment =>
+                    otherConfig.SegmentsToCheck.Contains(segment,
+                        StringComparer.OrdinalIgnoreCase));
         }
     }
 }

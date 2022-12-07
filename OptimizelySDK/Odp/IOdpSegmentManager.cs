@@ -31,5 +31,16 @@ namespace OptimizelySDK.Odp
         /// <param name="options">An array of OptimizelySegmentOption used to ignore and/or reset the cache.</param>
         /// <returns>Qualified segments for the user from the cache or the ODP server if the cache is empty.</returns>
         List<string> FetchQualifiedSegments(string fsUserId, List<OdpSegmentOption> options = null);
+
+        /// <summary>
+        /// Update the ODP configuration settings being used by the Segment Manager
+        /// </summary>
+        /// <param name="odpConfig">New ODP Configuration to apply</param>
+        void UpdateSettings(OdpConfig odpConfig);
+
+        /// <summary>
+        /// Reset/clear the segments cache
+        /// </summary>
+        void ResetCache();
     }
 }

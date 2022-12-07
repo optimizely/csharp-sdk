@@ -40,7 +40,7 @@ namespace OptimizelySDK.Odp
         /// <summary>
         /// ODP configuration containing the connection parameters
         /// </summary>
-        private readonly OdpConfig _odpConfig;
+        private volatile OdpConfig _odpConfig;
 
         /// <summary>
         /// Cached segments 
@@ -141,6 +141,23 @@ namespace OptimizelySDK.Odp
         private static string GetCacheKey(string userKey, string userValue)
         {
             return $"{userKey}-$-{userValue}";
+        }
+
+        /// <summary>
+        /// Update the ODP configuration settings being used by the Segment Manager
+        /// </summary>
+        /// <param name="odpConfig">New ODP Configuration to apply</param>
+        public void UpdateSettings(OdpConfig odpConfig)
+        {
+            _odpConfig = odpConfig;
+        }
+
+        /// <summary>
+        /// Reset/clear the segments cache
+        /// </summary>
+        public void ResetCache()
+        {
+            _segmentsCache.Reset();
         }
     }
 }
