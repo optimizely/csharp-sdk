@@ -35,7 +35,7 @@ namespace OptimizelySDK.Odp
         /// <summary>
         /// Configuration used to communicate with ODP
         /// </summary>
-        private OdpConfig _odpConfig;
+        private volatile OdpConfig _odpConfig;
 
         /// <summary>
         /// Manager used to handle audience segment membership
