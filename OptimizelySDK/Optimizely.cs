@@ -1366,6 +1366,17 @@ namespace OptimizelySDK
         #endregion FeatureFlag APIs
 
         /// <summary>
+        /// Attempts to fetch and return a list of a user's qualified segments.
+        /// </summary>
+        /// <param name="userId">FS User ID</param>
+        /// <param name="options">Options used during segment cache handling</param>
+        /// <returns>Qualified segments for the user from the cache or the ODP server</returns>
+        public string[] FetchQualifiedSegments(string userId, List<OdpSegmentOption> options)
+        {
+            return OdpManager.FetchQualifiedSegments(userId, options);
+        }
+
+        /// <summary>
         /// Validate all string inputs are not null or empty.
         /// </summary>
         /// <param name="inputs">Array Hash input types and values</param>
