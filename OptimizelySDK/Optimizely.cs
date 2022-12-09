@@ -135,7 +135,7 @@ namespace OptimizelySDK
             bool skipJsonValidation = false,
             EventProcessor eventProcessor = null,
             OptimizelyDecideOption[] defaultDecideOptions = null,
-            OdpManager odpManager = default
+            OdpManager odpManager = null
         )
         {
             try
@@ -219,7 +219,7 @@ namespace OptimizelySDK
                 Logger);
             DefaultDecideOptions = defaultDecideOptions ?? new OptimizelyDecideOption[]
                 { };
-            OdpManager = odpManager ?? new OdpManager();
+            OdpManager = odpManager;
 
             if (odpManager != null)
             {
@@ -1373,7 +1373,7 @@ namespace OptimizelySDK
         /// <returns>Qualified segments for the user from the cache or the ODP server</returns>
         public string[] FetchQualifiedSegments(string userId, List<OdpSegmentOption> segmentOptions)
         {
-            return OdpManager.FetchQualifiedSegments(userId, segmentOptions);
+            return OdpManager?.FetchQualifiedSegments(userId, segmentOptions);
         }
 
         /// <summary>
@@ -1382,7 +1382,7 @@ namespace OptimizelySDK
         /// <param name="userId">FS User ID to send</param>
         public void IdentifyUser(string userId)
         {
-            OdpManager.IdentifyUser(userId);
+            OdpManager?.IdentifyUser(userId);
         }
 
         /// <summary>
