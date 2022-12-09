@@ -77,13 +77,13 @@ namespace OptimizelySDK
 
             if (shouldIdentifyUser)
             {
-                optimizely.IdentifyUser(userId);
+                optimizely.IdentifyUser(UserId);
             }
         }
 
         private OptimizelyUserContext Copy() =>
             new OptimizelyUserContext(Optimizely, UserId, GetAttributes(),
-                GetForcedDecisionsStore(), GetQualifiedSegments(), ErrorHandler, Logger);
+                GetForcedDecisionsStore(), GetQualifiedSegments(), ErrorHandler, Logger, false);
 
         /// <summary>
         /// Returns Optimizely instance associated with the UserContext.

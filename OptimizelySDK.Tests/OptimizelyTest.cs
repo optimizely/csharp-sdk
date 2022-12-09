@@ -32,7 +32,7 @@ using OptimizelySDK.Tests.NotificationTests;
 using OptimizelySDK.Utils;
 using OptimizelySDK.Config;
 using OptimizelySDK.Event.Entity;
-using OptimizelySDK.OptlyConfig;
+using OptimizelySDK.Odp;
 using System.Globalization;
 using System.Threading;
 using OptimizelySDK.Tests.Utils;
@@ -102,7 +102,7 @@ namespace OptimizelySDK.Tests
                 SkipJsonValidation = false,
             };
 
-            OptimizelyMock = new Mock<Optimizely>(TestData.Datafile, EventDispatcherMock.Object, LoggerMock.Object, ErrorHandlerMock.Object, null, false, null, null)
+            OptimizelyMock = new Mock<Optimizely>(TestData.Datafile, EventDispatcherMock.Object, LoggerMock.Object, ErrorHandlerMock.Object, null, false, null, null, null)
             {
                 CallBase = true
             };
@@ -174,6 +174,8 @@ namespace OptimizelySDK.Tests
 
             public OptimizelyDecideOption[] DefaultDecideOptions { get; set; }
 
+            public OdpManager OdpManager { get; set; }
+
             public PrivateObject CreatePrivateOptimizely()
             {
                 return new PrivateObject(typeof(Optimizely), ParameterTypes,
@@ -186,7 +188,8 @@ namespace OptimizelySDK.Tests
                         UserProfileService,
                         SkipJsonValidation,
                         EventProcessor,
-                        DefaultDecideOptions
+                        DefaultDecideOptions,
+                        OdpManager,
                     });
             }
         }
