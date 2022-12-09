@@ -20,6 +20,7 @@ using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Entity;
 using OptimizelySDK.Odp;
 using OptimizelySDK.OptimizelyDecisions;
+using System;
 using System.Linq;
 
 namespace OptimizelySDK
@@ -62,7 +63,8 @@ namespace OptimizelySDK
 
         public OptimizelyUserContext(Optimizely optimizely, string userId,
             UserAttributes userAttributes, ForcedDecisionsStore forcedDecisionsStore,
-            List<string> qualifiedSegments, IErrorHandler errorHandler, ILogger logger
+            List<string> qualifiedSegments, IErrorHandler errorHandler, ILogger logger,
+            bool shouldIdentifyUser = true
         )
         {
             ErrorHandler = errorHandler;
@@ -72,6 +74,11 @@ namespace OptimizelySDK
             ForcedDecisionsStore = forcedDecisionsStore ?? new ForcedDecisionsStore();
             UserId = userId;
             QualifiedSegments = qualifiedSegments ?? new List<string>();
+
+            if (shouldIdentifyUser)
+            {
+                optimizely.IdentifyUser(userId);
+            }
         }
 
         private OptimizelyUserContext Copy() =>
@@ -140,22 +147,28 @@ namespace OptimizelySDK
         /// <summary>
         /// Fetch all qualified segments for the user context.
         /// </summary>
-        /// <param name="userId"></param>
-        /// <param name="segmentOptions"></param>
-        /// <returns></returns>
+        /// <param name="userId">FS User ID</param>
+        /// <param name="callback">Callback function to invoke when results are available</param>
+        /// <param name="segmentOptions">Options used during segment cache handling</param>
+        /// <returns>True if ODP segments were fetched successfully otherwise False</returns>
         public bool FetchQualifiedSegments(string userId,
+            Action<bool> callback = null,
             List<OdpSegmentOption> segmentOptions = null
         )
         {
-            var segments =
-                Optimizely.FetchQualifiedSegments(userId,
-                    segmentOptions ?? new List<OdpSegmentOption>(0));
-            if (segments != null)
+            var segments = Optimizely.FetchQualifiedSegments(userId,
+                segmentOptions ?? new List<OdpSegmentOption>(0));
+
+            var success = segments != null;
+
+            if (success)
             {
                 SetQualifiedSegments(segments.ToList());
             }
 
-            return segments != null;
+            callback?.Invoke(success);
+
+            return success;
         }
 
         /// <summary>

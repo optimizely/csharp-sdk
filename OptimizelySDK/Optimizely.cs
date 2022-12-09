@@ -1369,11 +1369,20 @@ namespace OptimizelySDK
         /// Attempts to fetch and return a list of a user's qualified segments.
         /// </summary>
         /// <param name="userId">FS User ID</param>
-        /// <param name="options">Options used during segment cache handling</param>
+        /// <param name="segmentOptions">Options used during segment cache handling</param>
         /// <returns>Qualified segments for the user from the cache or the ODP server</returns>
-        public string[] FetchQualifiedSegments(string userId, List<OdpSegmentOption> options)
+        public string[] FetchQualifiedSegments(string userId, List<OdpSegmentOption> segmentOptions)
         {
-            return OdpManager.FetchQualifiedSegments(userId, options);
+            return OdpManager.FetchQualifiedSegments(userId, segmentOptions);
+        }
+
+        /// <summary>
+        /// Send identification event to Optimizely Data Platform
+        /// </summary>
+        /// <param name="userId">FS User ID to send</param>
+        public void IdentifyUser(string userId)
+        {
+            OdpManager.IdentifyUser(userId);
         }
 
         /// <summary>
@@ -1456,6 +1465,8 @@ namespace OptimizelySDK
             (EventProcessor as IDisposable)?.Dispose();
 
             ProjectConfigManager = null;
+
+            OdpManager?.Dispose();
         }
     }
 }

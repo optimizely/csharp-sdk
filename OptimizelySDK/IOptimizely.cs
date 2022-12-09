@@ -158,6 +158,18 @@ namespace OptimizelySDK
 
         #endregion
 
-        string[] FetchQualifiedSegments(string userId, List<OdpSegmentOption> options);
+        /// <summary>
+        /// Attempts to fetch and return a list of a user's qualified segments.
+        /// </summary>
+        /// <param name="userId">FS User ID</param>
+        /// <param name="segmentOptions">Options used during segment cache handling</param>
+        /// <returns>Qualified segments for the user from the cache or the ODP server</returns>
+        string[] FetchQualifiedSegments(string userId, List<OdpSegmentOption> segmentOptions);
+
+        /// <summary>
+        /// Send identification event to ODP for a given full-stack User ID
+        /// </summary>
+        /// <param name="userId">FS User ID to send</param>
+        void IdentifyUser(string userId);
     }
 }
