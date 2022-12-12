@@ -48,7 +48,6 @@ namespace OptimizelySDK
 
         private ForcedDecisionsStore ForcedDecisionsStore { get; set; }
 
-
         public OptimizelyUserContext(Optimizely optimizely, string userId,
             UserAttributes userAttributes, IErrorHandler errorHandler, ILogger logger
         ) :

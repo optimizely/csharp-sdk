@@ -29,6 +29,7 @@ using System.Reflection;
 using OptimizelySDK.Config;
 using OptimizelySDK.Event;
 using OptimizelySDK.Odp;
+using OptimizelySDK.Odp.Entity;
 using OptimizelySDK.OptlyConfig;
 using OptimizelySDK.OptimizelyDecisions;
 using System.Linq;
@@ -1383,6 +1384,27 @@ namespace OptimizelySDK
         public void IdentifyUser(string userId)
         {
             OdpManager?.IdentifyUser(userId);
+        }
+
+       
+        /// <summary>
+        /// Add event to queue for sending to ODP
+        /// </summary>
+        /// <param name="type">Type of event (typically `fullstack` from server-side SDK events)</param>
+        /// <param name="action">Subcategory of the event type</param>
+        /// <param name="identifiers">Key-value map of user identifiers</param>
+        /// <param name="data">Event data in a key-value pair format</param>
+        public void SendOdpEvent(string type, string action, Dictionary<string, string> identifiers,
+            Dictionary<string, object> data
+        )
+        {
+            if (OdpManager == null)
+            {
+                Logger.Log(LogLevel.ERROR, Constants.ODP_NOT_ENABLED_MESSAGE);
+                return;
+            }
+
+            OdpManager.SendEvent(type, action, identifiers, data);
         }
 
         /// <summary>
