@@ -29,7 +29,6 @@ using System.Reflection;
 using OptimizelySDK.Config;
 using OptimizelySDK.Event;
 using OptimizelySDK.Odp;
-using OptimizelySDK.Odp.Entity;
 using OptimizelySDK.OptlyConfig;
 using OptimizelySDK.OptimizelyDecisions;
 using System.Linq;
@@ -220,21 +219,23 @@ namespace OptimizelySDK
                 Logger);
             DefaultDecideOptions = defaultDecideOptions ?? new OptimizelyDecideOption[]
                 { };
-            OdpManager = odpManager;
+            OdpManager = odpManager ?? new OdpManager.Builder().
+                WithCacheSize(Constants.DEFAULT_MAX_CACHE_SIZE).
+                WithCacheTimeout(Constants.DEFAULT_CACHE_SECONDS).
+                WithLogger(Logger).
+                WithErrorHandler(ErrorHandler).
+                Build(/*TODO: set enabled/disabled*/);
 
-            if (odpManager != null)
+            OdpManager.EventManager.Start();
+
+            if (IsValid)
             {
-                odpManager.EventManager.Start();
-
-                if (IsValid)
-                {
-                    UpdateOdpSettings();
-                }
-
-                NotificationCenter.AddNotification(
-                    NotificationCenter.NotificationType.OptimizelyConfigUpdate,
-                    UpdateOdpSettings);
+                UpdateOdpSettings();
             }
+
+            NotificationCenter.AddNotification(
+                NotificationCenter.NotificationType.OptimizelyConfigUpdate,
+                UpdateOdpSettings);
         }
 
         private void UpdateOdpSettings()
@@ -1385,8 +1386,7 @@ namespace OptimizelySDK
         {
             OdpManager?.IdentifyUser(userId);
         }
-
-       
+        
         /// <summary>
         /// Add event to queue for sending to ODP
         /// </summary>

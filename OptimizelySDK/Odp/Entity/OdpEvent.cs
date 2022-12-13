@@ -54,7 +54,7 @@ namespace OptimizelySDK.Odp.Entity
             Dictionary<string, object> data = null
         )
         {
-            Type = type;
+            Type = type ?? Constants.ODP_EVENT_TYPE;
             Action = action;
             Identifiers = identifiers ?? new Dictionary<string, string>();
             Data = data ?? new Dictionary<string, object>();
