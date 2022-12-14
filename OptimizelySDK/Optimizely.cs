@@ -29,6 +29,7 @@ using System.Reflection;
 using OptimizelySDK.Config;
 using OptimizelySDK.Event;
 using OptimizelySDK.Odp;
+using OptimizelySDK.Odp.Entity;
 using OptimizelySDK.OptlyConfig;
 using OptimizelySDK.OptimizelyDecisions;
 using System.Linq;
@@ -66,6 +67,8 @@ namespace OptimizelySDK
         private OptimizelyDecideOption[] DefaultDecideOptions;
 
         private OdpManager OdpManager;
+
+        private OptimizelySdkSettings SdkSettings;
 
         /// <summary>
         /// It returns true if the ProjectConfig is valid otherwise false.
@@ -126,7 +129,7 @@ namespace OptimizelySDK
         /// <param name="skipJsonValidation">boolean representing whether JSON schema validation needs to be performed</param>
         /// <param name="eventProcessor">EventProcessor</param>
         /// <param name="defaultDecideOptions">Default Decide options</param>
-        /// <param name="odpManager">Optimizely Data Platform Manager</param>
+        /// <param name="sdkSettings">Optional settings for SDK configuration</param>
         public Optimizely(string datafile,
             IEventDispatcher eventDispatcher = null,
             ILogger logger = null,
@@ -135,13 +138,13 @@ namespace OptimizelySDK
             bool skipJsonValidation = false,
             EventProcessor eventProcessor = null,
             OptimizelyDecideOption[] defaultDecideOptions = null,
-            OdpManager odpManager = null
+            OptimizelySdkSettings sdkSettings = null
         )
         {
             try
             {
                 InitializeComponents(eventDispatcher, logger, errorHandler, userProfileService,
-                    null, eventProcessor, defaultDecideOptions, odpManager);
+                    null, eventProcessor, defaultDecideOptions, sdkSettings);
 
                 if (ValidateInputs(datafile, skipJsonValidation))
                 {
@@ -177,7 +180,7 @@ namespace OptimizelySDK
         /// <param name="userProfileService">User profile service.</param>
         /// <param name="eventProcessor">EventProcessor</param>
         /// <param name="defaultDecideOptions">Default Decide options</param>
-        /// <param name="odpManager">Optimizely Data Platform Manager</param>
+        /// <param name="sdkSettings">Optional settings for SDK configuration</param>
         public Optimizely(ProjectConfigManager configManager,
             NotificationCenter notificationCenter = null,
             IEventDispatcher eventDispatcher = null,
@@ -186,13 +189,13 @@ namespace OptimizelySDK
             UserProfileService userProfileService = null,
             EventProcessor eventProcessor = null,
             OptimizelyDecideOption[] defaultDecideOptions = null,
-            OdpManager odpManager = null
+            OptimizelySdkSettings sdkSettings = null
         )
         {
             ProjectConfigManager = configManager;
 
             InitializeComponents(eventDispatcher, logger, errorHandler, userProfileService,
-                notificationCenter, eventProcessor, defaultDecideOptions, odpManager);
+                notificationCenter, eventProcessor, defaultDecideOptions, sdkSettings);
         }
 
         private void InitializeComponents(IEventDispatcher eventDispatcher = null,
@@ -202,7 +205,7 @@ namespace OptimizelySDK
             NotificationCenter notificationCenter = null,
             EventProcessor eventProcessor = null,
             OptimizelyDecideOption[] defaultDecideOptions = null,
-            OdpManager odpManager = null
+            OptimizelySdkSettings sdkSettings = null
         )
         {
             Logger = logger ?? new NoOpLogger();
@@ -219,16 +222,17 @@ namespace OptimizelySDK
                 Logger);
             DefaultDecideOptions = defaultDecideOptions ?? new OptimizelyDecideOption[]
                 { };
-            OdpManager = odpManager ?? new OdpManager.Builder().
-                WithCacheSize(Constants.DEFAULT_MAX_CACHE_SIZE).
-                WithCacheTimeout(Constants.DEFAULT_CACHE_SECONDS).
+            SdkSettings = sdkSettings ?? new OptimizelySdkSettings();
+
+            OdpManager = new OdpManager.Builder().
+                WithCacheSize(SdkSettings.SegmentsCacheSize).
+                WithCacheTimeout(SdkSettings.SegmentsCacheTimeout).
                 WithLogger(Logger).
                 WithErrorHandler(ErrorHandler).
-                Build(/*TODO: set enabled/disabled*/);
-
+                Build(!SdkSettings.DisableOdp);
             OdpManager.EventManager.Start();
 
-            if (IsValid)
+            if (IsValid && !SdkSettings.DisableOdp)
             {
                 UpdateOdpSettings();
             }
@@ -240,17 +244,11 @@ namespace OptimizelySDK
 
         private void UpdateOdpSettings()
         {
-            if (OdpManager == null)
-            {
-                return;
-            }
-
-            var config = ProjectConfigManager?.GetConfig();
+            var config = ProjectConfigManager.GetConfig();
             if (config == null)
             {
                 return;
             }
-
             var optimizelyConfig =
                 new OptimizelyConfigService(config).GetOptimizelyConfig();
             var allSegments = optimizelyConfig.Audiences.Select(a => a.Name).ToList();
@@ -1375,7 +1373,7 @@ namespace OptimizelySDK
         /// <returns>Qualified segments for the user from the cache or the ODP server</returns>
         public string[] FetchQualifiedSegments(string userId, List<OdpSegmentOption> segmentOptions)
         {
-            return OdpManager?.FetchQualifiedSegments(userId, segmentOptions);
+            return OdpManager.FetchQualifiedSegments(userId, segmentOptions);
         }
 
         /// <summary>
@@ -1384,9 +1382,9 @@ namespace OptimizelySDK
         /// <param name="userId">FS User ID to send</param>
         public void IdentifyUser(string userId)
         {
-            OdpManager?.IdentifyUser(userId);
+            OdpManager.IdentifyUser(userId);
         }
-        
+
         /// <summary>
         /// Add event to queue for sending to ODP
         /// </summary>
@@ -1488,7 +1486,7 @@ namespace OptimizelySDK
 
             ProjectConfigManager = null;
 
-            OdpManager?.Dispose();
+            OdpManager.Dispose();
         }
     }
 }

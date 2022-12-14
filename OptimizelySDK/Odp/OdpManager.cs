@@ -235,6 +235,8 @@ namespace OptimizelySDK.Odp
 
                     manager.EventManager = new OdpEventManager.Builder().
                         WithOdpConfig(_odpConfig).
+                        WithBatchSize(_cacheSize).
+                        WithTimeoutInterval(TimeSpan.FromMilliseconds(_cacheTimeoutSeconds)).
                         WithOdpEventApiManager(eventApiManager).
                         WithLogger(_logger).
                         WithErrorHandler(_errorHandler).
@@ -244,6 +246,8 @@ namespace OptimizelySDK.Odp
                 {
                     manager.EventManager = _eventManager;
                 }
+
+                manager.EventManager.Start();
 
                 if (_segmentManager == null)
                 {
@@ -259,8 +263,6 @@ namespace OptimizelySDK.Odp
                 {
                     manager.SegmentManager = _segmentManager;
                 }
-
-                manager.EventManager.Start();
 
                 return manager;
             }

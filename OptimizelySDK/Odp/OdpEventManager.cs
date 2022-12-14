@@ -250,7 +250,7 @@ namespace OptimizelySDK.Odp
 
             _eventQueue.Add(_shutdownSignal);
 
-            if (!_executionThread.Join(_timeoutInterval))
+            if (_executionThread != null && !_executionThread.Join(_timeoutInterval))
             {
                 _logger.Log(LogLevel.ERROR,
                     $"Timeout exceeded attempting to close for {_timeoutInterval.Milliseconds} ms");

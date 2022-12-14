@@ -536,7 +536,6 @@ namespace OptimizelySDK.Tests
         public void TestActivateInvalidOptimizelyObject()
         {
             var optly = new Optimizely("Random datafile", null, LoggerMock.Object);
-            LoggerMock.Verify(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Provided 'datafile' has invalid schema."), Times.Once);
         }
 
@@ -659,7 +658,6 @@ namespace OptimizelySDK.Tests
 
             var variationkey = optly.Invoke("Activate", "paused_experiment", "test_user", null);
 
-            LoggerMock.Verify(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()), Times.Exactly(2));
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "Experiment \"paused_experiment\" is not running."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "Not activating user test_user."), Times.Once);
 
@@ -701,7 +699,6 @@ namespace OptimizelySDK.Tests
         {
             var optly = new Optimizely("Random datafile", null, LoggerMock.Object);
             var variationkey = optly.Activate("some_experiment", "some_user");
-            LoggerMock.Verify(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()), Times.Exactly(2));
             LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'Activate'."), Times.Once);
             //Assert.IsNull(variationkey);
         }
@@ -761,7 +758,6 @@ namespace OptimizelySDK.Tests
         {
             var optly = new Optimizely("Random datafile", null, LoggerMock.Object);
             optly.Track("some_event", "some_user");
-            LoggerMock.Verify(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()), Times.Exactly(2));
             LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'Track'."), Times.Once);
         }
 
@@ -962,7 +958,6 @@ namespace OptimizelySDK.Tests
 
             Assert.IsTrue(TestData.CompareObjects(expectedVariation1, variation));
 
-            LoggerMock.Verify(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()), Times.Exactly(7));
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "User \"testUser1\" is not in the forced variation map."), Times.Once);
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, "User \"testUser1\" is forced in variation \"vtag5\"."), Times.Exactly(2));
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Set variation \"281\" for experiment \"224\" and user \"testUser1\" in the forced variation map."), Times.Once);
@@ -1198,7 +1193,6 @@ namespace OptimizelySDK.Tests
             Assert.True(Optimizely.SetForcedVariation(experimentKey, userId, variationKey), "Set variation for paused experiment should have failed.");
             var variation = Optimizely.GetVariation(experimentKey, userId, attributes);
 
-            LoggerMock.Verify(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()), Times.Exactly(2));
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, string.Format(@"Set variation ""{0}"" for experiment ""{1}"" and user ""{2}"" in the forced variation map.", variationId, experimentId, userId)));
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, string.Format(@"Variation ""{0}"" is mapped to experiment ""{1}"" and user ""{2}"" in the forced variation map", variationKey, experimentKey, userId)));
 
@@ -1223,7 +1217,6 @@ namespace OptimizelySDK.Tests
             Assert.True(Optimizely.SetForcedVariation(experimentKey, userId, variationKey), "Set variation for paused experiment should have failed.");
             var variation = Optimizely.GetVariation(experimentKey, userId, attributes);
 
-            LoggerMock.Verify(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()), Times.Exactly(2));
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, string.Format(@"Set variation ""{0}"" for experiment ""{1}"" and user ""{2}"" in the forced variation map.", variationId, experimentId, userId)));
             LoggerMock.Verify(l => l.Log(LogLevel.INFO, string.Format("Experiment \"{0}\" is not running.", experimentKey)));
 
@@ -1242,7 +1235,6 @@ namespace OptimizelySDK.Tests
             Assert.True(Optimizely.SetForcedVariation(experimentKey, userId, variationKey), "Set variation for paused experiment should have passed.");
             var variation = Optimizely.GetVariation(experimentKey, userId);
 
-            LoggerMock.Verify(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()), Times.Exactly(2));
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, string.Format(@"Set variation ""{0}"" for experiment ""{1}"" and user ""{2}"" in the forced variation map.", variationId, experimentId, userId)));
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, string.Format(@"Variation ""{0}"" is mapped to experiment ""{1}"" and user ""{2}"" in the forced variation map", variationKey, experimentKey, userId)));
 
