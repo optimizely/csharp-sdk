@@ -232,7 +232,7 @@ namespace OptimizelySDK
                 Build(!SdkSettings.DisableOdp);
             OdpManager.EventManager.Start();
 
-            if (IsValid && !SdkSettings.DisableOdp)
+            if (!SdkSettings.DisableOdp)
             {
                 UpdateOdpSettings();
             }
@@ -244,7 +244,7 @@ namespace OptimizelySDK
 
         private void UpdateOdpSettings()
         {
-            var config = ProjectConfigManager.GetConfig();
+            var config = ProjectConfigManager?.GetConfig();
             if (config == null)
             {
                 return;
