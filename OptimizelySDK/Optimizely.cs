@@ -148,7 +148,7 @@ namespace OptimizelySDK
             EventProcessor eventProcessor = null,
             OptimizelyDecideOption[] defaultDecideOptions = null
 #if USE_ODP
-            ,OptimizelySdkSettings sdkSettings = null
+            , OptimizelySdkSettings sdkSettings = null
 #endif
         )
         {
@@ -205,7 +205,7 @@ namespace OptimizelySDK
             EventProcessor eventProcessor = null,
             OptimizelyDecideOption[] defaultDecideOptions = null
 #if USE_ODP
-            ,OptimizelySdkSettings sdkSettings = null
+            , OptimizelySdkSettings sdkSettings = null
 #endif
         )
         {
@@ -227,7 +227,7 @@ namespace OptimizelySDK
             EventProcessor eventProcessor = null,
             OptimizelyDecideOption[] defaultDecideOptions = null
 #if USE_ODP
-            ,OptimizelySdkSettings sdkSettings = null
+            , OptimizelySdkSettings sdkSettings = null
 #endif
         )
         {

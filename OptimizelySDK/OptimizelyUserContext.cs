@@ -71,7 +71,7 @@ namespace OptimizelySDK
             UserAttributes userAttributes, ForcedDecisionsStore forcedDecisionsStore,
             List<string> qualifiedSegments, IErrorHandler errorHandler, ILogger logger
 #if USE_ODP
-            ,bool shouldIdentifyUser = true
+            , bool shouldIdentifyUser = true
 #endif
         )
         {
@@ -97,7 +97,7 @@ namespace OptimizelySDK
 #if USE_ODP
                 , false
 #endif
-);
+            );
 
         /// <summary>
         /// Returns Optimizely instance associated with the UserContext.

@@ -14,28 +14,28 @@
  * limitations under the License.
  */
 
+using Moq;
+using NUnit.Framework;
+using OptimizelySDK.Bucketing;
+using OptimizelySDK.Config;
+using OptimizelySDK.Entity;
+using OptimizelySDK.ErrorHandler;
+using OptimizelySDK.Event;
+using OptimizelySDK.Event.Dispatcher;
+using OptimizelySDK.Event.Entity;
+using OptimizelySDK.Exceptions;
+using OptimizelySDK.Logger;
+using OptimizelySDK.Notifications;
+using OptimizelySDK.Odp;
+using OptimizelySDK.OptimizelyDecisions;
+using OptimizelySDK.Tests.NotificationTests;
+using OptimizelySDK.Tests.Utils;
+using OptimizelySDK.Tests.UtilsTests;
+using OptimizelySDK.Utils;
 using System;
 using System.Collections.Generic;
-using Moq;
-using OptimizelySDK.Logger;
-using OptimizelySDK.Event.Dispatcher;
-using OptimizelySDK.ErrorHandler;
-using OptimizelySDK.Exceptions;
-using OptimizelySDK.Event;
-using OptimizelySDK.Entity;
-using NUnit.Framework;
-using OptimizelySDK.Tests.UtilsTests;
-using OptimizelySDK.Bucketing;
-using OptimizelySDK.Notifications;
-using OptimizelySDK.Tests.NotificationTests;
-using OptimizelySDK.Utils;
-using OptimizelySDK.Config;
-using OptimizelySDK.Event.Entity;
-using OptimizelySDK.Odp;
 using System.Globalization;
 using System.Threading;
-using OptimizelySDK.Tests.Utils;
-using OptimizelySDK.OptimizelyDecisions;
 
 namespace OptimizelySDK.Tests
 {
