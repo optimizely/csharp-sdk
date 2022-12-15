@@ -183,7 +183,7 @@ namespace OptimizelySDK
         /// <summary>
         /// Array of ODP segments / audience names 
         /// </summary>
-        public string[] Segments { get; set; }
+        string[] Segments { get; set; }
 
         //========================= Getters ===========================
 
