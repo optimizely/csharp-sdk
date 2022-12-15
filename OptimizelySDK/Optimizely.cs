@@ -232,11 +232,6 @@ namespace OptimizelySDK
                 Build(!SdkSettings.DisableOdp);
             OdpManager.EventManager.Start();
 
-            if (!SdkSettings.DisableOdp)
-            {
-                UpdateOdpSettings();
-            }
-
             NotificationCenter.AddNotification(
                 NotificationCenter.NotificationType.OptimizelyConfigUpdate,
                 UpdateOdpSettings);
