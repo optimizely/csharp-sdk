@@ -3505,8 +3505,7 @@ namespace OptimizelySDK.Tests
                     DecisionReasons);
             var logEvent = new LogEvent("https://logx.optimizely.com/v1/events",
                 OptimizelyHelper.SingleParameter,
-                "POST", new Dictionary<string, string>
-                    { });
+                "POST", new Dictionary<string, string>());
 
             var optly = Helper.CreatePrivateOptimizely();
             var optStronglyTyped = optly.GetObject() as Optimizely;
@@ -5820,8 +5819,7 @@ namespace OptimizelySDK.Tests
         public void TestIsFeatureEnabledExcludeUserFromExperimentWithTypedAudiences()
         {
             var featureEnabled = OptimizelyWithTypedAudiences.IsFeatureEnabled("feat", "user1",
-                new UserAttributes
-                    { });
+                new UserAttributes());
             Assert.False(featureEnabled);
         }
 
@@ -6017,8 +6015,7 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestGetFeatureVariableIntegerReturnsDefaultValueWithComplexAudienceConditions()
         {
-            var userAttributes = new UserAttributes
-                { };
+            var userAttributes = new UserAttributes();
 
             // Should be excluded - no audiences match with no attributes.
             var value =

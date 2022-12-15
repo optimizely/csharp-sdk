@@ -146,21 +146,23 @@ namespace OptimizelySDK
             UserProfileService userProfileService = null,
             bool skipJsonValidation = false,
             EventProcessor eventProcessor = null,
-            OptimizelyDecideOption[] defaultDecideOptions = null
 #if USE_ODP
-            , OptimizelySdkSettings sdkSettings = null
+            OptimizelyDecideOption[] defaultDecideOptions = null,
+            OptimizelySdkSettings sdkSettings = null
+#else
+            OptimizelyDecideOption[] defaultDecideOptions = null
 #endif
         )
         {
             try
             {
-                InitializeComponents(eventDispatcher, logger, errorHandler, userProfileService,
-                    null, eventProcessor, defaultDecideOptions
 #if USE_ODP
-                    , sdkSettings
+                InitializeComponents(eventDispatcher, logger, errorHandler, userProfileService,
+                    null, eventProcessor, defaultDecideOptions, sdkSettings);
+#else
+                InitializeComponents(eventDispatcher, logger, errorHandler, userProfileService,
+                                null, eventProcessor, defaultDecideOptions);
 #endif
-                );
-
                 if (ValidateInputs(datafile, skipJsonValidation))
                 {
                     var config = DatafileProjectConfig.Create(datafile, Logger, ErrorHandler);
@@ -203,20 +205,22 @@ namespace OptimizelySDK
             IErrorHandler errorHandler = null,
             UserProfileService userProfileService = null,
             EventProcessor eventProcessor = null,
-            OptimizelyDecideOption[] defaultDecideOptions = null
 #if USE_ODP
-            , OptimizelySdkSettings sdkSettings = null
+            OptimizelyDecideOption[] defaultDecideOptions = null,
+            OptimizelySdkSettings sdkSettings = null
+#else
+            OptimizelyDecideOption[] defaultDecideOptions = null
 #endif
         )
         {
             ProjectConfigManager = configManager;
-
-            InitializeComponents(eventDispatcher, logger, errorHandler, userProfileService,
-                notificationCenter, eventProcessor, defaultDecideOptions
 #if USE_ODP
-                , sdkSettings
+            InitializeComponents(eventDispatcher, logger, errorHandler, userProfileService,
+                notificationCenter, eventProcessor, defaultDecideOptions, sdkSettings);
+#else
+            InitializeComponents(eventDispatcher, logger, errorHandler, userProfileService,
+                            notificationCenter, eventProcessor, defaultDecideOptions);
 #endif
-            );
         }
 
         private void InitializeComponents(IEventDispatcher eventDispatcher = null,
