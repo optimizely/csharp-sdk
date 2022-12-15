@@ -51,7 +51,7 @@ namespace OptimizelySDK.Odp
         /// Logger used to record messages that occur within the ODP client
         /// </summary>
         private ILogger _logger;
-        
+
         private OdpManager() { }
 
         /// <summary>

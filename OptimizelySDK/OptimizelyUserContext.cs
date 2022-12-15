@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-using OptimizelySDK.Logger;
-using System.Collections.Generic;
 using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Entity;
+using OptimizelySDK.Logger;
 using OptimizelySDK.Odp;
 using OptimizelySDK.OptimizelyDecisions;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace OptimizelySDK

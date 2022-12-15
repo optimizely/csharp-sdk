@@ -244,6 +244,7 @@ namespace OptimizelySDK
             {
                 return;
             }
+
             var optimizelyConfig =
                 new OptimizelyConfigService(config).GetOptimizelyConfig();
             var allSegments = optimizelyConfig.Audiences.Select(a => a.Name).ToList();
