@@ -259,7 +259,6 @@ namespace OptimizelySDK
                 WithLogger(Logger).
                 WithErrorHandler(ErrorHandler).
                 Build(!SdkSettings.DisableOdp);
-            OdpManager.EventManager.Start();
 
             NotificationCenter.AddNotification(
                 NotificationCenter.NotificationType.OptimizelyConfigUpdate,
@@ -276,11 +275,8 @@ namespace OptimizelySDK
                 return;
             }
 
-            var optimizelyConfig =
-                new OptimizelyConfigService(config).GetOptimizelyConfig();
-            var allSegments = optimizelyConfig.Audiences.Select(a => a.Name).ToList();
-
-            OdpManager.UpdateSettings(config.PublicKeyForOdp, config.HostForOdp, allSegments);
+            OdpManager.UpdateSettings(config.PublicKeyForOdp, config.HostForOdp,
+                config.Segments.ToList());
         }
 #endif
 
@@ -1400,7 +1396,9 @@ namespace OptimizelySDK
         /// <param name="userId">FS User ID</param>
         /// <param name="segmentOptions">Options used during segment cache handling</param>
         /// <returns>Qualified segments for the user from the cache or the ODP server</returns>
-        public string[] FetchQualifiedSegments(string userId, List<OdpSegmentOption> segmentOptions)
+        internal string[] FetchQualifiedSegments(string userId,
+            List<OdpSegmentOption> segmentOptions
+        )
         {
             return OdpManager.FetchQualifiedSegments(userId, segmentOptions);
         }
@@ -1409,7 +1407,7 @@ namespace OptimizelySDK
         /// Send identification event to Optimizely Data Platform
         /// </summary>
         /// <param name="userId">FS User ID to send</param>
-        public void IdentifyUser(string userId)
+        internal void IdentifyUser(string userId)
         {
             OdpManager.IdentifyUser(userId);
         }
@@ -1425,15 +1423,10 @@ namespace OptimizelySDK
             Dictionary<string, object> data
         )
         {
-            if (OdpManager == null)
-            {
-                Logger.Log(LogLevel.ERROR, Constants.ODP_NOT_ENABLED_MESSAGE);
-                return;
-            }
-
             OdpManager.SendEvent(type, action, identifiers, data);
         }
 #endif
+
         /// <summary>
         /// Validate all string inputs are not null or empty.
         /// </summary>

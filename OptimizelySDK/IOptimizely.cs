@@ -14,16 +14,8 @@
  * limitations under the License.
  */
 
-#if !(NET35 || NET40 || NETSTANDARD1_6)
-#define USE_ODP
-#endif
-
 using OptimizelySDK.Entity;
 using System.Collections.Generic;
-
-#if USE_ODP
-using OptimizelySDK.Odp;
-#endif
 
 namespace OptimizelySDK
 {
@@ -164,21 +156,5 @@ namespace OptimizelySDK
         List<string> GetEnabledFeatures(string userId, UserAttributes userAttributes = null);
 
         #endregion
-
-#if USE_ODP
-        /// <summary>
-        /// Attempts to fetch and return a list of a user's qualified segments.
-        /// </summary>
-        /// <param name="userId">FS User ID</param>
-        /// <param name="segmentOptions">Options used during segment cache handling</param>
-        /// <returns>Qualified segments for the user from the cache or the ODP server</returns>
-        string[] FetchQualifiedSegments(string userId, List<OdpSegmentOption> segmentOptions);
-
-        /// <summary>
-        /// Send identification event to ODP for a given full-stack User ID
-        /// </summary>
-        /// <param name="userId">FS User ID to send</param>
-        void IdentifyUser(string userId);
-#endif
     }
 }
