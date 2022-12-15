@@ -10,6 +10,84 @@
     <Compile Include="..\OptimizelySDK\IOptimizely.cs">
       <Link>IOptimizely.cs</Link>
     </Compile>
+    <Compile Include="..\OptimizelySDK\Odp\Constants.cs">
+      <Link>Odp\Constants.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Odp\Entity\Audience.cs">
+      <Link>Odp\Entity\Audience.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Odp\Entity\Customer.cs">
+      <Link>Odp\Entity\Customer.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Odp\Entity\Data.cs">
+      <Link>Odp\Entity\Data.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Odp\Entity\Edge.cs">
+      <Link>Odp\Entity\Edge.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Odp\Entity\Error.cs">
+      <Link>Odp\Entity\Error.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Odp\Entity\Extension.cs">
+      <Link>Odp\Entity\Extension.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Odp\Entity\Location.cs">
+      <Link>Odp\Entity\Location.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Odp\Entity\Node.cs">
+      <Link>Odp\Entity\Node.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Odp\Entity\OdpEvent.cs">
+      <Link>Odp\Entity\OdpEvent.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Odp\Entity\OptimizelySdkSettings.cs">
+      <Link>Odp\Entity\OptimizelySdkSettings.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Odp\Entity\Response.cs">
+      <Link>Odp\Entity\Response.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Odp\Enums.cs">
+      <Link>Odp\Enums.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Odp\ICache.cs">
+      <Link>Odp\ICache.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Odp\IOdpEventApiManager.cs">
+      <Link>Odp\IOdpEventApiManager.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Odp\IOdpEventManager.cs">
+      <Link>Odp\IOdpEventManager.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Odp\IOdpManager.cs">
+      <Link>Odp\IOdpManager.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Odp\IOdpSegmentApiManager.cs">
+      <Link>Odp\IOdpSegmentApiManager.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Odp\IOdpSegmentManager.cs">
+      <Link>Odp\IOdpSegmentManager.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Odp\LruCache.cs">
+      <Link>Odp\LruCache.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Odp\OdpConfig.cs">
+      <Link>Odp\OdpConfig.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Odp\OdpEventApiManager.cs">
+      <Link>Odp\OdpEventApiManager.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Odp\OdpEventManager.cs">
+      <Link>Odp\OdpEventManager.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Odp\OdpManager.cs">
+      <Link>Odp\OdpManager.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Odp\OdpSegmentApiManager.cs">
+      <Link>Odp\OdpSegmentApiManager.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Odp\OdpSegmentManager.cs">
+      <Link>Odp\OdpSegmentManager.cs</Link>
+    </Compile>
     <Compile Include="..\OptimizelySDK\Optimizely.cs">
       <Link>Optimizely.cs</Link>
     </Compile>
@@ -222,6 +300,9 @@
     </Compile>
     <Compile Include="..\OptimizelySDK\Utils\AttributeMatchTypes.cs">
       <Link>Utils\AttributeMatchTypes.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Utils\CollectionExtensions.cs">
+      <Link>Utils\CollectionExtensions.cs</Link>
     </Compile>
     <Compile Include="..\OptimizelySDK\Utils\ConditionParser.cs">
       <Link>Utils\ConditionParser.cs</Link>

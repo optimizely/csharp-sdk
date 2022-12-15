@@ -14,14 +14,21 @@
  * limitations under the License.
  */
 
+#if !(NET35 || NET40 || NETSTANDARD1_6)
+#define USE_ODP
+#endif
+
 using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Entity;
 using OptimizelySDK.Logger;
-using OptimizelySDK.Odp;
 using OptimizelySDK.OptimizelyDecisions;
 using System;
 using System.Collections.Generic;
+
+#if USE_ODP
+using OptimizelySDK.Odp;
 using System.Linq;
+#endif
 
 namespace OptimizelySDK
 {
@@ -62,8 +69,10 @@ namespace OptimizelySDK
 
         public OptimizelyUserContext(Optimizely optimizely, string userId,
             UserAttributes userAttributes, ForcedDecisionsStore forcedDecisionsStore,
-            List<string> qualifiedSegments, IErrorHandler errorHandler, ILogger logger,
-            bool shouldIdentifyUser = true
+            List<string> qualifiedSegments, IErrorHandler errorHandler, ILogger logger
+#if USE_ODP
+            ,bool shouldIdentifyUser = true
+#endif
         )
         {
             ErrorHandler = errorHandler;
@@ -74,15 +83,21 @@ namespace OptimizelySDK
             UserId = userId;
             QualifiedSegments = qualifiedSegments ?? new List<string>();
 
+#if USE_ODP
             if (shouldIdentifyUser)
             {
                 optimizely.IdentifyUser(UserId);
             }
+#endif
         }
 
         private OptimizelyUserContext Copy() =>
             new OptimizelyUserContext(Optimizely, UserId, GetAttributes(),
-                GetForcedDecisionsStore(), GetQualifiedSegments(), ErrorHandler, Logger, false);
+                GetForcedDecisionsStore(), GetQualifiedSegments(), ErrorHandler, Logger
+#if USE_ODP
+                , false
+#endif
+);
 
         /// <summary>
         /// Returns Optimizely instance associated with the UserContext.
@@ -143,6 +158,7 @@ namespace OptimizelySDK
             }
         }
 
+#if USE_ODP
         /// <summary>
         /// Fetch all qualified segments for the user context.
         /// </summary>
@@ -169,6 +185,7 @@ namespace OptimizelySDK
 
             return success;
         }
+#endif
 
         /// <summary>
         /// Returns copy of UserAttributes associated with UserContext.

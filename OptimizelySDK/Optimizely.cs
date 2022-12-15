@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+#if !(NET35 || NET40 || NETSTANDARD1_6)
+#define USE_ODP
+#endif
+
 using OptimizelySDK.Bucketing;
 using OptimizelySDK.Entity;
 using OptimizelySDK.ErrorHandler;
@@ -28,11 +32,14 @@ using System.Collections.Generic;
 using System.Reflection;
 using OptimizelySDK.Config;
 using OptimizelySDK.Event;
-using OptimizelySDK.Odp;
-using OptimizelySDK.Odp.Entity;
 using OptimizelySDK.OptlyConfig;
 using OptimizelySDK.OptimizelyDecisions;
 using System.Linq;
+
+#if USE_ODP
+using OptimizelySDK.Odp;
+using OptimizelySDK.Odp.Entity;
+#endif
 
 namespace OptimizelySDK
 {
@@ -66,9 +73,11 @@ namespace OptimizelySDK
 
         private OptimizelyDecideOption[] DefaultDecideOptions;
 
+#if USE_ODP
         private OdpManager OdpManager;
 
         private OptimizelySdkSettings SdkSettings;
+#endif
 
         /// <summary>
         /// It returns true if the ProjectConfig is valid otherwise false.
@@ -137,14 +146,20 @@ namespace OptimizelySDK
             UserProfileService userProfileService = null,
             bool skipJsonValidation = false,
             EventProcessor eventProcessor = null,
-            OptimizelyDecideOption[] defaultDecideOptions = null,
-            OptimizelySdkSettings sdkSettings = null
+            OptimizelyDecideOption[] defaultDecideOptions = null
+#if USE_ODP
+            ,OptimizelySdkSettings sdkSettings = null
+#endif
         )
         {
             try
             {
                 InitializeComponents(eventDispatcher, logger, errorHandler, userProfileService,
-                    null, eventProcessor, defaultDecideOptions, sdkSettings);
+                    null, eventProcessor, defaultDecideOptions
+#if USE_ODP
+                    , sdkSettings
+#endif
+                );
 
                 if (ValidateInputs(datafile, skipJsonValidation))
                 {
@@ -188,14 +203,20 @@ namespace OptimizelySDK
             IErrorHandler errorHandler = null,
             UserProfileService userProfileService = null,
             EventProcessor eventProcessor = null,
-            OptimizelyDecideOption[] defaultDecideOptions = null,
-            OptimizelySdkSettings sdkSettings = null
+            OptimizelyDecideOption[] defaultDecideOptions = null
+#if USE_ODP
+            ,OptimizelySdkSettings sdkSettings = null
+#endif
         )
         {
             ProjectConfigManager = configManager;
 
             InitializeComponents(eventDispatcher, logger, errorHandler, userProfileService,
-                notificationCenter, eventProcessor, defaultDecideOptions, sdkSettings);
+                notificationCenter, eventProcessor, defaultDecideOptions
+#if USE_ODP
+                , sdkSettings
+#endif
+            );
         }
 
         private void InitializeComponents(IEventDispatcher eventDispatcher = null,
@@ -204,8 +225,10 @@ namespace OptimizelySDK
             UserProfileService userProfileService = null,
             NotificationCenter notificationCenter = null,
             EventProcessor eventProcessor = null,
-            OptimizelyDecideOption[] defaultDecideOptions = null,
-            OptimizelySdkSettings sdkSettings = null
+            OptimizelyDecideOption[] defaultDecideOptions = null
+#if USE_ODP
+            ,OptimizelySdkSettings sdkSettings = null
+#endif
         )
         {
             Logger = logger ?? new NoOpLogger();
@@ -222,6 +245,8 @@ namespace OptimizelySDK
                 Logger);
             DefaultDecideOptions = defaultDecideOptions ?? new OptimizelyDecideOption[]
                 { };
+
+#if USE_ODP
             SdkSettings = sdkSettings ?? new OptimizelySdkSettings();
 
             OdpManager = new OdpManager.Builder().
@@ -235,8 +260,10 @@ namespace OptimizelySDK
             NotificationCenter.AddNotification(
                 NotificationCenter.NotificationType.OptimizelyConfigUpdate,
                 UpdateOdpSettings);
+#endif
         }
 
+#if USE_ODP
         private void UpdateOdpSettings()
         {
             var config = ProjectConfigManager?.GetConfig();
@@ -251,6 +278,7 @@ namespace OptimizelySDK
 
             OdpManager.UpdateSettings(config.PublicKeyForOdp, config.HostForOdp, allSegments);
         }
+#endif
 
         /// <summary>
         /// Buckets visitor and sends impression event to Optimizely.
@@ -1361,6 +1389,7 @@ namespace OptimizelySDK
 
         #endregion FeatureFlag APIs
 
+#if USE_ODP
         /// <summary>
         /// Attempts to fetch and return a list of a user's qualified segments.
         /// </summary>
@@ -1400,7 +1429,7 @@ namespace OptimizelySDK
 
             OdpManager.SendEvent(type, action, identifiers, data);
         }
-
+#endif
         /// <summary>
         /// Validate all string inputs are not null or empty.
         /// </summary>
@@ -1482,7 +1511,9 @@ namespace OptimizelySDK
 
             ProjectConfigManager = null;
 
+#if USE_ODP
             OdpManager.Dispose();
+#endif
         }
     }
 }
