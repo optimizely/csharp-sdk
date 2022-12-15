@@ -229,9 +229,11 @@ namespace OptimizelySDK
             UserProfileService userProfileService = null,
             NotificationCenter notificationCenter = null,
             EventProcessor eventProcessor = null,
-            OptimizelyDecideOption[] defaultDecideOptions = null
 #if USE_ODP
-            , OptimizelySdkSettings sdkSettings = null
+            OptimizelyDecideOption[] defaultDecideOptions = null,
+            OptimizelySdkSettings sdkSettings = null
+#else
+            OptimizelyDecideOption[] defaultDecideOptions = null
 #endif
         )
         {
