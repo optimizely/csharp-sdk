@@ -28,6 +28,7 @@ using System.Collections.Generic;
 #if USE_ODP
 using OptimizelySDK.Odp;
 using System.Linq;
+using System.Threading.Tasks;
 #endif
 
 namespace OptimizelySDK
@@ -159,17 +160,11 @@ namespace OptimizelySDK
         /// <summary>
         /// Fetch all qualified segments for the user context.
         /// </summary>
-        /// <param name="userId">FS User ID</param>
-        /// <param name="callback">Callback function to invoke when results are available</param>
         /// <param name="segmentOptions">Options used during segment cache handling</param>
         /// <returns>True if ODP segments were fetched successfully otherwise False</returns>
-        public bool FetchQualifiedSegments(string userId,
-            Action<bool> callback = null,
-            List<OdpSegmentOption> segmentOptions = null
-        )
+        public bool FetchQualifiedSegments(List<OdpSegmentOption> segmentOptions = null)
         {
-            var segments = Optimizely.FetchQualifiedSegments(userId,
-                segmentOptions ?? new List<OdpSegmentOption>(0));
+            var segments = Optimizely.FetchQualifiedSegments(UserId, segmentOptions);
 
             var success = segments != null;
 
@@ -178,9 +173,25 @@ namespace OptimizelySDK
                 SetQualifiedSegments(segments.ToList());
             }
 
-            callback?.Invoke(success);
-
             return success;
+        }
+
+        /// <summary>
+        /// Asynchronously fetch all qualified segments for the user context.
+        /// </summary>
+        /// <param name="callback">Callback function to invoke when results are available</param>
+        /// <param name="segmentOptions">Options used during segment cache handling</param>
+        /// <returns>True if ODP segments were fetched successfully otherwise False</returns>
+        public void FetchQualifiedSegments(Action<bool> callback,
+            List<OdpSegmentOption> segmentOptions = null
+        )
+        {
+            Task.Run(() =>
+            {
+                var success = FetchQualifiedSegments(segmentOptions);
+
+                callback?.Invoke(success);
+            });
         }
 #endif
 
