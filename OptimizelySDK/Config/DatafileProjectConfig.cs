@@ -408,7 +408,8 @@ namespace OptimizelySDK.Config
             var integration = Integrations.FirstOrDefault(i => i.Key.ToLower() == "odp");
             HostForOdp = integration?.Host;
             PublicKeyForOdp = integration?.PublicKey;
-            Segments = TypedAudiences.Select(a => a.Name).ToArray();
+            
+            Segments = TypedAudiences.SelectMany(ta=>ta.GetSegments()).ToArray();
 
             var flagToVariationsMap = new Dictionary<string, Dictionary<string, Variation>>();
             // Adding experiments in experiment-feature map and flag variation map to use.

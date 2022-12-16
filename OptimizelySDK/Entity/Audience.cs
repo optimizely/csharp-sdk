@@ -18,6 +18,8 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using OptimizelySDK.AudienceConditions;
 using OptimizelySDK.Utils;
+using System;
+using System.Collections.Generic;
 
 namespace OptimizelySDK.Entity
 {
@@ -89,6 +91,38 @@ namespace OptimizelySDK.Entity
 
                 return _conditionsString;
             }
+        }
+
+        public List<string> GetSegments()
+        {
+            return GetSegments(ConditionList);
+        }
+
+        private List<string> GetSegments(ICondition conditions)
+        {
+            if (Conditions == null)
+            {
+                return new List<string>(0);
+            }
+
+       var nestedConditions = ConditionParser.ParseAudienceConditions((JToken)AudienceConditions);
+
+            
+            var segments = new List<string>();
+            if (nestedConditions != null) {
+                foreach (var nestedCondition in nestedConditions) {
+                    var nestedSegments = GetSegments(nestedCondition);
+                    segments.AddRange(nestedSegments);
+                }
+            } else {
+                if (Conditions.GetType().Name == UserAttribute.class) {
+                    UserAttribute userAttributeCondition = (UserAttribute) conditions;
+                    if (UserAttribute.QUALIFIED.equals(userAttributeCondition.getMatch())) {
+                        segments.add((String)userAttributeCondition.getValue());
+                    }
+                }
+            }
+            return segments;
         }
     }
 }
