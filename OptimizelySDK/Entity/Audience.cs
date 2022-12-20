@@ -93,35 +93,34 @@ namespace OptimizelySDK.Entity
             }
         }
 
-        public List<string> GetSegments()
+        public HashSet<string> GetSegments()
         {
             return GetSegments(ConditionList);
         }
 
-        private List<string> GetSegments(ICondition conditions)
+        private HashSet<string> GetSegments(ICondition conditions)
         {
-            if (Conditions == null)
+            if (conditions == null)
             {
-                return new List<string>(0);
+                return new HashSet<string>();
             }
 
-       var nestedConditions = ConditionParser.ParseAudienceConditions((JToken)AudienceConditions);
-
-            
-            var segments = new List<string>();
-            if (nestedConditions != null) {
-                foreach (var nestedCondition in nestedConditions) {
-                    var nestedSegments = GetSegments(nestedCondition);
-                    segments.AddRange(nestedSegments);
-                }
-            } else {
-                if (Conditions.GetType().Name == UserAttribute.class) {
-                    UserAttribute userAttributeCondition = (UserAttribute) conditions;
-                    if (UserAttribute.QUALIFIED.equals(userAttributeCondition.getMatch())) {
-                        segments.add((String)userAttributeCondition.getValue());
-                    }
+            var segments = new HashSet<string>();
+            if (conditions is BaseCondition baseCondition)
+            {
+                if (baseCondition.Match == BaseCondition.QUALIFIED)
+                {
+                    segments.Add(baseCondition.Value.ToString());
                 }
             }
+            else if (conditions is IMultipleConditions multipleConditions)
+            {
+                foreach (var nestedCondition in multipleConditions.Conditions)
+                {
+                    segments.UnionWith(GetSegments(nestedCondition));
+                }
+            }
+
             return segments;
         }
     }

@@ -22,7 +22,7 @@ namespace OptimizelySDK.AudienceConditions
     /// <summary>
     /// Represents an 'OR' condition operation for audience evaluation.
     /// </summary>
-    public class OrCondition : ICondition
+    public class OrCondition : IMultipleConditions
     {
         public ICondition[] Conditions { get; set; }
 
