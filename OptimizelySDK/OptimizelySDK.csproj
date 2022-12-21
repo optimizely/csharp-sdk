@@ -68,7 +68,6 @@
     <Compile Include="AudienceConditions\AudienceIdCondition.cs" />
     <Compile Include="AudienceConditions\EmptyCondition.cs" />
     <Compile Include="AudienceConditions\ICondition.cs" />
-    <Compile Include="AudienceConditions\IMultipleConditions.cs" />
     <Compile Include="AudienceConditions\NotCondition.cs" />
     <Compile Include="AudienceConditions\OrCondition.cs" />
     <Compile Include="Bucketing\Bucketer.cs" />
