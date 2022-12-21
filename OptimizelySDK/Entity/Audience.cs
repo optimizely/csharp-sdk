@@ -18,7 +18,6 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using OptimizelySDK.AudienceConditions;
 using OptimizelySDK.Utils;
-using System;
 using System.Collections.Generic;
 
 namespace OptimizelySDK.Entity
@@ -106,6 +105,7 @@ namespace OptimizelySDK.Entity
             }
 
             var segments = new HashSet<string>();
+
             if (conditions is BaseCondition baseCondition)
             {
                 if (baseCondition.Match == BaseCondition.QUALIFIED)
@@ -113,9 +113,16 @@ namespace OptimizelySDK.Entity
                     segments.Add(baseCondition.Value.ToString());
                 }
             }
-            else if (conditions is IMultipleConditions multipleConditions)
+            else if (conditions is AndCondition andCondition)
             {
-                foreach (var nestedCondition in multipleConditions.Conditions)
+                foreach (var nestedCondition in andCondition.Conditions)
+                {
+                    segments.UnionWith(GetSegments(nestedCondition));
+                }
+            }
+            else if (conditions is OrCondition orCondition)
+            {
+                foreach (var nestedCondition in orCondition.Conditions)
                 {
                     segments.UnionWith(GetSegments(nestedCondition));
                 }

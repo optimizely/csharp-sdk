@@ -17,7 +17,6 @@
 using Moq;
 using NUnit.Framework;
 using OptimizelySDK.Logger;
-using System;
 using System.Collections.Generic;
 
 namespace OptimizelySDK.Tests.AudienceConditionsTests
@@ -35,24 +34,22 @@ namespace OptimizelySDK.Tests.AudienceConditionsTests
         }
 
         [Test]
-        public void ShouldGetSegmentsFromAudiences()
+        public void ShouldGetSegmentsFromDatafileTypedAudiences()
         {
+            var expectedSegments = new SortedSet<string>
+            {
+                "atsbugbashsegmentgender",
+                "atsbugbashsegmenthaspurchased",
+                "has_email_opted_out",
+                "atsbugbashsegmentdob",
+            };
             var optimizelyClient = new Optimizely(TestData.OdpSegmentsDatafile,
                 new ValidEventDispatcher(), _mockLogger.Object);
-            var typedAudiences = optimizelyClient.ProjectConfigManager.GetConfig().TypedAudiences;
 
-            HashSet<string> allSegments = new HashSet<string>();
-            foreach (var typedAudience in typedAudiences)
-            {
-                allSegments.UnionWith(typedAudience.GetSegments());
-            }
+            var allSegments = optimizelyClient.ProjectConfigManager.GetConfig().Segments;
 
-            foreach (var segment in allSegments)
-            {
-                Console.WriteLine(segment);
-            }
-
-            Assert.IsNotNull(allSegments);
+            var actualSegments = new SortedSet<string>(allSegments);
+            Assert.AreEqual(expectedSegments, actualSegments);
         }
     }
 }
