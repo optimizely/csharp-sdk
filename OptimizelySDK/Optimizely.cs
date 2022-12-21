@@ -156,13 +156,9 @@ namespace OptimizelySDK
         {
             try
             {
-#if USE_ODP
                 InitializeComponents(eventDispatcher, logger, errorHandler, userProfileService,
-                    null, eventProcessor, defaultDecideOptions, sdkSettings);
-#else
-                InitializeComponents(eventDispatcher, logger, errorHandler, userProfileService,
-                                null, eventProcessor, defaultDecideOptions);
-#endif
+                    null, eventProcessor, defaultDecideOptions);
+
                 if (ValidateInputs(datafile, skipJsonValidation))
                 {
                     var config = DatafileProjectConfig.Create(datafile, Logger, ErrorHandler);
@@ -172,6 +168,8 @@ namespace OptimizelySDK
                 {
                     Logger.Log(LogLevel.ERROR, "Provided 'datafile' has invalid schema.");
                 }
+
+                SetupOdp(sdkSettings);
             }
             catch (Exception ex)
             {
@@ -205,22 +203,15 @@ namespace OptimizelySDK
             IErrorHandler errorHandler = null,
             UserProfileService userProfileService = null,
             EventProcessor eventProcessor = null,
-#if USE_ODP
-            OptimizelyDecideOption[] defaultDecideOptions = null,
-            OptimizelySdkSettings sdkSettings = null
-#else
             OptimizelyDecideOption[] defaultDecideOptions = null
-#endif
         )
         {
             ProjectConfigManager = configManager;
-#if USE_ODP
+
             InitializeComponents(eventDispatcher, logger, errorHandler, userProfileService,
-                notificationCenter, eventProcessor, defaultDecideOptions, sdkSettings);
-#else
-            InitializeComponents(eventDispatcher, logger, errorHandler, userProfileService,
-                            notificationCenter, eventProcessor, defaultDecideOptions);
-#endif
+                notificationCenter, eventProcessor, defaultDecideOptions);
+
+            SetupOdp();
         }
 
         private void InitializeComponents(IEventDispatcher eventDispatcher = null,
@@ -229,12 +220,7 @@ namespace OptimizelySDK
             UserProfileService userProfileService = null,
             NotificationCenter notificationCenter = null,
             EventProcessor eventProcessor = null,
-#if USE_ODP
-            OptimizelyDecideOption[] defaultDecideOptions = null,
-            OptimizelySdkSettings sdkSettings = null
-#else
             OptimizelyDecideOption[] defaultDecideOptions = null
-#endif
         )
         {
             Logger = logger ?? new NoOpLogger();
@@ -251,11 +237,24 @@ namespace OptimizelySDK
                 Logger);
             DefaultDecideOptions = defaultDecideOptions ?? new OptimizelyDecideOption[]
                 { };
+        }
 
 #if USE_ODP
+        private void SetupOdp(OptimizelySdkSettings sdkSettings = null)
+        {
             SdkSettings = sdkSettings ?? new OptimizelySdkSettings();
 
+            var config = ProjectConfigManager.GetConfig();
+            if (config == null)
+            {
+                return;
+            }
+
+            var odpConfig = new OdpConfig(config.PublicKeyForOdp, config.HostForOdp,
+                config.Segments.ToList());
+
             OdpManager = new OdpManager.Builder().
+                WithOdpConfig(odpConfig).
                 WithCacheSize(SdkSettings.SegmentsCacheSize).
                 WithCacheTimeout(SdkSettings.SegmentsCacheTimeout).
                 WithLogger(Logger).
@@ -265,10 +264,8 @@ namespace OptimizelySDK
             NotificationCenter.AddNotification(
                 NotificationCenter.NotificationType.OptimizelyConfigUpdate,
                 UpdateOdpSettings);
-#endif
         }
 
-#if USE_ODP
         private void UpdateOdpSettings()
         {
             var config = ProjectConfigManager?.GetConfig();
@@ -277,7 +274,7 @@ namespace OptimizelySDK
                 return;
             }
 
-            OdpManager.UpdateSettings(config.PublicKeyForOdp, config.HostForOdp,
+            OdpManager?.UpdateSettings(config.PublicKeyForOdp, config.HostForOdp,
                 config.Segments.ToList());
         }
 #endif
@@ -1402,7 +1399,7 @@ namespace OptimizelySDK
             List<OdpSegmentOption> segmentOptions
         )
         {
-            return OdpManager.FetchQualifiedSegments(userId, segmentOptions);
+            return OdpManager?.FetchQualifiedSegments(userId, segmentOptions) ?? new string[0];
         }
 
         /// <summary>
@@ -1411,7 +1408,7 @@ namespace OptimizelySDK
         /// <param name="userId">FS User ID to send</param>
         internal void IdentifyUser(string userId)
         {
-            OdpManager.IdentifyUser(userId);
+            OdpManager?.IdentifyUser(userId);
         }
 
         /// <summary>
@@ -1425,7 +1422,7 @@ namespace OptimizelySDK
             Dictionary<string, object> data
         )
         {
-            OdpManager.SendEvent(type, action, identifiers, data);
+            OdpManager?.SendEvent(type, action, identifiers, data);
         }
 #endif
 
@@ -1511,7 +1508,7 @@ namespace OptimizelySDK
             ProjectConfigManager = null;
 
 #if USE_ODP
-            OdpManager.Dispose();
+            OdpManager?.Dispose();
 #endif
         }
     }

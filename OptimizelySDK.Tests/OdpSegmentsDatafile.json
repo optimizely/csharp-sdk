@@ -162,8 +162,8 @@
   ],
   "integrations": [
     {
-      "publicKey": "ax6UV2223fD-jpOXID0BMg",
-      "host": "https://api.zaius.com",
+      "publicKey": "ax6Bz223fD-jpOo9u0BMg",
+      "host": "https://example.com",
       "key": "odp"
     }
   ],
@@ -299,7 +299,7 @@
     }
   ],
   "anonymizeIP": true,
-  "sdkKey": "VZEZsxbqS2Tv3nESLvFui",
+  "sdkKey": "VZEZsi7xS2Tv3nESLvFui",
   "attributes": [
     {
       "id": "22696496486",
