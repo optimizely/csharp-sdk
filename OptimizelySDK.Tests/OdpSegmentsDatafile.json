@@ -1,22 +1,32 @@
 {
-  "groups": [],
+  "groups": [
+
+  ],
   "environmentKey": "production",
   "rollouts": [
     {
       "experiments": [
         {
           "status": "Running",
-          "audienceConditions": [],
-          "audienceIds": [],
+          "audienceConditions": [
+
+          ],
+          "audienceIds": [
+
+          ],
           "variations": [
             {
-              "variables": [],
+              "variables": [
+
+              ],
               "id": "109682",
               "key": "off",
               "featureEnabled": false
             }
           ],
-          "forcedVariations": {},
+          "forcedVariations": {
+
+          },
           "key": "default-rollout-36645-22702840437",
           "layerId": "rollout-36645-22702840437",
           "trafficAllocation": [
@@ -52,6 +62,25 @@
       "name": "ODP Gender Audience"
     },
     {
+      "id": "22642853106",
+      "conditions": [
+        "and",
+        [
+          "or",
+          [
+            "or",
+            {
+              "value": "has_email_opted_out",
+              "type": "third_party_dimension",
+              "name": "odp.audiences",
+              "match": "qualified"
+            }
+          ]
+        ]
+      ],
+      "name": "Email Opt-Out Audience"
+    },
+    {
       "id": "22722060443",
       "conditions": [
         "and",
@@ -69,7 +98,7 @@
           [
             "or",
             {
-              "value": "atsbugbashsegmentgender",
+              "value": "atsbugbashsegmenthaspurchased",
               "type": "third_party_dimension",
               "name": "odp.audiences",
               "match": "qualified"
@@ -77,7 +106,7 @@
           ]
         ]
       ],
-      "name": "Current Holiday"
+      "name": "Current Holiday Purchases"
     },
     {
       "id": "22713562125",
@@ -88,7 +117,7 @@
           [
             "or",
             {
-              "value": "atsbugbashsegmentgender",
+              "value": "atsbugbashsegmentdob",
               "type": "third_party_dimension",
               "name": "odp.audiences",
               "match": "qualified"
@@ -96,18 +125,44 @@
           ]
         ]
       ],
-      "name": "ODP Test Audience"
+      "name": "ODP Birthdate Audience"
+    },
+    {
+      "id": "22734824597",
+      "conditions": [
+        "and",
+        [
+          "or",
+          [
+            "not",
+            [
+              "or",
+              {
+                "value": true,
+                "type": "custom_attribute",
+                "name": "likes_presents",
+                "match": "exact"
+              }
+            ]
+          ]
+        ]
+      ],
+      "name": "Hates Presents"
     }
   ],
   "projectId": "22720961022",
-  "variables": [],
+  "variables": [
+
+  ],
   "featureFlags": [
     {
       "experimentIds": [
         "9300000149777"
       ],
       "rolloutId": "rollout-36645-22702840437",
-      "variables": [],
+      "variables": [
+
+      ],
       "id": "36645",
       "key": "favorite_holiday"
     }
@@ -126,34 +181,46 @@
         "or",
         "22722060443",
         "22713562125",
-        "22727912729"
+        "22727912729",
+        "22642853106",
+        "22734824597"
       ],
       "audienceIds": [
         "22722060443",
         "22713562125",
-        "22727912729"
+        "22727912729",
+        "22642853106",
+        "22734824597"
       ],
       "variations": [
         {
-          "variables": [],
+          "variables": [
+
+          ],
           "id": "109684",
           "key": "christmas",
           "featureEnabled": true
         },
         {
-          "variables": [],
+          "variables": [
+
+          ],
           "id": "109685",
           "key": "hanukkah",
           "featureEnabled": true
         },
         {
-          "variables": [],
+          "variables": [
+
+          ],
           "id": "109686",
           "key": "kwanzaa",
           "featureEnabled": true
         }
       ],
-      "forcedVariations": {},
+      "forcedVariations": {
+
+      },
       "key": "holiday_banner",
       "layerId": "9300000114602",
       "trafficAllocation": [
@@ -192,6 +259,18 @@
         {
           "entityId": "109686",
           "endOfRange": 8100
+        },
+        {
+          "entityId": "109684",
+          "endOfRange": 8234
+        },
+        {
+          "entityId": "109685",
+          "endOfRange": 8368
+        },
+        {
+          "entityId": "109686",
+          "endOfRange": 8501
         }
       ],
       "id": "9300000149777"
@@ -205,14 +284,24 @@
       "name": "ODP Gender Audience"
     },
     {
+      "id": "22642853106",
+      "conditions": "[\"or\", {\"match\": \"exact\", \"name\": \"$opt_dummy_attribute\", \"type\": \"custom_attribute\", \"value\": \"$opt_dummy_value\"}]",
+      "name": "Email Opt-Out Audience"
+    },
+    {
       "id": "22722060443",
       "conditions": "[\"or\", {\"match\": \"exact\", \"name\": \"$opt_dummy_attribute\", \"type\": \"custom_attribute\", \"value\": \"$opt_dummy_value\"}]",
-      "name": "Current Holiday"
+      "name": "Current Holiday Purchases"
     },
     {
       "id": "22713562125",
       "conditions": "[\"or\", {\"match\": \"exact\", \"name\": \"$opt_dummy_attribute\", \"type\": \"custom_attribute\", \"value\": \"$opt_dummy_value\"}]",
-      "name": "ODP Test Audience"
+      "name": "ODP Birthdate Audience"
+    },
+    {
+      "id": "22734824597",
+      "conditions": "[\"or\", {\"match\": \"exact\", \"name\": \"$opt_dummy_attribute\", \"type\": \"custom_attribute\", \"value\": \"$opt_dummy_value\"}]",
+      "name": "Hates Presents"
     },
     {
       "conditions": "[\"or\", {\"match\": \"exact\", \"name\": \"$opt_dummy_attribute\", \"type\": \"custom_attribute\", \"value\": \"$opt_dummy_value\"}]",
@@ -224,12 +313,18 @@
   "sdkKey": "VZEZsxbqS2Tv3nESLvFui",
   "attributes": [
     {
+      "id": "22696496486",
+      "key": "likes_presents"
+    },
+    {
       "id": "22700670748",
       "key": "current_holiday"
     }
   ],
   "botFiltering": false,
   "accountId": "21468570738",
-  "events": [],
-  "revision": "21"
+  "events": [
+
+  ],
+  "revision": "29"
 }
