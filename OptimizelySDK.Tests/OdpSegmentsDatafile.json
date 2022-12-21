@@ -1,6 +1,5 @@
 {
   "groups": [
-
   ],
   "environmentKey": "production",
   "rollouts": [
@@ -9,15 +8,12 @@
         {
           "status": "Running",
           "audienceConditions": [
-
           ],
           "audienceIds": [
-
           ],
           "variations": [
             {
               "variables": [
-
               ],
               "id": "109682",
               "key": "off",
@@ -25,7 +21,6 @@
             }
           ],
           "forcedVariations": {
-
           },
           "key": "default-rollout-36645-22702840437",
           "layerId": "rollout-36645-22702840437",
@@ -51,7 +46,7 @@
           [
             "or",
             {
-              "value": "atsbugbashsegmentgender",
+              "value": "ats_bug_bash_segment_gender",
               "type": "third_party_dimension",
               "name": "odp.audiences",
               "match": "qualified"
@@ -98,7 +93,7 @@
           [
             "or",
             {
-              "value": "atsbugbashsegmenthaspurchased",
+              "value": "ats_bug_bash_segment_has_purchased",
               "type": "third_party_dimension",
               "name": "odp.audiences",
               "match": "qualified"
@@ -117,7 +112,7 @@
           [
             "or",
             {
-              "value": "atsbugbashsegmentdob",
+              "value": "ats_bug_bash_segment_dob",
               "type": "third_party_dimension",
               "name": "odp.audiences",
               "match": "qualified"
@@ -152,7 +147,6 @@
   ],
   "projectId": "22720961022",
   "variables": [
-
   ],
   "featureFlags": [
     {
@@ -161,7 +155,6 @@
       ],
       "rolloutId": "rollout-36645-22702840437",
       "variables": [
-
       ],
       "id": "36645",
       "key": "favorite_holiday"
@@ -195,7 +188,6 @@
       "variations": [
         {
           "variables": [
-
           ],
           "id": "109684",
           "key": "christmas",
@@ -203,7 +195,6 @@
         },
         {
           "variables": [
-
           ],
           "id": "109685",
           "key": "hanukkah",
@@ -211,7 +202,6 @@
         },
         {
           "variables": [
-
           ],
           "id": "109686",
           "key": "kwanzaa",
@@ -219,7 +209,6 @@
         }
       ],
       "forcedVariations": {
-
       },
       "key": "holiday_banner",
       "layerId": "9300000114602",
@@ -324,7 +313,6 @@
   "botFiltering": false,
   "accountId": "21468570738",
   "events": [
-
   ],
   "revision": "29"
 }

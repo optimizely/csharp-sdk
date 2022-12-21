@@ -97,7 +97,7 @@ namespace OptimizelySDK.Entity
             return GetSegments(ConditionList);
         }
 
-        private HashSet<string> GetSegments(ICondition conditions)
+        public static HashSet<string> GetSegments(ICondition conditions)
         {
             if (conditions == null)
             {
@@ -126,6 +126,10 @@ namespace OptimizelySDK.Entity
                 {
                     segments.UnionWith(GetSegments(nestedCondition));
                 }
+            }
+            else if (conditions is NotCondition notCondition)
+            {
+                segments.UnionWith(GetSegments(notCondition.Condition));
             }
 
             return segments;
