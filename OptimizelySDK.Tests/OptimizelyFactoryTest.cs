@@ -28,7 +28,7 @@ using OptimizelySDK.Tests.Utils;
 using System;
 namespace OptimizelySDK.Tests
 {
-    [TestFixture, Ignore]
+    [TestFixture]
     public class OptimizelyFactoryTest
     {
         private Mock<ILogger> LoggerMock;

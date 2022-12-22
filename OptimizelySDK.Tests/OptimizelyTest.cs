@@ -5438,7 +5438,7 @@ namespace OptimizelySDK.Tests
 
         #region DFM Notification
 
-        [Test, Ignore]
+        [Test]
         public void TestDFMNotificationWhenProjectConfigIsUpdated()
         {
             var httpClientMock = new Mock<HttpProjectConfigManager.HttpClient>();
