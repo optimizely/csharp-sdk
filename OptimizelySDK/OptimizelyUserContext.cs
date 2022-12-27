@@ -36,7 +36,7 @@ namespace OptimizelySDK
     /// <summary>
     /// OptimizelyUserContext defines user contexts that the SDK will use to make decisions for
     /// </summary>
-    public class OptimizelyUserContext
+    public class OptimizelyUserContext : IDisposable
     {
         private ILogger Logger;
         private IErrorHandler ErrorHandler;
@@ -54,6 +54,11 @@ namespace OptimizelySDK
         // Optimizely object to be used.
         private Optimizely Optimizely;
 
+        /// <summary>
+        /// Determine if User Context has already been disposed
+        /// </summary>
+        public bool Disposed { get; private set; }
+
         private ForcedDecisionsStore ForcedDecisionsStore { get; set; }
 
         public OptimizelyUserContext(Optimizely optimizely, string userId,
@@ -63,7 +68,8 @@ namespace OptimizelySDK
         public OptimizelyUserContext(Optimizely optimizely, string userId,
             UserAttributes userAttributes, ForcedDecisionsStore forcedDecisionsStore,
             IErrorHandler errorHandler, ILogger logger
-        ) : this(optimizely, userId, userAttributes, forcedDecisionsStore, null, errorHandler, logger) { }
+        ) : this(optimizely, userId, userAttributes, forcedDecisionsStore, null, errorHandler,
+            logger) { }
 
         public OptimizelyUserContext(Optimizely optimizely, string userId,
             UserAttributes userAttributes, ForcedDecisionsStore forcedDecisionsStore,
@@ -428,6 +434,18 @@ namespace OptimizelySDK
             }
 
             return true;
+        }
+
+        public void Dispose()
+        {
+            if (Disposed)
+            {
+                return;
+            }
+
+            Disposed = true;
+
+            Optimizely?.Dispose();
         }
     }
 }

@@ -1,12 +1,12 @@
-﻿/**
+﻿/*
  *
- *    Copyright 2020-2021, Optimizely and contributors
+ *    Copyright 2020-2021, 2022 Optimizely and contributors
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
  *    You may obtain a copy of the License at
  *
- *        http://www.apache.org/licenses/LICENSE-2.0
+ *    https://www.apache.org/licenses/LICENSE-2.0
  *
  *    Unless required by applicable law or agreed to in writing, software
  *    distributed under the License is distributed on an "AS IS" BASIS,
@@ -1077,13 +1077,14 @@ namespace OptimizelySDK.Tests
                 EventDispatcherMock.Object, LoggerMock.Object, ErrorHandlerMock.Object);
             var context = new OptimizelyUserContext(optimizely, UserID, null,
                 ErrorHandlerMock.Object, LoggerMock.Object);
-
+            
             context.FetchQualifiedSegments(success =>
             {
                 callbackResult = success;
                 cde.Signal();
             });
             cde.Wait(5000);
+            context.Dispose();
 
             LoggerMock.Verify(l => l.Log(LogLevel.ERROR, Constants.ODP_NOT_ENABLED_MESSAGE),
                 Times.Never);
@@ -1101,7 +1102,8 @@ namespace OptimizelySDK.Tests
                 ErrorHandlerMock.Object, mockLogger.Object);
 
             var success = context.FetchQualifiedSegments();
-
+            context.Dispose();
+            
             mockLogger.Verify(l => l.Log(LogLevel.ERROR, Constants.ODP_NOT_ENABLED_MESSAGE),
                 Times.Never);
             Assert.IsTrue(success);

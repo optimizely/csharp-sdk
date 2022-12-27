@@ -1,11 +1,11 @@
 ﻿/* 
- * Copyright 2019, Optimizely
+ * Copyright 2019, 2022 Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,8 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-using System;
 
 namespace OptimizelySDK.Config
 {
@@ -28,5 +26,11 @@ namespace OptimizelySDK.Config
         /// </summary>
         /// <returns>ProjectConfig instance</returns>
         ProjectConfig GetConfig();
+
+        /// <summary>
+        /// Access to current project configuration
+        /// </summary>
+        /// <returns>ProjectConfig instance</returns>
+        ProjectConfig GetCurrentProjectConfig();
     }
 }

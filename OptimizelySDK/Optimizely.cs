@@ -163,13 +163,13 @@ namespace OptimizelySDK
                 {
                     var config = DatafileProjectConfig.Create(datafile, Logger, ErrorHandler);
                     ProjectConfigManager = new FallbackProjectConfigManager(config);
+
+                    SetupOdp(config, sdkSettings);
                 }
                 else
                 {
                     Logger.Log(LogLevel.ERROR, "Provided 'datafile' has invalid schema.");
                 }
-
-                SetupOdp(sdkSettings);
             }
             catch (Exception ex)
             {
@@ -203,7 +203,12 @@ namespace OptimizelySDK
             IErrorHandler errorHandler = null,
             UserProfileService userProfileService = null,
             EventProcessor eventProcessor = null,
+#if USE_ODP
+            OptimizelyDecideOption[] defaultDecideOptions = null,
+            OptimizelySdkSettings sdkSettings = null
+#else
             OptimizelyDecideOption[] defaultDecideOptions = null
+#endif
         )
         {
             ProjectConfigManager = configManager;
@@ -211,7 +216,7 @@ namespace OptimizelySDK
             InitializeComponents(eventDispatcher, logger, errorHandler, userProfileService,
                 notificationCenter, eventProcessor, defaultDecideOptions);
 
-            SetupOdp();
+            SetupOdp(ProjectConfigManager.GetCurrentProjectConfig(), sdkSettings);
         }
 
         private void InitializeComponents(IEventDispatcher eventDispatcher = null,
@@ -240,15 +245,14 @@ namespace OptimizelySDK
         }
 
 #if USE_ODP
-        private void SetupOdp(OptimizelySdkSettings sdkSettings = null)
+        private void SetupOdp(ProjectConfig config, OptimizelySdkSettings sdkSettings = null)
         {
-            SdkSettings = sdkSettings ?? new OptimizelySdkSettings();
-
-            var config = ProjectConfigManager.GetConfig();
             if (config == null)
             {
                 return;
             }
+
+            SdkSettings = sdkSettings ?? new OptimizelySdkSettings();
 
             var odpConfig = new OdpConfig(config.PublicKeyForOdp, config.HostForOdp,
                 config.Segments.ToList());
