@@ -163,8 +163,9 @@ namespace OptimizelySDK
                 {
                     var config = DatafileProjectConfig.Create(datafile, Logger, ErrorHandler);
                     ProjectConfigManager = new FallbackProjectConfigManager(config);
-
+#if USE_ODP
                     SetupOdp(config, sdkSettings);
+#endif
                 }
                 else
                 {
@@ -215,8 +216,9 @@ namespace OptimizelySDK
 
             InitializeComponents(eventDispatcher, logger, errorHandler, userProfileService,
                 notificationCenter, eventProcessor, defaultDecideOptions);
-
+#if USE_ODP
             SetupOdp(ProjectConfigManager.GetCurrentProjectConfig(), sdkSettings);
+#endif
         }
 
         private void InitializeComponents(IEventDispatcher eventDispatcher = null,
