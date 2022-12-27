@@ -1077,7 +1077,7 @@ namespace OptimizelySDK.Tests
                 EventDispatcherMock.Object, LoggerMock.Object, ErrorHandlerMock.Object);
             var context = new OptimizelyUserContext(optimizely, UserID, null,
                 ErrorHandlerMock.Object, LoggerMock.Object);
-            
+
             context.FetchQualifiedSegments(success =>
             {
                 callbackResult = success;
@@ -1103,7 +1103,7 @@ namespace OptimizelySDK.Tests
 
             var success = context.FetchQualifiedSegments();
             context.Dispose();
-            
+
             mockLogger.Verify(l => l.Log(LogLevel.ERROR, Constants.ODP_NOT_ENABLED_MESSAGE),
                 Times.Never);
             Assert.IsTrue(success);
