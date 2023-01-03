@@ -146,11 +146,9 @@ namespace OptimizelySDK
             UserProfileService userProfileService = null,
             bool skipJsonValidation = false,
             EventProcessor eventProcessor = null,
-#if USE_ODP
-            OptimizelyDecideOption[] defaultDecideOptions = null,
-            OptimizelySdkSettings sdkSettings = null
-#else
             OptimizelyDecideOption[] defaultDecideOptions = null
+#if USE_ODP
+            , OptimizelySdkSettings sdkSettings = null
 #endif
         )
         {
@@ -204,11 +202,9 @@ namespace OptimizelySDK
             IErrorHandler errorHandler = null,
             UserProfileService userProfileService = null,
             EventProcessor eventProcessor = null,
-#if USE_ODP
-            OptimizelyDecideOption[] defaultDecideOptions = null,
-            OptimizelySdkSettings sdkSettings = null
-#else
             OptimizelyDecideOption[] defaultDecideOptions = null
+#if USE_ODP
+            , OptimizelySdkSettings sdkSettings = null
 #endif
         )
         {
@@ -217,7 +213,7 @@ namespace OptimizelySDK
             InitializeComponents(eventDispatcher, logger, errorHandler, userProfileService,
                 notificationCenter, eventProcessor, defaultDecideOptions);
 #if USE_ODP
-            SetupOdp(ProjectConfigManager.GetCurrentProjectConfig(), sdkSettings);
+            SetupOdp(ProjectConfigManager.CachedProjectConfig, sdkSettings);
 #endif
         }
 
@@ -249,7 +245,7 @@ namespace OptimizelySDK
 #if USE_ODP
         private void SetupOdp(ProjectConfig config, OptimizelySdkSettings sdkSettings = null)
         {
-            if (config == null)
+            if (config == null || sdkSettings?.DisableOdp == true)
             {
                 return;
             }
@@ -269,19 +265,9 @@ namespace OptimizelySDK
 
             NotificationCenter.AddNotification(
                 NotificationCenter.NotificationType.OptimizelyConfigUpdate,
-                UpdateOdpSettings);
-        }
-
-        private void UpdateOdpSettings()
-        {
-            var config = ProjectConfigManager?.GetConfig();
-            if (config == null)
-            {
-                return;
-            }
-
-            OdpManager?.UpdateSettings(config.PublicKeyForOdp, config.HostForOdp,
-                config.Segments.ToList());
+                () => OdpManager?.UpdateSettings(config.PublicKeyForOdp, config.HostForOdp,
+                    config.Segments.ToList())
+            );
         }
 #endif
 

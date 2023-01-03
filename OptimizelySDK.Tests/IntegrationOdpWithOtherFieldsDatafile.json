@@ -273,7 +273,7 @@
 		{
 			"key": "odp",
 			"host": "https://api.zaius.com",
-			"publicKey": "N0tA-r3a1-K3y",
+			"publicKey": "fake-public-key",
 			"k1": 10, 
 			"k2": true, 
 			"k3": "any-value"

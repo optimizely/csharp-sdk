@@ -145,10 +145,16 @@ namespace OptimizelySDK.Config
         }
 
         /// <summary>
-        /// Access to current project configuration
+        /// Access to current cached project configuration
         /// </summary>
         /// <returns>ProjectConfig instance</returns>
-        public ProjectConfig GetCurrentProjectConfig() => CurrentProjectConfig;
+        public ProjectConfig CachedProjectConfig
+        {
+            get
+            {
+                return CurrentProjectConfig;
+            }
+        } 
 
         /// <summary>
         /// Sets the latest available ProjectConfig valid instance.

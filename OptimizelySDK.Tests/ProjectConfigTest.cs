@@ -1306,7 +1306,7 @@ namespace OptimizelySDK.Tests
         }
 
         private const string ZAIUS_HOST = "https://api.zaius.com";
-        private const string ZAIUS_PUBLIC_KEY = "N0tA-r3a1-K3y";
+        private const string ZAIUS_PUBLIC_KEY = "fake-public-key";
 
         [Test]
         public void TestProjectConfigWithOdpIntegration()

@@ -28,9 +28,9 @@ namespace OptimizelySDK.Config
         ProjectConfig GetConfig();
 
         /// <summary>
-        /// Access to current project configuration
+        /// Access to current cached project configuration
         /// </summary>
         /// <returns>ProjectConfig instance</returns>
-        ProjectConfig GetCurrentProjectConfig();
+        ProjectConfig CachedProjectConfig { get; }
     }
 }

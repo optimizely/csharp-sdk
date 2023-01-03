@@ -519,6 +519,10 @@ namespace OptimizelySDK.Odp
             }
         }
 
+        /// <summary>
+        /// TESTING ONLY: Read the current ODP config
+        /// </summary>
+        /// <returns>Current ODP settings</returns>
         public OdpConfig _readOdpConfigForTesting()
         {
             return _odpConfig;

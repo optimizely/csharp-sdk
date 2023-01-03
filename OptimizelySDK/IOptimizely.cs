@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+#if !(NET35 || NET40 || NETSTANDARD1_6)
+#define USE_ODP
+#endif
+
 using OptimizelySDK.Entity;
 using System.Collections.Generic;
 
@@ -156,5 +160,11 @@ namespace OptimizelySDK
         List<string> GetEnabledFeatures(string userId, UserAttributes userAttributes = null);
 
         #endregion
+        
+#if USE_ODP
+        void SendOdpEvent(string type, string action, Dictionary<string, string> identifiers,
+            Dictionary<string, object> data
+        );
+#endif
     }
 }
