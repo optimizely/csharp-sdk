@@ -154,7 +154,7 @@ namespace OptimizelySDK.Config
             {
                 return CurrentProjectConfig;
             }
-        } 
+        }
 
         /// <summary>
         /// Sets the latest available ProjectConfig valid instance.
