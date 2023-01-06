@@ -222,7 +222,8 @@ namespace OptimizelySDK.Odp
                     manager.EventManager = new OdpEventManager.Builder().
                         WithOdpConfig(_odpConfig).
                         WithBatchSize(Constants.DEFAULT_MAX_CACHE_SIZE).
-                        WithTimeoutInterval(TimeSpan.FromMilliseconds(Constants.DEFAULT_CACHE_SECONDS)).
+                        WithTimeoutInterval(
+                            TimeSpan.FromMilliseconds(Constants.DEFAULT_CACHE_SECONDS)).
                         WithOdpEventApiManager(eventApiManager).
                         WithLogger(_logger).
                         WithErrorHandler(_errorHandler).
@@ -237,11 +238,10 @@ namespace OptimizelySDK.Odp
 
                 if (_segmentManager == null)
                 {
-                    var cacheTimeout = TimeSpan.FromSeconds(Constants.DEFAULT_CACHE_SECONDS);
                     var apiManager = new OdpSegmentApiManager(_logger, _errorHandler);
 
-                    manager.SegmentManager = new OdpSegmentManager(_odpConfig, apiManager,
-                        Constants.DEFAULT_MAX_CACHE_SIZE, cacheTimeout, _logger, _cache);
+                    manager.SegmentManager =
+                        new OdpSegmentManager(apiManager, _odpConfig, _cache, _logger);
                 }
                 else
                 {
