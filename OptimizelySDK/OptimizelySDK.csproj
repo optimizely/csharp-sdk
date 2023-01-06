@@ -99,7 +99,6 @@
     <Compile Include="Odp\Entity\Extension.cs" />
     <Compile Include="Odp\Entity\Node.cs" />
     <Compile Include="Odp\Entity\OdpEvent.cs" />
-    <Compile Include="Odp\Entity\OptimizelySdkSettings.cs" />
     <Compile Include="Odp\Entity\Response.cs" />
     <Compile Include="Odp\Enums.cs" />
     <Compile Include="Odp\IOdpManager.cs" />

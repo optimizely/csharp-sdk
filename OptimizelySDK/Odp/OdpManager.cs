@@ -152,8 +152,6 @@ namespace OptimizelySDK.Odp
             private OdpConfig _odpConfig;
             private IOdpEventManager _eventManager;
             private IOdpSegmentManager _segmentManager;
-            private int _cacheSize;
-            private int _cacheTimeoutSeconds;
             private ILogger _logger;
             private IErrorHandler _errorHandler;
             private ICache<List<string>> _cache;
@@ -173,18 +171,6 @@ namespace OptimizelySDK.Odp
             public Builder WithOdpConfig(OdpConfig odpConfig)
             {
                 _odpConfig = odpConfig;
-                return this;
-            }
-
-            public Builder WithCacheSize(int cacheSize)
-            {
-                _cacheSize = cacheSize;
-                return this;
-            }
-
-            public Builder WithCacheTimeout(int seconds)
-            {
-                _cacheTimeoutSeconds = seconds;
                 return this;
             }
 
@@ -235,8 +221,8 @@ namespace OptimizelySDK.Odp
 
                     manager.EventManager = new OdpEventManager.Builder().
                         WithOdpConfig(_odpConfig).
-                        WithBatchSize(_cacheSize).
-                        WithTimeoutInterval(TimeSpan.FromMilliseconds(_cacheTimeoutSeconds)).
+                        WithBatchSize(Constants.DEFAULT_MAX_CACHE_SIZE).
+                        WithTimeoutInterval(TimeSpan.FromMilliseconds(Constants.DEFAULT_CACHE_SECONDS)).
                         WithOdpEventApiManager(eventApiManager).
                         WithLogger(_logger).
                         WithErrorHandler(_errorHandler).
@@ -251,13 +237,11 @@ namespace OptimizelySDK.Odp
 
                 if (_segmentManager == null)
                 {
-                    var cacheTimeout = TimeSpan.FromSeconds(_cacheTimeoutSeconds <= 0 ?
-                        Constants.DEFAULT_CACHE_SECONDS :
-                        _cacheTimeoutSeconds);
+                    var cacheTimeout = TimeSpan.FromSeconds(Constants.DEFAULT_CACHE_SECONDS);
                     var apiManager = new OdpSegmentApiManager(_logger, _errorHandler);
 
                     manager.SegmentManager = new OdpSegmentManager(_odpConfig, apiManager,
-                        _cacheSize, cacheTimeout, _logger, _cache);
+                        Constants.DEFAULT_MAX_CACHE_SIZE, cacheTimeout, _logger, _cache);
                 }
                 else
                 {
