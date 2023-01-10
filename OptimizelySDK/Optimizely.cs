@@ -233,7 +233,6 @@ namespace OptimizelySDK
             // in case if notification is lost.
             OdpManager?.UpdateSettings(projectConfig.PublicKeyForOdp, projectConfig.HostForOdp,
                 projectConfig.Segments.ToList());
-
 #else
             InitializeComponents(eventDispatcher, logger, errorHandler, userProfileService,
                 notificationCenter, eventProcessor, defaultDecideOptions);

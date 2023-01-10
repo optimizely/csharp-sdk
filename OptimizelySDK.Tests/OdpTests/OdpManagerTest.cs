@@ -67,7 +67,6 @@ namespace OptimizelySDK.Tests.OdpTests
 
         private readonly List<string> _emptySegmentsToCheck = new List<string>(0);
 
-
         private Mock<ILogger> _mockLogger;
         private Mock<IOdpEventManager> _mockOdpEventManager;
         private Mock<IOdpSegmentManager> _mockSegmentManager;
@@ -103,7 +102,8 @@ namespace OptimizelySDK.Tests.OdpTests
                 WithEventManager(_mockOdpEventManager.Object).
                 WithLogger(_mockLogger.Object).
                 Build();
-
+            manager.UpdateSettings(API_KEY, API_HOST, _emptySegmentsToCheck);
+            
             manager.Dispose();
 
             _mockOdpEventManager.Verify(e => e.Stop(), Times.Once);
@@ -120,6 +120,7 @@ namespace OptimizelySDK.Tests.OdpTests
                 WithEventManager(_mockOdpEventManager.Object).
                 WithLogger(_mockLogger.Object).
                 Build();
+            manager.UpdateSettings(API_KEY, API_HOST, _emptySegmentsToCheck);
 
             var wasUpdated = manager.UpdateSettings(UPDATED_API_KEY, UPDATED_ODP_ENDPOINT,
                 _updatedSegmentsToCheck);
@@ -142,6 +143,7 @@ namespace OptimizelySDK.Tests.OdpTests
                 WithEventManager(_mockOdpEventManager.Object).
                 WithLogger(_mockLogger.Object).
                 Build();
+            manager.UpdateSettings(API_KEY, API_HOST, _emptySegmentsToCheck);
 
             var wasUpdated = manager.UpdateSettings(UPDATED_API_KEY, UPDATED_ODP_ENDPOINT,
                 _updatedSegmentsToCheck);
@@ -183,6 +185,7 @@ namespace OptimizelySDK.Tests.OdpTests
                 WithEventManager(_mockOdpEventManager.Object).
                 WithLogger(_mockLogger.Object).
                 Build();
+            manager.UpdateSettings(API_KEY, API_HOST, _emptySegmentsToCheck);
 
             var wasUpdated = manager.UpdateSettings(UPDATED_API_KEY, UPDATED_ODP_ENDPOINT,
                 _updatedSegmentsToCheck);
@@ -200,6 +203,7 @@ namespace OptimizelySDK.Tests.OdpTests
                 WithEventManager(_mockOdpEventManager.Object).
                 WithLogger(_mockLogger.Object).
                 Build();
+            manager.UpdateSettings(API_KEY, API_HOST, _emptySegmentsToCheck);
 
             manager.SendEvent(TEST_EVENT_TYPE, TEST_EVENT_ACTION, _testEventIdentifiers,
                 _testEventData);
@@ -230,6 +234,7 @@ namespace OptimizelySDK.Tests.OdpTests
                 WithEventManager(_mockOdpEventManager.Object).
                 WithLogger(_mockLogger.Object).
                 Build();
+            manager.UpdateSettings(API_KEY, API_HOST, _emptySegmentsToCheck);
 
             Assert.IsNotNull(manager.EventManager);
         }
@@ -242,6 +247,7 @@ namespace OptimizelySDK.Tests.OdpTests
                 WithEventManager(_mockOdpEventManager.Object).
                 WithLogger(_mockLogger.Object).
                 Build();
+            manager.UpdateSettings(API_KEY, API_HOST, _emptySegmentsToCheck);
 
             Assert.IsNotNull(manager.SegmentManager);
         }
@@ -255,6 +261,7 @@ namespace OptimizelySDK.Tests.OdpTests
                 WithEventManager(_mockOdpEventManager.Object).
                 WithLogger(_mockLogger.Object).
                 Build();
+            manager.UpdateSettings(API_KEY, API_HOST, _emptySegmentsToCheck);
 
             manager.IdentifyUser(VALID_FS_USER_ID);
             manager.Dispose();
@@ -272,6 +279,7 @@ namespace OptimizelySDK.Tests.OdpTests
                 WithEventManager(_mockOdpEventManager.Object).
                 WithLogger(_mockLogger.Object).
                 Build(false);
+            manager.UpdateSettings(API_KEY, API_HOST, _emptySegmentsToCheck);
 
             manager.IdentifyUser(VALID_FS_USER_ID);
             manager.Dispose();
@@ -290,6 +298,7 @@ namespace OptimizelySDK.Tests.OdpTests
                 WithEventManager(_mockOdpEventManager.Object).
                 WithLogger(_mockLogger.Object).
                 Build();
+            manager.UpdateSettings(API_KEY, API_HOST, _emptySegmentsToCheck);
 
             manager.SendEvent(TEST_EVENT_TYPE, TEST_EVENT_ACTION, _testEventIdentifiers,
                 _testEventData);
@@ -305,6 +314,7 @@ namespace OptimizelySDK.Tests.OdpTests
             var manager = new OdpManager.Builder().
                 WithLogger(_mockLogger.Object).
                 Build(false); // do not enable
+            manager.UpdateSettings(string.Empty, string.Empty, _emptySegmentsToCheck);
 
             manager.SendEvent(TEST_EVENT_TYPE, TEST_EVENT_ACTION, _testEventIdentifiers,
                 _testEventData);

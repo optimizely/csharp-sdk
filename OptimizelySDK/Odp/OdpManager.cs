@@ -64,7 +64,7 @@ namespace OptimizelySDK.Odp
         public bool UpdateSettings(string apiKey, string apiHost, List<string> segmentsToCheck)
         {
             var newConfig = new OdpConfig(apiKey, apiHost, segmentsToCheck);
-            if (_odpConfig.Equals(newConfig))
+            if (_odpConfig == null || _odpConfig.Equals(newConfig))
             {
                 return false;
             }
@@ -264,7 +264,7 @@ namespace OptimizelySDK.Odp
         /// <returns>True if EventManager can process events otherwise False</returns>
         private bool EventManagerOrConfigNotReady()
         {
-            return EventManager == null || !_enabled || !_odpConfig.IsReady();
+            return EventManager == null || !_enabled || _odpConfig == null || !_odpConfig.IsReady();
         }
 
         /// <summary>
@@ -273,7 +273,8 @@ namespace OptimizelySDK.Odp
         /// <returns>True if SegmentManager can fetch audience segments otherwise False</returns>
         private bool SegmentManagerOrConfigNotReady()
         {
-            return SegmentManager == null || !_enabled || !_odpConfig.IsReady();
+            return SegmentManager == null || !_enabled || _odpConfig == null ||
+                   !_odpConfig.IsReady();
         }
     }
 }

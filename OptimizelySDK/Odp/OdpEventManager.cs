@@ -107,7 +107,7 @@ namespace OptimizelySDK.Odp
         /// </summary>
         public void Start()
         {
-            if (!_odpConfig.IsReady())
+            if (_odpConfig == null || !_odpConfig.IsReady())
             {
                 _logger.Log(LogLevel.WARN, Constants.ODP_NOT_INTEGRATED_MESSAGE);
 

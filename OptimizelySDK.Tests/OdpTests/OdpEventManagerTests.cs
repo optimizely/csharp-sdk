@@ -286,7 +286,7 @@ namespace OptimizelySDK.Tests.OdpTests
             eventManager.UpdateSettings(_odpConfig);
 
             eventManager.SendEvent(_testEvents[0]);
-            cde.Wait();
+            cde.Wait(MAX_COUNT_DOWN_EVENT_WAIT_MS);
 
             var eventsSentToApi = eventsCollector.FirstOrDefault();
             var actualEvent = eventsSentToApi?.FirstOrDefault();
