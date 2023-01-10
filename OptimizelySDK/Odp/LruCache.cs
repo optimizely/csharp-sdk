@@ -61,6 +61,7 @@ namespace OptimizelySDK.Odp
             ILogger logger = null
         )
         {
+            //TODO: Please add a condition to check minimum value of maxSize as well. 
             _mutex = new object();
 
             _maxSize = Math.Max(0, maxSize ?? Constants.DEFAULT_MAX_CACHE_SIZE);

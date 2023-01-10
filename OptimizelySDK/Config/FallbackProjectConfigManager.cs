@@ -45,6 +45,15 @@ namespace OptimizelySDK.Config
             return ProjectConfig;
         }
 
+        public string SdkKey
+        {
+            get
+            {
+                return null;
+            }
+            
+        }
+
         /// <summary>
         /// Access to current cached project configuration
         /// </summary>

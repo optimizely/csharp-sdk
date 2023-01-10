@@ -164,7 +164,10 @@ namespace OptimizelySDK
                     var config = DatafileProjectConfig.Create(datafile, Logger, ErrorHandler);
                     ProjectConfigManager = new FallbackProjectConfigManager(config);
 #if USE_ODP
-                    SetupOdp(config);
+                    // Don't need to setup notification for update settings when DF is changed, because this is for hardcoded datafile.
+                    // Not supposed to change using this method.
+                    OdpManager.UpdateSettings(config.PublicKeyForOdp, config.HostForOdp,
+                    config.Segments.ToList());
 #endif
                 }
                 else
@@ -215,8 +218,8 @@ namespace OptimizelySDK
 #if USE_ODP
             InitializeComponents(eventDispatcher, logger, errorHandler, userProfileService,
                 notificationCenter, eventProcessor, defaultDecideOptions, odpManager);
+            SetupOdp(configManager.SdkKey);
 
-            SetupOdp(ProjectConfigManager.CachedProjectConfig);
 #else
             InitializeComponents(eventDispatcher, logger, errorHandler, userProfileService,
                 notificationCenter, eventProcessor, defaultDecideOptions);
@@ -255,27 +258,23 @@ namespace OptimizelySDK
         }
 
 #if USE_ODP
-        private void SetupOdp(ProjectConfig config)
+        private void SetupOdp(string sdkKey)
         {
-            if (config == null)
-            {
-                return;
-            }
 
-            var odpConfig = new OdpConfig(config.PublicKeyForOdp, config.HostForOdp,
-                config.Segments.ToList());
 
-            OdpManager = new OdpManager.Builder().
-                WithOdpConfig(odpConfig).
-                WithLogger(Logger).
-                WithErrorHandler(ErrorHandler).
-                Build();
+            NotificationRegistry.GetNotificationCenter(sdkKey).
+                AddNotification(NotificationCenter.NotificationType.OptimizelyConfigUpdate,
+                () =>
+                {
+                    var projectConfig = this.ProjectConfigManager.CachedProjectConfig;
+                    OdpManager?.UpdateSettings(projectConfig.PublicKeyForOdp, projectConfig.HostForOdp,
+                    projectConfig.Segments.ToList());
+                });
 
-            NotificationCenter.AddNotification(
-                NotificationCenter.NotificationType.OptimizelyConfigUpdate,
-                () => OdpManager?.UpdateSettings(config.PublicKeyForOdp, config.HostForOdp,
-                    config.Segments.ToList())
-            );
+            // in case if notification is lost.
+            var projectConfig = this.ProjectConfigManager.CachedProjectConfig;
+            OdpManager?.UpdateSettings(projectConfig.PublicKeyForOdp, projectConfig.HostForOdp,
+                    projectConfig.Segments.ToList());
         }
 #endif
 

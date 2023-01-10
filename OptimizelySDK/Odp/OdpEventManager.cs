@@ -402,7 +402,6 @@ namespace OptimizelySDK.Odp
             private BlockingCollection<object> _eventQueue =
                 new BlockingCollection<object>(Constants.DEFAULT_QUEUE_CAPACITY);
 
-            private OdpConfig _odpConfig;
             private IOdpEventApiManager _odpEventApiManager;
             private int _batchSize;
             private TimeSpan _flushInterval;
@@ -416,11 +415,6 @@ namespace OptimizelySDK.Odp
                 return this;
             }
 
-            public Builder WithOdpConfig(OdpConfig odpConfig)
-            {
-                _odpConfig = odpConfig;
-                return this;
-            }
 
             public Builder WithOdpEventApiManager(IOdpEventApiManager odpEventApiManager)
             {
@@ -467,7 +461,6 @@ namespace OptimizelySDK.Odp
             {
                 var manager = new OdpEventManager();
                 manager._eventQueue = _eventQueue;
-                manager._odpConfig = _odpConfig;
                 manager._odpEventApiManager = _odpEventApiManager;
                 manager._batchSize =
                     _batchSize < 1 ? Constants.DEFAULT_BATCH_SIZE : _batchSize;

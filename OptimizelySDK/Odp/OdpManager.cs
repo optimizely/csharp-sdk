@@ -155,7 +155,8 @@ namespace OptimizelySDK.Odp
             private ILogger _logger;
             private IErrorHandler _errorHandler;
             private ICache<List<string>> _cache;
-
+            private int? _maxSize;
+            private TimeSpan? _itemTimeout;
             public Builder WithSegmentManager(IOdpSegmentManager segmentManager)
             {
                 _segmentManager = segmentManager;
@@ -165,12 +166,6 @@ namespace OptimizelySDK.Odp
             public Builder WithEventManager(IOdpEventManager eventManager)
             {
                 _eventManager = eventManager;
-                return this;
-            }
-
-            public Builder WithOdpConfig(OdpConfig odpConfig)
-            {
-                _odpConfig = odpConfig;
                 return this;
             }
 
@@ -186,9 +181,18 @@ namespace OptimizelySDK.Odp
                 return this;
             }
 
-            public Builder WithCacheImplementation(ICache<List<string>> cache)
+            public Builder WithCache(ICache<List<string>> cache)
             {
                 _cache = cache;
+                return this;
+            }
+
+            public Builder WithCache(int? maxSize = null,
+                TimeSpan? itemTimeout = null)
+            {
+                _maxSize = maxSize;
+                _itemTimeout = itemTimeout;
+                
                 return this;
             }
 
@@ -201,11 +205,9 @@ namespace OptimizelySDK.Odp
             {
                 _logger = _logger ?? new DefaultLogger();
                 _errorHandler = _errorHandler ?? new NoOpErrorHandler();
-                _odpConfig = _odpConfig ?? new OdpConfig();
 
                 var manager = new OdpManager
                 {
-                    _odpConfig = _odpConfig,
                     _logger = _logger,
                     _enabled = asEnabled,
                 };
@@ -220,7 +222,6 @@ namespace OptimizelySDK.Odp
                     var eventApiManager = new OdpEventApiManager(_logger, _errorHandler);
 
                     manager.EventManager = new OdpEventManager.Builder().
-                        WithOdpConfig(_odpConfig).
                         WithBatchSize(Constants.DEFAULT_MAX_CACHE_SIZE).
                         WithTimeoutInterval(
                             TimeSpan.FromMilliseconds(Constants.DEFAULT_CACHE_SECONDS)).
@@ -241,7 +242,7 @@ namespace OptimizelySDK.Odp
                     var apiManager = new OdpSegmentApiManager(_logger, _errorHandler);
 
                     manager.SegmentManager =
-                        new OdpSegmentManager(apiManager, _odpConfig, _cache, _logger);
+                        new OdpSegmentManager(apiManager, this.GetCache(), _logger);
                 }
                 else
                 {
@@ -249,6 +250,11 @@ namespace OptimizelySDK.Odp
                 }
 
                 return manager;
+            }
+
+            private ICache<List<string>> GetCache()
+            {
+                return _cache ?? new LruCache<List<string>>(_maxSize, _itemTimeout, _logger);
             }
         }
 

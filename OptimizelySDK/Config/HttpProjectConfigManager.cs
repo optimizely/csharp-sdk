@@ -29,16 +29,28 @@ namespace OptimizelySDK.Config
         private string Url;
         private string LastModifiedSince = string.Empty;
         private string DatafileAccessToken = string.Empty;
-        private HttpProjectConfigManager(TimeSpan period, string url, TimeSpan blockingTimeout, bool autoUpdate, ILogger logger, IErrorHandler errorHandler) 
+        private string _sdkKey = string.Empty;
+
+        private HttpProjectConfigManager(TimeSpan period, string url, TimeSpan blockingTimeout, bool autoUpdate, ILogger logger, IErrorHandler errorHandler, string sdkKey) 
             : base(period, blockingTimeout, autoUpdate, logger, errorHandler)
         {
             Url = url;
+            _sdkKey = sdkKey;
         }
 
-        private HttpProjectConfigManager(TimeSpan period, string url, TimeSpan blockingTimeout, bool autoUpdate, ILogger logger, IErrorHandler errorHandler, string datafileAccessToken)
-            : this(period, url, blockingTimeout, autoUpdate, logger, errorHandler)
+        private HttpProjectConfigManager(TimeSpan period, string url, TimeSpan blockingTimeout, bool autoUpdate, ILogger logger, IErrorHandler errorHandler, string datafileAccessToken, string sdkKey
+            )
+            : this(period, url, blockingTimeout, autoUpdate, logger, errorHandler, sdkKey)
         {
             DatafileAccessToken = datafileAccessToken;
+        }
+
+        public string SdkKey
+        {
+            get
+            {
+                return _sdkKey;
+            }
         }
 
         public Task OnReady()
@@ -337,7 +349,7 @@ namespace OptimizelySDK.Config
                 }
                     
 
-                configManager = new HttpProjectConfigManager(Period, Url, BlockingTimeoutSpan, AutoUpdate, Logger, ErrorHandler, DatafileAccessToken);
+                configManager = new HttpProjectConfigManager(Period, Url, BlockingTimeoutSpan, AutoUpdate, Logger, ErrorHandler, DatafileAccessToken, SdkKey);
 
                 if (Datafile != null)
                 {
@@ -354,6 +366,7 @@ namespace OptimizelySDK.Config
                 
                 configManager.NotifyOnProjectConfigUpdate += () => {
                     NotificationCenter?.SendNotifications(NotificationCenter.NotificationType.OptimizelyConfigUpdate);
+                    NotificationRegistry.GetNotificationCenter(SdkKey).SendNotifications(NotificationCenter.NotificationType.OptimizelyConfigUpdate);
                 };
                 
 
