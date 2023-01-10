@@ -149,7 +149,6 @@ namespace OptimizelySDK.Odp
         /// </summary>
         public class Builder
         {
-            private OdpConfig _odpConfig;
             private IOdpEventManager _eventManager;
             private IOdpSegmentManager _segmentManager;
             private ILogger _logger;

@@ -21,11 +21,17 @@ namespace OptimizelySDK.Notifications
 {
     internal class NotificationRegistry
     {
-        private static object _mutex = new object();
+        private static readonly object _mutex = new object();
         private static Dictionary<string, NotificationCenter> _notificationCenters;
 
         private NotificationRegistry() { }
 
+        /// <summary>
+        /// Thread-safe access to the NotificationCenter
+        /// </summary>
+        /// <param name="sdkKey">Retrieve NotificationCenter based on SDK key</param>
+        /// <param name="logger">Logger to record events</param>
+        /// <returns>NotificationCenter instance per SDK key</returns>
         public static NotificationCenter GetNotificationCenter(string sdkKey, ILogger logger = null)
         {
             NotificationCenter notificationCenter;
