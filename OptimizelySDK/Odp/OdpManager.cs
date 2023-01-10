@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2022 Optimizely
+ * Copyright 2022-2023 Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -157,6 +157,7 @@ namespace OptimizelySDK.Odp
             private ICache<List<string>> _cache;
             private int? _maxSize;
             private TimeSpan? _itemTimeout;
+
             public Builder WithSegmentManager(IOdpSegmentManager segmentManager)
             {
                 _segmentManager = segmentManager;
@@ -188,11 +189,12 @@ namespace OptimizelySDK.Odp
             }
 
             public Builder WithCache(int? maxSize = null,
-                TimeSpan? itemTimeout = null)
+                TimeSpan? itemTimeout = null
+            )
             {
                 _maxSize = maxSize;
                 _itemTimeout = itemTimeout;
-                
+
                 return this;
             }
 
@@ -241,8 +243,7 @@ namespace OptimizelySDK.Odp
                 {
                     var apiManager = new OdpSegmentApiManager(_logger, _errorHandler);
 
-                    manager.SegmentManager =
-                        new OdpSegmentManager(apiManager, this.GetCache(), _logger);
+                    manager.SegmentManager = new OdpSegmentManager(apiManager, GetCache(), _logger);
                 }
                 else
                 {

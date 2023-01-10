@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright 2017-2022, Optimizely
+ * Copyright 2017-2023, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use file except in compliance with the License.
@@ -164,10 +164,10 @@ namespace OptimizelySDK
                     var config = DatafileProjectConfig.Create(datafile, Logger, ErrorHandler);
                     ProjectConfigManager = new FallbackProjectConfigManager(config);
 #if USE_ODP
-                    // Don't need to setup notification for update settings when DF is changed, because this is for hardcoded datafile.
-                    // Not supposed to change using this method.
+                    // No need to setup notification for datafile updates. This constructor
+                    // is for hardcoded datafile which should not be changed using this method.
                     OdpManager.UpdateSettings(config.PublicKeyForOdp, config.HostForOdp,
-                    config.Segments.ToList());
+                        config.Segments.ToList());
 #endif
                 }
                 else
@@ -218,7 +218,21 @@ namespace OptimizelySDK
 #if USE_ODP
             InitializeComponents(eventDispatcher, logger, errorHandler, userProfileService,
                 notificationCenter, eventProcessor, defaultDecideOptions, odpManager);
-            SetupOdp(configManager.SdkKey);
+
+            var projectConfig = ProjectConfigManager.CachedProjectConfig;
+
+            NotificationRegistry.GetNotificationCenter(sdkKey).
+                AddNotification(NotificationCenter.NotificationType.OptimizelyConfigUpdate,
+                    () =>
+                    {
+                        OdpManager?.UpdateSettings(projectConfig.PublicKeyForOdp,
+                            projectConfig.HostForOdp,
+                            projectConfig.Segments.ToList());
+                    });
+
+            // in case if notification is lost.
+            OdpManager?.UpdateSettings(projectConfig.PublicKeyForOdp, projectConfig.HostForOdp,
+                projectConfig.Segments.ToList());
 
 #else
             InitializeComponents(eventDispatcher, logger, errorHandler, userProfileService,
@@ -256,27 +270,6 @@ namespace OptimizelySDK
             OdpManager = odpManager ?? new OdpManager.Builder().Build();
 #endif
         }
-
-#if USE_ODP
-        private void SetupOdp(string sdkKey)
-        {
-
-
-            NotificationRegistry.GetNotificationCenter(sdkKey).
-                AddNotification(NotificationCenter.NotificationType.OptimizelyConfigUpdate,
-                () =>
-                {
-                    var projectConfig = this.ProjectConfigManager.CachedProjectConfig;
-                    OdpManager?.UpdateSettings(projectConfig.PublicKeyForOdp, projectConfig.HostForOdp,
-                    projectConfig.Segments.ToList());
-                });
-
-            // in case if notification is lost.
-            var projectConfig = this.ProjectConfigManager.CachedProjectConfig;
-            OdpManager?.UpdateSettings(projectConfig.PublicKeyForOdp, projectConfig.HostForOdp,
-                    projectConfig.Segments.ToList());
-        }
-#endif
 
         /// <summary>
         /// Buckets visitor and sends impression event to Optimizely.

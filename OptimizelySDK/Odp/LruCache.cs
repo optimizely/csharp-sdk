@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2022, Optimizely
+ * Copyright 2022-2023, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,7 @@ using System.Linq;
 
 namespace OptimizelySDK.Odp
 {
-    public class LruCache<T> : ICache<T>
-        where T : class
+    public class LruCache<T> : ICache<T> where T : class
     {
         /// <summary>
         /// The maximum number of elements that should be stored
@@ -61,9 +60,17 @@ namespace OptimizelySDK.Odp
             ILogger logger = null
         )
         {
-            //TODO: Please add a condition to check minimum value of maxSize as well. 
             _mutex = new object();
 
+            // TODO: Please add a condition to check minimum value of maxSize as well. 
+            // @msohailhussain What's the minimum value for maxSize?
+            // Thinking...
+            // maxSize ==> ____
+            // null ==> 10,000 (DEFAULT_MAX_CACHE_SIZE)
+            // -1 ==> 0
+            // 1 ==> 1
+            // 100 ==> 100
+            // 20,000 ==> 20,000
             _maxSize = Math.Max(0, maxSize ?? Constants.DEFAULT_MAX_CACHE_SIZE);
 
             _logger = logger ?? new DefaultLogger();

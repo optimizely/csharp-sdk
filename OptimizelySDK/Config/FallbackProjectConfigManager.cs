@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2019, 2022 Optimizely
+ * Copyright 2019, 2022-2023 Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,13 +45,15 @@ namespace OptimizelySDK.Config
             return ProjectConfig;
         }
 
+        /// <summary>
+        /// SDK Key for Fallback is not used and always null
+        /// </summary>
         public string SdkKey
         {
             get
             {
                 return null;
             }
-            
         }
 
         /// <summary>
