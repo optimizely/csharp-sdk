@@ -266,7 +266,7 @@ namespace OptimizelySDK.Odp
         /// <param name="odpEvent">Event to enqueue</param>
         public void SendEvent(OdpEvent odpEvent)
         {
-            if (!_odpConfig.IsReady())
+            if (_odpConfig == null || !_odpConfig.IsReady())
             {
                 _logger.Log(LogLevel.WARN, Constants.ODP_NOT_INTEGRATED_MESSAGE);
                 return;
@@ -349,7 +349,21 @@ namespace OptimizelySDK.Odp
         /// <param name="odpConfig">Configuration object containing new values</param>
         public void UpdateSettings(OdpConfig odpConfig)
         {
-            _odpConfig = odpConfig;
+            if (odpConfig == null)
+            {
+                return;
+            }
+
+            if (_odpConfig == null)
+            {
+                _odpConfig = odpConfig;
+
+                Start();
+            }
+            else
+            {
+                _odpConfig = odpConfig;
+            }
         }
 
         /// <summary>
@@ -414,7 +428,6 @@ namespace OptimizelySDK.Odp
                 _eventQueue = eventQueue;
                 return this;
             }
-
 
             public Builder WithOdpEventApiManager(IOdpEventApiManager odpEventApiManager)
             {

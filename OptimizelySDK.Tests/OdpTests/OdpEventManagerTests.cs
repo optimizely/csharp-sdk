@@ -161,7 +161,7 @@ namespace OptimizelySDK.Tests.OdpTests
                 Build(startImmediately: false);
             eventManager.UpdateSettings(_odpConfig);
 
-            // since we've not called start() then...
+            // since we've not called Start() then...
             eventManager.SendEvent(_testEvents[0]);
 
             // ...we should get a notice after trying to send an event
@@ -174,11 +174,11 @@ namespace OptimizelySDK.Tests.OdpTests
         public void ShouldLogAndDiscardEventsWhenEventManagerConfigNotReady()
         {
             var mockOdpConfig = new Mock<OdpConfig>(API_KEY, API_HOST, _emptySegmentsToCheck);
-            mockOdpConfig.Setup(o => o.IsReady()).Returns(false);
+            mockOdpConfig.Setup(o => o.IsReady()).Returns(false); // stay not ready
             var eventManager = new OdpEventManager.Builder().
                 WithOdpEventApiManager(_mockApiManager.Object).
                 WithLogger(_mockLogger.Object).
-                Build(startImmediately: false); // doing it manually in Act next
+                Build(startImmediately: false); // start manually in Act; Log once here
             eventManager.UpdateSettings(mockOdpConfig.Object);
 
             eventManager.Start(); // Log when Start() called
@@ -186,7 +186,7 @@ namespace OptimizelySDK.Tests.OdpTests
 
             _mockLogger.Verify(
                 l => l.Log(LogLevel.WARN, Constants.ODP_NOT_INTEGRATED_MESSAGE),
-                Times.Exactly(2));
+                Times.Exactly(3));
         }
 
         [Test]
@@ -211,17 +211,17 @@ namespace OptimizelySDK.Tests.OdpTests
         public void ShouldLogWhenOdpNotIntegratedAndStartCalled()
         {
             var mockOdpConfig = new Mock<OdpConfig>(API_KEY, API_HOST, _emptySegmentsToCheck);
-            mockOdpConfig.Setup(o => o.IsReady()).Returns(false);
+            mockOdpConfig.Setup(o => o.IsReady()).Returns(false); // since never ready
             var eventManager = new OdpEventManager.Builder().
                 WithOdpEventApiManager(_mockApiManager.Object).
                 WithLogger(_mockLogger.Object).
-                Build(startImmediately: false); // doing it manually in Act next
+                Build(startImmediately: false); // doing it manually in Act next; Log once
             eventManager.UpdateSettings(mockOdpConfig.Object);
 
-            eventManager.Start();
+            eventManager.Start(); // Log again
 
             _mockLogger.Verify(l => l.Log(LogLevel.WARN, Constants.ODP_NOT_INTEGRATED_MESSAGE),
-                Times.Once);
+                Times.Exactly(2));
         }
 
         [Test]
