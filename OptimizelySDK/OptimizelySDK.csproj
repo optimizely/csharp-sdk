@@ -195,7 +195,7 @@
     <Compile Include="Event\Entity\EventContext.cs" />
     <Compile Include="AudienceConditions\SemanticVersion.cs" />
     <Compile Include="Entity\Result.cs" />
-    <Compile Include="Notifications\NotificationRegistry.cs" />
+    <Compile Include="Notifications\NotificationCenterRegistry.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Utils\schema.json" />

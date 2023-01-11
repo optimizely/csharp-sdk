@@ -221,7 +221,7 @@ namespace OptimizelySDK
 
             var projectConfig = ProjectConfigManager.CachedProjectConfig;
 
-            NotificationRegistry.GetNotificationCenter(configManager.SdkKey).
+            NotificationCenterRegistry.GetNotificationCenter(configManager.SdkKey).
                 AddNotification(NotificationCenter.NotificationType.OptimizelyConfigUpdate,
                     () =>
                     {

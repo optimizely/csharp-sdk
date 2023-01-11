@@ -19,12 +19,10 @@ using System.Collections.Generic;
 
 namespace OptimizelySDK.Notifications
 {
-    internal class NotificationRegistry
+    internal static class NotificationCenterRegistry
     {
         private static readonly object _mutex = new object();
         private static Dictionary<string, NotificationCenter> _notificationCenters;
-
-        private NotificationRegistry() { }
 
         /// <summary>
         /// Thread-safe access to the NotificationCenter
