@@ -92,6 +92,11 @@ namespace OptimizelySDK.Odp
         private Dictionary<string, object> _commonData;
 
         /// <summary>
+        /// Indicates if OdpEventManager should start upon Build() and UpdateSettings()
+        /// </summary>
+        private bool _autoStart;
+
+        /// <summary>
         /// Clear all entries from the queue
         /// </summary>
         private void DropQueue()
@@ -422,6 +427,18 @@ namespace OptimizelySDK.Odp
             private TimeSpan _timeoutInterval;
             private ILogger _logger;
             private IErrorHandler _errorHandler;
+            private bool? _autoStart;
+
+            /// <summary>
+            /// Indicates if OdpEventManager should start upon Build() and UpdateSettings()
+            /// </summary>
+            /// <param name="autoStart"></param>
+            /// <returns></returns>
+            public Builder WithAutoStart(bool autoStart)
+            {
+                _autoStart = autoStart;
+                return this;
+            }
 
             public Builder WithEventQueue(BlockingCollection<object> eventQueue)
             {
@@ -468,9 +485,8 @@ namespace OptimizelySDK.Odp
             /// <summary>
             /// Build OdpEventManager instance using collected parameters
             /// </summary>
-            /// <param name="startImmediately">Should start event processor upon initialization</param>
             /// <returns>OdpEventProcessor instance</returns>
-            public OdpEventManager Build(bool startImmediately = true)
+            public OdpEventManager Build()
             {
                 var manager = new OdpEventManager();
                 manager._eventQueue = _eventQueue;
@@ -485,6 +501,7 @@ namespace OptimizelySDK.Odp
                     _timeoutInterval;
                 manager._logger = _logger ?? new NoOpLogger();
                 manager._errorHandler = _errorHandler ?? new NoOpErrorHandler();
+                manager._autoStart = _autoStart ?? true;
 
                 manager._validOdpDataTypes = new List<string>()
                 {
@@ -516,7 +533,7 @@ namespace OptimizelySDK.Odp
                     },
                 };
 
-                if (startImmediately)
+                if (manager._autoStart)
                 {
                     manager.Start();
                 }
