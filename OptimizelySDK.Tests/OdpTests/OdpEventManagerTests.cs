@@ -158,7 +158,8 @@ namespace OptimizelySDK.Tests.OdpTests
             var eventManager = new OdpEventManager.Builder().
                 WithOdpEventApiManager(_mockApiManager.Object).
                 WithLogger(_mockLogger.Object).
-                Build(startImmediately: false);
+                WithAutoStart(false).
+                Build();
             eventManager.UpdateSettings(_odpConfig);
 
             // since we've not called Start() then...
@@ -178,7 +179,8 @@ namespace OptimizelySDK.Tests.OdpTests
             var eventManager = new OdpEventManager.Builder().
                 WithOdpEventApiManager(_mockApiManager.Object).
                 WithLogger(_mockLogger.Object).
-                Build(startImmediately: false); // start manually in Act; Log once here
+                WithAutoStart(false). // start manually in Act
+                Build(); 
             eventManager.UpdateSettings(mockOdpConfig.Object);
 
             eventManager.Start(); // Log when Start() called
@@ -186,25 +188,25 @@ namespace OptimizelySDK.Tests.OdpTests
 
             _mockLogger.Verify(
                 l => l.Log(LogLevel.WARN, Constants.ODP_NOT_INTEGRATED_MESSAGE),
-                Times.Exactly(3));
+                Times.Exactly(2));
         }
 
         [Test]
         public void ShouldLogWhenOdpNotIntegratedAndIdentifyUserCalled()
         {
             var mockOdpConfig = new Mock<OdpConfig>(API_KEY, API_HOST, _emptySegmentsToCheck);
-            mockOdpConfig.Setup(o => o.IsReady()).Returns(false);
+            mockOdpConfig.Setup(o => o.IsReady()).Returns(false); // never ready
             var eventManager = new OdpEventManager.Builder().
                 WithOdpEventApiManager(_mockApiManager.Object).
                 WithLogger(_mockLogger.Object).
-                Build();
-            eventManager.UpdateSettings(mockOdpConfig.Object);
+                Build(); // assumed AutoStart true; Logs 1x here
+            eventManager.UpdateSettings(mockOdpConfig.Object); // auto-start after update; Logs 1x here
 
-            eventManager.IdentifyUser(FS_USER_ID);
+            eventManager.IdentifyUser(FS_USER_ID); // Logs 1x here too
 
             _mockLogger.Verify(
                 l => l.Log(LogLevel.WARN, Constants.ODP_NOT_INTEGRATED_MESSAGE),
-                Times.Exactly(2)); // during Start() and SendEvent()
+                Times.Exactly(3)); // during Start() and SendEvent()
         }
 
         [Test]
@@ -215,13 +217,14 @@ namespace OptimizelySDK.Tests.OdpTests
             var eventManager = new OdpEventManager.Builder().
                 WithOdpEventApiManager(_mockApiManager.Object).
                 WithLogger(_mockLogger.Object).
-                Build(startImmediately: false); // doing it manually in Act next; Log once
-            eventManager.UpdateSettings(mockOdpConfig.Object);
+                WithAutoStart(false). // doing it manually in Act next
+                Build(); 
+            eventManager.UpdateSettings(mockOdpConfig.Object); 
 
-            eventManager.Start(); // Log again
+            eventManager.Start(); // Log 1x here too
 
             _mockLogger.Verify(l => l.Log(LogLevel.WARN, Constants.ODP_NOT_INTEGRATED_MESSAGE),
-                Times.Exactly(2));
+                Times.Once);
         }
 
         [Test]

@@ -359,15 +359,11 @@ namespace OptimizelySDK.Odp
                 return;
             }
 
-            if (_odpConfig == null)
-            {
-                _odpConfig = odpConfig;
+            _odpConfig = odpConfig;
 
-                Start();
-            }
-            else
+            if (_autoStart)
             {
-                _odpConfig = odpConfig;
+                Start();
             }
         }
 
