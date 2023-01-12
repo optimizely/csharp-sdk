@@ -55,12 +55,13 @@ namespace OptimizelySDK.Notifications
         /// <param name="sdkKey">SDK key identifying the target</param>
         public static void RemoveNotificationCenter(string sdkKey)
         {
-            var notificationCenterToRemove = GetNotificationCenter(sdkKey);
-            notificationCenterToRemove.ClearAllNotifications();
-
             lock (_mutex)
             {
-                _notificationCenters.Remove(sdkKey);
+                if (_notificationCenters.TryGetValue(sdkKey, out NotificationCenter notificationCenter))
+                {
+                    notificationCenter.ClearAllNotifications();
+                    _notificationCenters.Remove(sdkKey);
+                }
             }
         }
     }
