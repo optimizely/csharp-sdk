@@ -1493,9 +1493,16 @@ namespace OptimizelySDK
 
             Disposed = true;
 
-            NotificationCenterRegistry.RemoveNotificationCenter(ProjectConfigManager.SdkKey);
+            if (ProjectConfigManager is IDisposable)
+            {
+                NotificationCenterRegistry.GetNotificationCenter(ProjectConfigManager.SdkKey).
+                    RemoveNotification(NotificationCenter.NotificationId);
 
-            (ProjectConfigManager as IDisposable)?.Dispose();
+                NotificationCenterRegistry.RemoveNotificationCenter(ProjectConfigManager.SdkKey);
+
+                (ProjectConfigManager as IDisposable)?.Dispose();
+            }
+
             (EventProcessor as IDisposable)?.Dispose();
 
             ProjectConfigManager = null;
