@@ -48,5 +48,18 @@ namespace OptimizelySDK.Notifications
 
             return notificationCenter;
         }
+
+        /// <summary>
+        /// Thread-safe removal of a NotificationCenter from the Registry 
+        /// </summary>
+        /// <param name="sdkKey">SDK key identifying the target</param>
+        /// <returns>true if the element is successfully found and removed; otherwise, false</returns>
+        public static bool RemoveNotificationCenter(string sdkKey)
+        {
+            lock (_mutex)
+            {
+                return _notificationCenters.Remove(sdkKey);
+            }
+        }
     }
 }

@@ -1491,7 +1491,7 @@ namespace OptimizelySDK
         {
             if (Disposed) return;
 
-            Disposed = true;
+            NotificationCenterRegistry.RemoveNotificationCenter(ProjectConfigManager.SdkKey);
 
             (ProjectConfigManager as IDisposable)?.Dispose();
             (EventProcessor as IDisposable)?.Dispose();
@@ -1501,6 +1501,7 @@ namespace OptimizelySDK
 #if USE_ODP
             OdpManager?.Dispose();
 #endif
+            Disposed = true;
         }
     }
 }
