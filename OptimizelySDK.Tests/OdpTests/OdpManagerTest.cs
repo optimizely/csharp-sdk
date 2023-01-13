@@ -103,7 +103,7 @@ namespace OptimizelySDK.Tests.OdpTests
                 WithLogger(_mockLogger.Object).
                 Build();
             manager.UpdateSettings(API_KEY, API_HOST, _emptySegmentsToCheck);
-            
+
             manager.Dispose();
 
             _mockOdpEventManager.Verify(e => e.Stop(), Times.Once);
@@ -120,7 +120,6 @@ namespace OptimizelySDK.Tests.OdpTests
                 WithEventManager(_mockOdpEventManager.Object).
                 WithLogger(_mockLogger.Object).
                 Build();
-            manager.UpdateSettings(API_KEY, API_HOST, _emptySegmentsToCheck);
 
             var wasUpdated = manager.UpdateSettings(UPDATED_API_KEY, UPDATED_ODP_ENDPOINT,
                 _updatedSegmentsToCheck);
@@ -143,7 +142,6 @@ namespace OptimizelySDK.Tests.OdpTests
                 WithEventManager(_mockOdpEventManager.Object).
                 WithLogger(_mockLogger.Object).
                 Build();
-            manager.UpdateSettings(API_KEY, API_HOST, _emptySegmentsToCheck);
 
             var wasUpdated = manager.UpdateSettings(UPDATED_API_KEY, UPDATED_ODP_ENDPOINT,
                 _updatedSegmentsToCheck);
@@ -158,7 +156,6 @@ namespace OptimizelySDK.Tests.OdpTests
         [Test]
         public void ShouldHandleOdpConfigSettingsNoChange()
         {
-            var odpConfig = new OdpConfig(API_KEY, API_HOST, _emptySegmentsToCheck);
             _mockSegmentManager.Setup(s => s.UpdateSettings(It.IsAny<OdpConfig>()));
             _mockOdpEventManager.Setup(e => e.UpdateSettings(It.IsAny<OdpConfig>()));
             var manager = new OdpManager.Builder().
@@ -166,9 +163,12 @@ namespace OptimizelySDK.Tests.OdpTests
                 WithEventManager(_mockOdpEventManager.Object).
                 WithLogger(_mockLogger.Object).
                 Build();
+            manager.UpdateSettings(API_KEY, API_HOST, _emptySegmentsToCheck); // initial set
+            _mockOdpEventManager.ResetCalls();
+            _mockSegmentManager.ResetCalls();
 
-            var wasUpdated = manager.UpdateSettings(odpConfig.ApiKey, odpConfig.ApiHost,
-                odpConfig.SegmentsToCheck);
+            // attempt to set with the same config
+            var wasUpdated = manager.UpdateSettings(API_KEY, API_HOST, _emptySegmentsToCheck);
 
             Assert.IsFalse(wasUpdated);
             _mockSegmentManager.Verify(s => s.UpdateSettings(It.IsAny<OdpConfig>()), Times.Never);
@@ -178,36 +178,44 @@ namespace OptimizelySDK.Tests.OdpTests
         [Test]
         public void ShouldUpdateSettingsWithReset()
         {
-            _mockSegmentManager.Setup(s =>
-                s.UpdateSettings(It.IsAny<OdpConfig>()));
+            _mockOdpEventManager.Setup(e => e.UpdateSettings(It.IsAny<OdpConfig>()));
+            _mockSegmentManager.Setup(s => s.ResetCache());
+            _mockSegmentManager.Setup(s => s.UpdateSettings(It.IsAny<OdpConfig>()));
             var manager = new OdpManager.Builder().
                 WithSegmentManager(_mockSegmentManager.Object).
                 WithEventManager(_mockOdpEventManager.Object).
                 WithLogger(_mockLogger.Object).
                 Build();
-            manager.UpdateSettings(API_KEY, API_HOST, _emptySegmentsToCheck);
 
             var wasUpdated = manager.UpdateSettings(UPDATED_API_KEY, UPDATED_ODP_ENDPOINT,
                 _updatedSegmentsToCheck);
 
             Assert.IsTrue(wasUpdated);
+            _mockOdpEventManager.Verify(e=>e.UpdateSettings(It.IsAny<OdpConfig>()), Times.Once);
             _mockSegmentManager.Verify(s => s.ResetCache(), Times.Once);
+            _mockSegmentManager.Verify(s=>s.UpdateSettings(It.IsAny<OdpConfig>()), Times.Once);
         }
 
         [Test]
         public void ShouldDisableOdpThroughConfiguration()
         {
-            _mockOdpEventManager.Setup(e => e.SendEvent(It.IsAny<OdpEvent>()));
+            _mockOdpEventManager.Setup(e => e.Start());
             _mockOdpEventManager.Setup(e => e.IsStarted).Returns(true);
+            _mockOdpEventManager.Setup(e => e.SendEvent(It.IsAny<OdpEvent>()));
+            _mockOdpEventManager.Setup(e => e.UpdateSettings(It.IsAny<OdpConfig>()));
             var manager = new OdpManager.Builder().
                 WithEventManager(_mockOdpEventManager.Object).
                 WithLogger(_mockLogger.Object).
-                Build();
-            manager.UpdateSettings(API_KEY, API_HOST, _emptySegmentsToCheck);
+                Build(); // auto-start event manager attempted, but no config
+            manager.UpdateSettings(API_KEY, API_HOST,
+                _emptySegmentsToCheck); // event manager config added + auto-start
 
+            // should send event
             manager.SendEvent(TEST_EVENT_TYPE, TEST_EVENT_ACTION, _testEventIdentifiers,
                 _testEventData);
 
+            _mockOdpEventManager.Verify(e => e.Start(), Times.Once);
+            _mockOdpEventManager.Verify(e => e.UpdateSettings(It.IsAny<OdpConfig>()), Times.Once);
             _mockOdpEventManager.Verify(e => e.SendEvent(It.IsAny<OdpEvent>()), Times.Once);
             _mockLogger.Verify(l =>
                 l.Log(LogLevel.ERROR, "ODP event not dispatched (ODP disabled)."), Times.Never);
@@ -215,12 +223,13 @@ namespace OptimizelySDK.Tests.OdpTests
             _mockOdpEventManager.ResetCalls();
             _mockLogger.ResetCalls();
 
+            // remove config and try sending again
             manager.UpdateSettings(string.Empty, string.Empty, _emptySegmentsToCheck);
-
             manager.SendEvent(TEST_EVENT_TYPE, TEST_EVENT_ACTION, _testEventIdentifiers,
                 _testEventData);
             manager.Dispose();
 
+            // should not try to send and provide a log message
             _mockOdpEventManager.Verify(e => e.SendEvent(It.IsAny<OdpEvent>()), Times.Never);
             _mockLogger.Verify(l =>
                 l.Log(LogLevel.ERROR, "ODP event not dispatched (ODP disabled)."), Times.Once);
@@ -312,6 +321,7 @@ namespace OptimizelySDK.Tests.OdpTests
         {
             _mockOdpEventManager.Setup(e => e.SendEvent(It.IsAny<OdpEvent>()));
             var manager = new OdpManager.Builder().
+                WithEventManager(_mockOdpEventManager.Object).
                 WithLogger(_mockLogger.Object).
                 Build(false); // do not enable
             manager.UpdateSettings(string.Empty, string.Empty, _emptySegmentsToCheck);

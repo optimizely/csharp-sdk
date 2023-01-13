@@ -64,7 +64,7 @@ namespace OptimizelySDK.Odp
         public bool UpdateSettings(string apiKey, string apiHost, List<string> segmentsToCheck)
         {
             var newConfig = new OdpConfig(apiKey, apiHost, segmentsToCheck);
-            if (_odpConfig == null || _odpConfig.Equals(newConfig))
+            if (_odpConfig != null && _odpConfig.Equals(newConfig))
             {
                 return false;
             }
@@ -212,11 +212,6 @@ namespace OptimizelySDK.Odp
                     _logger = _logger,
                     _enabled = asEnabled,
                 };
-
-                if (!manager._enabled)
-                {
-                    return manager;
-                }
 
                 if (_eventManager == null)
                 {

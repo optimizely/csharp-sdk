@@ -22,7 +22,9 @@ namespace OptimizelySDK.Notifications
     internal static class NotificationCenterRegistry
     {
         private static readonly object _mutex = new object();
-        private static Dictionary<string, NotificationCenter> _notificationCenters;
+
+        private static Dictionary<string, NotificationCenter> _notificationCenters =
+            new Dictionary<string, NotificationCenter>();
 
         /// <summary>
         /// Thread-safe access to the NotificationCenter
@@ -32,6 +34,11 @@ namespace OptimizelySDK.Notifications
         /// <returns>NotificationCenter instance per SDK key</returns>
         public static NotificationCenter GetNotificationCenter(string sdkKey, ILogger logger = null)
         {
+            if (sdkKey == null)
+            {
+                return default;
+            }
+            
             NotificationCenter notificationCenter;
             lock (_mutex)
             {
@@ -55,9 +62,15 @@ namespace OptimizelySDK.Notifications
         /// <param name="sdkKey">SDK key identifying the target</param>
         public static void RemoveNotificationCenter(string sdkKey)
         {
+            if (sdkKey == null)
+            {
+                return;
+            }
+            
             lock (_mutex)
             {
-                if (_notificationCenters.TryGetValue(sdkKey, out NotificationCenter notificationCenter))
+                if (_notificationCenters.TryGetValue(sdkKey,
+                        out NotificationCenter notificationCenter))
                 {
                     notificationCenter.ClearAllNotifications();
                     _notificationCenters.Remove(sdkKey);

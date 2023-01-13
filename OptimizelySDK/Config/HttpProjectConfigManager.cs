@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+#if !(NET35 || NET40 || NETSTANDARD1_6)
+#define USE_ODP
+#endif
+
 using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Logger;
 using OptimizelySDK.Notifications;
@@ -412,9 +416,12 @@ namespace OptimizelySDK.Config
                 {
                     NotificationCenter?.SendNotifications(NotificationCenter.NotificationType.
                         OptimizelyConfigUpdate);
+                    
+#if USE_ODP
                     NotificationCenterRegistry.GetNotificationCenter(SdkKey).
                         SendNotifications(
                             NotificationCenter.NotificationType.OptimizelyConfigUpdate);
+#endif
                 };
 
 

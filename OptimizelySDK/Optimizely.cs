@@ -220,19 +220,21 @@ namespace OptimizelySDK
                 notificationCenter, eventProcessor, defaultDecideOptions, odpManager);
 
             var projectConfig = ProjectConfigManager.CachedProjectConfig;
+            if (projectConfig != null)
+            {
+                NotificationCenterRegistry.GetNotificationCenter(configManager.SdkKey)?.
+                    AddNotification(NotificationCenter.NotificationType.OptimizelyConfigUpdate,
+                        () =>
+                        {
+                            OdpManager?.UpdateSettings(projectConfig.PublicKeyForOdp,
+                                projectConfig.HostForOdp,
+                                projectConfig.Segments.ToList());
+                        });
 
-            NotificationCenterRegistry.GetNotificationCenter(configManager.SdkKey).
-                AddNotification(NotificationCenter.NotificationType.OptimizelyConfigUpdate,
-                    () =>
-                    {
-                        OdpManager?.UpdateSettings(projectConfig.PublicKeyForOdp,
-                            projectConfig.HostForOdp,
-                            projectConfig.Segments.ToList());
-                    });
-
-            // in case if notification is lost.
-            OdpManager?.UpdateSettings(projectConfig.PublicKeyForOdp, projectConfig.HostForOdp,
-                projectConfig.Segments.ToList());
+                // in case if notification is lost.
+                OdpManager?.UpdateSettings(projectConfig.PublicKeyForOdp, projectConfig.HostForOdp,
+                    projectConfig.Segments.ToList());
+            }
 #else
             InitializeComponents(eventDispatcher, logger, errorHandler, userProfileService,
                 notificationCenter, eventProcessor, defaultDecideOptions);
@@ -1493,18 +1495,22 @@ namespace OptimizelySDK
             {
                 return;
             }
+
             Disposed = true;
 
             if (ProjectConfigManager is IDisposable)
             {
+#if USE_ODP
                 NotificationCenterRegistry.RemoveNotificationCenter(ProjectConfigManager.SdkKey);
+#endif
 
                 (ProjectConfigManager as IDisposable)?.Dispose();
             }
+
             ProjectConfigManager = null;
 
             (EventProcessor as IDisposable)?.Dispose();
-            
+
 #if USE_ODP
             OdpManager?.Dispose();
 #endif
