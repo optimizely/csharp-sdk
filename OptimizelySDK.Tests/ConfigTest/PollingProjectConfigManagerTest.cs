@@ -73,10 +73,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
             configManager.GetConfig();
             stopwatch.Stop();
 
-            var elapsed = stopwatch.Elapsed.TotalMilliseconds;
-            Assert.True(elapsed >= POLL_EVERY_MILLISECONDS);
-            Console.WriteLine(
-                $"stopwatch.Elapsed.TotalMilliseconds: {elapsed}");
+            Assert.GreaterOrEqual(stopwatch.Elapsed.TotalMilliseconds, POLL_EVERY_MILLISECONDS);
             configManager.Dispose();
         }
 
