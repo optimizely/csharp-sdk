@@ -61,7 +61,7 @@ namespace OptimizelySDK.Odp
         )
         {
             _mutex = new object();
-            
+
             _maxSize = Math.Max(0, maxSize ?? Constants.DEFAULT_MAX_CACHE_SIZE);
 
             _logger = logger ?? new DefaultLogger();

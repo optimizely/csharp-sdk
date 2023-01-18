@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2022 Optimizely
+ * Copyright 2022, 2023 Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -167,7 +167,7 @@ namespace OptimizelySDK.Tests.OdpTests
             var manager = new OdpSegmentManager(_mockApiManager.Object, _mockCache.Object,
                 _mockLogger.Object);
             manager.UpdateSettings(mockOdpConfig.Object);
-            
+
             var segments = manager.FetchQualifiedSegments(FS_USER_ID);
 
             Assert.IsNull(segments);
@@ -179,7 +179,8 @@ namespace OptimizelySDK.Tests.OdpTests
         [Test]
         public void ShouldIgnoreCache()
         {
-            var manager = new OdpSegmentManager(_mockApiManager.Object, _mockCache.Object, _mockLogger.Object);
+            var manager = new OdpSegmentManager(_mockApiManager.Object, _mockCache.Object,
+                _mockLogger.Object);
             manager.UpdateSettings(_odpConfig);
 
             manager.FetchQualifiedSegments(FS_USER_ID, new List<OdpSegmentOption>
@@ -199,7 +200,8 @@ namespace OptimizelySDK.Tests.OdpTests
         [Test]
         public void ShouldResetCache()
         {
-            var manager = new OdpSegmentManager(_mockApiManager.Object, _mockCache.Object, _mockLogger.Object);
+            var manager = new OdpSegmentManager(_mockApiManager.Object, _mockCache.Object,
+                _mockLogger.Object);
             manager.UpdateSettings(_odpConfig);
 
             manager.FetchQualifiedSegments(FS_USER_ID, new List<OdpSegmentOption>
@@ -221,7 +223,8 @@ namespace OptimizelySDK.Tests.OdpTests
         {
             var keyCollector = new List<string>();
             _mockCache.Setup(c => c.Lookup(Capture.In(keyCollector)));
-            var manager = new OdpSegmentManager(_mockApiManager.Object, _mockCache.Object, _mockLogger.Object);
+            var manager = new OdpSegmentManager(_mockApiManager.Object, _mockCache.Object,
+                _mockLogger.Object);
             manager.UpdateSettings(_odpConfig);
 
             manager.FetchQualifiedSegments(FS_USER_ID);

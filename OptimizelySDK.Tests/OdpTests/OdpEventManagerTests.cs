@@ -180,7 +180,7 @@ namespace OptimizelySDK.Tests.OdpTests
                 WithOdpEventApiManager(_mockApiManager.Object).
                 WithLogger(_mockLogger.Object).
                 WithAutoStart(false). // start manually in Act
-                Build(); 
+                Build();
             eventManager.UpdateSettings(mockOdpConfig.Object);
 
             eventManager.Start(); // Log when Start() called
@@ -200,7 +200,8 @@ namespace OptimizelySDK.Tests.OdpTests
                 WithOdpEventApiManager(_mockApiManager.Object).
                 WithLogger(_mockLogger.Object).
                 Build(); // assumed AutoStart true; Logs 1x here
-            eventManager.UpdateSettings(mockOdpConfig.Object); // auto-start after update; Logs 1x here
+            eventManager.UpdateSettings(mockOdpConfig.
+                Object); // auto-start after update; Logs 1x here
 
             eventManager.IdentifyUser(FS_USER_ID); // Logs 1x here too
 
@@ -218,8 +219,8 @@ namespace OptimizelySDK.Tests.OdpTests
                 WithOdpEventApiManager(_mockApiManager.Object).
                 WithLogger(_mockLogger.Object).
                 WithAutoStart(false). // doing it manually in Act next
-                Build(); 
-            eventManager.UpdateSettings(mockOdpConfig.Object); 
+                Build();
+            eventManager.UpdateSettings(mockOdpConfig.Object);
 
             eventManager.Start(); // Log 1x here too
 

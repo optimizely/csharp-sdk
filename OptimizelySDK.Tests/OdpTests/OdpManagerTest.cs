@@ -191,9 +191,9 @@ namespace OptimizelySDK.Tests.OdpTests
                 _updatedSegmentsToCheck);
 
             Assert.IsTrue(wasUpdated);
-            _mockOdpEventManager.Verify(e=>e.UpdateSettings(It.IsAny<OdpConfig>()), Times.Once);
+            _mockOdpEventManager.Verify(e => e.UpdateSettings(It.IsAny<OdpConfig>()), Times.Once);
             _mockSegmentManager.Verify(s => s.ResetCache(), Times.Once);
-            _mockSegmentManager.Verify(s=>s.UpdateSettings(It.IsAny<OdpConfig>()), Times.Once);
+            _mockSegmentManager.Verify(s => s.UpdateSettings(It.IsAny<OdpConfig>()), Times.Once);
         }
 
         [Test]

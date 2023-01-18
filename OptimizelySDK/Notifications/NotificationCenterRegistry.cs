@@ -39,7 +39,7 @@ namespace OptimizelySDK.Notifications
                 logger?.Log(LogLevel.INFO, "No SDK key provided to GetNotificationCenter");
                 return default;
             }
-            
+
             NotificationCenter notificationCenter;
             lock (_mutex)
             {
@@ -67,7 +67,7 @@ namespace OptimizelySDK.Notifications
             {
                 return;
             }
-            
+
             lock (_mutex)
             {
                 if (_notificationCenters.TryGetValue(sdkKey,
