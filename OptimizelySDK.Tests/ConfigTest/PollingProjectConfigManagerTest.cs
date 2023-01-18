@@ -61,18 +61,22 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         [Test]
         public void TestPollingConfigManagerBlocksWhenProjectConfigIsNotProvided()
         {
+            const int POLL_EVERY_MILLISECONDS = 500;
             var stopwatch = new Stopwatch();
             var configManager = new TestPollingProjectConfigManager(TimeSpan.FromSeconds(2),
-                TimeSpan.FromSeconds(2), true, LoggerMock.Object, new int[]
+                TimeSpan.FromSeconds(2), true, LoggerMock.Object, new[]
                 {
-                    500
+                    POLL_EVERY_MILLISECONDS,
                 });
 
             stopwatch.Start();
-            var config = configManager.GetConfig();
+            configManager.GetConfig();
             stopwatch.Stop();
 
-            Assert.True(stopwatch.Elapsed.TotalMilliseconds >= 500);
+            var elapsed = stopwatch.Elapsed.TotalMilliseconds;
+            Assert.True(elapsed >= POLL_EVERY_MILLISECONDS);
+            Console.WriteLine(
+                $"stopwatch.Elapsed.TotalMilliseconds: {elapsed}");
             configManager.Dispose();
         }
 
