@@ -414,14 +414,13 @@ namespace OptimizelySDK.Config
 
                 configManager.NotifyOnProjectConfigUpdate += () =>
                 {
-                    NotificationCenter?.SendNotifications(NotificationCenter.NotificationType.
-                        OptimizelyConfigUpdate);
-                    
 #if USE_ODP
                     NotificationCenterRegistry.GetNotificationCenter(SdkKey).
                         SendNotifications(
                             NotificationCenter.NotificationType.OptimizelyConfigUpdate);
 #endif
+                    NotificationCenter?.SendNotifications(NotificationCenter.NotificationType.
+                        OptimizelyConfigUpdate);
                 };
 
 
