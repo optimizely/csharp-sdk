@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2022, Optimizely
+ * Copyright 2022-2023, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -92,6 +92,11 @@ namespace OptimizelySDK.Odp
         private Dictionary<string, object> _commonData;
 
         /// <summary>
+        /// Indicates if OdpEventManager should start upon Build() and UpdateSettings()
+        /// </summary>
+        private bool _autoStart;
+
+        /// <summary>
         /// Clear all entries from the queue
         /// </summary>
         private void DropQueue()
@@ -107,7 +112,7 @@ namespace OptimizelySDK.Odp
         /// </summary>
         public void Start()
         {
-            if (!_odpConfig.IsReady())
+            if (_odpConfig == null || !_odpConfig.IsReady())
             {
                 _logger.Log(LogLevel.WARN, Constants.ODP_NOT_INTEGRATED_MESSAGE);
 
@@ -266,7 +271,7 @@ namespace OptimizelySDK.Odp
         /// <param name="odpEvent">Event to enqueue</param>
         public void SendEvent(OdpEvent odpEvent)
         {
-            if (!_odpConfig.IsReady())
+            if (_odpConfig == null || !_odpConfig.IsReady())
             {
                 _logger.Log(LogLevel.WARN, Constants.ODP_NOT_INTEGRATED_MESSAGE);
                 return;
@@ -349,7 +354,17 @@ namespace OptimizelySDK.Odp
         /// <param name="odpConfig">Configuration object containing new values</param>
         public void UpdateSettings(OdpConfig odpConfig)
         {
+            if (odpConfig == null)
+            {
+                return;
+            }
+
             _odpConfig = odpConfig;
+
+            if (_autoStart)
+            {
+                Start();
+            }
         }
 
         /// <summary>
@@ -402,23 +417,28 @@ namespace OptimizelySDK.Odp
             private BlockingCollection<object> _eventQueue =
                 new BlockingCollection<object>(Constants.DEFAULT_QUEUE_CAPACITY);
 
-            private OdpConfig _odpConfig;
             private IOdpEventApiManager _odpEventApiManager;
             private int _batchSize;
             private TimeSpan _flushInterval;
             private TimeSpan _timeoutInterval;
             private ILogger _logger;
             private IErrorHandler _errorHandler;
+            private bool? _autoStart;
+
+            /// <summary>
+            /// Indicates if OdpEventManager should start upon Build() and UpdateSettings()
+            /// </summary>
+            /// <param name="autoStart"></param>
+            /// <returns></returns>
+            public Builder WithAutoStart(bool autoStart)
+            {
+                _autoStart = autoStart;
+                return this;
+            }
 
             public Builder WithEventQueue(BlockingCollection<object> eventQueue)
             {
                 _eventQueue = eventQueue;
-                return this;
-            }
-
-            public Builder WithOdpConfig(OdpConfig odpConfig)
-            {
-                _odpConfig = odpConfig;
                 return this;
             }
 
@@ -461,13 +481,11 @@ namespace OptimizelySDK.Odp
             /// <summary>
             /// Build OdpEventManager instance using collected parameters
             /// </summary>
-            /// <param name="startImmediately">Should start event processor upon initialization</param>
             /// <returns>OdpEventProcessor instance</returns>
-            public OdpEventManager Build(bool startImmediately = true)
+            public OdpEventManager Build()
             {
                 var manager = new OdpEventManager();
                 manager._eventQueue = _eventQueue;
-                manager._odpConfig = _odpConfig;
                 manager._odpEventApiManager = _odpEventApiManager;
                 manager._batchSize =
                     _batchSize < 1 ? Constants.DEFAULT_BATCH_SIZE : _batchSize;
@@ -479,6 +497,7 @@ namespace OptimizelySDK.Odp
                     _timeoutInterval;
                 manager._logger = _logger ?? new NoOpLogger();
                 manager._errorHandler = _errorHandler ?? new NoOpErrorHandler();
+                manager._autoStart = _autoStart ?? true;
 
                 manager._validOdpDataTypes = new List<string>()
                 {
@@ -510,7 +529,7 @@ namespace OptimizelySDK.Odp
                     },
                 };
 
-                if (startImmediately)
+                if (manager._autoStart)
                 {
                     manager.Start();
                 }

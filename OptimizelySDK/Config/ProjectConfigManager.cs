@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2019, 2022 Optimizely
+ * Copyright 2019, 2022-2023 Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,11 @@ namespace OptimizelySDK.Config
         /// </summary>
         /// <returns>ProjectConfig instance</returns>
         ProjectConfig GetConfig();
+
+        /// <summary>
+        /// SDK key in use for this project
+        /// </summary>
+        string SdkKey { get; }
 
         /// <summary>
         /// Access to current cached project configuration

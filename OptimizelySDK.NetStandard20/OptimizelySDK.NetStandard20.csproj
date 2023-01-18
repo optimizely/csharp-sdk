@@ -10,6 +10,9 @@
     <Compile Include="..\OptimizelySDK\IOptimizely.cs">
       <Link>IOptimizely.cs</Link>
     </Compile>
+    <Compile Include="..\OptimizelySDK\Notifications\NotificationCenterRegistry.cs">
+      <Link>Notifications\NotificationCenterRegistry.cs</Link>
+    </Compile>
     <Compile Include="..\OptimizelySDK\Odp\Constants.cs">
       <Link>Odp\Constants.cs</Link>
     </Compile>
@@ -39,9 +42,6 @@
     </Compile>
     <Compile Include="..\OptimizelySDK\Odp\Entity\OdpEvent.cs">
       <Link>Odp\Entity\OdpEvent.cs</Link>
-    </Compile>
-    <Compile Include="..\OptimizelySDK\Odp\Entity\OptimizelySdkSettings.cs">
-      <Link>Odp\Entity\OptimizelySdkSettings.cs</Link>
     </Compile>
     <Compile Include="..\OptimizelySDK\Odp\Entity\Response.cs">
       <Link>Odp\Entity\Response.cs</Link>

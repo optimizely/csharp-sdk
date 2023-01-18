@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2022 Optimizely
+ * Copyright 2022-2023 Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,7 +64,7 @@ namespace OptimizelySDK.Odp
         public bool UpdateSettings(string apiKey, string apiHost, List<string> segmentsToCheck)
         {
             var newConfig = new OdpConfig(apiKey, apiHost, segmentsToCheck);
-            if (_odpConfig.Equals(newConfig))
+            if (_odpConfig != null && _odpConfig.Equals(newConfig))
             {
                 return false;
             }
@@ -149,14 +149,13 @@ namespace OptimizelySDK.Odp
         /// </summary>
         public class Builder
         {
-            private OdpConfig _odpConfig;
             private IOdpEventManager _eventManager;
             private IOdpSegmentManager _segmentManager;
-            private int _cacheSize;
-            private int _cacheTimeoutSeconds;
             private ILogger _logger;
             private IErrorHandler _errorHandler;
             private ICache<List<string>> _cache;
+            private int? _maxSize;
+            private TimeSpan? _itemTimeout;
 
             public Builder WithSegmentManager(IOdpSegmentManager segmentManager)
             {
@@ -167,24 +166,6 @@ namespace OptimizelySDK.Odp
             public Builder WithEventManager(IOdpEventManager eventManager)
             {
                 _eventManager = eventManager;
-                return this;
-            }
-
-            public Builder WithOdpConfig(OdpConfig odpConfig)
-            {
-                _odpConfig = odpConfig;
-                return this;
-            }
-
-            public Builder WithCacheSize(int cacheSize)
-            {
-                _cacheSize = cacheSize;
-                return this;
-            }
-
-            public Builder WithCacheTimeout(int seconds)
-            {
-                _cacheTimeoutSeconds = seconds;
                 return this;
             }
 
@@ -200,9 +181,19 @@ namespace OptimizelySDK.Odp
                 return this;
             }
 
-            public Builder WithCacheImplementation(ICache<List<string>> cache)
+            public Builder WithCache(ICache<List<string>> cache)
             {
                 _cache = cache;
+                return this;
+            }
+
+            public Builder WithCache(int? maxSize = null,
+                TimeSpan? itemTimeout = null
+            )
+            {
+                _maxSize = maxSize;
+                _itemTimeout = itemTimeout;
+
                 return this;
             }
 
@@ -215,28 +206,21 @@ namespace OptimizelySDK.Odp
             {
                 _logger = _logger ?? new DefaultLogger();
                 _errorHandler = _errorHandler ?? new NoOpErrorHandler();
-                _odpConfig = _odpConfig ?? new OdpConfig();
 
                 var manager = new OdpManager
                 {
-                    _odpConfig = _odpConfig,
                     _logger = _logger,
                     _enabled = asEnabled,
                 };
-
-                if (!manager._enabled)
-                {
-                    return manager;
-                }
 
                 if (_eventManager == null)
                 {
                     var eventApiManager = new OdpEventApiManager(_logger, _errorHandler);
 
                     manager.EventManager = new OdpEventManager.Builder().
-                        WithOdpConfig(_odpConfig).
-                        WithBatchSize(_cacheSize).
-                        WithTimeoutInterval(TimeSpan.FromMilliseconds(_cacheTimeoutSeconds)).
+                        WithBatchSize(Constants.DEFAULT_MAX_CACHE_SIZE).
+                        WithTimeoutInterval(
+                            TimeSpan.FromMilliseconds(Constants.DEFAULT_CACHE_SECONDS)).
                         WithOdpEventApiManager(eventApiManager).
                         WithLogger(_logger).
                         WithErrorHandler(_errorHandler).
@@ -251,13 +235,9 @@ namespace OptimizelySDK.Odp
 
                 if (_segmentManager == null)
                 {
-                    var cacheTimeout = TimeSpan.FromSeconds(_cacheTimeoutSeconds <= 0 ?
-                        Constants.DEFAULT_CACHE_SECONDS :
-                        _cacheTimeoutSeconds);
                     var apiManager = new OdpSegmentApiManager(_logger, _errorHandler);
 
-                    manager.SegmentManager = new OdpSegmentManager(_odpConfig, apiManager,
-                        _cacheSize, cacheTimeout, _logger, _cache);
+                    manager.SegmentManager = new OdpSegmentManager(apiManager, GetCache(), _logger);
                 }
                 else
                 {
@@ -265,6 +245,11 @@ namespace OptimizelySDK.Odp
                 }
 
                 return manager;
+            }
+
+            private ICache<List<string>> GetCache()
+            {
+                return _cache ?? new LruCache<List<string>>(_maxSize, _itemTimeout, _logger);
             }
         }
 
@@ -274,7 +259,7 @@ namespace OptimizelySDK.Odp
         /// <returns>True if EventManager can process events otherwise False</returns>
         private bool EventManagerOrConfigNotReady()
         {
-            return EventManager == null || !_enabled || !_odpConfig.IsReady();
+            return EventManager == null || !_enabled || _odpConfig == null || !_odpConfig.IsReady();
         }
 
         /// <summary>
@@ -283,7 +268,8 @@ namespace OptimizelySDK.Odp
         /// <returns>True if SegmentManager can fetch audience segments otherwise False</returns>
         private bool SegmentManagerOrConfigNotReady()
         {
-            return SegmentManager == null || !_enabled || !_odpConfig.IsReady();
+            return SegmentManager == null || !_enabled || _odpConfig == null ||
+                   !_odpConfig.IsReady();
         }
     }
 }

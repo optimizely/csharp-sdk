@@ -99,7 +99,6 @@
     <Compile Include="Odp\Entity\Extension.cs" />
     <Compile Include="Odp\Entity\Node.cs" />
     <Compile Include="Odp\Entity\OdpEvent.cs" />
-    <Compile Include="Odp\Entity\OptimizelySdkSettings.cs" />
     <Compile Include="Odp\Entity\Response.cs" />
     <Compile Include="Odp\Enums.cs" />
     <Compile Include="Odp\IOdpManager.cs" />
@@ -196,6 +195,7 @@
     <Compile Include="Event\Entity\EventContext.cs" />
     <Compile Include="AudienceConditions\SemanticVersion.cs" />
     <Compile Include="Entity\Result.cs" />
+    <Compile Include="Notifications\NotificationCenterRegistry.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Utils\schema.json" />

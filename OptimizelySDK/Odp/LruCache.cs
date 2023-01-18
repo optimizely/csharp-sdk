@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2022, Optimizely
+ * Copyright 2022-2023, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,7 @@ using System.Linq;
 
 namespace OptimizelySDK.Odp
 {
-    public class LruCache<T> : ICache<T>
-        where T : class
+    public class LruCache<T> : ICache<T> where T : class
     {
         /// <summary>
         /// The maximum number of elements that should be stored
@@ -62,7 +61,7 @@ namespace OptimizelySDK.Odp
         )
         {
             _mutex = new object();
-
+            
             _maxSize = Math.Max(0, maxSize ?? Constants.DEFAULT_MAX_CACHE_SIZE);
 
             _logger = logger ?? new DefaultLogger();

@@ -47,13 +47,27 @@ namespace OptimizelySDK.Odp
         /// </summary>
         private readonly ICache<List<string>> _segmentsCache;
 
-        public OdpSegmentManager(OdpConfig odpConfig, IOdpSegmentApiManager apiManager,
-            int? cacheSize = null, TimeSpan? itemTimeout = null,
-            ILogger logger = null, ICache<List<string>> cache = null
+        public OdpSegmentManager(IOdpSegmentApiManager apiManager,
+            ICache<List<string>> cache = null,
+            ILogger logger = null
         )
         {
             _apiManager = apiManager;
-            _odpConfig = odpConfig;
+            _logger = logger ?? new DefaultLogger();
+
+            _segmentsCache =
+                cache ?? new LruCache<List<string>>(Constants.DEFAULT_MAX_CACHE_SIZE,
+                    TimeSpan.FromSeconds(Constants.DEFAULT_CACHE_SECONDS), logger);
+        }
+
+        public OdpSegmentManager(IOdpSegmentApiManager apiManager,
+            int? cacheSize = null,
+            TimeSpan? itemTimeout = null,
+            ICache<List<string>> cache = null,
+            ILogger logger = null
+        )
+        {
+            _apiManager = apiManager;
             _logger = logger ?? new DefaultLogger();
 
             itemTimeout = itemTimeout ?? TimeSpan.FromSeconds(Constants.DEFAULT_CACHE_SECONDS);
@@ -81,7 +95,7 @@ namespace OptimizelySDK.Odp
             List<OdpSegmentOption> options = null
         )
         {
-            if (!_odpConfig.IsReady())
+            if (_odpConfig == null || !_odpConfig.IsReady())
             {
                 _logger.Log(LogLevel.WARN, Constants.ODP_NOT_INTEGRATED_MESSAGE);
                 return null;

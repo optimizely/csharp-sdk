@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright 2017-2022, Optimizely
+ * Copyright 2017-2023, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use file except in compliance with the License.
@@ -38,7 +38,6 @@ using System.Linq;
 
 #if USE_ODP
 using OptimizelySDK.Odp;
-using OptimizelySDK.Odp.Entity;
 #endif
 
 namespace OptimizelySDK
@@ -75,8 +74,6 @@ namespace OptimizelySDK
 
 #if USE_ODP
         private OdpManager OdpManager;
-
-        private OptimizelySdkSettings SdkSettings;
 #endif
 
         /// <summary>
@@ -138,7 +135,7 @@ namespace OptimizelySDK
         /// <param name="skipJsonValidation">boolean representing whether JSON schema validation needs to be performed</param>
         /// <param name="eventProcessor">EventProcessor</param>
         /// <param name="defaultDecideOptions">Default Decide options</param>
-        /// <param name="sdkSettings">Optional settings for SDK configuration</param>
+        /// <param name="odpManager">Optional ODP Manager</param>
         public Optimizely(string datafile,
             IEventDispatcher eventDispatcher = null,
             ILogger logger = null,
@@ -148,21 +145,29 @@ namespace OptimizelySDK
             EventProcessor eventProcessor = null,
             OptimizelyDecideOption[] defaultDecideOptions = null
 #if USE_ODP
-            , OptimizelySdkSettings sdkSettings = null
+            , OdpManager odpManager = null
 #endif
         )
         {
             try
             {
+#if USE_ODP
                 InitializeComponents(eventDispatcher, logger, errorHandler, userProfileService,
-                    null, eventProcessor, defaultDecideOptions);
+                    null, eventProcessor, defaultDecideOptions, odpManager);
+#else
+                InitializeComponents(eventDispatcher, logger, errorHandler, userProfileService,
+                                    null, eventProcessor, defaultDecideOptions);
+#endif
 
                 if (ValidateInputs(datafile, skipJsonValidation))
                 {
                     var config = DatafileProjectConfig.Create(datafile, Logger, ErrorHandler);
                     ProjectConfigManager = new FallbackProjectConfigManager(config);
 #if USE_ODP
-                    SetupOdp(config, sdkSettings);
+                    // No need to setup notification for datafile updates. This constructor
+                    // is for hardcoded datafile which should not be changed using this method.
+                    OdpManager.UpdateSettings(config.PublicKeyForOdp, config.HostForOdp,
+                        config.Segments.ToList());
 #endif
                 }
                 else
@@ -194,7 +199,7 @@ namespace OptimizelySDK
         /// <param name="userProfileService">User profile service.</param>
         /// <param name="eventProcessor">EventProcessor</param>
         /// <param name="defaultDecideOptions">Default Decide options</param>
-        /// <param name="sdkSettings">Optional settings for SDK configuration</param>
+        /// <param name="odpManager">Optional ODP Manager</param>
         public Optimizely(ProjectConfigManager configManager,
             NotificationCenter notificationCenter = null,
             IEventDispatcher eventDispatcher = null,
@@ -204,16 +209,35 @@ namespace OptimizelySDK
             EventProcessor eventProcessor = null,
             OptimizelyDecideOption[] defaultDecideOptions = null
 #if USE_ODP
-            , OptimizelySdkSettings sdkSettings = null
+            , OdpManager odpManager = null
 #endif
         )
         {
             ProjectConfigManager = configManager;
 
+#if USE_ODP
+            InitializeComponents(eventDispatcher, logger, errorHandler, userProfileService,
+                notificationCenter, eventProcessor, defaultDecideOptions, odpManager);
+
+            var projectConfig = ProjectConfigManager.CachedProjectConfig;
+            if (projectConfig != null)
+            {
+                NotificationCenterRegistry.GetNotificationCenter(configManager.SdkKey, logger)?.
+                    AddNotification(NotificationCenter.NotificationType.OptimizelyConfigUpdate,
+                        () =>
+                        {
+                            OdpManager?.UpdateSettings(projectConfig.PublicKeyForOdp,
+                                projectConfig.HostForOdp,
+                                projectConfig.Segments.ToList());
+                        });
+
+                // in case if notification is lost.
+                OdpManager?.UpdateSettings(projectConfig.PublicKeyForOdp, projectConfig.HostForOdp,
+                    projectConfig.Segments.ToList());
+            }
+#else
             InitializeComponents(eventDispatcher, logger, errorHandler, userProfileService,
                 notificationCenter, eventProcessor, defaultDecideOptions);
-#if USE_ODP
-            SetupOdp(ProjectConfigManager.CachedProjectConfig, sdkSettings);
 #endif
         }
 
@@ -224,6 +248,9 @@ namespace OptimizelySDK
             NotificationCenter notificationCenter = null,
             EventProcessor eventProcessor = null,
             OptimizelyDecideOption[] defaultDecideOptions = null
+#if USE_ODP
+            , OdpManager odpManager = null
+#endif
         )
         {
             Logger = logger ?? new NoOpLogger();
@@ -240,36 +267,10 @@ namespace OptimizelySDK
                 Logger);
             DefaultDecideOptions = defaultDecideOptions ?? new OptimizelyDecideOption[]
                 { };
-        }
-
 #if USE_ODP
-        private void SetupOdp(ProjectConfig config, OptimizelySdkSettings sdkSettings = null)
-        {
-            if (config == null || sdkSettings?.DisableOdp == true)
-            {
-                return;
-            }
-
-            SdkSettings = sdkSettings ?? new OptimizelySdkSettings();
-
-            var odpConfig = new OdpConfig(config.PublicKeyForOdp, config.HostForOdp,
-                config.Segments.ToList());
-
-            OdpManager = new OdpManager.Builder().
-                WithOdpConfig(odpConfig).
-                WithCacheSize(SdkSettings.SegmentsCacheSize).
-                WithCacheTimeout(SdkSettings.SegmentsCacheTimeout).
-                WithLogger(Logger).
-                WithErrorHandler(ErrorHandler).
-                Build(!SdkSettings.DisableOdp);
-
-            NotificationCenter.AddNotification(
-                NotificationCenter.NotificationType.OptimizelyConfigUpdate,
-                () => OdpManager?.UpdateSettings(config.PublicKeyForOdp, config.HostForOdp,
-                    config.Segments.ToList())
-            );
-        }
+            OdpManager = odpManager ?? new OdpManager.Builder().Build();
 #endif
+        }
 
         /// <summary>
         /// Buckets visitor and sends impression event to Optimizely.
@@ -1490,14 +1491,25 @@ namespace OptimizelySDK
 
         public void Dispose()
         {
-            if (Disposed) return;
+            if (Disposed)
+            {
+                return;
+            }
 
             Disposed = true;
 
-            (ProjectConfigManager as IDisposable)?.Dispose();
-            (EventProcessor as IDisposable)?.Dispose();
+            if (ProjectConfigManager is IDisposable)
+            {
+#if USE_ODP
+                NotificationCenterRegistry.RemoveNotificationCenter(ProjectConfigManager.SdkKey);
+#endif
+
+                (ProjectConfigManager as IDisposable)?.Dispose();
+            }
 
             ProjectConfigManager = null;
+
+            (EventProcessor as IDisposable)?.Dispose();
 
 #if USE_ODP
             OdpManager?.Dispose();
