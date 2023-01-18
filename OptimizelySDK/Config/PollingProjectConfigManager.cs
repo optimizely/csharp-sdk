@@ -46,7 +46,8 @@ namespace OptimizelySDK.Config
         protected IErrorHandler ErrorHandler { get; set; }
         protected TimeSpan BlockingTimeout;
 
-        public virtual string SdkKey { get;  }
+        public virtual string SdkKey { get; }
+
         protected TaskCompletionSource<bool> CompletableConfigManager =
             new TaskCompletionSource<bool>();
 
