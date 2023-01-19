@@ -404,8 +404,7 @@ namespace OptimizelySDK.Config
                     }
                 }
             }
-
-            var integration = Integrations.FirstOrDefault(i => i.Key.ToLower() == "odp");
+            var integration = Integrations.FirstOrDefault(i => i.Key == "odp");
             HostForOdp = integration?.Host;
             PublicKeyForOdp = integration?.PublicKey;
 
