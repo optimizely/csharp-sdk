@@ -33,9 +33,7 @@ namespace OptimizelySDK.Odp
 
         public void IdentifyUser(string userId) { }
 
-        public void SendEvent(string type, string action, Dictionary<string, string> identifiers,
-            Dictionary<string, object> data
-        ){ }
+        public void SendEvent(string type, string action, Dictionary<string, string> identifiers, Dictionary<string, object> data) { }
 
         public void Dispose() { }
     }
