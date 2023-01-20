@@ -35,7 +35,7 @@ namespace OptimizelySDK.Odp
 
         public void SendEvent(string type, string action, Dictionary<string, string> identifiers,
             Dictionary<string, object> data
-        ) { }
+        ){ }
 
         public void Dispose() { }
     }
