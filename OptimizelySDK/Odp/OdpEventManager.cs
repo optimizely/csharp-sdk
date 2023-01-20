@@ -418,7 +418,6 @@ namespace OptimizelySDK.Odp
                 new BlockingCollection<object>(Constants.DEFAULT_QUEUE_CAPACITY);
 
             private IOdpEventApiManager _odpEventApiManager;
-            private int _batchSize;
             private TimeSpan _flushInterval;
             private TimeSpan _timeoutInterval;
             private ILogger _logger;
@@ -445,12 +444,6 @@ namespace OptimizelySDK.Odp
             public Builder WithOdpEventApiManager(IOdpEventApiManager odpEventApiManager)
             {
                 _odpEventApiManager = odpEventApiManager;
-                return this;
-            }
-
-            public Builder WithBatchSize(int batchSize)
-            {
-                _batchSize = batchSize;
                 return this;
             }
 
@@ -487,17 +480,19 @@ namespace OptimizelySDK.Odp
                 var manager = new OdpEventManager();
                 manager._eventQueue = _eventQueue;
                 manager._odpEventApiManager = _odpEventApiManager;
-                manager._batchSize =
-                    _batchSize < 1 ? Constants.DEFAULT_BATCH_SIZE : _batchSize;
-                manager._flushInterval = _flushInterval <= TimeSpan.FromSeconds(0) ?
+                manager._flushInterval = _flushInterval < TimeSpan.Zero ?
                     Constants.DEFAULT_FLUSH_INTERVAL :
                     _flushInterval;
-                manager._timeoutInterval = _timeoutInterval <= TimeSpan.FromSeconds(0) ?
+                manager._timeoutInterval = _timeoutInterval <= TimeSpan.Zero ?
                     Constants.DEFAULT_TIMEOUT_INTERVAL :
                     _timeoutInterval;
                 manager._logger = _logger ?? new NoOpLogger();
                 manager._errorHandler = _errorHandler ?? new NoOpErrorHandler();
                 manager._autoStart = _autoStart ?? true;
+
+                manager._batchSize = manager._flushInterval == TimeSpan.Zero ?
+                    1 :
+                    Constants.DEFAULT_BATCH_SIZE;
 
                 manager._validOdpDataTypes = new List<string>()
                 {
