@@ -219,10 +219,21 @@ namespace OptimizelySDK
             InitializeComponents(eventDispatcher, logger, errorHandler, userProfileService,
                 notificationCenter, eventProcessor, defaultDecideOptions, odpManager);
 
-            var projectConfig = ProjectConfigManager.CachedProjectConfig;
-            if (projectConfig != null)
+            if (ProjectConfigManager.CachedProjectConfig == null)
             {
-                NotificationCenterRegistry.GetNotificationCenter(configManager.SdkKey, logger)?.
+                return;
+            }
+
+            var projectConfig = ProjectConfigManager.CachedProjectConfig;
+
+            // in case if notification is lost.
+            OdpManager?.UpdateSettings(projectConfig.PublicKeyForOdp, projectConfig.HostForOdp,
+                projectConfig.Segments.ToList());
+
+            if (ProjectConfigManager?.SdkKey != null)
+            {
+                NotificationCenterRegistry.
+                    GetNotificationCenter(ProjectConfigManager.SdkKey, logger)?.
                     AddNotification(NotificationCenter.NotificationType.OptimizelyConfigUpdate,
                         () =>
                         {
@@ -230,10 +241,6 @@ namespace OptimizelySDK
                                 projectConfig.HostForOdp,
                                 projectConfig.Segments.ToList());
                         });
-
-                // in case if notification is lost.
-                OdpManager?.UpdateSettings(projectConfig.PublicKeyForOdp, projectConfig.HostForOdp,
-                    projectConfig.Segments.ToList());
             }
 #else
             InitializeComponents(eventDispatcher, logger, errorHandler, userProfileService,
