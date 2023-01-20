@@ -73,7 +73,7 @@ namespace OptimizelySDK
         private OptimizelyDecideOption[] DefaultDecideOptions;
 
 #if USE_ODP
-        private OdpManager OdpManager;
+        private IOdpManager OdpManager;
 #endif
 
         /// <summary>
@@ -145,7 +145,7 @@ namespace OptimizelySDK
             EventProcessor eventProcessor = null,
             OptimizelyDecideOption[] defaultDecideOptions = null
 #if USE_ODP
-            , OdpManager odpManager = null
+            , IOdpManager odpManager = null
 #endif
         )
         {
@@ -209,7 +209,7 @@ namespace OptimizelySDK
             EventProcessor eventProcessor = null,
             OptimizelyDecideOption[] defaultDecideOptions = null
 #if USE_ODP
-            , OdpManager odpManager = null
+            , IOdpManager odpManager = null
 #endif
         )
         {
@@ -249,7 +249,7 @@ namespace OptimizelySDK
             EventProcessor eventProcessor = null,
             OptimizelyDecideOption[] defaultDecideOptions = null
 #if USE_ODP
-            , OdpManager odpManager = null
+            , IOdpManager odpManager = null
 #endif
         )
         {
@@ -268,7 +268,7 @@ namespace OptimizelySDK
             DefaultDecideOptions = defaultDecideOptions ?? new OptimizelyDecideOption[]
                 { };
 #if USE_ODP
-            OdpManager = odpManager ?? new OdpManager.Builder().Build();
+            OdpManager = odpManager ?? new NoOpOdpManager();
 #endif
         }
 
