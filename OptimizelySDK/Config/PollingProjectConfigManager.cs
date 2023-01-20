@@ -150,7 +150,7 @@ namespace OptimizelySDK.Config
         /// Access to current cached project configuration
         /// </summary>
         /// <returns>ProjectConfig instance</returns>
-        public ProjectConfig CachedProjectConfig
+        public virtual ProjectConfig CachedProjectConfig
         {
             get
             {
