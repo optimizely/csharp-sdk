@@ -230,7 +230,7 @@ namespace OptimizelySDK
             OdpManager?.UpdateSettings(projectConfig.PublicKeyForOdp, projectConfig.HostForOdp,
                 projectConfig.Segments.ToList());
 
-            if (ProjectConfigManager?.SdkKey != null)
+            if (ProjectConfigManager.SdkKey != null)
             {
                 NotificationCenterRegistry.
                     GetNotificationCenter(ProjectConfigManager.SdkKey, logger)?.
