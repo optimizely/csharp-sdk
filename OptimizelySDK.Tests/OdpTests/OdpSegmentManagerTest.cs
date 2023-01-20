@@ -185,7 +185,7 @@ namespace OptimizelySDK.Tests.OdpTests
 
             manager.FetchQualifiedSegments(FS_USER_ID, new List<OdpSegmentOption>
             {
-                OdpSegmentOption.IGNORE_CACHE,
+                OdpSegmentOption.IgnoreCache,
             });
 
             _mockCache.Verify(c => c.Reset(), Times.Never);
@@ -206,7 +206,7 @@ namespace OptimizelySDK.Tests.OdpTests
 
             manager.FetchQualifiedSegments(FS_USER_ID, new List<OdpSegmentOption>
             {
-                OdpSegmentOption.RESET_CACHE,
+                OdpSegmentOption.ResetCache,
             });
 
             _mockCache.Verify(c => c.Reset(), Times.Once);

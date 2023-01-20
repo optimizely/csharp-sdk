@@ -195,7 +195,7 @@ namespace OptimizelySDK.Odp
                 _logger.Log(LogLevel.ERROR,
                     $"{AUDIENCE_FETCH_FAILURE_MESSAGE} ({Constants.NETWORK_ERROR_REASON})");
 
-                return default;
+                return null;
             }
 
             return response.Content.ReadAsStringAsync().Result;

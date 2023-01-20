@@ -218,7 +218,6 @@ namespace OptimizelySDK.Odp
                     var eventApiManager = new OdpEventApiManager(_logger, _errorHandler);
 
                     manager.EventManager = new OdpEventManager.Builder().
-                        WithBatchSize(Constants.DEFAULT_MAX_CACHE_SIZE).
                         WithTimeoutInterval(
                             TimeSpan.FromMilliseconds(Constants.DEFAULT_CACHE_SECONDS)).
                         WithOdpEventApiManager(eventApiManager).

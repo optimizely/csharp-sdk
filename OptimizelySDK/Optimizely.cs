@@ -166,7 +166,7 @@ namespace OptimizelySDK
 #if USE_ODP
                     // No need to setup notification for datafile updates. This constructor
                     // is for hardcoded datafile which should not be changed using this method.
-                    OdpManager.UpdateSettings(config.PublicKeyForOdp, config.HostForOdp,
+                    OdpManager?.UpdateSettings(config.PublicKeyForOdp, config.HostForOdp,
                         config.Segments.ToList());
 #endif
                 }
@@ -220,21 +220,27 @@ namespace OptimizelySDK
                 notificationCenter, eventProcessor, defaultDecideOptions, odpManager);
 
             var projectConfig = ProjectConfigManager.CachedProjectConfig;
-            if (projectConfig != null)
+            
+            if (ProjectConfigManager.CachedProjectConfig != null)
             {
-                NotificationCenterRegistry.GetNotificationCenter(configManager.SdkKey, logger)?.
-                    AddNotification(NotificationCenter.NotificationType.OptimizelyConfigUpdate,
-                        () =>
-                        {
-                            OdpManager?.UpdateSettings(projectConfig.PublicKeyForOdp,
-                                projectConfig.HostForOdp,
-                                projectConfig.Segments.ToList());
-                        });
-
-                // in case if notification is lost.
+                // in case Project config is instantly available
                 OdpManager?.UpdateSettings(projectConfig.PublicKeyForOdp, projectConfig.HostForOdp,
                     projectConfig.Segments.ToList());
             }
+            if (ProjectConfigManager.SdkKey != null)
+            {
+                NotificationCenterRegistry.GetNotificationCenter(configManager.SdkKey, logger)?.
+                AddNotification(NotificationCenter.NotificationType.OptimizelyConfigUpdate,
+                    () =>
+                    {
+                        projectConfig = ProjectConfigManager.CachedProjectConfig;
+                    
+                        OdpManager?.UpdateSettings(projectConfig.PublicKeyForOdp,
+                            projectConfig.HostForOdp,
+                            projectConfig.Segments.ToList());
+                    });
+            }
+
 #else
             InitializeComponents(eventDispatcher, logger, errorHandler, userProfileService,
                 notificationCenter, eventProcessor, defaultDecideOptions);
@@ -268,7 +274,7 @@ namespace OptimizelySDK
             DefaultDecideOptions = defaultDecideOptions ?? new OptimizelyDecideOption[]
                 { };
 #if USE_ODP
-            OdpManager = odpManager ?? new OdpManager.Builder().Build();
+            OdpManager = odpManager;
 #endif
         }
 
@@ -450,7 +456,7 @@ namespace OptimizelySDK
                 return null;
             userAttributes = userAttributes ?? new UserAttributes();
 
-            var userContext = CreateUserContext(userId, userAttributes);
+            var userContext = CreateUserContextCopy(userId, userAttributes);
             var variation = DecisionService.GetVariation(experiment, userContext, config)?.
                 ResultObject;
             var decisionInfo = new Dictionary<string, object>
@@ -579,7 +585,7 @@ namespace OptimizelySDK
             bool featureEnabled = false;
             var sourceInfo = new Dictionary<string, string>();
             var decision = DecisionService.
-                GetVariationForFeature(featureFlag, CreateUserContext(userId, userAttributes),
+                GetVariationForFeature(featureFlag, CreateUserContextCopy(userId, userAttributes),
                     config).
                 ResultObject;
             var variation = decision?.Variation;
@@ -699,7 +705,7 @@ namespace OptimizelySDK
             var featureEnabled = false;
             var variableValue = featureVariable.DefaultValue;
             var decision = DecisionService.
-                GetVariationForFeature(featureFlag, CreateUserContext(userId, userAttributes),
+                GetVariationForFeature(featureFlag, CreateUserContextCopy(userId, userAttributes),
                     config).
                 ResultObject;
 
@@ -883,6 +889,24 @@ namespace OptimizelySDK
                 return null;
 
             return new OptimizelyUserContext(this, userId, userAttributes, ErrorHandler, Logger);
+        }
+
+        private OptimizelyUserContext CreateUserContextCopy(string userId,
+            UserAttributes userAttributes = null
+        )
+        {
+            var inputValues = new Dictionary<string, string>
+            {
+                {
+                    USER_ID, userId
+                },
+            };
+
+            if (!ValidateStringInputs(inputValues))
+                return null;
+            
+
+            return new OptimizelyUserContext(this, userId, userAttributes, null, null, ErrorHandler, Logger, shouldIdentifyUser: false);
         }
 
         /// <summary>
@@ -1269,7 +1293,7 @@ namespace OptimizelySDK
 
             var featureEnabled = false;
             var decisionResult = DecisionService.GetVariationForFeature(featureFlag,
-                CreateUserContext(userId, userAttributes), config);
+                CreateUserContextCopy(userId, userAttributes), config);
             var variation = decisionResult.ResultObject?.Variation;
 
             if (variation != null)
@@ -1392,7 +1416,7 @@ namespace OptimizelySDK
             List<OdpSegmentOption> segmentOptions
         )
         {
-            return OdpManager?.FetchQualifiedSegments(userId, segmentOptions) ?? new string[0];
+            return OdpManager?.FetchQualifiedSegments(userId, segmentOptions);
         }
 
         /// <summary>

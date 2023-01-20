@@ -56,7 +56,7 @@ namespace OptimizelySDK.Config
         /// <summary>
         /// SDK key in use for this project
         /// </summary>
-        public string SdkKey
+        public override string SdkKey
         {
             get
             {
