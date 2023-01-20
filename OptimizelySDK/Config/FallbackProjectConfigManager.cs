@@ -48,7 +48,7 @@ namespace OptimizelySDK.Config
         /// <summary>
         /// SDK Key for Fallback is not used and always null
         /// </summary>
-        public string SdkKey
+        public virtual string SdkKey
         {
             get
             {
