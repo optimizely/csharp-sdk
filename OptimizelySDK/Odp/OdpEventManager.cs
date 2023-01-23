@@ -358,7 +358,7 @@ namespace OptimizelySDK.Odp
             {
                 return;
             }
-
+            Flush();
             _odpConfig = odpConfig;
 
             if (_autoStart)
@@ -480,19 +480,14 @@ namespace OptimizelySDK.Odp
                 var manager = new OdpEventManager();
                 manager._eventQueue = _eventQueue;
                 manager._odpEventApiManager = _odpEventApiManager;
-                manager._flushInterval = _flushInterval < TimeSpan.Zero ?
-                    Constants.DEFAULT_FLUSH_INTERVAL :
-                    _flushInterval;
+                manager._flushInterval = (_flushInterval != null && _flushInterval > TimeSpan.Zero) ? _flushInterval : Constants.DEFAULT_FLUSH_INTERVAL;
+                manager._batchSize = (_flushInterval != null && _flushInterval == TimeSpan.Zero) ? 1 : Constants.DEFAULT_BATCH_SIZE;
                 manager._timeoutInterval = _timeoutInterval <= TimeSpan.Zero ?
                     Constants.DEFAULT_TIMEOUT_INTERVAL :
                     _timeoutInterval;
                 manager._logger = _logger ?? new NoOpLogger();
                 manager._errorHandler = _errorHandler ?? new NoOpErrorHandler();
                 manager._autoStart = _autoStart ?? true;
-
-                manager._batchSize = manager._flushInterval == TimeSpan.Zero ?
-                    1 :
-                    Constants.DEFAULT_BATCH_SIZE;
 
                 manager._validOdpDataTypes = new List<string>()
                 {
