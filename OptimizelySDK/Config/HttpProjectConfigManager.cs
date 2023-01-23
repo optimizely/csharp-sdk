@@ -33,10 +33,10 @@ namespace OptimizelySDK.Config
         private string Url;
         private string LastModifiedSince = string.Empty;
         private string DatafileAccessToken = string.Empty;
-        private string _sdkKey = string.Empty;
+        private string _sdkKey;
 
         private HttpProjectConfigManager(TimeSpan period, string url, TimeSpan blockingTimeout,
-            bool autoUpdate, ILogger logger, IErrorHandler errorHandler, string sdkKey
+            bool autoUpdate, ILogger logger, IErrorHandler errorHandler, string sdkKey = null
         )
             : base(period, blockingTimeout, autoUpdate, logger, errorHandler)
         {
@@ -46,7 +46,7 @@ namespace OptimizelySDK.Config
 
         private HttpProjectConfigManager(TimeSpan period, string url, TimeSpan blockingTimeout,
             bool autoUpdate, ILogger logger, IErrorHandler errorHandler, string datafileAccessToken,
-            string sdkKey
+            string sdkKey = null
         )
             : this(period, url, blockingTimeout, autoUpdate, logger, errorHandler, sdkKey)
         {
