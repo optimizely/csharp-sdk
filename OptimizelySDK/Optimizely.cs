@@ -275,7 +275,7 @@ namespace OptimizelySDK
             DefaultDecideOptions = defaultDecideOptions ?? new OptimizelyDecideOption[]
                 { };
 #if USE_ODP
-            OdpManager = odpManager ?? new OdpManager.Builder().Build();
+            OdpManager = odpManager;
 #endif
         }
 

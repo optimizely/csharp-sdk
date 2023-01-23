@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+#if !(NET35 || NET40 || NETSTANDARD1_6)
+#define USE_ODP
+#endif
+
 using Newtonsoft.Json;
 using OptimizelySDK.Entity;
 using OptimizelySDK.ErrorHandler;
@@ -408,10 +412,10 @@ namespace OptimizelySDK.Config
             var integration = Integrations.FirstOrDefault(i => i.Key.ToLower() == "odp");
             HostForOdp = integration?.Host;
             PublicKeyForOdp = integration?.PublicKey;
-
+#if USE_ODP
             var rawSegments = TypedAudiences.SelectMany(ta => ta.GetSegments()).ToArray();
             Segments = new SortedSet<string>(rawSegments).ToArray();
-
+#endif
             var flagToVariationsMap = new Dictionary<string, Dictionary<string, Variation>>();
             // Adding experiments in experiment-feature map and flag variation map to use.
             foreach (var feature in FeatureFlags)
@@ -728,7 +732,7 @@ namespace OptimizelySDK.Config
         public Rollout GetRolloutFromId(string rolloutId)
         {
 #if NET35 || NET40
-    if (string.IsNullOrEmpty(rolloutId) || string.IsNullOrEmpty(rolloutId.Trim()))
+            if (string.IsNullOrEmpty(rolloutId) || string.IsNullOrEmpty(rolloutId.Trim()))
 #else
             if (string.IsNullOrWhiteSpace(rolloutId))
 #endif
