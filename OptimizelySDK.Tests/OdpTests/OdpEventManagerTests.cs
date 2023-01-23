@@ -506,7 +506,7 @@ namespace OptimizelySDK.Tests.OdpTests
 
             eventManager.UpdateSettings(differentOdpConfig);
 
-            Assert.IsFalse(_odpConfig.Equals(eventManager._readOdpConfigForTesting()));
+            Assert.IsFalse(_odpConfig.Equals(eventManager.OdpConfigForTesting));
         }
 
         private static OdpEvent MakeEvent(int id) =>

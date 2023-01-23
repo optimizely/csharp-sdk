@@ -191,14 +191,9 @@ namespace OptimizelySDK.Odp
             }
         }
 
-        /// <summary>
-        /// Read the current cache index/linked list for unit testing
-        /// </summary>
-        /// <returns></returns>
-        public string[] _readCurrentCacheKeys()
-        {
-            _logger.Log(LogLevel.WARN, "_readCurrentCacheKeys used for non-testing purpose");
 
+        internal string[] CurrentCacheKeysForTesting()
+        {
             string[] cacheKeys;
             lock (_mutex)
             {
@@ -207,5 +202,8 @@ namespace OptimizelySDK.Odp
 
             return cacheKeys;
         }
+
+        internal TimeSpan TimeoutForTesting { get { return _timeout; } }
+        internal int MaxSizeForTesting { get { return _maxSize; } }
     }
 }
