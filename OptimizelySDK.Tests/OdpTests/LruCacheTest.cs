@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2022, Optimizely
+ * Copyright 2022-2023, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -108,35 +108,35 @@ namespace OptimizelySDK.Tests.OdpTests
             cache.Save("user3", _segments5And6);
 
             var cacheKeys = cache.CurrentCacheKeysForTesting();
-            
+
             // last added should be at the top of the list
-            Assert.AreEqual("user3",cacheKeys[0]);
-            Assert.AreEqual("user2",cacheKeys[1]);
-            Assert.AreEqual("user1" ,cacheKeys[2]);
+            Assert.AreEqual("user3", cacheKeys[0]);
+            Assert.AreEqual("user2", cacheKeys[1]);
+            Assert.AreEqual("user1", cacheKeys[2]);
 
             // save should move user1 to the top of the list and push down others.
             cache.Save("user1", _segments1And2);
-            
+
             cacheKeys = cache.CurrentCacheKeysForTesting();
-            Assert.AreEqual("user1",cacheKeys[0]);
-            Assert.AreEqual("user3",cacheKeys[1]);
-            Assert.AreEqual("user2",cacheKeys[2]);
+            Assert.AreEqual("user1", cacheKeys[0]);
+            Assert.AreEqual("user3", cacheKeys[1]);
+            Assert.AreEqual("user2", cacheKeys[2]);
 
             // save user2 should bring it to the top and push down others.
             cache.Save("user2", _segments3And4);
-            
+
             cacheKeys = cache.CurrentCacheKeysForTesting();
-            Assert.AreEqual("user2",cacheKeys[0]);
-            Assert.AreEqual("user1",cacheKeys[1]);
-            Assert.AreEqual("user3",cacheKeys[2]);
+            Assert.AreEqual("user2", cacheKeys[0]);
+            Assert.AreEqual("user1", cacheKeys[1]);
+            Assert.AreEqual("user3", cacheKeys[2]);
 
             // saving user3 again should return to the original insertion order.
             cache.Save("user3", _segments5And6);
-            
+
             cacheKeys = cache.CurrentCacheKeysForTesting();
-            Assert.AreEqual("user3",cacheKeys[0]);
-            Assert.AreEqual("user2",cacheKeys[1]);
-            Assert.AreEqual("user1" ,cacheKeys[2]);
+            Assert.AreEqual("user3", cacheKeys[0]);
+            Assert.AreEqual("user2", cacheKeys[1]);
+            Assert.AreEqual("user1", cacheKeys[2]);
         }
 
         [Test]
