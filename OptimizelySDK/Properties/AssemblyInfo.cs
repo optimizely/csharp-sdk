@@ -22,6 +22,7 @@ using System.Runtime.InteropServices;
 // Make types and members with internal scope visible to friend
 // OptimizelySDK.Tests unit tests. 
 #pragma warning disable 1700
+[assembly: InternalsVisibleTo("OptimizelySDK.Tests, PublicKey=00240000048000009400000006020000002400005253413100040000010001006b0705c5f697a2522639be5d5bc02835aaef2e2cd4adf47c3bbf5ed97187298c17448701597b5a610d29eed362f36f056062bbccd424fc830dd5966a9378302c61e3ddd77effcd9dcfaf739f3ca88149e961f55f23d5ce1948703da33e261f6cc0c681a19ce62ccbfdeca8bd286f93395e4f67e4a2ea7782af581062edab8083")]
 [assembly: InternalsVisibleTo("OptimizelySDK.Tests")]
 #pragma warning restore 1700
 
