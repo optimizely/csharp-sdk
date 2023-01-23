@@ -1,6 +1,5 @@
 ﻿/*
- *
- *    Copyright 2020-2021, 2022 Optimizely and contributors
+ *    Copyright 2020-2021, 2022-2023 Optimizely and contributors
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -1072,7 +1071,7 @@ namespace OptimizelySDK.Tests
         public void ShouldFetchQualifiedSegmentsAsyncThenCallCallback()
         {
             var cde = new CountdownEvent(1);
-            bool? callbackResult = null;
+            bool callbackResult = false;
             var optimizely = new Optimizely(TestData.OdpIntegrationDatafile,
                 EventDispatcherMock.Object, LoggerMock.Object, ErrorHandlerMock.Object);
             var context = new OptimizelyUserContext(optimizely, UserID, null,
@@ -1088,7 +1087,7 @@ namespace OptimizelySDK.Tests
 
             LoggerMock.Verify(l => l.Log(LogLevel.ERROR, Constants.ODP_NOT_ENABLED_MESSAGE),
                 Times.Never);
-            Assert.IsNotNull(callbackResult);
+            Assert.IsTrue(callbackResult);
         }
 
         [Test]

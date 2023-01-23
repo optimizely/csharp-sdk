@@ -275,7 +275,7 @@ namespace OptimizelySDK
             DefaultDecideOptions = defaultDecideOptions ?? new OptimizelyDecideOption[]
                 { };
 #if USE_ODP
-            OdpManager = odpManager ?? new NoOpOdpManager();
+            OdpManager = odpManager ?? new OdpManager.Builder().Build();
 #endif
         }
 
@@ -1399,7 +1399,7 @@ namespace OptimizelySDK
             List<OdpSegmentOption> segmentOptions
         )
         {
-            return OdpManager?.FetchQualifiedSegments(userId, segmentOptions) ?? new string[0];
+            return OdpManager?.FetchQualifiedSegments(userId, segmentOptions);
         }
 
         /// <summary>

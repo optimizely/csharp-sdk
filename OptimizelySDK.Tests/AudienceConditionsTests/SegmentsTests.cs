@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2022, Optimizely
+ * Copyright 2022-2023 Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,8 +81,10 @@ namespace OptimizelySDK.Tests.AudienceConditionsTests
 
             var allSegments = optimizelyClient.ProjectConfigManager.GetConfig().Segments;
 
-            var actualSegments = new SortedSet<string>(allSegments);
-            Assert.AreEqual(expectedSegments, actualSegments);
+            var orderedDistinctSegments = new SortedSet<string>(allSegments);
+            // check for no duplicates
+            Assert.AreEqual(allSegments.Length, orderedDistinctSegments.Count);
+            Assert.AreEqual(expectedSegments, orderedDistinctSegments);
         }
 
         [Test]

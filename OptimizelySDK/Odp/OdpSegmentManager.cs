@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2022 Optimizely
+ * Copyright 2022-2023 Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,25 +63,13 @@ namespace OptimizelySDK.Odp
         public OdpSegmentManager(IOdpSegmentApiManager apiManager,
             int? cacheSize = null,
             TimeSpan? itemTimeout = null,
-            ICache<List<string>> cache = null,
             ILogger logger = null
         )
         {
             _apiManager = apiManager;
             _logger = logger ?? new DefaultLogger();
 
-            itemTimeout = itemTimeout ?? TimeSpan.FromSeconds(Constants.DEFAULT_CACHE_SECONDS);
-            if (itemTimeout < TimeSpan.Zero)
-            {
-                _logger.Log(LogLevel.WARN,
-                    "Negative item timeout provided. Items will not expire in cache.");
-                itemTimeout = TimeSpan.Zero;
-            }
-
-            cacheSize = cacheSize ?? Constants.DEFAULT_MAX_CACHE_SIZE;
-
-            _segmentsCache =
-                cache ?? new LruCache<List<string>>(cacheSize.Value, itemTimeout, logger);
+            _segmentsCache = new LruCache<List<string>>(cacheSize, itemTimeout, logger);
         }
 
         /// <summary>
