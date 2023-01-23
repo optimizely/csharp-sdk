@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright 2019-2022, Optimizely
+ * Copyright 2019-2023, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -409,7 +409,8 @@ namespace OptimizelySDK.Config
             HostForOdp = integration?.Host;
             PublicKeyForOdp = integration?.PublicKey;
 
-            Segments = TypedAudiences.SelectMany(ta => ta.GetSegments()).ToArray();
+            var rawSegments = TypedAudiences.SelectMany(ta => ta.GetSegments()).ToArray();
+            Segments = new SortedSet<string>(rawSegments).ToArray();
 
             var flagToVariationsMap = new Dictionary<string, Dictionary<string, Variation>>();
             // Adding experiments in experiment-feature map and flag variation map to use.

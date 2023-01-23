@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright 2017-2022, Optimizely
+ * Copyright 2017-2023, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -299,13 +299,13 @@ namespace OptimizelySDK.Tests
                     "test_experiment_with_feature_rollout", new Dictionary<string, object>
                     {
                         {
-                            "control",
-                            Config.GetVariationFromKey("test_experiment_with_feature_rollout",
+                            "control", Config.GetVariationFromKey(
+                                "test_experiment_with_feature_rollout",
                                 "control")
                         },
                         {
-                            "variation",
-                            Config.GetVariationFromKey("test_experiment_with_feature_rollout",
+                            "variation", Config.GetVariationFromKey(
+                                "test_experiment_with_feature_rollout",
                                 "variation")
                         }
                     }
@@ -318,8 +318,8 @@ namespace OptimizelySDK.Tests
                             Config.GetVariationFromKey("test_experiment_double_feature", "control")
                         },
                         {
-                            "variation",
-                            Config.GetVariationFromKey("test_experiment_double_feature",
+                            "variation", Config.GetVariationFromKey(
+                                "test_experiment_double_feature",
                                 "variation")
                         }
                     }
@@ -332,8 +332,8 @@ namespace OptimizelySDK.Tests
                             Config.GetVariationFromKey("test_experiment_integer_feature", "control")
                         },
                         {
-                            "variation",
-                            Config.GetVariationFromKey("test_experiment_integer_feature",
+                            "variation", Config.GetVariationFromKey(
+                                "test_experiment_integer_feature",
                                 "variation")
                         }
                     }
@@ -502,13 +502,13 @@ namespace OptimizelySDK.Tests
                     "test_experiment_with_feature_rollout", new Dictionary<string, object>
                     {
                         {
-                            "122236",
-                            Config.GetVariationFromId("test_experiment_with_feature_rollout",
+                            "122236", Config.GetVariationFromId(
+                                "test_experiment_with_feature_rollout",
                                 "122236")
                         },
                         {
-                            "122237",
-                            Config.GetVariationFromId("test_experiment_with_feature_rollout",
+                            "122237", Config.GetVariationFromId(
+                                "test_experiment_with_feature_rollout",
                                 "122237")
                         }
                     }

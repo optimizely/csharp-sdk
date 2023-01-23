@@ -36,7 +36,7 @@ namespace OptimizelySDK.Notifications
         {
             if (sdkKey == null)
             {
-                logger?.Log(LogLevel.INFO, "No SDK key provided to GetNotificationCenter");
+                logger?.Log(LogLevel.ERROR, "No SDK key provided to GetNotificationCenter");
                 return default;
             }
 

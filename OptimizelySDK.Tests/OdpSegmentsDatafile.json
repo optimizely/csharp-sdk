@@ -98,6 +98,15 @@
               "name": "odp.audiences",
               "match": "qualified"
             }
+          ],
+          [
+            "or",
+            {
+              "value": "ats_bug_bash_segment_gender",
+              "type": "third_party_dimension",
+              "name": "odp.audiences",
+              "match": "qualified"
+            }
           ]
         ]
       ],

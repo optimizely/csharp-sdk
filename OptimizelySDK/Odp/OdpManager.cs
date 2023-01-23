@@ -218,8 +218,7 @@ namespace OptimizelySDK.Odp
                     var eventApiManager = new OdpEventApiManager(_logger, _errorHandler);
 
                     manager.EventManager = new OdpEventManager.Builder().
-                        WithTimeoutInterval(
-                            TimeSpan.FromMilliseconds(Constants.DEFAULT_CACHE_SECONDS)).
+                        WithTimeoutInterval(Constants.DEFAULT_TIMEOUT_INTERVAL).
                         WithOdpEventApiManager(eventApiManager).
                         WithLogger(_logger).
                         WithErrorHandler(_errorHandler).

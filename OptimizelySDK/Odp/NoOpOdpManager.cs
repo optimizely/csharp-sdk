@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-/* 
+﻿/* 
  * Copyright 2023 Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,6 +13,9 @@ using System.Collections.Generic;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+using System;
+using System.Collections.Generic;
 
 namespace OptimizelySDK.Odp
 {
@@ -33,7 +33,9 @@ namespace OptimizelySDK.Odp
 
         public void IdentifyUser(string userId) { }
 
-        public void SendEvent(string type, string action, Dictionary<string, string> identifiers, Dictionary<string, object> data) { }
+        public void SendEvent(string type, string action, Dictionary<string, string> identifiers,
+            Dictionary<string, object> data
+        ) { }
 
         public void Dispose() { }
     }
