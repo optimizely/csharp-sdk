@@ -284,7 +284,6 @@ namespace OptimizelySDK.Tests.OdpTests
                 WithOdpEventApiManager(_mockApiManager.Object).
                 WithLogger(_mockLogger.Object).
                 WithEventQueue(new BlockingCollection<object>(10)). // max capacity of 10
-                WithBatchSize(10).
                 WithFlushInterval(TimeSpan.FromMilliseconds(100)).
                 Build();
             eventManager.UpdateSettings(_odpConfig);
@@ -318,7 +317,6 @@ namespace OptimizelySDK.Tests.OdpTests
                 WithOdpEventApiManager(_mockApiManager.Object).
                 WithLogger(_mockLogger.Object).
                 WithEventQueue(new BlockingCollection<object>(10)).
-                WithBatchSize(10).
                 WithFlushInterval(TimeSpan.FromMilliseconds(100)).
                 Build();
             eventManager.UpdateSettings(_odpConfig);
@@ -343,7 +341,6 @@ namespace OptimizelySDK.Tests.OdpTests
                 WithOdpEventApiManager(_mockApiManager.Object).
                 WithLogger(_mockLogger.Object).
                 WithEventQueue(new BlockingCollection<object>(10)).
-                WithBatchSize(10).
                 WithFlushInterval(TimeSpan.FromMilliseconds(500)).
                 Build();
             eventManager.UpdateSettings(_odpConfig);
@@ -377,7 +374,6 @@ namespace OptimizelySDK.Tests.OdpTests
             var eventManager = new OdpEventManager.Builder().
                 WithOdpEventApiManager(_mockApiManager.Object).
                 WithLogger(_mockLogger.Object).
-                WithBatchSize(10).
                 WithFlushInterval(TimeSpan.FromSeconds(1)).
                 Build();
             eventManager.UpdateSettings(_odpConfig);
@@ -402,7 +398,7 @@ namespace OptimizelySDK.Tests.OdpTests
         [Test]
         public void ShouldRetryFailedEvents()
         {
-            var cde = new CountdownEvent(6);
+            var cde = new CountdownEvent(12);
             _mockApiManager.Setup(a =>
                     a.SendEvents(It.IsAny<string>(), It.IsAny<string>(),
                         It.IsAny<List<OdpEvent>>())).
@@ -412,22 +408,21 @@ namespace OptimizelySDK.Tests.OdpTests
                 WithOdpEventApiManager(_mockApiManager.Object).
                 WithLogger(_mockLogger.Object).
                 WithEventQueue(new BlockingCollection<object>(10)).
-                WithBatchSize(2).
-                WithFlushInterval(TimeSpan.FromMilliseconds(100)).
+                WithFlushInterval(TimeSpan.Zero). // batches of 1
                 Build();
             eventManager.UpdateSettings(_odpConfig);
 
-            for (int i = 0; i < 4; i++)
+            for (int i = 0; i < 4; i++) // send 4 events in batches of 1
             {
                 eventManager.SendEvent(MakeEvent(i));
             }
 
             cde.Wait(MAX_COUNT_DOWN_EVENT_WAIT_MS);
 
-            // retry 3x (default) for 2 batches or 6 calls to attempt to process
+            // retry 3x (default) 4 events (batches of 1) = 12 calls to attempt to process
             _mockApiManager.Verify(
                 a => a.SendEvents(It.IsAny<string>(), It.IsAny<string>(),
-                    It.IsAny<List<OdpEvent>>()), Times.Exactly(6));
+                    It.IsAny<List<OdpEvent>>()), Times.Exactly(12));
         }
 
         [Test]
@@ -437,7 +432,6 @@ namespace OptimizelySDK.Tests.OdpTests
                 WithOdpEventApiManager(_mockApiManager.Object).
                 WithLogger(_mockLogger.Object).
                 WithEventQueue(new BlockingCollection<object>(100)).
-                WithBatchSize(2). // small batch size
                 WithFlushInterval(TimeSpan.FromSeconds(2)). // long flush interval
                 Build();
             eventManager.UpdateSettings(_odpConfig);
@@ -472,7 +466,7 @@ namespace OptimizelySDK.Tests.OdpTests
                 WithOdpEventApiManager(_mockApiManager.Object).
                 WithLogger(_mockLogger.Object).
                 WithEventQueue(new BlockingCollection<object>(1)).
-                WithBatchSize(1).
+                WithFlushInterval(TimeSpan.FromSeconds(1)).
                 Build();
             eventManager.UpdateSettings(_odpConfig);
 

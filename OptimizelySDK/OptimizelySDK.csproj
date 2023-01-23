@@ -103,6 +103,7 @@
     <Compile Include="Odp\Enums.cs" />
     <Compile Include="Odp\IOdpManager.cs" />
     <Compile Include="Odp\IOdpSegmentManager.cs" />
+    <Compile Include="Odp\NoOpOdpManager.cs" />
     <Compile Include="Odp\OdpManager.cs" />
     <Compile Include="Odp\OdpSegmentApiManager.cs" />
     <Compile Include="Odp\IOdpSegmentApiManager.cs" />

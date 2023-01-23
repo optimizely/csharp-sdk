@@ -70,6 +70,9 @@
     <Compile Include="..\OptimizelySDK\Odp\LruCache.cs">
       <Link>Odp\LruCache.cs</Link>
     </Compile>
+    <Compile Include="..\OptimizelySDK\Odp\NoOpOdpManager.cs">
+      <Link>Odp\NoOpOdpManager.cs</Link>
+    </Compile>
     <Compile Include="..\OptimizelySDK\Odp\OdpConfig.cs">
       <Link>Odp\OdpConfig.cs</Link>
     </Compile>
