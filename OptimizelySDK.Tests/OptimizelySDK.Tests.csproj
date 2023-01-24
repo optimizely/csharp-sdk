@@ -18,8 +18,6 @@
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
     <ReleaseVersion>1.2.1</ReleaseVersion>
-    <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>keypair.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -155,6 +153,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\keypair.snk">
+      <Link>keypair.snk</Link>
+    </None>
     <None Include="packages.config" />
     <EmbeddedResource Include="unsupported_version_datafile.json" />
     <EmbeddedResource Include="typed_audience_datafile.json" />
