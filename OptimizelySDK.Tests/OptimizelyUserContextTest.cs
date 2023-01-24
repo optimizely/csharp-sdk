@@ -1070,10 +1070,12 @@ namespace OptimizelySDK.Tests
         [Test]
         public void ShouldFetchQualifiedSegmentsAsyncThenCallCallback()
         {
+            var odpManager = new OdpManager.Builder().Build();
             var cde = new CountdownEvent(1);
             bool callbackResult = false;
             var optimizely = new Optimizely(TestData.OdpIntegrationDatafile,
-                EventDispatcherMock.Object, LoggerMock.Object, ErrorHandlerMock.Object);
+                EventDispatcherMock.Object, LoggerMock.Object, ErrorHandlerMock.Object,
+                odpManager: odpManager);
             var context = new OptimizelyUserContext(optimizely, UserID, null,
                 ErrorHandlerMock.Object, LoggerMock.Object);
 
@@ -1093,10 +1095,12 @@ namespace OptimizelySDK.Tests
         [Test]
         public void ShouldFetchQualifiedSegmentsSynchronously()
         {
+            var odpManager = new OdpManager.Builder().Build();
             var mockLogger = new Mock<ILogger>();
             mockLogger.Setup(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()));
             var optimizely = new Optimizely(TestData.OdpIntegrationDatafile,
-                EventDispatcherMock.Object, mockLogger.Object, ErrorHandlerMock.Object);
+                EventDispatcherMock.Object, mockLogger.Object, ErrorHandlerMock.Object,
+                odpManager: odpManager);
             var context = new OptimizelyUserContext(optimizely, UserID, null,
                 ErrorHandlerMock.Object, mockLogger.Object);
 

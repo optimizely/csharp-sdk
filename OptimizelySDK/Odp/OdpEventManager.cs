@@ -532,9 +532,8 @@ namespace OptimizelySDK.Odp
         /// TESTING ONLY: Read the current ODP config
         /// </summary>
         /// <returns>Current ODP settings</returns>
-        public OdpConfig _readOdpConfigForTesting()
-        {
-            return _odpConfig;
-        }
+        internal OdpConfig OdpConfigForTesting { get { return _odpConfig; } }
+        internal TimeSpan FlushIntervalForTesting { get { return _flushInterval; } }
+        internal TimeSpan TimeoutIntervalForTesting { get { return _timeoutInterval; } }
     }
 }

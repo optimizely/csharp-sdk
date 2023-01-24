@@ -161,5 +161,7 @@ namespace OptimizelySDK.Odp
         {
             _segmentsCache.Reset();
         }
+
+        internal ICache<List<string>> SegmentsCacheForTesting { get { return _segmentsCache; } }
     }
 }

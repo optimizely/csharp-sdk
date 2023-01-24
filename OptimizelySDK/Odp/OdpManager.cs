@@ -219,6 +219,7 @@ namespace OptimizelySDK.Odp
 
                     manager.EventManager = new OdpEventManager.Builder().
                         WithTimeoutInterval(Constants.DEFAULT_TIMEOUT_INTERVAL).
+                        WithFlushInterval(Constants.DEFAULT_FLUSH_INTERVAL).
                         WithOdpEventApiManager(eventApiManager).
                         WithLogger(_logger).
                         WithErrorHandler(_errorHandler).

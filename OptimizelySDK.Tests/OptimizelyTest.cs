@@ -1233,7 +1233,7 @@ namespace OptimizelySDK.Tests
                 l => l.Log(LogLevel.INFO,
                     "Activating user test_user in experiment test_experiment."), Times.Once);
             // Need to see how error handler can be verified.
-            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, It.IsAny<string>()), Times.Once);
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Attribute key \"company\" is not in datafile."), Times.Once);
 
             Assert.IsTrue(TestData.CompareObjects(VariationWithKeyControl, variation));
         }
