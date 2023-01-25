@@ -690,8 +690,7 @@ namespace OptimizelySDK
                 { "featureEnabled", featureEnabled },
                 { "variableKey", variableKey },
                 {
-                    "variableValue",
-                    typeCastedValue is OptimizelyJSON
+                    "variableValue", typeCastedValue is OptimizelyJSON
                         ? ((OptimizelyJSON)typeCastedValue).ToDictionary()
                         : typeCastedValue
                 },
@@ -814,9 +813,11 @@ namespace OptimizelySDK
             if (!ValidateStringInputs(inputValues))
                 return null;
 
-
-            return new OptimizelyUserContext(this, userId, userAttributes, null, null, ErrorHandler, Logger,
-                shouldIdentifyUser: false);
+            return new OptimizelyUserContext(this, userId, userAttributes, null, null, ErrorHandler, Logger
+#if USE_ODP
+                , shouldIdentifyUser: false
+#endif
+            );
         }
 
         /// <summary>
