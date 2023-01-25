@@ -126,10 +126,13 @@ namespace OptimizelySDK
         /// <returns>List of qualified segments</returns>
         public List<string> GetQualifiedSegments()
         {
-            List<string> qualifiedSegmentsCopy;
+            List<string> qualifiedSegmentsCopy = null;
             lock (mutex)
             {
-                qualifiedSegmentsCopy = new List<string>(QualifiedSegments);
+                if (QualifiedSegments != null)
+                {
+                    qualifiedSegmentsCopy = new List<string>(QualifiedSegments);
+                }
             }
 
             return qualifiedSegmentsCopy;
@@ -143,8 +146,19 @@ namespace OptimizelySDK
         {
             lock (mutex)
             {
-                QualifiedSegments.Clear();
-                QualifiedSegments.AddRange(qualifiedSegments);
+                if (qualifiedSegments == null)
+                {
+                    QualifiedSegments = null;
+                }
+                else if (QualifiedSegments == null)
+                {
+                    QualifiedSegments = new List<string>(qualifiedSegments);
+                }
+                else
+                {
+                    QualifiedSegments.Clear();
+                    QualifiedSegments.AddRange(qualifiedSegments);
+                }
             }
         }
 
@@ -157,7 +171,7 @@ namespace OptimizelySDK
         {
             lock (mutex)
             {
-                return QualifiedSegments.Contains(segment);
+                return QualifiedSegments?.Contains(segment) ?? false;
             }
         }
 
@@ -173,11 +187,8 @@ namespace OptimizelySDK
 
             var success = segments != null;
 
-            if (success)
-            {
-                SetQualifiedSegments(segments.ToList());
-            }
-
+            SetQualifiedSegments(segments?.ToList());
+           
             return success;
         }
 

@@ -101,12 +101,12 @@ namespace OptimizelySDK.Odp
             List<string> qualifiedSegments;
             var cacheKey = GetCacheKey(OdpUserKeyType.FS_USER_ID.ToString().ToLower(), fsUserId);
 
-            if (options.Contains(OdpSegmentOption.ResetCache))
+            if (options.Contains(OdpSegmentOption.RESET_CACHE))
             {
                 _segmentsCache.Reset();
             }
 
-            if (!options.Contains(OdpSegmentOption.IgnoreCache))
+            if (!options.Contains(OdpSegmentOption.IGNORE_CACHE))
             {
                 qualifiedSegments = _segmentsCache.Lookup(cacheKey);
                 if (qualifiedSegments != null)
@@ -126,7 +126,7 @@ namespace OptimizelySDK.Odp
                     _odpConfig.SegmentsToCheck)?.
                 ToList();
 
-            if (qualifiedSegments != null && !options.Contains(OdpSegmentOption.IgnoreCache))
+            if (qualifiedSegments != null && !options.Contains(OdpSegmentOption.IGNORE_CACHE))
             {
                 _segmentsCache.Save(cacheKey, qualifiedSegments);
             }

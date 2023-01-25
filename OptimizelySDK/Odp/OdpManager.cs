@@ -93,7 +93,7 @@ namespace OptimizelySDK.Odp
                 return null;
             }
 
-            return SegmentManager.FetchQualifiedSegments(userId, options).ToArray();
+            return SegmentManager.FetchQualifiedSegments(userId, options)?.ToArray();
         }
 
         /// <summary>

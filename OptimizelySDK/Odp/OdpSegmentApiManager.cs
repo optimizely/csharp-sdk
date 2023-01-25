@@ -150,22 +150,7 @@ namespace OptimizelySDK.Odp
         {
             return
                 @"{
-                    ""query"": ""{
-                        query($userId: String, $audiences: [String]) {
-                            {
-                                customer({userKey}: $userId) {
-                                    audiences(subset: $audiences) {
-                                        edges {
-                                            node {
-                                                name
-                                                state
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }"", 
+                    ""query"": ""query($userId: String, $audiences: [String]) {customer({userKey}: $userId) {audiences(subset: $audiences) {edges {node {name state}}}}}"", 
                     ""variables"" : {
                         ""userId"": ""{userValue}"",
                         ""audiences"": {audiences}
@@ -210,7 +195,7 @@ namespace OptimizelySDK.Odp
                 _logger.Log(LogLevel.ERROR,
                     $"{AUDIENCE_FETCH_FAILURE_MESSAGE} ({Constants.NETWORK_ERROR_REASON})");
 
-                return default;
+                return null;
             }
 
             return response.Content.ReadAsStringAsync().Result;
