@@ -63,12 +63,16 @@ namespace OptimizelySDK
 
         public OptimizelyUserContext(Optimizely optimizely, string userId,
             UserAttributes userAttributes, IErrorHandler errorHandler, ILogger logger
-        ) : this(optimizely, userId, userAttributes, null, null, errorHandler, logger) { }
+        ) : this(optimizely, userId, userAttributes, null, null, errorHandler, logger)
+        {
+        }
 
         public OptimizelyUserContext(Optimizely optimizely, string userId,
             UserAttributes userAttributes, ForcedDecisionsStore forcedDecisionsStore,
             IErrorHandler errorHandler, ILogger logger
-        ) : this(optimizely, userId, userAttributes, forcedDecisionsStore, null, errorHandler, logger) { }
+        ) : this(optimizely, userId, userAttributes, forcedDecisionsStore, null, errorHandler, logger)
+        {
+        }
 
         public OptimizelyUserContext(Optimizely optimizely, string userId,
             UserAttributes userAttributes, ForcedDecisionsStore forcedDecisionsStore,
@@ -188,7 +192,7 @@ namespace OptimizelySDK
             var success = segments != null;
 
             SetQualifiedSegments(segments?.ToList());
-           
+
             return success;
         }
 
@@ -278,8 +282,7 @@ namespace OptimizelySDK
         /// <returns>A decision result.</returns>
         public virtual OptimizelyDecision Decide(string key)
         {
-            return Decide(key, new OptimizelyDecideOption[]
-                { });
+            return Decide(key, new OptimizelyDecideOption[] { });
         }
 
         /// <summary>
@@ -319,8 +322,7 @@ namespace OptimizelySDK
         /// <returns>A dictionary of all decision results, mapped by flag keys.</returns>
         public virtual Dictionary<string, OptimizelyDecision> DecideForKeys(string[] keys)
         {
-            return DecideForKeys(keys, new OptimizelyDecideOption[]
-                { });
+            return DecideForKeys(keys, new OptimizelyDecideOption[] { });
         }
 
         /// <summary>
@@ -329,8 +331,7 @@ namespace OptimizelySDK
         /// <returns>A dictionary of all decision results, mapped by flag keys.</returns>
         public virtual Dictionary<string, OptimizelyDecision> DecideAll()
         {
-            return DecideAll(new OptimizelyDecideOption[]
-                { });
+            return DecideAll(new OptimizelyDecideOption[] { });
         }
 
         /// <summary>
