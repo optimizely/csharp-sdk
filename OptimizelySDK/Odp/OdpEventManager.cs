@@ -339,9 +339,7 @@ namespace OptimizelySDK.Odp
         {
             var identifiers = new Dictionary<string, string>
             {
-                {
-                    OdpUserKeyType.FS_USER_ID.ToString(), userId
-                },
+                { OdpUserKeyType.FS_USER_ID.ToString(), userId },
             };
 
             var odpEvent = new OdpEvent(Constants.ODP_EVENT_TYPE, "identified", identifiers);
@@ -349,7 +347,7 @@ namespace OptimizelySDK.Odp
         }
 
         /// <summary>
-        /// Update ODP configuration settings
+        /// Update ODP configuration settings with a implied flush of the queued events
         /// </summary>
         /// <param name="odpConfig">Configuration object containing new values</param>
         public void UpdateSettings(OdpConfig odpConfig)
@@ -358,7 +356,9 @@ namespace OptimizelySDK.Odp
             {
                 return;
             }
+
             Flush();
+
             _odpConfig = odpConfig;
 
             if (_autoStart)
@@ -435,36 +435,66 @@ namespace OptimizelySDK.Odp
                 return this;
             }
 
+            /// <summary>
+            /// Provide an Event Queue
+            /// </summary>
+            /// <param name="eventQueue">Concrete implementation of an event queue</param>
+            /// <returns>Current Builder instance</returns>
             public Builder WithEventQueue(BlockingCollection<object> eventQueue)
             {
                 _eventQueue = eventQueue;
                 return this;
             }
 
+            /// <summary>
+            /// Provide an ODP Event Manager API
+            /// </summary>
+            /// <param name="odpEventApiManager">Concrete implementation of an Event API Manager</param>
+            /// <returns>Current Builder instance</returns>
             public Builder WithOdpEventApiManager(IOdpEventApiManager odpEventApiManager)
             {
                 _odpEventApiManager = odpEventApiManager;
                 return this;
             }
 
+            /// <summary>
+            /// Provide an flush interval
+            /// </summary>
+            /// <param name="flushInterval">Frequency to flush the queue</param>
+            /// <returns>Current Builder instance</returns>
             public Builder WithFlushInterval(TimeSpan flushInterval)
             {
                 _flushInterval = flushInterval;
                 return this;
             }
 
+            /// <summary>
+            /// Provide a timeout to wait for network communication
+            /// </summary>
+            /// <param name="timeout">Span to allow for communication timeout</param>
+            /// <returns>Current Builder instance</returns>
             public Builder WithTimeoutInterval(TimeSpan timeout)
             {
                 _timeoutInterval = timeout;
                 return this;
             }
 
+            /// <summary>
+            /// Provide a logger to record code events
+            /// </summary>
+            /// <param name="logger">Concrete implementation of a logger</param>
+            /// <returns>Current Builder instance</returns>
             public Builder WithLogger(ILogger logger = null)
             {
                 _logger = logger;
                 return this;
             }
 
+            /// <summary>
+            /// Provide an error handler
+            /// </summary>
+            /// <param name="errorHandler">Concrete implementation of an error handler</param>
+            /// <returns>Current Builder instance</returns>
             public Builder WithErrorHandler(IErrorHandler errorHandler = null)
             {
                 _errorHandler = errorHandler;
@@ -480,8 +510,12 @@ namespace OptimizelySDK.Odp
                 var manager = new OdpEventManager();
                 manager._eventQueue = _eventQueue;
                 manager._odpEventApiManager = _odpEventApiManager;
-                manager._flushInterval = (_flushInterval != null && _flushInterval > TimeSpan.Zero) ? _flushInterval : Constants.DEFAULT_FLUSH_INTERVAL;
-                manager._batchSize = (_flushInterval != null && _flushInterval == TimeSpan.Zero) ? 1 : Constants.DEFAULT_BATCH_SIZE;
+                manager._flushInterval = (_flushInterval > TimeSpan.Zero) ?
+                    _flushInterval :
+                    Constants.DEFAULT_FLUSH_INTERVAL;
+                manager._batchSize = (_flushInterval == TimeSpan.Zero) ?
+                    1 :
+                    Constants.DEFAULT_BATCH_SIZE;
                 manager._timeoutInterval = _timeoutInterval <= TimeSpan.Zero ?
                     Constants.DEFAULT_TIMEOUT_INTERVAL :
                     _timeoutInterval;
@@ -505,18 +539,10 @@ namespace OptimizelySDK.Odp
 
                 manager._commonData = new Dictionary<string, object>
                 {
-                    {
-                        "idempotence_id", Guid.NewGuid()
-                    },
-                    {
-                        "data_source_type", "sdk"
-                    },
-                    {
-                        "data_source", Optimizely.SDK_TYPE
-                    },
-                    {
-                        "data_source_version", Optimizely.SDK_VERSION
-                    },
+                    { "idempotence_id", Guid.NewGuid() },
+                    { "data_source_type", "sdk" },
+                    { "data_source", Optimizely.SDK_TYPE },
+                    { "data_source_version", Optimizely.SDK_VERSION },
                 };
 
                 if (manager._autoStart)
@@ -529,11 +555,19 @@ namespace OptimizelySDK.Odp
         }
 
         /// <summary>
-        /// TESTING ONLY: Read the current ODP config
+        /// For Testing Only: Read the current ODP config
         /// </summary>
         /// <returns>Current ODP settings</returns>
         internal OdpConfig OdpConfigForTesting { get { return _odpConfig; } }
+
+        /// <summary>
+        /// For Testing Only: Read the current flush interval
+        /// </summary>
         internal TimeSpan FlushIntervalForTesting { get { return _flushInterval; } }
+
+        /// <summary>
+        /// For Testing Only: Read the current timeout interval
+        /// </summary>
         internal TimeSpan TimeoutIntervalForTesting { get { return _timeoutInterval; } }
     }
 }

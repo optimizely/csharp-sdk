@@ -162,6 +162,9 @@ namespace OptimizelySDK.Odp
             _segmentsCache.Reset();
         }
 
+        /// <summary>
+        /// For Testing Only: Retrieve the current segment cache
+        /// </summary>
         internal ICache<List<string>> SegmentsCacheForTesting { get { return _segmentsCache; } }
     }
 }

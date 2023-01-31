@@ -27,34 +27,34 @@ namespace OptimizelySDK.Tests.AudienceConditionsTests
     [TestFixture]
     public class SegmentsTests
     {
-        private BaseCondition _qualifiedMatchCondition;
-        private BaseCondition _anotherQualifiedMatchCondition;
-        private ICondition _exactMatchCondition;
+        private BaseCondition _firstThirdPartyOdpQualifiedMatchCondition;
+        private BaseCondition _secondThirdPartyOdpQualifiedMatchCondition;
+        private ICondition _customExactMatchCondition;
         private Mock<ILogger> _mockLogger;
 
-        private const string QUALIFIED_MATCH_VALUE = "example_odp_condition_value";
-        private const string ANOTHER_QUALIFIED_MATCH_VALUE = "another_example_odp_condition_value";
+        private const string FIRST_CONDITION_VALUE = "first_condition_value";
+        private const string SECOND_CONDITION_VALUE = "second_condition_value";
 
         [TestFixtureSetUp]
         public void Setup()
         {
-            _qualifiedMatchCondition = new BaseCondition
+            _firstThirdPartyOdpQualifiedMatchCondition = new BaseCondition
             {
-                Value = QUALIFIED_MATCH_VALUE,
+                Value = FIRST_CONDITION_VALUE,
                 Type = "third_party_dimension",
                 Name = "odp.audiences",
                 Match = "qualified",
             };
 
-            _anotherQualifiedMatchCondition = new BaseCondition
+            _secondThirdPartyOdpQualifiedMatchCondition = new BaseCondition
             {
-                Value = ANOTHER_QUALIFIED_MATCH_VALUE,
+                Value = SECOND_CONDITION_VALUE,
                 Type = "third_party_dimension",
                 Name = "odp.audiences",
                 Match = "qualified",
             };
 
-            _exactMatchCondition = new BaseCondition()
+            _customExactMatchCondition = new BaseCondition()
             {
                 Value = "test_custom_value",
                 Type = "custom_attribute",
@@ -94,13 +94,13 @@ namespace OptimizelySDK.Tests.AudienceConditionsTests
             {
                 Conditions = new[]
                 {
-                    _qualifiedMatchCondition, _exactMatchCondition,
+                    _firstThirdPartyOdpQualifiedMatchCondition, _customExactMatchCondition,
                 },
             };
 
             var allSegments = Audience.GetSegments(conditions);
 
-            Assert.AreEqual(_qualifiedMatchCondition.Value.ToString(),
+            Assert.AreEqual(_firstThirdPartyOdpQualifiedMatchCondition.Value.ToString(),
                 allSegments.FirstOrDefault());
         }
 
@@ -111,13 +111,13 @@ namespace OptimizelySDK.Tests.AudienceConditionsTests
             {
                 Conditions = new[]
                 {
-                    _exactMatchCondition, _qualifiedMatchCondition,
+                    _customExactMatchCondition, _firstThirdPartyOdpQualifiedMatchCondition,
                 },
             };
 
             var allSegments = Audience.GetSegments(conditions);
 
-            Assert.AreEqual(_qualifiedMatchCondition.Value.ToString(),
+            Assert.AreEqual(_firstThirdPartyOdpQualifiedMatchCondition.Value.ToString(),
                 allSegments.FirstOrDefault());
         }
 
@@ -128,7 +128,7 @@ namespace OptimizelySDK.Tests.AudienceConditionsTests
             {
                 Conditions = new[]
                 {
-                    _exactMatchCondition, _exactMatchCondition, _exactMatchCondition,
+                    _customExactMatchCondition, _customExactMatchCondition, _customExactMatchCondition,
                 },
             };
 
@@ -144,14 +144,14 @@ namespace OptimizelySDK.Tests.AudienceConditionsTests
             {
                 Conditions = new ICondition[]
                 {
-                    _qualifiedMatchCondition, _exactMatchCondition,
+                    _firstThirdPartyOdpQualifiedMatchCondition, _customExactMatchCondition,
                 },
             };
             var twoQualified = new AndCondition
             {
                 Conditions = new ICondition[]
                 {
-                    _anotherQualifiedMatchCondition, _qualifiedMatchCondition,
+                    _secondThirdPartyOdpQualifiedMatchCondition, _firstThirdPartyOdpQualifiedMatchCondition,
                 },
             };
             var orConditions = new OrCondition
@@ -169,8 +169,8 @@ namespace OptimizelySDK.Tests.AudienceConditionsTests
             var allSegments = Audience.GetSegments(notCondition).ToList();
 
             Assert.AreEqual(2, allSegments.Count);
-            Assert.Contains(QUALIFIED_MATCH_VALUE, allSegments);
-            Assert.Contains(ANOTHER_QUALIFIED_MATCH_VALUE, allSegments);
+            Assert.Contains(FIRST_CONDITION_VALUE, allSegments);
+            Assert.Contains(SECOND_CONDITION_VALUE, allSegments);
         }
     }
 }

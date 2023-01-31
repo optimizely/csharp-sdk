@@ -157,36 +157,67 @@ namespace OptimizelySDK.Odp
             private int? _maxSize;
             private TimeSpan? _itemTimeout;
 
+            /// <summary>
+            /// Provide a Segment Manager
+            /// </summary>
+            /// <param name="segmentManager">Concrete implementation of a SegmentManager</param>
+            /// <returns>Current Builder instance</returns>
             public Builder WithSegmentManager(IOdpSegmentManager segmentManager)
             {
                 _segmentManager = segmentManager;
                 return this;
             }
 
+            /// <summary>
+            /// Provide an Event Manager
+            /// </summary>
+            /// <param name="eventManager">Concrete implementation of an Event Manager</param>
+            /// <returns>Current Builder instance</returns>
             public Builder WithEventManager(IOdpEventManager eventManager)
             {
                 _eventManager = eventManager;
                 return this;
             }
 
+            /// <summary>
+            /// Provide a handler for logging
+            /// </summary>
+            /// <param name="logger">Concrete implementation of a log handler</param>
+            /// <returns>Current Builder instance</returns>
             public Builder WithLogger(ILogger logger = null)
             {
                 _logger = logger;
                 return this;
             }
 
+            /// <summary>
+            /// Provide handler for errors
+            /// </summary>
+            /// <param name="errorHandler">Concrete implementation of an error handler</param>
+            /// <returns>Current Builder instance</returns>
             public Builder WithErrorHandler(IErrorHandler errorHandler = null)
             {
                 _errorHandler = errorHandler;
                 return this;
             }
 
+            /// <summary>
+            /// Provide a custom caching mechanism
+            /// </summary>
+            /// <param name="cache">Concrete implementation of a cache</param>
+            /// <returns>Current Builder instance</returns>
             public Builder WithCache(ICache<List<string>> cache)
             {
                 _cache = cache;
                 return this;
             }
 
+            /// <summary>
+            /// Provide a specification for the default cache mechanism
+            /// </summary>
+            /// <param name="maxSize">Maximum number of elements to cache</param>
+            /// <param name="itemTimeout">Maximum time an element can be cached</param>
+            /// <returns>Current Builder instance</returns>
             public Builder WithCache(int? maxSize = null,
                 TimeSpan? itemTimeout = null
             )
