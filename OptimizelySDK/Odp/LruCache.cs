@@ -210,7 +210,7 @@ namespace OptimizelySDK.Odp
         /// For Testing Only: Retrieve the current cache timout
         /// </summary>
         internal TimeSpan TimeoutForTesting { get { return _timeout; } }
-        
+
         /// <summary>
         /// For Testing Only: Retrieve hte current maximum cache size
         /// </summary>
