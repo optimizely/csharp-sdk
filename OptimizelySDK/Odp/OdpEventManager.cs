@@ -152,9 +152,9 @@ namespace OptimizelySDK.Odp
                         FlushQueue();
                     }
 
-                    if (!_eventQueue.TryTake(out object item, 50))
+                    if (!_eventQueue.TryTake(out object item, (int)
+                        (_flushingIntervalDeadline - DateTime.Now.MillisecondsSince1970())))
                     {
-                        Thread.Sleep(50);
                         continue;
                     }
 
