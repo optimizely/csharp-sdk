@@ -311,7 +311,7 @@ namespace OptimizelySDK.Tests.OdpTests
         }
 
         [Test]
-        public void ShouldAttemptToFlushAnEmptyQueueAtFlushInterval()
+        public void ShouldNotAttemptToFlushAnEmptyQueueAtFlushInterval()
         {
             var eventManager = new OdpEventManager.Builder().
                 WithOdpEventApiManager(_mockApiManager.Object).
@@ -327,7 +327,7 @@ namespace OptimizelySDK.Tests.OdpTests
             eventManager.Stop();
 
             _mockLogger.Verify(l => l.Log(LogLevel.DEBUG, "Flushing queue."),
-                Times.AtLeast(3));
+                Times.Never);
         }
 
         [Test]
