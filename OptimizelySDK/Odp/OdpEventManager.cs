@@ -146,10 +146,10 @@ namespace OptimizelySDK.Odp
             {
                 while (true)
                 {
-                    Object item;
+                    object item;
                     // If batch has events, set the timeout to remaining time for flush interval,
                     //      otherwise wait for the new event indefinitely
-                    if (_eventQueue.Count > 0)
+                    if (_currentBatch.Count > 0)
                     {
                         _eventQueue.TryTake(out item, (int)(_flushingIntervalDeadline - DateTime.Now.MillisecondsSince1970()));
                     }
@@ -160,8 +160,11 @@ namespace OptimizelySDK.Odp
                     if (item == null)
                     {
                         // null means no new events received and flush interval is over, dispatch whatever is in the batch.
-                        _logger.Log(LogLevel.DEBUG, $"Flushing queue.");
-                        FlushQueue();
+                        if (_currentBatch.Count != 0)
+                        {
+                            _logger.Log(LogLevel.DEBUG, $"Flushing queue.");
+                            FlushQueue();
+                        }
                         continue;
                     }
 
