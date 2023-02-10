@@ -168,7 +168,7 @@ namespace OptimizelySDK.Odp
                             FlushQueue();
                         }
                         continue;
-                    } 
+                    }
                     else if (item == _shutdownSignal)
                     {
                         _logger.Log(LogLevel.INFO, "Received shutdown signal.");
