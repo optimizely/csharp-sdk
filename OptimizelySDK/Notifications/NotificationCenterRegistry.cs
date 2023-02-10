@@ -15,7 +15,6 @@
  */
 
 using OptimizelySDK.Logger;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 
 namespace OptimizelySDK.Notifications
@@ -24,7 +23,8 @@ namespace OptimizelySDK.Notifications
     {
         private static readonly object _mutex = new object();
 
-        private static ConcurrentDictionary<string, NotificationCenter> _notificationCenters = new ConcurrentDictionary<string, NotificationCenter>();
+        private static Dictionary<string, NotificationCenter> _notificationCenters =
+            new Dictionary<string, NotificationCenter>();
 
         /// <summary>
         /// Thread-safe access to the NotificationCenter
@@ -40,16 +40,18 @@ namespace OptimizelySDK.Notifications
                 return default;
             }
 
-            NotificationCenter notificationCenter = null;
-            
-            if (_notificationCenters.ContainsKey(sdkKey))
+            NotificationCenter notificationCenter;
+            lock (_mutex)
             {
-                notificationCenter = _notificationCenters[sdkKey];
-            }
-            else
-            {
-                notificationCenter = new NotificationCenter(logger);
-                _notificationCenters[sdkKey] = notificationCenter;
+                if (_notificationCenters.ContainsKey(sdkKey))
+                {
+                    notificationCenter = _notificationCenters[sdkKey];
+                }
+                else
+                {
+                    notificationCenter = new NotificationCenter(logger);
+                    _notificationCenters[sdkKey] = notificationCenter;
+                }
             }
 
             return notificationCenter;
@@ -72,7 +74,7 @@ namespace OptimizelySDK.Notifications
                         out NotificationCenter notificationCenter))
                 {
                     notificationCenter.ClearAllNotifications();
-                    _notificationCenters.TryRemove(sdkKey, out NotificationCenter obj);
+                    _notificationCenters.Remove(sdkKey);
                 }
             }
         }
