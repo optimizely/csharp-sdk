@@ -158,6 +158,7 @@ namespace OptimizelySDK.Odp
                         item = _eventQueue.Take();
                         Thread.Sleep(1); // TODO: need to figure out why this is allowing item to read shutdown signal.
                     }
+
                     if (item == null)
                     {
                         // null means no new events received and flush interval is over, dispatch whatever is in the batch.
@@ -173,7 +174,6 @@ namespace OptimizelySDK.Odp
                         _logger.Log(LogLevel.INFO, "Received shutdown signal.");
                         break;
                     }
-
                     else if (item == _flushSignal)
                     {
                         _logger.Log(LogLevel.DEBUG, "Received flush signal.");
