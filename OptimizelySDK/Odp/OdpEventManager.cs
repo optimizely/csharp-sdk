@@ -156,6 +156,7 @@ namespace OptimizelySDK.Odp
                     else
                     {
                         item = _eventQueue.Take();
+                        Thread.Sleep(1); // TODO: need to figure out why this is allowing item to read shutdown signal.
                     }
                     if (item == null)
                     {
@@ -166,25 +167,24 @@ namespace OptimizelySDK.Odp
                             FlushQueue();
                         }
                         continue;
-                    }
-
-                    if (item == _shutdownSignal)
+                    } 
+                    else if (item == _shutdownSignal)
                     {
                         _logger.Log(LogLevel.INFO, "Received shutdown signal.");
                         break;
                     }
 
-                    if (item == _flushSignal)
+                    else if (item == _flushSignal)
                     {
                         _logger.Log(LogLevel.DEBUG, "Received flush signal.");
                         FlushQueue();
                         continue;
                     }
-
-                    if (item is OdpEvent odpEvent)
+                    else if (item is OdpEvent odpEvent)
                     {
                         AddToBatch(odpEvent);
                     }
+
                 }
             }
             catch (InvalidOperationException ioe)
