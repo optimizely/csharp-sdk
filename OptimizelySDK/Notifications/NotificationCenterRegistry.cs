@@ -15,6 +15,7 @@
  */
 
 using OptimizelySDK.Logger;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 
 namespace OptimizelySDK.Notifications
@@ -23,8 +24,7 @@ namespace OptimizelySDK.Notifications
     {
         private static readonly object _mutex = new object();
 
-        private static Dictionary<string, NotificationCenter> _notificationCenters =
-            new Dictionary<string, NotificationCenter>();
+        private static ConcurrentDictionary<string, NotificationCenter> _notificationCenters = new ConcurrentDictionary<string, NotificationCenter>();
 
         /// <summary>
         /// Thread-safe access to the NotificationCenter
@@ -40,18 +40,16 @@ namespace OptimizelySDK.Notifications
                 return default;
             }
 
-            NotificationCenter notificationCenter;
-            lock (_mutex)
+            NotificationCenter notificationCenter = null;
+            
+            if (_notificationCenters.ContainsKey(sdkKey))
             {
-                if (_notificationCenters.ContainsKey(sdkKey))
-                {
-                    notificationCenter = _notificationCenters[sdkKey];
-                }
-                else
-                {
-                    notificationCenter = new NotificationCenter(logger);
-                    _notificationCenters[sdkKey] = notificationCenter;
-                }
+                notificationCenter = _notificationCenters[sdkKey];
+            }
+            else
+            {
+                notificationCenter = new NotificationCenter(logger);
+                _notificationCenters[sdkKey] = notificationCenter;
             }
 
             return notificationCenter;
@@ -74,7 +72,7 @@ namespace OptimizelySDK.Notifications
                         out NotificationCenter notificationCenter))
                 {
                     notificationCenter.ClearAllNotifications();
-                    _notificationCenters.Remove(sdkKey);
+                    _notificationCenters.TryRemove(sdkKey, out NotificationCenter obj);
                 }
             }
         }
