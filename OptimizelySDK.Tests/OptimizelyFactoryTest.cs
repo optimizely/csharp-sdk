@@ -15,6 +15,7 @@
  *    limitations under the License.
  */
 
+using System;
 using Moq;
 using NUnit.Framework;
 using OptimizelySDK.Config;
@@ -25,7 +26,6 @@ using OptimizelySDK.Notifications;
 using OptimizelySDK.Tests.ConfigTest;
 using OptimizelySDK.Tests.EventTest;
 using OptimizelySDK.Tests.Utils;
-using System;
 
 namespace OptimizelySDK.Tests
 {

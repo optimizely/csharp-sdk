@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Threading;
 using Moq;
 using NUnit.Framework;
 using OptimizelySDK.Bucketing;
@@ -32,10 +36,6 @@ using OptimizelySDK.Tests.NotificationTests;
 using OptimizelySDK.Tests.Utils;
 using OptimizelySDK.Tests.UtilsTests;
 using OptimizelySDK.Utils;
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Threading;
 
 namespace OptimizelySDK.Tests
 {
@@ -3380,6 +3380,7 @@ namespace OptimizelySDK.Tests
             TestActivateListener(userAttributes);
         }
 
+        [Obsolete]
         public void TestActivateListener(UserAttributes userAttributes)
         {
             var experimentKey = "group_experiment_1";

@@ -1,4 +1,7 @@
-﻿using Moq;
+﻿using System;
+using System.Collections.Concurrent;
+using System.Threading;
+using Moq;
 using NUnit.Framework;
 using OptimizelySDK.Config;
 using OptimizelySDK.Entity;
@@ -9,9 +12,6 @@ using OptimizelySDK.Event.Entity;
 using OptimizelySDK.Logger;
 using OptimizelySDK.Notifications;
 using OptimizelySDK.Tests.NotificationTests;
-using System;
-using System.Collections.Concurrent;
-using System.Threading;
 
 namespace OptimizelySDK.Tests.EventTests
 {
@@ -98,7 +98,7 @@ namespace OptimizelySDK.Tests.EventTests
         {
             var countdownEvent = new CountdownEvent(1);
             var eventDispatcher = new TestEventDispatcher(countdownEvent)
-                { Logger = LoggerMock.Object };
+            { Logger = LoggerMock.Object };
             SetEventProcessor(eventDispatcher);
 
             for (var i = 0; i < MAX_BATCH_SIZE; i++)

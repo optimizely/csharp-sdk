@@ -1,4 +1,8 @@
-﻿using Newtonsoft.Json;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using OptimizelySDK.Config;
 using OptimizelySDK.Entity;
@@ -6,10 +10,6 @@ using OptimizelySDK.Event;
 using OptimizelySDK.Event.Dispatcher;
 using OptimizelySDK.Event.Entity;
 using OptimizelySDK.Logger;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
 
 namespace OptimizelySDK.Tests.EventTests
 {

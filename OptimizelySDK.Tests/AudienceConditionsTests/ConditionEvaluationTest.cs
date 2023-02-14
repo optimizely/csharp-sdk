@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
+using System;
+using System.Collections.Generic;
 using Moq;
 using NUnit.Framework;
 using OptimizelySDK.AudienceConditions;
 using OptimizelySDK.Entity;
 using OptimizelySDK.Logger;
 using OptimizelySDK.Tests.Utils;
-using System;
-using System.Collections.Generic;
 
 namespace OptimizelySDK.Tests.AudienceConditionsTests
 {
@@ -29,25 +29,25 @@ namespace OptimizelySDK.Tests.AudienceConditionsTests
     public class ConditionEvaluationTest
     {
         private BaseCondition LegacyCondition = new BaseCondition
-            { Name = "device_type", Value = "iPhone", Type = "custom_attribute" };
+        { Name = "device_type", Value = "iPhone", Type = "custom_attribute" };
 
         private BaseCondition ExistsCondition = new BaseCondition
-            { Name = "input_value", Match = "exists", Type = "custom_attribute" };
+        { Name = "input_value", Match = "exists", Type = "custom_attribute" };
 
         private BaseCondition SubstrCondition = new BaseCondition
-            { Name = "location", Value = "USA", Match = "substring", Type = "custom_attribute" };
+        { Name = "location", Value = "USA", Match = "substring", Type = "custom_attribute" };
 
         private BaseCondition GTCondition = new BaseCondition
-            { Name = "distance_gt", Value = 10, Match = "gt", Type = "custom_attribute" };
+        { Name = "distance_gt", Value = 10, Match = "gt", Type = "custom_attribute" };
 
         private BaseCondition GECondition = new BaseCondition
-            { Name = "distance_ge", Value = 10, Match = "ge", Type = "custom_attribute" };
+        { Name = "distance_ge", Value = 10, Match = "ge", Type = "custom_attribute" };
 
         private BaseCondition LTCondition = new BaseCondition
-            { Name = "distance_lt", Value = 10, Match = "lt", Type = "custom_attribute" };
+        { Name = "distance_lt", Value = 10, Match = "lt", Type = "custom_attribute" };
 
         private BaseCondition LECondition = new BaseCondition
-            { Name = "distance_le", Value = 10, Match = "le", Type = "custom_attribute" };
+        { Name = "distance_le", Value = 10, Match = "le", Type = "custom_attribute" };
 
         private BaseCondition ExactStrCondition = new BaseCondition
         {
@@ -60,10 +60,10 @@ namespace OptimizelySDK.Tests.AudienceConditionsTests
         };
 
         private BaseCondition ExactDecimalCondition = new BaseCondition
-            { Name = "pi_value", Value = 3.14, Match = "exact", Type = "custom_attribute" };
+        { Name = "pi_value", Value = 3.14, Match = "exact", Type = "custom_attribute" };
 
         private BaseCondition ExactIntCondition = new BaseCondition
-            { Name = "lasers_count", Value = 9000, Match = "exact", Type = "custom_attribute" };
+        { Name = "lasers_count", Value = 9000, Match = "exact", Type = "custom_attribute" };
 
         private BaseCondition InfinityIntCondition = new BaseCondition
         {
@@ -169,7 +169,7 @@ namespace OptimizelySDK.Tests.AudienceConditionsTests
         public void TestEvaluateWithMissingTypeProperty()
         {
             var condition = new BaseCondition
-                { Name = "input_value", Value = "Android", Match = "exists" };
+            { Name = "input_value", Value = "Android", Match = "exists" };
             Assert.That(
                 condition.Evaluate(null,
                     new UserAttributes { { "device_type", "iPhone" } }.ToUserContext(), Logger),
@@ -338,7 +338,7 @@ namespace OptimizelySDK.Tests.AudienceConditionsTests
                 Times.Once);
 
             invalidCondition = new BaseCondition
-                { Name = "location", Value = 25, Match = "substring", Type = "custom_attribute" };
+            { Name = "location", Value = 25, Match = "substring", Type = "custom_attribute" };
             Assert.That(
                 invalidCondition.Evaluate(null,
                     new UserAttributes { { "location", "USA" } }.ToUserContext(), Logger), Is.Null);

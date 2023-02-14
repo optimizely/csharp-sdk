@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright 2020-2022, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+using System;
+using System.Collections.Generic;
 using Moq;
 using Newtonsoft.Json.Linq;
 using NUnit.Framework;
@@ -21,8 +23,6 @@ using OptimizelySDK.Config;
 using OptimizelySDK.Logger;
 using OptimizelySDK.OptlyConfig;
 using OptimizelySDK.Tests.UtilsTests;
-using System;
-using System.Collections.Generic;
 
 namespace OptimizelySDK.Tests.OptimizelyConfigTests
 {
@@ -144,6 +144,7 @@ namespace OptimizelySDK.Tests.OptimizelyConfigTests
         }
 
         [Test]
+        [Obsolete]
         public void TestGetOptimizelyConfigWithDuplicateExperimentKeys()
         {
             var datafileProjectConfig = DatafileProjectConfig.Create(
@@ -633,6 +634,7 @@ namespace OptimizelySDK.Tests.OptimizelyConfigTests
         }
 
         [Test]
+        [Obsolete]
         public void TestOptimizelyFeatureEntity()
         {
             var expectedOptlyFeature = new OptimizelyFeature("1", "featKey",

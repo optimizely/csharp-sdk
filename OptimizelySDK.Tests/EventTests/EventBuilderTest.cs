@@ -1,4 +1,4 @@
-/* 
+﻿/* 
  * Copyright 2017-2019, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-using OptimizelySDK.Entity;
-using OptimizelySDK.Logger;
-using OptimizelySDK.Event.Builder;
-using OptimizelySDK.Event;
-using System.Collections.Generic;
 using System;
+using System.Collections.Generic;
 using NUnit.Framework;
 using OptimizelySDK.Bucketing;
-using OptimizelySDK.Utils;
 using OptimizelySDK.Config;
+using OptimizelySDK.Entity;
+using OptimizelySDK.Event;
+using OptimizelySDK.Event.Builder;
+using OptimizelySDK.Logger;
+using OptimizelySDK.Utils;
 
 namespace OptimizelySDK.Tests.EventTests
 {
@@ -32,10 +32,11 @@ namespace OptimizelySDK.Tests.EventTests
     {
         private string TestUserId = string.Empty;
         private ProjectConfig Config;
-
+        [Obsolete]
         private EventBuilder EventBuilder;
 
         [TestFixtureSetUp]
+        [Obsolete]
         public void Setup()
         {
             TestUserId = "testUserId";

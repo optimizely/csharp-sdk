@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+using System.Collections.Generic;
 using NUnit.Framework;
 using OptimizelySDK.Odp;
-using System.Collections.Generic;
 
 namespace OptimizelySDK.Tests.OdpTests
 {

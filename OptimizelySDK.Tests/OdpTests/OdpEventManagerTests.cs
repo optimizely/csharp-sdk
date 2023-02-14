@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-using Moq;
-using NUnit.Framework;
-using OptimizelySDK.Logger;
-using OptimizelySDK.Odp;
-using OptimizelySDK.Odp.Entity;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Moq;
+using NUnit.Framework;
+using OptimizelySDK.Logger;
+using OptimizelySDK.Odp;
+using OptimizelySDK.Odp.Entity;
 
 namespace OptimizelySDK.Tests.OdpTests
 {

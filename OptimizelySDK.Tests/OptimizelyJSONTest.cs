@@ -15,13 +15,13 @@
  *    limitations under the License.
  */
 
+using System;
+using System.Collections.Generic;
 using Moq;
 using NUnit.Framework;
 using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Exceptions;
 using OptimizelySDK.Logger;
-using System;
-using System.Collections.Generic;
 
 namespace OptimizelySDK.Tests
 {

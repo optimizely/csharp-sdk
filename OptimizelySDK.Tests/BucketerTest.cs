@@ -289,7 +289,7 @@ namespace OptimizelySDK.Tests
             var bucketer = new Bucketer(LoggerMock.Object);
             var expectedVariation = new Variation();
             var expectedGroupVariation = new Variation
-                { Id = "7725250007", Key = "group_exp_2_var_2" };
+            { Id = "7725250007", Key = "group_exp_2_var_2" };
             var variationResult = bucketer.Bucket(Config,
                 Config.GetExperimentFromKey("group_experiment_2"),
                 TestBucketingIdGroupExp2Var2, TestUserIdBucketsToNoGroup);

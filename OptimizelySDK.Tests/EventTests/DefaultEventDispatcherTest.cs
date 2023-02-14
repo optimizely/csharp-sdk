@@ -1,13 +1,13 @@
-﻿using OptimizelySDK.Entity;
-using OptimizelySDK.Logger;
-using Moq;
-using OptimizelySDK.Event.Builder;
-using OptimizelySDK.Event;
+﻿using System;
 using System.Collections.Generic;
+using Moq;
 using Newtonsoft.Json.Linq;
-using System;
-using OptimizelySDK.Event.Dispatcher;
 using NUnit.Framework;
+using OptimizelySDK.Entity;
+using OptimizelySDK.Event;
+using OptimizelySDK.Event.Builder;
+using OptimizelySDK.Event.Dispatcher;
+using OptimizelySDK.Logger;
 
 namespace OptimizelySDK.Tests.EventTests
 {

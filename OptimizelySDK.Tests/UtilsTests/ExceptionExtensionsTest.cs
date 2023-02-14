@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+using System;
 using NUnit.Framework;
 using OptimizelySDK.Utils;
-using System;
 
 namespace OptimizelySDK.Tests.UtilsTests
 {

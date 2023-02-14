@@ -16,8 +16,8 @@
 
 #if !NETSTANDARD1_6 && !NET35
 
-using NUnit.Framework;
 using System.Configuration;
+using NUnit.Framework;
 
 namespace OptimizelySDK.Tests
 {

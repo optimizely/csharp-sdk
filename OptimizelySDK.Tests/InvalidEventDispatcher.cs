@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+using System;
 using OptimizelySDK.Event.Dispatcher;
 using OptimizelySDK.Logger;
-using System;
 
 namespace OptimizelySDK.Tests
 {

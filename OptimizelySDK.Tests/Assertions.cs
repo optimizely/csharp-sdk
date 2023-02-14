@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-using NUnit.Framework;
-using OptimizelySDK.Entity;
-using OptimizelySDK.OptimizelyDecisions;
-using OptimizelySDK.OptlyConfig;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NUnit.Framework;
+using OptimizelySDK.Entity;
+using OptimizelySDK.OptimizelyDecisions;
+using OptimizelySDK.OptlyConfig;
 
 namespace OptimizelySDK.Tests
 {
@@ -418,6 +418,7 @@ namespace OptimizelySDK.Tests
             AreEqual(expected.Value, actual.Value);
         }
 
+        [Obsolete]
         public static void AreEqual(OptimizelyFeature expected, OptimizelyFeature actual)
         {
             AreEquivalent(expected.DeliveryRules, actual.DeliveryRules);

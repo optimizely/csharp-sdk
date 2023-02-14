@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+using System;
+using System.Collections.Generic;
 using Moq;
 using NUnit.Framework;
 using OptimizelySDK.Config;
@@ -22,8 +24,6 @@ using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Event;
 using OptimizelySDK.Logger;
 using OptimizelySDK.Notifications;
-using System;
-using System.Collections.Generic;
 using NotificationType = OptimizelySDK.Notifications.NotificationCenter.NotificationType;
 
 namespace OptimizelySDK.Tests.NotificationTests
@@ -48,6 +48,7 @@ namespace OptimizelySDK.Tests.NotificationTests
         }
 
         [Test]
+        [Obsolete]
         public void TestAddAndRemoveNotificationListener()
         {
             // Verify that callback added successfully.
@@ -71,6 +72,7 @@ namespace OptimizelySDK.Tests.NotificationTests
         }
 
         [Test]
+        [Obsolete]
         public void TestAddMultipleNotificationListeners()
         {
             NotificationCenter.AddNotification(NotificationTypeActivate,
@@ -98,6 +100,7 @@ namespace OptimizelySDK.Tests.NotificationTests
         }
 
         [Test]
+        [Obsolete]
         public void TestAddSameNotificationListenerMultipleTimes()
         {
             NotificationCenter.AddNotification(NotificationTypeActivate,
@@ -114,6 +117,7 @@ namespace OptimizelySDK.Tests.NotificationTests
         }
 
         [Test]
+        [Obsolete]
         public void TestAddInvalidNotificationListeners()
         {
             // Verify that AddNotification gets failed on adding invalid notification listeners.
@@ -132,6 +136,7 @@ namespace OptimizelySDK.Tests.NotificationTests
         }
 
         [Test]
+        [Obsolete]
         public void TestClearNotifications()
         {
             // Add decision notifications.
@@ -168,6 +173,7 @@ namespace OptimizelySDK.Tests.NotificationTests
         }
 
         [Test]
+        [Obsolete]
         public void TestClearAllNotifications()
         {
             // Add decision notifications.
@@ -194,6 +200,7 @@ namespace OptimizelySDK.Tests.NotificationTests
         }
 
         [Test]
+        [Obsolete]
         public void TestSendNotifications()
         {
             var config = DatafileProjectConfig.Create(TestData.Datafile, LoggerMock.Object,
@@ -296,27 +303,32 @@ namespace OptimizelySDK.Tests.NotificationTests
         public virtual void TestActivateCallback(Experiment experiment, string userId,
             UserAttributes userAttributes,
             Variation variation, LogEvent logEvent
-        ) { }
+        )
+        { }
 
         public virtual void TestAnotherActivateCallback(Experiment experiment, string userId,
             UserAttributes userAttributes,
             Variation variation, LogEvent logEvent
-        ) { }
+        )
+        { }
 
         public virtual void TestTrackCallback(string eventKey, string userId,
             UserAttributes userAttributes,
             EventTags eventTags, LogEvent logEvent
-        ) { }
+        )
+        { }
 
         public virtual void TestAnotherTrackCallback(string eventKey, string userId,
             UserAttributes userAttributes,
             EventTags eventTags, LogEvent logEvent
-        ) { }
+        )
+        { }
 
         public virtual void TestDecisionCallback(string type, string userId,
             UserAttributes userAttributes,
             Dictionary<string, object> decisionInfo
-        ) { }
+        )
+        { }
 
         public virtual void TestConfigUpdateCallback() { }
 

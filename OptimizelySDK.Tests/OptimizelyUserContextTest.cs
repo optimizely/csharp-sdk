@@ -14,6 +14,9 @@
  *    limitations under the License.
  */
 
+using System;
+using System.Collections.Generic;
+using System.Threading;
 using Castle.Core.Internal;
 using Moq;
 using NUnit.Framework;
@@ -29,9 +32,6 @@ using OptimizelySDK.Odp;
 using OptimizelySDK.OptimizelyDecisions;
 using OptimizelySDK.Tests.NotificationTests;
 using OptimizelySDK.Utils;
-using System;
-using System.Collections.Generic;
-using System.Threading;
 
 namespace OptimizelySDK.Tests
 {

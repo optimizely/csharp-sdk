@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using Moq;
 using NUnit.Framework;
 using OptimizelySDK.Config;
 using OptimizelySDK.Logger;
 using OptimizelySDK.Tests.DatafileManagementTests;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 
 namespace OptimizelySDK.Tests.DatafileManagement_Tests
 {

@@ -15,6 +15,7 @@
  *    limitations under the License.
  */
 
+using System.Collections.Generic;
 using Moq;
 using NUnit.Framework;
 using OptimizelySDK.Bucketing;
@@ -24,7 +25,6 @@ using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Logger;
 using OptimizelySDK.OptimizelyDecisions;
 using OptimizelySDK.Utils;
-using System.Collections.Generic;
 
 namespace OptimizelySDK.Tests
 {
@@ -65,7 +65,8 @@ namespace OptimizelySDK.Tests
             DecisionService = new DecisionService(new Bucketer(LoggerMock.Object),
                 ErrorHandlerMock.Object, null, LoggerMock.Object);
             DecisionServiceMock = new Mock<DecisionService>(BucketerMock.Object,
-                ErrorHandlerMock.Object, null, LoggerMock.Object) { CallBase = true };
+                ErrorHandlerMock.Object, null, LoggerMock.Object)
+            { CallBase = true };
             DecisionReasons = new DecisionReasons();
 
             VariationWithKeyControl =

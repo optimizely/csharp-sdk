@@ -1,7 +1,7 @@
-﻿using OptimizelySDK.Entity;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using OptimizelySDK.Entity;
 
 namespace OptimizelySDK.Tests.EventTests
 {

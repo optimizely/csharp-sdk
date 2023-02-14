@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
+using System.Collections.Generic;
+using System.Linq;
 using Moq;
 using NUnit.Framework;
 using OptimizelySDK.AudienceConditions;
 using OptimizelySDK.Entity;
 using OptimizelySDK.Logger;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace OptimizelySDK.Tests.AudienceConditionsTests
 {

@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-using OptimizelySDK.ErrorHandler;
-using OptimizelySDK.Logger;
-using OptimizelySDK.Utils;
-using OptimizelySDK.Entity;
 using NUnit.Framework;
 using OptimizelySDK.Config;
+using OptimizelySDK.Entity;
+using OptimizelySDK.ErrorHandler;
+using OptimizelySDK.Logger;
 using OptimizelySDK.Tests.Utils;
+using OptimizelySDK.Utils;
 
 namespace OptimizelySDK.Tests.UtilsTests
 {

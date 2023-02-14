@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+using System.Collections.Generic;
 using Moq;
 using NUnit.Framework;
 using OptimizelySDK.Logger;
 using OptimizelySDK.Utils;
-using System.Collections.Generic;
 
 namespace OptimizelySDK.Tests.UtilsTests
 {
