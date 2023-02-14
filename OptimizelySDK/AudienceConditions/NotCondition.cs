@@ -26,7 +26,9 @@ namespace OptimizelySDK.AudienceConditions
     {
         public ICondition Condition { get; set; }
 
-        public bool? Evaluate(ProjectConfig config, OptimizelyUserContext userContext, ILogger logger)
+        public bool? Evaluate(ProjectConfig config, OptimizelyUserContext userContext,
+            ILogger logger
+        )
         {
             var result = Condition?.Evaluate(config, userContext, logger);
             return result == null ? null : !result;

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 using Newtonsoft.Json;
 
 namespace OptimizelySDK.Event.Entity
@@ -23,7 +24,7 @@ namespace OptimizelySDK.Event.Entity
     public class EventContext
     {
         [JsonProperty("account_id")]
-        public string AccountId {get; protected set;}
+        public string AccountId { get; protected set; }
 
         [JsonProperty("project_id")]
         public string ProjectId { get; protected set; }
@@ -92,6 +93,5 @@ namespace OptimizelySDK.Event.Entity
                 return eventContext;
             }
         }
-
     }
 }

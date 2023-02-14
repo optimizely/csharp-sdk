@@ -86,7 +86,7 @@ namespace OptimizelySDK.Config
                 var handler = new System.Net.Http.HttpClientHandler()
                 {
                     AutomaticDecompression = System.Net.DecompressionMethods.GZip |
-                                             System.Net.DecompressionMethods.Deflate
+                                             System.Net.DecompressionMethods.Deflate,
                 };
 
                 return handler;
@@ -118,7 +118,9 @@ namespace OptimizelySDK.Config
 
             // Send If-Modified-Since header if Last-Modified-Since header contains any value.
             if (!string.IsNullOrEmpty(LastModifiedSince))
+            {
                 request.Headers.Add("If-Modified-Since", LastModifiedSince);
+            }
 
             if (!string.IsNullOrEmpty(DatafileAccessToken))
             {
@@ -139,11 +141,15 @@ namespace OptimizelySDK.Config
             }
 
             // Update Last-Modified header if provided.
-            if (result.Headers.TryGetValues("Last-Modified", out IEnumerable<string> values))
+            if (result.Headers.TryGetValues("Last-Modified", out var values))
+            {
                 LastModifiedSince = values.First();
+            }
 
             if (result.StatusCode == System.Net.HttpStatusCode.NotModified)
+            {
                 return null;
+            }
 
             var content = result.Content.ReadAsStringAsync();
             content.Wait();
@@ -157,21 +163,27 @@ namespace OptimizelySDK.Config
 
             // Send If-Modified-Since header if Last-Modified-Since header contains any value.
             if (!string.IsNullOrEmpty(LastModifiedSince))
+            {
                 request.Headers.Add("If-Modified-Since", LastModifiedSince);
+            }
+
             var result = (System.Net.HttpWebResponse)request.GetResponse();
-            
-            if (result.StatusCode != System.Net.HttpStatusCode.OK) {
+
+            if (result.StatusCode != System.Net.HttpStatusCode.OK)
+            {
                 Logger.Log(LogLevel.ERROR, $"Error fetching datafile \"{result.StatusCode}\"");
             }
+
             var lastModified = result.Headers.GetValues("Last-Modified");
-            if(!string.IsNullOrEmpty(lastModified.First()))
+            if (!string.IsNullOrEmpty(lastModified.First()))
             {
                 LastModifiedSince = lastModified.First();
             }
 
             var encoding = System.Text.Encoding.ASCII;
-            using (var reader = new System.IO.StreamReader(result.GetResponseStream(), encoding)) {
-                string responseText = reader.ReadToEnd();
+            using (var reader = new System.IO.StreamReader(result.GetResponseStream(), encoding))
+            {
+                var responseText = reader.ReadToEnd();
                 return responseText;
             }
         }
@@ -186,7 +198,9 @@ namespace OptimizelySDK.Config
             var datafile = GetRemoteDatafileResponse();
 
             if (datafile == null)
+            {
                 return null;
+            }
 
             return DatafileProjectConfig.Create(datafile, Logger, ErrorHandler);
         }
@@ -245,7 +259,7 @@ namespace OptimizelySDK.Config
 #if !NET40 && !NET35
             public Builder WithAccessToken(string accessToken)
             {
-                this.DatafileAccessToken = accessToken;
+                DatafileAccessToken = accessToken;
 
                 return this;
             }
@@ -330,10 +344,14 @@ namespace OptimizelySDK.Config
                 HttpProjectConfigManager configManager = null;
 
                 if (Logger == null)
+                {
                     Logger = new DefaultLogger();
+                }
 
                 if (ErrorHandler == null)
+                {
                     ErrorHandler = new DefaultErrorHandler(Logger, false);
+                }
 
                 if (string.IsNullOrEmpty(Format))
                 {
@@ -418,11 +436,15 @@ namespace OptimizelySDK.Config
 
 
                 if (StartByDefault)
+                {
                     configManager.Start();
+                }
 
                 // Optionally block until config is available.
                 if (!defer)
+                {
                     configManager.GetConfig();
+                }
 
                 return configManager;
             }

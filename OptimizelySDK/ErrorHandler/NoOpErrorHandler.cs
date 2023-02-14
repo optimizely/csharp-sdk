@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 using OptimizelySDK.Logger;
 using System;
 
@@ -21,8 +22,6 @@ namespace OptimizelySDK.ErrorHandler
     public class NoOpErrorHandler : DefaultErrorHandler
     {
         public NoOpErrorHandler(ILogger logger = null)
-            : base(logger: logger, throwExceptions: false)
-        {
-        }
+            : base(logger, false) { }
     }
 }

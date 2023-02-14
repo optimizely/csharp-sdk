@@ -25,7 +25,7 @@ namespace OptimizelySDK.Odp.Entity
         /// Code or data line number 
         /// </summary>
         public int Line { get; set; }
-        
+
         /// <summary>
         /// Code or data column number
         /// </summary>

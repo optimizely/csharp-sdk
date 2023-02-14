@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 using System.Diagnostics;
 
 namespace OptimizelySDK.Logger
@@ -24,7 +25,7 @@ namespace OptimizelySDK.Logger
     {
         public void Log(LogLevel level, string message)
         {
-            string line = $"[{level}] : {message}";
+            var line = $"[{level}] : {message}";
             Debug.WriteLine(line);
         }
     }

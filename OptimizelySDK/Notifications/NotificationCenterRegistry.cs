@@ -71,7 +71,7 @@ namespace OptimizelySDK.Notifications
             lock (_mutex)
             {
                 if (_notificationCenters.TryGetValue(sdkKey,
-                        out NotificationCenter notificationCenter))
+                        out var notificationCenter))
                 {
                     notificationCenter.ClearAllNotifications();
                     _notificationCenters.Remove(sdkKey);

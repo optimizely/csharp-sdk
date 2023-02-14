@@ -23,9 +23,12 @@ namespace OptimizelySDK.OptlyConfig
     {
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public bool? FeatureEnabled { get; private set; }
+
         public IDictionary<string, OptimizelyVariable> VariablesMap { get; private set; }
 
-        public OptimizelyVariation(string id, string key, bool? featureEnabled, IDictionary<string, OptimizelyVariable> variablesMap)
+        public OptimizelyVariation(string id, string key, bool? featureEnabled,
+            IDictionary<string, OptimizelyVariable> variablesMap
+        )
         {
             Id = id;
             Key = key;

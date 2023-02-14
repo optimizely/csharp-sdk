@@ -44,7 +44,7 @@ namespace OptimizelySDK.Config
         {
             V2 = 2,
             V3 = 3,
-            V4 = 4
+            V4 = 4,
         }
 
         /// <summary>
@@ -119,7 +119,7 @@ namespace OptimizelySDK.Config
         {
             OPTLYSDKVersion.V2,
             OPTLYSDKVersion.V3,
-            OPTLYSDKVersion.V4
+            OPTLYSDKVersion.V4,
         };
 
         //========================= Mappings ===========================
@@ -129,14 +129,14 @@ namespace OptimizelySDK.Config
         /// </summary>
         private Dictionary<string, Group> _GroupIdMap;
 
-        public Dictionary<string, Group> GroupIdMap { get { return _GroupIdMap; } }
+        public Dictionary<string, Group> GroupIdMap => _GroupIdMap;
 
         /// <summary>
         /// Associative array of experiment key to Experiment(s) in the datafile
         /// </summary>
         private Dictionary<string, Experiment> _ExperimentKeyMap;
 
-        public Dictionary<string, Experiment> ExperimentKeyMap { get { return _ExperimentKeyMap; } }
+        public Dictionary<string, Experiment> ExperimentKeyMap => _ExperimentKeyMap;
 
         /// <summary>
         /// Associative array of experiment ID to Experiment(s) in the datafile
@@ -144,7 +144,7 @@ namespace OptimizelySDK.Config
         private Dictionary<string, Experiment> _ExperimentIdMap
             = new Dictionary<string, Experiment>();
 
-        public Dictionary<string, Experiment> ExperimentIdMap { get { return _ExperimentIdMap; } }
+        public Dictionary<string, Experiment> ExperimentIdMap => _ExperimentIdMap;
 
         /// <summary>
         /// Associative array of experiment key to associative array of variation key to variations
@@ -152,10 +152,8 @@ namespace OptimizelySDK.Config
         private Dictionary<string, Dictionary<string, Variation>> _VariationKeyMap
             = new Dictionary<string, Dictionary<string, Variation>>();
 
-        public Dictionary<string, Dictionary<string, Variation>> VariationKeyMap
-        {
-            get { return _VariationKeyMap; }
-        }
+        public Dictionary<string, Dictionary<string, Variation>> VariationKeyMap =>
+            _VariationKeyMap;
 
         /// <summary>
         /// Associative array of experiment ID to associative array of variation key to variations
@@ -163,10 +161,8 @@ namespace OptimizelySDK.Config
         private Dictionary<string, Dictionary<string, Variation>> _VariationKeyMapByExperimentId
             = new Dictionary<string, Dictionary<string, Variation>>();
 
-        public Dictionary<string, Dictionary<string, Variation>> VariationKeyMapByExperimentId
-        {
-            get { return _VariationKeyMapByExperimentId; }
-        }
+        public Dictionary<string, Dictionary<string, Variation>> VariationKeyMapByExperimentId =>
+            _VariationKeyMapByExperimentId;
 
         /// <summary>
         /// Associative array of experiment ID to associative array of variation key to variations
@@ -174,10 +170,8 @@ namespace OptimizelySDK.Config
         private Dictionary<string, Dictionary<string, Variation>> _VariationIdMapByExperimentId
             = new Dictionary<string, Dictionary<string, Variation>>();
 
-        public Dictionary<string, Dictionary<string, Variation>> VariationKeyIdByExperimentId
-        {
-            get { return _VariationIdMapByExperimentId; }
-        }
+        public Dictionary<string, Dictionary<string, Variation>> VariationKeyIdByExperimentId =>
+            _VariationIdMapByExperimentId;
 
         /// <summary>
         /// Associative array of experiment key to associative array of variation ID to variations
@@ -185,45 +179,42 @@ namespace OptimizelySDK.Config
         private Dictionary<string, Dictionary<string, Variation>> _VariationIdMap
             = new Dictionary<string, Dictionary<string, Variation>>();
 
-        public Dictionary<string, Dictionary<string, Variation>> VariationIdMap
-        {
-            get { return _VariationIdMap; }
-        }
+        public Dictionary<string, Dictionary<string, Variation>> VariationIdMap => _VariationIdMap;
 
         /// <summary>
         /// Associative array of event key to Event(s) in the datafile
         /// </summary>
         private Dictionary<string, Entity.Event> _EventKeyMap;
 
-        public Dictionary<string, Entity.Event> EventKeyMap { get { return _EventKeyMap; } }
+        public Dictionary<string, Entity.Event> EventKeyMap => _EventKeyMap;
 
         /// <summary>
         /// Associative array of attribute key to Attribute(s) in the datafile
         /// </summary>
         private Dictionary<string, Attribute> _AttributeKeyMap;
 
-        public Dictionary<string, Attribute> AttributeKeyMap { get { return _AttributeKeyMap; } }
+        public Dictionary<string, Attribute> AttributeKeyMap => _AttributeKeyMap;
 
         /// <summary>
         /// Associative array of audience ID to Audience(s) in the datafile
         /// </summary>
         private Dictionary<string, Audience> _AudienceIdMap;
 
-        public Dictionary<string, Audience> AudienceIdMap { get { return _AudienceIdMap; } }
+        public Dictionary<string, Audience> AudienceIdMap => _AudienceIdMap;
 
         /// <summary>
         /// Associative array of Feature Key to Feature(s) in the datafile
         /// </summary>
         private Dictionary<string, FeatureFlag> _FeatureKeyMap;
 
-        public Dictionary<string, FeatureFlag> FeatureKeyMap { get { return _FeatureKeyMap; } }
+        public Dictionary<string, FeatureFlag> FeatureKeyMap => _FeatureKeyMap;
 
         /// <summary>
         /// Associative array of Rollout ID to Rollout(s) in the datafile
         /// </summary>
         private Dictionary<string, Rollout> _RolloutIdMap;
 
-        public Dictionary<string, Rollout> RolloutIdMap { get { return _RolloutIdMap; } }
+        public Dictionary<string, Rollout> RolloutIdMap => _RolloutIdMap;
 
         /// <summary>
         /// Associative array of experiment IDs that exist in any feature
@@ -238,10 +229,8 @@ namespace OptimizelySDK.Config
         private Dictionary<string, Dictionary<string, Variation>> _FlagVariationMap =
             new Dictionary<string, Dictionary<string, Variation>>();
 
-        public Dictionary<string, Dictionary<string, Variation>> FlagVariationMap
-        {
-            get { return _FlagVariationMap; }
-        }
+        public Dictionary<string, Dictionary<string, Variation>> FlagVariationMap =>
+            _FlagVariationMap;
 
         //========================= Interfaces ===========================
 
@@ -323,34 +312,36 @@ namespace OptimizelySDK.Config
             Integrations = Integrations ?? new Integration[0];
             _ExperimentKeyMap = new Dictionary<string, Experiment>();
 
-            _GroupIdMap = ConfigParser<Group>.GenerateMap(entities: Groups,
-                getKey: g => g.Id.ToString(), clone: true);
-            _ExperimentIdMap = ConfigParser<Experiment>.GenerateMap(entities: Experiments,
-                getKey: e => e.Id, clone: true);
+            _GroupIdMap = ConfigParser<Group>.GenerateMap(Groups,
+                g => g.Id.ToString(), true);
+            _ExperimentIdMap = ConfigParser<Experiment>.GenerateMap(Experiments,
+                e => e.Id, true);
             _EventKeyMap =
-                ConfigParser<Entity.Event>.GenerateMap(entities: Events, getKey: e => e.Key,
-                    clone: true);
-            _AttributeKeyMap = ConfigParser<Attribute>.GenerateMap(entities: Attributes,
-                getKey: a => a.Key, clone: true);
-            _AudienceIdMap = ConfigParser<Audience>.GenerateMap(entities: Audiences,
-                getKey: a => a.Id.ToString(), clone: true);
-            _FeatureKeyMap = ConfigParser<FeatureFlag>.GenerateMap(entities: FeatureFlags,
-                getKey: f => f.Key, clone: true);
-            _RolloutIdMap = ConfigParser<Rollout>.GenerateMap(entities: Rollouts,
-                getKey: r => r.Id.ToString(), clone: true);
+                ConfigParser<Entity.Event>.GenerateMap(Events, e => e.Key,
+                    true);
+            _AttributeKeyMap = ConfigParser<Attribute>.GenerateMap(Attributes,
+                a => a.Key, true);
+            _AudienceIdMap = ConfigParser<Audience>.GenerateMap(Audiences,
+                a => a.Id.ToString(), true);
+            _FeatureKeyMap = ConfigParser<FeatureFlag>.GenerateMap(FeatureFlags,
+                f => f.Key, true);
+            _RolloutIdMap = ConfigParser<Rollout>.GenerateMap(Rollouts,
+                r => r.Id.ToString(), true);
 
             // Overwrite similar items in audience id map with typed audience id map.
-            var typedAudienceIdMap = ConfigParser<Audience>.GenerateMap(entities: TypedAudiences,
-                getKey: a => a.Id.ToString(), clone: true);
+            var typedAudienceIdMap = ConfigParser<Audience>.GenerateMap(TypedAudiences,
+                a => a.Id.ToString(), true);
             foreach (var item in typedAudienceIdMap)
+            {
                 _AudienceIdMap[item.Key] = item.Value;
+            }
 
-            foreach (Group group in Groups)
+            foreach (var group in Groups)
             {
                 var experimentsInGroup =
-                    ConfigParser<Experiment>.GenerateMap(group.Experiments, getKey: e => e.Id,
-                        clone: true);
-                foreach (Experiment experiment in experimentsInGroup.Values)
+                    ConfigParser<Experiment>.GenerateMap(group.Experiments, e => e.Id,
+                        true);
+                foreach (var experiment in experimentsInGroup.Values)
                 {
                     experiment.GroupId = group.Id;
                     experiment.GroupPolicy = group.Policy;
@@ -359,10 +350,12 @@ namespace OptimizelySDK.Config
                 // RJE: I believe that this is equivalent to this:
                 // $this->_experimentKeyMap = array_merge($this->_experimentKeyMap, $experimentsInGroup);
                 foreach (var experiment in experimentsInGroup.Values)
+                {
                     _ExperimentIdMap[experiment.Id] = experiment;
+                }
             }
 
-            foreach (Experiment experiment in _ExperimentIdMap.Values)
+            foreach (var experiment in _ExperimentIdMap.Values)
             {
                 _VariationKeyMap[experiment.Key] = new Dictionary<string, Variation>();
                 _VariationIdMap[experiment.Key] = new Dictionary<string, Variation>();
@@ -373,7 +366,7 @@ namespace OptimizelySDK.Config
 
                 if (experiment.Variations != null)
                 {
-                    foreach (Variation variation in experiment.Variations)
+                    foreach (var variation in experiment.Variations)
                     {
                         _VariationKeyMap[experiment.Key][variation.Key] = variation;
                         _VariationIdMap[experiment.Key][variation.Id] = variation;
@@ -437,7 +430,7 @@ namespace OptimizelySDK.Config
                     {
                         ExperimentFeatureMap[experimentId] = new List<string>
                         {
-                            feature.Id
+                            feature.Id,
                         };
                     }
                 }
@@ -470,7 +463,7 @@ namespace OptimizelySDK.Config
             IErrorHandler errorHandler
         )
         {
-            DatafileProjectConfig config = GetConfig(content);
+            var config = GetConfig(content);
 
             config.Logger = logger ?? new NoOpLogger();
             config.ErrorHandler = errorHandler ?? new NoOpErrorHandler(logger);
@@ -483,19 +476,25 @@ namespace OptimizelySDK.Config
         private static DatafileProjectConfig GetConfig(string configData)
         {
             if (configData == null)
+            {
                 throw new ConfigParseException("Unable to parse null datafile.");
+            }
 
             if (string.IsNullOrEmpty(configData))
+            {
                 throw new ConfigParseException("Unable to parse empty datafile.");
+            }
 
             var config = JsonConvert.DeserializeObject<DatafileProjectConfig>(configData);
             config._datafile = configData;
 
             if (SupportedVersions.TrueForAll((supportedVersion) =>
                     !(((int)supportedVersion).ToString() == config.Version)))
+            {
                 throw new ConfigParseException(
                     $@"This version of the C# SDK does not support the given datafile version: {
                         config.Version}");
+            }
 
             return config;
         }
@@ -510,12 +509,14 @@ namespace OptimizelySDK.Config
         public Group GetGroup(string groupId)
         {
             if (_GroupIdMap.ContainsKey(groupId))
+            {
                 return _GroupIdMap[groupId];
+            }
 
-            string message = $@"Group ID ""{groupId}"" is not in datafile.";
+            var message = $@"Group ID ""{groupId}"" is not in datafile.";
             Logger.Log(LogLevel.ERROR, message);
             ErrorHandler.HandleError(
-                new Exceptions.InvalidGroupException("Provided group is not in datafile."));
+                new InvalidGroupException("Provided group is not in datafile."));
             return new Group();
         }
 
@@ -527,12 +528,14 @@ namespace OptimizelySDK.Config
         public Experiment GetExperimentFromKey(string experimentKey)
         {
             if (_ExperimentKeyMap.ContainsKey(experimentKey))
+            {
                 return _ExperimentKeyMap[experimentKey];
+            }
 
-            string message = $@"Experiment key ""{experimentKey}"" is not in datafile.";
+            var message = $@"Experiment key ""{experimentKey}"" is not in datafile.";
             Logger.Log(LogLevel.ERROR, message);
             ErrorHandler.HandleError(
-                new Exceptions.InvalidExperimentException(
+                new InvalidExperimentException(
                     "Provided experiment is not in datafile."));
             return new Experiment();
         }
@@ -545,12 +548,14 @@ namespace OptimizelySDK.Config
         public Experiment GetExperimentFromId(string experimentId)
         {
             if (_ExperimentIdMap.ContainsKey(experimentId))
+            {
                 return _ExperimentIdMap[experimentId];
+            }
 
-            string message = $@"Experiment ID ""{experimentId}"" is not in datafile.";
+            var message = $@"Experiment ID ""{experimentId}"" is not in datafile.";
             Logger.Log(LogLevel.ERROR, message);
             ErrorHandler.HandleError(
-                new Exceptions.InvalidExperimentException(
+                new InvalidExperimentException(
                     "Provided experiment is not in datafile."));
             return new Experiment();
         }
@@ -563,12 +568,14 @@ namespace OptimizelySDK.Config
         public Entity.Event GetEvent(string eventKey)
         {
             if (_EventKeyMap.ContainsKey(eventKey))
+            {
                 return _EventKeyMap[eventKey];
+            }
 
-            string message = $@"Event key ""{eventKey}"" is not in datafile.";
+            var message = $@"Event key ""{eventKey}"" is not in datafile.";
             Logger.Log(LogLevel.ERROR, message);
             ErrorHandler.HandleError(
-                new Exceptions.InvalidEventException("Provided event is not in datafile."));
+                new InvalidEventException("Provided event is not in datafile."));
             return new Entity.Event();
         }
 
@@ -580,12 +587,14 @@ namespace OptimizelySDK.Config
         public Audience GetAudience(string audienceId)
         {
             if (_AudienceIdMap.ContainsKey(audienceId))
+            {
                 return _AudienceIdMap[audienceId];
+            }
 
-            string message = $@"Audience ID ""{audienceId}"" is not in datafile.";
+            var message = $@"Audience ID ""{audienceId}"" is not in datafile.";
             Logger.Log(LogLevel.ERROR, message);
             ErrorHandler.HandleError(
-                new Exceptions.InvalidAudienceException("Provided audience is not in datafile."));
+                new InvalidAudienceException("Provided audience is not in datafile."));
             return new Audience();
         }
 
@@ -597,12 +606,14 @@ namespace OptimizelySDK.Config
         public Attribute GetAttribute(string attributeKey)
         {
             if (_AttributeKeyMap.ContainsKey(attributeKey))
+            {
                 return _AttributeKeyMap[attributeKey];
+            }
 
-            string message = $@"Attribute key ""{attributeKey}"" is not in datafile.";
+            var message = $@"Attribute key ""{attributeKey}"" is not in datafile.";
             Logger.Log(LogLevel.ERROR, message);
             ErrorHandler.HandleError(
-                new Exceptions.InvalidAttributeException("Provided attribute is not in datafile."));
+                new InvalidAttributeException("Provided attribute is not in datafile."));
             return new Attribute();
         }
 
@@ -617,13 +628,15 @@ namespace OptimizelySDK.Config
         {
             if (_VariationKeyMap.ContainsKey(experimentKey) &&
                 _VariationKeyMap[experimentKey].ContainsKey(variationKey))
+            {
                 return _VariationKeyMap[experimentKey][variationKey];
+            }
 
-            string message = $@"No variation key ""{variationKey
+            var message = $@"No variation key ""{variationKey
             }"" defined in datafile for experiment ""{experimentKey}"".";
             Logger.Log(LogLevel.ERROR, message);
             ErrorHandler.HandleError(
-                new Exceptions.InvalidVariationException("Provided variation is not in datafile."));
+                new InvalidVariationException("Provided variation is not in datafile."));
             return new Variation();
         }
 
@@ -638,13 +651,15 @@ namespace OptimizelySDK.Config
         {
             if (_VariationKeyMapByExperimentId.ContainsKey(experimentId) &&
                 _VariationKeyMapByExperimentId[experimentId].ContainsKey(variationKey))
+            {
                 return _VariationKeyMapByExperimentId[experimentId][variationKey];
+            }
 
-            string message = $@"No variation key ""{variationKey
+            var message = $@"No variation key ""{variationKey
             }"" defined in datafile for experiment ""{experimentId}"".";
             Logger.Log(LogLevel.ERROR, message);
             ErrorHandler.HandleError(
-                new Exceptions.InvalidVariationException("Provided variation is not in datafile."));
+                new InvalidVariationException("Provided variation is not in datafile."));
             return new Variation();
         }
 
@@ -659,13 +674,15 @@ namespace OptimizelySDK.Config
         {
             if (_VariationIdMap.ContainsKey(experimentKey) &&
                 _VariationIdMap[experimentKey].ContainsKey(variationId))
+            {
                 return _VariationIdMap[experimentKey][variationId];
+            }
 
-            string message = $@"No variation ID ""{variationId
+            var message = $@"No variation ID ""{variationId
             }"" defined in datafile for experiment ""{experimentKey}"".";
             Logger.Log(LogLevel.ERROR, message);
             ErrorHandler.HandleError(
-                new Exceptions.InvalidVariationException("Provided variation is not in datafile."));
+                new InvalidVariationException("Provided variation is not in datafile."));
             return new Variation();
         }
 
@@ -680,13 +697,15 @@ namespace OptimizelySDK.Config
         {
             if (_VariationIdMapByExperimentId.ContainsKey(experimentId) &&
                 _VariationIdMapByExperimentId[experimentId].ContainsKey(variationId))
+            {
                 return _VariationIdMapByExperimentId[experimentId][variationId];
+            }
 
-            string message = $@"No variation ID ""{variationId
+            var message = $@"No variation ID ""{variationId
             }"" defined in datafile for experiment ""{experimentId}"".";
             Logger.Log(LogLevel.ERROR, message);
             ErrorHandler.HandleError(
-                new Exceptions.InvalidVariationException("Provided variation is not in datafile."));
+                new InvalidVariationException("Provided variation is not in datafile."));
             return new Variation();
         }
 
@@ -698,12 +717,14 @@ namespace OptimizelySDK.Config
         public FeatureFlag GetFeatureFlagFromKey(string featureKey)
         {
             if (_FeatureKeyMap.ContainsKey(featureKey))
+            {
                 return _FeatureKeyMap[featureKey];
+            }
 
-            string message = $@"Feature key ""{featureKey}"" is not in datafile.";
+            var message = $@"Feature key ""{featureKey}"" is not in datafile.";
             Logger.Log(LogLevel.ERROR, message);
             ErrorHandler.HandleError(
-                new Exceptions.InvalidFeatureException("Provided feature is not in datafile."));
+                new InvalidFeatureException("Provided feature is not in datafile."));
             return new FeatureFlag();
         }
 
@@ -741,12 +762,14 @@ namespace OptimizelySDK.Config
             }
 
             if (_RolloutIdMap.ContainsKey(rolloutId))
+            {
                 return _RolloutIdMap[rolloutId];
+            }
 
-            string message = $@"Rollout ID ""{rolloutId}"" is not in datafile.";
+            var message = $@"Rollout ID ""{rolloutId}"" is not in datafile.";
             Logger.Log(LogLevel.ERROR, message);
             ErrorHandler.HandleError(
-                new Exceptions.InvalidRolloutException("Provided rollout is not in datafile."));
+                new InvalidRolloutException("Provided rollout is not in datafile."));
             return new Rollout();
         }
 
@@ -763,10 +786,12 @@ namespace OptimizelySDK.Config
             {
                 var attribute = _AttributeKeyMap[attributeKey];
                 if (hasReservedPrefix)
+                {
                     Logger.Log(LogLevel.WARN,
                         $@"Attribute {attributeKey} unexpectedly has reserved prefix {
                             RESERVED_ATTRIBUTE_PREFIX
                         }; using attribute ID instead of reserved attribute name.");
+                }
 
                 return attribute.Id;
             }

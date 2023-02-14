@@ -25,7 +25,6 @@ namespace OptimizelySDK.Utils
     {
         public static bool IsExperimentActive(Experiment experiment, ILogger logger)
         {
-
             if (!experiment.IsExperimentRunning)
             {
                 logger.Log(LogLevel.INFO, $"Experiment \"{experiment.Key}\" is not running.");
@@ -51,7 +50,8 @@ namespace OptimizelySDK.Utils
             OptimizelyUserContext user,
             string loggingKeyType,
             string loggingKey,
-            ILogger logger)
+            ILogger logger
+        )
         {
             var reasons = new DecisionReasons();
             if (user == null)
@@ -63,21 +63,29 @@ namespace OptimizelySDK.Utils
             if (experiment.AudienceConditionsList != null)
             {
                 expConditions = experiment.AudienceConditionsList;
-                logger.Log(LogLevel.DEBUG, $@"Evaluating audiences for {loggingKeyType} ""{loggingKey}"": {experiment.AudienceConditionsString}.");
+                logger.Log(LogLevel.DEBUG,
+                    $@"Evaluating audiences for {loggingKeyType} ""{loggingKey}"": {
+                        experiment.AudienceConditionsString}.");
             }
             else
             {
                 expConditions = experiment.AudienceIdsList;
-                logger.Log(LogLevel.DEBUG, $@"Evaluating audiences for {loggingKeyType} ""{loggingKey}"": {experiment.AudienceIdsString}.");
+                logger.Log(LogLevel.DEBUG,
+                    $@"Evaluating audiences for {loggingKeyType} ""{loggingKey}"": {
+                        experiment.AudienceIdsString}.");
             }
 
             // If there are no audiences, return true because that means ALL users are included in the experiment.
             if (expConditions == null)
+            {
                 return Result<bool>.NewResult(true, reasons);
+            }
 
             var result = expConditions.Evaluate(config, user, logger).GetValueOrDefault();
             var resultText = result.ToString().ToUpper();
-            logger.Log(LogLevel.INFO, reasons.AddInfo($@"Audiences for {loggingKeyType} ""{loggingKey}"" collectively evaluated to {resultText}"));
+            logger.Log(LogLevel.INFO,
+                reasons.AddInfo($@"Audiences for {loggingKeyType} ""{loggingKey
+                }"" collectively evaluated to {resultText}"));
             return Result<bool>.NewResult(result, reasons);
         }
     }

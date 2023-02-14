@@ -33,7 +33,10 @@ namespace OptimizelySDK.Event
     public class EventFactory
     {
         private const string CUSTOM_ATTRIBUTE_FEATURE_TYPE = "custom";
-        public const string EVENT_ENDPOINT = "https://logx.optimizely.com/v1/events";  // Should be part of the datafile
+
+        public const string
+            EVENT_ENDPOINT =
+                "https://logx.optimizely.com/v1/events"; // Should be part of the datafile
 
         private const string ACTIVATE_EVENT_KEY = "campaign_activated";
 
@@ -43,8 +46,8 @@ namespace OptimizelySDK.Event
         /// <param name="userEvent">The UserEvent entity</param>
         /// <param name="logger">The ILogger entity</param>
         /// <returns>LogEvent instance</returns>
-        public static LogEvent CreateLogEvent(UserEvent userEvent, ILogger logger) {
-                        
+        public static LogEvent CreateLogEvent(UserEvent userEvent, ILogger logger)
+        {
             return CreateLogEvent(new UserEvent[] { userEvent }, logger);
         }
 
@@ -54,50 +57,56 @@ namespace OptimizelySDK.Event
         /// <param name="userEvents">The UserEvent array</param>
         /// <param name="logger">The ILogger entity</param>
         /// <returns>LogEvent instance</returns>
-        public static LogEvent CreateLogEvent(UserEvent[] userEvents, ILogger logger) {
+        public static LogEvent CreateLogEvent(UserEvent[] userEvents, ILogger logger)
+        {
+            var builder = new EventBatch.Builder();
 
-            EventBatch.Builder builder = new EventBatch.Builder();
+            var visitors = new List<Visitor>(userEvents.Count());
 
-            List<Visitor> visitors = new List<Visitor>(userEvents.Count());
-
-            foreach (UserEvent userEvent in userEvents) {
-
-                if (userEvent is ImpressionEvent) {
-                    visitors.Add(CreateVisitor((ImpressionEvent) userEvent));
+            foreach (var userEvent in userEvents)
+            {
+                if (userEvent is ImpressionEvent)
+                {
+                    visitors.Add(CreateVisitor((ImpressionEvent)userEvent));
                 }
-                else if (userEvent is ConversionEvent) {                
-                    visitors.Add(CreateVisitor((ConversionEvent) userEvent, logger));
+                else if (userEvent is ConversionEvent)
+                {
+                    visitors.Add(CreateVisitor((ConversionEvent)userEvent, logger));
                 }
-                else {
+                else
+                {
                     //TODO: Need to log a message, invalid UserEvent added in a list.
                     continue;
                 }
-               
+
                 var userContext = userEvent.Context;
 
-                builder
-                    .WithClientName(userContext.ClientName)
-                    .WithClientVersion(userContext.ClientVersion)
-                    .WithAccountId(userContext.AccountId)
-                    .WithAnonymizeIP(userContext.AnonymizeIP)
-                    .WithProjectID(userContext.ProjectId)
-                    .WithRevision(userContext.Revision)
-                    .WithEnrichDecisions(true);                    
+                builder.WithClientName(userContext.ClientName).
+                    WithClientVersion(userContext.ClientVersion).
+                    WithAccountId(userContext.AccountId).
+                    WithAnonymizeIP(userContext.AnonymizeIP).
+                    WithProjectID(userContext.ProjectId).
+                    WithRevision(userContext.Revision).
+                    WithEnrichDecisions(true);
             }
 
-            if (visitors.Count == 0) {
+            if (visitors.Count == 0)
+            {
                 return null;
             }
 
             builder.WithVisitors(visitors.ToArray());
 
-            EventBatch eventBatch = builder.Build();
+            var eventBatch = builder.Build();
 
-            var eventBatchDictionary = JObject.FromObject(eventBatch).ToObject<Dictionary<string, object>>();
+            var eventBatchDictionary =
+                JObject.FromObject(eventBatch).ToObject<Dictionary<string, object>>();
 
-            return new LogEvent(EVENT_ENDPOINT, eventBatchDictionary, "POST", headers: new Dictionary<string, string> {
-                { "Content-Type", "application/json" }
-            });
+            return new LogEvent(EVENT_ENDPOINT, eventBatchDictionary, "POST",
+                new Dictionary<string, string>
+                {
+                    { "Content-Type", "application/json" },
+                });
         }
 
         /// <summary>
@@ -105,29 +114,30 @@ namespace OptimizelySDK.Event
         /// </summary>
         /// <param name="impressionEvent">The ImpressionEvent entity</param>
         /// <returns>Visitor instance if ImpressionEvent is valid, null otherwise</returns>
-        private static Visitor CreateVisitor(ImpressionEvent impressionEvent) {
-
-            if (impressionEvent == null) {
+        private static Visitor CreateVisitor(ImpressionEvent impressionEvent)
+        {
+            if (impressionEvent == null)
+            {
                 return null;
             }
 
-            Decision decision = new Decision(impressionEvent.Experiment?.LayerId,
+            var decision = new Decision(impressionEvent.Experiment?.LayerId,
                 impressionEvent.Experiment?.Id ?? string.Empty,
                 impressionEvent.Variation?.Id,
                 impressionEvent.Metadata);
 
-            SnapshotEvent snapshotEvent = new SnapshotEvent.Builder()
-                .WithUUID(impressionEvent.UUID)
-                .WithEntityId(impressionEvent.Experiment?.LayerId)
-                .WithKey(ACTIVATE_EVENT_KEY)
-                .WithTimeStamp(impressionEvent.Timestamp)
-                .Build();
+            var snapshotEvent = new SnapshotEvent.Builder().WithUUID(impressionEvent.UUID).
+                WithEntityId(impressionEvent.Experiment?.LayerId).
+                WithKey(ACTIVATE_EVENT_KEY).
+                WithTimeStamp(impressionEvent.Timestamp).
+                Build();
 
-            Snapshot snapshot = new Snapshot(
+            var snapshot = new Snapshot(
                 new SnapshotEvent[] { snapshotEvent },
                 new Decision[] { decision });
-            
-            var visitor = new Visitor(new Snapshot[] { snapshot }, impressionEvent.VisitorAttributes, impressionEvent.UserId);
+
+            var visitor = new Visitor(new Snapshot[] { snapshot },
+                impressionEvent.VisitorAttributes, impressionEvent.UserId);
 
             return visitor;
         }
@@ -138,28 +148,30 @@ namespace OptimizelySDK.Event
         /// <param name="conversionEvent">The ConversionEvent entity</param>
         /// <param name="logger">The ILogger entity</param>
         /// <returns>Visitor instance if ConversionEvent is valid, null otherwise</returns>
-        private static Visitor CreateVisitor(ConversionEvent conversionEvent, ILogger logger) {
-            if (conversionEvent == null) {
+        private static Visitor CreateVisitor(ConversionEvent conversionEvent, ILogger logger)
+        {
+            if (conversionEvent == null)
+            {
                 return null;
             }
 
-            EventContext userContext = conversionEvent.Context;
+            var userContext = conversionEvent.Context;
             var revenue = EventTagUtils.GetRevenueValue(conversionEvent.EventTags, logger) as int?;
             var value = EventTagUtils.GetNumericValue(conversionEvent.EventTags, logger) as float?;
-            SnapshotEvent snapshotEvent = new SnapshotEvent.Builder()
-                .WithUUID(conversionEvent.UUID)
-                .WithEntityId(conversionEvent.Event.Id)
-                .WithKey(conversionEvent.Event?.Key)
-                .WithTimeStamp(conversionEvent.Timestamp)
-                .WithRevenue(revenue)
-                .WithValue(value)
-                .WithEventTags(conversionEvent.EventTags)
-                .Build();
-            
+            var snapshotEvent = new SnapshotEvent.Builder().WithUUID(conversionEvent.UUID).
+                WithEntityId(conversionEvent.Event.Id).
+                WithKey(conversionEvent.Event?.Key).
+                WithTimeStamp(conversionEvent.Timestamp).
+                WithRevenue(revenue).
+                WithValue(value).
+                WithEventTags(conversionEvent.EventTags).
+                Build();
 
-            Snapshot snapshot = new Snapshot(new SnapshotEvent[] { snapshotEvent });
-            
-            var visitor = new Visitor(new Snapshot[] { snapshot }, conversionEvent.VisitorAttributes, conversionEvent.UserId);
+
+            var snapshot = new Snapshot(new SnapshotEvent[] { snapshotEvent });
+
+            var visitor = new Visitor(new Snapshot[] { snapshot },
+                conversionEvent.VisitorAttributes, conversionEvent.UserId);
 
             return visitor;
         }
@@ -170,34 +182,40 @@ namespace OptimizelySDK.Event
         /// <param name="userAttributes">The user's attributes</param>
         /// <param name="config">ProjectConfig instance</param>
         /// <returns>VisitorAttribute array if config is valid, null otherwise</returns>
-        public static VisitorAttribute[] BuildAttributeList(UserAttributes userAttributes, ProjectConfig config)
-        {            
+        public static VisitorAttribute[] BuildAttributeList(UserAttributes userAttributes,
+            ProjectConfig config
+        )
+        {
             if (config == null)
+            {
                 return null;
+            }
 
-            List<VisitorAttribute> attributesList = new List<VisitorAttribute>();
+            var attributesList = new List<VisitorAttribute>();
 
             if (userAttributes != null)
             {
-                foreach (var validUserAttribute in userAttributes.Where(attribute => Validator.IsUserAttributeValid(attribute))) {
-
+                foreach (var validUserAttribute in userAttributes.Where(attribute =>
+                             Validator.IsUserAttributeValid(attribute)))
+                {
                     var attributeId = config.GetAttributeId(validUserAttribute.Key);
-                    if (!string.IsNullOrEmpty(attributeId)) {
-                        attributesList.Add(new VisitorAttribute(entityId: attributeId, key: validUserAttribute.Key,
-                            type: CUSTOM_ATTRIBUTE_FEATURE_TYPE, value: validUserAttribute.Value));
+                    if (!string.IsNullOrEmpty(attributeId))
+                    {
+                        attributesList.Add(new VisitorAttribute(attributeId, validUserAttribute.Key,
+                            CUSTOM_ATTRIBUTE_FEATURE_TYPE, validUserAttribute.Value));
                     }
                 }
             }
 
             //checks if botFiltering value is not set in the project config file.
-            if (config.BotFiltering.HasValue) {
-
-                attributesList.Add(new VisitorAttribute(entityId: ControlAttributes.BOT_FILTERING_ATTRIBUTE,
-                    key: ControlAttributes.BOT_FILTERING_ATTRIBUTE, type: CUSTOM_ATTRIBUTE_FEATURE_TYPE, value: config.BotFiltering));                
+            if (config.BotFiltering.HasValue)
+            {
+                attributesList.Add(new VisitorAttribute(ControlAttributes.BOT_FILTERING_ATTRIBUTE,
+                    ControlAttributes.BOT_FILTERING_ATTRIBUTE, CUSTOM_ATTRIBUTE_FEATURE_TYPE,
+                    config.BotFiltering));
             }
 
             return attributesList.ToArray();
         }
     }
 }
-

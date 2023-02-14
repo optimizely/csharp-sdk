@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 using Newtonsoft.Json;
 
 namespace OptimizelySDK.Event.Entity
@@ -31,12 +32,12 @@ namespace OptimizelySDK.Event.Entity
         [JsonProperty("value")]
         public object Value { get; set; }
 
-        public VisitorAttribute (string entityId, string key, string type, object value)
+        public VisitorAttribute(string entityId, string key, string type, object value)
         {
             EntityId = entityId;
             Key = key;
             Type = type;
-            Value = value;            
+            Value = value;
         }
     }
 }

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 using OptimizelySDK.Bucketing;
 using OptimizelySDK.Entity;
 using OptimizelySDK.Logger;
@@ -36,8 +37,9 @@ namespace OptimizelySDK.Event.Builder
 
         private const string ACTIVATE_EVENT_KEY = "campaign_activated";
 
-        private static readonly Dictionary<string, string> HTTP_HEADERS = new Dictionary<string, string>
-        {
+        private static readonly Dictionary<string, string> HTTP_HEADERS =
+            new Dictionary<string, string>
+            {
                 { "Content-Type", "application/json" },
             };
 
@@ -68,15 +70,17 @@ namespace OptimizelySDK.Event.Builder
         /// <param name="config">ProjectConfig Configuration for the project</param>
         /// <param name="userId">string ID of user</param>
         /// <param name="userAttributes">associative array of Attributes for the user</param>
-        private Dictionary<string, object> GetCommonParams(ProjectConfig config, string userId, UserAttributes userAttributes)
+        private Dictionary<string, object> GetCommonParams(ProjectConfig config, string userId,
+            UserAttributes userAttributes
+        )
         {
             var comonParams = new Dictionary<string, object>();
 
             var visitor = new Dictionary<string, object>
             {
-                    { "snapshots", new object[0]},
-                    { "visitor_id", userId },
-                    { "attributes", new object[0] }
+                { "snapshots", new object[0] },
+                { "visitor_id", userId },
+                { "attributes", new object[0] },
             };
 
             comonParams[Params.VISITORS] = new object[] { visitor };
@@ -91,16 +95,18 @@ namespace OptimizelySDK.Event.Builder
             var userFeatures = new List<Dictionary<string, object>>();
 
             //Omit attribute values that are not supported by the log endpoint.
-            foreach (var validUserAttribute in userAttributes.Where(attribute => Validator.IsUserAttributeValid(attribute)))
-            {                
+            foreach (var validUserAttribute in userAttributes.Where(attribute =>
+                         Validator.IsUserAttributeValid(attribute)))
+            {
                 var attributeId = config.GetAttributeId(validUserAttribute.Key);
-                if (!string.IsNullOrEmpty(attributeId)) {
+                if (!string.IsNullOrEmpty(attributeId))
+                {
                     userFeatures.Add(new Dictionary<string, object>
                     {
                         { "entity_id", attributeId },
                         { "key", validUserAttribute.Key },
                         { "type", CUSTOM_ATTRIBUTE_FEATURE_TYPE },
-                        { "value", validUserAttribute.Value}
+                        { "value", validUserAttribute.Value },
                     });
                 }
             }
@@ -109,11 +115,11 @@ namespace OptimizelySDK.Event.Builder
             {
                 userFeatures.Add(new Dictionary<string, object>
                 {
-                        { "entity_id", ControlAttributes.BOT_FILTERING_ATTRIBUTE },
-                        { "key", ControlAttributes.BOT_FILTERING_ATTRIBUTE },
-                        { "type", CUSTOM_ATTRIBUTE_FEATURE_TYPE },
-                        { "value",  config.BotFiltering}
-                    });
+                    { "entity_id", ControlAttributes.BOT_FILTERING_ATTRIBUTE },
+                    { "key", ControlAttributes.BOT_FILTERING_ATTRIBUTE },
+                    { "type", CUSTOM_ATTRIBUTE_FEATURE_TYPE },
+                    { "value", config.BotFiltering },
+                });
             }
 
             visitor["attributes"] = userFeatures;
@@ -121,31 +127,32 @@ namespace OptimizelySDK.Event.Builder
             return comonParams;
         }
 
-        private Dictionary<string, object> GetImpressionParams(Experiment experiment, string variationId)
+        private Dictionary<string, object> GetImpressionParams(Experiment experiment,
+            string variationId
+        )
         {
-
             var impressionEvent = new Dictionary<string, object>();
 
             var decisions = new object[]
             {
-                    new Dictionary<string, object>
-                    {
-                        { Params.CAMPAIGN_ID,   experiment?.LayerId },
-                        { Params.EXPERIMENT_ID, experiment?.Id ?? string.Empty },
-                        { Params.VARIATION_ID,  variationId }
-                    }
+                new Dictionary<string, object>
+                {
+                    { Params.CAMPAIGN_ID, experiment?.LayerId },
+                    { Params.EXPERIMENT_ID, experiment?.Id ?? string.Empty },
+                    { Params.VARIATION_ID, variationId },
+                },
             };
 
 
             var events = new object[]
             {
-                    new Dictionary<string, object>
-                    {
-                        { "entity_id", experiment?.LayerId },
-                        { "timestamp", DateTimeUtils.SecondsSince1970*1000 },
-                        { "key", ACTIVATE_EVENT_KEY },
-                        { "uuid", Guid.NewGuid() }
-                    }
+                new Dictionary<string, object>
+                {
+                    { "entity_id", experiment?.LayerId },
+                    { "timestamp", DateTimeUtils.SecondsSince1970 * 1000 },
+                    { "key", ACTIVATE_EVENT_KEY },
+                    { "uuid", Guid.NewGuid() },
+                },
             };
 
             impressionEvent[Params.DECISIONS] = decisions;
@@ -154,51 +161,61 @@ namespace OptimizelySDK.Event.Builder
             return impressionEvent;
         }
 
-        private List<object> GetConversionParams(ProjectConfig config, string eventKey, string userId, Dictionary<string, object> eventTags)
+        private List<object> GetConversionParams(ProjectConfig config, string eventKey,
+            string userId, Dictionary<string, object> eventTags
+        )
         {
-
             var conversionEventParams = new List<object>();
             var snapshot = new Dictionary<string, object>();
 
             var eventDict = new Dictionary<string, object>
-                {
-                        { Params.ENTITY_ID, config.EventKeyMap[eventKey].Id },
-                        { Params.TIMESTAMP, DateTimeUtils.SecondsSince1970*1000 },
-                        { "uuid", Guid.NewGuid() },
-                        { "key", eventKey }
-                    };
+            {
+                { Params.ENTITY_ID, config.EventKeyMap[eventKey].Id },
+                { Params.TIMESTAMP, DateTimeUtils.SecondsSince1970 * 1000 },
+                { "uuid", Guid.NewGuid() },
+                { "key", eventKey },
+            };
 
-            if (eventTags != null) {
+            if (eventTags != null)
+            {
                 var revenue = EventTagUtils.GetRevenueValue(eventTags, Logger);
 
-                if (revenue != null) {
+                if (revenue != null)
+                {
                     eventDict[EventTagUtils.REVENUE_EVENT_METRIC_NAME] = revenue;
                 }
 
                 var eventValue = EventTagUtils.GetNumericValue(eventTags, Logger);
 
-                if (eventValue != null) {
+                if (eventValue != null)
+                {
                     eventDict[EventTagUtils.VALUE_EVENT_METRIC_NAME] = eventValue;
                 }
 
                 if (eventTags.Any())
+                {
                     eventDict["tags"] = eventTags;
+                }
             }
 
-            snapshot[Params.EVENTS] = new object[]{
-                    eventDict
-                };
+            snapshot[Params.EVENTS] = new object[]
+            {
+                eventDict,
+            };
 
             conversionEventParams.Add(snapshot);
 
             return conversionEventParams;
         }
 
-        private Dictionary<string, object> GetImpressionOrConversionParamsWithCommonParams(Dictionary<string, object> commonParams, object[] conversionOrImpressionOnlyParams)
+        private Dictionary<string, object> GetImpressionOrConversionParamsWithCommonParams(
+            Dictionary<string, object> commonParams, object[] conversionOrImpressionOnlyParams
+        )
         {
             var visitors = commonParams[Params.VISITORS] as object[];
 
-            if (visitors.Length > 0) {
+            if (visitors.Length > 0)
+            {
                 var visitor = visitors[0] as Dictionary<string, object>;
                 visitor["snapshots"] = conversionOrImpressionOnlyParams;
             }
@@ -215,14 +232,18 @@ namespace OptimizelySDK.Event.Builder
         /// <param name="userId">User Id</param>
         /// <param name="userAttributes">associative array of attributes for the user</param>
         /// <returns>LogEvent object to be sent to dispatcher</returns>
-        public virtual LogEvent CreateImpressionEvent(ProjectConfig config, Experiment experiment, string variationId,
-            string userId, UserAttributes userAttributes)
+        public virtual LogEvent CreateImpressionEvent(ProjectConfig config, Experiment experiment,
+            string variationId,
+            string userId, UserAttributes userAttributes
+        )
         {
-
-            var commonParams = GetCommonParams(config, userId, userAttributes ?? new UserAttributes());
+            var commonParams =
+                GetCommonParams(config, userId, userAttributes ?? new UserAttributes());
             var impressionOnlyParams = GetImpressionParams(experiment, variationId);
 
-            var impressionParams = GetImpressionOrConversionParamsWithCommonParams(commonParams, new object[] { impressionOnlyParams });
+            var impressionParams =
+                GetImpressionOrConversionParamsWithCommonParams(commonParams,
+                    new object[] { impressionOnlyParams });
 
             return new LogEvent(IMPRESSION_ENDPOINT, impressionParams, HTTP_VERB, HTTP_HEADERS);
         }
@@ -237,13 +258,18 @@ namespace OptimizelySDK.Event.Builder
         /// <param name="userAttributes">associative array of Attributes for the user</param>
         /// <param name="eventTags">Dict representing metadata associated with the event.</param>
         /// <returns>LogEvent object to be sent to dispatcher</returns>
-        public virtual LogEvent CreateConversionEvent(ProjectConfig config, string eventKey, string userId, UserAttributes userAttributes, EventTags eventTags)
+        public virtual LogEvent CreateConversionEvent(ProjectConfig config, string eventKey,
+            string userId, UserAttributes userAttributes, EventTags eventTags
+        )
         {
-            var commonParams = GetCommonParams(config, userId, userAttributes ?? new UserAttributes());
+            var commonParams =
+                GetCommonParams(config, userId, userAttributes ?? new UserAttributes());
 
-            var conversionOnlyParams = GetConversionParams(config, eventKey, userId, eventTags).ToArray();
+            var conversionOnlyParams =
+                GetConversionParams(config, eventKey, userId, eventTags).ToArray();
 
-            var conversionParams = GetImpressionOrConversionParamsWithCommonParams(commonParams, conversionOnlyParams);
+            var conversionParams =
+                GetImpressionOrConversionParamsWithCommonParams(commonParams, conversionOnlyParams);
 
             return new LogEvent(CONVERSION_ENDPOINT, conversionParams, HTTP_VERB, HTTP_HEADERS);
         }

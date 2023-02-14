@@ -28,38 +28,48 @@ namespace OptimizelySDK.Utils
         /// <summary>
         /// const string Representing AND operator.
         /// </summary>
-        const string AND_OPERATOR = "and";
+        private const string AND_OPERATOR = "and";
 
         /// <summary>
         /// const string Representing OR operator.
         /// </summary>
-        const string OR_OPERATOR = "or";
+        private const string OR_OPERATOR = "or";
 
         /// <summary>
         /// const string Representing NOT operator.
         /// </summary>
-        const string NOT_OPERATOR = "not";
+        private const string NOT_OPERATOR = "not";
 
         public static ICondition ParseAudienceConditions(JToken audienceConditions)
         {
             if (audienceConditions.Type != JTokenType.Array)
+            {
                 return new AudienceIdCondition { AudienceId = (string)audienceConditions };
+            }
 
             var conditionsArray = audienceConditions as JArray;
             if (conditionsArray.Count == 0)
+            {
                 return new EmptyCondition();
+            }
 
             var startIndex = 0;
             var conditionOperator = GetOperator(conditionsArray.First.ToString());
 
             if (conditionOperator != null)
+            {
                 startIndex = 1;
+            }
             else
+            {
                 conditionOperator = OR_OPERATOR;
+            }
 
-            List<ICondition> conditions = new List<ICondition>();
-            for (int i = startIndex; i < conditionsArray.Count; ++i)
+            var conditions = new List<ICondition>();
+            for (var i = startIndex; i < conditionsArray.Count; ++i)
+            {
                 conditions.Add(ParseAudienceConditions(conditionsArray[i]));
+            }
 
             return GetConditions(conditions, conditionOperator);
         }
@@ -67,6 +77,7 @@ namespace OptimizelySDK.Utils
         public static ICondition ParseConditions(JToken conditionObj)
         {
             if (conditionObj.Type != JTokenType.Array)
+            {
                 return new BaseCondition
                 {
                     Match = conditionObj["match"]?.ToString(),
@@ -74,18 +85,23 @@ namespace OptimizelySDK.Utils
                     Name = conditionObj["name"].ToString(),
                     Value = conditionObj["value"]?.ToObject<object>(),
                 };
+            }
 
             var startIndex = 0;
             var conditionsArray = conditionObj as JArray;
             var conditionOperator = GetOperator(conditionsArray.First.ToString());
 
             if (conditionOperator != null)
+            {
                 startIndex = 1;
+            }
             else
+            {
                 conditionOperator = OR_OPERATOR;
+            }
 
-            List<ICondition> conditions = new List<ICondition>();
-            for (int i = startIndex; i < conditionsArray.Count; ++i)
+            var conditions = new List<ICondition>();
+            for (var i = startIndex; i < conditionsArray.Count; ++i)
             {
                 conditions.Add(ParseConditions(conditionsArray[i]));
             }
@@ -95,7 +111,7 @@ namespace OptimizelySDK.Utils
 
         public static string GetOperator(object condition)
         {
-            string conditionOperator = (string)condition;
+            var conditionOperator = (string)condition;
             switch (conditionOperator)
             {
                 case OR_OPERATOR:
@@ -107,7 +123,8 @@ namespace OptimizelySDK.Utils
             }
         }
 
-        public static ICondition GetConditions(List<ICondition> conditions, string conditionOperator)
+        public static ICondition GetConditions(List<ICondition> conditions, string conditionOperator
+        )
         {
             ICondition condition = null;
             switch (conditionOperator)
@@ -119,7 +136,8 @@ namespace OptimizelySDK.Utils
                     condition = new OrCondition() { Conditions = conditions.ToArray() };
                     break;
                 case NOT_OPERATOR:
-                    condition = new NotCondition() { Condition = conditions.Count == 0 ? null : conditions[0] };
+                    condition = new NotCondition()
+                        { Condition = conditions.Count == 0 ? null : conditions[0] };
                     break;
                 default:
                     break;

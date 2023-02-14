@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 using OptimizelySDK.OptimizelyDecisions;
 
 namespace OptimizelySDK.Entity
@@ -29,14 +30,14 @@ namespace OptimizelySDK.Entity
 
         public Result<T> SetReasons(DecisionReasons decisionReasons)
         {
-            DecisionReasons =  decisionReasons;
+            DecisionReasons = decisionReasons;
 
             return this;
         }
 
         public static Result<T> NullResult(DecisionReasons decisionReasons)
         {
-            return NewResult(default(T), decisionReasons);
+            return NewResult(default, decisionReasons);
         }
     }
 }

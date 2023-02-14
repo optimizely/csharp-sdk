@@ -165,6 +165,6 @@ namespace OptimizelySDK.Odp
         /// <summary>
         /// For Testing Only: Retrieve the current segment cache
         /// </summary>
-        internal ICache<List<string>> SegmentsCacheForTesting { get { return _segmentsCache; } }
+        internal ICache<List<string>> SegmentsCacheForTesting => _segmentsCache;
     }
 }

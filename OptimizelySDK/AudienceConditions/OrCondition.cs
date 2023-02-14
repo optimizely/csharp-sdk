@@ -26,7 +26,9 @@ namespace OptimizelySDK.AudienceConditions
     {
         public ICondition[] Conditions { get; set; }
 
-        public bool? Evaluate(ProjectConfig config, OptimizelyUserContext userContext, ILogger logger)
+        public bool? Evaluate(ProjectConfig config, OptimizelyUserContext userContext,
+            ILogger logger
+        )
         {
             // According to the matrix:
             // true returns true
@@ -38,13 +40,19 @@ namespace OptimizelySDK.AudienceConditions
             {
                 var result = condition.Evaluate(config, userContext, logger);
                 if (result == null)
+                {
                     foundNull = true;
+                }
                 else if (result == true)
+                {
                     return true;
+                }
             }
 
             if (foundNull)
+            {
                 return null;
+            }
 
             return false;
         }

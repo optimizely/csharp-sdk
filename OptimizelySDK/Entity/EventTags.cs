@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 using System.Collections.Generic;
 using OptimizelySDK.Logger;
 
@@ -20,15 +21,22 @@ namespace OptimizelySDK.Entity
 {
     public class EventTags : Dictionary<string, object>
     {
-        public EventTags FilterNullValues(ILogger logger) {
-            EventTags answer = new EventTags();
-            foreach (KeyValuePair<string, object> pair in this) {
-                if (pair.Value != null) {
+        public EventTags FilterNullValues(ILogger logger)
+        {
+            var answer = new EventTags();
+            foreach (var pair in this)
+            {
+                if (pair.Value != null)
+                {
                     answer[pair.Key] = pair.Value;
-                } else {
-                    logger.Log(LogLevel.ERROR, $"[EventTags] Null value for key {pair.Key} removed and will not be sent to results.");
+                }
+                else
+                {
+                    logger.Log(LogLevel.ERROR,
+                        $"[EventTags] Null value for key {pair.Key} removed and will not be sent to results.");
                 }
             }
+
             return answer;
         }
     }

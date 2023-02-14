@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #if !NET35 && !NET40
 using OptimizelySDK.Logger;
 using OptimizelySDK.Utils;
@@ -46,18 +47,23 @@ namespace OptimizelySDK.Event.Dispatcher
         {
             try
             {
-                string json = logEvent.GetParamsAsJson();
+                var json = logEvent.GetParamsAsJson();
                 var request = new HttpRequestMessage
                 {
                     RequestUri = new Uri(logEvent.Url),
                     Method = HttpMethod.Post,
                     // The Content-Type header applies to the Content, not the Request itself
-                    Content = new StringContent(json, System.Text.Encoding.UTF8, "application/json"),
+                    Content =
+                        new StringContent(json, System.Text.Encoding.UTF8, "application/json"),
                 };
 
                 foreach (var h in logEvent.Headers)
+                {
                     if (h.Key.ToLower() != "content-type")
+                    {
                         request.Content.Headers.Add(h.Key, h.Value);
+                    }
+                }
 
                 var result = await Client.SendAsync(request);
                 result.EnsureSuccessStatusCode();

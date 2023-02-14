@@ -34,12 +34,6 @@ namespace OptimizelySDK.Odp.Entity
         /// <summary>
         /// Determines if an error exists
         /// </summary>
-        public bool HasErrors
-        {
-            get
-            {
-                return Errors != null && Errors.Length > 0;
-            }
-        }
+        public bool HasErrors => Errors != null && Errors.Length > 0;
     }
 }

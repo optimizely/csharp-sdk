@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 using OptimizelySDK.Logger;
 using System;
 
@@ -34,16 +35,21 @@ namespace OptimizelySDK.ErrorHandler
         public void HandleError(Exception exception)
         {
             if (Logger != null)
+            {
                 Logger.Log(LogLevel.ERROR, exception.Message);
+            }
 
             if (ThrowExceptions)
+            {
                 throw exception;
+            }
         }
 
         /// <summary>
         /// An optional Logger include exceptions in your log
         /// </summary>
         private ILogger Logger;
+
         private bool ThrowExceptions;
     }
 }

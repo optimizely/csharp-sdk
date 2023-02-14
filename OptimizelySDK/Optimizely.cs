@@ -80,13 +80,7 @@ namespace OptimizelySDK
         /// It returns true if the ProjectConfig is valid otherwise false.
         /// Also, it may block execution if GetConfig() blocks execution to get ProjectConfig.
         /// </summary>
-        public bool IsValid
-        {
-            get
-            {
-                return ProjectConfigManager?.GetConfig() != null;
-            }
-        }
+        public bool IsValid => ProjectConfigManager?.GetConfig() != null;
 
         public static String SDK_VERSION
         {
@@ -94,26 +88,20 @@ namespace OptimizelySDK
             {
                 // Example output: "2.1.0" .  Should be kept in synch with NuGet package version.
 #if NET35 || NET40
-                Assembly assembly = Assembly.GetExecutingAssembly();
+                var assembly = Assembly.GetExecutingAssembly();
 #else
-                Assembly assembly = typeof(Optimizely).GetTypeInfo().Assembly;
+                var assembly = typeof(Optimizely).GetTypeInfo().Assembly;
 #endif
                 // Microsoft    Major.Minor.Build.Revision
                 // Semantic     Major.Minor.Patch
-                Version version = assembly.GetName().Version;
-                String answer = String.Format("{0}.{1}.{2}", version.Major, version.Minor,
+                var version = assembly.GetName().Version;
+                var answer = String.Format("{0}.{1}.{2}", version.Major, version.Minor,
                     version.Build);
                 return answer;
             }
         }
 
-        public static String SDK_TYPE
-        {
-            get
-            {
-                return "csharp-sdk";
-            }
-        }
+        public static String SDK_TYPE => "csharp-sdk";
 
         public const string USER_ID = "User Id";
         public const string EXPERIMENT_KEY = "Experiment Key";
@@ -156,7 +144,7 @@ namespace OptimizelySDK
                     null, eventProcessor, defaultDecideOptions, odpManager);
 #else
                 InitializeComponents(eventDispatcher, logger, errorHandler, userProfileService,
-                                    null, eventProcessor, defaultDecideOptions);
+                    null, eventProcessor, defaultDecideOptions);
 #endif
 
                 if (ValidateInputs(datafile, skipJsonValidation))
@@ -177,11 +165,15 @@ namespace OptimizelySDK
             }
             catch (Exception ex)
             {
-                string error = String.Empty;
+                var error = String.Empty;
                 if (ex.GetType() == typeof(ConfigParseException))
+                {
                     error = ex.Message;
+                }
                 else
+                {
                     error = "Provided 'datafile' is in an invalid format. " + ex.Message;
+                }
 
                 Logger.Log(LogLevel.ERROR, error);
                 ErrorHandler.HandleError(ex);
@@ -230,8 +222,8 @@ namespace OptimizelySDK
 
             if (ProjectConfigManager.SdkKey != null)
             {
-                NotificationCenterRegistry.GetNotificationCenter(configManager.SdkKey, logger)
-                    ?.AddNotification(NotificationCenter.NotificationType.OptimizelyConfigUpdate,
+                NotificationCenterRegistry.GetNotificationCenter(configManager.SdkKey, logger)?.
+                    AddNotification(NotificationCenter.NotificationType.OptimizelyConfigUpdate,
                         () =>
                         {
                             projectConfig = ProjectConfigManager.CachedProjectConfig;
@@ -297,10 +289,13 @@ namespace OptimizelySDK
                 return null;
             }
 
-            var inputValues = new Dictionary<string, string> { { USER_ID, userId }, { EXPERIMENT_KEY, experimentKey } };
+            var inputValues = new Dictionary<string, string>
+                { { USER_ID, userId }, { EXPERIMENT_KEY, experimentKey } };
 
             if (!ValidateStringInputs(inputValues))
+            {
                 return null;
+            }
 
             var experiment = config.GetExperimentFromKey(experimentKey);
 
@@ -354,10 +349,13 @@ namespace OptimizelySDK
                 return;
             }
 
-            var inputValues = new Dictionary<string, string> { { USER_ID, userId }, { EVENT_KEY, eventKey } };
+            var inputValues = new Dictionary<string, string>
+                { { USER_ID, userId }, { EVENT_KEY, eventKey } };
 
             if (!ValidateStringInputs(inputValues))
+            {
                 return;
+            }
 
             var eevent = config.GetEvent(eventKey);
 
@@ -422,26 +420,33 @@ namespace OptimizelySDK
                 return null;
             }
 
-            var inputValues = new Dictionary<string, string> { { USER_ID, userId }, { EXPERIMENT_KEY, experimentKey } };
+            var inputValues = new Dictionary<string, string>
+                { { USER_ID, userId }, { EXPERIMENT_KEY, experimentKey } };
 
             if (!ValidateStringInputs(inputValues))
+            {
                 return null;
+            }
 
-            Experiment experiment = config.GetExperimentFromKey(experimentKey);
+            var experiment = config.GetExperimentFromKey(experimentKey);
             if (experiment.Key == null)
+            {
                 return null;
+            }
+
             userAttributes = userAttributes ?? new UserAttributes();
 
             var userContext = CreateUserContextCopy(userId, userAttributes);
-            var variation = DecisionService.GetVariation(experiment, userContext, config)?.ResultObject;
+            var variation = DecisionService.GetVariation(experiment, userContext, config)?.
+                ResultObject;
             var decisionInfo = new Dictionary<string, object>
             {
                 { "experimentKey", experimentKey }, { "variationKey", variation?.Key },
             };
 
-            var decisionNotificationType = config.IsFeatureExperiment(experiment.Id)
-                ? DecisionNotificationTypes.FEATURE_TEST
-                : DecisionNotificationTypes.AB_TEST;
+            var decisionNotificationType = config.IsFeatureExperiment(experiment.Id) ?
+                DecisionNotificationTypes.FEATURE_TEST :
+                DecisionNotificationTypes.AB_TEST;
             NotificationCenter.SendNotifications(NotificationCenter.NotificationType.Decision,
                 decisionNotificationType, userId,
                 userAttributes, decisionInfo);
@@ -465,7 +470,8 @@ namespace OptimizelySDK
                 return false;
             }
 
-            var inputValues = new Dictionary<string, string> { { USER_ID, userId }, { EXPERIMENT_KEY, experimentKey } };
+            var inputValues = new Dictionary<string, string>
+                { { USER_ID, userId }, { EXPERIMENT_KEY, experimentKey } };
             return ValidateStringInputs(inputValues) &&
                    DecisionService.SetForcedVariation(experimentKey, userId, variationKey, config);
         }
@@ -484,10 +490,13 @@ namespace OptimizelySDK
                 return null;
             }
 
-            var inputValues = new Dictionary<string, string> { { USER_ID, userId }, { EXPERIMENT_KEY, experimentKey } };
+            var inputValues = new Dictionary<string, string>
+                { { USER_ID, userId }, { EXPERIMENT_KEY, experimentKey } };
 
             if (!ValidateStringInputs(inputValues))
+            {
                 return null;
+            }
 
             return DecisionService.GetForcedVariation(experimentKey, userId, config).ResultObject;
         }
@@ -516,24 +525,31 @@ namespace OptimizelySDK
                 return false;
             }
 
-            var inputValues = new Dictionary<string, string> { { USER_ID, userId }, { FEATURE_KEY, featureKey } };
+            var inputValues = new Dictionary<string, string>
+                { { USER_ID, userId }, { FEATURE_KEY, featureKey } };
 
             if (!ValidateStringInputs(inputValues))
+            {
                 return false;
+            }
 
             var featureFlag = config.GetFeatureFlagFromKey(featureKey);
             if (string.IsNullOrEmpty(featureFlag.Key))
+            {
                 return false;
+            }
 
             if (!Validator.IsFeatureFlagValid(config, featureFlag))
+            {
                 return false;
+            }
 
-            bool featureEnabled = false;
+            var featureEnabled = false;
             var sourceInfo = new Dictionary<string, string>();
             var decision = DecisionService.GetVariationForFeature(featureFlag,
                     CreateUserContextCopy(userId, userAttributes),
-                    config)
-                .ResultObject;
+                    config).
+                ResultObject;
             var variation = decision?.Variation;
             var decisionSource = decision?.Source ?? FeatureDecision.DECISION_SOURCE_ROLLOUT;
 
@@ -558,11 +574,15 @@ namespace OptimizelySDK
             }
 
             if (featureEnabled == true)
+            {
                 Logger.Log(LogLevel.INFO,
                     $@"Feature flag ""{featureKey}"" is enabled for user ""{userId}"".");
+            }
             else
+            {
                 Logger.Log(LogLevel.INFO,
                     $@"Feature flag ""{featureKey}"" is not enabled for user ""{userId}"".");
+            }
 
             var decisionInfo = new Dictionary<string, object>
             {
@@ -601,20 +621,24 @@ namespace OptimizelySDK
                 Logger.Log(LogLevel.ERROR,
                     $@"Datafile has invalid format. Failing '{
                         FeatureVariable.GetFeatureVariableTypeName(variableType)}'.");
-                return default(T);
+                return default;
             }
 
             var inputValues = new Dictionary<string, string>
             {
-                { USER_ID, userId }, { FEATURE_KEY, featureKey }, { VARIABLE_KEY, variableKey }
+                { USER_ID, userId }, { FEATURE_KEY, featureKey }, { VARIABLE_KEY, variableKey },
             };
 
             if (!ValidateStringInputs(inputValues))
-                return default(T);
+            {
+                return default;
+            }
 
             var featureFlag = config.GetFeatureFlagFromKey(featureKey);
             if (string.IsNullOrEmpty(featureFlag.Key))
-                return default(T);
+            {
+                return default;
+            }
 
             var featureVariable = featureFlag.GetFeatureVariableFromKey(variableKey);
             if (featureVariable == null)
@@ -622,22 +646,22 @@ namespace OptimizelySDK
                 Logger.Log(LogLevel.ERROR,
                     $@"No feature variable was found for key ""{variableKey}"" in feature flag ""{
                         featureKey}"".");
-                return default(T);
+                return default;
             }
             else if (featureVariable.Type != variableType)
             {
                 Logger.Log(LogLevel.ERROR,
                     $@"Variable is of type ""{featureVariable.Type
                     }"", but you requested it as type ""{variableType}"".");
-                return default(T);
+                return default;
             }
 
             var featureEnabled = false;
             var variableValue = featureVariable.DefaultValue;
             var decision = DecisionService.GetVariationForFeature(featureFlag,
                     CreateUserContextCopy(userId, userAttributes),
-                    config)
-                .ResultObject;
+                    config).
+                ResultObject;
 
             if (decision?.Variation != null)
             {
@@ -690,9 +714,10 @@ namespace OptimizelySDK
                 { "featureEnabled", featureEnabled },
                 { "variableKey", variableKey },
                 {
-                    "variableValue", typeCastedValue is OptimizelyJSON
-                        ? ((OptimizelyJSON)typeCastedValue).ToDictionary()
-                        : typeCastedValue
+                    "variableValue",
+                    typeCastedValue is OptimizelyJSON ?
+                        ((OptimizelyJSON)typeCastedValue).ToDictionary() :
+                        typeCastedValue
                 },
                 { "variableType", variableType.ToString().ToLower() },
                 { "source", decision?.Source },
@@ -796,10 +821,12 @@ namespace OptimizelySDK
             UserAttributes userAttributes = null
         )
         {
-            var inputValues = new Dictionary<string, string> { { USER_ID, userId }, };
+            var inputValues = new Dictionary<string, string> { { USER_ID, userId } };
 
             if (!ValidateStringInputs(inputValues))
+            {
                 return null;
+            }
 
             return new OptimizelyUserContext(this, userId, userAttributes, ErrorHandler, Logger);
         }
@@ -808,14 +835,17 @@ namespace OptimizelySDK
             UserAttributes userAttributes = null
         )
         {
-            var inputValues = new Dictionary<string, string> { { USER_ID, userId }, };
+            var inputValues = new Dictionary<string, string> { { USER_ID, userId } };
 
             if (!ValidateStringInputs(inputValues))
+            {
                 return null;
+            }
 
-            return new OptimizelyUserContext(this, userId, userAttributes, null, null, ErrorHandler, Logger
+            return new OptimizelyUserContext(this, userId, userAttributes, null, null, ErrorHandler,
+                Logger
 #if USE_ODP
-                , shouldIdentifyUser: false
+                , false
 #endif
             );
         }
@@ -913,7 +943,7 @@ namespace OptimizelySDK
             {
                 foreach (var featureVariable in flag?.Variables)
                 {
-                    string variableValue = featureVariable.DefaultValue;
+                    var variableValue = featureVariable.DefaultValue;
                     if (featureEnabled)
                     {
                         var featureVariableUsageInstance =
@@ -928,7 +958,9 @@ namespace OptimizelySDK
                         GetTypeCastedVariableValue(variableValue, featureVariable.Type);
 
                     if (typeCastedValue is OptimizelyJSON)
+                    {
                         typeCastedValue = ((OptimizelyJSON)typeCastedValue).ToDictionary();
+                    }
 
                     variableMap.Add(featureVariable.Key, typeCastedValue);
                 }
@@ -944,8 +976,9 @@ namespace OptimizelySDK
                     featureEnabled);
             }
 
-            var reasonsToReport = decisionReasons.ToReport(allOptions.Contains(OptimizelyDecideOption.INCLUDE_REASONS))
-                .ToArray();
+            var reasonsToReport = decisionReasons.
+                ToReport(allOptions.Contains(OptimizelyDecideOption.INCLUDE_REASONS)).
+                ToArray();
             var variationKey = decision?.Variation?.Key;
 
             // TODO: add ruleKey values when available later. use a copy of experimentKey until then.
@@ -959,7 +992,7 @@ namespace OptimizelySDK
                 { "variationKey", variationKey },
                 { "ruleKey", ruleKey },
                 { "reasons", reasonsToReport },
-                { "decisionEventDispatched", decisionEventDispatched }
+                { "decisionEventDispatched", decisionEventDispatched },
             };
 
             NotificationCenter.SendNotifications(NotificationCenter.NotificationType.Decision,
@@ -1018,7 +1051,7 @@ namespace OptimizelySDK
 
             var allOptions = GetAllOptions(options);
 
-            foreach (string key in keys)
+            foreach (var key in keys)
             {
                 var decision = Decide(user, key, options);
                 if (!allOptions.Contains(OptimizelyDecideOption.ENABLED_FLAGS_ONLY) ||
@@ -1033,7 +1066,7 @@ namespace OptimizelySDK
 
         private OptimizelyDecideOption[] GetAllOptions(OptimizelyDecideOption[] options)
         {
-            OptimizelyDecideOption[] copiedOptions = DefaultDecideOptions;
+            var copiedOptions = DefaultDecideOptions;
             if (options != null)
             {
                 copiedOptions = options.Union(DefaultDecideOptions).ToArray();
@@ -1117,7 +1150,7 @@ namespace OptimizelySDK
         /// <returns>List of the feature keys that are enabled for the user.</returns>
         public List<string> GetEnabledFeatures(string userId, UserAttributes userAttributes = null)
         {
-            List<string> enabledFeaturesList = new List<string>();
+            var enabledFeaturesList = new List<string>();
 
             var config = ProjectConfigManager?.GetConfig();
 
@@ -1129,13 +1162,17 @@ namespace OptimizelySDK
             }
 
             if (!ValidateStringInputs(new Dictionary<string, string> { { USER_ID, userId } }))
+            {
                 return enabledFeaturesList;
+            }
 
             foreach (var feature in config.FeatureKeyMap.Values)
             {
                 var featureKey = feature.Key;
                 if (IsFeatureEnabled(featureKey, userId, userAttributes))
+                {
                     enabledFeaturesList.Add(featureKey);
+                }
             }
 
             return enabledFeaturesList;
@@ -1180,7 +1217,9 @@ namespace OptimizelySDK
             }
 
             if (!Validator.IsFeatureFlagValid(config, featureFlag))
+            {
                 return null;
+            }
 
             var featureEnabled = false;
             var decisionResult = DecisionService.GetVariationForFeature(featureFlag,
@@ -1213,7 +1252,7 @@ namespace OptimizelySDK
             var valuesMap = new Dictionary<string, object>();
             foreach (var featureVariable in featureFlag.Variables)
             {
-                string variableValue = featureVariable.DefaultValue;
+                var variableValue = featureVariable.DefaultValue;
                 if (featureEnabled)
                 {
                     var featureVariableUsageInstance =
@@ -1228,7 +1267,9 @@ namespace OptimizelySDK
                     GetTypeCastedVariableValue(variableValue, featureVariable.Type);
 
                 if (typeCastedValue is OptimizelyJSON)
+                {
                     typeCastedValue = ((OptimizelyJSON)typeCastedValue).ToDictionary();
+                }
 
                 valuesMap.Add(featureVariable.Key, typeCastedValue);
             }
@@ -1331,7 +1372,7 @@ namespace OptimizelySDK
         /// <returns>True if all values are valid, false otherwise</returns>
         private bool ValidateStringInputs(Dictionary<string, string> inputs)
         {
-            bool isValid = true;
+            var isValid = true;
 
             // Empty user Id is valid value.
             if (inputs.ContainsKey(USER_ID))
@@ -1363,18 +1404,18 @@ namespace OptimizelySDK
             switch (type)
             {
                 case FeatureVariable.BOOLEAN_TYPE:
-                    bool.TryParse(value, out bool booleanValue);
+                    bool.TryParse(value, out var booleanValue);
                     result = booleanValue;
                     break;
 
                 case FeatureVariable.DOUBLE_TYPE:
                     double.TryParse(value, System.Globalization.NumberStyles.Number,
-                        System.Globalization.CultureInfo.InvariantCulture, out double doubleValue);
+                        System.Globalization.CultureInfo.InvariantCulture, out var doubleValue);
                     result = doubleValue;
                     break;
 
                 case FeatureVariable.INTEGER_TYPE:
-                    int.TryParse(value, out int intValue);
+                    int.TryParse(value, out var intValue);
                     result = intValue;
                     break;
 
@@ -1388,8 +1429,10 @@ namespace OptimizelySDK
             }
 
             if (result == null)
+            {
                 Logger.Log(LogLevel.ERROR,
                     $@"Unable to cast variable value ""{value}"" to type ""{type}"".");
+            }
 
             return result;
         }

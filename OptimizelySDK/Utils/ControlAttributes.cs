@@ -19,7 +19,7 @@ namespace OptimizelySDK.Utils
     public class ControlAttributes
     {
         public const string BOT_FILTERING_ATTRIBUTE = "$opt_bot_filtering";
-        public const string BUCKETING_ID_ATTRIBUTE  = "$opt_bucketing_id";
-        public const string USER_AGENT_ATTRIBUTE    = "$opt_user_agent";
+        public const string BUCKETING_ID_ATTRIBUTE = "$opt_bucketing_id";
+        public const string USER_AGENT_ATTRIBUTE = "$opt_user_agent";
     }
 }

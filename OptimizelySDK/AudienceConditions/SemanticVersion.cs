@@ -13,9 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
+
 namespace OptimizelySDK.AudienceConditions
 {
     /// <summary>
@@ -26,7 +28,10 @@ namespace OptimizelySDK.AudienceConditions
         public const char BuildSeparator = '+';
         public const char PreReleaseSeparator = '-';
         public const string NumberExpression = "[0-9]+";
-        public static readonly System.Text.RegularExpressions.Regex NumberRegex = new System.Text.RegularExpressions.Regex(NumberExpression);
+
+        public static readonly System.Text.RegularExpressions.Regex NumberRegex =
+            new System.Text.RegularExpressions.Regex(NumberExpression);
+
         /// <summary>
         /// Helper method to check if semantic version contains white spaces.
         /// </summary>
@@ -54,6 +59,7 @@ namespace OptimizelySDK.AudienceConditions
             {
                 return false;
             }
+
             return preReleaseIndex < buildIndex;
         }
 
@@ -74,6 +80,7 @@ namespace OptimizelySDK.AudienceConditions
             {
                 return false;
             }
+
             return buildIndex < preReleaseIndex;
         }
 
@@ -94,38 +101,48 @@ namespace OptimizelySDK.AudienceConditions
         /// <returns>string array conatining major.minor.patch and prerelease or beta version as last element.</returns>
         public static string[] SplitSemanticVersion(this string version)
         {
-            List<string> versionParts = new List<string>();
+            var versionParts = new List<string>();
             // pre-release or build.
-            string versionSuffix = string.Empty;
-            string versionPrefix = version;
+            var versionSuffix = string.Empty;
+            var versionPrefix = version;
             string[] preVersionParts;
             if (version.ContainsWhiteSpace())
             {
                 // log and throw error
-                throw new Exception("Semantic version contains white spaces. Invalid Semantic Version.");
+                throw new Exception(
+                    "Semantic version contains white spaces. Invalid Semantic Version.");
             }
 
             if (version.IsBuild() || version.IsPreRelease())
             {
-                var partialVersionParts = version.Split(new char [] { version.IsPreRelease() ?
-                     PreReleaseSeparator : BuildSeparator}, 2, StringSplitOptions.RemoveEmptyEntries);
+                var partialVersionParts = version.Split(new char[]
+                {
+                    version.IsPreRelease() ?
+                        PreReleaseSeparator :
+                        BuildSeparator,
+                }, 2, StringSplitOptions.RemoveEmptyEntries);
                 if (partialVersionParts.Length <= 1)
                 {
                     // throw error
                     throw new Exception("Invalid Semantic Version.");
                 }
+
                 // major.minor.patch
                 versionPrefix = partialVersionParts[0];
                 versionSuffix = partialVersionParts[1];
 
-                preVersionParts = versionPrefix.Split(new char[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
+                preVersionParts = versionPrefix.Split(new char[] { '.' },
+                    StringSplitOptions.RemoveEmptyEntries);
             }
             else
             {
-                preVersionParts = version.Split(new char[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
+                preVersionParts = version.Split(new char[] { '.' },
+                    StringSplitOptions.RemoveEmptyEntries);
             }
-            int dotCount = versionPrefix.Count(c => c == '.');
-            if (preVersionParts.Length != dotCount + 1 || dotCount > 2 || (preVersionParts.Any(part => !part.IsNumber())))
+
+            var dotCount = versionPrefix.Count(c => c == '.');
+            if (preVersionParts.Length != dotCount + 1 || dotCount > 2 ||
+                preVersionParts.Any(part => !part.IsNumber()))
             {
                 // Throw error as pre version should only contain major.minor.patch version 
                 throw new Exception("Invalid Semantic Version.");
@@ -180,27 +197,34 @@ namespace OptimizelySDK.AudienceConditions
 
             for (var index = 0; index < targetedVersionParts.Length; index++)
             {
-
                 if (userVersionParts.Length <= index)
                 {
                     return targetedVersion.Version.IsPreRelease() ? 1 : -1;
                 }
                 else
                 {
-                    if (!int.TryParse(userVersionParts[index], out int userVersionPartInt))
+                    if (!int.TryParse(userVersionParts[index], out var userVersionPartInt))
                     {
                         // Compare strings
-                        var result = string.Compare(userVersionParts[index], targetedVersionParts[index]);
+                        var result = string.Compare(userVersionParts[index],
+                            targetedVersionParts[index]);
                         if (result < 0)
                         {
-                            return targetedVersion.Version.IsPreRelease() && !Version.IsPreRelease() ? 1 : -1;
+                            return targetedVersion.Version.IsPreRelease() &&
+                                   !Version.IsPreRelease() ?
+                                1 :
+                                -1;
                         }
                         else if (result > 0)
                         {
-                            return !targetedVersion.Version.IsPreRelease() && Version.IsPreRelease() ? -1 : 1;
+                            return !targetedVersion.Version.IsPreRelease() &&
+                                   Version.IsPreRelease() ?
+                                -1 :
+                                1;
                         }
                     }
-                    else if (int.TryParse(targetedVersionParts[index], out int targetVersionPartInt))
+                    else if (int.TryParse(targetedVersionParts[index],
+                                 out var targetVersionPartInt))
                     {
                         if (userVersionPartInt != targetVersionPartInt)
                         {

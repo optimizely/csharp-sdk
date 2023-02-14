@@ -19,14 +19,13 @@ using System.Collections.Generic;
 
 namespace OptimizelySDK.Bucketing
 {
-
     /// <summary>
     /// Class encapsulating user profile service functionality.
     /// Override with your own implementation for storing and retrieving the user profile.
     /// </summary>
     public interface UserProfileService
     {
-		Dictionary<string, object> Lookup(String userId);
+        Dictionary<string, object> Lookup(String userId);
 
         void Save(Dictionary<string, object> userProfile);
     }

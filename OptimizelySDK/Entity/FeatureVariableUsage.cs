@@ -27,6 +27,5 @@ namespace OptimizelySDK.Entity
         /// Audience Name
         /// </summary>
         public string Value { get; set; }
-
     }
 }

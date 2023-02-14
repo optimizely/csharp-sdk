@@ -35,16 +35,18 @@ namespace OptimizelySDK.Event
         /// <param name="userAttributes">The user's attributes</param>
         /// <returns>ImpressionEvent instance</returns>
         public static ImpressionEvent CreateImpressionEvent(ProjectConfig projectConfig,
-                                                            Experiment activatedExperiment,
-                                                            string variationId,
-                                                            string userId,
-                                                            UserAttributes userAttributes,
-                                                            string flagKey,
-                                                            string ruleType,
-                                                            bool enabled = false)
+            Experiment activatedExperiment,
+            string variationId,
+            string userId,
+            UserAttributes userAttributes,
+            string flagKey,
+            string ruleType,
+            bool enabled = false
+        )
         {
-            Variation variation = projectConfig.GetVariationFromId(activatedExperiment?.Key, variationId);
-            return CreateImpressionEvent(projectConfig, activatedExperiment, variation, userId, userAttributes, flagKey, ruleType, enabled);
+            var variation = projectConfig.GetVariationFromId(activatedExperiment?.Key, variationId);
+            return CreateImpressionEvent(projectConfig, activatedExperiment, variation, userId,
+                userAttributes, flagKey, ruleType, enabled);
         }
 
         /// <summary>
@@ -59,45 +61,46 @@ namespace OptimizelySDK.Event
         /// <param name="ruleType">experiment or featureDecision source </param>
         /// <returns>ImpressionEvent instance</returns>
         public static ImpressionEvent CreateImpressionEvent(ProjectConfig projectConfig,
-                                                            Experiment activatedExperiment,
-                                                            Variation variation,
-                                                            string userId,
-                                                            UserAttributes userAttributes,
-                                                            string flagKey,
-                                                            string ruleType,
-                                                            bool enabled = false)
+            Experiment activatedExperiment,
+            Variation variation,
+            string userId,
+            UserAttributes userAttributes,
+            string flagKey,
+            string ruleType,
+            bool enabled = false
+        )
         {
-            if ((ruleType == FeatureDecision.DECISION_SOURCE_ROLLOUT || variation == null) && !projectConfig.SendFlagDecisions)
+            if ((ruleType == FeatureDecision.DECISION_SOURCE_ROLLOUT || variation == null) &&
+                !projectConfig.SendFlagDecisions)
             {
                 return null;
             }
 
-            var eventContext = new EventContext.Builder()
-            .WithProjectId(projectConfig.ProjectId)
-            .WithAccountId(projectConfig.AccountId)
-            .WithAnonymizeIP(projectConfig.AnonymizeIP)
-            .WithRevision(projectConfig.Revision)                
-            .Build();
+            var eventContext = new EventContext.Builder().WithProjectId(projectConfig.ProjectId).
+                WithAccountId(projectConfig.AccountId).
+                WithAnonymizeIP(projectConfig.AnonymizeIP).
+                WithRevision(projectConfig.Revision).
+                Build();
 
-            var variationKey = ""; 
-            var ruleKey = "";   
+            var variationKey = "";
+            var ruleKey = "";
             if (variation != null)
             {
                 variationKey = variation.Key;
                 ruleKey = activatedExperiment?.Key ?? string.Empty;
             }
+
             var metadata = new DecisionMetadata(flagKey, ruleKey, ruleType, variationKey, enabled);
 
-            return new ImpressionEvent.Builder()
-                .WithEventContext(eventContext)
-                .WithBotFilteringEnabled(projectConfig.BotFiltering)
-                .WithExperiment(activatedExperiment)
-                .WithMetadata(metadata)
-                .WithUserId(userId)
-                .WithVariation(variation)
-                .WithVisitorAttributes(EventFactory.BuildAttributeList(userAttributes, projectConfig))
-                .Build();
-            
+            return new ImpressionEvent.Builder().WithEventContext(eventContext).
+                WithBotFilteringEnabled(projectConfig.BotFiltering).
+                WithExperiment(activatedExperiment).
+                WithMetadata(metadata).
+                WithUserId(userId).
+                WithVariation(variation).
+                WithVisitorAttributes(
+                    EventFactory.BuildAttributeList(userAttributes, projectConfig)).
+                Build();
         }
 
         /// <summary>
@@ -109,29 +112,28 @@ namespace OptimizelySDK.Event
         /// <param name="userAttributes">The user's attributes</param>
         /// <param name="eventTags">Array Hash representing metadata associated with the event.</param>
         /// <returns>ConversionEvent instance</returns>
-        public static ConversionEvent CreateConversionEvent(ProjectConfig projectConfig,                                                            
-                                                            string eventKey,
-                                                            string userId,
-                                                            UserAttributes userAttributes,
-                                                            EventTags eventTags)
+        public static ConversionEvent CreateConversionEvent(ProjectConfig projectConfig,
+            string eventKey,
+            string userId,
+            UserAttributes userAttributes,
+            EventTags eventTags
+        )
         {
-            
+            var eventContext = new EventContext.Builder().WithProjectId(projectConfig.ProjectId).
+                WithAccountId(projectConfig.AccountId).
+                WithAnonymizeIP(projectConfig.AnonymizeIP).
+                WithRevision(projectConfig.Revision).
+                Build();
 
-            var eventContext = new EventContext.Builder()
-                    .WithProjectId(projectConfig.ProjectId)
-                    .WithAccountId(projectConfig.AccountId)
-                    .WithAnonymizeIP(projectConfig.AnonymizeIP)
-                    .WithRevision(projectConfig.Revision)
-                    .Build();
-
-            return new ConversionEvent.Builder()
-                .WithBotFilteringEnabled(projectConfig.BotFiltering)
-                .WithEventContext(eventContext)
-                .WithEventTags(eventTags)
-                .WithEvent(projectConfig.GetEvent(eventKey))
-                .WithUserId(userId)
-                .WithVisitorAttributes(EventFactory.BuildAttributeList(userAttributes, projectConfig))
-                .Build();            
+            return new ConversionEvent.Builder().
+                WithBotFilteringEnabled(projectConfig.BotFiltering).
+                WithEventContext(eventContext).
+                WithEventTags(eventTags).
+                WithEvent(projectConfig.GetEvent(eventKey)).
+                WithUserId(userId).
+                WithVisitorAttributes(
+                    EventFactory.BuildAttributeList(userAttributes, projectConfig)).
+                Build();
         }
     }
 }

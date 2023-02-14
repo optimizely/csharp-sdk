@@ -131,10 +131,10 @@ namespace OptimizelySDK.Odp
                 return null;
             }
 
-            return segments.Data.Customer.Audiences.Edges
-                .Where(e => e.Node.State == BaseCondition.QUALIFIED)
-                .Select(e => e.Node.Name)
-                .ToArray();
+            return segments.Data.Customer.Audiences.Edges.
+                Where(e => e.Node.State == BaseCondition.QUALIFIED).
+                Select(e => e.Node.Name).
+                ToArray();
         }
 
         /// <summary>
@@ -155,10 +155,9 @@ namespace OptimizelySDK.Odp
                         ""userId"": ""{userValue}"",
                         ""audiences"": {audiences}
                     }
-                }"
-                    .Replace("{userKey}", userKey)
-                    .Replace("{userValue}", userValue)
-                    .Replace("{audiences}", JsonConvert.SerializeObject(segmentsToCheck));
+                }".Replace("{userKey}", userKey).
+                    Replace("{userValue}", userValue).
+                    Replace("{audiences}", JsonConvert.SerializeObject(segmentsToCheck));
         }
 
         /// <summary>
