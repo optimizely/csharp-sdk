@@ -73,6 +73,7 @@
     <Compile Include="Assertions.cs" />
     <Compile Include="AudienceConditionsTests\ConditionEvaluationTest.cs" />
     <Compile Include="AudienceConditionsTests\ConditionsTest.cs" />
+    <Compile Include="AudienceConditionsTests\SegmentsTests.cs" />
     <Compile Include="ConfigTest\HttpProjectConfigManagerTest.cs" />
     <Compile Include="ConfigTest\PollingProjectConfigManagerTest.cs" />
     <Compile Include="ConfigTest\FallbackProjectConfigManagerTest.cs" />
@@ -131,6 +132,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="App.config" />
+    <EmbeddedResource Include="OdpSegmentsDatafile.json" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="IntegrationEmptyDatafile.json" />
@@ -151,6 +153,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\keypair.snk">
+      <Link>keypair.snk</Link>
+    </None>
     <None Include="packages.config" />
     <EmbeddedResource Include="unsupported_version_datafile.json" />
     <EmbeddedResource Include="typed_audience_datafile.json" />

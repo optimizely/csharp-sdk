@@ -32,7 +32,7 @@ namespace OptimizelySDK.Odp
     /// </summary>
     public enum OdpSegmentOption
     {
-        IgnoreCache = 0,
-        ResetCache = 1,
+        IGNORE_CACHE = 0,
+        RESET_CACHE = 1,
     }
 }

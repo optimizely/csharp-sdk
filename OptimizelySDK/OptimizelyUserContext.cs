@@ -14,18 +14,29 @@
  * limitations under the License.
  */
 
-using OptimizelySDK.Logger;
-using System.Collections.Generic;
+#if !(NET35 || NET40 || NETSTANDARD1_6)
+#define USE_ODP
+#endif
+
 using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Entity;
+using OptimizelySDK.Logger;
 using OptimizelySDK.OptimizelyDecisions;
+using System;
+using System.Collections.Generic;
+
+#if USE_ODP
+using OptimizelySDK.Odp;
+using System.Linq;
+using System.Threading.Tasks;
+#endif
 
 namespace OptimizelySDK
 {
     /// <summary>
     /// OptimizelyUserContext defines user contexts that the SDK will use to make decisions for
     /// </summary>
-    public class OptimizelyUserContext
+    public class OptimizelyUserContext : IDisposable
     {
         private ILogger Logger;
         private IErrorHandler ErrorHandler;
@@ -43,20 +54,33 @@ namespace OptimizelySDK
         // Optimizely object to be used.
         private Optimizely Optimizely;
 
+        /// <summary>
+        /// Determine if User Context has already been disposed
+        /// </summary>
+        public bool Disposed { get; private set; }
+
         private ForcedDecisionsStore ForcedDecisionsStore { get; set; }
 
-
-        public OptimizelyUserContext(Optimizely optimizely, string userId, UserAttributes userAttributes, IErrorHandler errorHandler, ILogger logger) :
-            this(optimizely, userId, userAttributes, null, null, errorHandler, logger)
+        public OptimizelyUserContext(Optimizely optimizely, string userId,
+            UserAttributes userAttributes, IErrorHandler errorHandler, ILogger logger
+        ) : this(optimizely, userId, userAttributes, null, null, errorHandler, logger)
         {
         }
 
-        public OptimizelyUserContext(Optimizely optimizely, string userId, UserAttributes userAttributes, ForcedDecisionsStore forcedDecisionsStore, IErrorHandler errorHandler, ILogger logger) :
-            this(optimizely, userId, userAttributes, forcedDecisionsStore, null, errorHandler, logger)
+        public OptimizelyUserContext(Optimizely optimizely, string userId,
+            UserAttributes userAttributes, ForcedDecisionsStore forcedDecisionsStore,
+            IErrorHandler errorHandler, ILogger logger
+        ) : this(optimizely, userId, userAttributes, forcedDecisionsStore, null, errorHandler, logger)
         {
         }
 
-        public OptimizelyUserContext(Optimizely optimizely, string userId, UserAttributes userAttributes, ForcedDecisionsStore forcedDecisionsStore, List<string> qualifiedSegments, IErrorHandler errorHandler, ILogger logger)
+        public OptimizelyUserContext(Optimizely optimizely, string userId,
+            UserAttributes userAttributes, ForcedDecisionsStore forcedDecisionsStore,
+            List<string> qualifiedSegments, IErrorHandler errorHandler, ILogger logger
+#if USE_ODP
+            , bool shouldIdentifyUser = true
+#endif
+        )
         {
             ErrorHandler = errorHandler;
             Logger = logger;
@@ -65,9 +89,22 @@ namespace OptimizelySDK
             ForcedDecisionsStore = forcedDecisionsStore ?? new ForcedDecisionsStore();
             UserId = userId;
             QualifiedSegments = qualifiedSegments ?? new List<string>();
+
+#if USE_ODP
+            if (shouldIdentifyUser)
+            {
+                optimizely.IdentifyUser(UserId);
+            }
+#endif
         }
 
-        private OptimizelyUserContext Copy() => new OptimizelyUserContext(Optimizely, UserId, GetAttributes(), GetForcedDecisionsStore(), GetQualifiedSegments(), ErrorHandler, Logger);
+        private OptimizelyUserContext Copy() =>
+            new OptimizelyUserContext(Optimizely, UserId, GetAttributes(),
+                GetForcedDecisionsStore(), GetQualifiedSegments(), ErrorHandler, Logger
+#if USE_ODP
+                , false
+#endif
+            );
 
         /// <summary>
         /// Returns Optimizely instance associated with the UserContext.
@@ -93,10 +130,13 @@ namespace OptimizelySDK
         /// <returns>List of qualified segments</returns>
         public List<string> GetQualifiedSegments()
         {
-            List<string> qualifiedSegmentsCopy;
+            List<string> qualifiedSegmentsCopy = null;
             lock (mutex)
             {
-                qualifiedSegmentsCopy = new List<string>(QualifiedSegments);
+                if (QualifiedSegments != null)
+                {
+                    qualifiedSegmentsCopy = new List<string>(QualifiedSegments);
+                }
             }
 
             return qualifiedSegmentsCopy;
@@ -110,11 +150,22 @@ namespace OptimizelySDK
         {
             lock (mutex)
             {
-                QualifiedSegments.Clear();
-                QualifiedSegments.AddRange(qualifiedSegments);
+                if (qualifiedSegments == null)
+                {
+                    QualifiedSegments = null;
+                }
+                else if (QualifiedSegments == null)
+                {
+                    QualifiedSegments = new List<string>(qualifiedSegments);
+                }
+                else
+                {
+                    QualifiedSegments.Clear();
+                    QualifiedSegments.AddRange(qualifiedSegments);
+                }
             }
         }
-        
+
         /// <summary>
         /// Returns true if the user is qualified for the given segment name
         /// </summary>
@@ -124,9 +175,45 @@ namespace OptimizelySDK
         {
             lock (mutex)
             {
-                return QualifiedSegments.Contains(segment);
+                return QualifiedSegments?.Contains(segment) ?? false;
             }
         }
+
+#if USE_ODP
+        /// <summary>
+        /// Fetch all qualified segments for the user context.
+        /// </summary>
+        /// <param name="segmentOptions">Options used during segment cache handling</param>
+        /// <returns>True if ODP segments were fetched successfully otherwise False</returns>
+        public bool FetchQualifiedSegments(List<OdpSegmentOption> segmentOptions = null)
+        {
+            var segments = Optimizely.FetchQualifiedSegments(UserId, segmentOptions);
+
+            var success = segments != null;
+
+            SetQualifiedSegments(segments?.ToList());
+
+            return success;
+        }
+
+        /// <summary>
+        /// Asynchronously fetch all qualified segments for the user context.
+        /// </summary>
+        /// <param name="callback">Callback function to invoke when results are available</param>
+        /// <param name="segmentOptions">Options used during segment cache handling</param>
+        /// <returns>True if ODP segments were fetched successfully otherwise False</returns>
+        public void FetchQualifiedSegments(Action<bool> callback,
+            List<OdpSegmentOption> segmentOptions = null
+        )
+        {
+            Task.Run(() =>
+            {
+                var success = FetchQualifiedSegments(segmentOptions);
+
+                callback?.Invoke(success);
+            });
+        }
+#endif
 
         /// <summary>
         /// Returns copy of UserAttributes associated with UserContext.
@@ -155,7 +242,8 @@ namespace OptimizelySDK
                 if (ForcedDecisionsStore.Count == 0)
                 {
                     copiedForcedDecisionsStore = ForcedDecisionsStore.NullForcedDecision();
-                } else
+                }
+                else
                 {
                     copiedForcedDecisionsStore = new ForcedDecisionsStore(ForcedDecisionsStore);
                 }
@@ -207,7 +295,8 @@ namespace OptimizelySDK
         /// <param name="options">A list of options for decision-making.</param>
         /// <returns>A decision result.</returns>
         public virtual OptimizelyDecision Decide(string key,
-            OptimizelyDecideOption[] options)
+            OptimizelyDecideOption[] options
+        )
         {
             var optimizelyUserContext = Copy();
             return Optimizely.Decide(optimizelyUserContext, key, options);
@@ -218,7 +307,9 @@ namespace OptimizelySDK
         /// </summary>
         /// <param name="keys">list of flag keys for which a decision will be made.</param>
         /// <returns>A dictionary of all decision results, mapped by flag keys.</returns>
-        public virtual Dictionary<string, OptimizelyDecision> DecideForKeys(string[] keys, OptimizelyDecideOption[] options)
+        public virtual Dictionary<string, OptimizelyDecision> DecideForKeys(string[] keys,
+            OptimizelyDecideOption[] options
+        )
         {
             var optimizelyUserContext = Copy();
             return Optimizely.DecideForKeys(optimizelyUserContext, keys, options);
@@ -248,7 +339,9 @@ namespace OptimizelySDK
         /// </summary>
         /// <param name="options">A list of options for decision-making.</param>
         /// <returns>All decision results mapped by flag keys.</returns>
-        public virtual Dictionary<string, OptimizelyDecision> DecideAll(OptimizelyDecideOption[] options)
+        public virtual Dictionary<string, OptimizelyDecision> DecideAll(
+            OptimizelyDecideOption[] options
+        )
         {
             var optimizelyUserContext = Copy();
             return Optimizely.DecideAll(optimizelyUserContext, options);
@@ -269,7 +362,8 @@ namespace OptimizelySDK
         /// <param name="eventName">The event name.</param>
         /// <param name="eventTags">A map of event tag names to event tag values.</param>
         public virtual void TrackEvent(string eventName,
-            EventTags eventTags)
+            EventTags eventTags
+        )
         {
             Optimizely.Track(eventName, UserId, Attributes, eventTags);
         }
@@ -280,7 +374,9 @@ namespace OptimizelySDK
         /// <param name="context">The context object containing flag and rule key.</param>
         /// <param name="decision">OptimizelyForcedDecision object containing variation key.</param>
         /// <returns></returns>
-        public bool SetForcedDecision(OptimizelyDecisionContext context, OptimizelyForcedDecision decision)
+        public bool SetForcedDecision(OptimizelyDecisionContext context,
+            OptimizelyForcedDecision decision
+        )
         {
             lock (mutex)
             {
@@ -349,6 +445,18 @@ namespace OptimizelySDK
             }
 
             return true;
+        }
+
+        public void Dispose()
+        {
+            if (Disposed)
+            {
+                return;
+            }
+
+            Disposed = true;
+
+            Optimizely?.Dispose();
         }
     }
 }

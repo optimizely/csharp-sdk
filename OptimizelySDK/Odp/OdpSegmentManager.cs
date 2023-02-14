@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2022 Optimizely
+ * Copyright 2022-2023 Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,27 +47,29 @@ namespace OptimizelySDK.Odp
         /// </summary>
         private readonly ICache<List<string>> _segmentsCache;
 
-        public OdpSegmentManager(OdpConfig odpConfig, IOdpSegmentApiManager apiManager,
-            int? cacheSize = null, TimeSpan? itemTimeout = null,
-            ILogger logger = null, ICache<List<string>> cache = null
+        public OdpSegmentManager(IOdpSegmentApiManager apiManager,
+            ICache<List<string>> cache = null,
+            ILogger logger = null
         )
         {
             _apiManager = apiManager;
-            _odpConfig = odpConfig;
             _logger = logger ?? new DefaultLogger();
 
-            itemTimeout = itemTimeout ?? TimeSpan.FromSeconds(Constants.DEFAULT_CACHE_SECONDS);
-            if (itemTimeout < TimeSpan.Zero)
-            {
-                _logger.Log(LogLevel.WARN,
-                    "Negative item timeout provided. Items will not expire in cache.");
-                itemTimeout = TimeSpan.Zero;
-            }
-
-            cacheSize = cacheSize ?? Constants.DEFAULT_MAX_CACHE_SIZE;
-
             _segmentsCache =
-                cache ?? new LruCache<List<string>>(cacheSize.Value, itemTimeout, logger);
+                cache ?? new LruCache<List<string>>(Constants.DEFAULT_MAX_CACHE_SIZE,
+                    TimeSpan.FromSeconds(Constants.DEFAULT_CACHE_SECONDS), logger);
+        }
+
+        public OdpSegmentManager(IOdpSegmentApiManager apiManager,
+            int? cacheSize = null,
+            TimeSpan? itemTimeout = null,
+            ILogger logger = null
+        )
+        {
+            _apiManager = apiManager;
+            _logger = logger ?? new DefaultLogger();
+
+            _segmentsCache = new LruCache<List<string>>(cacheSize, itemTimeout, logger);
         }
 
         /// <summary>
@@ -81,7 +83,7 @@ namespace OptimizelySDK.Odp
             List<OdpSegmentOption> options = null
         )
         {
-            if (!_odpConfig.IsReady())
+            if (_odpConfig == null || !_odpConfig.IsReady())
             {
                 _logger.Log(LogLevel.WARN, Constants.ODP_NOT_INTEGRATED_MESSAGE);
                 return null;
@@ -99,12 +101,12 @@ namespace OptimizelySDK.Odp
             List<string> qualifiedSegments;
             var cacheKey = GetCacheKey(OdpUserKeyType.FS_USER_ID.ToString().ToLower(), fsUserId);
 
-            if (options.Contains(OdpSegmentOption.ResetCache))
+            if (options.Contains(OdpSegmentOption.RESET_CACHE))
             {
                 _segmentsCache.Reset();
             }
 
-            if (!options.Contains(OdpSegmentOption.IgnoreCache))
+            if (!options.Contains(OdpSegmentOption.IGNORE_CACHE))
             {
                 qualifiedSegments = _segmentsCache.Lookup(cacheKey);
                 if (qualifiedSegments != null)
@@ -124,7 +126,7 @@ namespace OptimizelySDK.Odp
                     _odpConfig.SegmentsToCheck)?.
                 ToList();
 
-            if (qualifiedSegments != null && !options.Contains(OdpSegmentOption.IgnoreCache))
+            if (qualifiedSegments != null && !options.Contains(OdpSegmentOption.IGNORE_CACHE))
             {
                 _segmentsCache.Save(cacheKey, qualifiedSegments);
             }
@@ -159,5 +161,10 @@ namespace OptimizelySDK.Odp
         {
             _segmentsCache.Reset();
         }
+
+        /// <summary>
+        /// For Testing Only: Retrieve the current segment cache
+        /// </summary>
+        internal ICache<List<string>> SegmentsCacheForTesting { get { return _segmentsCache; } }
     }
 }

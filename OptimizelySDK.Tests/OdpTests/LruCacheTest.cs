@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2022, Optimizely
+ * Copyright 2022-2023, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,7 +67,7 @@ namespace OptimizelySDK.Tests.OdpTests
             cache.Save("user2", _segments3And4);
             cache.Save("user3", _segments5And6);
 
-            var cacheKeys = cache._readCurrentCacheKeys();
+            var cacheKeys = cache.CurrentCacheKeysForTesting();
 
             Assert.AreEqual("user3", cacheKeys[0]);
             Assert.AreEqual("user2", cacheKeys[1]);
@@ -76,7 +76,7 @@ namespace OptimizelySDK.Tests.OdpTests
             // Lookup should move user1 to top of the list and push down others.
             Assert.AreEqual(_segments1And2, cache.Lookup("user1"));
 
-            cacheKeys = cache._readCurrentCacheKeys();
+            cacheKeys = cache.CurrentCacheKeysForTesting();
             Assert.AreEqual("user1", cacheKeys[0]);
             Assert.AreEqual("user3", cacheKeys[1]);
             Assert.AreEqual("user2", cacheKeys[2]);
@@ -84,7 +84,7 @@ namespace OptimizelySDK.Tests.OdpTests
             // Lookup should move user2 to the beginning of the list and push others.
             Assert.AreEqual(_segments3And4, cache.Lookup("user2"));
 
-            cacheKeys = cache._readCurrentCacheKeys();
+            cacheKeys = cache.CurrentCacheKeysForTesting();
             Assert.AreEqual("user2", cacheKeys[0]);
             Assert.AreEqual("user1", cacheKeys[1]);
             Assert.AreEqual("user3", cacheKeys[2]);
@@ -92,7 +92,7 @@ namespace OptimizelySDK.Tests.OdpTests
             // Lookup moves user3 to top and pushes others down.
             Assert.AreEqual(_segments5And6, cache.Lookup("user3"));
 
-            cacheKeys = cache._readCurrentCacheKeys();
+            cacheKeys = cache.CurrentCacheKeysForTesting();
             Assert.AreEqual("user3", cacheKeys[0]);
             Assert.AreEqual("user2", cacheKeys[1]);
             Assert.AreEqual("user1", cacheKeys[2]);
@@ -107,36 +107,36 @@ namespace OptimizelySDK.Tests.OdpTests
             cache.Save("user2", _segments3And4);
             cache.Save("user3", _segments5And6);
 
-            var cacheKeys = cache._readCurrentCacheKeys();
-            
+            var cacheKeys = cache.CurrentCacheKeysForTesting();
+
             // last added should be at the top of the list
-            Assert.AreEqual("user3",cacheKeys[0]);
-            Assert.AreEqual("user2",cacheKeys[1]);
-            Assert.AreEqual("user1" ,cacheKeys[2]);
+            Assert.AreEqual("user3", cacheKeys[0]);
+            Assert.AreEqual("user2", cacheKeys[1]);
+            Assert.AreEqual("user1", cacheKeys[2]);
 
             // save should move user1 to the top of the list and push down others.
             cache.Save("user1", _segments1And2);
-            
-            cacheKeys = cache._readCurrentCacheKeys();
-            Assert.AreEqual("user1",cacheKeys[0]);
-            Assert.AreEqual("user3",cacheKeys[1]);
-            Assert.AreEqual("user2",cacheKeys[2]);
+
+            cacheKeys = cache.CurrentCacheKeysForTesting();
+            Assert.AreEqual("user1", cacheKeys[0]);
+            Assert.AreEqual("user3", cacheKeys[1]);
+            Assert.AreEqual("user2", cacheKeys[2]);
 
             // save user2 should bring it to the top and push down others.
             cache.Save("user2", _segments3And4);
-            
-            cacheKeys = cache._readCurrentCacheKeys();
-            Assert.AreEqual("user2",cacheKeys[0]);
-            Assert.AreEqual("user1",cacheKeys[1]);
-            Assert.AreEqual("user3",cacheKeys[2]);
+
+            cacheKeys = cache.CurrentCacheKeysForTesting();
+            Assert.AreEqual("user2", cacheKeys[0]);
+            Assert.AreEqual("user1", cacheKeys[1]);
+            Assert.AreEqual("user3", cacheKeys[2]);
 
             // saving user3 again should return to the original insertion order.
             cache.Save("user3", _segments5And6);
-            
-            cacheKeys = cache._readCurrentCacheKeys();
-            Assert.AreEqual("user3",cacheKeys[0]);
-            Assert.AreEqual("user2",cacheKeys[1]);
-            Assert.AreEqual("user1" ,cacheKeys[2]);
+
+            cacheKeys = cache.CurrentCacheKeysForTesting();
+            Assert.AreEqual("user3", cacheKeys[0]);
+            Assert.AreEqual("user2", cacheKeys[1]);
+            Assert.AreEqual("user1", cacheKeys[2]);
         }
 
         [Test]
@@ -161,12 +161,12 @@ namespace OptimizelySDK.Tests.OdpTests
             cache.Save("user1", _segments1And2);
 
             Assert.AreEqual(_segments1And2, cache.Lookup("user1"));
-            Assert.AreEqual(1, cache._readCurrentCacheKeys().Length);
+            Assert.AreEqual(1, cache.CurrentCacheKeysForTesting().Length);
 
             Thread.Sleep(1200);
 
             Assert.IsNull(cache.Lookup("user1"));
-            Assert.AreEqual(0, cache._readCurrentCacheKeys().Length);
+            Assert.AreEqual(0, cache.CurrentCacheKeysForTesting().Length);
         }
 
         [Test]
@@ -178,7 +178,7 @@ namespace OptimizelySDK.Tests.OdpTests
             cache.Save("user2", _segments3And4);
             cache.Save("user3", _segments5And6);
 
-            Assert.AreEqual(2, cache._readCurrentCacheKeys().Length);
+            Assert.AreEqual(2, cache.CurrentCacheKeysForTesting().Length);
 
             Assert.AreEqual(_segments5And6, cache.Lookup("user3"));
             Assert.AreEqual(_segments3And4, cache.Lookup("user2"));
@@ -198,7 +198,7 @@ namespace OptimizelySDK.Tests.OdpTests
             Assert.AreEqual(_segments3And4, cache.Lookup("user2"));
             Assert.AreEqual(_segments5And6, cache.Lookup("user3"));
 
-            Assert.AreEqual(3, cache._readCurrentCacheKeys().Length);
+            Assert.AreEqual(3, cache.CurrentCacheKeysForTesting().Length);
 
             cache.Reset();
 
@@ -206,7 +206,7 @@ namespace OptimizelySDK.Tests.OdpTests
             Assert.IsNull(cache.Lookup("user2"));
             Assert.IsNull(cache.Lookup("user3"));
 
-            Assert.AreEqual(0, cache._readCurrentCacheKeys().Length);
+            Assert.AreEqual(0, cache.CurrentCacheKeysForTesting().Length);
         }
     }
 }

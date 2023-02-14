@@ -15,7 +15,6 @@
  */
 
 using OptimizelySDK.Entity;
-using OptimizelySDK.Config;
 using System.Collections.Generic;
 
 namespace OptimizelySDK
@@ -71,7 +70,7 @@ namespace OptimizelySDK
         /// Configured host name for the Optimizely Data Platform. 
         /// </summary>
         string HostForOdp { get; }
-        
+
         /// <summary>
         /// Configured public key from the Optimizely Data Platform.
         /// </summary>
@@ -180,6 +179,11 @@ namespace OptimizelySDK
         /// Associative list of Integrations.
         /// </summary>
         Integration[] Integrations { get; }
+
+        /// <summary>
+        /// Array of ODP segments / audience names 
+        /// </summary>
+        string[] Segments { get; set; }
 
         //========================= Getters ===========================
 

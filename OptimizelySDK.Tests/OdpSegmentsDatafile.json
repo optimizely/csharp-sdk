@@ -1,0 +1,327 @@
+{
+  "groups": [
+  ],
+  "environmentKey": "production",
+  "rollouts": [
+    {
+      "experiments": [
+        {
+          "status": "Running",
+          "audienceConditions": [
+          ],
+          "audienceIds": [
+          ],
+          "variations": [
+            {
+              "variables": [
+              ],
+              "id": "109682",
+              "key": "off",
+              "featureEnabled": false
+            }
+          ],
+          "forcedVariations": {
+          },
+          "key": "default-rollout-36645-22702840437",
+          "layerId": "rollout-36645-22702840437",
+          "trafficAllocation": [
+            {
+              "entityId": "109682",
+              "endOfRange": 10000
+            }
+          ],
+          "id": "default-rollout-36645-22702840437"
+        }
+      ],
+      "id": "rollout-36645-22702840437"
+    }
+  ],
+  "typedAudiences": [
+    {
+      "id": "22727912729",
+      "conditions": [
+        "and",
+        [
+          "or",
+          [
+            "or",
+            {
+              "value": "ats_bug_bash_segment_gender",
+              "type": "third_party_dimension",
+              "name": "odp.audiences",
+              "match": "qualified"
+            }
+          ]
+        ]
+      ],
+      "name": "ODP Gender Audience"
+    },
+    {
+      "id": "22642853106",
+      "conditions": [
+        "and",
+        [
+          "or",
+          [
+            "or",
+            {
+              "value": "has_email_opted_out",
+              "type": "third_party_dimension",
+              "name": "odp.audiences",
+              "match": "qualified"
+            }
+          ]
+        ]
+      ],
+      "name": "Email Opt-Out Audience"
+    },
+    {
+      "id": "22722060443",
+      "conditions": [
+        "and",
+        [
+          "or",
+          [
+            "or",
+            {
+              "value": "kwanzaa",
+              "type": "custom_attribute",
+              "name": "current_holiday",
+              "match": "exact"
+            }
+          ],
+          [
+            "or",
+            {
+              "value": "ats_bug_bash_segment_has_purchased",
+              "type": "third_party_dimension",
+              "name": "odp.audiences",
+              "match": "qualified"
+            }
+          ],
+          [
+            "or",
+            {
+              "value": "ats_bug_bash_segment_gender",
+              "type": "third_party_dimension",
+              "name": "odp.audiences",
+              "match": "qualified"
+            }
+          ]
+        ]
+      ],
+      "name": "Current Holiday Purchases"
+    },
+    {
+      "id": "22713562125",
+      "conditions": [
+        "and",
+        [
+          "or",
+          [
+            "or",
+            {
+              "value": "ats_bug_bash_segment_dob",
+              "type": "third_party_dimension",
+              "name": "odp.audiences",
+              "match": "qualified"
+            }
+          ]
+        ]
+      ],
+      "name": "ODP Birthdate Audience"
+    },
+    {
+      "id": "22734824597",
+      "conditions": [
+        "and",
+        [
+          "or",
+          [
+            "not",
+            [
+              "or",
+              {
+                "value": true,
+                "type": "custom_attribute",
+                "name": "likes_presents",
+                "match": "exact"
+              }
+            ]
+          ]
+        ]
+      ],
+      "name": "Hates Presents"
+    }
+  ],
+  "projectId": "22720961022",
+  "variables": [
+  ],
+  "featureFlags": [
+    {
+      "experimentIds": [
+        "9300000149777"
+      ],
+      "rolloutId": "rollout-36645-22702840437",
+      "variables": [
+      ],
+      "id": "36645",
+      "key": "favorite_holiday"
+    }
+  ],
+  "integrations": [
+    {
+      "publicKey": "ax6Bz223fD-jpOo9u0BMg",
+      "host": "https://example.com",
+      "key": "odp"
+    }
+  ],
+  "experiments": [
+    {
+      "status": "Running",
+      "audienceConditions": [
+        "or",
+        "22722060443",
+        "22713562125",
+        "22727912729",
+        "22642853106",
+        "22734824597"
+      ],
+      "audienceIds": [
+        "22722060443",
+        "22713562125",
+        "22727912729",
+        "22642853106",
+        "22734824597"
+      ],
+      "variations": [
+        {
+          "variables": [
+          ],
+          "id": "109684",
+          "key": "christmas",
+          "featureEnabled": true
+        },
+        {
+          "variables": [
+          ],
+          "id": "109685",
+          "key": "hanukkah",
+          "featureEnabled": true
+        },
+        {
+          "variables": [
+          ],
+          "id": "109686",
+          "key": "kwanzaa",
+          "featureEnabled": true
+        }
+      ],
+      "forcedVariations": {
+      },
+      "key": "holiday_banner",
+      "layerId": "9300000114602",
+      "trafficAllocation": [
+        {
+          "entityId": "109684",
+          "endOfRange": 1966
+        },
+        {
+          "entityId": "",
+          "endOfRange": 2400
+        },
+        {
+          "entityId": "109685",
+          "endOfRange": 4366
+        },
+        {
+          "entityId": "",
+          "endOfRange": 4800
+        },
+        {
+          "entityId": "109686",
+          "endOfRange": 6767
+        },
+        {
+          "entityId": "",
+          "endOfRange": 7200
+        },
+        {
+          "entityId": "109684",
+          "endOfRange": 7500
+        },
+        {
+          "entityId": "109685",
+          "endOfRange": 7800
+        },
+        {
+          "entityId": "109686",
+          "endOfRange": 8100
+        },
+        {
+          "entityId": "109684",
+          "endOfRange": 8234
+        },
+        {
+          "entityId": "109685",
+          "endOfRange": 8368
+        },
+        {
+          "entityId": "109686",
+          "endOfRange": 8501
+        }
+      ],
+      "id": "9300000149777"
+    }
+  ],
+  "version": "4",
+  "audiences": [
+    {
+      "id": "22727912729",
+      "conditions": "[\"or\", {\"match\": \"exact\", \"name\": \"$opt_dummy_attribute\", \"type\": \"custom_attribute\", \"value\": \"$opt_dummy_value\"}]",
+      "name": "ODP Gender Audience"
+    },
+    {
+      "id": "22642853106",
+      "conditions": "[\"or\", {\"match\": \"exact\", \"name\": \"$opt_dummy_attribute\", \"type\": \"custom_attribute\", \"value\": \"$opt_dummy_value\"}]",
+      "name": "Email Opt-Out Audience"
+    },
+    {
+      "id": "22722060443",
+      "conditions": "[\"or\", {\"match\": \"exact\", \"name\": \"$opt_dummy_attribute\", \"type\": \"custom_attribute\", \"value\": \"$opt_dummy_value\"}]",
+      "name": "Current Holiday Purchases"
+    },
+    {
+      "id": "22713562125",
+      "conditions": "[\"or\", {\"match\": \"exact\", \"name\": \"$opt_dummy_attribute\", \"type\": \"custom_attribute\", \"value\": \"$opt_dummy_value\"}]",
+      "name": "ODP Birthdate Audience"
+    },
+    {
+      "id": "22734824597",
+      "conditions": "[\"or\", {\"match\": \"exact\", \"name\": \"$opt_dummy_attribute\", \"type\": \"custom_attribute\", \"value\": \"$opt_dummy_value\"}]",
+      "name": "Hates Presents"
+    },
+    {
+      "conditions": "[\"or\", {\"match\": \"exact\", \"name\": \"$opt_dummy_attribute\", \"type\": \"custom_attribute\", \"value\": \"$opt_dummy_value\"}]",
+      "id": "$opt_dummy_audience",
+      "name": "Optimizely-Generated Audience for Backwards Compatibility"
+    }
+  ],
+  "anonymizeIP": true,
+  "sdkKey": "VZEZsi7xS2Tv3nESLvFui",
+  "attributes": [
+    {
+      "id": "22696496486",
+      "key": "likes_presents"
+    },
+    {
+      "id": "22700670748",
+      "key": "current_holiday"
+    }
+  ],
+  "botFiltering": false,
+  "accountId": "21468570738",
+  "events": [
+  ],
+  "revision": "29"
+}

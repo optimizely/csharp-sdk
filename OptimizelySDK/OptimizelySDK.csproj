@@ -1,213 +1,214 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
-  <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{4DDE7FAA-110D-441C-AB3B-3F31B593E8BF}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>OptimizelySDK</RootNamespace>
-    <AssemblyName>OptimizelySDK</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile />
-    <ReleaseVersion>1.2.1</ReleaseVersion>
-    <AssemblyOriginatorKeyFile>..\keypair.snk</AssemblyOriginatorKeyFile>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
-    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup>
-    <DefineConstants Condition=" '$(TargetFrameworkVersion)' == 'v3.5'">NET35</DefineConstants>
-    <DefineConstants Condition=" '$(TargetFrameworkVersion)' == 'v4.0'">NET40</DefineConstants>
-    <!-- <DefineConstants Condition=" !$(DefineConstants.Contains(';NET')) ">$(DefineConstants);$(TargetFrameworkVersion.Replace("v", "NET").Replace(".", ""))</DefineConstants> -->
-    <!-- <DefineConstants Condition=" $(DefineConstants.Contains(';NET')) ">$(DefineConstants.Remove($(DefineConstants.LastIndexOf(";NET"))));$(TargetFrameworkVersion.Replace("v", "NET").Replace(".", ""))</DefineConstants> -->
-  </PropertyGroup>
-  <ItemGroup>
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="NJsonSchema, Version=8.30.6304.31883, Culture=neutral, PublicKeyToken=c2f9c3bdfae56102, processorArchitecture=MSIL">
-      <HintPath>..\packages\NJsonSchema.8.30.6304.31883\lib\net45\NJsonSchema.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Configuration" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Net.Http" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
-    <Reference Include="MurmurHash">
-      <HintPath>..\packages\murmurhash-signed.1.0.2\lib\net45\MurmurHash.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="AudienceConditions\AndCondition.cs" />
-    <Compile Include="AudienceConditions\AudienceIdCondition.cs" />
-    <Compile Include="AudienceConditions\EmptyCondition.cs" />
-    <Compile Include="AudienceConditions\ICondition.cs" />
-    <Compile Include="AudienceConditions\NotCondition.cs" />
-    <Compile Include="AudienceConditions\OrCondition.cs" />
-    <Compile Include="Bucketing\Bucketer.cs" />
-    <Compile Include="Bucketing\Decision.cs" />
-    <Compile Include="ClientConfigHandler.cs" />
-    <Compile Include="Entity\Attribute.cs" />
-    <Compile Include="Entity\Audience.cs" />
-    <Compile Include="AudienceConditions\BaseCondition.cs" />
-    <Compile Include="Entity\Entity.cs" />
-    <Compile Include="Entity\Event.cs" />
-    <Compile Include="Entity\EventTags.cs" />
-    <Compile Include="Entity\Experiment.cs" />
-    <Compile Include="Entity\FeatureDecision.cs" />
-    <Compile Include="Entity\FeatureFlag.cs" />
-    <Compile Include="Entity\FeatureVariable.cs" />
-    <Compile Include="Entity\FeatureVariableUsage.cs" />
-    <Compile Include="Entity\ForcedVariation.cs" />
-    <Compile Include="Entity\Group.cs" />
-    <Compile Include="Entity\IdKeyEntity.cs" />
-    <Compile Include="Entity\Integration.cs" />
-    <Compile Include="Event\Entity\DecisionMetadata.cs" />
-    <Compile Include="Odp\Constants.cs" />
-    <Compile Include="Odp\Entity\Audience.cs" />
-    <Compile Include="Odp\Entity\Customer.cs" />
-    <Compile Include="Odp\Entity\Data.cs" />
-    <Compile Include="Odp\Entity\Edge.cs" />
-    <Compile Include="Odp\Entity\Error.cs" />
-    <Compile Include="Odp\Entity\Location.cs" />
-    <Compile Include="Odp\Entity\Extension.cs" />
-    <Compile Include="Odp\Entity\Node.cs" />
-    <Compile Include="Odp\Entity\OdpEvent.cs" />
-    <Compile Include="Odp\Entity\Response.cs" />
-    <Compile Include="Odp\Enums.cs" />
-    <Compile Include="Odp\IOdpManager.cs" />
-    <Compile Include="Odp\IOdpSegmentManager.cs" />
-    <Compile Include="Odp\OdpManager.cs" />
-    <Compile Include="Odp\OdpSegmentApiManager.cs" />
-    <Compile Include="Odp\IOdpSegmentApiManager.cs" />
-    <Compile Include="Odp\ICache.cs" />
-    <Compile Include="Odp\IOdpEventApiManager.cs" />
-    <Compile Include="Odp\IOdpEventManager.cs" />
-    <Compile Include="Odp\LruCache.cs" />
-    <Compile Include="Odp\OdpConfig.cs" />
-    <Compile Include="Odp\OdpEventManager.cs" />
-    <Compile Include="Odp\OdpEventApiManager.cs" />
-    <Compile Include="Odp\OdpSegmentManager.cs" />
-    <Compile Include="OptimizelyDecisions\DecisionMessage.cs" />
-    <Compile Include="OptimizelyDecisions\DecisionReasons.cs" />
-    <Compile Include="OptimizelyDecisions\OptimizelyDecideOption.cs" />
-    <Compile Include="OptimizelyDecisions\OptimizelyDecision.cs" />
-    <Compile Include="OptimizelyForcedDecision.cs" />
-    <Compile Include="ForcedDecisionsStore.cs" />
-    <Compile Include="OptimizelyUserContext.cs" />
-    <Compile Include="OptimizelyJSON.cs" />
-    <Compile Include="Entity\Rollout.cs" />
-    <Compile Include="Entity\TrafficAllocation.cs" />
-    <Compile Include="Entity\UserAttributes.cs" />
-    <Compile Include="Entity\Variation.cs" />
-    <Compile Include="ErrorHandler\DefaultErrorHandler.cs" />
-    <Compile Include="ErrorHandler\IErrorHandler.cs" />
-    <Compile Include="ErrorHandler\NoOpErrorHandler.cs" />
-    <Compile Include="Event\BatchEventProcessor.cs" />
-    <Compile Include="Event\Builder\EventBuilder.cs" />
-    <Compile Include="Event\Builder\Params.cs" />
-    <Compile Include="Event\Dispatcher\DefaultEventDispatcher.cs" />
-    <Compile Include="Event\Dispatcher\WebRequestEventDispatcher35.cs" />
-    <Compile Include="Event\Dispatcher\HttpClientEventDispatcher45.cs" />
-    <Compile Include="Event\Dispatcher\IEventDispatcher.cs" />
-    <Compile Include="Event\EventFactory.cs" />
-    <Compile Include="Event\EventProcessor.cs" />
-    <Compile Include="Event\ForwardingEventProcessor.cs" />
-    <Compile Include="Event\UserEventFactory.cs" />
-    <Compile Include="Event\LogEvent.cs" />
-    <Compile Include="Exceptions\OptimizelyException.cs" />
-    <Compile Include="IOptimizely.cs" />
-    <Compile Include="Logger\DefaultLogger.cs" />
-    <Compile Include="Logger\ILogger.cs" />
-    <Compile Include="Logger\NoOpLogger.cs" />
-    <Compile Include="Notifications\NotificationCenter.cs" />
-    <Compile Include="Optimizely.cs" />
-    <Compile Include="Bucketing\UserProfile.cs" />
-    <Compile Include="OptimizelyDecisionContext.cs" />
-    <Compile Include="OptlyConfig\IOptimizelyConfigManager.cs" />
-    <Compile Include="OptlyConfig\OptimizelyEvent.cs" />
-    <Compile Include="OptlyConfig\OptimizelyAttribute.cs" />
-    <Compile Include="OptlyConfig\OptimizelyAudience.cs" />
-    <Compile Include="OptlyConfig\OptimizelyConfig.cs" />
-    <Compile Include="OptlyConfig\OptimizelyConfigService.cs" />
-    <Compile Include="OptlyConfig\OptimizelyExperiment.cs" />
-    <Compile Include="OptlyConfig\OptimizelyFeature.cs" />
-    <Compile Include="OptlyConfig\OptimizelyVariable.cs" />
-    <Compile Include="OptlyConfig\OptimizelyVariation.cs" />
-    <Compile Include="Utils\AttributeMatchTypes.cs" />
-    <Compile Include="Utils\CollectionExtensions.cs" />
-    <Compile Include="Utils\ConditionParser.cs" />
-    <Compile Include="Utils\DecisionInfoTypes.cs" />
-    <Compile Include="Utils\EventTagUtils.cs" />
-    <Compile Include="Bucketing\UserProfileUtil.cs" />
-    <Compile Include="Utils\ExperimentUtils.cs" />
-    <Compile Include="Utils\ControlAttributes.cs" />
-    <Compile Include="Utils\ExceptionExtensions.cs" />
-    <Compile Include="Utils\DateTimeUtils.cs" />
-    <Compile Include="Utils\Validator.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Utils\ConfigParser.cs" />
-    <Compile Include="Utils\Schema.cs" />
-    <Compile Include="Bucketing\UserProfileService.cs" />
-    <Compile Include="Bucketing\DecisionService.cs" />
-    <Compile Include="ProjectConfig.cs" />
-    <Compile Include="Config\DatafileProjectConfig.cs" />
-    <Compile Include="Config\ProjectConfigManager.cs" />
-    <Compile Include="Config\PollingProjectConfigManager.cs" />
-    <Compile Include="Config\HttpProjectConfigManager.cs" />
-    <Compile Include="Config\FallbackProjectConfigManager.cs" />
-    <Compile Include="OptimizelyFactory.cs" />
-    <Compile Include="Event\Entity\UserEvent.cs" />
-    <Compile Include="Event\Entity\ConversionEvent.cs" />
-    <Compile Include="Event\Entity\ImpressionEvent.cs" />
-    <Compile Include="Event\Entity\VisitorAttribute.cs" />
-    <Compile Include="Event\Entity\Visitor.cs" />
-    <Compile Include="Event\Entity\Decision.cs" />
-    <Compile Include="Event\Entity\Snapshot.cs" />
-    <Compile Include="Event\Entity\SnapshotEvent.cs" />
-    <Compile Include="Event\Entity\EventBatch.cs" />
-    <Compile Include="Event\Entity\EventContext.cs" />
-    <Compile Include="AudienceConditions\SemanticVersion.cs" />
-    <Compile Include="Entity\Result.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Utils\schema.json" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
+    <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+    <PropertyGroup>
+        <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+        <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+        <ProjectGuid>{4DDE7FAA-110D-441C-AB3B-3F31B593E8BF}</ProjectGuid>
+        <OutputType>Library</OutputType>
+        <AppDesignerFolder>Properties</AppDesignerFolder>
+        <RootNamespace>OptimizelySDK</RootNamespace>
+        <AssemblyName>OptimizelySDK</AssemblyName>
+        <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+        <FileAlignment>512</FileAlignment>
+        <TargetFrameworkProfile />
+        <ReleaseVersion>1.2.1</ReleaseVersion>
+        <AssemblyOriginatorKeyFile>..\keypair.snk</AssemblyOriginatorKeyFile>
+    </PropertyGroup>
+    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+        <DebugSymbols>true</DebugSymbols>
+        <DebugType>full</DebugType>
+        <Optimize>false</Optimize>
+        <OutputPath>bin\Debug\</OutputPath>
+        <DefineConstants>TRACE;DEBUG</DefineConstants>
+        <ErrorReport>prompt</ErrorReport>
+        <WarningLevel>4</WarningLevel>
+        <Prefer32Bit>false</Prefer32Bit>
+        <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    </PropertyGroup>
+    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+        <DebugType>pdbonly</DebugType>
+        <Optimize>true</Optimize>
+        <OutputPath>bin\Release\</OutputPath>
+        <DefineConstants>TRACE</DefineConstants>
+        <ErrorReport>prompt</ErrorReport>
+        <WarningLevel>4</WarningLevel>
+        <Prefer32Bit>false</Prefer32Bit>
+    </PropertyGroup>
+    <PropertyGroup>
+        <DefineConstants Condition=" '$(TargetFrameworkVersion)' == 'v3.5'">NET35</DefineConstants>
+        <DefineConstants Condition=" '$(TargetFrameworkVersion)' == 'v4.0'">NET40</DefineConstants>
+        <!-- <DefineConstants Condition=" !$(DefineConstants.Contains(';NET')) ">$(DefineConstants);$(TargetFrameworkVersion.Replace("v", "NET").Replace(".", ""))</DefineConstants> -->
+        <!-- <DefineConstants Condition=" $(DefineConstants.Contains(';NET')) ">$(DefineConstants.Remove($(DefineConstants.LastIndexOf(";NET"))));$(TargetFrameworkVersion.Replace("v", "NET").Replace(".", ""))</DefineConstants> -->
+    </PropertyGroup>
+    <ItemGroup>
+        <Reference Include="Microsoft.CSharp" />
+        <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+            <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+        <Reference Include="NJsonSchema, Version=8.30.6304.31883, Culture=neutral, PublicKeyToken=c2f9c3bdfae56102, processorArchitecture=MSIL">
+            <HintPath>..\packages\NJsonSchema.8.30.6304.31883\lib\net45\NJsonSchema.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+        <Reference Include="System" />
+        <Reference Include="System.Configuration" />
+        <Reference Include="System.Core" />
+        <Reference Include="System.Net.Http" />
+        <Reference Include="System.Xml.Linq" />
+        <Reference Include="System.Data.DataSetExtensions" />
+        <Reference Include="System.Data" />
+        <Reference Include="System.Xml" />
+        <Reference Include="MurmurHash">
+            <HintPath>..\packages\murmurhash-signed.1.0.2\lib\net45\MurmurHash.dll</HintPath>
+        </Reference>
+    </ItemGroup>
+    <ItemGroup>
+        <Compile Include="AudienceConditions\AndCondition.cs" />
+        <Compile Include="AudienceConditions\AudienceIdCondition.cs" />
+        <Compile Include="AudienceConditions\EmptyCondition.cs" />
+        <Compile Include="AudienceConditions\ICondition.cs" />
+        <Compile Include="AudienceConditions\NotCondition.cs" />
+        <Compile Include="AudienceConditions\OrCondition.cs" />
+        <Compile Include="Bucketing\Bucketer.cs" />
+        <Compile Include="Bucketing\Decision.cs" />
+        <Compile Include="ClientConfigHandler.cs" />
+        <Compile Include="Entity\Attribute.cs" />
+        <Compile Include="Entity\Audience.cs" />
+        <Compile Include="AudienceConditions\BaseCondition.cs" />
+        <Compile Include="Entity\Entity.cs" />
+        <Compile Include="Entity\Event.cs" />
+        <Compile Include="Entity\EventTags.cs" />
+        <Compile Include="Entity\Experiment.cs" />
+        <Compile Include="Entity\FeatureDecision.cs" />
+        <Compile Include="Entity\FeatureFlag.cs" />
+        <Compile Include="Entity\FeatureVariable.cs" />
+        <Compile Include="Entity\FeatureVariableUsage.cs" />
+        <Compile Include="Entity\ForcedVariation.cs" />
+        <Compile Include="Entity\Group.cs" />
+        <Compile Include="Entity\IdKeyEntity.cs" />
+        <Compile Include="Entity\Integration.cs" />
+        <Compile Include="Event\Entity\DecisionMetadata.cs" />
+        <Compile Include="Odp\Constants.cs" />
+        <Compile Include="Odp\Entity\Audience.cs" />
+        <Compile Include="Odp\Entity\Customer.cs" />
+        <Compile Include="Odp\Entity\Data.cs" />
+        <Compile Include="Odp\Entity\Edge.cs" />
+        <Compile Include="Odp\Entity\Error.cs" />
+        <Compile Include="Odp\Entity\Location.cs" />
+        <Compile Include="Odp\Entity\Extension.cs" />
+        <Compile Include="Odp\Entity\Node.cs" />
+        <Compile Include="Odp\Entity\OdpEvent.cs" />
+        <Compile Include="Odp\Entity\Response.cs" />
+        <Compile Include="Odp\Enums.cs" />
+        <Compile Include="Odp\IOdpManager.cs" />
+        <Compile Include="Odp\IOdpSegmentManager.cs" />
+        <Compile Include="Odp\OdpManager.cs" />
+        <Compile Include="Odp\OdpSegmentApiManager.cs" />
+        <Compile Include="Odp\IOdpSegmentApiManager.cs" />
+        <Compile Include="Odp\ICache.cs" />
+        <Compile Include="Odp\IOdpEventApiManager.cs" />
+        <Compile Include="Odp\IOdpEventManager.cs" />
+        <Compile Include="Odp\LruCache.cs" />
+        <Compile Include="Odp\OdpConfig.cs" />
+        <Compile Include="Odp\OdpEventManager.cs" />
+        <Compile Include="Odp\OdpEventApiManager.cs" />
+        <Compile Include="Odp\OdpSegmentManager.cs" />
+        <Compile Include="OptimizelyDecisions\DecisionMessage.cs" />
+        <Compile Include="OptimizelyDecisions\DecisionReasons.cs" />
+        <Compile Include="OptimizelyDecisions\OptimizelyDecideOption.cs" />
+        <Compile Include="OptimizelyDecisions\OptimizelyDecision.cs" />
+        <Compile Include="OptimizelyForcedDecision.cs" />
+        <Compile Include="ForcedDecisionsStore.cs" />
+        <Compile Include="OptimizelyUserContext.cs" />
+        <Compile Include="OptimizelyJSON.cs" />
+        <Compile Include="Entity\Rollout.cs" />
+        <Compile Include="Entity\TrafficAllocation.cs" />
+        <Compile Include="Entity\UserAttributes.cs" />
+        <Compile Include="Entity\Variation.cs" />
+        <Compile Include="ErrorHandler\DefaultErrorHandler.cs" />
+        <Compile Include="ErrorHandler\IErrorHandler.cs" />
+        <Compile Include="ErrorHandler\NoOpErrorHandler.cs" />
+        <Compile Include="Event\BatchEventProcessor.cs" />
+        <Compile Include="Event\Builder\EventBuilder.cs" />
+        <Compile Include="Event\Builder\Params.cs" />
+        <Compile Include="Event\Dispatcher\DefaultEventDispatcher.cs" />
+        <Compile Include="Event\Dispatcher\WebRequestEventDispatcher35.cs" />
+        <Compile Include="Event\Dispatcher\HttpClientEventDispatcher45.cs" />
+        <Compile Include="Event\Dispatcher\IEventDispatcher.cs" />
+        <Compile Include="Event\EventFactory.cs" />
+        <Compile Include="Event\EventProcessor.cs" />
+        <Compile Include="Event\ForwardingEventProcessor.cs" />
+        <Compile Include="Event\UserEventFactory.cs" />
+        <Compile Include="Event\LogEvent.cs" />
+        <Compile Include="Exceptions\OptimizelyException.cs" />
+        <Compile Include="IOptimizely.cs" />
+        <Compile Include="Logger\DefaultLogger.cs" />
+        <Compile Include="Logger\ILogger.cs" />
+        <Compile Include="Logger\NoOpLogger.cs" />
+        <Compile Include="Notifications\NotificationCenter.cs" />
+        <Compile Include="Optimizely.cs" />
+        <Compile Include="Bucketing\UserProfile.cs" />
+        <Compile Include="OptimizelyDecisionContext.cs" />
+        <Compile Include="OptlyConfig\IOptimizelyConfigManager.cs" />
+        <Compile Include="OptlyConfig\OptimizelyEvent.cs" />
+        <Compile Include="OptlyConfig\OptimizelyAttribute.cs" />
+        <Compile Include="OptlyConfig\OptimizelyAudience.cs" />
+        <Compile Include="OptlyConfig\OptimizelyConfig.cs" />
+        <Compile Include="OptlyConfig\OptimizelyConfigService.cs" />
+        <Compile Include="OptlyConfig\OptimizelyExperiment.cs" />
+        <Compile Include="OptlyConfig\OptimizelyFeature.cs" />
+        <Compile Include="OptlyConfig\OptimizelyVariable.cs" />
+        <Compile Include="OptlyConfig\OptimizelyVariation.cs" />
+        <Compile Include="Utils\AttributeMatchTypes.cs" />
+        <Compile Include="Utils\CollectionExtensions.cs" />
+        <Compile Include="Utils\ConditionParser.cs" />
+        <Compile Include="Utils\DecisionInfoTypes.cs" />
+        <Compile Include="Utils\EventTagUtils.cs" />
+        <Compile Include="Bucketing\UserProfileUtil.cs" />
+        <Compile Include="Utils\ExperimentUtils.cs" />
+        <Compile Include="Utils\ControlAttributes.cs" />
+        <Compile Include="Utils\ExceptionExtensions.cs" />
+        <Compile Include="Utils\DateTimeUtils.cs" />
+        <Compile Include="Utils\Validator.cs" />
+        <Compile Include="Properties\AssemblyInfo.cs" />
+        <Compile Include="Utils\ConfigParser.cs" />
+        <Compile Include="Utils\Schema.cs" />
+        <Compile Include="Bucketing\UserProfileService.cs" />
+        <Compile Include="Bucketing\DecisionService.cs" />
+        <Compile Include="ProjectConfig.cs" />
+        <Compile Include="Config\DatafileProjectConfig.cs" />
+        <Compile Include="Config\ProjectConfigManager.cs" />
+        <Compile Include="Config\PollingProjectConfigManager.cs" />
+        <Compile Include="Config\HttpProjectConfigManager.cs" />
+        <Compile Include="Config\FallbackProjectConfigManager.cs" />
+        <Compile Include="OptimizelyFactory.cs" />
+        <Compile Include="Event\Entity\UserEvent.cs" />
+        <Compile Include="Event\Entity\ConversionEvent.cs" />
+        <Compile Include="Event\Entity\ImpressionEvent.cs" />
+        <Compile Include="Event\Entity\VisitorAttribute.cs" />
+        <Compile Include="Event\Entity\Visitor.cs" />
+        <Compile Include="Event\Entity\Decision.cs" />
+        <Compile Include="Event\Entity\Snapshot.cs" />
+        <Compile Include="Event\Entity\SnapshotEvent.cs" />
+        <Compile Include="Event\Entity\EventBatch.cs" />
+        <Compile Include="Event\Entity\EventContext.cs" />
+        <Compile Include="AudienceConditions\SemanticVersion.cs" />
+        <Compile Include="Entity\Result.cs" />
+        <Compile Include="Notifications\NotificationCenterRegistry.cs" />
+    </ItemGroup>
+    <ItemGroup>
+        <EmbeddedResource Include="Utils\schema.json" />
+    </ItemGroup>
+    <ItemGroup>
+        <None Include="packages.config" />
+    </ItemGroup>
+    <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+    <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+         Other similar extension points exist, see Microsoft.Common.targets.
+    <Target Name="BeforeBuild">
+    </Target>
+    <Target Name="AfterBuild">
+    </Target>
+    -->
 </Project>

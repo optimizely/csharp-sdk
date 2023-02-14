@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2022, Optimizely
+ * Copyright 2022-2023, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,7 @@ using System.Linq;
 
 namespace OptimizelySDK.Odp
 {
-    public class LruCache<T> : ICache<T>
-        where T : class
+    public class LruCache<T> : ICache<T> where T : class
     {
         /// <summary>
         /// The maximum number of elements that should be stored
@@ -193,13 +192,11 @@ namespace OptimizelySDK.Odp
         }
 
         /// <summary>
-        /// Read the current cache index/linked list for unit testing
+        /// For Testing Only: thread-safe retrieval of current cache keys 
         /// </summary>
-        /// <returns></returns>
-        public string[] _readCurrentCacheKeys()
+        /// <returns>Current cache keys</returns>
+        internal string[] CurrentCacheKeysForTesting()
         {
-            _logger.Log(LogLevel.WARN, "_readCurrentCacheKeys used for non-testing purpose");
-
             string[] cacheKeys;
             lock (_mutex)
             {
@@ -208,5 +205,15 @@ namespace OptimizelySDK.Odp
 
             return cacheKeys;
         }
+
+        /// <summary>
+        /// For Testing Only: Retrieve the current cache timout
+        /// </summary>
+        internal TimeSpan TimeoutForTesting { get { return _timeout; } }
+
+        /// <summary>
+        /// For Testing Only: Retrieve hte current maximum cache size
+        /// </summary>
+        internal int MaxSizeForTesting { get { return _maxSize; } }
     }
 }

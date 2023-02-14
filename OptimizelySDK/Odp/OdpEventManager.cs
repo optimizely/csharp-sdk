@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2022, Optimizely
+ * Copyright 2022-2023, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -92,6 +92,11 @@ namespace OptimizelySDK.Odp
         private Dictionary<string, object> _commonData;
 
         /// <summary>
+        /// Indicates if OdpEventManager should start upon Build() and UpdateSettings()
+        /// </summary>
+        private bool _autoStart;
+
+        /// <summary>
         /// Clear all entries from the queue
         /// </summary>
         private void DropQueue()
@@ -107,7 +112,7 @@ namespace OptimizelySDK.Odp
         /// </summary>
         public void Start()
         {
-            if (!_odpConfig.IsReady())
+            if (_odpConfig == null || !_odpConfig.IsReady())
             {
                 _logger.Log(LogLevel.WARN, Constants.ODP_NOT_INTEGRATED_MESSAGE);
 
@@ -141,35 +146,45 @@ namespace OptimizelySDK.Odp
             {
                 while (true)
                 {
-                    if (DateTime.Now.MillisecondsSince1970() > _flushingIntervalDeadline)
+                    object item;
+                    // If batch has events, set the timeout to remaining time for flush interval,
+                    //      otherwise wait for the new event indefinitely
+                    if (_currentBatch.Count > 0)
                     {
-                        _logger.Log(LogLevel.DEBUG, $"Flushing queue.");
-                        FlushQueue();
+                        _eventQueue.TryTake(out item, (int)(_flushingIntervalDeadline - DateTime.Now.MillisecondsSince1970()));
+                    }
+                    else
+                    {
+                        item = _eventQueue.Take();
+                        Thread.Sleep(1); // TODO: need to figure out why this is allowing item to read shutdown signal.
                     }
 
-                    if (!_eventQueue.TryTake(out object item, 50))
+                    if (item == null)
                     {
-                        Thread.Sleep(50);
+                        // null means no new events received and flush interval is over, dispatch whatever is in the batch.
+                        if (_currentBatch.Count != 0)
+                        {
+                            _logger.Log(LogLevel.DEBUG, $"Flushing queue.");
+                            FlushQueue();
+                        }
                         continue;
                     }
-
-                    if (item == _shutdownSignal)
+                    else if (item == _shutdownSignal)
                     {
                         _logger.Log(LogLevel.INFO, "Received shutdown signal.");
                         break;
                     }
-
-                    if (item == _flushSignal)
+                    else if (item == _flushSignal)
                     {
                         _logger.Log(LogLevel.DEBUG, "Received flush signal.");
                         FlushQueue();
                         continue;
                     }
-
-                    if (item is OdpEvent odpEvent)
+                    else if (item is OdpEvent odpEvent)
                     {
                         AddToBatch(odpEvent);
                     }
+
                 }
             }
             catch (InvalidOperationException ioe)
@@ -250,7 +265,7 @@ namespace OptimizelySDK.Odp
 
             _eventQueue.Add(_shutdownSignal);
 
-            if (!_executionThread.Join(_timeoutInterval))
+            if (_executionThread != null && !_executionThread.Join(_timeoutInterval))
             {
                 _logger.Log(LogLevel.ERROR,
                     $"Timeout exceeded attempting to close for {_timeoutInterval.Milliseconds} ms");
@@ -266,7 +281,7 @@ namespace OptimizelySDK.Odp
         /// <param name="odpEvent">Event to enqueue</param>
         public void SendEvent(OdpEvent odpEvent)
         {
-            if (!_odpConfig.IsReady())
+            if (_odpConfig == null || !_odpConfig.IsReady())
             {
                 _logger.Log(LogLevel.WARN, Constants.ODP_NOT_INTEGRATED_MESSAGE);
                 return;
@@ -334,9 +349,7 @@ namespace OptimizelySDK.Odp
         {
             var identifiers = new Dictionary<string, string>
             {
-                {
-                    OdpUserKeyType.FS_USER_ID.ToString(), userId
-                },
+                { OdpUserKeyType.FS_USER_ID.ToString(), userId },
             };
 
             var odpEvent = new OdpEvent(Constants.ODP_EVENT_TYPE, "identified", identifiers);
@@ -344,12 +357,24 @@ namespace OptimizelySDK.Odp
         }
 
         /// <summary>
-        /// Update ODP configuration settings
+        /// Update ODP configuration settings with a implied flush of the queued events
         /// </summary>
         /// <param name="odpConfig">Configuration object containing new values</param>
         public void UpdateSettings(OdpConfig odpConfig)
         {
+            if (odpConfig == null)
+            {
+                return;
+            }
+
+            Flush();
+
             _odpConfig = odpConfig;
+
+            if (_autoStart)
+            {
+                Start();
+            }
         }
 
         /// <summary>
@@ -402,56 +427,84 @@ namespace OptimizelySDK.Odp
             private BlockingCollection<object> _eventQueue =
                 new BlockingCollection<object>(Constants.DEFAULT_QUEUE_CAPACITY);
 
-            private OdpConfig _odpConfig;
             private IOdpEventApiManager _odpEventApiManager;
-            private int _batchSize;
             private TimeSpan _flushInterval;
             private TimeSpan _timeoutInterval;
             private ILogger _logger;
             private IErrorHandler _errorHandler;
+            private bool? _autoStart;
 
+            /// <summary>
+            /// Indicates if OdpEventManager should start upon Build() and UpdateSettings()
+            /// </summary>
+            /// <param name="autoStart"></param>
+            /// <returns></returns>
+            public Builder WithAutoStart(bool autoStart)
+            {
+                _autoStart = autoStart;
+                return this;
+            }
+
+            /// <summary>
+            /// Provide an Event Queue
+            /// </summary>
+            /// <param name="eventQueue">Concrete implementation of an event queue</param>
+            /// <returns>Current Builder instance</returns>
             public Builder WithEventQueue(BlockingCollection<object> eventQueue)
             {
                 _eventQueue = eventQueue;
                 return this;
             }
 
-            public Builder WithOdpConfig(OdpConfig odpConfig)
-            {
-                _odpConfig = odpConfig;
-                return this;
-            }
-
+            /// <summary>
+            /// Provide an ODP Event Manager API
+            /// </summary>
+            /// <param name="odpEventApiManager">Concrete implementation of an Event API Manager</param>
+            /// <returns>Current Builder instance</returns>
             public Builder WithOdpEventApiManager(IOdpEventApiManager odpEventApiManager)
             {
                 _odpEventApiManager = odpEventApiManager;
                 return this;
             }
 
-            public Builder WithBatchSize(int batchSize)
-            {
-                _batchSize = batchSize;
-                return this;
-            }
-
+            /// <summary>
+            /// Provide an flush interval
+            /// </summary>
+            /// <param name="flushInterval">Frequency to flush the queue</param>
+            /// <returns>Current Builder instance</returns>
             public Builder WithFlushInterval(TimeSpan flushInterval)
             {
                 _flushInterval = flushInterval;
                 return this;
             }
 
+            /// <summary>
+            /// Provide a timeout to wait for network communication
+            /// </summary>
+            /// <param name="timeout">Span to allow for communication timeout</param>
+            /// <returns>Current Builder instance</returns>
             public Builder WithTimeoutInterval(TimeSpan timeout)
             {
                 _timeoutInterval = timeout;
                 return this;
             }
 
+            /// <summary>
+            /// Provide a logger to record code events
+            /// </summary>
+            /// <param name="logger">Concrete implementation of a logger</param>
+            /// <returns>Current Builder instance</returns>
             public Builder WithLogger(ILogger logger = null)
             {
                 _logger = logger;
                 return this;
             }
 
+            /// <summary>
+            /// Provide an error handler
+            /// </summary>
+            /// <param name="errorHandler">Concrete implementation of an error handler</param>
+            /// <returns>Current Builder instance</returns>
             public Builder WithErrorHandler(IErrorHandler errorHandler = null)
             {
                 _errorHandler = errorHandler;
@@ -461,24 +514,24 @@ namespace OptimizelySDK.Odp
             /// <summary>
             /// Build OdpEventManager instance using collected parameters
             /// </summary>
-            /// <param name="startImmediately">Should start event processor upon initialization</param>
             /// <returns>OdpEventProcessor instance</returns>
-            public OdpEventManager Build(bool startImmediately = true)
+            public OdpEventManager Build()
             {
                 var manager = new OdpEventManager();
                 manager._eventQueue = _eventQueue;
-                manager._odpConfig = _odpConfig;
                 manager._odpEventApiManager = _odpEventApiManager;
-                manager._batchSize =
-                    _batchSize < 1 ? Constants.DEFAULT_BATCH_SIZE : _batchSize;
-                manager._flushInterval = _flushInterval <= TimeSpan.FromSeconds(0) ?
-                    Constants.DEFAULT_FLUSH_INTERVAL :
-                    _flushInterval;
-                manager._timeoutInterval = _timeoutInterval <= TimeSpan.FromSeconds(0) ?
+                manager._flushInterval = (_flushInterval > TimeSpan.Zero) ?
+                    _flushInterval :
+                    Constants.DEFAULT_FLUSH_INTERVAL;
+                manager._batchSize = (_flushInterval == TimeSpan.Zero) ?
+                    1 :
+                    Constants.DEFAULT_BATCH_SIZE;
+                manager._timeoutInterval = _timeoutInterval <= TimeSpan.Zero ?
                     Constants.DEFAULT_TIMEOUT_INTERVAL :
                     _timeoutInterval;
                 manager._logger = _logger ?? new NoOpLogger();
                 manager._errorHandler = _errorHandler ?? new NoOpErrorHandler();
+                manager._autoStart = _autoStart ?? true;
 
                 manager._validOdpDataTypes = new List<string>()
                 {
@@ -496,21 +549,13 @@ namespace OptimizelySDK.Odp
 
                 manager._commonData = new Dictionary<string, object>
                 {
-                    {
-                        "idempotence_id", Guid.NewGuid()
-                    },
-                    {
-                        "data_source_type", "sdk"
-                    },
-                    {
-                        "data_source", Optimizely.SDK_TYPE
-                    },
-                    {
-                        "data_source_version", Optimizely.SDK_VERSION
-                    },
+                    { "idempotence_id", Guid.NewGuid() },
+                    { "data_source_type", "sdk" },
+                    { "data_source", Optimizely.SDK_TYPE },
+                    { "data_source_version", Optimizely.SDK_VERSION },
                 };
 
-                if (startImmediately)
+                if (manager._autoStart)
                 {
                     manager.Start();
                 }
@@ -519,9 +564,20 @@ namespace OptimizelySDK.Odp
             }
         }
 
-        public OdpConfig _readOdpConfigForTesting()
-        {
-            return _odpConfig;
-        }
+        /// <summary>
+        /// For Testing Only: Read the current ODP config
+        /// </summary>
+        /// <returns>Current ODP settings</returns>
+        internal OdpConfig OdpConfigForTesting { get { return _odpConfig; } }
+
+        /// <summary>
+        /// For Testing Only: Read the current flush interval
+        /// </summary>
+        internal TimeSpan FlushIntervalForTesting { get { return _flushInterval; } }
+
+        /// <summary>
+        /// For Testing Only: Read the current timeout interval
+        /// </summary>
+        internal TimeSpan TimeoutIntervalForTesting { get { return _timeoutInterval; } }
     }
 }

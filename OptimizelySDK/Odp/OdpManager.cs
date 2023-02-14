@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2022 Optimizely
+ * Copyright 2022-2023 Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,6 +52,8 @@ namespace OptimizelySDK.Odp
         /// </summary>
         private ILogger _logger;
 
+        private OdpManager() { }
+
         /// <summary>
         /// Update the settings being used for ODP configuration and reset/restart dependent processes
         /// </summary>
@@ -62,7 +64,7 @@ namespace OptimizelySDK.Odp
         public bool UpdateSettings(string apiKey, string apiHost, List<string> segmentsToCheck)
         {
             var newConfig = new OdpConfig(apiKey, apiHost, segmentsToCheck);
-            if (_odpConfig.Equals(newConfig))
+            if (_odpConfig != null && _odpConfig.Equals(newConfig))
             {
                 return false;
             }
@@ -91,7 +93,7 @@ namespace OptimizelySDK.Odp
                 return null;
             }
 
-            return SegmentManager.FetchQualifiedSegments(userId, options).ToArray();
+            return SegmentManager.FetchQualifiedSegments(userId, options)?.ToArray();
         }
 
         /// <summary>
@@ -147,60 +149,82 @@ namespace OptimizelySDK.Odp
         /// </summary>
         public class Builder
         {
-            private OdpConfig _odpConfig;
             private IOdpEventManager _eventManager;
             private IOdpSegmentManager _segmentManager;
-            private int _cacheSize;
-            private int _cacheTimeoutSeconds;
             private ILogger _logger;
             private IErrorHandler _errorHandler;
             private ICache<List<string>> _cache;
+            private int? _maxSize;
+            private TimeSpan? _itemTimeout;
 
+            /// <summary>
+            /// Provide a Segment Manager
+            /// </summary>
+            /// <param name="segmentManager">Concrete implementation of a SegmentManager</param>
+            /// <returns>Current Builder instance</returns>
             public Builder WithSegmentManager(IOdpSegmentManager segmentManager)
             {
                 _segmentManager = segmentManager;
                 return this;
             }
 
+            /// <summary>
+            /// Provide an Event Manager
+            /// </summary>
+            /// <param name="eventManager">Concrete implementation of an Event Manager</param>
+            /// <returns>Current Builder instance</returns>
             public Builder WithEventManager(IOdpEventManager eventManager)
             {
                 _eventManager = eventManager;
                 return this;
             }
 
-            public Builder WithOdpConfig(OdpConfig odpConfig)
-            {
-                _odpConfig = odpConfig;
-                return this;
-            }
-
-            public Builder WithCacheSize(int cacheSize)
-            {
-                _cacheSize = cacheSize;
-                return this;
-            }
-
-            public Builder WithCacheTimeout(int seconds)
-            {
-                _cacheTimeoutSeconds = seconds;
-                return this;
-            }
-
+            /// <summary>
+            /// Provide a handler for logging
+            /// </summary>
+            /// <param name="logger">Concrete implementation of a log handler</param>
+            /// <returns>Current Builder instance</returns>
             public Builder WithLogger(ILogger logger = null)
             {
                 _logger = logger;
                 return this;
             }
 
+            /// <summary>
+            /// Provide handler for errors
+            /// </summary>
+            /// <param name="errorHandler">Concrete implementation of an error handler</param>
+            /// <returns>Current Builder instance</returns>
             public Builder WithErrorHandler(IErrorHandler errorHandler = null)
             {
                 _errorHandler = errorHandler;
                 return this;
             }
 
-            public Builder WithCacheImplementation(ICache<List<string>> cache)
+            /// <summary>
+            /// Provide a custom caching mechanism
+            /// </summary>
+            /// <param name="cache">Concrete implementation of a cache</param>
+            /// <returns>Current Builder instance</returns>
+            public Builder WithCache(ICache<List<string>> cache)
             {
                 _cache = cache;
+                return this;
+            }
+
+            /// <summary>
+            /// Provide a specification for the default cache mechanism
+            /// </summary>
+            /// <param name="maxSize">Maximum number of elements to cache</param>
+            /// <param name="itemTimeout">Maximum time an element can be cached</param>
+            /// <returns>Current Builder instance</returns>
+            public Builder WithCache(int? maxSize = null,
+                TimeSpan? itemTimeout = null
+            )
+            {
+                _maxSize = maxSize;
+                _itemTimeout = itemTimeout;
+
                 return this;
             }
 
@@ -213,26 +237,20 @@ namespace OptimizelySDK.Odp
             {
                 _logger = _logger ?? new DefaultLogger();
                 _errorHandler = _errorHandler ?? new NoOpErrorHandler();
-                _odpConfig = _odpConfig ?? new OdpConfig();
 
                 var manager = new OdpManager
                 {
-                    _odpConfig = _odpConfig,
                     _logger = _logger,
                     _enabled = asEnabled,
                 };
-
-                if (!manager._enabled)
-                {
-                    return manager;
-                }
 
                 if (_eventManager == null)
                 {
                     var eventApiManager = new OdpEventApiManager(_logger, _errorHandler);
 
                     manager.EventManager = new OdpEventManager.Builder().
-                        WithOdpConfig(_odpConfig).
+                        WithTimeoutInterval(Constants.DEFAULT_TIMEOUT_INTERVAL).
+                        WithFlushInterval(Constants.DEFAULT_FLUSH_INTERVAL).
                         WithOdpEventApiManager(eventApiManager).
                         WithLogger(_logger).
                         WithErrorHandler(_errorHandler).
@@ -243,24 +261,25 @@ namespace OptimizelySDK.Odp
                     manager.EventManager = _eventManager;
                 }
 
+                manager.EventManager.Start();
+
                 if (_segmentManager == null)
                 {
-                    var cacheTimeout = TimeSpan.FromSeconds(_cacheTimeoutSeconds <= 0 ?
-                        Constants.DEFAULT_CACHE_SECONDS :
-                        _cacheTimeoutSeconds);
                     var apiManager = new OdpSegmentApiManager(_logger, _errorHandler);
 
-                    manager.SegmentManager = new OdpSegmentManager(_odpConfig, apiManager,
-                        _cacheSize, cacheTimeout, _logger, _cache);
+                    manager.SegmentManager = new OdpSegmentManager(apiManager, GetCache(), _logger);
                 }
                 else
                 {
                     manager.SegmentManager = _segmentManager;
                 }
 
-                manager.EventManager.Start();
-
                 return manager;
+            }
+
+            private ICache<List<string>> GetCache()
+            {
+                return _cache ?? new LruCache<List<string>>(_maxSize, _itemTimeout, _logger);
             }
         }
 
@@ -270,7 +289,7 @@ namespace OptimizelySDK.Odp
         /// <returns>True if EventManager can process events otherwise False</returns>
         private bool EventManagerOrConfigNotReady()
         {
-            return EventManager == null || !_enabled || !_odpConfig.IsReady();
+            return EventManager == null || !_enabled || _odpConfig == null || !_odpConfig.IsReady();
         }
 
         /// <summary>
@@ -279,7 +298,8 @@ namespace OptimizelySDK.Odp
         /// <returns>True if SegmentManager can fetch audience segments otherwise False</returns>
         private bool SegmentManagerOrConfigNotReady()
         {
-            return SegmentManager == null || !_enabled || !_odpConfig.IsReady();
+            return SegmentManager == null || !_enabled || _odpConfig == null ||
+                   !_odpConfig.IsReady();
         }
     }
 }

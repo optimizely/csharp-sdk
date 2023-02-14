@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2022 Optimizely
+ * Copyright 2022, 2023 Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,11 +36,7 @@ namespace OptimizelySDK.Tests.OdpTests
 
         private static readonly string expectedCacheKey = $"fs_user_id-$-{FS_USER_ID}";
 
-        private static readonly List<string> segmentsToCheck = new List<string>
-        {
-            "segment1",
-            "segment2",
-        };
+        private static readonly List<string> segmentsToCheck = new List<string> { "segment1", "segment2", };
 
         private OdpConfig _odpConfig;
         private Mock<IOdpSegmentApiManager> _mockApiManager;
@@ -64,13 +60,13 @@ namespace OptimizelySDK.Tests.OdpTests
         public void ShouldFetchSegmentsOnCacheMiss()
         {
             var keyCollector = new List<string>();
-            _mockCache.Setup(c => c.Lookup(Capture.In(keyCollector))).
-                Returns(default(List<string>));
+            _mockCache.Setup(c => c.Lookup(Capture.In(keyCollector))).Returns(default(List<string>));
             _mockApiManager.Setup(a => a.FetchSegments(It.IsAny<string>(), It.IsAny<string>(),
-                    It.IsAny<OdpUserKeyType>(), It.IsAny<string>(), It.IsAny<List<string>>())).
-                Returns(segmentsToCheck.ToArray());
-            var manager = new OdpSegmentManager(_odpConfig, _mockApiManager.Object,
-                Constants.DEFAULT_MAX_CACHE_SIZE, null, _mockLogger.Object, _mockCache.Object);
+                    It.IsAny<OdpUserKeyType>(), It.IsAny<string>(), It.IsAny<List<string>>()))
+                .Returns(segmentsToCheck.ToArray());
+            var manager = new OdpSegmentManager(_mockApiManager.Object, _mockCache.Object,
+                _mockLogger.Object);
+            manager.UpdateSettings(_odpConfig);
 
             var segments = manager.FetchQualifiedSegments(FS_USER_ID);
 
@@ -98,8 +94,9 @@ namespace OptimizelySDK.Tests.OdpTests
             _mockCache.Setup(c => c.Lookup(Capture.In(keyCollector))).Returns(segmentsToCheck);
             _mockApiManager.Setup(a => a.FetchSegments(It.IsAny<string>(), It.IsAny<string>(),
                 It.IsAny<OdpUserKeyType>(), It.IsAny<string>(), It.IsAny<List<string>>()));
-            var manager = new OdpSegmentManager(_odpConfig, _mockApiManager.Object,
-                Constants.DEFAULT_MAX_CACHE_SIZE, null, _mockLogger.Object, _mockCache.Object);
+            var manager = new OdpSegmentManager(_mockApiManager.Object, _mockCache.Object,
+                _mockLogger.Object);
+            manager.UpdateSettings(_odpConfig);
 
             var segments = manager.FetchQualifiedSegments(FS_USER_ID);
 
@@ -122,10 +119,11 @@ namespace OptimizelySDK.Tests.OdpTests
         {
             // OdpSegmentApiManager.FetchSegments() return null on any error
             _mockApiManager.Setup(a => a.FetchSegments(It.IsAny<string>(), It.IsAny<string>(),
-                    It.IsAny<OdpUserKeyType>(), It.IsAny<string>(), It.IsAny<List<string>>())).
-                Returns(null as string[]);
-            var manager = new OdpSegmentManager(_odpConfig, _mockApiManager.Object,
-                Constants.DEFAULT_MAX_CACHE_SIZE, null, _mockLogger.Object, _mockCache.Object);
+                    It.IsAny<OdpUserKeyType>(), It.IsAny<string>(), It.IsAny<List<string>>()))
+                .Returns(null as string[]);
+            var manager = new OdpSegmentManager(_mockApiManager.Object, _mockCache.Object,
+                _mockLogger.Object);
+            manager.UpdateSettings(_odpConfig);
 
             var segments = manager.FetchQualifiedSegments(FS_USER_ID);
 
@@ -143,8 +141,9 @@ namespace OptimizelySDK.Tests.OdpTests
         public void ShouldLogAndReturnAnEmptySetWhenNoSegmentsToCheck()
         {
             var odpConfig = new OdpConfig(API_KEY, API_HOST, new List<string>(0));
-            var manager = new OdpSegmentManager(odpConfig, _mockApiManager.Object,
-                Constants.DEFAULT_MAX_CACHE_SIZE, null, _mockLogger.Object, _mockCache.Object);
+            var manager = new OdpSegmentManager(_mockApiManager.Object, _mockCache.Object,
+                _mockLogger.Object);
+            manager.UpdateSettings(odpConfig);
 
             var segments = manager.FetchQualifiedSegments(FS_USER_ID);
 
@@ -160,8 +159,9 @@ namespace OptimizelySDK.Tests.OdpTests
         {
             var mockOdpConfig = new Mock<OdpConfig>(API_KEY, API_HOST, new List<string>(0));
             mockOdpConfig.Setup(o => o.IsReady()).Returns(false);
-            var manager = new OdpSegmentManager(mockOdpConfig.Object, _mockApiManager.Object,
-                Constants.DEFAULT_MAX_CACHE_SIZE, null, _mockLogger.Object, _mockCache.Object);
+            var manager = new OdpSegmentManager(_mockApiManager.Object, _mockCache.Object,
+                _mockLogger.Object);
+            manager.UpdateSettings(mockOdpConfig.Object);
 
             var segments = manager.FetchQualifiedSegments(FS_USER_ID);
 
@@ -174,13 +174,11 @@ namespace OptimizelySDK.Tests.OdpTests
         [Test]
         public void ShouldIgnoreCache()
         {
-            var manager = new OdpSegmentManager(_odpConfig, _mockApiManager.Object,
-                Constants.DEFAULT_MAX_CACHE_SIZE, null, _mockLogger.Object, _mockCache.Object);
+            var manager = new OdpSegmentManager(_mockApiManager.Object, _mockCache.Object,
+                _mockLogger.Object);
+            manager.UpdateSettings(_odpConfig);
 
-            manager.FetchQualifiedSegments(FS_USER_ID, new List<OdpSegmentOption>
-            {
-                OdpSegmentOption.IgnoreCache,
-            });
+            manager.FetchQualifiedSegments(FS_USER_ID, new List<OdpSegmentOption> { OdpSegmentOption.IGNORE_CACHE, });
 
             _mockCache.Verify(c => c.Reset(), Times.Never);
             _mockCache.Verify(c => c.Lookup(It.IsAny<string>()), Times.Never);
@@ -194,13 +192,11 @@ namespace OptimizelySDK.Tests.OdpTests
         [Test]
         public void ShouldResetCache()
         {
-            var manager = new OdpSegmentManager(_odpConfig, _mockApiManager.Object,
-                Constants.DEFAULT_MAX_CACHE_SIZE, null, _mockLogger.Object, _mockCache.Object);
+            var manager = new OdpSegmentManager(_mockApiManager.Object, _mockCache.Object,
+                _mockLogger.Object);
+            manager.UpdateSettings(_odpConfig);
 
-            manager.FetchQualifiedSegments(FS_USER_ID, new List<OdpSegmentOption>
-            {
-                OdpSegmentOption.ResetCache,
-            });
+            manager.FetchQualifiedSegments(FS_USER_ID, new List<OdpSegmentOption> { OdpSegmentOption.RESET_CACHE, });
 
             _mockCache.Verify(c => c.Reset(), Times.Once);
             _mockCache.Verify(c => c.Lookup(It.IsAny<string>()), Times.Once);
@@ -216,8 +212,9 @@ namespace OptimizelySDK.Tests.OdpTests
         {
             var keyCollector = new List<string>();
             _mockCache.Setup(c => c.Lookup(Capture.In(keyCollector)));
-            var manager = new OdpSegmentManager(_odpConfig, _mockApiManager.Object,
-                Constants.DEFAULT_MAX_CACHE_SIZE, null, _mockLogger.Object, _mockCache.Object);
+            var manager = new OdpSegmentManager(_mockApiManager.Object, _mockCache.Object,
+                _mockLogger.Object);
+            manager.UpdateSettings(_odpConfig);
 
             manager.FetchQualifiedSegments(FS_USER_ID);
 

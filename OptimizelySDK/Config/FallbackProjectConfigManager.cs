@@ -1,11 +1,11 @@
 ﻿/* 
- * Copyright 2019, Optimizely
+ * Copyright 2019, 2022-2023 Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,8 +24,8 @@ namespace OptimizelySDK.Config
     /// </summary>
     public class FallbackProjectConfigManager : ProjectConfigManager
     {
-        private ProjectConfig ProjectConfig;        
-        
+        private ProjectConfig ProjectConfig;
+
         /// <summary>
         /// Initializes a new instance of the FallbackProjectConfigManager class
         /// with the given ProjectConfig instance.
@@ -43,6 +43,29 @@ namespace OptimizelySDK.Config
         public ProjectConfig GetConfig()
         {
             return ProjectConfig;
+        }
+
+        /// <summary>
+        /// SDK Key for Fallback is not used and always null
+        /// </summary>
+        public virtual string SdkKey
+        {
+            get
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Access to current cached project configuration
+        /// </summary>
+        /// <returns>ProjectConfig instance</returns>
+        public virtual ProjectConfig CachedProjectConfig
+        {
+            get
+            {
+                return ProjectConfig;
+            }
         }
     }
 }

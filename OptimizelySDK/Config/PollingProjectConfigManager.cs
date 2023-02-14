@@ -1,11 +1,11 @@
 ﻿/* 
- * Copyright 2019-2020, Optimizely
+ * Copyright 2019-2020, 2022-2023 Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
+using OptimizelySDK.ErrorHandler;
+using OptimizelySDK.Logger;
+using OptimizelySDK.OptlyConfig;
+using OptimizelySDK.Utils;
 using System;
 using System.Threading;
-using OptimizelySDK.Logger;
-using OptimizelySDK.Utils;
 using System.Threading.Tasks;
-using OptimizelySDK.ErrorHandler;
-using OptimizelySDK.OptlyConfig;
 
 namespace OptimizelySDK.Config
 {
@@ -30,7 +30,8 @@ namespace OptimizelySDK.Config
     /// Instances of this class, must implement the <see cref="Poll()"/> method
     /// which is responsible for fetching a given ProjectConfig.
     /// </summary>
-    public abstract class PollingProjectConfigManager : ProjectConfigManager, IOptimizelyConfigManager, IDisposable
+    public abstract class PollingProjectConfigManager : ProjectConfigManager,
+        IOptimizelyConfigManager, IDisposable
     {
         public bool Disposed { get; private set; }
 
@@ -44,14 +45,22 @@ namespace OptimizelySDK.Config
         protected ILogger Logger { get; set; }
         protected IErrorHandler ErrorHandler { get; set; }
         protected TimeSpan BlockingTimeout;
-        protected TaskCompletionSource<bool> CompletableConfigManager = new TaskCompletionSource<bool>();
+
+        public virtual string SdkKey { get; }
+
+        protected TaskCompletionSource<bool> CompletableConfigManager =
+            new TaskCompletionSource<bool>();
+
         private OptimizelyConfig CurrentOptimizelyConfig;
+
         // Variables to control blocking/syncing.
         public int resourceInUse = 0;
 
         public event Action NotifyOnProjectConfigUpdate;
 
-        public PollingProjectConfigManager(TimeSpan period, TimeSpan blockingTimeout, bool autoUpdate = true, ILogger logger = null, IErrorHandler errorHandler = null)
+        public PollingProjectConfigManager(TimeSpan period, TimeSpan blockingTimeout,
+            bool autoUpdate = true, ILogger logger = null, IErrorHandler errorHandler = null
+        )
         {
             Logger = logger;
             ErrorHandler = errorHandler;
@@ -80,15 +89,17 @@ namespace OptimizelySDK.Config
                 return;
             }
 
-            Logger.Log(LogLevel.WARN, $"Starting Config scheduler with interval: {PollingInterval}.");
-            SchedulerService.Change(TimeSpan.Zero, AutoUpdate ? PollingInterval : TimeSpan.FromMilliseconds(-1));
+            Logger.Log(LogLevel.WARN,
+                $"Starting Config scheduler with interval: {PollingInterval}.");
+            SchedulerService.Change(TimeSpan.Zero,
+                AutoUpdate ? PollingInterval : TimeSpan.FromMilliseconds(-1));
             IsStarted = true;
         }
 
         /// <summary>
         /// Stops datafile scheduler.
         /// </summary>
-        public void Stop() 
+        public void Stop()
         {
             if (Disposed) return;
             // don't call now and onwards.
@@ -116,12 +127,15 @@ namespace OptimizelySDK.Config
                     {
                         // Don't wait next time.
                         BlockingTimeout = TimeSpan.FromMilliseconds(0);
-                        Logger.Log(LogLevel.WARN, "Timeout exceeded waiting for ProjectConfig to be set, returning null.");
+                        Logger.Log(LogLevel.WARN,
+                            "Timeout exceeded waiting for ProjectConfig to be set, returning null.");
                     }
                 }
                 catch (AggregateException ex)
                 {
-                    Logger.Log(LogLevel.WARN, "Interrupted waiting for valid ProjectConfig. Error: " + ex.GetAllMessages());
+                    Logger.Log(LogLevel.WARN,
+                        "Interrupted waiting for valid ProjectConfig. Error: " +
+                        ex.GetAllMessages());
                     throw;
                 }
 
@@ -133,28 +147,41 @@ namespace OptimizelySDK.Config
         }
 
         /// <summary>
+        /// Access to current cached project configuration
+        /// </summary>
+        /// <returns>ProjectConfig instance</returns>
+        public virtual ProjectConfig CachedProjectConfig
+        {
+            get
+            {
+                return CurrentProjectConfig;
+            }
+        }
+
+        /// <summary>
         /// Sets the latest available ProjectConfig valid instance.
         /// </summary>
         /// <param name="projectConfig">ProjectConfig</param>
         /// <returns>true if the ProjectConfig saved successfully, false otherwise</returns>
         public bool SetConfig(ProjectConfig projectConfig)
-        {            
+        {
             if (projectConfig == null)
                 return false;
-                
-            var previousVersion = CurrentProjectConfig == null ? "null" : CurrentProjectConfig.Revision;
+
+            var previousVersion =
+                CurrentProjectConfig == null ? "null" : CurrentProjectConfig.Revision;
             if (projectConfig.Revision == previousVersion)
                 return false;
-            
+
             CurrentProjectConfig = projectConfig;
             SetOptimizelyConfig(CurrentProjectConfig);
 
             // SetResult raise exception if called again, that's why Try is used.
             CompletableConfigManager.TrySetResult(true);
-                        
-            NotifyOnProjectConfigUpdate?.Invoke();            
 
-            
+            NotifyOnProjectConfigUpdate?.Invoke();
+
+
             return true;
         }
 
@@ -162,7 +189,8 @@ namespace OptimizelySDK.Config
         {
             try
             {
-                CurrentOptimizelyConfig = new OptimizelyConfigService(projectConfig).GetOptimizelyConfig();
+                CurrentOptimizelyConfig =
+                    new OptimizelyConfigService(projectConfig).GetOptimizelyConfig();
             }
             catch (Exception ex)
             {
@@ -195,28 +223,36 @@ namespace OptimizelySDK.Config
         /// </summary>
         public virtual void Run()
         {
-            if (Interlocked.Exchange(ref resourceInUse, 1) == 0){
-                try {
+            if (Interlocked.Exchange(ref resourceInUse, 1) == 0)
+            {
+                try
+                {
                     var config = Poll();
 
                     // during in-flight, if PollingProjectConfigManagerStopped, then don't need to set.
-                    if(IsStarted)
+                    if (IsStarted)
                         SetConfig(config);
-
-                } catch (Exception exception) {
-                    Logger.Log(LogLevel.ERROR, "Unable to get project config. Error: " + exception.GetAllMessages());
-                } finally {
+                }
+                catch (Exception exception)
+                {
+                    Logger.Log(LogLevel.ERROR,
+                        "Unable to get project config. Error: " + exception.GetAllMessages());
+                }
+                finally
+                {
                     Interlocked.Exchange(ref resourceInUse, 0);
 
                     // trigger now, due because of delayed latency response
-                    if (!Disposed && scheduleWhenFinished && IsStarted) {
+                    if (!Disposed && scheduleWhenFinished && IsStarted)
+                    {
                         // Call immediately, because it's due now.
                         scheduleWhenFinished = false;
                         SchedulerService.Change(TimeSpan.FromSeconds(0), PollingInterval);
                     }
                 }
             }
-            else {
+            else
+            {
                 scheduleWhenFinished = true;
             }
         }
