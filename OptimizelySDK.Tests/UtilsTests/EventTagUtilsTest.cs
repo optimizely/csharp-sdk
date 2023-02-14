@@ -23,7 +23,7 @@ using System.Collections.Generic;
 namespace OptimizelySDK.Tests.UtilsTests
 {
     [TestFixture]
-    class EventTagUtilsTest
+    internal class EventTagUtilsTest
     {
         private Mock<ILogger> LoggerMock;
         private ILogger Logger;
@@ -43,28 +43,34 @@ namespace OptimizelySDK.Tests.UtilsTests
             var expectedValue = 42;
             var expectedValue2 = 100;
             var expectedValueString = 123;
-            var validTag = new Dictionary<string, object>() {
-                { "revenue", 42 }
+            var validTag = new Dictionary<string, object>()
+            {
+                { "revenue", 42 },
             };
-            var validTag2 = new Dictionary<string, object>() {
-                { "revenue", 100 }
+            var validTag2 = new Dictionary<string, object>()
+            {
+                { "revenue", 100 },
             };
-            var validTagStringValue = new Dictionary<string, object>() {
-                { "revenue", "123" }
+            var validTagStringValue = new Dictionary<string, object>()
+            {
+                { "revenue", "123" },
             };
 
-            var invalidTag = new Dictionary<string, object>() {
-                { "abc", 42 }
+            var invalidTag = new Dictionary<string, object>()
+            {
+                { "abc", 42 },
             };
-            var nullValue = new Dictionary<string, object>() {
-                { "revenue", null }
+            var nullValue = new Dictionary<string, object>()
+            {
+                { "revenue", null },
             };
-            var invalidValue = new Dictionary<string, object>() {
-                { "revenue", 42.5 }
+            var invalidValue = new Dictionary<string, object>()
+            {
+                { "revenue", 42.5 },
             };
             var invalidTagNonRevenue = new Dictionary<string, object>()
             {
-                {"non-revenue", 123 }
+                { "non-revenue", 123 },
             };
 
             // Invalid data.
@@ -75,50 +81,72 @@ namespace OptimizelySDK.Tests.UtilsTests
             Assert.Null(EventTagUtils.GetRevenueValue(invalidTagNonRevenue, Logger));
 
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Event tags is undefined."), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "The revenue key is not defined in the event tags."), Times.Exactly(2));
-            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "The revenue key value is not defined in event tags."), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Revenue value is not an integer or couldn't be parsed as an integer."), Times.Once);
+            LoggerMock.Verify(
+                l => l.Log(LogLevel.DEBUG, "The revenue key is not defined in the event tags."),
+                Times.Exactly(2));
+            LoggerMock.Verify(
+                l => l.Log(LogLevel.DEBUG, "The revenue key value is not defined in event tags."),
+                Times.Once);
+            LoggerMock.Verify(
+                l => l.Log(LogLevel.ERROR,
+                    "Revenue value is not an integer or couldn't be parsed as an integer."),
+                Times.Once);
 
             // Valid data.
             Assert.AreEqual(EventTagUtils.GetRevenueValue(validTag, Logger), expectedValue);
             Assert.AreEqual(EventTagUtils.GetRevenueValue(validTag2, Logger), expectedValue2);
-            Assert.AreEqual(EventTagUtils.GetRevenueValue(validTagStringValue, Logger), expectedValueString);
+            Assert.AreEqual(EventTagUtils.GetRevenueValue(validTagStringValue, Logger),
+                expectedValueString);
 
-            LoggerMock.Verify(l => l.Log(LogLevel.INFO, $"The revenue value {expectedValue} will be sent to results."), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.INFO, $"The revenue value {expectedValue2} will be sent to results."), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.INFO, $"The revenue value {expectedValueString} will be sent to results."), Times.Once);
+            LoggerMock.Verify(
+                l => l.Log(LogLevel.INFO,
+                    $"The revenue value {expectedValue} will be sent to results."), Times.Once);
+            LoggerMock.Verify(
+                l => l.Log(LogLevel.INFO,
+                    $"The revenue value {expectedValue2} will be sent to results."), Times.Once);
+            LoggerMock.Verify(
+                l => l.Log(LogLevel.INFO,
+                    $"The revenue value {expectedValueString} will be sent to results."),
+                Times.Once);
         }
 
         [Test]
         public void TestGetEventValue()
         {
-            int expectedValue = 42;
-            float expectedValue2 = 42.5F;
-            double expectedValue3 = 42.52;
+            var expectedValue = 42;
+            var expectedValue2 = 42.5F;
+            var expectedValue3 = 42.52;
 
-            var validTag = new Dictionary<string, object>() {
-                { "value", 42 }
-            };
-
-            var validTag2 = new Dictionary<string, object>() {
-                { "value", 42.5 }
+            var validTag = new Dictionary<string, object>()
+            {
+                { "value", 42 },
             };
 
-            var validTag3 = new Dictionary<string, object>() {
-                { "value", 42.52 }
+            var validTag2 = new Dictionary<string, object>()
+            {
+                { "value", 42.5 },
             };
 
-            var invalidTag = new Dictionary<string, object>() {
-                { "abc", 42 }
+            var validTag3 = new Dictionary<string, object>()
+            {
+                { "value", 42.52 },
             };
-            var nullValue = new Dictionary<string, object>() {
-                { "value", null }
+
+            var invalidTag = new Dictionary<string, object>()
+            {
+                { "abc", 42 },
             };
-            var validTagStr = new Dictionary<string, object>() {
-                { "value", "42" }
+            var nullValue = new Dictionary<string, object>()
+            {
+                { "value", null },
             };
-            var validTagStr1 = new Dictionary<string, object>() {
-                { "value", "42.3" }
+            var validTagStr = new Dictionary<string, object>()
+            {
+                { "value", "42" },
+            };
+            var validTagStr1 = new Dictionary<string, object>()
+            {
+                { "value", "42.3" },
             };
 
             // Invalid data.
@@ -127,20 +155,36 @@ namespace OptimizelySDK.Tests.UtilsTests
             Assert.Null(EventTagUtils.GetNumericValue(nullValue, Logger));
 
             LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "Event tags is undefined."), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "The numeric metric key is not in event tags."), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "The numeric metric key value is not defined in event tags."), Times.Once);
+            LoggerMock.Verify(
+                l => l.Log(LogLevel.DEBUG, "The numeric metric key is not in event tags."),
+                Times.Once);
+            LoggerMock.Verify(
+                l => l.Log(LogLevel.DEBUG,
+                    "The numeric metric key value is not defined in event tags."), Times.Once);
 
             // Valid data.
             Assert.AreEqual(42, EventTagUtils.GetNumericValue(validTagStr, Logger));
             Assert.AreEqual("42.3", EventTagUtils.GetNumericValue(validTagStr1, Logger).ToString());
             Assert.AreEqual(EventTagUtils.GetNumericValue(validTag, Logger), expectedValue);
             Assert.AreEqual(EventTagUtils.GetNumericValue(validTag2, Logger), expectedValue2);
-            Assert.AreEqual(EventTagUtils.GetNumericValue(validTag3, Logger).ToString(), expectedValue3.ToString());
-            
-            LoggerMock.Verify(l => l.Log(LogLevel.INFO, "The numeric metric value 42.3 will be sent to results."), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.INFO, $"The numeric metric value {expectedValue} will be sent to results."), Times.Exactly(2));
-            LoggerMock.Verify(l => l.Log(LogLevel.INFO, $"The numeric metric value {expectedValue2} will be sent to results."), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.INFO, $"The numeric metric value {expectedValue3} will be sent to results."), Times.Once);
+            Assert.AreEqual(EventTagUtils.GetNumericValue(validTag3, Logger).ToString(),
+                expectedValue3.ToString());
+
+            LoggerMock.Verify(
+                l => l.Log(LogLevel.INFO, "The numeric metric value 42.3 will be sent to results."),
+                Times.Once);
+            LoggerMock.Verify(
+                l => l.Log(LogLevel.INFO,
+                    $"The numeric metric value {expectedValue} will be sent to results."),
+                Times.Exactly(2));
+            LoggerMock.Verify(
+                l => l.Log(LogLevel.INFO,
+                    $"The numeric metric value {expectedValue2} will be sent to results."),
+                Times.Once);
+            LoggerMock.Verify(
+                l => l.Log(LogLevel.INFO,
+                    $"The numeric metric value {expectedValue3} will be sent to results."),
+                Times.Once);
         }
 
         [Test]
@@ -159,15 +203,20 @@ namespace OptimizelySDK.Tests.UtilsTests
             //Assert.IsNull(EventTagUtils.GetEventValue(False));
         }
 
-        
+
         [Test]
         public void TestGetNumericMetricNoValueTag()
         {
             // Test that numeric value is not returned when there's no numeric event tag.
-            Assert.IsNull(EventTagUtils.GetNumericValue(new Dictionary<string, object> { }, Logger));
-            Assert.IsNull(EventTagUtils.GetNumericValue(new Dictionary<string, object> { { "non-value", 42 } }, Logger));
+            Assert.IsNull(
+                EventTagUtils.GetNumericValue(new Dictionary<string, object> { }, Logger));
+            Assert.IsNull(
+                EventTagUtils.GetNumericValue(
+                    new Dictionary<string, object> { { "non-value", 42 } }, Logger));
 
-            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "The numeric metric key is not in event tags."), Times.Exactly(2));
+            LoggerMock.Verify(
+                l => l.Log(LogLevel.DEBUG, "The numeric metric key is not in event tags."),
+                Times.Exactly(2));
 
             //Errors for all, because it accepts only dictionary// 
             //Assert.IsNull(EventTagUtils.GetEventValue(new object[] { }));
@@ -176,71 +225,126 @@ namespace OptimizelySDK.Tests.UtilsTests
         [Test]
         public void TestGetNumericMetricInvalidValueTag()
         {
-            
             // Test that numeric value is not returned when revenue event tag has invalid data type.
 
-            Assert.IsNull(EventTagUtils.GetNumericValue(new Dictionary<string, object> { { "non-value", null } }, Logger));
-            Assert.IsNull(EventTagUtils.GetNumericValue(new Dictionary<string, object> { { "non-value",  0.5} }, Logger));
-            Assert.IsNull(EventTagUtils.GetNumericValue(new Dictionary<string, object> { { "non-value",  12345} }, Logger));
-            Assert.IsNull(EventTagUtils.GetNumericValue(new Dictionary<string, object> { { "non-value", "65536" } }, Logger));
-            Assert.IsNull(EventTagUtils.GetNumericValue(new Dictionary<string, object> { { "non-value", true } }, Logger));
-            Assert.IsNull(EventTagUtils.GetNumericValue(new Dictionary<string, object> { { "non-value", false } }, Logger));
-            Assert.IsNull(EventTagUtils.GetNumericValue(new Dictionary<string, object> { { "non-value", new object[] { 1, 2, 3 } } }, Logger));
-            Assert.IsNull(EventTagUtils.GetNumericValue(new Dictionary<string, object> { { "non-value", new object[] { 'a', 'b', 'c' } } }, Logger));
+            Assert.IsNull(
+                EventTagUtils.GetNumericValue(
+                    new Dictionary<string, object> { { "non-value", null } }, Logger));
+            Assert.IsNull(
+                EventTagUtils.GetNumericValue(
+                    new Dictionary<string, object> { { "non-value", 0.5 } }, Logger));
+            Assert.IsNull(EventTagUtils.GetNumericValue(
+                new Dictionary<string, object> { { "non-value", 12345 } }, Logger));
+            Assert.IsNull(EventTagUtils.GetNumericValue(
+                new Dictionary<string, object> { { "non-value", "65536" } }, Logger));
+            Assert.IsNull(
+                EventTagUtils.GetNumericValue(
+                    new Dictionary<string, object> { { "non-value", true } }, Logger));
+            Assert.IsNull(EventTagUtils.GetNumericValue(
+                new Dictionary<string, object> { { "non-value", false } }, Logger));
+            Assert.IsNull(EventTagUtils.GetNumericValue(
+                new Dictionary<string, object> { { "non-value", new object[] { 1, 2, 3 } } },
+                Logger));
+            Assert.IsNull(EventTagUtils.GetNumericValue(
+                new Dictionary<string, object> { { "non-value", new object[] { 'a', 'b', 'c' } } },
+                Logger));
 
-            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, "The numeric metric key is not in event tags."), Times.Exactly(8));
+            LoggerMock.Verify(
+                l => l.Log(LogLevel.DEBUG, "The numeric metric key is not in event tags."),
+                Times.Exactly(8));
         }
 
         [Test]
-
         public void TestGetNumericMetricValueTag()
         {
-
             // An integer should be cast to a float
-            Assert.AreEqual(12345.0, EventTagUtils.GetNumericValue(new Dictionary<string, object> { { "value", 12345 } }, Logger));
+            Assert.AreEqual(12345.0,
+                EventTagUtils.GetNumericValue(new Dictionary<string, object> { { "value", 12345 } },
+                    Logger));
 
             // A string should be cast to a float
-            Assert.AreEqual(12345.0, EventTagUtils.GetNumericValue(new Dictionary<string, object> { { "value", "12345" } }, Logger));
-            
+            Assert.AreEqual(12345.0,
+                EventTagUtils.GetNumericValue(
+                    new Dictionary<string, object> { { "value", "12345" } }, Logger));
+
             // Valid float values
-            float someFloat = 1.2345F;
+            var someFloat = 1.2345F;
 
-            Assert.AreEqual(someFloat, EventTagUtils.GetNumericValue(new Dictionary<string, object> { { "value", someFloat } }, Logger));
+            Assert.AreEqual(someFloat,
+                EventTagUtils.GetNumericValue(
+                    new Dictionary<string, object> { { "value", someFloat } }, Logger));
 
-            float maxFloat = float.MaxValue;
-            Assert.AreEqual(maxFloat, EventTagUtils.GetNumericValue(new Dictionary<string, object> { { "value", maxFloat } }, Logger));
+            var maxFloat = float.MaxValue;
+            Assert.AreEqual(maxFloat,
+                EventTagUtils.GetNumericValue(
+                    new Dictionary<string, object> { { "value", maxFloat } }, Logger));
 
 
-            float minFloat = float.MinValue;
-            Assert.AreEqual(minFloat, EventTagUtils.GetNumericValue(new Dictionary<string, object> { { "value", minFloat } }, Logger));
+            var minFloat = float.MinValue;
+            Assert.AreEqual(minFloat,
+                EventTagUtils.GetNumericValue(
+                    new Dictionary<string, object> { { "value", minFloat } }, Logger));
 
             // Invalid values
-            Assert.IsNull(EventTagUtils.GetNumericValue(new Dictionary<string, object> { { "value", false } }, Logger));
-            Assert.IsNull(EventTagUtils.GetNumericValue(new Dictionary<string, object> { { "value", null } }, Logger));
+            Assert.IsNull(
+                EventTagUtils.GetNumericValue(new Dictionary<string, object> { { "value", false } },
+                    Logger));
+            Assert.IsNull(
+                EventTagUtils.GetNumericValue(new Dictionary<string, object> { { "value", null } },
+                    Logger));
 
-            Assert.IsNull(EventTagUtils.GetNumericValue(new Dictionary<string, object> { { "value", true } }, Logger));
-            Assert.IsNull(EventTagUtils.GetNumericValue(new Dictionary<string, object> { { "value", new int[] { } } }, Logger));
+            Assert.IsNull(
+                EventTagUtils.GetNumericValue(new Dictionary<string, object> { { "value", true } },
+                    Logger));
+            Assert.IsNull(EventTagUtils.GetNumericValue(
+                new Dictionary<string, object> { { "value", new int[] { } } }, Logger));
 
-            var numericValueArray = EventTagUtils.GetNumericValue(new Dictionary<string, object> { { "value", new object[] { }} }, Logger);
-            Assert.IsNull(numericValueArray, string.Format("Array numeric value is {0}", numericValueArray));
+            var numericValueArray = EventTagUtils.GetNumericValue(
+                new Dictionary<string, object> { { "value", new object[] { } } }, Logger);
+            Assert.IsNull(numericValueArray,
+                string.Format("Array numeric value is {0}", numericValueArray));
 
 
-            var numericValueNone = EventTagUtils.GetNumericValue(new Dictionary<string, object> { { "value", null } }, Logger);
-            Assert.IsNull(numericValueNone, string.Format("None numeric value is {0}", numericValueNone));
+            var numericValueNone =
+                EventTagUtils.GetNumericValue(new Dictionary<string, object> { { "value", null } },
+                    Logger);
+            Assert.IsNull(numericValueNone,
+                string.Format("None numeric value is {0}", numericValueNone));
 
 
-            var numericValueOverflow = EventTagUtils.GetNumericValue(new Dictionary<string, object> { { "value", float.MaxValue * 10 } }, Logger);
-            Assert.IsNull(numericValueOverflow, string.Format("Max numeric value is {0}", float.MaxValue * 10 ));
+            var numericValueOverflow = EventTagUtils.GetNumericValue(
+                new Dictionary<string, object> { { "value", float.MaxValue * 10 } }, Logger);
+            Assert.IsNull(numericValueOverflow,
+                string.Format("Max numeric value is {0}", float.MaxValue * 10));
 
-            Assert.AreEqual(0.0, EventTagUtils.GetNumericValue(new Dictionary<string, object> { { "value", 0.0 } }, Logger));
+            Assert.AreEqual(0.0,
+                EventTagUtils.GetNumericValue(new Dictionary<string, object> { { "value", 0.0 } },
+                    Logger));
 
-            LoggerMock.Verify(l => l.Log(LogLevel.INFO, "The numeric metric value 12345 will be sent to results."), Times.Exactly(2));
-            LoggerMock.Verify(l => l.Log(LogLevel.INFO, $"The numeric metric value {maxFloat} will be sent to results."), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.INFO, $"The numeric metric value {minFloat} will be sent to results."), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, $"Provided numeric value {float.PositiveInfinity} is in an invalid format."), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.INFO, "The numeric metric value 0 will be sent to results."), Times.Once);
-            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Provided numeric value is boolean which is an invalid format."), Times.Exactly(2));
-            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Numeric metric value is not in integer, float, or string form."), Times.Exactly(2));
+            LoggerMock.Verify(
+                l => l.Log(LogLevel.INFO,
+                    "The numeric metric value 12345 will be sent to results."), Times.Exactly(2));
+            LoggerMock.Verify(
+                l => l.Log(LogLevel.INFO,
+                    $"The numeric metric value {maxFloat} will be sent to results."), Times.Once);
+            LoggerMock.Verify(
+                l => l.Log(LogLevel.INFO,
+                    $"The numeric metric value {minFloat} will be sent to results."), Times.Once);
+            LoggerMock.Verify(
+                l => l.Log(LogLevel.ERROR,
+                    $"Provided numeric value {float.PositiveInfinity} is in an invalid format."),
+                Times.Once);
+            LoggerMock.Verify(
+                l => l.Log(LogLevel.INFO, "The numeric metric value 0 will be sent to results."),
+                Times.Once);
+            LoggerMock.Verify(
+                l => l.Log(LogLevel.ERROR,
+                    "Provided numeric value is boolean which is an invalid format."),
+                Times.Exactly(2));
+            LoggerMock.Verify(
+                l => l.Log(LogLevel.ERROR,
+                    "Numeric metric value is not in integer, float, or string form."),
+                Times.Exactly(2));
 
             /* Value is converted into 1234F */
             //var numericValueInvalidLiteral = EventTagUtils.GetEventValue(new Dictionary<string, object> { { "value", "1,234" } });
@@ -250,6 +354,5 @@ namespace OptimizelySDK.Tests.UtilsTests
             // float - inf is not possible.
             // float -inf is not possible.
         }
-
     }
 }

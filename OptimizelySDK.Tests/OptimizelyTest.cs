@@ -83,9 +83,9 @@ namespace OptimizelySDK.Tests
             EventProcessorMock.Setup(b => b.Process(It.IsAny<UserEvent>()));
             DecisionReasons = new DecisionReasons();
             var config = DatafileProjectConfig.Create(
-                content: TestData.Datafile,
-                logger: LoggerMock.Object,
-                errorHandler: new NoOpErrorHandler());
+                TestData.Datafile,
+                LoggerMock.Object,
+                new NoOpErrorHandler());
             ConfigManager = new FallbackProjectConfigManager(config);
             Config = ConfigManager.GetConfig();
             EventDispatcherMock = new Mock<IEventDispatcher>();
@@ -106,7 +106,7 @@ namespace OptimizelySDK.Tests
             OptimizelyMock = new Mock<Optimizely>(TestData.Datafile, EventDispatcherMock.Object,
                 LoggerMock.Object, ErrorHandlerMock.Object, null, false, null, null, null)
             {
-                CallBase = true
+                CallBase = true,
             };
 
             DecisionServiceMock = new Mock<DecisionService>(new Bucketer(LoggerMock.Object),
@@ -137,7 +137,7 @@ namespace OptimizelySDK.Tests
             private static Type[] ParameterTypes =
             {
                 typeof(string), typeof(IEventDispatcher), typeof(ILogger), typeof(IErrorHandler),
-                typeof(bool), typeof(EventProcessor)
+                typeof(bool), typeof(EventProcessor),
             };
 
             public static Dictionary<string, object> SingleParameter =
@@ -145,7 +145,7 @@ namespace OptimizelySDK.Tests
                 {
                     {
                         "param1", "val1"
-                    }
+                    },
                 };
 
             public static UserAttributes UserAttributes = new UserAttributes
@@ -158,7 +158,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
 
             // NullUserAttributes extends copy of UserAttributes with key-value
@@ -182,7 +182,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "bad_food", null
-                }
+                },
             };
 
             public string Datafile { get; set; }
@@ -222,7 +222,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
             var optlyUserContext = Optimizely.CreateUserContext(TestUserId, attribute);
             Assert.AreEqual(TestUserId, optlyUserContext.GetUserId());
@@ -249,7 +249,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
             var optlyUserContext1 = Optimizely.CreateUserContext("userId1", attribute1);
 
@@ -260,7 +260,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "location2", "California"
-                }
+                },
             };
             var optlyUserContext2 = Optimizely.CreateUserContext("userId2", attribute2);
 
@@ -285,7 +285,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
             Config.SendFlagDecisions = false;
             var fallbackConfigManager = new FallbackProjectConfigManager(Config);
@@ -334,7 +334,7 @@ namespace OptimizelySDK.Tests
                         },
                         {
                             "decisionEventDispatched", true
-                        }
+                        },
                     }))), Times.Once);
             EventDispatcherMock.Verify(dispatcher => dispatcher.DispatchEvent(It.IsAny<LogEvent>()),
                 Times.Once);
@@ -352,7 +352,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
             var fallbackConfigManager = new FallbackProjectConfigManager(Config);
             var optimizely = new Optimizely(fallbackConfigManager,
@@ -400,7 +400,7 @@ namespace OptimizelySDK.Tests
                         },
                         {
                             "decisionEventDispatched", true
-                        }
+                        },
                     }))), Times.Once);
             EventDispatcherMock.Verify(dispatcher => dispatcher.DispatchEvent(It.IsAny<LogEvent>()),
                 Times.Once);
@@ -419,7 +419,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
             var experiment = Config.GetRolloutFromId("166660").Experiments[1];
             var ruleKey = experiment.Key;
@@ -471,7 +471,7 @@ namespace OptimizelySDK.Tests
                         },
                         {
                             "decisionEventDispatched", false
-                        }
+                        },
                     }))), Times.Once);
             EventDispatcherMock.Verify(dispatcher => dispatcher.DispatchEvent(It.IsAny<LogEvent>()),
                 Times.Never);
@@ -490,7 +490,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
             var experiment = Config.GetRolloutFromId("166660").Experiments[1];
             var ruleKey = experiment.Key;
@@ -542,7 +542,7 @@ namespace OptimizelySDK.Tests
                         },
                         {
                             "decisionEventDispatched", true
-                        }
+                        },
                     }))), Times.Once);
             EventDispatcherMock.Verify(dispatcher => dispatcher.DispatchEvent(It.IsAny<LogEvent>()),
                 Times.Once);
@@ -559,7 +559,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
             var optlyUserContext = Optimizely.CreateUserContext(userId, attribute);
             Assert.AreEqual(TestUserId, optlyUserContext.GetUserId());
@@ -576,7 +576,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
             Assert.AreEqual("testUserId", optlyUserContext.GetUserId());
             Assert.AreEqual(Optimizely, optlyUserContext.GetOptimizely());
@@ -590,7 +590,7 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestInvalidInstanceLogMessages()
         {
-            string datafile = "{\"name\":\"optimizely\"}";
+            var datafile = "{\"name\":\"optimizely\"}";
             var optimizely = new Optimizely(datafile, null, LoggerMock.Object);
 
             Assert.IsNull(optimizely.GetVariation(string.Empty, string.Empty));
@@ -651,16 +651,16 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestValidateInputsInvalidFileJsonValidationNotSkipped()
         {
-            string datafile = "{\"name\":\"optimizely\"}";
-            Optimizely optimizely = new Optimizely(datafile);
+            var datafile = "{\"name\":\"optimizely\"}";
+            var optimizely = new Optimizely(datafile);
             Assert.IsFalse(optimizely.IsValid);
         }
 
         [Test]
         public void TestValidateInputsInvalidFileJsonValidationSkipped()
         {
-            string datafile = "{\"name\":\"optimizely\"}";
-            Optimizely optimizely =
+            var datafile = "{\"name\":\"optimizely\"}";
+            var optimizely =
                 new Optimizely(datafile, null, null, null, skipJsonValidation: true);
             Assert.IsFalse(optimizely.IsValid);
         }
@@ -715,7 +715,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
 
             var variation = Optimizely.GetVariation("test_experiment", "test_user", attributes);
@@ -797,7 +797,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "param2", "val2"
-                }
+                },
             };
 
             var optly = Helper.CreatePrivateOptimizely();
@@ -948,7 +948,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "double_key", 3.14
-                }
+                },
             };
 
             var optly = Helper.CreatePrivateOptimizely();
@@ -1015,7 +1015,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
 
             var variation = Optimizely.GetVariation("test_experiment", "test_user", attributes);
@@ -1078,7 +1078,7 @@ namespace OptimizelySDK.Tests
             {
                 {
                     "abc", "43"
-                }
+                },
             };
 
             Optimizely.Track("purchase", TestUserId, attributes);
@@ -1140,7 +1140,7 @@ namespace OptimizelySDK.Tests
             {
                 {
                     "revenue", 42
-                }
+                },
             });
             EventProcessorMock.Verify(ep => ep.Process(It.IsAny<ConversionEvent>()), Times.Once);
 
@@ -1169,7 +1169,7 @@ namespace OptimizelySDK.Tests
             {
                 {
                     "revenue", 42
-                }
+                },
             });
 
             EventProcessorMock.Verify(ep => ep.Process(It.IsAny<ConversionEvent>()), Times.Once);
@@ -1193,7 +1193,7 @@ namespace OptimizelySDK.Tests
                     },
                     {
                         "wont_send_null", null
-                    }
+                    },
                 });
 
             EventProcessorMock.Verify(ep => ep.Process(It.IsAny<ConversionEvent>()), Times.Once);
@@ -1233,7 +1233,9 @@ namespace OptimizelySDK.Tests
                 l => l.Log(LogLevel.INFO,
                     "Activating user test_user in experiment test_experiment."), Times.Once);
             // Need to see how error handler can be verified.
-            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Attribute key \"company\" is not in datafile."), Times.Once);
+            LoggerMock.Verify(
+                l => l.Log(LogLevel.ERROR, "Attribute key \"company\" is not in datafile."),
+                Times.Once);
 
             Assert.IsTrue(TestData.CompareObjects(VariationWithKeyControl, variation));
         }
@@ -1269,7 +1271,7 @@ namespace OptimizelySDK.Tests
             {
                 {
                     "revenue", 4200
-                }
+                },
             });
         }
 
@@ -1284,7 +1286,7 @@ namespace OptimizelySDK.Tests
             {
                 {
                     "revenue", 42
-                }
+                },
             });
         }
 
@@ -1295,8 +1297,8 @@ namespace OptimizelySDK.Tests
                 LoggerMock.Object, ErrorHandlerMock.Object);
             var projectConfig = DatafileProjectConfig.Create(TestData.Datafile, LoggerMock.Object,
                 ErrorHandlerMock.Object);
-            Variation expectedVariation1 = projectConfig.GetVariationFromKey("etag3", "vtag5");
-            Variation expectedVariation2 = projectConfig.GetVariationFromKey("etag3", "vtag6");
+            var expectedVariation1 = projectConfig.GetVariationFromKey("etag3", "vtag5");
+            var expectedVariation2 = projectConfig.GetVariationFromKey("etag3", "vtag6");
 
             //Check whitelisted experiment
             var variation = optimizely.GetVariation("etag3", "testUser1");
@@ -1348,12 +1350,12 @@ namespace OptimizelySDK.Tests
             var variationKey = "vtag2";
             var fbVariationKey = "vtag1";
 
-            UserProfile userProfile = new UserProfile(userId,
+            var userProfile = new UserProfile(userId,
                 new Dictionary<string, Bucketing.Decision>
                 {
                     {
                         experimentKey, new Bucketing.Decision(variationKey)
-                    }
+                    },
                 });
 
             userProfileServiceMock.Setup(_ => _.Lookup(userId)).Returns(userProfile.ToMap());
@@ -1362,9 +1364,9 @@ namespace OptimizelySDK.Tests
                 LoggerMock.Object, ErrorHandlerMock.Object, userProfileServiceMock.Object);
             var projectConfig = DatafileProjectConfig.Create(TestData.Datafile, LoggerMock.Object,
                 ErrorHandlerMock.Object);
-            Variation expectedFbVariation =
+            var expectedFbVariation =
                 projectConfig.GetVariationFromKey(experimentKey, fbVariationKey);
-            Variation expectedVariation =
+            var expectedVariation =
                 projectConfig.GetVariationFromKey(experimentKey, variationKey);
 
             var variationUserProfile = optimizely.GetVariation(experimentKey, userId);
@@ -1435,7 +1437,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
 
             Optimizely.Activate(experimentKey, TestUserId, userAttributes);
@@ -1476,7 +1478,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
 
             Optimizely.Activate(experimentKey, TestUserId, userAttributes);
@@ -1556,12 +1558,12 @@ namespace OptimizelySDK.Tests
             var expectedForcedVariation = new Variation
             {
                 Key = "variation",
-                Id = "7721010009"
+                Id = "7721010009",
             };
             var expectedForcedVariation2 = new Variation
             {
                 Key = "variation",
-                Id = "7721010509"
+                Id = "7721010509",
             };
             var userAttributes = new UserAttributes
             {
@@ -1570,7 +1572,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
 
             Optimizely.Activate(experimentKey, TestUserId, userAttributes);
@@ -1648,7 +1650,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
 
             Assert.True(Optimizely.SetForcedVariation(experimentKey, userId, variationKey),
@@ -1683,7 +1685,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
 
             Assert.True(Optimizely.SetForcedVariation(experimentKey, userId, variationKey),
@@ -1740,10 +1742,10 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "param2", "val2"
-                }
+                },
             };
 
-            Experiment experiment = new Experiment();
+            var experiment = new Experiment();
             experiment.Key = "group_experiment_1";
 
             var optly = Helper.CreatePrivateOptimizely();
@@ -1808,7 +1810,7 @@ namespace OptimizelySDK.Tests
             {
                 {
                     "param1", "val1"
-                }
+                },
             };
 
             var optly = Helper.CreatePrivateOptimizely();
@@ -1852,7 +1854,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
 
             var userAttributesWithBucketingId = new UserAttributes
@@ -1868,7 +1870,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     ControlAttributes.BUCKETING_ID_ATTRIBUTE, testBucketingIdVariation
-                }
+                },
             };
 
             // confirm that a valid variation is bucketed without the bucketing ID
@@ -2040,7 +2042,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "boolean_key", false
-                }
+                },
             };
 
             SetCulture("en-US");
@@ -2239,25 +2241,25 @@ namespace OptimizelySDK.Tests
             {
                 {
                     "string", "Test String"
-                }
+                },
             };
             var expectedIntegerDict = new Dictionary<string, object>()
             {
                 {
                     "integer", 123
-                }
+                },
             };
             var expectedDoubleDict = new Dictionary<string, object>()
             {
                 {
                     "double", 123.28
-                }
+                },
             };
             var expectedBooleanDict = new Dictionary<string, object>()
             {
                 {
                     "boolean", true
-                }
+                },
             };
 
             OptimizelyMock.Setup(om => om.GetFeatureVariableValueForType<OptimizelyJSON>(
@@ -2383,7 +2385,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
 
             DecisionServiceMock.
@@ -2463,7 +2465,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
 
             DecisionServiceMock.
@@ -2541,7 +2543,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
 
             DecisionServiceMock.
@@ -2589,7 +2591,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
 
             DecisionServiceMock.
@@ -2636,7 +2638,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
 
             DecisionServiceMock.
@@ -2713,7 +2715,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
 
             DecisionServiceMock.
@@ -2913,7 +2915,7 @@ namespace OptimizelySDK.Tests
             var variableValue = (double?)optly.InvokeGeneric("GetFeatureVariableValueForType",
                 new Type[]
                 {
-                    typeof(double?)
+                    typeof(double?),
                 }, featureKey, variableKey, TestUserId, null, variableType);
             Assert.AreEqual(expectedValue, variableValue);
 
@@ -2955,7 +2957,7 @@ namespace OptimizelySDK.Tests
             var variableValue = (double?)optly.InvokeGeneric("GetFeatureVariableValueForType",
                 new Type[]
                 {
-                    typeof(double?)
+                    typeof(double?),
                 }, featureKey, variableKey, TestUserId, null, variableType);
             Assert.AreEqual(expectedValue, variableValue);
 
@@ -2996,7 +2998,7 @@ namespace OptimizelySDK.Tests
             var variableValue = (double?)optly.InvokeGeneric("GetFeatureVariableValueForType",
                 new Type[]
                 {
-                    typeof(double?)
+                    typeof(double?),
                 }, featureKey, variableKey, TestUserId, null, variableType);
             Assert.AreEqual(expectedValue, variableValue);
 
@@ -3089,7 +3091,7 @@ namespace OptimizelySDK.Tests
             // Set such an experiment to the list of experiment ids, that does not belong to the feature.
             featureFlag.ExperimentIds = new List<string>
             {
-                "4209211"
+                "4209211",
             };
 
             // Should return false when the experiment in feature flag does not get found in the datafile.
@@ -3123,7 +3125,7 @@ namespace OptimizelySDK.Tests
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
             optly.SetFieldOrProperty("ProjectConfigManager", ConfigManager);
 
-            bool result = (bool)optly.Invoke("IsFeatureEnabled", featureKey, TestUserId, null);
+            var result = (bool)optly.Invoke("IsFeatureEnabled", featureKey, TestUserId, null);
             Assert.False(result);
 
             LoggerMock.Verify(l => l.Log(LogLevel.INFO,
@@ -3154,7 +3156,7 @@ namespace OptimizelySDK.Tests
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
             optly.SetFieldOrProperty("ProjectConfigManager", ConfigManager);
 
-            bool result = (bool)optly.Invoke("IsFeatureEnabled", featureKey, TestUserId, null);
+            var result = (bool)optly.Invoke("IsFeatureEnabled", featureKey, TestUserId, null);
             Assert.True(result);
 
             // SendImpressionEvent() does not get called.
@@ -3189,7 +3191,7 @@ namespace OptimizelySDK.Tests
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
             optly.SetFieldOrProperty("ProjectConfigManager", ConfigManager);
 
-            bool result = (bool)optly.Invoke("IsFeatureEnabled", featureKey, TestUserId, null);
+            var result = (bool)optly.Invoke("IsFeatureEnabled", featureKey, TestUserId, null);
             Assert.True(result);
 
             // SendImpressionEvent() gets called.
@@ -3225,7 +3227,7 @@ namespace OptimizelySDK.Tests
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
             optly.SetFieldOrProperty("ProjectConfigManager", ConfigManager);
 
-            bool result = (bool)optly.Invoke("IsFeatureEnabled", featureKey, TestUserId, null);
+            var result = (bool)optly.Invoke("IsFeatureEnabled", featureKey, TestUserId, null);
             Assert.False(result);
 
             // SendImpressionEvent() gets called.
@@ -3252,7 +3254,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "company", "Optimizely"
-                }
+                },
             };
 
             Assert.True(Optimizely.IsFeatureEnabled(featureKey, TestUserId, userAttributes));
@@ -3320,7 +3322,7 @@ namespace OptimizelySDK.Tests
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
 
             // Verify that IsFeatureEnabled returns true when feature experiment variation's 'featureEnabled' property is true.
-            bool result = (bool)optly.Invoke("IsFeatureEnabled", featureKey, TestUserId, null);
+            var result = (bool)optly.Invoke("IsFeatureEnabled", featureKey, TestUserId, null);
             Assert.True(result);
 
             // Verify that IsFeatureEnabled returns false when feature experiment variation's 'featureEnabled' property is false.
@@ -3345,7 +3347,7 @@ namespace OptimizelySDK.Tests
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
 
             // Verify that IsFeatureEnabled returns false when user does not get bucketed into the rollout rule's variation.
-            bool result = (bool)optly.Invoke("IsFeatureEnabled", featureKey, TestUserId, null);
+            var result = (bool)optly.Invoke("IsFeatureEnabled", featureKey, TestUserId, null);
             Assert.False(result);
         }
 
@@ -3372,7 +3374,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
 
             TestActivateListener(userAttributes);
@@ -3403,7 +3405,7 @@ namespace OptimizelySDK.Tests
                 It.IsAny<string>(),
                 It.IsAny<UserAttributes>(), It.IsAny<EventTags>(), It.IsAny<LogEvent>()));
 
-            Mock<OptimizelyUserContext> mockUserContext =
+            var mockUserContext =
                 new Mock<OptimizelyUserContext>(OptimizelyMock.Object, TestUserId, userAttributes,
                     ErrorHandlerMock.Object, LoggerMock.Object);
             mockUserContext.Setup(ouc => ouc.GetUserId()).Returns(TestUserId);
@@ -3462,7 +3464,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
 
             TestTrackListener(userAttributes, null);
@@ -3481,14 +3483,14 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
 
             var eventTags = new EventTags
             {
                 {
                     "revenue", 42
-                }
+                },
             };
 
             TestTrackListener(userAttributes, eventTags);
@@ -3518,7 +3520,7 @@ namespace OptimizelySDK.Tests
                 It.IsAny<string>(),
                 It.IsAny<UserAttributes>(), It.IsAny<EventTags>(), It.IsAny<LogEvent>()));
 
-            Mock<OptimizelyUserContext> mockUserContext =
+            var mockUserContext =
                 new Mock<OptimizelyUserContext>(Optimizely, TestUserId, new UserAttributes(),
                     ErrorHandlerMock.Object, LoggerMock.Object);
             mockUserContext.Setup(ouc => ouc.GetUserId()).Returns(TestUserId);
@@ -3571,7 +3573,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
 
             // Mocking objects.
@@ -3628,7 +3630,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
 
             // Mocking objects.
@@ -3723,7 +3725,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
 
             var optly = Helper.CreatePrivateOptimizely();
@@ -3736,7 +3738,7 @@ namespace OptimizelySDK.Tests
                 It.IsAny<string>(),
                 It.IsAny<UserAttributes>(), It.IsAny<Dictionary<string, object>>()));
 
-            Mock<OptimizelyUserContext> mockUserContext =
+            var mockUserContext =
                 new Mock<OptimizelyUserContext>(optStronglyTyped, TestUserId, new UserAttributes(),
                     ErrorHandlerMock.Object, LoggerMock.Object);
             mockUserContext.Setup(ouc => ouc.GetUserId()).Returns(TestUserId);
@@ -3786,7 +3788,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
 
             var optly = Helper.CreatePrivateOptimizely();
@@ -3797,7 +3799,7 @@ namespace OptimizelySDK.Tests
                 It.IsAny<string>(),
                 It.IsAny<UserAttributes>(), It.IsAny<Dictionary<string, object>>()));
 
-            Mock<OptimizelyUserContext> mockUserContext =
+            var mockUserContext =
                 new Mock<OptimizelyUserContext>(optStronglyTyped, TestUserId, new UserAttributes(),
                     ErrorHandlerMock.Object, LoggerMock.Object);
             mockUserContext.Setup(ouc => ouc.GetUserId()).Returns(TestUserId);
@@ -3902,7 +3904,7 @@ namespace OptimizelySDK.Tests
                 NotificationCallbackMock.Object.TestDecisionCallback);
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
 
-            bool result = (bool)optly.Invoke("IsFeatureEnabled", featureKey, TestUserId, null);
+            var result = (bool)optly.Invoke("IsFeatureEnabled", featureKey, TestUserId, null);
             Assert.True(result);
 
             var decisionInfo = new Dictionary<string, object>
@@ -3966,7 +3968,7 @@ namespace OptimizelySDK.Tests
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
             optly.SetFieldOrProperty("ProjectConfigManager", ConfigManager);
 
-            bool result = (bool)optly.Invoke("IsFeatureEnabled", featureKey, TestUserId, null);
+            var result = (bool)optly.Invoke("IsFeatureEnabled", featureKey, TestUserId, null);
             Assert.False(result);
 
             var decisionInfo = new Dictionary<string, object>
@@ -4012,7 +4014,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "company", "Optimizely"
-                }
+                },
             };
             var experiment = Config.GetRolloutFromId("166660").Experiments[0];
             var variation = Config.GetVariationFromKey("177770", "177771");
@@ -4039,7 +4041,7 @@ namespace OptimizelySDK.Tests
                 NotificationCallbackMock.Object.TestDecisionCallback);
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
 
-            bool result = (bool)optly.Invoke("IsFeatureEnabled", featureKey, TestUserId,
+            var result = (bool)optly.Invoke("IsFeatureEnabled", featureKey, TestUserId,
                 userAttributes);
             Assert.True(result);
 
@@ -4078,7 +4080,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "company", "Optimizely"
-                }
+                },
             };
             var experiment = Config.GetRolloutFromId("166660").Experiments[3];
             var variation = Config.GetVariationFromKey("188880", "188881");
@@ -4105,7 +4107,7 @@ namespace OptimizelySDK.Tests
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
             optly.SetFieldOrProperty("ProjectConfigManager", ConfigManager);
 
-            bool result = (bool)optly.Invoke("IsFeatureEnabled", featureKey, TestUserId,
+            var result = (bool)optly.Invoke("IsFeatureEnabled", featureKey, TestUserId,
                 userAttributes);
             Assert.False(result);
 
@@ -4160,7 +4162,7 @@ namespace OptimizelySDK.Tests
             optly.SetFieldOrProperty("DecisionService", DecisionServiceMock.Object);
             optly.SetFieldOrProperty("ProjectConfigManager", ConfigManager);
 
-            bool result = (bool)optly.Invoke("IsFeatureEnabled", featureKey, TestUserId, null);
+            var result = (bool)optly.Invoke("IsFeatureEnabled", featureKey, TestUserId, null);
             Assert.False(result);
 
             var decisionInfo = new Dictionary<string, object>
@@ -4193,7 +4195,7 @@ namespace OptimizelySDK.Tests
             string[] enabledFeatures =
             {
                 "double_single_variable_feature", "boolean_single_variable_feature",
-                "string_single_variable_feature"
+                "string_single_variable_feature",
             };
 
             var userAttributes = new UserAttributes
@@ -4203,7 +4205,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
 
             NotificationCallbackMock.Setup(nc => nc.TestDecisionCallback(It.IsAny<string>(),
@@ -4265,7 +4267,7 @@ namespace OptimizelySDK.Tests
                                 },
                                 {
                                     "variationKey", "control"
-                                }
+                                },
                             }
                         },
                     }))), Times.Once);
@@ -4511,7 +4513,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "string_var", "cta_4"
-                }
+                },
             };
             var experiment = Config.GetRolloutFromId("166661").Experiments[0];
             var variation = Config.GetVariationFromKey(experiment.Key, "177775");
@@ -4528,7 +4530,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
 
             DecisionServiceMock.
@@ -4609,7 +4611,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
 
             DecisionServiceMock.
@@ -4774,7 +4776,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
 
             DecisionServiceMock.
@@ -4928,7 +4930,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
 
             DecisionServiceMock.
@@ -5075,7 +5077,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
 
             DecisionServiceMock.
@@ -5215,7 +5217,7 @@ namespace OptimizelySDK.Tests
                         },
                         {
                             "string_var", "cta_4"
-                        }
+                        },
                     }
                 },
                 {
@@ -5226,9 +5228,9 @@ namespace OptimizelySDK.Tests
                         },
                         {
                             "string_var", "cta_5"
-                        }
+                        },
                     }
-                }
+                },
             };
             var experiment = Config.GetRolloutFromId("166661").Experiments[0];
             var variation = Config.GetVariationFromKey(experiment.Key, "177775");
@@ -5245,7 +5247,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
 
             DecisionServiceMock.
@@ -5313,7 +5315,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
             var optimizely = new Optimizely(TestData.Datafile, EventDispatcherMock.Object,
                 LoggerMock.Object, ErrorHandlerMock.Object);
@@ -5374,7 +5376,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
 
             var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
@@ -5415,7 +5417,7 @@ namespace OptimizelySDK.Tests
             {
                 {
                     "double_variable", 42.42
-                }
+                },
             };
 
             var optimizely = new Optimizely(TestData.Datafile, EventDispatcherMock.Object,
@@ -5446,7 +5448,7 @@ namespace OptimizelySDK.Tests
                 TestData.Datafile, TimeSpan.FromMilliseconds(300));
             TestHttpProjectConfigManagerUtil.SetClientFieldValue(httpClientMock.Object);
 
-            NotificationCenter notificationCenter = new NotificationCenter();
+            var notificationCenter = new NotificationCenter();
             NotificationCallbackMock.Setup(notification => notification.TestConfigUpdateCallback());
 
             var httpManager = new HttpProjectConfigManager.Builder().
@@ -5526,7 +5528,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
 
             OptimizelyMock.Setup(om =>
@@ -5542,12 +5544,12 @@ namespace OptimizelySDK.Tests
             string[] enabledFeatures =
             {
                 "boolean_feature", "double_single_variable_feature",
-                "string_single_variable_feature", "multi_variate_feature", "empty_feature"
+                "string_single_variable_feature", "multi_variate_feature", "empty_feature",
             };
             string[] notEnabledFeatures =
             {
                 "integer_single_variable_feature", "boolean_single_variable_feature",
-                "mutex_group_feature", "no_rollout_experiment_feature"
+                "mutex_group_feature", "no_rollout_experiment_feature",
             };
             var userAttributes = new UserAttributes
             {
@@ -5556,7 +5558,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             };
 
             OptimizelyMock.Setup(om => om.IsFeatureEnabled(It.IsIn<string>(enabledFeatures),
@@ -5586,11 +5588,11 @@ namespace OptimizelySDK.Tests
         {
             var optly = Helper.CreatePrivateOptimizely();
 
-            bool result = (bool)optly.Invoke("ValidateStringInputs", new Dictionary<string, string>
+            var result = (bool)optly.Invoke("ValidateStringInputs", new Dictionary<string, string>
             {
                 {
                     Optimizely.EXPERIMENT_KEY, "test_experiment"
-                }
+                },
             });
             Assert.True(result);
 
@@ -5598,7 +5600,7 @@ namespace OptimizelySDK.Tests
             {
                 {
                     Optimizely.EVENT_KEY, "buy_now_event"
-                }
+                },
             });
             Assert.True(result);
         }
@@ -5608,11 +5610,11 @@ namespace OptimizelySDK.Tests
         {
             var optly = Helper.CreatePrivateOptimizely();
 
-            bool result = (bool)optly.Invoke("ValidateStringInputs", new Dictionary<string, string>
+            var result = (bool)optly.Invoke("ValidateStringInputs", new Dictionary<string, string>
             {
                 {
                     Optimizely.EXPERIMENT_KEY, ""
-                }
+                },
             });
             Assert.False(result);
 
@@ -5620,7 +5622,7 @@ namespace OptimizelySDK.Tests
             {
                 {
                     Optimizely.EVENT_KEY, null
-                }
+                },
             });
             Assert.False(result);
         }
@@ -5630,11 +5632,11 @@ namespace OptimizelySDK.Tests
         {
             var optly = Helper.CreatePrivateOptimizely();
 
-            bool result = (bool)optly.Invoke("ValidateStringInputs", new Dictionary<string, string>
+            var result = (bool)optly.Invoke("ValidateStringInputs", new Dictionary<string, string>
             {
                 {
                     Optimizely.USER_ID, "testUser"
-                }
+                },
             });
             Assert.True(result);
 
@@ -5642,7 +5644,7 @@ namespace OptimizelySDK.Tests
             {
                 {
                     Optimizely.USER_ID, ""
-                }
+                },
             });
             Assert.True(result);
 
@@ -5650,7 +5652,7 @@ namespace OptimizelySDK.Tests
             {
                 {
                     Optimizely.USER_ID, null
-                }
+                },
             });
             Assert.False(result);
         }
@@ -5726,7 +5728,7 @@ namespace OptimizelySDK.Tests
                 {
                     {
                         "house", "Gryffindor"
-                    }
+                    },
                 });
 
             Assert.AreEqual("A", variation.Key);
@@ -5738,7 +5740,7 @@ namespace OptimizelySDK.Tests
                 {
                     {
                         "lasers", 45.5
-                    }
+                    },
                 });
 
             Assert.AreEqual("A", variation.Key);
@@ -5754,7 +5756,7 @@ namespace OptimizelySDK.Tests
                 {
                     {
                         "house", "Hufflepuff"
-                    }
+                    },
                 });
 
             Assert.Null(variation);
@@ -5769,7 +5771,7 @@ namespace OptimizelySDK.Tests
             {
                 {
                     "house", "Welcome to Slytherin!"
-                }
+                },
             });
 
             EventDispatcherMock.Verify(dispatcher => dispatcher.DispatchEvent(It.IsAny<LogEvent>()),
@@ -5784,7 +5786,7 @@ namespace OptimizelySDK.Tests
             {
                 {
                     "house", "Hufflepuff"
-                }
+                },
             });
 
             EventDispatcherMock.Verify(dispatcher => dispatcher.DispatchEvent(It.IsAny<LogEvent>()),
@@ -5799,7 +5801,7 @@ namespace OptimizelySDK.Tests
                 {
                     {
                         "favorite_ice_cream", "chocolate"
-                    }
+                    },
                 });
 
             Assert.True(featureEnabled);
@@ -5809,7 +5811,7 @@ namespace OptimizelySDK.Tests
                 {
                     {
                         "lasers", 45.5
-                    }
+                    },
                 });
 
             Assert.True(featureEnabled);
@@ -5831,7 +5833,7 @@ namespace OptimizelySDK.Tests
                 {
                     {
                         "lasers", 71
-                    }
+                    },
                 });
 
             Assert.AreEqual(variableValue, "xyz");
@@ -5841,7 +5843,7 @@ namespace OptimizelySDK.Tests
                 {
                     {
                         "should_do_it", true
-                    }
+                    },
                 });
 
             Assert.AreEqual(variableValue, "xyz");
@@ -5855,7 +5857,7 @@ namespace OptimizelySDK.Tests
                 {
                     {
                         "lasers", 50
-                    }
+                    },
                 });
 
             Assert.AreEqual(variableValue, "x");
@@ -5875,7 +5877,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "lasers", 45.5
-                }
+                },
             };
 
             // Should be included via substring match string audience with id '3988293898' and exact match number audience with id '3468206646'
@@ -5898,7 +5900,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "lasers", 45.5
-                }
+                },
             };
 
             // Should be excluded as substring audience with id '3988293898' does not match, so the overall conditions fail.
@@ -5921,7 +5923,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "should_do_it", true
-                }
+                },
             };
 
             // Should be included via exact match string audience with id '3468206642' and exact match boolean audience with id '3468206646'
@@ -5942,7 +5944,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "should_do_it", false
-                }
+                },
             };
 
             // Should be excluded as exact match boolean audience with id '3468206643' does not match so the overall conditions fail.
@@ -5962,7 +5964,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "favorite_ice_cream", "walls"
-                }
+                },
             };
 
             // Should be included via substring match string audience with id '3988293898' and exists audience with id '3988293899'
@@ -5981,7 +5983,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "lasers", 45.5
-                }
+                },
             };
 
             // Should be excluded - substring match string audience with id '3988293898' does not match,
@@ -6002,7 +6004,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "lasers", 700
-                }
+                },
             };
 
             // Should be included via substring match string audience with id '3988293898' and exists audience with id '3988293899'
@@ -6078,7 +6080,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "location", "San Francisco"
-                }
+                },
             });
             Assert.NotNull(activate);
             optimizely.Dispose();
@@ -6090,7 +6092,7 @@ namespace OptimizelySDK.Tests
                     },
                     {
                         "location", "San Francisco"
-                    }
+                    },
                 });
             Assert.Null(activateAfterDispose);
             httpManager.Dispose();

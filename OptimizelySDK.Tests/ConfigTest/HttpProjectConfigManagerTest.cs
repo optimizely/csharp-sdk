@@ -34,7 +34,9 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
     {
         private Mock<ILogger> LoggerMock;
         private Mock<HttpProjectConfigManager.HttpClient> HttpClientMock;
-        private Mock<TestNotificationCallbacks> NotificationCallbackMock = new Mock<TestNotificationCallbacks>();
+
+        private Mock<TestNotificationCallbacks> NotificationCallbackMock =
+            new Mock<TestNotificationCallbacks>();
 
         [SetUp]
         public void Setup()
@@ -45,28 +47,28 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
             TestHttpProjectConfigManagerUtil.SetClientFieldValue(HttpClientMock.Object);
             LoggerMock.Setup(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()));
             NotificationCallbackMock.Setup(nc => nc.TestConfigUpdateCallback());
-
         }
 
         [Test]
         public void TestHttpConfigManagerRetreiveProjectConfigByURL()
         {
             var t = MockSendAsync(TestData.Datafile);
-            HttpProjectConfigManager httpManager = new HttpProjectConfigManager.Builder()
-                .WithUrl("https://cdn.optimizely.com/datafiles/QBw9gFM8oTn7ogY9ANCC1z.json")
-                .WithLogger(LoggerMock.Object)
-                .WithPollingInterval(TimeSpan.FromMilliseconds(1000))
-                .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(500))
-                .WithStartByDefault()
-                .Build();
+            var httpManager = new HttpProjectConfigManager.Builder().
+                WithUrl("https://cdn.optimizely.com/datafiles/QBw9gFM8oTn7ogY9ANCC1z.json").
+                WithLogger(LoggerMock.Object).
+                WithPollingInterval(TimeSpan.FromMilliseconds(1000)).
+                WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(500)).
+                WithStartByDefault().
+                Build();
 
             // This method waits until SendAsync is not triggered.
             // Time is given here to avoid hanging-up in any worst case.
             t.Wait(1000);
 
             HttpClientMock.Verify(_ => _.SendAsync(
-                It.Is<System.Net.Http.HttpRequestMessage>(requestMessage =>
-                requestMessage.RequestUri.ToString() == "https://cdn.optimizely.com/datafiles/QBw9gFM8oTn7ogY9ANCC1z.json"
+                It.Is<HttpRequestMessage>(requestMessage =>
+                    requestMessage.RequestUri.ToString() ==
+                    "https://cdn.optimizely.com/datafiles/QBw9gFM8oTn7ogY9ANCC1z.json"
                 )));
             httpManager.Dispose();
         }
@@ -76,15 +78,17 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         {
             var t = MockSendAsync(statusCode: HttpStatusCode.Forbidden);
 
-            HttpProjectConfigManager httpManager = new HttpProjectConfigManager.Builder()
-                .WithUrl("https://cdn.optimizely.com/datafiles/QBw9gFM8oTn7ogY9ANCC1z.json")
-                .WithLogger(LoggerMock.Object)
-                .WithPollingInterval(TimeSpan.FromMilliseconds(1000))
-                .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(500))
-                .WithStartByDefault()
-                .Build();
+            var httpManager = new HttpProjectConfigManager.Builder().
+                WithUrl("https://cdn.optimizely.com/datafiles/QBw9gFM8oTn7ogY9ANCC1z.json").
+                WithLogger(LoggerMock.Object).
+                WithPollingInterval(TimeSpan.FromMilliseconds(1000)).
+                WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(500)).
+                WithStartByDefault().
+                Build();
 
-            LoggerMock.Verify(_ => _.Log(LogLevel.ERROR, $"Error fetching datafile \"{HttpStatusCode.Forbidden}\""), Times.AtLeastOnce);
+            LoggerMock.Verify(
+                _ => _.Log(LogLevel.ERROR,
+                    $"Error fetching datafile \"{HttpStatusCode.Forbidden}\""), Times.AtLeastOnce);
 
             httpManager.Dispose();
         }
@@ -93,7 +97,8 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         public void TestHttpClientHandler()
         {
             var httpConfigHandler = HttpProjectConfigManager.HttpClient.GetHttpClientHandler();
-            Assert.IsTrue(httpConfigHandler.AutomaticDecompression == (System.Net.DecompressionMethods.Deflate | System.Net.DecompressionMethods.GZip));
+            Assert.IsTrue(httpConfigHandler.AutomaticDecompression ==
+                          (DecompressionMethods.Deflate | DecompressionMethods.GZip));
         }
 
         [Test]
@@ -101,21 +106,22 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         {
             var t = MockSendAsync(TestData.Datafile);
 
-            HttpProjectConfigManager httpManager = new HttpProjectConfigManager.Builder()
-                 .WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z")
-                 .WithFormat("")
-                 .WithLogger(LoggerMock.Object)
-                 .WithPollingInterval(TimeSpan.FromMilliseconds(1000))
-                 .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(500))
-                 .WithStartByDefault()
-                 .Build();
+            var httpManager = new HttpProjectConfigManager.Builder().
+                WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z").
+                WithFormat("").
+                WithLogger(LoggerMock.Object).
+                WithPollingInterval(TimeSpan.FromMilliseconds(1000)).
+                WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(500)).
+                WithStartByDefault().
+                Build();
 
             // This "Wait" notifies When SendAsync is triggered.
             // Time is given here to avoid hanging-up in any worst case.
             t.Wait(1000);
             HttpClientMock.Verify(_ => _.SendAsync(
-                It.Is<System.Net.Http.HttpRequestMessage>(requestMessage =>
-                requestMessage.RequestUri.ToString() == "https://cdn.optimizely.com/datafiles/QBw9gFM8oTn7ogY9ANCC1z.json"
+                It.Is<HttpRequestMessage>(requestMessage =>
+                    requestMessage.RequestUri.ToString() ==
+                    "https://cdn.optimizely.com/datafiles/QBw9gFM8oTn7ogY9ANCC1z.json"
                 )));
             httpManager.Dispose();
         }
@@ -125,18 +131,19 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         {
             var t = MockSendAsync(TestData.Datafile);
 
-            HttpProjectConfigManager httpManager = new HttpProjectConfigManager.Builder()
-                .WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z")
-                .WithLogger(LoggerMock.Object)
-                .WithPollingInterval(TimeSpan.FromMilliseconds(1000))
-                .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(500))
-                .WithStartByDefault()
-                .Build();
+            var httpManager = new HttpProjectConfigManager.Builder().
+                WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z").
+                WithLogger(LoggerMock.Object).
+                WithPollingInterval(TimeSpan.FromMilliseconds(1000)).
+                WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(500)).
+                WithStartByDefault().
+                Build();
 
             t.Wait(1000);
             HttpClientMock.Verify(_ => _.SendAsync(
-                It.Is<System.Net.Http.HttpRequestMessage>(requestMessage =>
-                requestMessage.RequestUri.ToString() == "https://cdn.optimizely.com/datafiles/QBw9gFM8oTn7ogY9ANCC1z.json"
+                It.Is<HttpRequestMessage>(requestMessage =>
+                    requestMessage.RequestUri.ToString() ==
+                    "https://cdn.optimizely.com/datafiles/QBw9gFM8oTn7ogY9ANCC1z.json"
                 )));
             Assert.IsNotNull(httpManager.GetConfig());
             httpManager.Dispose();
@@ -147,24 +154,25 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         {
             var t = MockSendAsync(TestData.Datafile);
 
-            HttpProjectConfigManager httpManager = new HttpProjectConfigManager.Builder()
-                .WithSdkKey("10192104166")
-                .WithFormat("https://cdn.optimizely.com/json/{0}.json")
-                .WithLogger(LoggerMock.Object)
-                .WithPollingInterval(TimeSpan.FromMilliseconds(1000))
-                .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(500))
-                .WithStartByDefault()
-                .Build(true);
+            var httpManager = new HttpProjectConfigManager.Builder().WithSdkKey("10192104166").
+                WithFormat("https://cdn.optimizely.com/json/{0}.json").
+                WithLogger(LoggerMock.Object).
+                WithPollingInterval(TimeSpan.FromMilliseconds(1000)).
+                WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(500)).
+                WithStartByDefault().
+                Build(true);
 
             t.Wait(1000);
             HttpClientMock.Verify(_ => _.SendAsync(
-                It.Is<System.Net.Http.HttpRequestMessage>(requestMessage =>
-                requestMessage.RequestUri.ToString() == "https://cdn.optimizely.com/json/10192104166.json"
+                It.Is<HttpRequestMessage>(requestMessage =>
+                    requestMessage.RequestUri.ToString() ==
+                    "https://cdn.optimizely.com/json/10192104166.json"
                 )));
-            
+
             Assert.IsNotNull(httpManager.GetConfig());
 
-            LoggerMock.Verify(_ => _.Log(LogLevel.DEBUG, "Making datafile request to url \"https://cdn.optimizely.com/json/10192104166.json\""));
+            LoggerMock.Verify(_ => _.Log(LogLevel.DEBUG,
+                "Making datafile request to url \"https://cdn.optimizely.com/json/10192104166.json\""));
             httpManager.Dispose();
         }
 
@@ -173,24 +181,25 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         {
             var t = MockSendAsync(TestData.Datafile);
 
-            HttpProjectConfigManager httpManager = new HttpProjectConfigManager.Builder()
-                .WithSdkKey("10192104166")
-                .WithFormat("https://cdn.optimizely.com/json/{0}.json")
-                .WithLogger(LoggerMock.Object)
-                .WithPollingInterval(TimeSpan.FromMilliseconds(1000))
-                .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(500))
-                .WithStartByDefault()
-                .Build(true);
+            var httpManager = new HttpProjectConfigManager.Builder().WithSdkKey("10192104166").
+                WithFormat("https://cdn.optimizely.com/json/{0}.json").
+                WithLogger(LoggerMock.Object).
+                WithPollingInterval(TimeSpan.FromMilliseconds(1000)).
+                WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(500)).
+                WithStartByDefault().
+                Build(true);
 
             t.Wait(1000);
             HttpClientMock.Verify(_ => _.SendAsync(
-                It.Is<System.Net.Http.HttpRequestMessage>(requestMessage =>
-                requestMessage.RequestUri.ToString() == "https://cdn.optimizely.com/json/10192104166.json"
+                It.Is<HttpRequestMessage>(requestMessage =>
+                    requestMessage.RequestUri.ToString() ==
+                    "https://cdn.optimizely.com/json/10192104166.json"
                 )));
             var datafileConfig = httpManager.GetConfig();
             Assert.IsNotNull(datafileConfig);
             Assert.IsNull(datafileConfig.GetExperimentFromKey("project_config_not_valid").Key);
-            LoggerMock.Verify(_ => _.Log(LogLevel.DEBUG, "Making datafile request to url \"https://cdn.optimizely.com/json/10192104166.json\""));
+            LoggerMock.Verify(_ => _.Log(LogLevel.DEBUG,
+                "Making datafile request to url \"https://cdn.optimizely.com/json/10192104166.json\""));
             httpManager.Dispose();
         }
 
@@ -198,17 +207,18 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         public void TestOnReadyPromiseResolvedImmediatelyWhenDatafileIsProvided()
         {
             // Revision - 42
-            var t = MockSendAsync(TestData.SimpleABExperimentsDatafile, TimeSpan.FromMilliseconds(100));
+            var t = MockSendAsync(TestData.SimpleABExperimentsDatafile,
+                TimeSpan.FromMilliseconds(100));
 
-            HttpProjectConfigManager httpManager = new HttpProjectConfigManager.Builder()
+            var httpManager = new HttpProjectConfigManager.Builder()
                 // Revision - 15
-                .WithSdkKey("10192104166")
-                .WithDatafile(TestData.Datafile)
-                .WithLogger(LoggerMock.Object)
-                .WithPollingInterval(TimeSpan.FromMilliseconds(1000))
-                .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(500))
-                .WithStartByDefault()
-                .Build();
+                .WithSdkKey("10192104166").
+                WithDatafile(TestData.Datafile).
+                WithLogger(LoggerMock.Object).
+                WithPollingInterval(TimeSpan.FromMilliseconds(1000)).
+                WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(500)).
+                WithStartByDefault().
+                Build();
 
             // OnReady waits until is resolved, need to add time in case of deadlock.
             httpManager.OnReady().Wait(10000);
@@ -227,15 +237,16 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         public void TestOnReadyPromiseWaitsForProjectConfigRetrievalWhenDatafileIsNotProvided()
         {
             // Revision - 42
-            var t = MockSendAsync(TestData.SimpleABExperimentsDatafile, TimeSpan.FromMilliseconds(1000));
+            var t = MockSendAsync(TestData.SimpleABExperimentsDatafile,
+                TimeSpan.FromMilliseconds(1000));
 
-            HttpProjectConfigManager httpManager = new HttpProjectConfigManager.Builder()
-                .WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z")
-                .WithLogger(LoggerMock.Object)
-                .WithPollingInterval(TimeSpan.FromSeconds(2))
-                .WithBlockingTimeoutPeriod(TimeSpan.FromSeconds(1))
-                .WithStartByDefault(true)
-                .Build();
+            var httpManager = new HttpProjectConfigManager.Builder().
+                WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z").
+                WithLogger(LoggerMock.Object).
+                WithPollingInterval(TimeSpan.FromSeconds(2)).
+                WithBlockingTimeoutPeriod(TimeSpan.FromSeconds(1)).
+                WithStartByDefault(true).
+                Build();
             t.Wait();
 
             // OnReady waits until is resolved, need to add time in case of deadlock.
@@ -249,14 +260,15 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         {
             var t = MockSendAsync(TestData.Datafile, TimeSpan.FromMilliseconds(150));
 
-            var httpManager = new HttpProjectConfigManager.Builder()
-                .WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z")
-                .WithLogger(LoggerMock.Object)
-                .WithPollingInterval(TimeSpan.FromSeconds(2))
+            var httpManager = new HttpProjectConfigManager.Builder().
+                WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z").
+                WithLogger(LoggerMock.Object).
+                WithPollingInterval(TimeSpan.FromSeconds(2))
                 // negligible timeout
-                .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(50))
-                .WithStartByDefault()
-                .Build(false);
+                .
+                WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(50)).
+                WithStartByDefault().
+                Build(false);
 
             // When blocking timeout is 0 and defer is false and getconfig immediately called
             // should return null
@@ -265,7 +277,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
             t.Wait();
             // in case deadlock, it will release after 3sec.
             httpManager.OnReady().Wait(8000);
-                
+
             HttpClientMock.Verify(_ => _.SendAsync(It.IsAny<HttpRequestMessage>()));
             Assert.NotNull(httpManager.GetConfig());
 
@@ -273,20 +285,22 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         }
 
         #region Notification
+
         [Test]
         public void TestHttpConfigManagerSendConfigUpdateNotificationWhenProjectConfigGetsUpdated()
-        {            
+        {
             var t = MockSendAsync(TestData.Datafile);
 
-            var httpManager = new HttpProjectConfigManager.Builder()
-                .WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z")
-                .WithLogger(LoggerMock.Object)
-                .WithPollingInterval(TimeSpan.FromMilliseconds(1000))
-                .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(1000))
-                .WithStartByDefault(false)
-                .Build(true);
+            var httpManager = new HttpProjectConfigManager.Builder().
+                WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z").
+                WithLogger(LoggerMock.Object).
+                WithPollingInterval(TimeSpan.FromMilliseconds(1000)).
+                WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(1000)).
+                WithStartByDefault(false).
+                Build(true);
 
-            httpManager.NotifyOnProjectConfigUpdate += NotificationCallbackMock.Object.TestConfigUpdateCallback;
+            httpManager.NotifyOnProjectConfigUpdate +=
+                NotificationCallbackMock.Object.TestConfigUpdateCallback;
             httpManager.Start();
 
             Assert.NotNull(httpManager.GetConfig());
@@ -297,130 +311,148 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
 
         [Test]
         public void TestHttpConfigManagerDoesNotSendConfigUpdateNotificationWhenDatafileIsProvided()
-        {            
+        {
             var t = MockSendAsync(TestData.Datafile, TimeSpan.FromMilliseconds(100));
 
-            var httpManager = new HttpProjectConfigManager.Builder()
-                .WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z")
-                .WithDatafile(TestData.Datafile)
-                .WithLogger(LoggerMock.Object)
-                .WithPollingInterval(TimeSpan.FromMilliseconds(1000))
-                .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(500))
-                .Build();
+            var httpManager = new HttpProjectConfigManager.Builder().
+                WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z").
+                WithDatafile(TestData.Datafile).
+                WithLogger(LoggerMock.Object).
+                WithPollingInterval(TimeSpan.FromMilliseconds(1000)).
+                WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(500)).
+                Build();
 
 
-            httpManager.NotifyOnProjectConfigUpdate += NotificationCallbackMock.Object.TestConfigUpdateCallback;
+            httpManager.NotifyOnProjectConfigUpdate +=
+                NotificationCallbackMock.Object.TestConfigUpdateCallback;
 
             NotificationCallbackMock.Verify(nc => nc.TestConfigUpdateCallback(), Times.Never);
-            Assert.NotNull(httpManager.GetConfig()); Assert.NotNull(httpManager.GetConfig());
+            Assert.NotNull(httpManager.GetConfig());
+            Assert.NotNull(httpManager.GetConfig());
             httpManager.Dispose();
         }
 
         [Test]
         public void TestDefaultBlockingTimeoutWhileProvidingZero()
         {
-            var httpManager = new HttpProjectConfigManager.Builder()
-                .WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z")
-                .WithDatafile(TestData.Datafile)
-                .WithLogger(LoggerMock.Object)
-                .WithPollingInterval(TimeSpan.FromMilliseconds(1000))
-                .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(0))
-                .WithStartByDefault(true)
-                .Build(true);
+            var httpManager = new HttpProjectConfigManager.Builder().
+                WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z").
+                WithDatafile(TestData.Datafile).
+                WithLogger(LoggerMock.Object).
+                WithPollingInterval(TimeSpan.FromMilliseconds(1000)).
+                WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(0)).
+                WithStartByDefault(true).
+                Build(true);
 
-            var fieldInfo = httpManager.GetType().GetField("BlockingTimeout", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+            var fieldInfo = httpManager.GetType().
+                GetField("BlockingTimeout",
+                    System.Reflection.BindingFlags.Instance |
+                    System.Reflection.BindingFlags.NonPublic);
             var expectedBlockingTimeout = (TimeSpan)fieldInfo.GetValue(httpManager);
             Assert.AreNotEqual(expectedBlockingTimeout.TotalSeconds, TimeSpan.Zero.TotalSeconds);
 
-            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, $"Blocking timeout is not valid, using default blocking timeout {TimeSpan.FromSeconds(15).TotalMilliseconds}ms"));
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG,
+                $"Blocking timeout is not valid, using default blocking timeout {TimeSpan.FromSeconds(15).TotalMilliseconds}ms"));
             httpManager.Dispose();
         }
 
         [Test]
         public void TestDefaultPeriodWhileProvidingZero()
         {
-            var httpManager = new HttpProjectConfigManager.Builder()
-                .WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z")
-                .WithDatafile(TestData.Datafile)
-                .WithLogger(LoggerMock.Object)
-                .WithPollingInterval(TimeSpan.FromMilliseconds(0))
-                .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(1000))
-                .WithStartByDefault(true)
-                .Build(true);
+            var httpManager = new HttpProjectConfigManager.Builder().
+                WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z").
+                WithDatafile(TestData.Datafile).
+                WithLogger(LoggerMock.Object).
+                WithPollingInterval(TimeSpan.FromMilliseconds(0)).
+                WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(1000)).
+                WithStartByDefault(true).
+                Build(true);
 
-            var fieldInfo = typeof(PollingProjectConfigManager).GetField("PollingInterval", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+            var fieldInfo = typeof(PollingProjectConfigManager).GetField("PollingInterval",
+                System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
             var expectedPollingInterval = (TimeSpan)fieldInfo.GetValue(httpManager);
             Assert.AreNotEqual(expectedPollingInterval.TotalSeconds, TimeSpan.Zero.TotalSeconds);
 
-            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, $"Polling interval is not valid for periodic calls, using default period {TimeSpan.FromMinutes(5).TotalMilliseconds}ms"));
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG,
+                $"Polling interval is not valid for periodic calls, using default period {TimeSpan.FromMinutes(5).TotalMilliseconds}ms"));
             httpManager.Dispose();
         }
 
         [Test]
         public void TestDefaultPeriodWhileProvidingNegative()
         {
-            var httpManager = new HttpProjectConfigManager.Builder()
-                .WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z")
-                .WithDatafile(TestData.Datafile)
-                .WithLogger(LoggerMock.Object)
-                .WithPollingInterval(TimeSpan.FromMilliseconds(-1))
-                .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(1000))
-                .WithStartByDefault(true)
-                .Build(true);
+            var httpManager = new HttpProjectConfigManager.Builder().
+                WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z").
+                WithDatafile(TestData.Datafile).
+                WithLogger(LoggerMock.Object).
+                WithPollingInterval(TimeSpan.FromMilliseconds(-1)).
+                WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(1000)).
+                WithStartByDefault(true).
+                Build(true);
 
-            var fieldInfo = typeof(PollingProjectConfigManager).GetField("PollingInterval", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+            var fieldInfo = typeof(PollingProjectConfigManager).GetField("PollingInterval",
+                System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
             var expectedPollingInterval = (TimeSpan)fieldInfo.GetValue(httpManager);
             Assert.AreNotEqual(expectedPollingInterval.TotalSeconds, TimeSpan.Zero.TotalSeconds);
 
-            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, $"Polling interval is not valid for periodic calls, using default period {TimeSpan.FromMinutes(5).TotalMilliseconds}ms"));
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG,
+                $"Polling interval is not valid for periodic calls, using default period {TimeSpan.FromMinutes(5).TotalMilliseconds}ms"));
             httpManager.Dispose();
         }
 
         [Test]
         public void TestDefaultPeriodWhileNotProvidingValue()
         {
-            var httpManager = new HttpProjectConfigManager.Builder()
-                .WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z")
-                .WithDatafile(TestData.Datafile)
-                .WithLogger(LoggerMock.Object)
-                .Build(true);
+            var httpManager = new HttpProjectConfigManager.Builder().
+                WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z").
+                WithDatafile(TestData.Datafile).
+                WithLogger(LoggerMock.Object).
+                Build(true);
 
-            var fieldInfo = typeof(PollingProjectConfigManager).GetField("PollingInterval", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+            var fieldInfo = typeof(PollingProjectConfigManager).GetField("PollingInterval",
+                System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
             var expectedPollingInterval = (TimeSpan)fieldInfo.GetValue(httpManager);
             Assert.AreNotEqual(expectedPollingInterval.TotalSeconds, TimeSpan.Zero.TotalSeconds);
 
-            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, $"No polling interval provided, using default period {TimeSpan.FromMinutes(5).TotalMilliseconds}ms"));
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG,
+                $"No polling interval provided, using default period {TimeSpan.FromMinutes(5).TotalMilliseconds}ms"));
             httpManager.Dispose();
         }
 
         [Test]
         public void TestDefaultBlockingTimeoutWhileNotProvidingValue()
         {
-            var httpManager = new HttpProjectConfigManager.Builder()
-                .WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z")
-                .WithDatafile(TestData.Datafile)
-                .WithLogger(LoggerMock.Object)
-                .Build(true);
+            var httpManager = new HttpProjectConfigManager.Builder().
+                WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z").
+                WithDatafile(TestData.Datafile).
+                WithLogger(LoggerMock.Object).
+                Build(true);
 
-            var fieldInfo = httpManager.GetType().GetField("BlockingTimeout", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+            var fieldInfo = httpManager.GetType().
+                GetField("BlockingTimeout",
+                    System.Reflection.BindingFlags.Instance |
+                    System.Reflection.BindingFlags.NonPublic);
             var expectedBlockingTimeout = (TimeSpan)fieldInfo.GetValue(httpManager);
             Assert.AreNotEqual(expectedBlockingTimeout.TotalSeconds, TimeSpan.Zero.TotalSeconds);
 
-            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, $"No Blocking timeout provided, using default blocking timeout {TimeSpan.FromSeconds(15).TotalMilliseconds}ms"));
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG,
+                $"No Blocking timeout provided, using default blocking timeout {TimeSpan.FromSeconds(15).TotalMilliseconds}ms"));
             httpManager.Dispose();
         }
 
         [Test]
         public void TestDefaultValuesWhenNotProvided()
         {
-            var httpManager = new HttpProjectConfigManager.Builder()
-                .WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z")
-                .WithDatafile(TestData.Datafile)
-                .WithLogger(LoggerMock.Object)
-                .Build(true);
+            var httpManager = new HttpProjectConfigManager.Builder().
+                WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z").
+                WithDatafile(TestData.Datafile).
+                WithLogger(LoggerMock.Object).
+                Build(true);
 
-            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, $"No polling interval provided, using default period {TimeSpan.FromMinutes(5).TotalMilliseconds}ms"));
-            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, $"No Blocking timeout provided, using default blocking timeout {TimeSpan.FromSeconds(15).TotalMilliseconds}ms"));
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG,
+                $"No polling interval provided, using default period {TimeSpan.FromMinutes(5).TotalMilliseconds}ms"));
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG,
+                $"No Blocking timeout provided, using default blocking timeout {TimeSpan.FromSeconds(15).TotalMilliseconds}ms"));
             httpManager.Dispose();
         }
 
@@ -429,19 +461,20 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         {
             var t = MockSendAsync();
 
-            var httpManager = new HttpProjectConfigManager.Builder()
-                .WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z")
-                .WithLogger(LoggerMock.Object)
-                .WithAccessToken("datafile1")
-                .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(50))
-                .Build(true);
+            var httpManager = new HttpProjectConfigManager.Builder().
+                WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z").
+                WithLogger(LoggerMock.Object).
+                WithAccessToken("datafile1").
+                WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(50)).
+                Build(true);
 
             // it's to wait if SendAsync is not triggered.
             t.Wait(2000);
 
             HttpClientMock.Verify(_ => _.SendAsync(
-                It.Is<System.Net.Http.HttpRequestMessage>(requestMessage =>
-                requestMessage.RequestUri.ToString() == "https://config.optimizely.com/datafiles/auth/QBw9gFM8oTn7ogY9ANCC1z.json"
+                It.Is<HttpRequestMessage>(requestMessage =>
+                    requestMessage.RequestUri.ToString() ==
+                    "https://config.optimizely.com/datafiles/auth/QBw9gFM8oTn7ogY9ANCC1z.json"
                 )));
             httpManager.Dispose();
         }
@@ -451,17 +484,18 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         {
             var t = MockSendAsync();
 
-            var httpManager = new HttpProjectConfigManager.Builder()
-                .WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z")
-                .WithLogger(LoggerMock.Object)
-                .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(50))
-                .Build(true);
+            var httpManager = new HttpProjectConfigManager.Builder().
+                WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z").
+                WithLogger(LoggerMock.Object).
+                WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(50)).
+                Build(true);
 
             // it's to wait if SendAsync is not triggered.
             t.Wait(2000);
             HttpClientMock.Verify(_ => _.SendAsync(
-                It.Is<System.Net.Http.HttpRequestMessage>(requestMessage =>
-                requestMessage.RequestUri.ToString() == "https://cdn.optimizely.com/datafiles/QBw9gFM8oTn7ogY9ANCC1z.json"
+                It.Is<HttpRequestMessage>(requestMessage =>
+                    requestMessage.RequestUri.ToString() ==
+                    "https://cdn.optimizely.com/datafiles/QBw9gFM8oTn7ogY9ANCC1z.json"
                 )));
             httpManager.Dispose();
         }
@@ -471,19 +505,19 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         {
             var t = MockSendAsync();
 
-            var httpManager = new HttpProjectConfigManager.Builder()
-                .WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z")
-                .WithLogger(LoggerMock.Object)
-                .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(50))
-                .WithAccessToken("datafile1")
-                .Build(true);
+            var httpManager = new HttpProjectConfigManager.Builder().
+                WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z").
+                WithLogger(LoggerMock.Object).
+                WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(50)).
+                WithAccessToken("datafile1").
+                Build(true);
 
             // it's to wait if SendAsync is not triggered.
             t.Wait(2000);
 
             HttpClientMock.Verify(_ => _.SendAsync(
-                It.Is<System.Net.Http.HttpRequestMessage>(requestMessage =>
-                requestMessage.Headers.Authorization.ToString() == "Bearer datafile1"
+                It.Is<HttpRequestMessage>(requestMessage =>
+                    requestMessage.Headers.Authorization.ToString() == "Bearer datafile1"
                 )));
             httpManager.Dispose();
         }
@@ -492,27 +526,31 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         public void TestFormatUrlHigherPriorityThanDefaultUrl()
         {
             var t = MockSendAsync();
-            var httpManager = new HttpProjectConfigManager.Builder()
-                .WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z")
-                .WithLogger(LoggerMock.Object)
-                .WithFormat("http://customformat/{0}.json")
-                .WithAccessToken("datafile1")
-                .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(50))
-                .Build(true);
+            var httpManager = new HttpProjectConfigManager.Builder().
+                WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z").
+                WithLogger(LoggerMock.Object).
+                WithFormat("http://customformat/{0}.json").
+                WithAccessToken("datafile1").
+                WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(50)).
+                Build(true);
             // it's to wait if SendAsync is not triggered.
             t.Wait(2000);
             HttpClientMock.Verify(_ => _.SendAsync(
-                It.Is<System.Net.Http.HttpRequestMessage>(requestMessage =>
-                requestMessage.RequestUri.ToString() == "http://customformat/QBw9gFM8oTn7ogY9ANCC1z.json"
+                It.Is<HttpRequestMessage>(requestMessage =>
+                    requestMessage.RequestUri.ToString() ==
+                    "http://customformat/QBw9gFM8oTn7ogY9ANCC1z.json"
                 )));
             httpManager.Dispose();
-
         }
 
-        public Task MockSendAsync(string datafile = null, TimeSpan? delay = null, HttpStatusCode statusCode = HttpStatusCode.OK)
+        public Task MockSendAsync(string datafile = null, TimeSpan? delay = null,
+            HttpStatusCode statusCode = HttpStatusCode.OK
+        )
         {
-            return TestHttpProjectConfigManagerUtil.MockSendAsync(HttpClientMock, datafile, delay, statusCode);
+            return TestHttpProjectConfigManagerUtil.MockSendAsync(HttpClientMock, datafile, delay,
+                statusCode);
         }
+
         #endregion
     }
 }

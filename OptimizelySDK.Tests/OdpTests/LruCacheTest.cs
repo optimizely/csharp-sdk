@@ -142,7 +142,7 @@ namespace OptimizelySDK.Tests.OdpTests
         [Test]
         public void ShouldHandleWhenCacheIsDisabled()
         {
-            var cache = new LruCache<List<string>>(maxSize: 0);
+            var cache = new LruCache<List<string>>(0);
 
             cache.Save("user1", _segments1And2);
             cache.Save("user2", _segments3And4);
@@ -172,7 +172,7 @@ namespace OptimizelySDK.Tests.OdpTests
         [Test]
         public void ShouldHandleWhenCacheReachesMaxSize()
         {
-            var cache = new LruCache<List<string>>(maxSize: 2);
+            var cache = new LruCache<List<string>>(2);
 
             cache.Save("user1", _segments1And2);
             cache.Save("user2", _segments3And4);

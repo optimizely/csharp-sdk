@@ -26,11 +26,18 @@ namespace OptimizelySDK.Tests.EntityTests
         [Test]
         public void TestFeatureVariableTypeName()
         {
-            Assert.AreEqual(FeatureVariable.GetFeatureVariableTypeName(FeatureVariable.BOOLEAN_TYPE), "GetFeatureVariableBoolean");
-            Assert.AreEqual(FeatureVariable.GetFeatureVariableTypeName(FeatureVariable.DOUBLE_TYPE), "GetFeatureVariableDouble");
-            Assert.AreEqual(FeatureVariable.GetFeatureVariableTypeName(FeatureVariable.INTEGER_TYPE), "GetFeatureVariableInteger");
-            Assert.AreEqual(FeatureVariable.GetFeatureVariableTypeName(FeatureVariable.STRING_TYPE), "GetFeatureVariableString");
-            Assert.AreEqual(FeatureVariable.GetFeatureVariableTypeName(FeatureVariable.JSON_TYPE), "GetFeatureVariableJSON");
+            Assert.AreEqual(
+                FeatureVariable.GetFeatureVariableTypeName(FeatureVariable.BOOLEAN_TYPE),
+                "GetFeatureVariableBoolean");
+            Assert.AreEqual(FeatureVariable.GetFeatureVariableTypeName(FeatureVariable.DOUBLE_TYPE),
+                "GetFeatureVariableDouble");
+            Assert.AreEqual(
+                FeatureVariable.GetFeatureVariableTypeName(FeatureVariable.INTEGER_TYPE),
+                "GetFeatureVariableInteger");
+            Assert.AreEqual(FeatureVariable.GetFeatureVariableTypeName(FeatureVariable.STRING_TYPE),
+                "GetFeatureVariableString");
+            Assert.AreEqual(FeatureVariable.GetFeatureVariableTypeName(FeatureVariable.JSON_TYPE),
+                "GetFeatureVariableJSON");
         }
 
         [Test]

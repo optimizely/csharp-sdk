@@ -13,16 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 using OptimizelySDK.Event.Dispatcher;
 using OptimizelySDK.Logger;
 
 namespace OptimizelySDK.Tests
 {
-    class ValidEventDispatcher : IEventDispatcher
+    internal class ValidEventDispatcher : IEventDispatcher
     {
         public ILogger Logger { get; set; }
-        public void DispatchEvent(Event.LogEvent logEvent)
-        {
-        }
+        public void DispatchEvent(Event.LogEvent logEvent) { }
     }
 }

@@ -47,12 +47,12 @@ namespace OptimizelySDK.Tests.OdpTests
             }
 
             var mockedHandler = new Mock<HttpMessageHandler>();
-            mockedHandler.Protected()
-                .Setup<Task<HttpResponseMessage>>(
+            mockedHandler.Protected().
+                Setup<Task<HttpResponseMessage>>(
                     "SendAsync",
                     ItExpr.IsAny<HttpRequestMessage>(),
-                    ItExpr.IsAny<CancellationToken>())
-                .ReturnsAsync(response);
+                    ItExpr.IsAny<CancellationToken>()).
+                ReturnsAsync(response);
             return new HttpClient(mockedHandler.Object);
         }
 
@@ -63,12 +63,12 @@ namespace OptimizelySDK.Tests.OdpTests
         public static HttpClient MakeHttpClientWithTimeout()
         {
             var mockedHandler = new Mock<HttpMessageHandler>();
-            mockedHandler.Protected()
-                .Setup<Task<HttpResponseMessage>>(
+            mockedHandler.Protected().
+                Setup<Task<HttpResponseMessage>>(
                     "SendAsync",
                     ItExpr.IsAny<HttpRequestMessage>(),
-                    ItExpr.IsAny<CancellationToken>())
-                .Throws<TimeoutException>();
+                    ItExpr.IsAny<CancellationToken>()).
+                Throws<TimeoutException>();
             return new HttpClient(mockedHandler.Object);
         }
     }

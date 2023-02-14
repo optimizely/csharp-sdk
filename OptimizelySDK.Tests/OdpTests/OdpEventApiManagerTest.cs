@@ -121,7 +121,8 @@ namespace OptimizelySDK.Tests.OdpTests
         }
 
         [Test]
-        public void ShouldSuggestRetryForNetworkTimeout() { 
+        public void ShouldSuggestRetryForNetworkTimeout()
+        {
             var httpClient = HttpClientTestUtil.MakeHttpClientWithTimeout();
             var manger =
                 new OdpEventApiManager(_mockLogger.Object, _mockErrorHandler.Object, httpClient);
@@ -129,6 +130,7 @@ namespace OptimizelySDK.Tests.OdpTests
             var shouldRetry = manger.SendEvents(VALID_ODP_PUBLIC_KEY, ODP_REST_API_HOST,
                 _odpEvents);
 
-            Assert.IsTrue(shouldRetry);}
+            Assert.IsTrue(shouldRetry);
+        }
     }
 }

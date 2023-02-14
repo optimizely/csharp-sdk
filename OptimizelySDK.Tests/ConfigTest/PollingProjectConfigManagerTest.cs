@@ -85,7 +85,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
             var configManager = new TestPollingProjectConfigManager(TimeSpan.FromSeconds(1),
                 TimeSpan.FromMilliseconds(1500), true, LoggerMock.Object, new int[]
                 {
-                    1200, 500, 500
+                    1200, 500, 500,
                 });
 
             configManager.Start();
@@ -110,7 +110,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
             var configManager = new TestPollingProjectConfigManager(TimeSpan.FromSeconds(3),
                 TimeSpan.FromMilliseconds(1000), true, LoggerMock.Object, new int[]
                 {
-                    1300, 500, 500
+                    1300, 500, 500,
                 });
 
             configManager.Start();
@@ -128,9 +128,9 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
             var configManager = new TestPollingProjectConfigManager(TimeSpan.FromSeconds(3),
                 TimeSpan.FromMilliseconds(1000), true, LoggerMock.Object, new int[]
                 {
-                    1300, 500, 500
+                    1300, 500, 500,
                 });
-            Stopwatch sw = new Stopwatch();
+            var sw = new Stopwatch();
             sw.Start();
             var config = configManager.GetConfig();
             sw.Stop();
@@ -146,9 +146,9 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
             var configManager = new TestPollingProjectConfigManager(TimeSpan.FromSeconds(3),
                 TimeSpan.FromMilliseconds(1000), true, LoggerMock.Object, new int[]
                 {
-                    1300, 500, 500
+                    1300, 500, 500,
                 });
-            Stopwatch sw = new Stopwatch();
+            var sw = new Stopwatch();
             sw.Start();
             var config = configManager.GetConfig();
             sw.Stop();
@@ -167,14 +167,14 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
                 {
                     PollingTime = 500,
                     ChangeVersion = false,
-                    ConfigDatafile = projConfig
+                    ConfigDatafile = projConfig,
                 },
                 new TestPollingData
                 {
                     PollingTime = 500,
                     ChangeVersion = false,
-                    ConfigDatafile = projConfig
-                }
+                    ConfigDatafile = projConfig,
+                },
             };
 
             var configManager = new TestPollingProjectConfigManager(TimeSpan.FromSeconds(3),
@@ -204,20 +204,20 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
                 {
                     PollingTime = 50,
                     ChangeVersion = false,
-                    ConfigDatafile = null
+                    ConfigDatafile = null,
                 },
                 new TestPollingData
                 {
                     PollingTime = 50,
                     ChangeVersion = false,
-                    ConfigDatafile = null
+                    ConfigDatafile = null,
                 },
                 new TestPollingData
                 {
                     PollingTime = 50,
                     ChangeVersion = false,
-                    ConfigDatafile = projConfig
-                }
+                    ConfigDatafile = projConfig,
+                },
             };
 
 
@@ -241,20 +241,20 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
                 {
                     PollingTime = 50,
                     ChangeVersion = false,
-                    ConfigDatafile = null
+                    ConfigDatafile = null,
                 },
                 new TestPollingData
                 {
                     PollingTime = 50,
                     ChangeVersion = false,
-                    ConfigDatafile = null
+                    ConfigDatafile = null,
                 },
                 new TestPollingData
                 {
                     PollingTime = 50,
                     ChangeVersion = false,
-                    ConfigDatafile = null
-                }
+                    ConfigDatafile = null,
+                },
             };
 
             var configManager = new TestPollingProjectConfigManager(TimeSpan.FromMilliseconds(1000),

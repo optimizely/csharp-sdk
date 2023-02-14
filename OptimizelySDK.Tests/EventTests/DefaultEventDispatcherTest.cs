@@ -20,22 +20,22 @@ namespace OptimizelySDK.Tests.EventTests
             var logEvent = new LogEvent("",
                 new Dictionary<string, object>
                 {
-                    {"accountId", "1234" },
-                    {"projectId", "9876" },
-                    {"visitorId", "testUser" }
+                    { "accountId", "1234" },
+                    { "projectId", "9876" },
+                    { "visitorId", "testUser" },
                 },
                 "POST",
                 new Dictionary<string, string>
                 {
-                    {"Content-Type", "application/json" }
+                    { "Content-Type", "application/json" },
                 });
 
             var expectionedOptions = new Dictionary<string, object>
             {
-                {"headers", logEvent.Headers },
-                {"json", logEvent.Params },
-                {"timeout", 10 },
-                {"connect_timeout", 10 }
+                { "headers", logEvent.Headers },
+                { "json", logEvent.Params },
+                { "timeout", 10 },
+                { "connect_timeout", 10 },
             };
 
             //TODO: Have to mock http calls. Will discuss with Randall.

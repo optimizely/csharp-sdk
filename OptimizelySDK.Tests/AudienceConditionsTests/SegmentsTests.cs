@@ -128,7 +128,8 @@ namespace OptimizelySDK.Tests.AudienceConditionsTests
             {
                 Conditions = new[]
                 {
-                    _customExactMatchCondition, _customExactMatchCondition, _customExactMatchCondition,
+                    _customExactMatchCondition, _customExactMatchCondition,
+                    _customExactMatchCondition,
                 },
             };
 
@@ -151,7 +152,8 @@ namespace OptimizelySDK.Tests.AudienceConditionsTests
             {
                 Conditions = new ICondition[]
                 {
-                    _secondThirdPartyOdpQualifiedMatchCondition, _firstThirdPartyOdpQualifiedMatchCondition,
+                    _secondThirdPartyOdpQualifiedMatchCondition,
+                    _firstThirdPartyOdpQualifiedMatchCondition,
                 },
             };
             var orConditions = new OrCondition

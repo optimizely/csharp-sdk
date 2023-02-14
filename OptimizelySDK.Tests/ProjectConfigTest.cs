@@ -54,7 +54,7 @@ namespace OptimizelySDK.Tests
             {
                 {
                     name, entityObject
-                }
+                },
             };
         }
 
@@ -125,7 +125,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "etag4", Config.GetExperimentFromKey("etag4")
-                }
+                },
             };
 
             Assert.IsTrue(TestData.CompareObjects(experimentKeyMap, Config.ExperimentKeyMap));
@@ -169,7 +169,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "119", Config.GetExperimentFromId("119")
-                }
+                },
             };
 
             Assert.IsTrue(TestData.CompareObjects(experimentIdMap, Config.ExperimentIdMap));
@@ -179,7 +179,7 @@ namespace OptimizelySDK.Tests
             {
                 {
                     "purchase", Config.GetEvent("purchase")
-                }
+                },
             };
             Assert.IsTrue(TestData.CompareObjects(eventKeyMap, Config.EventKeyMap));
 
@@ -203,7 +203,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "double_key", Config.GetAttribute("double_key")
-                }
+                },
             };
             Assert.IsTrue(TestData.CompareObjects(attributeKeyMap, Config.AttributeKeyMap));
 
@@ -218,7 +218,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "100", Config.GetAudience("100")
-                }
+                },
             };
             Assert.IsTrue(TestData.CompareObjects(audienceIdMap, Config.AudienceIdMap));
 
@@ -233,7 +233,7 @@ namespace OptimizelySDK.Tests
                         },
                         {
                             "variation", Config.GetVariationFromKey("test_experiment", "variation")
-                        }
+                        },
                     }
                 },
                 {
@@ -245,7 +245,7 @@ namespace OptimizelySDK.Tests
                         {
                             "variation",
                             Config.GetVariationFromKey("paused_experiment", "variation")
-                        }
+                        },
                     }
                 },
                 {
@@ -258,7 +258,7 @@ namespace OptimizelySDK.Tests
                         {
                             "group_exp_1_var_2",
                             Config.GetVariationFromKey("group_experiment_1", "group_exp_1_var_2")
-                        }
+                        },
                     }
                 },
                 {
@@ -271,7 +271,7 @@ namespace OptimizelySDK.Tests
                         {
                             "group_exp_2_var_2",
                             Config.GetVariationFromKey("group_experiment_2", "group_exp_2_var_2")
-                        }
+                        },
                     }
                 },
                 {
@@ -292,7 +292,7 @@ namespace OptimizelySDK.Tests
                         {
                             "George",
                             Config.GetVariationFromKey("test_experiment_multivariate", "George")
-                        }
+                        },
                     }
                 },
                 {
@@ -307,7 +307,7 @@ namespace OptimizelySDK.Tests
                             "variation", Config.GetVariationFromKey(
                                 "test_experiment_with_feature_rollout",
                                 "variation")
-                        }
+                        },
                     }
                 },
                 {
@@ -321,7 +321,7 @@ namespace OptimizelySDK.Tests
                             "variation", Config.GetVariationFromKey(
                                 "test_experiment_double_feature",
                                 "variation")
-                        }
+                        },
                     }
                 },
                 {
@@ -335,7 +335,7 @@ namespace OptimizelySDK.Tests
                             "variation", Config.GetVariationFromKey(
                                 "test_experiment_integer_feature",
                                 "variation")
-                        }
+                        },
                     }
                 },
                 {
@@ -343,7 +343,7 @@ namespace OptimizelySDK.Tests
                     {
                         {
                             "177771", Config.GetVariationFromKey("177770", "177771")
-                        }
+                        },
                     }
                 },
                 {
@@ -351,7 +351,7 @@ namespace OptimizelySDK.Tests
                     {
                         {
                             "177773", Config.GetVariationFromKey("177772", "177773")
-                        }
+                        },
                     }
                 },
                 {
@@ -359,7 +359,7 @@ namespace OptimizelySDK.Tests
                     {
                         {
                             "177778", Config.GetVariationFromKey("177776", "177778")
-                        }
+                        },
                     }
                 },
                 {
@@ -367,7 +367,7 @@ namespace OptimizelySDK.Tests
                     {
                         {
                             "177775", Config.GetVariationFromKey("177774", "177775")
-                        }
+                        },
                     }
                 },
                 {
@@ -375,7 +375,7 @@ namespace OptimizelySDK.Tests
                     {
                         {
                             "177780", Config.GetVariationFromKey("177779", "177780")
-                        }
+                        },
                     }
                 },
                 {
@@ -383,7 +383,7 @@ namespace OptimizelySDK.Tests
                     {
                         {
                             "177782", Config.GetVariationFromKey("177781", "177782")
-                        }
+                        },
                     }
                 },
                 {
@@ -391,7 +391,7 @@ namespace OptimizelySDK.Tests
                     {
                         {
                             "177784", Config.GetVariationFromKey("177783", "177784")
-                        }
+                        },
                     }
                 },
                 {
@@ -399,7 +399,7 @@ namespace OptimizelySDK.Tests
                     {
                         {
                             "188881", Config.GetVariationFromKey("188880", "188881")
-                        }
+                        },
                     }
                 },
                 {
@@ -410,7 +410,7 @@ namespace OptimizelySDK.Tests
                         },
                         {
                             "vtag2", Config.GetVariationFromKey("etag1", "vtag2")
-                        }
+                        },
                     }
                 },
                 {
@@ -421,7 +421,7 @@ namespace OptimizelySDK.Tests
                         },
                         {
                             "vtag4", Config.GetVariationFromKey("etag2", "vtag4")
-                        }
+                        },
                     }
                 },
                 {
@@ -432,7 +432,7 @@ namespace OptimizelySDK.Tests
                         },
                         {
                             "vtag6", Config.GetVariationFromKey("etag3", "vtag6")
-                        }
+                        },
                     }
                 },
                 {
@@ -443,9 +443,9 @@ namespace OptimizelySDK.Tests
                         },
                         {
                             "vtag8", Config.GetVariationFromKey("etag4", "vtag8")
-                        }
+                        },
                     }
-                }
+                },
             };
 
             Assert.IsTrue(TestData.CompareObjects(expectedVariationKeyMap, Config.VariationKeyMap));
@@ -461,7 +461,7 @@ namespace OptimizelySDK.Tests
                         },
                         {
                             "7721010009", Config.GetVariationFromId("test_experiment", "7721010009")
-                        }
+                        },
                     }
                 },
                 {
@@ -474,7 +474,7 @@ namespace OptimizelySDK.Tests
                         {
                             "7721010509",
                             Config.GetVariationFromId("paused_experiment", "7721010509")
-                        }
+                        },
                     }
                 },
                 {
@@ -495,7 +495,7 @@ namespace OptimizelySDK.Tests
                         {
                             "122234",
                             Config.GetVariationFromId("test_experiment_multivariate", "122234")
-                        }
+                        },
                     }
                 },
                 {
@@ -510,7 +510,7 @@ namespace OptimizelySDK.Tests
                             "122237", Config.GetVariationFromId(
                                 "test_experiment_with_feature_rollout",
                                 "122237")
-                        }
+                        },
                     }
                 },
                 {
@@ -523,7 +523,7 @@ namespace OptimizelySDK.Tests
                         {
                             "122240",
                             Config.GetVariationFromId("test_experiment_double_feature", "122240")
-                        }
+                        },
                     }
                 },
                 {
@@ -536,7 +536,7 @@ namespace OptimizelySDK.Tests
                         {
                             "122243",
                             Config.GetVariationFromId("test_experiment_integer_feature", "122243")
-                        }
+                        },
                     }
                 },
                 {
@@ -549,7 +549,7 @@ namespace OptimizelySDK.Tests
                         {
                             "7722360022",
                             Config.GetVariationFromId("group_experiment_1", "7722360022")
-                        }
+                        },
                     }
                 },
                 {
@@ -562,7 +562,7 @@ namespace OptimizelySDK.Tests
                         {
                             "7725250007",
                             Config.GetVariationFromId("group_experiment_2", "7725250007")
-                        }
+                        },
                     }
                 },
                 {
@@ -570,7 +570,7 @@ namespace OptimizelySDK.Tests
                     {
                         {
                             "177771", Config.GetVariationFromId("177770", "177771")
-                        }
+                        },
                     }
                 },
                 {
@@ -578,7 +578,7 @@ namespace OptimizelySDK.Tests
                     {
                         {
                             "177773", Config.GetVariationFromId("177772", "177773")
-                        }
+                        },
                     }
                 },
                 {
@@ -586,7 +586,7 @@ namespace OptimizelySDK.Tests
                     {
                         {
                             "177778", Config.GetVariationFromId("177776", "177778")
-                        }
+                        },
                     }
                 },
                 {
@@ -594,7 +594,7 @@ namespace OptimizelySDK.Tests
                     {
                         {
                             "177775", Config.GetVariationFromId("177774", "177775")
-                        }
+                        },
                     }
                 },
                 {
@@ -602,7 +602,7 @@ namespace OptimizelySDK.Tests
                     {
                         {
                             "177780", Config.GetVariationFromId("177779", "177780")
-                        }
+                        },
                     }
                 },
                 {
@@ -610,7 +610,7 @@ namespace OptimizelySDK.Tests
                     {
                         {
                             "177782", Config.GetVariationFromId("177781", "177782")
-                        }
+                        },
                     }
                 },
                 {
@@ -618,7 +618,7 @@ namespace OptimizelySDK.Tests
                     {
                         {
                             "177784", Config.GetVariationFromId("177783", "177784")
-                        }
+                        },
                     }
                 },
                 {
@@ -626,7 +626,7 @@ namespace OptimizelySDK.Tests
                     {
                         {
                             "188881", Config.GetVariationFromId("188880", "188881")
-                        }
+                        },
                     }
                 },
                 {
@@ -637,7 +637,7 @@ namespace OptimizelySDK.Tests
                         },
                         {
                             "277", Config.GetVariationFromId("etag1", "277")
-                        }
+                        },
                     }
                 },
                 {
@@ -648,7 +648,7 @@ namespace OptimizelySDK.Tests
                         },
                         {
                             "279", Config.GetVariationFromId("etag2", "279")
-                        }
+                        },
                     }
                 },
                 {
@@ -659,7 +659,7 @@ namespace OptimizelySDK.Tests
                         },
                         {
                             "281", Config.GetVariationFromId("etag3", "281")
-                        }
+                        },
                     }
                 },
                 {
@@ -670,9 +670,9 @@ namespace OptimizelySDK.Tests
                         },
                         {
                             "283", Config.GetVariationFromId("etag4", "283")
-                        }
+                        },
                     }
-                }
+                },
             };
 
             Assert.IsTrue(TestData.CompareObjects(expectedVariationIdMap, Config.VariationIdMap));
@@ -683,12 +683,12 @@ namespace OptimizelySDK.Tests
                 new FeatureVariableUsage
                 {
                     Id = "155560",
-                    Value = "F"
+                    Value = "F",
                 },
                 new FeatureVariableUsage
                 {
                     Id = "155561",
-                    Value = "red"
+                    Value = "red",
                 },
             };
 
@@ -697,7 +697,7 @@ namespace OptimizelySDK.Tests
                 Id = "122231",
                 Key = "Fred",
                 FeatureVariableUsageInstances = featureVariableUsageInstance,
-                FeatureEnabled = true
+                FeatureEnabled = true,
             };
             var actualVariationUsage =
                 Config.GetVariationFromKey("test_experiment_multivariate", "Fred");
@@ -742,7 +742,7 @@ namespace OptimizelySDK.Tests
                 {
                     "unsupported_variabletype",
                     Config.GetFeatureFlagFromKey("unsupported_variabletype")
-                }
+                },
             };
 
             Assertions.AreEquivalent(expectedFeatureKeyMap, Config.FeatureKeyMap);
@@ -755,7 +755,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "166661", Config.GetRolloutFromId("166661")
-                }
+                },
             };
 
             Assert.IsTrue(TestData.CompareObjects(expectedRolloutIdMap, Config.RolloutIdMap));
@@ -779,9 +779,9 @@ namespace OptimizelySDK.Tests
                             new FeatureVariableUsage
                             {
                                 Id = "155563",
-                                Value = "groupie_1_v1"
-                            }
-                        }
+                                Value = "groupie_1_v1",
+                            },
+                        },
                     }
                 },
                 {
@@ -795,9 +795,9 @@ namespace OptimizelySDK.Tests
                             new FeatureVariableUsage
                             {
                                 Id = "155563",
-                                Value = "groupie_1_v2"
-                            }
-                        }
+                                Value = "groupie_1_v2",
+                            },
+                        },
                     }
                 },
                 {
@@ -811,9 +811,9 @@ namespace OptimizelySDK.Tests
                             new FeatureVariableUsage
                             {
                                 Id = "155563",
-                                Value = "groupie_2_v1"
-                            }
-                        }
+                                Value = "groupie_2_v1",
+                            },
+                        },
                     }
                 },
                 {
@@ -827,11 +827,11 @@ namespace OptimizelySDK.Tests
                             new FeatureVariableUsage
                             {
                                 Id = "155563",
-                                Value = "groupie_2_v2"
-                            }
-                        }
+                                Value = "groupie_2_v2",
+                            },
+                        },
                     }
-                }
+                },
             };
             var filteredActualFlagVariations = allVariations["boolean_feature"];
             TestData.CompareObjects(expectedVariationDict, filteredActualFlagVariations);
@@ -880,7 +880,7 @@ namespace OptimizelySDK.Tests
                         ex.Message == "Provided group is not in datafile.")),
                 Times.Once, "Failed");
 
-            Assert.IsTrue(TestData.CompareObjects(group, new Entity.Group()));
+            Assert.IsTrue(TestData.CompareObjects(group, new Group()));
         }
 
         [Test]
@@ -904,7 +904,7 @@ namespace OptimizelySDK.Tests
                 e.HandleError(It.Is<InvalidExperimentException>(ex =>
                     ex.Message == "Provided experiment is not in datafile.")));
 
-            Assert.IsTrue(TestData.CompareObjects(new Entity.Experiment(), experiment));
+            Assert.IsTrue(TestData.CompareObjects(new Experiment(), experiment));
         }
 
         [Test]
@@ -928,7 +928,7 @@ namespace OptimizelySDK.Tests
                 e.HandleError(It.Is<InvalidExperimentException>(ex =>
                     ex.Message == "Provided experiment is not in datafile.")));
 
-            Assert.IsTrue(TestData.CompareObjects(new Entity.Experiment(), experiment));
+            Assert.IsTrue(TestData.CompareObjects(new Experiment(), experiment));
         }
 
         [Test]
@@ -940,7 +940,7 @@ namespace OptimizelySDK.Tests
 
             Assert.IsTrue(TestData.CompareObjects(new object[]
             {
-                "7716830082", "7723330021", "7718750065", "7716830585"
+                "7716830082", "7723330021", "7718750065", "7716830585",
             }, ev.ExperimentIds));
         }
 
@@ -981,7 +981,7 @@ namespace OptimizelySDK.Tests
             ErrorHandlerMock.Verify(e =>
                 e.HandleError(It.Is<InvalidAudienceException>(ex =>
                     ex.Message == "Provided audience is not in datafile.")));
-            Assert.IsTrue(TestData.CompareObjects(new Entity.Audience(), audience));
+            Assert.IsTrue(TestData.CompareObjects(new Audience(), audience));
         }
 
         [Test]
@@ -1038,7 +1038,7 @@ namespace OptimizelySDK.Tests
                 e.HandleError(It.Is<InvalidVariationException>(ex =>
                     ex.Message == "Provided variation is not in datafile.")));
 
-            Assert.AreEqual(new Entity.Variation(), variation);
+            Assert.AreEqual(new Variation(), variation);
         }
 
         [Test]
@@ -1053,7 +1053,7 @@ namespace OptimizelySDK.Tests
             ErrorHandlerMock.Verify(e =>
                 e.HandleError(It.Is<InvalidVariationException>(ex =>
                     ex.Message == "Provided variation is not in datafile.")));
-            Assert.AreEqual(new Entity.Variation(), variation);
+            Assert.AreEqual(new Variation(), variation);
         }
 
         [Test]
@@ -1076,7 +1076,7 @@ namespace OptimizelySDK.Tests
             ErrorHandlerMock.Verify(e =>
                 e.HandleError(It.Is<InvalidVariationException>(ex =>
                     ex.Message == "Provided variation is not in datafile.")));
-            Assert.AreEqual(new Entity.Variation(), variation);
+            Assert.AreEqual(new Variation(), variation);
         }
 
         [Test]
@@ -1091,13 +1091,13 @@ namespace OptimizelySDK.Tests
             ErrorHandlerMock.Verify(e =>
                 e.HandleError(It.Is<InvalidVariationException>(ex =>
                     ex.Message == "Provided variation is not in datafile.")));
-            Assert.AreEqual(new Entity.Variation(), variation);
+            Assert.AreEqual(new Variation(), variation);
         }
 
         [Test]
         public void TempProjectConfigTest()
         {
-            ProjectConfig config = DatafileProjectConfig.Create(TestData.Datafile,
+            var config = DatafileProjectConfig.Create(TestData.Datafile,
                 new Mock<ILogger>().Object, new DefaultErrorHandler());
             Assert.IsNotNull(config);
             Assert.AreEqual("1592310167", config.AccountId);
@@ -1107,7 +1107,7 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestProjectConfigDatafileIsSame()
         {
-            ProjectConfig config = DatafileProjectConfig.Create(TestData.Datafile,
+            var config = DatafileProjectConfig.Create(TestData.Datafile,
                 new Mock<ILogger>().Object, new DefaultErrorHandler());
             Assert.AreEqual(config.ToDatafile(), TestData.Datafile);
         }
@@ -1132,8 +1132,8 @@ namespace OptimizelySDK.Tests
             Assert.True(Config.BotFiltering.GetValueOrDefault());
 
             // Remove botFilering node and verify returned value in null.
-            JObject projConfig = JObject.Parse(TestData.Datafile);
-            if (projConfig.TryGetValue("botFiltering", out JToken token))
+            var projConfig = JObject.Parse(TestData.Datafile);
+            if (projConfig.TryGetValue("botFiltering", out var token))
             {
                 projConfig.Property("botFiltering").Remove();
                 var configWithoutBotFilter = DatafileProjectConfig.Create(
@@ -1157,14 +1157,14 @@ namespace OptimizelySDK.Tests
                 "$opt_reserved_prefix_attribute");
 
             // Create config file copy with additional resered prefix attribute.
-            string reservedPrefixAttrKey = "$opt_user_defined_attribute";
-            JObject projConfig = JObject.Parse(TestData.Datafile);
+            var reservedPrefixAttrKey = "$opt_user_defined_attribute";
+            var projConfig = JObject.Parse(TestData.Datafile);
             var attributes = (JArray)projConfig["attributes"];
 
             var reservedAttr = new Entity.Attribute
             {
                 Id = "7723348204",
-                Key = reservedPrefixAttrKey
+                Key = reservedPrefixAttrKey,
             };
             attributes.Add((JObject)JToken.FromObject(reservedAttr));
 
@@ -1233,7 +1233,7 @@ namespace OptimizelySDK.Tests
             var expectedAudienceIds = new string[]
             {
                 "3468206642", "3988293898", "3988293899", "3468206646", "3468206647", "3468206644",
-                "3468206643"
+                "3468206643",
             };
             Assert.That(expectedAudienceIds, Is.EquivalentTo(experiment.AudienceIds));
         }
@@ -1313,7 +1313,7 @@ namespace OptimizelySDK.Tests
         {
             var datafileProjectConfig = DatafileProjectConfig.Create(
                 TestData.OdpIntegrationDatafile, new NoOpLogger(),
-                new ErrorHandler.NoOpErrorHandler());
+                new NoOpErrorHandler());
 
             Assert.AreEqual(ZAIUS_HOST, datafileProjectConfig.HostForOdp);
             Assert.AreEqual(ZAIUS_PUBLIC_KEY, datafileProjectConfig.PublicKeyForOdp);
@@ -1324,7 +1324,7 @@ namespace OptimizelySDK.Tests
         {
             var datafileProjectConfig = DatafileProjectConfig.Create(
                 TestData.OdpIntegrationWithOtherFieldsDatafile, new NoOpLogger(),
-                new ErrorHandler.NoOpErrorHandler());
+                new NoOpErrorHandler());
 
             Assert.AreEqual(ZAIUS_HOST, datafileProjectConfig.HostForOdp);
             Assert.AreEqual(ZAIUS_PUBLIC_KEY, datafileProjectConfig.PublicKeyForOdp);
@@ -1335,7 +1335,7 @@ namespace OptimizelySDK.Tests
         {
             var datafileProjectConfig = DatafileProjectConfig.Create(
                 TestData.EmptyIntegrationDatafile, new NoOpLogger(),
-                new ErrorHandler.NoOpErrorHandler());
+                new NoOpErrorHandler());
 
             Assert.IsNull(datafileProjectConfig.HostForOdp);
             Assert.IsNull(datafileProjectConfig.PublicKeyForOdp);
@@ -1346,7 +1346,7 @@ namespace OptimizelySDK.Tests
         {
             var datafileProjectConfig = DatafileProjectConfig.Create(
                 TestData.NonOdpIntegrationDatafile, new NoOpLogger(),
-                new ErrorHandler.NoOpErrorHandler());
+                new NoOpErrorHandler());
 
             Assert.IsNull(datafileProjectConfig.HostForOdp);
             Assert.IsNull(datafileProjectConfig.PublicKeyForOdp);
