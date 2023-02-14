@@ -51,7 +51,7 @@ namespace OptimizelySDK
     public class Optimizely : IOptimizely, IDisposable
     {
         private Bucketer Bucketer;
-
+        [Obsolete]
         private EventBuilder EventBuilder;
 
         private IEventDispatcher EventDispatcher;
@@ -240,6 +240,7 @@ namespace OptimizelySDK
 #endif
         }
 
+        [Obsolete]
         private void InitializeComponents(IEventDispatcher eventDispatcher = null,
             ILogger logger = null,
             IErrorHandler errorHandler = null,

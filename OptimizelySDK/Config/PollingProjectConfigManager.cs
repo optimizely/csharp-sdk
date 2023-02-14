@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Logger;
 using OptimizelySDK.OptlyConfig;
 using OptimizelySDK.Utils;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace OptimizelySDK.Config
 {

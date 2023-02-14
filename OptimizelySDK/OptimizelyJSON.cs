@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-using OptimizelySDK.Logger;
 using System;
 using System.Collections.Generic;
-using Newtonsoft.Json.Linq;
-using OptimizelySDK.ErrorHandler;
 using System.Linq;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using OptimizelySDK.ErrorHandler;
+using OptimizelySDK.Logger;
 
 namespace OptimizelySDK
 {

@@ -18,14 +18,14 @@
 #define USE_ODP
 #endif
 
+using System.Collections.Generic;
+using System.Linq;
 using Newtonsoft.Json;
 using OptimizelySDK.Entity;
 using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Exceptions;
 using OptimizelySDK.Logger;
 using OptimizelySDK.Utils;
-using System.Collections.Generic;
-using System.Linq;
 using Attribute = OptimizelySDK.Entity.Attribute;
 
 namespace OptimizelySDK.Config

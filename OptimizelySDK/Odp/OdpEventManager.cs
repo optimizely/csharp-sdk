@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-using OptimizelySDK.ErrorHandler;
-using OptimizelySDK.Logger;
-using OptimizelySDK.Odp.Entity;
-using OptimizelySDK.Utils;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using OptimizelySDK.ErrorHandler;
+using OptimizelySDK.Logger;
+using OptimizelySDK.Odp.Entity;
+using OptimizelySDK.Utils;
 
 namespace OptimizelySDK.Odp
 {
@@ -159,7 +159,7 @@ namespace OptimizelySDK.Odp
                     {
                         item = _eventQueue.Take();
                         // TODO: need to figure out why this is allowing item to read shutdown signal.
-                        Thread.Sleep(1); 
+                        Thread.Sleep(1);
                     }
 
                     if (item == null)

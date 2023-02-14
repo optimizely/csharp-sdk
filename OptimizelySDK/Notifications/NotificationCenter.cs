@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-using OptimizelySDK.Entity;
-using OptimizelySDK.Event;
-using OptimizelySDK.Logger;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using OptimizelySDK.Entity;
+using OptimizelySDK.Event;
+using OptimizelySDK.Logger;
 
 namespace OptimizelySDK.Notifications
 {

@@ -29,6 +29,7 @@ namespace OptimizelySDK.OptlyConfig
 
         public IDictionary<string, OptimizelyVariable> VariablesMap { get; private set; }
 
+        [Obsolete]
         public OptimizelyFeature(string id, string key, List<OptimizelyExperiment> experimentRules,
             List<OptimizelyExperiment> deliveryRules,
             IDictionary<string, OptimizelyExperiment> experimentsMap,

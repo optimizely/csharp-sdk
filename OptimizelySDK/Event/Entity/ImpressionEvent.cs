@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+using System;
 using OptimizelySDK.Entity;
 using OptimizelySDK.Utils;
-using System;
 
 namespace OptimizelySDK.Event.Entity
 {

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+using System.Collections.Generic;
 using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Logger;
-using System.Collections.Generic;
 
 namespace OptimizelySDK.OptimizelyDecisions
 {

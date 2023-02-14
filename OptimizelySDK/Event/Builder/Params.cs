@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-using OptimizelySDK.Event.Entity;
 using System;
+using OptimizelySDK.Event.Entity;
 
 namespace OptimizelySDK.Event.Builder
 {

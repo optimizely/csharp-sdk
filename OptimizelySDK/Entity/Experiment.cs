@@ -15,10 +15,10 @@
  */
 
 using System.Collections.Generic;
-using Newtonsoft.Json.Linq;
-using OptimizelySDK.Utils;
-using OptimizelySDK.AudienceConditions;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using OptimizelySDK.AudienceConditions;
+using OptimizelySDK.Utils;
 
 namespace OptimizelySDK.Entity
 {

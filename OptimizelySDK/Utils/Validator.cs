@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-using OptimizelySDK.Entity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using OptimizelySDK.Entity;
 using Attribute = OptimizelySDK.Entity.Attribute;
 
 namespace OptimizelySDK.Utils

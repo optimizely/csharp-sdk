@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-using OptimizelySDK.Entity;
-using OptimizelySDK.Logger;
-using OptimizelySDK.OptimizelyDecisions;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using OptimizelySDK.Entity;
+using OptimizelySDK.Logger;
+using OptimizelySDK.OptimizelyDecisions;
 
 namespace OptimizelySDK.Bucketing
 {

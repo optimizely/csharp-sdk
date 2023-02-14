@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
+using System;
 using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Event.Dispatcher;
 using OptimizelySDK.Event.Entity;
 using OptimizelySDK.Logger;
 using OptimizelySDK.Notifications;
-using System;
 
 namespace OptimizelySDK.Event
 {

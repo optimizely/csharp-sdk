@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+using System;
+using System.Linq;
 using Newtonsoft.Json;
 using OptimizelySDK.Logger;
 using OptimizelySDK.Utils;
-using System;
-using System.Linq;
 
 namespace OptimizelySDK.AudienceConditions
 {

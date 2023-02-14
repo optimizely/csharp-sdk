@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-using OptimizelySDK.Logger;
-using OptimizelySDK.Utils;
 using System;
 using System.Collections.Specialized;
 using System.Linq;
+using OptimizelySDK.Logger;
+using OptimizelySDK.Utils;
 
 namespace OptimizelySDK.Odp
 {

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-using Newtonsoft.Json;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace OptimizelySDK.OptlyConfig
 {

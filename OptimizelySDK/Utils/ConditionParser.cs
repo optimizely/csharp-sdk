@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
 using OptimizelySDK.AudienceConditions;
-using System.Collections.Generic;
 
 namespace OptimizelySDK.Utils
 {
@@ -137,7 +137,7 @@ namespace OptimizelySDK.Utils
                     break;
                 case NOT_OPERATOR:
                     condition = new NotCondition()
-                        { Condition = conditions.Count == 0 ? null : conditions[0] };
+                    { Condition = conditions.Count == 0 ? null : conditions[0] };
                     break;
                 default:
                     break;

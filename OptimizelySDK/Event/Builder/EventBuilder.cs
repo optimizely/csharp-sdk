@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using OptimizelySDK.Bucketing;
 using OptimizelySDK.Entity;
 using OptimizelySDK.Logger;
 using OptimizelySDK.Utils;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace OptimizelySDK.Event.Builder
 {

@@ -15,11 +15,11 @@
  */
 
 #if !NET35 && !NET40
-using OptimizelySDK.Logger;
-using OptimizelySDK.Utils;
 using System;
 using System.Net.Http;
 using System.Threading.Tasks;
+using OptimizelySDK.Logger;
+using OptimizelySDK.Utils;
 
 namespace OptimizelySDK.Event.Dispatcher
 {

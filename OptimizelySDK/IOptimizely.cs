@@ -18,8 +18,8 @@
 #define USE_ODP
 #endif
 
-using OptimizelySDK.Entity;
 using System.Collections.Generic;
+using OptimizelySDK.Entity;
 
 namespace OptimizelySDK
 {

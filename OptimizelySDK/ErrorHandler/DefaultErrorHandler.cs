@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-using OptimizelySDK.Logger;
 using System;
+using OptimizelySDK.Logger;
 
 namespace OptimizelySDK.ErrorHandler
 {

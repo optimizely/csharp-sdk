@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-using OptimizelySDK.Utils;
 using System.Collections.Generic;
+using OptimizelySDK.Utils;
 
 namespace OptimizelySDK.Entity
 {

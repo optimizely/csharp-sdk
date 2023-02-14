@@ -17,14 +17,14 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using OptimizelySDK.Event.Entity;
-using System.Threading;
-using OptimizelySDK.Utils;
-using OptimizelySDK.Logger;
-using OptimizelySDK.ErrorHandler;
 using System.Linq;
+using System.Threading;
+using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Event.Dispatcher;
+using OptimizelySDK.Event.Entity;
+using OptimizelySDK.Logger;
 using OptimizelySDK.Notifications;
+using OptimizelySDK.Utils;
 
 namespace OptimizelySDK.Event
 {
