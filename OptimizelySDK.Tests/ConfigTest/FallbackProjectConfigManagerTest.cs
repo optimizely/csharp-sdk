@@ -27,7 +27,8 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         [Test]
         public void TestStaticProjectConfigManagerReturnsCorrectProjectConfig()
         {
-            var expectedConfig = DatafileProjectConfig.Create(TestData.TypedAudienceDatafile, null, null);
+            var expectedConfig =
+                DatafileProjectConfig.Create(TestData.TypedAudienceDatafile, null, null);
             ConfigManager = new FallbackProjectConfigManager(expectedConfig);
 
             Assert.True(TestData.CompareObjects(expectedConfig, ConfigManager.GetConfig()));

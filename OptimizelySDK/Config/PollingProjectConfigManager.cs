@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Logger;
 using OptimizelySDK.OptlyConfig;
 using OptimizelySDK.Utils;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace OptimizelySDK.Config
 {
@@ -101,7 +101,11 @@ namespace OptimizelySDK.Config
         /// </summary>
         public void Stop()
         {
-            if (Disposed) return;
+            if (Disposed)
+            {
+                return;
+            }
+
             // don't call now and onwards.
             SchedulerService.Change(-1, -1);
 
@@ -116,13 +120,16 @@ namespace OptimizelySDK.Config
         /// <returns>ProjectConfig</returns>
         public ProjectConfig GetConfig()
         {
-            if (Disposed) return null;
+            if (Disposed)
+            {
+                return null;
+            }
 
             if (IsStarted)
             {
                 try
                 {
-                    bool isCompleted = CompletableConfigManager.Task.Wait(BlockingTimeout);
+                    var isCompleted = CompletableConfigManager.Task.Wait(BlockingTimeout);
                     if (!isCompleted)
                     {
                         // Don't wait next time.
@@ -150,13 +157,7 @@ namespace OptimizelySDK.Config
         /// Access to current cached project configuration
         /// </summary>
         /// <returns>ProjectConfig instance</returns>
-        public virtual ProjectConfig CachedProjectConfig
-        {
-            get
-            {
-                return CurrentProjectConfig;
-            }
-        }
+        public virtual ProjectConfig CachedProjectConfig => CurrentProjectConfig;
 
         /// <summary>
         /// Sets the latest available ProjectConfig valid instance.
@@ -166,12 +167,16 @@ namespace OptimizelySDK.Config
         public bool SetConfig(ProjectConfig projectConfig)
         {
             if (projectConfig == null)
+            {
                 return false;
+            }
 
             var previousVersion =
                 CurrentProjectConfig == null ? "null" : CurrentProjectConfig.Revision;
             if (projectConfig.Revision == previousVersion)
+            {
                 return false;
+            }
 
             CurrentProjectConfig = projectConfig;
             SetOptimizelyConfig(CurrentProjectConfig);
@@ -209,7 +214,10 @@ namespace OptimizelySDK.Config
 
         public virtual void Dispose()
         {
-            if (Disposed) return;
+            if (Disposed)
+            {
+                return;
+            }
 
             SchedulerService.Change(-1, -1);
             SchedulerService.Dispose();
@@ -231,7 +239,9 @@ namespace OptimizelySDK.Config
 
                     // during in-flight, if PollingProjectConfigManagerStopped, then don't need to set.
                     if (IsStarted)
+                    {
                         SetConfig(config);
+                    }
                 }
                 catch (Exception exception)
                 {

@@ -46,7 +46,7 @@ namespace OptimizelySDK.Utils
                 return left;
             }
 
-            foreach (KeyValuePair<TKey, TValue> kvp in right.Where(
+            foreach (var kvp in right.Where(
                          kvp => !left.ContainsKey(kvp.Key)))
             {
                 left.Add(kvp.Key, kvp.Value);

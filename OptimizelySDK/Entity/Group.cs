@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 namespace OptimizelySDK.Entity
 {
     public class Group : Entity
@@ -43,9 +44,9 @@ namespace OptimizelySDK.Entity
      */
     public function setTrafficAllocation($trafficAllocation)
     {
-        $this->_trafficAllocation = ConfigParser::generateMap($trafficAllocation, null, TrafficAllocation::class);
+        $this->_trafficAllocation =
+ ConfigParser::generateMap($trafficAllocation, null, TrafficAllocation::class);
     }
 #endif
-
     }
 }

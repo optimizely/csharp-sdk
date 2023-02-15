@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using Moq;
 using NUnit.Framework;
 using OptimizelySDK.Logger;
 using OptimizelySDK.Odp;
 using OptimizelySDK.Odp.Entity;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace OptimizelySDK.Tests.OdpTests
 {
@@ -87,7 +87,7 @@ namespace OptimizelySDK.Tests.OdpTests
                 WithLogger(_mockLogger.Object).
                 Build();
 
-            var eventManager = (manager.EventManager as OdpEventManager);
+            var eventManager = manager.EventManager as OdpEventManager;
             var segmentCache =
                 (manager.SegmentManager as OdpSegmentManager)?.SegmentsCacheForTesting as
                 LruCache<List<string>>;
@@ -96,7 +96,8 @@ namespace OptimizelySDK.Tests.OdpTests
             Assert.AreEqual(Constants.DEFAULT_TIMEOUT_INTERVAL,
                 eventManager.TimeoutIntervalForTesting);
             Assert.AreEqual(Constants.DEFAULT_MAX_CACHE_SIZE, segmentCache?.MaxSizeForTesting);
-            Assert.AreEqual(TimeSpan.FromSeconds(Constants.DEFAULT_CACHE_SECONDS), segmentCache.TimeoutForTesting);
+            Assert.AreEqual(TimeSpan.FromSeconds(Constants.DEFAULT_CACHE_SECONDS),
+                segmentCache.TimeoutForTesting);
         }
 
         [Test]

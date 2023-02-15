@@ -13,13 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-using OptimizelySDK.ErrorHandler;
-using OptimizelySDK.Logger;
-using OptimizelySDK.Utils;
-using OptimizelySDK.Entity;
+
 using NUnit.Framework;
 using OptimizelySDK.Config;
+using OptimizelySDK.Entity;
+using OptimizelySDK.ErrorHandler;
+using OptimizelySDK.Logger;
 using OptimizelySDK.Tests.Utils;
+using OptimizelySDK.Utils;
 
 namespace OptimizelySDK.Tests.UtilsTests
 {
@@ -44,7 +45,10 @@ namespace OptimizelySDK.Tests.UtilsTests
         {
             Assert.IsTrue(Validator.ValidateJSONSchema(TestData.Datafile));
 
-            var testDataJSON = Newtonsoft.Json.JsonConvert.DeserializeObject<System.Collections.Generic.Dictionary<string, object>>(TestData.Datafile);
+            var testDataJSON =
+                Newtonsoft.Json.JsonConvert.
+                    DeserializeObject<System.Collections.Generic.Dictionary<string, object>>(
+                        TestData.Datafile);
             Assert.IsTrue(testDataJSON.ContainsKey("tempproperty"));
         }
 
@@ -82,15 +86,25 @@ namespace OptimizelySDK.Tests.UtilsTests
         [Test]
         public void TestDoesUserMeetAudienceConditionsNoAudienceUsedInExperiment()
         {
-            Assert.IsTrue(ExperimentUtils.DoesUserMeetAudienceConditions(Config, Config.GetExperimentFromKey("paused_experiment"), new UserAttributes().ToUserContext(), "experiment", "paused_experiment", Logger).ResultObject);
+            Assert.IsTrue(ExperimentUtils.DoesUserMeetAudienceConditions(Config,
+                    Config.GetExperimentFromKey("paused_experiment"),
+                    new UserAttributes().ToUserContext(), "experiment", "paused_experiment",
+                    Logger).
+                ResultObject);
         }
 
         [Test]
         public void TestDoesUserMeetAudienceConditionsAudienceUsedInExperimentNoAttributesProvided()
         {
-            Assert.IsFalse(ExperimentUtils.DoesUserMeetAudienceConditions(Config, Config.GetExperimentFromKey("test_experiment"), new UserAttributes().ToUserContext(), "experiment", "test_experiment", Logger).ResultObject);
+            Assert.IsFalse(ExperimentUtils.DoesUserMeetAudienceConditions(Config,
+                    Config.GetExperimentFromKey("test_experiment"),
+                    new UserAttributes().ToUserContext(), "experiment", "test_experiment", Logger).
+                ResultObject);
 
-            Assert.IsFalse(ExperimentUtils.DoesUserMeetAudienceConditions(Config, Config.GetExperimentFromKey("test_experiment"), null, "experiment", "test_experiment", Logger).ResultObject);
+            Assert.IsFalse(ExperimentUtils.DoesUserMeetAudienceConditions(Config,
+                    Config.GetExperimentFromKey("test_experiment"), null, "experiment",
+                    "test_experiment", Logger).
+                ResultObject);
         }
 
         [Test]
@@ -98,28 +112,37 @@ namespace OptimizelySDK.Tests.UtilsTests
         {
             var userAttributes = new UserAttributes
             {
-                {"device_type", "iPhone" },
-                {"location", "San Francisco" }
+                { "device_type", "iPhone" },
+                { "location", "San Francisco" },
             };
-            Assert.IsTrue(ExperimentUtils.DoesUserMeetAudienceConditions(Config, Config.GetExperimentFromKey("test_experiment"), userAttributes.ToUserContext(), "experiment", "test_experiment", Logger).ResultObject);
+            Assert.IsTrue(ExperimentUtils.DoesUserMeetAudienceConditions(Config,
+                    Config.GetExperimentFromKey("test_experiment"), userAttributes.ToUserContext(),
+                    "experiment", "test_experiment", Logger).
+                ResultObject);
         }
 
         [Test]
         public void TestDoesUserMeetAudienceConditionsAudienceNoMatch()
         {
-            Assert.IsFalse(ExperimentUtils.DoesUserMeetAudienceConditions(Config, Config.GetExperimentFromKey("test_experiment"), new UserAttributes().ToUserContext(), "experiment", "test_experiment", Logger).ResultObject);
+            Assert.IsFalse(ExperimentUtils.DoesUserMeetAudienceConditions(Config,
+                    Config.GetExperimentFromKey("test_experiment"),
+                    new UserAttributes().ToUserContext(), "experiment", "test_experiment", Logger).
+                ResultObject);
         }
 
         [Test]
         public void TestAreEventTagsValidValidEventTags()
         {
-            Assert.IsTrue(Validator.AreEventTagsValid(new System.Collections.Generic.Dictionary<string, object>()));
-            Assert.IsTrue(Validator.AreEventTagsValid(new System.Collections.Generic.Dictionary<string, object>
-            {
-                {"location", "San Francisco" },
-                {"browser", "Firefox" },
-                {"revenue", 0 }
-            }));
+            Assert.IsTrue(
+                Validator.AreEventTagsValid(
+                    new System.Collections.Generic.Dictionary<string, object>()));
+            Assert.IsTrue(Validator.AreEventTagsValid(
+                new System.Collections.Generic.Dictionary<string, object>
+                {
+                    { "location", "San Francisco" },
+                    { "browser", "Firefox" },
+                    { "revenue", 0 },
+                }));
         }
 
         [Test]
@@ -127,10 +150,11 @@ namespace OptimizelySDK.Tests.UtilsTests
         {
             // Some of the tests cases are not applicable because C# is strongly typed.
 
-            Assert.IsFalse(Validator.AreEventTagsValid(new System.Collections.Generic.Dictionary<string, object>
-            {
-                {"43",  "23"}
-            }));
+            Assert.IsFalse(Validator.AreEventTagsValid(
+                new System.Collections.Generic.Dictionary<string, object>
+                {
+                    { "43", "23" },
+                }));
         }
 
         [Test]
@@ -141,11 +165,13 @@ namespace OptimizelySDK.Tests.UtilsTests
                 { "device_type", "Android" },
                 { "is_firefox", true },
                 { "num_users", 15 },
-                { "pi_value", 3.14 }
+                { "pi_value", 3.14 },
             };
 
             foreach (var attribute in userAttributes)
+            {
                 Assert.True(Validator.IsUserAttributeValid(attribute));
+            }
         }
 
         [Test]
@@ -154,11 +180,13 @@ namespace OptimizelySDK.Tests.UtilsTests
             var invalidUserAttributes = new UserAttributes
             {
                 { "objects", new object() },
-                { "arrays", new string[] { "a", "b", "c" } }
+                { "arrays", new string[] { "a", "b", "c" } },
             };
 
             foreach (var attribute in invalidUserAttributes)
+            {
                 Assert.False(Validator.IsUserAttributeValid(attribute));
+            }
         }
 
         [Test]
@@ -168,11 +196,13 @@ namespace OptimizelySDK.Tests.UtilsTests
             {
                 { "", "Android" },
                 { "integer", 0 },
-                { "string", string.Empty }
+                { "string", string.Empty },
             };
 
             foreach (var attribute in validUserAttributes)
-                Assert.True(Validator.IsUserAttributeValid(attribute));    
+            {
+                Assert.True(Validator.IsUserAttributeValid(attribute));
+            }
         }
     }
 }

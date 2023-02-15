@@ -63,16 +63,14 @@ namespace OptimizelySDK
 
         public OptimizelyUserContext(Optimizely optimizely, string userId,
             UserAttributes userAttributes, IErrorHandler errorHandler, ILogger logger
-        ) : this(optimizely, userId, userAttributes, null, null, errorHandler, logger)
-        {
-        }
+        ) : this(optimizely, userId, userAttributes, null, null, errorHandler, logger) { }
 
         public OptimizelyUserContext(Optimizely optimizely, string userId,
             UserAttributes userAttributes, ForcedDecisionsStore forcedDecisionsStore,
             IErrorHandler errorHandler, ILogger logger
-        ) : this(optimizely, userId, userAttributes, forcedDecisionsStore, null, errorHandler, logger)
-        {
-        }
+        ) : this(optimizely, userId, userAttributes, forcedDecisionsStore, null, errorHandler,
+            logger)
+        { }
 
         public OptimizelyUserContext(Optimizely optimizely, string userId,
             UserAttributes userAttributes, ForcedDecisionsStore forcedDecisionsStore,

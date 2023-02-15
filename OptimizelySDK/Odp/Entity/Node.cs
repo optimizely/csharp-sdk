@@ -25,7 +25,7 @@ namespace OptimizelySDK.Odp.Entity
         /// Descriptive label of a node
         /// </summary>
         public string Name { get; set; }
-        
+
         /// <summary>
         /// Status of the node
         /// </summary>

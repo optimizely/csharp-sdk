@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 using Newtonsoft.Json;
 
 namespace OptimizelySDK.Event.Entity
@@ -21,15 +22,21 @@ namespace OptimizelySDK.Event.Entity
     {
         [JsonProperty("campaign_id")]
         public string CampaignId { get; private set; }
+
         [JsonProperty("experiment_id")]
         public string ExperimentId { get; private set; }
+
         [JsonProperty("metadata")]
         public DecisionMetadata Metadata { get; private set; }
+
         [JsonProperty("variation_id")]
         public string VariationId { get; private set; }
-        public Decision() {}
 
-        public Decision(string campaignId, string experimentId, string variationId, DecisionMetadata metadata = null)
+        public Decision() { }
+
+        public Decision(string campaignId, string experimentId, string variationId,
+            DecisionMetadata metadata = null
+        )
         {
             CampaignId = campaignId;
             ExperimentId = experimentId;

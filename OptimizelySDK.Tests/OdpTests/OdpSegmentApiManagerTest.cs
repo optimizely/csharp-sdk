@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
+using System.Collections.Generic;
+using System.Net;
 using Moq;
 using NUnit.Framework;
 using OptimizelySDK.AudienceConditions;
 using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Logger;
 using OptimizelySDK.Odp;
-using System.Collections.Generic;
-using System.Net;
 
 namespace OptimizelySDK.Tests.OdpTests
 {

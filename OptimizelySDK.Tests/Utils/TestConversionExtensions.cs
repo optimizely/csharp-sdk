@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
+using System.Collections.Generic;
 using Moq;
 using OptimizelySDK.Config;
 using OptimizelySDK.Entity;
 using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Logger;
-using System.Collections.Generic;
 
 namespace OptimizelySDK.Tests.Utils
 {
@@ -29,15 +29,15 @@ namespace OptimizelySDK.Tests.Utils
         {
             var mockLogger = new Mock<ILogger>();
             mockLogger.Setup(i => i.Log(It.IsAny<LogLevel>(), It.IsAny<string>()));
-            
+
             var errorHandler = new NoOpErrorHandler();
             var config = DatafileProjectConfig.Create(
-                content: TestData.Datafile,
-                logger: mockLogger.Object,
-                errorHandler: errorHandler);
+                TestData.Datafile,
+                mockLogger.Object,
+                errorHandler);
             var configManager = new FallbackProjectConfigManager(config);
             var optimizely = new Optimizely(configManager);
-            
+
             return new OptimizelyUserContext(optimizely, "any-user", attributes, errorHandler,
                 mockLogger.Object);
         }
@@ -46,16 +46,17 @@ namespace OptimizelySDK.Tests.Utils
         {
             var mockLogger = new Mock<ILogger>();
             mockLogger.Setup(i => i.Log(It.IsAny<LogLevel>(), It.IsAny<string>()));
-            
+
             var errorHandler = new NoOpErrorHandler();
             var config = DatafileProjectConfig.Create(
-                content: TestData.Datafile,
-                logger: mockLogger.Object,
-                errorHandler: errorHandler);
+                TestData.Datafile,
+                mockLogger.Object,
+                errorHandler);
             var configManager = new FallbackProjectConfigManager(config);
             var optimizely = new Optimizely(configManager);
-            
-            return new OptimizelyUserContext(optimizely, "any-user", new UserAttributes(), null, qualifiedSegments, errorHandler,
+
+            return new OptimizelyUserContext(optimizely, "any-user", new UserAttributes(), null,
+                qualifiedSegments, errorHandler,
                 mockLogger.Object);
         }
     }

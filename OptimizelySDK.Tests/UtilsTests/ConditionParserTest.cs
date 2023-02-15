@@ -24,18 +24,21 @@ namespace OptimizelySDK.Tests.UtilsTests
     [TestFixture]
     public class ConditionParserTest
     {
-        JToken Conditions;
-        JToken BaseCondition;
-        JToken AudienceConditions;
-        JToken NoOpAudienceConditions;
+        private JToken Conditions;
+        private JToken BaseCondition;
+        private JToken AudienceConditions;
+        private JToken NoOpAudienceConditions;
 
         [TestFixtureSetUp]
         public void Initialize()
         {
-            string conditionStr = @"[""and"", [""or"", [""or"", {""name"": ""device_type"", ""type"": ""custom_attribute"", ""value"": ""iPhone"", ""match"": ""substring""}]]]";
-            string baseConditionStr = @"{""name"": ""browser_type"", ""type"": ""custom_attribute"", ""value"": ""Chrome"", ""match"": ""exact""}";
-            string audienceConditionStr = @"[""or"", [""or"", ""3468206642"", ""3988293898""], [""or"", ""3988293899"", ""3468206646"", ""3468206647""]]";
-            string noOpAudienceConditionStr = @"[""3468206642"", ""3988293898""]";
+            var conditionStr =
+                @"[""and"", [""or"", [""or"", {""name"": ""device_type"", ""type"": ""custom_attribute"", ""value"": ""iPhone"", ""match"": ""substring""}]]]";
+            var baseConditionStr =
+                @"{""name"": ""browser_type"", ""type"": ""custom_attribute"", ""value"": ""Chrome"", ""match"": ""exact""}";
+            var audienceConditionStr =
+                @"[""or"", [""or"", ""3468206642"", ""3988293898""], [""or"", ""3988293899"", ""3468206646"", ""3468206647""]]";
+            var noOpAudienceConditionStr = @"[""3468206642"", ""3988293898""]";
 
             Conditions = JToken.Parse(conditionStr);
             BaseCondition = JToken.Parse(baseConditionStr);
@@ -80,7 +83,7 @@ namespace OptimizelySDK.Tests.UtilsTests
         [Test]
         public void TestParseConditionsAssignsNullConditionIfNoConditionIsProvidedInNotOperator()
         {
-            JToken emptyNotCondition = JToken.Parse(@"[""not""]");
+            var emptyNotCondition = JToken.Parse(@"[""not""]");
             var condition = ConditionParser.ParseConditions(emptyNotCondition);
             Assert.NotNull(condition);
             Assert.IsInstanceOf(typeof(NotCondition), condition);

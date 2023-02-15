@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-using OptimizelySDK.Entity;
-using OptimizelySDK.Event;
-using OptimizelySDK.Logger;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using OptimizelySDK.Entity;
+using OptimizelySDK.Event;
+using OptimizelySDK.Logger;
 
 namespace OptimizelySDK.Notifications
 {
@@ -33,11 +33,11 @@ namespace OptimizelySDK.Notifications
         /// </summary>
         public enum NotificationType
         {
-            Activate,   // Activate called.
-            Track,      // Track called.
-            Decision,    // A decision is made in the system. i.e. user activation, feature access or feature-variable value retrieval.
+            Activate, // Activate called.
+            Track, // Track called.
+            Decision, // A decision is made in the system. i.e. user activation, feature access or feature-variable value retrieval.
             OptimizelyConfigUpdate, // When datafile is updated using HttpProjectConfigManager.
-            LogEvent    // LogEvent notification sends on flushing batch-event. // When datafile is updated using HttpProjectConfigManager.
+            LogEvent, // LogEvent notification sends on flushing batch-event. // When datafile is updated using HttpProjectConfigManager.
         };
 
         /// <summary>
@@ -49,8 +49,10 @@ namespace OptimizelySDK.Notifications
         /// <param name="variation">The variation entity</param>
         /// <param name="logEvent">The impression event</param>
         [Obsolete("ActivateCallback is deprecated. Use DecisionCallback instead.")]
-        public delegate void ActivateCallback(Experiment experiment, string userId, UserAttributes userAttributes,
-            Variation variation, LogEvent logEvent);
+        public delegate void ActivateCallback(Experiment experiment, string userId,
+            UserAttributes userAttributes,
+            Variation variation, LogEvent logEvent
+        );
 
         /// <summary>
         /// Delegate for track notifcations.
@@ -60,8 +62,10 @@ namespace OptimizelySDK.Notifications
         /// <param name="userAttributes">Associative array of attributes for the user</param>
         /// <param name="eventTags">Associative array of EventTags representing metadata associated with the event</param>
         /// <param name="logEvent">The conversion event</param>
-        public delegate void TrackCallback(string eventKey, string userId, UserAttributes userAttributes, EventTags eventTags,
-            LogEvent logEvent);
+        public delegate void TrackCallback(string eventKey, string userId,
+            UserAttributes userAttributes, EventTags eventTags,
+            LogEvent logEvent
+        );
 
         /// <summary>
         /// Delegate for decision notifications.
@@ -70,7 +74,9 @@ namespace OptimizelySDK.Notifications
         /// <param name="userId">The user identifier</param>
         /// <param name="userAttributes">Associative array of attributes for the user</param>
         /// <param name="decisionInfo">Dictionary containing decision information</param>
-        public delegate void DecisionCallback(string type, string userId, UserAttributes userAttributes, Dictionary<string, object> decisionInfo);
+        public delegate void DecisionCallback(string type, string userId,
+            UserAttributes userAttributes, Dictionary<string, object> decisionInfo
+        );
 
         /// <summary>
         /// Delegate for project config update.
@@ -95,10 +101,13 @@ namespace OptimizelySDK.Notifications
         /// <summary>
         /// Property representing total notifications count.
         /// </summary>
-        public int NotificationsCount {
-            get {
-                int notificationsCount = 0;
-                foreach (var notificationsMap in Notifications.Values) {
+        public int NotificationsCount
+        {
+            get
+            {
+                var notificationsCount = 0;
+                foreach (var notificationsMap in Notifications.Values)
+                {
                     notificationsCount += notificationsMap.Count;
                 }
 
@@ -114,14 +123,17 @@ namespace OptimizelySDK.Notifications
         {
             Logger = logger ?? new NoOpLogger();
 
-            foreach (NotificationType notificationType in Enum.GetValues(typeof(NotificationType))) {
+            foreach (NotificationType notificationType in Enum.GetValues(typeof(NotificationType)))
+            {
                 Notifications[notificationType] = new Dictionary<int, object>();
             }
         }
 
         public int GetNotificationCount(NotificationType notificationType)
         {
-            return Notifications.ContainsKey(notificationType) ? Notifications[notificationType].Count : 0;
+            return Notifications.ContainsKey(notificationType) ?
+                Notifications[notificationType].Count :
+                0;
         }
 
         /// <summary>
@@ -132,10 +144,14 @@ namespace OptimizelySDK.Notifications
         /// <returns>int | 0 for invalid notification type, -1 for adding existing notification
         /// or the notification id of newly added notification.</returns>
         [Obsolete("ActivateCallback is deprecated. Use DecisionCallback instead.")]
-        public int AddNotification(NotificationType notificationType, ActivateCallback activateCallback)
+        public int AddNotification(NotificationType notificationType,
+            ActivateCallback activateCallback
+        )
         {
             if (!IsNotificationTypeValid(notificationType, NotificationType.Activate))
+            {
                 return 0;
+            }
 
             return AddNotification(notificationType, (object)activateCallback);
         }
@@ -150,7 +166,9 @@ namespace OptimizelySDK.Notifications
         public int AddNotification(NotificationType notificationType, TrackCallback trackCallback)
         {
             if (!IsNotificationTypeValid(notificationType, NotificationType.Track))
+            {
                 return 0;
+            }
 
             return AddNotification(notificationType, (object)trackCallback);
         }
@@ -162,10 +180,14 @@ namespace OptimizelySDK.Notifications
         /// <param name="decisionCallback">Callback function to call when event gets triggered</param>
         /// <returns>int | 0 for invalid notification type, -1 for adding existing notification
         /// or the notification id of newly added notification.</returns>
-        public int AddNotification(NotificationType notificationType, DecisionCallback decisionCallback)
+        public int AddNotification(NotificationType notificationType,
+            DecisionCallback decisionCallback
+        )
         {
             if (!IsNotificationTypeValid(notificationType, NotificationType.Decision))
+            {
                 return 0;
+            }
 
             return AddNotification(notificationType, (object)decisionCallback);
         }
@@ -177,10 +199,14 @@ namespace OptimizelySDK.Notifications
         /// <param name="optimizelyConfigUpdate">Callback function to call when event gets triggered</param>
         /// <returns>0 for invalid notification type, -1 for adding existing notification
         /// or the notification id of newly added notification.</returns>
-        public int AddNotification(NotificationType notificationType, OptimizelyConfigUpdateCallback optimizelyConfigUpdate)
+        public int AddNotification(NotificationType notificationType,
+            OptimizelyConfigUpdateCallback optimizelyConfigUpdate
+        )
         {
             if (!IsNotificationTypeValid(notificationType, NotificationType.OptimizelyConfigUpdate))
+            {
                 return 0;
+            }
 
             return AddNotification(notificationType, (object)optimizelyConfigUpdate);
         }
@@ -192,10 +218,14 @@ namespace OptimizelySDK.Notifications
         /// <param name="logEventCallback">Callback function to call when event gets triggered</param>
         /// <returns>0 for invalid notification type, -1 for adding existing notification
         /// or the notification id of newly added notification.</returns>
-        public int AddNotification(NotificationType notificationType, LogEventCallback logEventCallback)
+        public int AddNotification(NotificationType notificationType,
+            LogEventCallback logEventCallback
+        )
         {
             if (!IsNotificationTypeValid(notificationType, NotificationType.LogEvent))
+            {
                 return 0;
+            }
 
             return AddNotification(notificationType, (object)logEventCallback);
         }
@@ -206,10 +236,15 @@ namespace OptimizelySDK.Notifications
         /// <param name="providedNotificationType">Provided notification type</param>
         /// <param name="expectedNotificationType">expected notification type</param>
         /// <returns>true if notification type is valid, false otherwise</returns>
-        private bool IsNotificationTypeValid(NotificationType providedNotificationType, NotificationType expectedNotificationType)
+        private bool IsNotificationTypeValid(NotificationType providedNotificationType,
+            NotificationType expectedNotificationType
+        )
         {
-            if (providedNotificationType != expectedNotificationType) {
-                Logger.Log(LogLevel.ERROR, $@"Invalid notification type provided for ""{expectedNotificationType}"" callback.");
+            if (providedNotificationType != expectedNotificationType)
+            {
+                Logger.Log(LogLevel.ERROR,
+                    $@"Invalid notification type provided for ""{expectedNotificationType
+                    }"" callback.");
                 return false;
             }
 
@@ -226,11 +261,17 @@ namespace OptimizelySDK.Notifications
         {
             var notificationHoldersList = Notifications[notificationType];
 
-            if (!Notifications.ContainsKey(notificationType) || Notifications[notificationType].Count == 0)
+            if (!Notifications.ContainsKey(notificationType) ||
+                Notifications[notificationType].Count == 0)
+            {
                 Notifications[notificationType][NotificationId] = notificationCallback;
-            else {
-                foreach (var notification in this.Notifications[notificationType]) {
-                    if ((Delegate)notification.Value == (Delegate)notificationCallback) {
+            }
+            else
+            {
+                foreach (var notification in Notifications[notificationType])
+                {
+                    if ((Delegate)notification.Value == (Delegate)notificationCallback)
+                    {
                         Logger.Log(LogLevel.ERROR, "The notification callback already exists.");
                         return -1;
                     }
@@ -239,7 +280,7 @@ namespace OptimizelySDK.Notifications
                 Notifications[notificationType][NotificationId] = notificationCallback;
             }
 
-            int retVal = NotificationId;
+            var retVal = NotificationId;
             NotificationId += 1;
 
             return retVal;
@@ -252,8 +293,11 @@ namespace OptimizelySDK.Notifications
         /// <returns>Returns true if found and removed, false otherwise.</returns>
         public bool RemoveNotification(int notificationId)
         {
-            foreach (var key in Notifications.Keys) {
-                if (Notifications[key] != null && Notifications[key].Any(notification => notification.Key == notificationId)) {
+            foreach (var key in Notifications.Keys)
+            {
+                if (Notifications[key] != null && Notifications[key].
+                        Any(notification => notification.Key == notificationId))
+                {
                     Notifications[key].Remove(notificationId);
                     return true;
                 }
@@ -276,7 +320,8 @@ namespace OptimizelySDK.Notifications
         /// </summary>
         public void ClearAllNotifications()
         {
-            foreach (var notificationsMap in Notifications.Values) {
+            foreach (var notificationsMap in Notifications.Values)
+            {
                 notificationsMap.Clear();
             }
         }
@@ -288,12 +333,17 @@ namespace OptimizelySDK.Notifications
         /// <param name="args">Arguments to pass in notification callbacks</param>
         public void SendNotifications(NotificationType notificationType, params object[] args)
         {
-            foreach (var notification in Notifications[notificationType]) {
-                try {
-                    Delegate d = notification.Value as Delegate;
+            foreach (var notification in Notifications[notificationType])
+            {
+                try
+                {
+                    var d = notification.Value as Delegate;
                     d.DynamicInvoke(args);
-                } catch (Exception exception) {
-                    Logger.Log(LogLevel.ERROR, "Problem calling notify callback. Error: " + exception.Message);
+                }
+                catch (Exception exception)
+                {
+                    Logger.Log(LogLevel.ERROR,
+                        "Problem calling notify callback. Error: " + exception.Message);
                 }
             }
         }

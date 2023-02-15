@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using Moq;
 using NUnit.Framework;
 using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Logger;
 using OptimizelySDK.OptimizelyDecisions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace OptimizelySDK.Tests.OptimizelyDecisions
 {
@@ -40,15 +40,18 @@ namespace OptimizelySDK.Tests.OptimizelyDecisions
             LoggerMock = new Mock<ILogger>();
             LoggerMock.Setup(i => i.Log(It.IsAny<LogLevel>(), It.IsAny<string>()));
         }
-        
+
         [Test]
         public void TestNewErrorDecision()
         {
-            var optimizelyDecision = OptimizelyDecision.NewErrorDecision("var_key", null, "some error message", ErrorHandlerMock.Object, LoggerMock.Object);
+            var optimizelyDecision = OptimizelyDecision.NewErrorDecision("var_key", null,
+                "some error message", ErrorHandlerMock.Object, LoggerMock.Object);
             Assert.IsNull(optimizelyDecision.VariationKey);
             Assert.AreEqual(optimizelyDecision.FlagKey, "var_key");
-            Assert.AreEqual(optimizelyDecision.Variables.ToDictionary(), new Dictionary<string, object>());
-            Assert.AreEqual(optimizelyDecision.Reasons, new List<string>() { "some error message" });
+            Assert.AreEqual(optimizelyDecision.Variables.ToDictionary(),
+                new Dictionary<string, object>());
+            Assert.AreEqual(optimizelyDecision.Reasons,
+                new List<string>() { "some error message" });
             Assert.IsNull(optimizelyDecision.RuleKey);
             Assert.False(optimizelyDecision.Enabled);
         }
@@ -56,16 +59,21 @@ namespace OptimizelySDK.Tests.OptimizelyDecisions
         [Test]
         public void TestNewDecision()
         {
-            var variableMap = new Dictionary<string, object>() {
+            var variableMap = new Dictionary<string, object>()
+            {
                 { "strField", "john doe" },
                 { "intField", 12 },
-                { "objectField", new Dictionary<string, object> () {
-                        { "inner_field_int", 3 }
+                {
+                    "objectField", new Dictionary<string, object>()
+                    {
+                        { "inner_field_int", 3 },
                     }
-                }
+                },
             };
-            var optimizelyJSONUsingMap = new OptimizelyJSON(variableMap, ErrorHandlerMock.Object, LoggerMock.Object);
-            string expectedStringObj = "{\"strField\":\"john doe\",\"intField\":12,\"objectField\":{\"inner_field_int\":3}}";
+            var optimizelyJSONUsingMap =
+                new OptimizelyJSON(variableMap, ErrorHandlerMock.Object, LoggerMock.Object);
+            var expectedStringObj =
+                "{\"strField\":\"john doe\",\"intField\":12,\"objectField\":{\"inner_field_int\":3}}";
 
             var optimizelyDecision = new OptimizelyDecision("var_key",
                 true,
@@ -86,25 +94,41 @@ namespace OptimizelySDK.Tests.OptimizelyDecisions
         public void TestNewDecisionReasonWithIncludeReasons()
         {
             var decisionReasons = new DecisionReasons();
-            var decideOptions = new OptimizelyDecideOption[] { OptimizelyDecideOption.INCLUDE_REASONS };
-            decisionReasons.AddError(DecisionMessage.Reason(DecisionMessage.FLAG_KEY_INVALID, "invalid_key"));
-            
-            Assert.AreEqual(decisionReasons.ToReport(decideOptions.Contains(OptimizelyDecideOption.INCLUDE_REASONS))[0], "No flag was found for key \"invalid_key\".");
-            decisionReasons.AddError(DecisionMessage.Reason(DecisionMessage.VARIABLE_VALUE_INVALID, "invalid_key"));
-            Assert.AreEqual(decisionReasons.ToReport(decideOptions.Contains(OptimizelyDecideOption.INCLUDE_REASONS))[1], "Variable value for key \"invalid_key\" is invalid or wrong type.");
+            var decideOptions = new OptimizelyDecideOption[]
+                { OptimizelyDecideOption.INCLUDE_REASONS };
+            decisionReasons.AddError(DecisionMessage.Reason(DecisionMessage.FLAG_KEY_INVALID,
+                "invalid_key"));
+
+            Assert.AreEqual(
+                decisionReasons.ToReport(
+                    decideOptions.Contains(OptimizelyDecideOption.INCLUDE_REASONS))[0],
+                "No flag was found for key \"invalid_key\".");
+            decisionReasons.AddError(DecisionMessage.Reason(DecisionMessage.VARIABLE_VALUE_INVALID,
+                "invalid_key"));
+            Assert.AreEqual(
+                decisionReasons.ToReport(
+                    decideOptions.Contains(OptimizelyDecideOption.INCLUDE_REASONS))[1],
+                "Variable value for key \"invalid_key\" is invalid or wrong type.");
             decisionReasons.AddInfo("Some info message.");
-            Assert.AreEqual(decisionReasons.ToReport(decideOptions.Contains(OptimizelyDecideOption.INCLUDE_REASONS))[2], "Some info message.");
+            Assert.AreEqual(
+                decisionReasons.ToReport(
+                    decideOptions.Contains(OptimizelyDecideOption.INCLUDE_REASONS))[2],
+                "Some info message.");
         }
 
         [Test]
         public void TestNewDecisionReasonWithoutIncludeReasons()
         {
             var decisionReasons = new DecisionReasons();
-            decisionReasons.AddError(DecisionMessage.Reason(DecisionMessage.FLAG_KEY_INVALID, "invalid_key"));
+            decisionReasons.AddError(DecisionMessage.Reason(DecisionMessage.FLAG_KEY_INVALID,
+                "invalid_key"));
 
-            Assert.AreEqual(decisionReasons.ToReport()[0], "No flag was found for key \"invalid_key\".");
-            decisionReasons.AddError(DecisionMessage.Reason(DecisionMessage.VARIABLE_VALUE_INVALID, "invalid_key"));
-            Assert.AreEqual(decisionReasons.ToReport()[1], "Variable value for key \"invalid_key\" is invalid or wrong type.");
+            Assert.AreEqual(decisionReasons.ToReport()[0],
+                "No flag was found for key \"invalid_key\".");
+            decisionReasons.AddError(DecisionMessage.Reason(DecisionMessage.VARIABLE_VALUE_INVALID,
+                "invalid_key"));
+            Assert.AreEqual(decisionReasons.ToReport()[1],
+                "Variable value for key \"invalid_key\" is invalid or wrong type.");
             decisionReasons.AddInfo("Some info message.");
             Assert.AreEqual(decisionReasons.ToReport().Count, 2);
         }

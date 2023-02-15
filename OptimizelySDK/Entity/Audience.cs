@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+using System.Collections.Generic;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using OptimizelySDK.AudienceConditions;
 using OptimizelySDK.Utils;
-using System.Collections.Generic;
 
 namespace OptimizelySDK.Entity
 {
@@ -49,7 +49,9 @@ namespace OptimizelySDK.Entity
             get
             {
                 if (Conditions == null)
+                {
                     return null;
+                }
 
                 if (_decodedConditions == null)
                 {
@@ -78,14 +80,20 @@ namespace OptimizelySDK.Entity
             get
             {
                 if (Conditions == null)
+                {
                     return null;
+                }
 
                 if (_conditionsString == null)
                 {
                     if (Conditions is JToken token)
+                    {
                         _conditionsString = token.ToString(Formatting.None);
+                    }
                     else
+                    {
                         _conditionsString = Conditions.ToString();
+                    }
                 }
 
                 return _conditionsString;

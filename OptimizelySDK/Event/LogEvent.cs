@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 using System.Collections.Generic;
 using System.Linq;
 
@@ -48,7 +49,9 @@ namespace OptimizelySDK.Event
         /// <summary>
         /// LogEvent Construtor
         /// </summary>
-        public LogEvent(string url, Dictionary<string, object> parameters, string httpVerb, Dictionary<string, string> headers)
+        public LogEvent(string url, Dictionary<string, object> parameters, string httpVerb,
+            Dictionary<string, string> headers
+        )
         {
             Url = url;
             Params = parameters;

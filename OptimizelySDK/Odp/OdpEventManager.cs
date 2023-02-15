@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-using OptimizelySDK.ErrorHandler;
-using OptimizelySDK.Logger;
-using OptimizelySDK.Odp.Entity;
-using OptimizelySDK.Utils;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using OptimizelySDK.ErrorHandler;
+using OptimizelySDK.Logger;
+using OptimizelySDK.Odp.Entity;
+using OptimizelySDK.Utils;
 
 namespace OptimizelySDK.Odp
 {
@@ -151,12 +151,15 @@ namespace OptimizelySDK.Odp
                     //      otherwise wait for the new event indefinitely
                     if (_currentBatch.Count > 0)
                     {
-                        _eventQueue.TryTake(out item, (int)(_flushingIntervalDeadline - DateTime.Now.MillisecondsSince1970()));
+                        _eventQueue.TryTake(out item,
+                            (int)(_flushingIntervalDeadline -
+                                  DateTime.Now.MillisecondsSince1970()));
                     }
                     else
                     {
                         item = _eventQueue.Take();
-                        Thread.Sleep(1); // TODO: need to figure out why this is allowing item to read shutdown signal.
+                        // TODO: need to figure out why this is allowing item to read shutdown signal.
+                        Thread.Sleep(1);
                     }
 
                     if (item == null)
@@ -167,6 +170,7 @@ namespace OptimizelySDK.Odp
                             _logger.Log(LogLevel.DEBUG, $"Flushing queue.");
                             FlushQueue();
                         }
+
                         continue;
                     }
                     else if (item == _shutdownSignal)
@@ -184,7 +188,6 @@ namespace OptimizelySDK.Odp
                     {
                         AddToBatch(odpEvent);
                     }
-
                 }
             }
             catch (InvalidOperationException ioe)
@@ -520,10 +523,10 @@ namespace OptimizelySDK.Odp
                 var manager = new OdpEventManager();
                 manager._eventQueue = _eventQueue;
                 manager._odpEventApiManager = _odpEventApiManager;
-                manager._flushInterval = (_flushInterval > TimeSpan.Zero) ?
+                manager._flushInterval = _flushInterval > TimeSpan.Zero ?
                     _flushInterval :
                     Constants.DEFAULT_FLUSH_INTERVAL;
-                manager._batchSize = (_flushInterval == TimeSpan.Zero) ?
+                manager._batchSize = _flushInterval == TimeSpan.Zero ?
                     1 :
                     Constants.DEFAULT_BATCH_SIZE;
                 manager._timeoutInterval = _timeoutInterval <= TimeSpan.Zero ?
@@ -568,16 +571,16 @@ namespace OptimizelySDK.Odp
         /// For Testing Only: Read the current ODP config
         /// </summary>
         /// <returns>Current ODP settings</returns>
-        internal OdpConfig OdpConfigForTesting { get { return _odpConfig; } }
+        internal OdpConfig OdpConfigForTesting => _odpConfig;
 
         /// <summary>
         /// For Testing Only: Read the current flush interval
         /// </summary>
-        internal TimeSpan FlushIntervalForTesting { get { return _flushInterval; } }
+        internal TimeSpan FlushIntervalForTesting => _flushInterval;
 
         /// <summary>
         /// For Testing Only: Read the current timeout interval
         /// </summary>
-        internal TimeSpan TimeoutIntervalForTesting { get { return _timeoutInterval; } }
+        internal TimeSpan TimeoutIntervalForTesting => _timeoutInterval;
     }
 }

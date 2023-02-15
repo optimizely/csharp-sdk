@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
- namespace OptimizelySDK.Tests
+namespace OptimizelySDK.Tests
 {
     internal class TestBucketer : Bucketing.Bucketer
     {
         public TestBucketer(Logger.ILogger logger)
-            : base(logger)
-        {
-        }
+            : base(logger) { }
 
         public void SetBucketValues(int[] bucketValues)
         {
@@ -36,7 +34,10 @@
         public override int GenerateBucketValue(string bucketingId)
         {
             if (BucketValues == null || BucketValues.Length == 0)
+            {
                 return 0;
+            }
+
             Ndx %= BucketValues.Length;
             return BucketValues[Ndx++];
         }

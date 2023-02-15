@@ -1,12 +1,11 @@
-﻿
-using Newtonsoft.Json.Linq;
-using NUnit.Framework;
-using OptimizelySDK.Event;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
+using NUnit.Framework;
+using OptimizelySDK.Event;
 
 namespace OptimizelySDK.Tests.EventTests
 {
@@ -17,7 +16,6 @@ namespace OptimizelySDK.Tests.EventTests
 
         public static bool CompareObjects(object o1, object o2)
         {
-
             var str1 = Newtonsoft.Json.JsonConvert.SerializeObject(o1);
             var str2 = Newtonsoft.Json.JsonConvert.SerializeObject(o2);
             var jtoken1 = JToken.Parse(Newtonsoft.Json.JsonConvert.SerializeObject(o1));
@@ -30,17 +28,17 @@ namespace OptimizelySDK.Tests.EventTests
         public void Setup()
         {
             LogEvent = new LogEvent(
-                url: "https://logx.optimizely.com", 
-                parameters: new Dictionary<string, object>
+                "https://logx.optimizely.com",
+                new Dictionary<string, object>
                 {
                     { "accountId", "1234" },
                     { "projectId", "9876" },
-                    { "visitorId", "testUser" }
+                    { "visitorId", "testUser" },
                 },
-                httpVerb: "POST", 
-                headers: new Dictionary<string, string>
+                "POST",
+                new Dictionary<string, string>
                 {
-                    { "Content-type", "application/json" }
+                    { "Content-type", "application/json" },
                 });
         }
 
@@ -57,7 +55,7 @@ namespace OptimizelySDK.Tests.EventTests
             {
                 { "accountId", "1234" },
                 { "projectId", "9876" },
-                { "visitorId", "testUser" }
+                { "visitorId", "testUser" },
             };
             Assert.IsTrue(CompareObjects(testParams, LogEvent.Params));
         }
@@ -73,7 +71,7 @@ namespace OptimizelySDK.Tests.EventTests
         {
             var headers = new Dictionary<string, string>
             {
-                { "Content-type", "application/json" }
+                { "Content-type", "application/json" },
             };
             Assert.IsTrue(CompareObjects(headers, LogEvent.Headers));
         }

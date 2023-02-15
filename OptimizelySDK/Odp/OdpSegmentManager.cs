@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-using OptimizelySDK.Logger;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using OptimizelySDK.Logger;
 
 namespace OptimizelySDK.Odp
 {
@@ -165,6 +165,6 @@ namespace OptimizelySDK.Odp
         /// <summary>
         /// For Testing Only: Retrieve the current segment cache
         /// </summary>
-        internal ICache<List<string>> SegmentsCacheForTesting { get { return _segmentsCache; } }
+        internal ICache<List<string>> SegmentsCacheForTesting => _segmentsCache;
     }
 }

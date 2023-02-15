@@ -48,24 +48,12 @@ namespace OptimizelySDK.Config
         /// <summary>
         /// SDK Key for Fallback is not used and always null
         /// </summary>
-        public virtual string SdkKey
-        {
-            get
-            {
-                return null;
-            }
-        }
+        public virtual string SdkKey => null;
 
         /// <summary>
         /// Access to current cached project configuration
         /// </summary>
         /// <returns>ProjectConfig instance</returns>
-        public virtual ProjectConfig CachedProjectConfig
-        {
-            get
-            {
-                return ProjectConfig;
-            }
-        }
+        public virtual ProjectConfig CachedProjectConfig => ProjectConfig;
     }
 }

@@ -1,4 +1,8 @@
-﻿using Newtonsoft.Json;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using OptimizelySDK.Config;
 using OptimizelySDK.Entity;
@@ -6,10 +10,6 @@ using OptimizelySDK.Event;
 using OptimizelySDK.Event.Dispatcher;
 using OptimizelySDK.Event.Entity;
 using OptimizelySDK.Logger;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
 
 namespace OptimizelySDK.Tests.EventTests
 {
@@ -30,16 +30,20 @@ namespace OptimizelySDK.Tests.EventTests
         public bool CompareEvents()
         {
             if (ExpectedEvents.Count != ActualEvents.Count)
+            {
                 return false;
+            }
 
 
-            for (int count = 0; count < ExpectedEvents.Count; ++count)
+            for (var count = 0; count < ExpectedEvents.Count; ++count)
             {
                 var expectedEvent = ExpectedEvents[count];
                 var actualEvent = ActualEvents[count];
 
                 if (expectedEvent != actualEvent)
+                {
                     return false;
+                }
             }
 
             return true;
@@ -50,12 +54,14 @@ namespace OptimizelySDK.Tests.EventTests
             Visitor[] visitors = null;
             if (actualLogEvent.Params.ContainsKey("visitors"))
             {
-                JArray jArray = (JArray)actualLogEvent.Params["visitors"];
+                var jArray = (JArray)actualLogEvent.Params["visitors"];
                 visitors = jArray.ToObject<Visitor[]>();
             }
 
             if (visitors == null)
+            {
                 return;
+            }
 
             foreach (var visitor in visitors)
             {
@@ -67,11 +73,15 @@ namespace OptimizelySDK.Tests.EventTests
                         foreach (var @event in snapshot.Events)
                         {
                             var userAttributes = new UserAttributes();
-                            foreach (var attribute in visitor.Attributes.Where(attr => !attr.Key.StartsWith(DatafileProjectConfig.RESERVED_ATTRIBUTE_PREFIX))) {
+                            foreach (var attribute in visitor.Attributes.Where(attr =>
+                                         !attr.Key.StartsWith(DatafileProjectConfig.
+                                             RESERVED_ATTRIBUTE_PREFIX)))
+                            {
                                 userAttributes.Add(attribute.Key, attribute.Value);
                             }
 
-                            ActualEvents.Add(new CanonicalEvent(decision.ExperimentId, decision.VariationId, @event.Key,
+                            ActualEvents.Add(new CanonicalEvent(decision.ExperimentId,
+                                decision.VariationId, @event.Key,
                                 visitor.VisitorId, userAttributes, @event.EventTags));
                         }
                     }
@@ -84,7 +94,8 @@ namespace OptimizelySDK.Tests.EventTests
             }
             catch (ObjectDisposedException)
             {
-                Logger.Log(LogLevel.ERROR, "The CountdownEvent instance has already been disposed.");
+                Logger.Log(LogLevel.ERROR,
+                    "The CountdownEvent instance has already been disposed.");
             }
             catch (InvalidOperationException)
             {
@@ -92,19 +103,26 @@ namespace OptimizelySDK.Tests.EventTests
             }
         }
 
-        public void ExpectImpression(string experimentId, string variationId, string userId, UserAttributes attributes = null)
+        public void ExpectImpression(string experimentId, string variationId, string userId,
+            UserAttributes attributes = null
+        )
         {
             Expect(experimentId, variationId, IMPRESSION_EVENT_NAME, userId, attributes, null);
         }
 
-        public void ExpectConversion(string eventName, string userId, UserAttributes attributes = null, EventTags tags = null)
+        public void ExpectConversion(string eventName, string userId,
+            UserAttributes attributes = null, EventTags tags = null
+        )
         {
             Expect(null, null, eventName, userId, attributes, tags);
         }
 
-        private void Expect(string experimentId, string variationId, string eventName, string visitorId, UserAttributes attributes, EventTags tags)
+        private void Expect(string experimentId, string variationId, string eventName,
+            string visitorId, UserAttributes attributes, EventTags tags
+        )
         {
-            var expectedEvent = new CanonicalEvent(experimentId, variationId, eventName, visitorId, attributes, tags);
+            var expectedEvent = new CanonicalEvent(experimentId, variationId, eventName, visitorId,
+                attributes, tags);
             ExpectedEvents.Add(expectedEvent);
         }
     }

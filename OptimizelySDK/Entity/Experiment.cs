@@ -13,19 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 using System.Collections.Generic;
-using Newtonsoft.Json.Linq;
-using OptimizelySDK.Utils;
-using OptimizelySDK.AudienceConditions;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using OptimizelySDK.AudienceConditions;
+using OptimizelySDK.Utils;
 
 namespace OptimizelySDK.Entity
 {
     public class Experiment : IdKeyEntity
     {
-        const string STATUS_RUNNING = "Running";
+        private const string STATUS_RUNNING = "Running";
 
-        const string MUTEX_GROUP_POLICY = "random";
+        private const string MUTEX_GROUP_POLICY = "random";
 
         /// <summary>
         /// Experiment Status
@@ -52,10 +53,10 @@ namespace OptimizelySDK.Entity
         /// </summary>
         public Dictionary<string, string> ForcedVariations { get; set; }
 
-		/// <summary>
-		/// ForcedVariations for the experiment
-		/// </summary>
-       	public Dictionary<string, string> UserIdToKeyVariations { get { return ForcedVariations; } }
+        /// <summary>
+        /// ForcedVariations for the experiment
+        /// </summary>
+        public Dictionary<string, string> UserIdToKeyVariations => ForcedVariations;
 
         /// <summary>
         /// Policy of the experiment group
@@ -77,17 +78,22 @@ namespace OptimizelySDK.Entity
             get
             {
                 if (AudienceIds == null || AudienceIds.Length == 0)
+                {
                     return null;
-                
+                }
+
                 if (_audienceIdsList == null)
                 {
                     var conditions = new List<ICondition>();
                     foreach (var audienceId in AudienceIds)
-                        conditions.Add(new AudienceIdCondition() { AudienceId = (string)audienceId });
+                    {
+                        conditions.Add(
+                            new AudienceIdCondition() { AudienceId = (string)audienceId });
+                    }
 
                     _audienceIdsList = new OrCondition() { Conditions = conditions.ToArray() };
                 }
-                
+
                 return _audienceIdsList;
             }
         }
@@ -102,10 +108,14 @@ namespace OptimizelySDK.Entity
             get
             {
                 if (AudienceIds == null)
+                {
                     return null;
+                }
 
                 if (_audienceIdsString == null)
+                {
                     _audienceIdsString = JsonConvert.SerializeObject(AudienceIds, Formatting.None);
+                }
 
                 return _audienceIdsString;
             }
@@ -131,14 +141,23 @@ namespace OptimizelySDK.Entity
             get
             {
                 if (AudienceConditions == null)
+                {
                     return null;
+                }
 
                 if (_audienceConditionsList == null)
                 {
                     if (AudienceConditions is string)
-                        _audienceConditionsList = ConditionParser.ParseAudienceConditions(JToken.Parse((string)AudienceConditions));
+                    {
+                        _audienceConditionsList =
+                            ConditionParser.ParseAudienceConditions(
+                                JToken.Parse((string)AudienceConditions));
+                    }
                     else
-                        _audienceConditionsList = ConditionParser.ParseAudienceConditions((JToken)AudienceConditions);
+                    {
+                        _audienceConditionsList =
+                            ConditionParser.ParseAudienceConditions((JToken)AudienceConditions);
+                    }
                 }
 
                 return _audienceConditionsList;
@@ -155,48 +174,73 @@ namespace OptimizelySDK.Entity
             get
             {
                 if (AudienceConditions == null)
+                {
                     return null;
+                }
 
                 if (_audienceConditionsString == null)
                 {
                     if (AudienceConditions is JToken token)
+                    {
                         _audienceConditionsString = token.ToString(Formatting.None);
+                    }
                     else
+                    {
                         _audienceConditionsString = AudienceConditions.ToString();
+                    }
                 }
 
                 return _audienceConditionsString;
             }
         }
 
-        bool isGenerateKeyMapCalled = false;
+        private bool isGenerateKeyMapCalled = false;
 
         private Dictionary<string, Variation> _VariationKeyToVariationMap;
-        public Dictionary<string, Variation> VariationKeyToVariationMap {
-            get {
-                if (!isGenerateKeyMapCalled) GenerateVariationKeyMap();
+
+        public Dictionary<string, Variation> VariationKeyToVariationMap
+        {
+            get
+            {
+                if (!isGenerateKeyMapCalled)
+                {
+                    GenerateVariationKeyMap();
+                }
+
                 return _VariationKeyToVariationMap;
             }
         }
 
-		private Dictionary<string, Variation> _VariationIdToVariationMap;
-		public Dictionary<string, Variation> VariationIdToVariationMap {
+        private Dictionary<string, Variation> _VariationIdToVariationMap;
+
+        public Dictionary<string, Variation> VariationIdToVariationMap
+        {
             get
             {
-                if (!isGenerateKeyMapCalled) GenerateVariationKeyMap();
+                if (!isGenerateKeyMapCalled)
+                {
+                    GenerateVariationKeyMap();
+                }
+
                 return _VariationIdToVariationMap;
             }
         }
 
         public void GenerateVariationKeyMap()
         {
-            if (Variations == null) return;
-            _VariationIdToVariationMap = ConfigParser<Variation>.GenerateMap(entities: Variations, getKey: a => a.Id, clone: true);
-            _VariationKeyToVariationMap = ConfigParser<Variation>.GenerateMap(entities: Variations, getKey: a => a.Key, clone: true);
+            if (Variations == null)
+            {
+                return;
+            }
+
+            _VariationIdToVariationMap =
+                ConfigParser<Variation>.GenerateMap(Variations, a => a.Id, true);
+            _VariationKeyToVariationMap =
+                ConfigParser<Variation>.GenerateMap(Variations, a => a.Key, true);
             isGenerateKeyMapCalled = true;
         }
 
-		// Code from PHP, need to build traffic and variations from config
+        // Code from PHP, need to build traffic and variations from config
 #if false
         /**
          * @param $variations array Variations in experiment.
@@ -211,31 +255,22 @@ namespace OptimizelySDK.Entity
          */
         public function setTrafficAllocation($trafficAllocation)
         {
-        $this->_trafficAllocation = ConfigParser::generateMap($trafficAllocation, null, TrafficAllocation::class);
+        $this->_trafficAllocation =
+ ConfigParser::generateMap($trafficAllocation, null, TrafficAllocation::class);
         }
 #endif
 
-		/// <summary>
-		/// Determine if experiment is in a mutually exclusive group
-		/// </summary>
-		public bool IsInMutexGroup
-        {
-            get
-            {
-                return !string.IsNullOrEmpty(GroupPolicy) && GroupPolicy == MUTEX_GROUP_POLICY;
-            }
-        }
+        /// <summary>
+        /// Determine if experiment is in a mutually exclusive group
+        /// </summary>
+        public bool IsInMutexGroup =>
+            !string.IsNullOrEmpty(GroupPolicy) && GroupPolicy == MUTEX_GROUP_POLICY;
 
         /// <summary>
         /// Determine if experiment is running or not
         /// </summary>
-        public bool IsExperimentRunning
-        {
-            get
-            {
-                return !string.IsNullOrEmpty(Status) && Status == STATUS_RUNNING;
-            }
-        }
+        public bool IsExperimentRunning =>
+            !string.IsNullOrEmpty(Status) && Status == STATUS_RUNNING;
 
         /// <summary>
         /// Determin if user is forced variation of experiment

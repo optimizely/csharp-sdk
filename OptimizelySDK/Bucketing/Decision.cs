@@ -20,7 +20,6 @@ namespace OptimizelySDK.Bucketing
 {
     public class Decision
     {
-
         /// <summary>
         /// The ID of the Variation into which the user was bucketed.
         /// </summary>
@@ -39,7 +38,7 @@ namespace OptimizelySDK.Bucketing
         {
             return new Dictionary<string, string>
             {
-                { UserProfile.VARIATION_ID_KEY, VariationId }
+                { UserProfile.VARIATION_ID_KEY, VariationId },
             };
         }
     }

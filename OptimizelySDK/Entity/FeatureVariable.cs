@@ -23,11 +23,11 @@ namespace OptimizelySDK.Entity
         public const string DOUBLE_TYPE = "double";
         public const string BOOLEAN_TYPE = "boolean";
         public const string JSON_TYPE = "json";
-        
+
         public enum VariableStatus
         {
             ACTIVE,
-            ARCHIVED
+            ARCHIVED,
         }
 
 
@@ -37,17 +37,12 @@ namespace OptimizelySDK.Entity
 
         public string SubType
         {
-            get
-            {
-                return _subType;
-            }
-            set
-            {
-                _subType = value;
-            }
+            get => _subType;
+            set => _subType = value;
         }
 
         private string _type;
+
         public string Type
         {
             get
@@ -56,12 +51,10 @@ namespace OptimizelySDK.Entity
                 {
                     return JSON_TYPE;
                 }
+
                 return _type;
             }
-            set
-            {
-                _type = value;
-            }
+            set => _type = value;
         }
 
         public VariableStatus Status { get; set; }
@@ -73,7 +66,8 @@ namespace OptimizelySDK.Entity
         /// <param name="variableType">Variable type.</param>
         public static string GetFeatureVariableTypeName(string variableType)
         {
-            switch (variableType) {
+            switch (variableType)
+            {
                 case BOOLEAN_TYPE:
                     return "GetFeatureVariableBoolean";
                 case DOUBLE_TYPE:

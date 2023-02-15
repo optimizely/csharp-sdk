@@ -26,13 +26,13 @@ namespace OptimizelySDK.OptimizelyDecisions
 
         public void AddError(string format, params object[] args)
         {
-            string message = string.Format(format, args);
+            var message = string.Format(format, args);
             Errors.Add(message);
         }
 
         public string AddInfo(string format, params object[] args)
         {
-            string message = string.Format(format, args);
+            var message = string.Format(format, args);
             Infos.Add(message);
 
             return message;
@@ -40,7 +40,10 @@ namespace OptimizelySDK.OptimizelyDecisions
 
         public static DecisionReasons operator +(DecisionReasons a, DecisionReasons b)
         {
-            if (b == null) return a;
+            if (b == null)
+            {
+                return a;
+            }
 
             a.Errors.AddRange(b.Errors);
             a.Infos.AddRange(b.Infos);
@@ -50,12 +53,13 @@ namespace OptimizelySDK.OptimizelyDecisions
 
         public List<string> ToReport(bool includeReasons = false)
         {
-            List<string> reasons = new List<string>(Errors);
+            var reasons = new List<string>(Errors);
 
-            if (includeReasons) {
+            if (includeReasons)
+            {
                 reasons.AddRange(Infos);
             }
-            
+
             return reasons;
         }
     }

@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
+using System.Collections.Generic;
+using System.Linq;
 using Moq;
 using NUnit.Framework;
 using OptimizelySDK.AudienceConditions;
 using OptimizelySDK.Entity;
 using OptimizelySDK.Logger;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace OptimizelySDK.Tests.AudienceConditionsTests
 {
@@ -128,7 +128,8 @@ namespace OptimizelySDK.Tests.AudienceConditionsTests
             {
                 Conditions = new[]
                 {
-                    _customExactMatchCondition, _customExactMatchCondition, _customExactMatchCondition,
+                    _customExactMatchCondition, _customExactMatchCondition,
+                    _customExactMatchCondition,
                 },
             };
 
@@ -151,7 +152,8 @@ namespace OptimizelySDK.Tests.AudienceConditionsTests
             {
                 Conditions = new ICondition[]
                 {
-                    _secondThirdPartyOdpQualifiedMatchCondition, _firstThirdPartyOdpQualifiedMatchCondition,
+                    _secondThirdPartyOdpQualifiedMatchCondition,
+                    _firstThirdPartyOdpQualifiedMatchCondition,
                 },
             };
             var orConditions = new OrCondition

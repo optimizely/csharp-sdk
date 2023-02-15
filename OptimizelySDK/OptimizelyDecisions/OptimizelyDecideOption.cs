@@ -22,6 +22,6 @@ namespace OptimizelySDK.OptimizelyDecisions
         ENABLED_FLAGS_ONLY,
         IGNORE_USER_PROFILE_SERVICE,
         INCLUDE_REASONS,
-        EXCLUDE_VARIABLES
+        EXCLUDE_VARIABLES,
     }
 }

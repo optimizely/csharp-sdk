@@ -25,6 +25,6 @@ namespace OptimizelySDK
             _variationKey = variationKey;
         }
 
-        public string VariationKey { get { return _variationKey; } }
+        public string VariationKey => _variationKey;
     }
 }

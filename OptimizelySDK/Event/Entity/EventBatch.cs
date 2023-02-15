@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 using System.Collections.Generic;
 using Newtonsoft.Json;
 
@@ -57,7 +58,7 @@ namespace OptimizelySDK.Event.Entity
 
             public EventBatch Build()
             {
-                EventBatch eventBatch = new EventBatch();
+                var eventBatch = new EventBatch();
                 eventBatch.AccountId = AccountId;
                 eventBatch.ProjectId = ProjectId;
                 eventBatch.Revision = Revision;

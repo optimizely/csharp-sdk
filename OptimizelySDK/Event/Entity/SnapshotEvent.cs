@@ -13,8 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 using Newtonsoft.Json;
 using OptimizelySDK.Entity;
+
 namespace OptimizelySDK.Event.Entity
 {
     /// <summary>
@@ -25,7 +27,7 @@ namespace OptimizelySDK.Event.Entity
         [JsonProperty("entity_id")]
         public string EntityId { get; private set; }
 
-        [JsonProperty(PropertyName ="uuid")]
+        [JsonProperty(PropertyName = "uuid")]
         public string UUID { get; private set; }
 
         [JsonProperty("key")]
@@ -35,7 +37,7 @@ namespace OptimizelySDK.Event.Entity
         public long TimeStamp { get; private set; }
 
         // The following properties are for Conversion that's why ignore if null.
-        [JsonProperty("revenue", NullValueHandling = NullValueHandling.Ignore)]        
+        [JsonProperty("revenue", NullValueHandling = NullValueHandling.Ignore)]
         public int? Revenue { get; private set; }
 
         [JsonProperty("value", NullValueHandling = NullValueHandling.Ignore)]
@@ -56,7 +58,7 @@ namespace OptimizelySDK.Event.Entity
 
             public SnapshotEvent Build()
             {
-                SnapshotEvent snapshotEvent = new SnapshotEvent();
+                var snapshotEvent = new SnapshotEvent();
                 snapshotEvent.EntityId = EntityId;
                 snapshotEvent.UUID = UUID;
                 snapshotEvent.Key = Key;
@@ -115,6 +117,5 @@ namespace OptimizelySDK.Event.Entity
                 return this;
             }
         }
-       
     }
 }

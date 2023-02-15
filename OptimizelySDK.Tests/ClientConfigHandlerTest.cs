@@ -16,19 +16,20 @@
 
 #if !NETSTANDARD1_6 && !NET35
 
-using NUnit.Framework;
 using System.Configuration;
+using NUnit.Framework;
 
 namespace OptimizelySDK.Tests
 {
     [TestFixture]
     public class ClientConfigHandlerTest
     {
-
         [Test]
         public void TestHTTPAppConfigSection()
         {
-            var configSection = ConfigurationManager.GetSection("optlySDKConfigSection") as OptimizelySDKConfigSection;
+            var configSection =
+                ConfigurationManager.GetSection("optlySDKConfigSection") as
+                    OptimizelySDKConfigSection;
             var httpSetting = configSection.HttpProjectConfig;
             Assert.IsNotNull(httpSetting);
             Assert.IsTrue(httpSetting.AutoUpdate);
@@ -44,7 +45,9 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestBatchEventAppConfigSection()
         {
-            var configSection = ConfigurationManager.GetSection("optlySDKConfigSection") as OptimizelySDKConfigSection;
+            var configSection =
+                ConfigurationManager.GetSection("optlySDKConfigSection") as
+                    OptimizelySDKConfigSection;
             var batchSetting = configSection.BatchEventProcessor;
             Assert.IsNotNull(batchSetting);
             Assert.AreEqual(batchSetting.BatchSize, 10);
@@ -52,7 +55,6 @@ namespace OptimizelySDK.Tests
             Assert.AreEqual(batchSetting.TimeoutInterval, 10000);
             Assert.IsTrue(batchSetting.DefaultStart);
         }
-
     }
 }
 #endif

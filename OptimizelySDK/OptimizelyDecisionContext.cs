@@ -37,27 +37,28 @@ namespace OptimizelySDK
         /// <summary>
         /// Flag key of the context.
         /// </summary>
-        public string FlagKey { get { return flagKey; } }
+        public string FlagKey => flagKey;
 
         /// <summary>
         /// Rule key, it can be experiment or rollout key and nullable.
         /// </summary>
-        public string RuleKey { get { return ruleKey; } }
+        public string RuleKey => ruleKey;
 
-        public OptimizelyDecisionContext(string flagKey, string ruleKey= null)
+        public OptimizelyDecisionContext(string flagKey, string ruleKey = null)
         {
-            if (flagKey != null) {
+            if (flagKey != null)
+            {
                 IsValid = true;
             }
+
             this.flagKey = flagKey;
             this.ruleKey = ruleKey;
         }
 
         public string GetKey()
         {
-            return string.Format("{0}{1}{2}", FlagKey, OPTI_KEY_DIVIDER, RuleKey ?? OPTI_NULL_RULE_KEY);
+            return string.Format("{0}{1}{2}", FlagKey, OPTI_KEY_DIVIDER,
+                RuleKey ?? OPTI_NULL_RULE_KEY);
         }
-
-
     }
 }

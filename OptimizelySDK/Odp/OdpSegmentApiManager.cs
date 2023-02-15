@@ -14,11 +14,6 @@
  * limitations under the License.
  */
 
-using Newtonsoft.Json;
-using OptimizelySDK.AudienceConditions;
-using OptimizelySDK.ErrorHandler;
-using OptimizelySDK.Logger;
-using OptimizelySDK.Odp.Entity;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -26,6 +21,11 @@ using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
+using OptimizelySDK.AudienceConditions;
+using OptimizelySDK.ErrorHandler;
+using OptimizelySDK.Logger;
+using OptimizelySDK.Odp.Entity;
 
 namespace OptimizelySDK.Odp
 {
@@ -131,10 +131,10 @@ namespace OptimizelySDK.Odp
                 return null;
             }
 
-            return segments.Data.Customer.Audiences.Edges
-                .Where(e => e.Node.State == BaseCondition.QUALIFIED)
-                .Select(e => e.Node.Name)
-                .ToArray();
+            return segments.Data.Customer.Audiences.Edges.
+                Where(e => e.Node.State == BaseCondition.QUALIFIED).
+                Select(e => e.Node.Name).
+                ToArray();
         }
 
         /// <summary>
@@ -155,10 +155,9 @@ namespace OptimizelySDK.Odp
                         ""userId"": ""{userValue}"",
                         ""audiences"": {audiences}
                     }
-                }"
-                    .Replace("{userKey}", userKey)
-                    .Replace("{userValue}", userValue)
-                    .Replace("{audiences}", JsonConvert.SerializeObject(segmentsToCheck));
+                }".Replace("{userKey}", userKey).
+                    Replace("{userValue}", userValue).
+                    Replace("{audiences}", JsonConvert.SerializeObject(segmentsToCheck));
         }
 
         /// <summary>

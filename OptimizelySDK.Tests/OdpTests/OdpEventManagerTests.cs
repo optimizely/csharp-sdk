@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-using Moq;
-using NUnit.Framework;
-using OptimizelySDK.Logger;
-using OptimizelySDK.Odp;
-using OptimizelySDK.Odp.Entity;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Moq;
+using NUnit.Framework;
+using OptimizelySDK.Logger;
+using OptimizelySDK.Odp;
+using OptimizelySDK.Odp.Entity;
 
 namespace OptimizelySDK.Tests.OdpTests
 {
@@ -345,7 +345,7 @@ namespace OptimizelySDK.Tests.OdpTests
                 Build();
             eventManager.UpdateSettings(_odpConfig);
 
-            for (int i = 0; i < 25; i++)
+            for (var i = 0; i < 25; i++)
             {
                 eventManager.SendEvent(MakeEvent(i));
             }
@@ -412,7 +412,7 @@ namespace OptimizelySDK.Tests.OdpTests
                 Build();
             eventManager.UpdateSettings(_odpConfig);
 
-            for (int i = 0; i < 4; i++) // send 4 events in batches of 1
+            for (var i = 0; i < 4; i++) // send 4 events in batches of 1
             {
                 eventManager.SendEvent(MakeEvent(i));
             }
@@ -436,7 +436,7 @@ namespace OptimizelySDK.Tests.OdpTests
                 Build();
             eventManager.UpdateSettings(_odpConfig);
 
-            for (int i = 0; i < 25; i++)
+            for (var i = 0; i < 25; i++)
             {
                 eventManager.SendEvent(MakeEvent(i));
             }
@@ -509,23 +509,26 @@ namespace OptimizelySDK.Tests.OdpTests
             Assert.IsFalse(_odpConfig.Equals(eventManager.OdpConfigForTesting));
         }
 
-        private static OdpEvent MakeEvent(int id) =>
-            new OdpEvent($"test-type-{id}", $"test-action-{id}", new Dictionary<string, string>
-            {
+        private static OdpEvent MakeEvent(int id)
+        {
+            return new OdpEvent($"test-type-{id}", $"test-action-{id}",
+                new Dictionary<string, string>
                 {
-                    "an-identifier", $"value1-{id}"
-                },
+                    {
+                        "an-identifier", $"value1-{id}"
+                    },
+                    {
+                        "another-identity", $"value2-{id}"
+                    },
+                }, new Dictionary<string, object>
                 {
-                    "another-identity", $"value2-{id}"
-                },
-            }, new Dictionary<string, object>
-            {
-                {
-                    "data1", $"data1-value1-{id}"
-                },
-                {
-                    "data2", id
-                },
-            });
+                    {
+                        "data1", $"data1-value1-{id}"
+                    },
+                    {
+                        "data2", id
+                    },
+                });
+        }
     }
 }

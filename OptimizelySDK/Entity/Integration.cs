@@ -21,14 +21,14 @@ namespace OptimizelySDK.Entity
     public class Integration : IdKeyEntity
     {
         public string Host { get; set; }
-        
+
         public string PublicKey { get; set; }
 
         public override string ToString()
         {
             var sb = new StringBuilder();
             sb.AppendFormat("Integration{{key='{0}'", Key);
-            
+
             if (!string.IsNullOrEmpty(Host))
             {
                 sb.AppendFormat(", host='{0}'", Host);
@@ -40,7 +40,7 @@ namespace OptimizelySDK.Entity
             }
 
             sb.Append("}");
-            
+
             return sb.ToString();
         }
     }

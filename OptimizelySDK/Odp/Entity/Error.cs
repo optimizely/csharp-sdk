@@ -25,17 +25,17 @@ namespace OptimizelySDK.Odp.Entity
         /// Human-readable message from the error
         /// </summary>
         public string Message { get; set; }
-        
+
         /// <summary>
         /// Points of failure producing the error
         /// </summary>
         public Location[] Locations { get; set; }
-        
+
         /// <summary>
         /// Files or urls producing the error
         /// </summary>
         public string[] Path { get; set; }
-        
+
         /// <summary>
         /// Additional technical error information 
         /// </summary>

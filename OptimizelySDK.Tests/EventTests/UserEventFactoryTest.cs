@@ -38,7 +38,8 @@ namespace OptimizelySDK.Tests.EventTests
             LoggerMock = new Mock<ILogger>();
             ErrorHandlerMock = new Mock<IErrorHandler>();
 
-            Config = DatafileProjectConfig.Create(TestData.Datafile, LoggerMock.Object, ErrorHandlerMock.Object);
+            Config = DatafileProjectConfig.Create(TestData.Datafile, LoggerMock.Object,
+                ErrorHandlerMock.Object);
         }
 
         [Test]
@@ -49,7 +50,8 @@ namespace OptimizelySDK.Tests.EventTests
             var variation = Config.GetVariationFromId(experiment.Key, "77210100090");
             var userId = TestUserId;
 
-            var impressionEvent = UserEventFactory.CreateImpressionEvent(projectConfig, experiment, variation, userId, null, "test_experiment", "experiment");
+            var impressionEvent = UserEventFactory.CreateImpressionEvent(projectConfig, experiment,
+                variation, userId, null, "test_experiment", "experiment");
 
             Assert.AreEqual(Config.ProjectId, impressionEvent.Context.ProjectId);
             Assert.AreEqual(Config.Revision, impressionEvent.Context.Revision);
@@ -70,12 +72,14 @@ namespace OptimizelySDK.Tests.EventTests
             var variation = Config.GetVariationFromId(experiment.Key, "77210100090");
             var userId = TestUserId;
 
-            var userAttributes = new UserAttributes {
+            var userAttributes = new UserAttributes
+            {
                 { "device_type", "iPhone" },
-                { "company", "Optimizely" }
+                { "company", "Optimizely" },
             };
 
-            var impressionEvent = UserEventFactory.CreateImpressionEvent(projectConfig, experiment, variation, userId, userAttributes, "test_experiment", "experiment");
+            var impressionEvent = UserEventFactory.CreateImpressionEvent(projectConfig, experiment,
+                variation, userId, userAttributes, "test_experiment", "experiment");
 
             Assert.AreEqual(Config.ProjectId, impressionEvent.Context.ProjectId);
             Assert.AreEqual(Config.Revision, impressionEvent.Context.Revision);
@@ -87,7 +91,8 @@ namespace OptimizelySDK.Tests.EventTests
             Assert.AreEqual(userId, impressionEvent.UserId);
             Assert.AreEqual(Config.BotFiltering, impressionEvent.BotFiltering);
 
-            var expectedVisitorAttributes = EventFactory.BuildAttributeList(userAttributes, projectConfig);
+            var expectedVisitorAttributes =
+                EventFactory.BuildAttributeList(userAttributes, projectConfig);
             TestData.CompareObjects(expectedVisitorAttributes, impressionEvent.VisitorAttributes);
         }
 
@@ -99,12 +104,14 @@ namespace OptimizelySDK.Tests.EventTests
             var variation = Config.GetVariationFromId(experiment.Key, "77210100090");
             var userId = TestUserId;
             var eventKey = "purchase";
-            var userAttributes = new UserAttributes {
+            var userAttributes = new UserAttributes
+            {
                 { "device_type", "iPhone" },
-                { "company", "Optimizely" }
+                { "company", "Optimizely" },
             };
 
-            var conversionEvent = UserEventFactory.CreateConversionEvent(projectConfig, eventKey, userId, userAttributes, null);
+            var conversionEvent = UserEventFactory.CreateConversionEvent(projectConfig, eventKey,
+                userId, userAttributes, null);
 
             Assert.AreEqual(Config.ProjectId, conversionEvent.Context.ProjectId);
             Assert.AreEqual(Config.Revision, conversionEvent.Context.Revision);
@@ -115,7 +122,8 @@ namespace OptimizelySDK.Tests.EventTests
             Assert.AreEqual(userId, conversionEvent.UserId);
             Assert.AreEqual(Config.BotFiltering, conversionEvent.BotFiltering);
 
-            var expectedVisitorAttributes = EventFactory.BuildAttributeList(userAttributes, projectConfig);
+            var expectedVisitorAttributes =
+                EventFactory.BuildAttributeList(userAttributes, projectConfig);
             TestData.CompareObjects(expectedVisitorAttributes, conversionEvent.VisitorAttributes);
         }
 
@@ -128,17 +136,20 @@ namespace OptimizelySDK.Tests.EventTests
             var userId = TestUserId;
             var eventKey = "purchase";
 
-            var eventTags = new EventTags {
+            var eventTags = new EventTags
+            {
                 { "revenue", 4200 },
                 { "value", 1.234 },
-                { "non-revenue", "abc" }
+                { "non-revenue", "abc" },
             };
-            var userAttributes = new UserAttributes {
+            var userAttributes = new UserAttributes
+            {
                 { "device_type", "iPhone" },
-                { "company", "Optimizely" }
+                { "company", "Optimizely" },
             };
 
-            var conversionEvent = UserEventFactory.CreateConversionEvent(projectConfig, eventKey, userId, userAttributes, eventTags);
+            var conversionEvent = UserEventFactory.CreateConversionEvent(projectConfig, eventKey,
+                userId, userAttributes, eventTags);
 
             Assert.AreEqual(Config.ProjectId, conversionEvent.Context.ProjectId);
             Assert.AreEqual(Config.Revision, conversionEvent.Context.Revision);
@@ -150,7 +161,8 @@ namespace OptimizelySDK.Tests.EventTests
             Assert.AreEqual(Config.BotFiltering, conversionEvent.BotFiltering);
             Assert.AreEqual(eventTags, conversionEvent.EventTags);
 
-            var expectedVisitorAttributes = EventFactory.BuildAttributeList(userAttributes, projectConfig);
+            var expectedVisitorAttributes =
+                EventFactory.BuildAttributeList(userAttributes, projectConfig);
             TestData.CompareObjects(expectedVisitorAttributes, conversionEvent.VisitorAttributes);
         }
     }

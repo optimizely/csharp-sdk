@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-using OptimizelySDK.Logger;
 using System.Collections.Generic;
+using OptimizelySDK.Logger;
 
 namespace OptimizelySDK.Notifications
 {
@@ -71,7 +71,7 @@ namespace OptimizelySDK.Notifications
             lock (_mutex)
             {
                 if (_notificationCenters.TryGetValue(sdkKey,
-                        out NotificationCenter notificationCenter))
+                        out var notificationCenter))
                 {
                     notificationCenter.ClearAllNotifications();
                     _notificationCenters.Remove(sdkKey);

@@ -24,7 +24,9 @@ namespace OptimizelySDK.AudienceConditions
     /// </summary>
     public class EmptyCondition : ICondition
     {
-        public bool? Evaluate(ProjectConfig config, OptimizelyUserContext userContext, ILogger logger)
+        public bool? Evaluate(ProjectConfig config, OptimizelyUserContext userContext,
+            ILogger logger
+        )
         {
             return true;
         }

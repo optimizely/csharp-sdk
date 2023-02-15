@@ -41,11 +41,17 @@ namespace OptimizelySDK.Tests.AudienceConditionsTests
         public void Initialize()
         {
             TrueConditionMock = new Mock<ICondition>();
-            TrueConditionMock.Setup(condition => condition.Evaluate(It.IsAny<ProjectConfig>(), It.IsAny<OptimizelyUserContext>(), It.IsAny<ILogger>())).Returns(true);
+            TrueConditionMock.Setup(condition => condition.Evaluate(It.IsAny<ProjectConfig>(),
+                    It.IsAny<OptimizelyUserContext>(), It.IsAny<ILogger>())).
+                Returns(true);
             FalseConditionMock = new Mock<ICondition>();
-            FalseConditionMock.Setup(condition => condition.Evaluate(It.IsAny<ProjectConfig>(), It.IsAny<OptimizelyUserContext>(), It.IsAny<ILogger>())).Returns(false);
+            FalseConditionMock.Setup(condition => condition.Evaluate(It.IsAny<ProjectConfig>(),
+                    It.IsAny<OptimizelyUserContext>(), It.IsAny<ILogger>())).
+                Returns(false);
             NullConditionMock = new Mock<ICondition>();
-            NullConditionMock.Setup(condition => condition.Evaluate(It.IsAny<ProjectConfig>(), It.IsAny<OptimizelyUserContext>(), It.IsAny<ILogger>())).Returns((bool?)null);
+            NullConditionMock.Setup(condition => condition.Evaluate(It.IsAny<ProjectConfig>(),
+                    It.IsAny<OptimizelyUserContext>(), It.IsAny<ILogger>())).
+                Returns((bool?)null);
 
             TrueCondition = TrueConditionMock.Object;
             FalseCondition = FalseConditionMock.Object;
@@ -61,7 +67,7 @@ namespace OptimizelySDK.Tests.AudienceConditionsTests
         [Test]
         public void TestAndEvaluatorReturnsTrueWhenAllOperandsEvaluateToTrue()
         {
-            ICondition[] conditions = new ICondition[] { TrueCondition, TrueCondition };
+            var conditions = new ICondition[] { TrueCondition, TrueCondition };
             var andCondition = new AndCondition { Conditions = conditions };
 
             Assert.That(andCondition.Evaluate(null, null, Logger), Is.True);
@@ -70,19 +76,21 @@ namespace OptimizelySDK.Tests.AudienceConditionsTests
         [Test]
         public void TestAndEvaluatorReturnsFalseWhenAnyOperandEvaluatesToFalse()
         {
-            ICondition[] conditions = new ICondition[] { FalseCondition, TrueCondition };
+            var conditions = new ICondition[] { FalseCondition, TrueCondition };
             var andCondition = new AndCondition { Conditions = conditions };
 
             Assert.That(andCondition.Evaluate(null, null, Logger), Is.False);
 
             // Should not be called due to short circuiting.
-            TrueConditionMock.Verify(condition => condition.Evaluate(It.IsAny<ProjectConfig>(), It.IsAny<OptimizelyUserContext>(), Logger), Times.Never);
+            TrueConditionMock.Verify(
+                condition => condition.Evaluate(It.IsAny<ProjectConfig>(),
+                    It.IsAny<OptimizelyUserContext>(), Logger), Times.Never);
         }
 
         [Test]
         public void TestAndEvaluatorReturnsNullWhenAllOperandsEvaluateToNull()
         {
-            ICondition[] conditions = new ICondition[] { NullCondition, NullCondition };
+            var conditions = new ICondition[] { NullCondition, NullCondition };
             var andCondition = new AndCondition { Conditions = conditions };
 
             Assert.That(andCondition.Evaluate(null, null, Logger), Is.Null);
@@ -91,7 +99,7 @@ namespace OptimizelySDK.Tests.AudienceConditionsTests
         [Test]
         public void TestAndEvaluatorReturnsNullWhenOperandsEvaluateToTrueAndNull()
         {
-            ICondition[] conditions = new ICondition[] { TrueCondition, NullCondition, TrueCondition };
+            var conditions = new ICondition[] { TrueCondition, NullCondition, TrueCondition };
             var andCondition = new AndCondition { Conditions = conditions };
 
             Assert.That(andCondition.Evaluate(null, null, Logger), Is.Null);
@@ -100,7 +108,7 @@ namespace OptimizelySDK.Tests.AudienceConditionsTests
         [Test]
         public void TestAndEvaluatorReturnsFalseWhenOperandsEvaluateToFalseAndNull()
         {
-            ICondition[] conditions = new ICondition[] { NullCondition, FalseCondition, NullCondition };
+            var conditions = new ICondition[] { NullCondition, FalseCondition, NullCondition };
             var andCondition = new AndCondition { Conditions = conditions };
 
             Assert.That(andCondition.Evaluate(null, null, Logger), Is.False);
@@ -109,7 +117,7 @@ namespace OptimizelySDK.Tests.AudienceConditionsTests
         [Test]
         public void TestAndEvaluatorReturnsFalseWhenOperandsEvaluateToTrueFalseAndNull()
         {
-            ICondition[] conditions = new ICondition[] { TrueCondition, FalseCondition, NullCondition };
+            var conditions = new ICondition[] { TrueCondition, FalseCondition, NullCondition };
             var andCondition = new AndCondition { Conditions = conditions };
 
             Assert.That(andCondition.Evaluate(null, null, Logger), Is.False);
@@ -122,7 +130,7 @@ namespace OptimizelySDK.Tests.AudienceConditionsTests
         [Test]
         public void TestOrEvaluatorReturnsTrueWhenAnyOperandEvaluatesToTrue()
         {
-            ICondition[] conditions = new ICondition[] { TrueCondition, FalseCondition, NullCondition };
+            var conditions = new ICondition[] { TrueCondition, FalseCondition, NullCondition };
             var orCondition = new OrCondition { Conditions = conditions };
 
             Assert.That(orCondition.Evaluate(null, null, Logger), Is.True);
@@ -131,7 +139,7 @@ namespace OptimizelySDK.Tests.AudienceConditionsTests
         [Test]
         public void TestOrEvaluatorReturnsFalseWhenAllOperandsEvaluatesToFalse()
         {
-            ICondition[] conditions = new ICondition[] { FalseCondition, FalseCondition };
+            var conditions = new ICondition[] { FalseCondition, FalseCondition };
             var orCondition = new OrCondition { Conditions = conditions };
 
             Assert.That(orCondition.Evaluate(null, null, Logger), Is.False);
@@ -140,7 +148,7 @@ namespace OptimizelySDK.Tests.AudienceConditionsTests
         [Test]
         public void TestOrEvaluatorReturnsNullWhenOperandsEvaluateToFalseAndNull()
         {
-            ICondition[] conditions = new ICondition[] { FalseCondition, NullCondition, FalseCondition };
+            var conditions = new ICondition[] { FalseCondition, NullCondition, FalseCondition };
             var orCondition = new OrCondition { Conditions = conditions };
 
             Assert.That(orCondition.Evaluate(null, null, Logger), Is.Null);
@@ -149,7 +157,7 @@ namespace OptimizelySDK.Tests.AudienceConditionsTests
         [Test]
         public void TestOrEvaluatorReturnsTrueWhenOperandsEvaluateToTrueAndNull()
         {
-            ICondition[] conditions = new ICondition[] { TrueCondition, NullCondition, TrueCondition };
+            var conditions = new ICondition[] { TrueCondition, NullCondition, TrueCondition };
             var orCondition = new OrCondition { Conditions = conditions };
 
             Assert.That(orCondition.Evaluate(null, null, Logger), Is.True);
@@ -158,7 +166,7 @@ namespace OptimizelySDK.Tests.AudienceConditionsTests
         [Test]
         public void TestOrEvaluatorReturnsTrueWhenOperandsEvaluateToFalseTrueAndNull()
         {
-            ICondition[] conditions = new ICondition[] { FalseCondition, NullCondition, TrueCondition };
+            var conditions = new ICondition[] { FalseCondition, NullCondition, TrueCondition };
             var orCondition = new OrCondition { Conditions = conditions };
 
             Assert.That(orCondition.Evaluate(null, null, Logger), Is.True);

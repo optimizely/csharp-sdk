@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-using OptimizelySDK.Utils;
 using System.Collections.Generic;
+using OptimizelySDK.Utils;
 
 namespace OptimizelySDK.Entity
 {
@@ -26,25 +26,31 @@ namespace OptimizelySDK.Entity
         [Newtonsoft.Json.JsonProperty("variables")]
         public List<FeatureVariableUsage> FeatureVariableUsageInstances
         {
-            get
-            {
-                return _FeatureVariableUsageInstances;
-            }
+            get => _FeatureVariableUsageInstances;
             set
             {
                 _FeatureVariableUsageInstances = value;
 
                 // Generating Variable Usage key map.
                 if (_FeatureVariableUsageInstances != null)
-                    VariableIdToVariableUsageInstanceMap = ConfigParser<FeatureVariableUsage>.GenerateMap(entities: _FeatureVariableUsageInstances, getKey: v => v.Id.ToString(), clone: true);
+                {
+                    VariableIdToVariableUsageInstanceMap =
+                        ConfigParser<FeatureVariableUsage>.GenerateMap(
+                            _FeatureVariableUsageInstances, v => v.Id.ToString(), true);
+                }
             }
         }
 
-        public Dictionary<string, FeatureVariableUsage> VariableIdToVariableUsageInstanceMap { get; set; }
+        public Dictionary<string, FeatureVariableUsage> VariableIdToVariableUsageInstanceMap
+        {
+            get;
+            set;
+        }
 
         public FeatureVariableUsage GetFeatureVariableUsageFromId(string variableId)
         {
-            if (VariableIdToVariableUsageInstanceMap != null && VariableIdToVariableUsageInstanceMap.ContainsKey(variableId))
+            if (VariableIdToVariableUsageInstanceMap != null &&
+                VariableIdToVariableUsageInstanceMap.ContainsKey(variableId))
             {
                 return VariableIdToVariableUsageInstanceMap[variableId];
             }
@@ -54,12 +60,6 @@ namespace OptimizelySDK.Entity
 
         public bool? FeatureEnabled { get; set; }
 
-        public bool IsFeatureEnabled
-        {
-            get
-            {
-                return FeatureEnabled ?? false;
-            }
-        }
+        public bool IsFeatureEnabled => FeatureEnabled ?? false;
     }
 }

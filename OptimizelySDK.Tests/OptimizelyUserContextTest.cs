@@ -14,6 +14,9 @@
  *    limitations under the License.
  */
 
+using System;
+using System.Collections.Generic;
+using System.Threading;
 using Castle.Core.Internal;
 using Moq;
 using NUnit.Framework;
@@ -29,16 +32,13 @@ using OptimizelySDK.Odp;
 using OptimizelySDK.OptimizelyDecisions;
 using OptimizelySDK.Tests.NotificationTests;
 using OptimizelySDK.Utils;
-using System;
-using System.Collections.Generic;
-using System.Threading;
 
 namespace OptimizelySDK.Tests
 {
     [TestFixture]
     public class OptimizelyUserContextTest
     {
-        const string UserID = "testUserID";
+        private const string UserID = "testUserID";
         private Optimizely Optimizely;
         private Mock<ILogger> LoggerMock;
         private Mock<IErrorHandler> ErrorHandlerMock;
@@ -69,9 +69,9 @@ namespace OptimizelySDK.Tests
             {
                 {
                     "house", "GRYFFINDOR"
-                }
+                },
             };
-            OptimizelyUserContext user = new OptimizelyUserContext(Optimizely, UserID, attributes,
+            var user = new OptimizelyUserContext(Optimizely, UserID, attributes,
                 ErrorHandlerMock.Object, LoggerMock.Object);
 
             Assert.AreEqual(user.GetOptimizely(), Optimizely);
@@ -82,7 +82,7 @@ namespace OptimizelySDK.Tests
         [Test]
         public void OptimizelyUserContextNoAttributes()
         {
-            OptimizelyUserContext user = new OptimizelyUserContext(Optimizely, UserID, null,
+            var user = new OptimizelyUserContext(Optimizely, UserID, null,
                 ErrorHandlerMock.Object, LoggerMock.Object);
 
             Assert.AreEqual(user.GetOptimizely(), Optimizely);
@@ -97,9 +97,9 @@ namespace OptimizelySDK.Tests
             {
                 {
                     "house", "GRYFFINDOR"
-                }
+                },
             };
-            OptimizelyUserContext user = new OptimizelyUserContext(Optimizely, UserID, attributes,
+            var user = new OptimizelyUserContext(Optimizely, UserID, attributes,
                 ErrorHandlerMock.Object, LoggerMock.Object);
 
             user.SetAttribute("k1", "v1");
@@ -120,7 +120,7 @@ namespace OptimizelySDK.Tests
         [Test]
         public void SetAttributeNoAttribute()
         {
-            OptimizelyUserContext user = new OptimizelyUserContext(Optimizely, UserID, null,
+            var user = new OptimizelyUserContext(Optimizely, UserID, null,
                 ErrorHandlerMock.Object, LoggerMock.Object);
 
             user.SetAttribute("k1", "v1");
@@ -140,9 +140,9 @@ namespace OptimizelySDK.Tests
             {
                 {
                     "house", "GRYFFINDOR"
-                }
+                },
             };
-            OptimizelyUserContext user = new OptimizelyUserContext(Optimizely, UserID, attributes,
+            var user = new OptimizelyUserContext(Optimizely, UserID, attributes,
                 ErrorHandlerMock.Object, LoggerMock.Object);
 
             user.SetAttribute("k1", "v1");
@@ -160,9 +160,9 @@ namespace OptimizelySDK.Tests
             {
                 {
                     "k1", null
-                }
+                },
             };
-            OptimizelyUserContext user = new OptimizelyUserContext(Optimizely, UserID, attributes,
+            var user = new OptimizelyUserContext(Optimizely, UserID, attributes,
                 ErrorHandlerMock.Object, LoggerMock.Object);
 
             var newAttributes = user.GetAttributes();
@@ -180,7 +180,7 @@ namespace OptimizelySDK.Tests
         [Test]
         public void SetAttributeToOverrideAttribute()
         {
-            OptimizelyUserContext user = new OptimizelyUserContext(Optimizely, UserID, null,
+            var user = new OptimizelyUserContext(Optimizely, UserID, null,
                 ErrorHandlerMock.Object, LoggerMock.Object);
 
             Assert.AreEqual(user.GetOptimizely(), Optimizely);
@@ -392,7 +392,7 @@ namespace OptimizelySDK.Tests
         [Test]
         public void DecideWhenConfigIsNull()
         {
-            Optimizely optimizely = new Optimizely(TestData.UnsupportedVersionDatafile,
+            var optimizely = new Optimizely(TestData.UnsupportedVersionDatafile,
                 EventDispatcherMock.Object, LoggerMock.Object, ErrorHandlerMock.Object);
 
             var flagKey = "multi_variate_feature";
@@ -419,7 +419,7 @@ namespace OptimizelySDK.Tests
             var flagKey = "multi_variate_feature";
             var flagKeys = new string[]
             {
-                flagKey
+                flagKey,
             };
 
             var variablesExpected = Optimizely.GetAllFeatureVariables(flagKey, UserID);
@@ -432,7 +432,7 @@ namespace OptimizelySDK.Tests
             Assert.True(decisions.Count == 1);
             var decision = decisions[flagKey];
 
-            OptimizelyDecision expDecision = new OptimizelyDecision(
+            var expDecision = new OptimizelyDecision(
                 "Gred",
                 false,
                 variablesExpected,
@@ -450,7 +450,7 @@ namespace OptimizelySDK.Tests
             var flagKey2 = "string_single_variable_feature";
             var flagKeys = new string[]
             {
-                flagKey1, flagKey2
+                flagKey1, flagKey2,
             };
 
             var variablesExpected1 = Optimizely.GetAllFeatureVariables(flagKey1, UserID);
@@ -473,7 +473,7 @@ namespace OptimizelySDK.Tests
             {
                 {
                     "browser_type", "chrome"
-                }
+                },
             };
 
             Assert.True(decisions.Count == 2);
@@ -481,7 +481,7 @@ namespace OptimizelySDK.Tests
                 nc => nc.TestDecisionCallback(DecisionNotificationTypes.FLAG, UserID,
                     userAttributes, It.IsAny<Dictionary<string, object>>()),
                 Times.Exactly(2));
-            OptimizelyDecision expDecision1 = new OptimizelyDecision(
+            var expDecision1 = new OptimizelyDecision(
                 "Gred",
                 false,
                 variablesExpected1,
@@ -491,7 +491,7 @@ namespace OptimizelySDK.Tests
                 new string[0]);
             Assert.IsTrue(TestData.CompareObjects(decisions[flagKey1], expDecision1));
 
-            OptimizelyDecision expDecision2 = new OptimizelyDecision(
+            var expDecision2 = new OptimizelyDecision(
                 "control",
                 true,
                 variablesExpected2,
@@ -544,7 +544,7 @@ namespace OptimizelySDK.Tests
             {
                 {
                     "browser_type", "chrome"
-                }
+                },
             };
 
             Assert.True(decisions.Count == 10);
@@ -553,7 +553,7 @@ namespace OptimizelySDK.Tests
                     userAttributes, It.IsAny<Dictionary<string, object>>()),
                 Times.Exactly(10));
 
-            OptimizelyDecision expDecision1 = new OptimizelyDecision(
+            var expDecision1 = new OptimizelyDecision(
                 null,
                 false,
                 variablesExpected1,
@@ -563,7 +563,7 @@ namespace OptimizelySDK.Tests
                 new string[0]);
             Assert.IsTrue(TestData.CompareObjects(decisions[flagKey1], expDecision1));
 
-            OptimizelyDecision expDecision2 = new OptimizelyDecision(
+            var expDecision2 = new OptimizelyDecision(
                 "variation",
                 false,
                 variablesExpected2,
@@ -573,7 +573,7 @@ namespace OptimizelySDK.Tests
                 new string[0]);
             Assert.IsTrue(TestData.CompareObjects(decisions[flagKey2], expDecision2));
 
-            OptimizelyDecision expDecision3 = new OptimizelyDecision(
+            var expDecision3 = new OptimizelyDecision(
                 "control",
                 false,
                 variablesExpected3,
@@ -583,7 +583,7 @@ namespace OptimizelySDK.Tests
                 new string[0]);
             Assert.IsTrue(TestData.CompareObjects(decisions[flagKey3], expDecision3));
 
-            OptimizelyDecision expDecision4 = new OptimizelyDecision(
+            var expDecision4 = new OptimizelyDecision(
                 "188881",
                 false,
                 variablesExpected4,
@@ -593,7 +593,7 @@ namespace OptimizelySDK.Tests
                 new string[0]);
             Assert.IsTrue(TestData.CompareObjects(decisions[flagKey4], expDecision4));
 
-            OptimizelyDecision expDecision5 = new OptimizelyDecision(
+            var expDecision5 = new OptimizelyDecision(
                 "control",
                 true,
                 variablesExpected5,
@@ -603,7 +603,7 @@ namespace OptimizelySDK.Tests
                 new string[0]);
             Assert.IsTrue(TestData.CompareObjects(decisions[flagKey5], expDecision5));
 
-            OptimizelyDecision expDecision6 = new OptimizelyDecision(
+            var expDecision6 = new OptimizelyDecision(
                 "Gred",
                 false,
                 variablesExpected6,
@@ -613,7 +613,7 @@ namespace OptimizelySDK.Tests
                 new string[0]);
             Assert.IsTrue(TestData.CompareObjects(decisions[flagKey6], expDecision6));
 
-            OptimizelyDecision expDecision7 = new OptimizelyDecision(
+            var expDecision7 = new OptimizelyDecision(
                 null,
                 false,
                 variablesExpected7,
@@ -623,7 +623,7 @@ namespace OptimizelySDK.Tests
                 new string[0]);
             Assert.IsTrue(TestData.CompareObjects(decisions[flagKey7], expDecision7));
 
-            OptimizelyDecision expDecision8 = new OptimizelyDecision(
+            var expDecision8 = new OptimizelyDecision(
                 null,
                 false,
                 variablesExpected8,
@@ -633,7 +633,7 @@ namespace OptimizelySDK.Tests
                 new string[0]);
             Assert.IsTrue(TestData.CompareObjects(decisions[flagKey8], expDecision8));
 
-            OptimizelyDecision expDecision9 = new OptimizelyDecision(
+            var expDecision9 = new OptimizelyDecision(
                 null,
                 false,
                 variablesExpected9,
@@ -643,7 +643,7 @@ namespace OptimizelySDK.Tests
                 new string[0]);
             Assert.IsTrue(TestData.CompareObjects(decisions[flagKey9], expDecision9));
 
-            OptimizelyDecision expDecision10 = new OptimizelyDecision(
+            var expDecision10 = new OptimizelyDecision(
                 null,
                 false,
                 variablesExpected10,
@@ -663,7 +663,7 @@ namespace OptimizelySDK.Tests
 
             var decideOptions = new OptimizelyDecideOption[]
             {
-                OptimizelyDecideOption.ENABLED_FLAGS_ONLY
+                OptimizelyDecideOption.ENABLED_FLAGS_ONLY,
             };
             var user = Optimizely.CreateUserContext(UserID);
             user.SetAttribute("browser_type", "chrome");
@@ -672,7 +672,7 @@ namespace OptimizelySDK.Tests
 
             Assert.True(decisions.Count == 1);
 
-            OptimizelyDecision expDecision1 = new OptimizelyDecision(
+            var expDecision1 = new OptimizelyDecision(
                 "control",
                 true,
                 variablesExpected1,
@@ -689,7 +689,7 @@ namespace OptimizelySDK.Tests
             var flagKey1 = "string_single_variable_feature";
             var decideOptions = new OptimizelyDecideOption[]
             {
-                OptimizelyDecideOption.ENABLED_FLAGS_ONLY
+                OptimizelyDecideOption.ENABLED_FLAGS_ONLY,
             };
 
             var optimizely = new Optimizely(TestData.Datafile,
@@ -707,7 +707,7 @@ namespace OptimizelySDK.Tests
 
             Assert.True(decisions.Count == 1);
 
-            OptimizelyDecision expDecision1 = new OptimizelyDecision(
+            var expDecision1 = new OptimizelyDecision(
                 "control",
                 true,
                 variablesExpected1,
@@ -724,7 +724,7 @@ namespace OptimizelySDK.Tests
             var flagKey1 = "string_single_variable_feature";
             var decideOptions = new OptimizelyDecideOption[]
             {
-                OptimizelyDecideOption.ENABLED_FLAGS_ONLY
+                OptimizelyDecideOption.ENABLED_FLAGS_ONLY,
             };
 
             var optimizely = new Optimizely(TestData.Datafile,
@@ -737,14 +737,14 @@ namespace OptimizelySDK.Tests
             user.SetAttribute("browser_type", "chrome");
             decideOptions = new OptimizelyDecideOption[]
             {
-                OptimizelyDecideOption.EXCLUDE_VARIABLES
+                OptimizelyDecideOption.EXCLUDE_VARIABLES,
             };
 
             var decisions = user.DecideAll(decideOptions);
 
             Assert.True(decisions.Count == 1);
             var expectedOptlyJson = new Dictionary<string, object>();
-            OptimizelyDecision expDecision1 = new OptimizelyDecision(
+            var expDecision1 = new OptimizelyDecision(
                 "control",
                 true,
                 new OptimizelyJSON(expectedOptlyJson, ErrorHandlerMock.Object, LoggerMock.Object),
@@ -765,7 +765,7 @@ namespace OptimizelySDK.Tests
             user.SetAttribute("browser_type", "chrome");
             var decideOptions = new OptimizelyDecideOption[]
             {
-                OptimizelyDecideOption.EXCLUDE_VARIABLES
+                OptimizelyDecideOption.EXCLUDE_VARIABLES,
             };
 
             var decision = user.Decide(flagKey, decideOptions);
@@ -794,7 +794,7 @@ namespace OptimizelySDK.Tests
 
             var decideOptions = new OptimizelyDecideOption[]
             {
-                OptimizelyDecideOption.INCLUDE_REASONS
+                OptimizelyDecideOption.INCLUDE_REASONS,
             };
 
             decision = user.Decide(flagKey, decideOptions);
@@ -837,7 +837,7 @@ namespace OptimizelySDK.Tests
 
             var decideOptions = new OptimizelyDecideOption[]
             {
-                OptimizelyDecideOption.DISABLE_DECISION_EVENT
+                OptimizelyDecideOption.DISABLE_DECISION_EVENT,
             };
             var decision = user.Decide(flagKey, decideOptions);
             EventDispatcherMock.Verify(dispatcher => dispatcher.DispatchEvent(It.IsAny<LogEvent>()),
@@ -863,7 +863,7 @@ namespace OptimizelySDK.Tests
             var variablesExpected = Optimizely.GetAllFeatureVariables(flagKey, UserID);
             var decideOptions = new OptimizelyDecideOption[]
             {
-                OptimizelyDecideOption.DISABLE_DECISION_EVENT
+                OptimizelyDecideOption.DISABLE_DECISION_EVENT,
             };
 
             var optimizely = new Optimizely(TestData.Datafile,
@@ -930,7 +930,7 @@ namespace OptimizelySDK.Tests
             {
                 {
                     "browser_type", "chrome"
-                }
+                },
             };
 
             // Mocking objects.
@@ -966,7 +966,7 @@ namespace OptimizelySDK.Tests
             {
                 {
                     experimentId, new Decision(fbVariationId)
-                }
+                },
             });
 
             userProfileServiceMock.Setup(_ => _.Lookup(userId)).Returns(userProfile.ToMap());
@@ -984,7 +984,7 @@ namespace OptimizelySDK.Tests
 
             var decideOptions = new OptimizelyDecideOption[]
             {
-                OptimizelyDecideOption.IGNORE_USER_PROFILE_SERVICE
+                OptimizelyDecideOption.IGNORE_USER_PROFILE_SERVICE,
             };
             variationUserProfile = user.Decide(flagKey, decideOptions);
             Assert.AreEqual(variationKey, variationUserProfile.VariationKey);
@@ -1005,7 +1005,7 @@ namespace OptimizelySDK.Tests
 
             var decideOptions = new OptimizelyDecideOption[]
             {
-                OptimizelyDecideOption.IGNORE_USER_PROFILE_SERVICE
+                OptimizelyDecideOption.IGNORE_USER_PROFILE_SERVICE,
             };
             var variationUserProfile = user.Decide(flagKey, decideOptions);
             userProfileServiceMock.Verify(l => l.Save(It.IsAny<Dictionary<string, object>>()),
@@ -1030,7 +1030,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "should_do_it", false
-                }
+                },
             };
 
             var user = OptimizelyWithTypedAudiences.CreateUserContext(UserID, userAttributes);
@@ -1058,7 +1058,7 @@ namespace OptimizelySDK.Tests
                 },
                 {
                     "wont_send_null", null
-                }
+                },
             });
 
             EventDispatcherMock.Verify(dispatcher => dispatcher.DispatchEvent(It.IsAny<LogEvent>()),
@@ -1072,7 +1072,7 @@ namespace OptimizelySDK.Tests
         {
             var odpManager = new OdpManager.Builder().Build();
             var cde = new CountdownEvent(1);
-            bool callbackResult = false;
+            var callbackResult = false;
             var optimizely = new Optimizely(TestData.OdpIntegrationDatafile,
                 EventDispatcherMock.Object, LoggerMock.Object, ErrorHandlerMock.Object,
                 odpManager: odpManager);

@@ -13,31 +13,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-using OptimizelySDK.Event.Entity;
+
 using System;
+using OptimizelySDK.Event.Entity;
 
 namespace OptimizelySDK.Event.Builder
 {
     [Obsolete("This class is deprecated.")]
     public static class Params
     {
-        public const string ACCOUNT_ID          = "account_id";
-        public const string ANONYMIZE_IP        = "anonymize_ip";
-        public const string CAMPAIGN_ID         = "campaign_id";
-        public const string CLIENT_ENGINE       = "client_name";
-        public const string CLIENT_VERSION      = "client_version";
-        public const string DECISIONS           = "decisions";
-        public const string ENRICH_DECISIONS    = "enrich_decisions";
-        public const string ENTITY_ID           = "entity_id";
-        public const string EVENTS              = "events";
-        public const string EXPERIMENT_ID       = "experiment_id";
-        public const string METADATA            = "metadata";
-        public const string PROJECT_ID          = "project_id";
-        public const string REVISION            = "revision";
-        public const string TIME                = "timestamp";
-        public const string TIMESTAMP           = "timestamp";
-        public const string VARIATION_ID        = "variation_id";
-        public const string VISITOR_ID          = "visitorId";
-        public const string VISITORS            = "visitors";
+        public const string ACCOUNT_ID = "account_id";
+        public const string ANONYMIZE_IP = "anonymize_ip";
+        public const string CAMPAIGN_ID = "campaign_id";
+        public const string CLIENT_ENGINE = "client_name";
+        public const string CLIENT_VERSION = "client_version";
+        public const string DECISIONS = "decisions";
+        public const string ENRICH_DECISIONS = "enrich_decisions";
+        public const string ENTITY_ID = "entity_id";
+        public const string EVENTS = "events";
+        public const string EXPERIMENT_ID = "experiment_id";
+        public const string METADATA = "metadata";
+        public const string PROJECT_ID = "project_id";
+        public const string REVISION = "revision";
+        public const string TIME = "timestamp";
+        public const string TIMESTAMP = "timestamp";
+        public const string VARIATION_ID = "variation_id";
+        public const string VISITOR_ID = "visitorId";
+        public const string VISITORS = "visitors";
     }
 }

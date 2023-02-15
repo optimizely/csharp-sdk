@@ -14,15 +14,16 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
+
 using System;
 using System.Collections.Generic;
 using Moq;
-using OptimizelySDK.Logger;
-using OptimizelySDK.ErrorHandler;
-using OptimizelySDK.Entity;
 using NUnit.Framework;
 using OptimizelySDK.Bucketing;
+using OptimizelySDK.Entity;
+using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Exceptions;
+using OptimizelySDK.Logger;
 
 namespace OptimizelySDK.Tests
 {
@@ -41,12 +42,12 @@ namespace OptimizelySDK.Tests
         public void TestErrorHandlerMessage()
         {
             DefaultErrorHandler = new DefaultErrorHandler(LoggerMock.Object, false);
-            string testingException = "Testing exception";
+            var testingException = "Testing exception";
             try
             {
                 throw new OptimizelyException("Testing exception");
             }
-            catch(OptimizelyException ex)
+            catch (OptimizelyException ex)
             {
                 DefaultErrorHandler.HandleError(ex);
             }
@@ -54,12 +55,11 @@ namespace OptimizelySDK.Tests
             LoggerMock.Verify(log => log.Log(LogLevel.ERROR, testingException), Times.Once);
         }
 
-        [Test]
-        [ExpectedException]
+        [Test, ExpectedException]
         public void TestErrorHandlerMessageWithThrowException()
         {
             DefaultErrorHandler = new DefaultErrorHandler(LoggerMock.Object, true);
-            string testingException = "Testing and throwing exception";
+            var testingException = "Testing and throwing exception";
             try
             {
                 throw new OptimizelyException("Testing exception");
@@ -72,6 +72,5 @@ namespace OptimizelySDK.Tests
 
             LoggerMock.Verify(log => log.Log(LogLevel.ERROR, testingException), Times.Once);
         }
-
     }
 }
