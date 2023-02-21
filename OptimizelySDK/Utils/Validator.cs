@@ -38,7 +38,7 @@ namespace OptimizelySDK.Utils
         {
             try
             {
-                return !NJsonSchema.JsonSchema4.FromJsonAsync(schemaJson ?? Schema.GetSchemaJson()).
+                return !NJsonSchema.JsonSchema.FromJsonAsync(schemaJson ?? Schema.GetSchemaJson()).
                     Result.Validate(configJson).
                     Any();
             }
