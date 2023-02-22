@@ -511,7 +511,7 @@ namespace OptimizelySDK
         /// <param name="featureKey">The feature key</param>
         /// <param name="userId">The user ID</param>
         /// <param name="userAttributes">The user's attributes.</param>
-        /// <returns>True if feature is enabled, false or null otherwise</returns>
+        /// <returns>True if feature is enabled, otherwise false</returns>
         public virtual bool IsFeatureEnabled(string featureKey, string userId,
             UserAttributes userAttributes = null
         )
