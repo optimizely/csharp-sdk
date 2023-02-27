@@ -3,12 +3,12 @@ name: Csharp CI with .NET
 
 on:
   push:
-    branches: [master]
+    branches: [3.11.2]
   pull_request:
-    branches: [master]
+    branches: [3.11.2]
 
 env:
-  RELEASE_BRANCH: "master"
+  RELEASE_BRANCH: "3.11.2"
   WINDOWS_2019_SN_PATH: C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.8 Tools\sn.exe
 
 jobs:
