@@ -155,8 +155,8 @@
         </EmbeddedResource>
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
-        <PackageReference Include="NJsonSchema" Version="8.33.6323.36213" />
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
+        <PackageReference Include="NJsonSchema" Version="10.8.0" />
         <PackageReference Include="murmurhash-signed" Version="1.0.2" />
     </ItemGroup>
 
