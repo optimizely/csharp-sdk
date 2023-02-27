@@ -64,8 +64,8 @@
       <HintPath>..\packages\Microsoft.Web.Infrastructure.1.0.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.13.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -124,7 +124,7 @@
       <HintPath>..\packages\murmurhash-signed.1.0.2\lib\net45\MurmurHash.dll</HintPath>
     </Reference>
     <Reference Include="NJsonSchema">
-      <HintPath>..\packages\NJsonSchema.8.30.6304.31883\lib\net45\NJsonSchema.dll</HintPath>
+      <HintPath>..\packages\NJsonSchema.10.8.0\lib\net45\NJsonSchema.dll</HintPath>
     </Reference>
     <Reference Include="OptimizelySDK">
       <HintPath>..\packages\Optimizely.SDK.2.1.0\lib\net45\OptimizelySDK.dll</HintPath>
