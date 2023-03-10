@@ -11,7 +11,7 @@
         <icon>OptimizelySDK.png</icon>
         <iconUrl>https://github.com/optimizely/csharp-sdk/blob/master/OptimizelySDK.png?raw=true</iconUrl>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
-        <description>C# SDK for Optimizely Feature Experimentation</description>
+        <description>C# SDK for Optimizely Feature Experimentation, Optimizely Full Stack (legacy), and Optimizely Rollouts</description>
         <releaseNotes>https://github.com/optimizely/csharp-sdk/blob/master/CHANGELOG.md</releaseNotes>
         <copyright>Copyright 2017-2019</copyright>
         <tags>Optimizely</tags>
