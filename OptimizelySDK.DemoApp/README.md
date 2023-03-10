@@ -40,7 +40,7 @@ Using the instructions below, you can run the app locally and mimic bucketing we
 
 To better understand this experiment, we recommend that you select a few different visitors on the "Select Visitor" page and bucket them into variations and simulate a conversion event by clicking the "Buy Now" button on the "Shop" page. Within a few seconds, you should see the results populate on the Optimizely results page.
 
-The crux of this Optimizely Feature Experimentation experiment is bucketing users into variations and exposing them to different sorting functions. The SDK’s `Activate()` function will bucket users into a variation based on a user ID (internal id, user cookie, etc…).
+The crux of this Optimizely Feature Experimentation experiment is bucketing users into variations and exposing them to different sorting functions. The SDK’s `Decide()` function will bucket users into a variation based on a user ID (internal id, user cookie, etc…).
 
 To actually test which sorting algorithm influences increased sales, we need to track the number of clicks on the Buy Now button. We can leverage the SDK's `Track()` function for that, passing it the event key which, in our case, is "add_to_cart" and the user ID.
 
