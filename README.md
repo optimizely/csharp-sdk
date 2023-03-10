@@ -13,7 +13,7 @@ Optimizely Rollouts is [free feature flags](https://www.optimizely.com/free-feat
 
 ## Get Started
 
-Refer to the [Csharp SDK's developer documentation](https://docs.developers.optimizely.com/experimentation/v4.0.0-full-stack/docs/csharp-sdk) for detailed instructions on getting started with using the SDK.
+Refer to the [C# SDK's developer documentation](https://docs.developers.optimizely.com/experimentation/v4.0.0-full-stack/docs/csharp-sdk) for detailed instructions on getting started with using the SDK.
 
 ### Install the C# SDK
 
@@ -40,7 +40,7 @@ To access the Feature Management configuration in the Optimizely dashboard, plea
 
 ## Use the C# SDK
 
-See the Optimizely Feature Experimentation [developer documentation](https://docs.developers.optimizely.com/experimentation/v4.0-full-stack/docs/csharp-sdk) to learn how to set up your first Csharp project and use the SDK.
+See the Optimizely Feature Experimentation [developer documentation](https://docs.developers.optimizely.com/experimentation/v4.0-full-stack/docs/csharp-sdk) to learn how to set up your first C# project and use the SDK.
 
 ### Initialization
 
@@ -216,11 +216,13 @@ This option is used to specify whether to start the config manager on initializa
 
 This option is used to provide token for datafile belonging to a secure environment.
 
-## Contributing
+## SDK Development
+
+### Contributing
 
 Please see [CONTRIBUTING](CONTRIBUTING.md).
 
-## Third Party Licenses
+### Third Party Licenses
 
 Optimizely SDK uses third party software:
 [murmurhash-signed](https://www.nuget.org/packages/murmurhash-signed/),
