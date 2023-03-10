@@ -38,7 +38,7 @@ jobs:
       TRAVIS_COM_TOKEN: ${{ secrets.TRAVIS_COM_TOKEN }}
   
   fullstack_production_suite:
-    name: Run Full Stack Compatibility Suite
+    name: Run Optimizely Feature Experimentation Compatibility Suite
     uses: optimizely/csharp-sdk/.github/workflows/integration_test.yml@master
     with:
       FULLSTACK_TEST_REPO: ProdTesting
