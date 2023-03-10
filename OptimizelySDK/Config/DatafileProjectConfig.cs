@@ -63,7 +63,7 @@ namespace OptimizelySDK.Config
         public string AccountId { get; set; }
 
         /// <summary>
-        /// Project ID of the Full Stack project.
+        /// Project ID of the Optimizely Feature Experimentation project.
         /// </summary>
         public string ProjectId { get; set; }
 

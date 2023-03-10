@@ -138,7 +138,7 @@ namespace OptimizelySDK.Odp
         /// Creates a key used to identify which user fetchQualifiedSegments should lookup and save to in the segments cache
         /// </summary>
         /// <param name="userKey">Always 'fs_user_id' (parameter for consistency with other SDKs)</param>
-        /// <param name="userValue">Arbitrary string representing the full stack user ID</param>
+        /// <param name="userValue">Arbitrary string representing the Optimizely Feature Experimentation user ID</param>
         /// <returns>Concatenates inputs and returns the string "{userKey}-$-{userValue}"</returns>
         private static string GetCacheKey(string userKey, string userValue)
         {

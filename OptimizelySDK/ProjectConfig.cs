@@ -32,7 +32,7 @@ namespace OptimizelySDK
         string AccountId { get; set; }
 
         /// <summary>
-        /// Project ID of the Full Stack project.
+        /// Project ID of the Optimizely Feature Experimentation project.
         /// </summary>
         string ProjectId { get; set; }
 
