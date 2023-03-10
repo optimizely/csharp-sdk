@@ -38,7 +38,7 @@ and is merely illustrates how to use the SDK.
 
 To access the Feature Management configuration in the Optimizely dashboard, please contact your Optimizely customer success manager.
 
-## Use the Csharp SDK
+## Use the C# SDK
 
 See the Optimizely Feature Experimentation [developer documentation](https://docs.developers.optimizely.com/experimentation/v4.0-full-stack/docs/csharp-sdk) to learn how to set up your first Csharp project and use the SDK.
 
