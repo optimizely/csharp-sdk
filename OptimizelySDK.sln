@@ -29,7 +29,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OptimizelySDK.Net35", "Opti
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OptimizelySDK.Net40", "OptimizelySDK.Net40\OptimizelySDK.Net40.csproj", "{41AFD990-BC81-49E3-BD85-40972BB2C262}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OptimizelySDK.NetStandard20", "OptimizelySDK.NetStandard20\OptimizelySDK.NetStandard20.csproj", "{CFEC91C6-B6E5-45D5-97D6-7081B0DC7453}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OptimizelySDK.NetStandard20", "OptimizelySDK.NetStandard20\OptimizelySDK.NetStandard20.csproj", "{CFEC91C6-B6E5-45D5-97D6-7081B0DC7453}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DemoConsoleApp", "DemoConsoleApp\DemoConsoleApp.csproj", "{A0EDCE22-EECC-4407-839E-4743A1AF8F51}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
