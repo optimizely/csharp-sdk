@@ -26,10 +26,10 @@ namespace OptimizelySDK.Utils
 
         public static object GetRevenueValue(Dictionary<string, object> eventTags, ILogger logger)
         {
-            int result = 0;
-            bool isCasted = false;
-            string logMessage = string.Empty;
-            LogLevel logLevel = LogLevel.INFO;
+            var result = 0;
+            var isCasted = false;
+            var logMessage = string.Empty;
+            var logLevel = LogLevel.INFO;
 
             if (eventTags == null)
             {
@@ -58,20 +58,26 @@ namespace OptimizelySDK.Utils
             }
 
             if (logger != null)
+            {
                 logger.Log(logLevel, logMessage);
+            }
 
             if (isCasted)
+            {
                 return result;
+            }
 
             return null;
         }
 
-        public static object GetNumericValue(Dictionary<string, object> eventTags, ILogger logger  = null)
+        public static object GetNumericValue(Dictionary<string, object> eventTags,
+            ILogger logger = null
+        )
         {
             float refVar = 0;
-            bool isCasted = false;
-            string logMessage = string.Empty;
-            LogLevel logLevel = LogLevel.INFO;
+            var isCasted = false;
+            var logMessage = string.Empty;
+            var logLevel = LogLevel.INFO;
 
             if (eventTags == null)
             {
@@ -92,10 +98,16 @@ namespace OptimizelySDK.Utils
             {
                 logMessage = "Provided numeric value is boolean which is an invalid format.";
                 logLevel = LogLevel.ERROR;
-            } else if (!(eventTags[VALUE_EVENT_METRIC_NAME] is int) && !(eventTags[VALUE_EVENT_METRIC_NAME] is string) && !(eventTags[VALUE_EVENT_METRIC_NAME] is float)
-                && !(eventTags[VALUE_EVENT_METRIC_NAME] is decimal) && !(eventTags[VALUE_EVENT_METRIC_NAME] is double) && !(eventTags[VALUE_EVENT_METRIC_NAME] is long)
-                && !(eventTags[VALUE_EVENT_METRIC_NAME] is short) && !(eventTags[VALUE_EVENT_METRIC_NAME] is uint))
-              {
+            }
+            else if (!(eventTags[VALUE_EVENT_METRIC_NAME] is int) &&
+                     !(eventTags[VALUE_EVENT_METRIC_NAME] is string) &&
+                     !(eventTags[VALUE_EVENT_METRIC_NAME] is float)
+                     && !(eventTags[VALUE_EVENT_METRIC_NAME] is decimal) &&
+                     !(eventTags[VALUE_EVENT_METRIC_NAME] is double) &&
+                     !(eventTags[VALUE_EVENT_METRIC_NAME] is long)
+                     && !(eventTags[VALUE_EVENT_METRIC_NAME] is short) &&
+                     !(eventTags[VALUE_EVENT_METRIC_NAME] is uint))
+            {
                 logMessage = "Numeric metric value is not in integer, float, or string form.";
                 logLevel = LogLevel.ERROR;
             }
@@ -108,14 +120,16 @@ namespace OptimizelySDK.Utils
             {
                 if (!float.TryParse(eventTags[VALUE_EVENT_METRIC_NAME].ToString(), out refVar))
                 {
-                    logMessage = $"Provided numeric value {eventTags[VALUE_EVENT_METRIC_NAME]} is in an invalid format.";
+                    logMessage =
+                        $"Provided numeric value {eventTags[VALUE_EVENT_METRIC_NAME]} is in an invalid format.";
                     logLevel = LogLevel.ERROR;
                 }
                 else
                 {
                     if (float.IsInfinity(refVar))
                     {
-                        logMessage = $"Provided numeric value {eventTags[VALUE_EVENT_METRIC_NAME]} is in an invalid format.";
+                        logMessage =
+                            $"Provided numeric value {eventTags[VALUE_EVENT_METRIC_NAME]} is in an invalid format.";
                         logLevel = LogLevel.ERROR;
                     }
                     else
@@ -127,10 +141,12 @@ namespace OptimizelySDK.Utils
             }
 
             if (logger != null)
+            {
                 logger.Log(logLevel, logMessage);
+            }
 
             object o = refVar;
-            if(isCasted && eventTags[VALUE_EVENT_METRIC_NAME] is float)
+            if (isCasted && eventTags[VALUE_EVENT_METRIC_NAME] is float)
             {
                 // Special case, maximum value when passed and gone through tryparse, it loses precision.
                 o = eventTags[VALUE_EVENT_METRIC_NAME];
@@ -140,4 +156,3 @@ namespace OptimizelySDK.Utils
         }
     }
 }
- 

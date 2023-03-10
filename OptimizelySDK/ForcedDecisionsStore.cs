@@ -33,6 +33,7 @@ namespace OptimizelySDK
         {
             NullForcedDecisionStore = new ForcedDecisionsStore();
         }
+
         public ForcedDecisionsStore()
         {
             ForcedDecisionsMap = new Dictionary<string, OptimizelyForcedDecision>();
@@ -50,16 +51,13 @@ namespace OptimizelySDK
 
         public ForcedDecisionsStore(ForcedDecisionsStore forcedDecisionsStore)
         {
-            ForcedDecisionsMap = new Dictionary<string, OptimizelyForcedDecision>(forcedDecisionsStore.ForcedDecisionsMap);
+            ForcedDecisionsMap =
+                new Dictionary<string, OptimizelyForcedDecision>(forcedDecisionsStore.
+                    ForcedDecisionsMap);
         }
 
-        public int Count
-        {
-            get
-            {
-                return ForcedDecisionsMap.Count;
-            }
-        }
+        public int Count => ForcedDecisionsMap.Count;
+
         public bool Remove(OptimizelyDecisionContext context)
         {
             return ForcedDecisionsMap.Remove(context.GetKey());
@@ -75,10 +73,12 @@ namespace OptimizelySDK
             get
             {
                 if (context != null && context.IsValid
-                    && ForcedDecisionsMap.TryGetValue(context.GetKey(), out OptimizelyForcedDecision flagForcedDecision))
+                                    && ForcedDecisionsMap.TryGetValue(context.GetKey(),
+                                        out var flagForcedDecision))
                 {
                     return flagForcedDecision;
                 }
+
                 return null;
             }
             set
@@ -88,7 +88,6 @@ namespace OptimizelySDK
                     ForcedDecisionsMap[context.GetKey()] = value;
                 }
             }
-
         }
     }
 }

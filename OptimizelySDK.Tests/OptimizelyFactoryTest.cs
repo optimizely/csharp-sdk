@@ -15,6 +15,7 @@
  *    limitations under the License.
  */
 
+using System;
 using Moq;
 using NUnit.Framework;
 using OptimizelySDK.Config;
@@ -25,13 +26,14 @@ using OptimizelySDK.Notifications;
 using OptimizelySDK.Tests.ConfigTest;
 using OptimizelySDK.Tests.EventTest;
 using OptimizelySDK.Tests.Utils;
-using System;
+
 namespace OptimizelySDK.Tests
 {
     [TestFixture]
     public class OptimizelyFactoryTest
     {
         private Mock<ILogger> LoggerMock;
+
         [SetUp]
         public void Initialize()
         {
@@ -55,7 +57,7 @@ namespace OptimizelySDK.Tests
                 AutoUpdate = true,
                 DatafileAccessToken = "testingtoken123",
                 BlockingTimeout = TimeSpan.FromSeconds(10),
-                PollingInterval = TimeSpan.FromSeconds(2)
+                PollingInterval = TimeSpan.FromSeconds(2),
             };
 
             Assert.AreEqual(actualConfigManagerProps, expectedConfigManagerProps);
@@ -78,7 +80,7 @@ namespace OptimizelySDK.Tests
                 LastModified = "",
                 AutoUpdate = true,
                 BlockingTimeout = TimeSpan.FromSeconds(30),
-                PollingInterval = TimeSpan.FromMilliseconds(2023)
+                PollingInterval = TimeSpan.FromMilliseconds(2023),
             };
 
             Assert.AreEqual(actualConfigManagerProps, expectedConfigManagerProps);
@@ -88,7 +90,8 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestProjectConfigManagerWithDatafileAccessToken()
         {
-            var optimizely = OptimizelyFactory.NewDefaultInstance("my-sdk-key", null, "access-token");
+            var optimizely =
+                OptimizelyFactory.NewDefaultInstance("my-sdk-key", null, "access-token");
 
             // Check values are loaded from app.config or not.
             var projectConfigManager = optimizely.ProjectConfigManager as HttpProjectConfigManager;
@@ -102,7 +105,7 @@ namespace OptimizelySDK.Tests
                 DatafileAccessToken = "access-token",
                 AutoUpdate = true,
                 BlockingTimeout = TimeSpan.FromSeconds(30),
-                PollingInterval = TimeSpan.FromMilliseconds(2023)
+                PollingInterval = TimeSpan.FromMilliseconds(2023),
             };
 
             Assert.AreEqual(actualConfigManagerProps, expectedConfigManagerProps);
@@ -111,7 +114,8 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
-        public void TestOptimizelyInstanceUsingConfigNotUseFactoryClassBlockingTimeoutAndPollingInterval()
+        public void
+            TestOptimizelyInstanceUsingConfigNotUseFactoryClassBlockingTimeoutAndPollingInterval()
         {
             OptimizelyFactory.SetBlockingTimeOutPeriod(TimeSpan.FromSeconds(30));
             OptimizelyFactory.SetPollingInterval(TimeSpan.FromMilliseconds(2023));
@@ -128,7 +132,7 @@ namespace OptimizelySDK.Tests
                 AutoUpdate = true,
                 DatafileAccessToken = "testingtoken123",
                 BlockingTimeout = TimeSpan.FromMilliseconds(10000),
-                PollingInterval = TimeSpan.FromMilliseconds(2000)
+                PollingInterval = TimeSpan.FromMilliseconds(2000),
             };
 
             Assert.AreEqual(actualConfigManagerProps, expectedConfigManagerProps);
@@ -138,18 +142,20 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestProjectConfigManagerWithCustomProjectConfigManager()
         {
-            var projectConfigManager = new HttpProjectConfigManager.Builder()
-                .WithSdkKey("10192104166")
-                .WithFormat("https://optimizely.com/json/{0}.json")
-                .WithPollingInterval(TimeSpan.FromMilliseconds(3000))
-                .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(4500))
-                .WithStartByDefault()
-                .WithAccessToken("access-token")
-                .Build(true);
+            var projectConfigManager = new HttpProjectConfigManager.Builder().
+                WithSdkKey("10192104166").
+                WithFormat("https://optimizely.com/json/{0}.json").
+                WithPollingInterval(TimeSpan.FromMilliseconds(3000)).
+                WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(4500)).
+                WithStartByDefault().
+                WithAccessToken("access-token").
+                Build(true);
 
             var optimizely = OptimizelyFactory.NewDefaultInstance(projectConfigManager);
-            var actualProjectConfigManager = optimizely.ProjectConfigManager as HttpProjectConfigManager;
-            var actualConfigManagerProps = new ProjectConfigManagerProps(actualProjectConfigManager);
+            var actualProjectConfigManager =
+                optimizely.ProjectConfigManager as HttpProjectConfigManager;
+            var actualConfigManagerProps =
+                new ProjectConfigManagerProps(actualProjectConfigManager);
             var expectedConfigManagerProps = new ProjectConfigManagerProps(projectConfigManager);
             Assert.AreEqual(actualConfigManagerProps, expectedConfigManagerProps);
             optimizely.Dispose();
@@ -160,13 +166,15 @@ namespace OptimizelySDK.Tests
         {
             var optimizely = OptimizelyFactory.NewDefaultInstance();
 
-            var batchEventProcessor = Reflection.GetFieldValue<BatchEventProcessor, Optimizely>(optimizely, "EventProcessor");
+            var batchEventProcessor =
+                Reflection.GetFieldValue<BatchEventProcessor, Optimizely>(optimizely,
+                    "EventProcessor");
             var actualEventProcessorProps = new EventProcessorProps(batchEventProcessor);
             var expectedEventProcessorProps = new EventProcessorProps
             {
                 BatchSize = 10,
                 FlushInterval = TimeSpan.FromSeconds(2),
-                TimeoutInterval = TimeSpan.FromSeconds(10)
+                TimeoutInterval = TimeSpan.FromSeconds(10),
             };
             Assert.AreEqual(actualEventProcessorProps, expectedEventProcessorProps);
             optimizely.Dispose();
@@ -180,13 +188,15 @@ namespace OptimizelySDK.Tests
 
             var optimizely = OptimizelyFactory.NewDefaultInstance("sdk-Key");
 
-            var batchEventProcessor = Reflection.GetFieldValue<BatchEventProcessor, Optimizely>(optimizely, "EventProcessor");
+            var batchEventProcessor =
+                Reflection.GetFieldValue<BatchEventProcessor, Optimizely>(optimizely,
+                    "EventProcessor");
             var actualEventProcessorProps = new EventProcessorProps(batchEventProcessor);
             var expectedEventProcessorProps = new EventProcessorProps
             {
                 BatchSize = 2,
                 FlushInterval = TimeSpan.FromSeconds(4),
-                TimeoutInterval = TimeSpan.FromMinutes(5)
+                TimeoutInterval = TimeSpan.FromMinutes(5),
             };
             Assert.AreEqual(actualEventProcessorProps, expectedEventProcessorProps);
             optimizely.Dispose();
@@ -197,21 +207,24 @@ namespace OptimizelySDK.Tests
         {
             var eventDispatcher = new DefaultEventDispatcher(LoggerMock.Object);
             var notificationCenter = new NotificationCenter();
-            var projectConfigManager = new HttpProjectConfigManager.Builder()
-                .WithSdkKey("10192104166")
-                .Build(true);
+            var projectConfigManager = new HttpProjectConfigManager.Builder().
+                WithSdkKey("10192104166").
+                Build(true);
 
-            var batchEventProcessor = new BatchEventProcessor.Builder()
-                .WithLogger(LoggerMock.Object)
-                .WithMaxBatchSize(20)
-                .WithFlushInterval(TimeSpan.FromSeconds(3))
-                .WithEventDispatcher(eventDispatcher)
-                .WithNotificationCenter(notificationCenter)
-                .Build();
+            var batchEventProcessor = new BatchEventProcessor.Builder().
+                WithLogger(LoggerMock.Object).
+                WithMaxBatchSize(20).
+                WithFlushInterval(TimeSpan.FromSeconds(3)).
+                WithEventDispatcher(eventDispatcher).
+                WithNotificationCenter(notificationCenter).
+                Build();
 
-            var optimizely = OptimizelyFactory.NewDefaultInstance(projectConfigManager, notificationCenter, eventProcessor: batchEventProcessor);
+            var optimizely = OptimizelyFactory.NewDefaultInstance(projectConfigManager,
+                notificationCenter, eventProcessor: batchEventProcessor);
 
-            var actualbatchEventProcessor = Reflection.GetFieldValue<BatchEventProcessor, Optimizely>(optimizely, "EventProcessor");
+            var actualbatchEventProcessor =
+                Reflection.GetFieldValue<BatchEventProcessor, Optimizely>(optimizely,
+                    "EventProcessor");
             var actualEventProcessorProps = new EventProcessorProps(actualbatchEventProcessor);
             var expectedEventProcessorProps = new EventProcessorProps(batchEventProcessor);
             Assert.AreEqual(actualEventProcessorProps, expectedEventProcessorProps);
@@ -222,11 +235,13 @@ namespace OptimizelySDK.Tests
         public void TestGetFeatureVariableJSONEmptyDatafileTest()
         {
             var httpClientMock = new Mock<HttpProjectConfigManager.HttpClient>();
-            var task = TestHttpProjectConfigManagerUtil.MockSendAsync(httpClientMock, TestData.EmptyDatafile, TimeSpan.Zero, System.Net.HttpStatusCode.OK);
+            var task = TestHttpProjectConfigManagerUtil.MockSendAsync(httpClientMock,
+                TestData.EmptyDatafile, TimeSpan.Zero, System.Net.HttpStatusCode.OK);
             TestHttpProjectConfigManagerUtil.SetClientFieldValue(httpClientMock.Object);
 
             var optimizely = OptimizelyFactory.NewDefaultInstance("sdk-key");
-            Assert.Null(optimizely.GetFeatureVariableJSON("no-feature-variable", "no-variable-key", "userId"));
+            Assert.Null(optimizely.GetFeatureVariableJSON("no-feature-variable", "no-variable-key",
+                "userId"));
             optimizely.Dispose();
         }
     }

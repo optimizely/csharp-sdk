@@ -43,12 +43,14 @@ namespace OptimizelySDK
 
         private ForcedDecisionsStore ForcedDecisionsStore { get; set; }
 
-        public OptimizelyUserContext(Optimizely optimizely, string userId, UserAttributes userAttributes, IErrorHandler errorHandler, ILogger logger) :
-            this(optimizely, userId, userAttributes, null, errorHandler, logger)
-        {
-        }
+        public OptimizelyUserContext(Optimizely optimizely, string userId,
+            UserAttributes userAttributes, IErrorHandler errorHandler, ILogger logger
+        ) : this(optimizely, userId, userAttributes, null, errorHandler, logger) { }
 
-        public OptimizelyUserContext(Optimizely optimizely, string userId, UserAttributes userAttributes, ForcedDecisionsStore forcedDecisionsStore, IErrorHandler errorHandler, ILogger logger)
+        public OptimizelyUserContext(Optimizely optimizely, string userId,
+            UserAttributes userAttributes, ForcedDecisionsStore forcedDecisionsStore,
+            IErrorHandler errorHandler, ILogger logger
+        )
         {
             ErrorHandler = errorHandler;
             Logger = logger;

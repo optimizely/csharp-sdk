@@ -24,7 +24,7 @@ namespace OptimizelySDK.Entity
         public Experiment Experiment { get; }
         public Variation Variation { get; }
         public string Source { get; }
-        
+
         public FeatureDecision(Experiment experiment, Variation variation, string source)
         {
             Experiment = experiment;

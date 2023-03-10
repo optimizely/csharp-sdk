@@ -33,23 +33,28 @@ namespace OptimizelySDK.Tests.EventTest
         public EventProcessorProps(BatchEventProcessor eventProcessor)
         {
             var fieldsInfo = Reflection.GetAllFields(eventProcessor.GetType());
-            BatchSize = Reflection.GetFieldValue<int, BatchEventProcessor>(eventProcessor, "BatchSize", fieldsInfo);
-            FlushInterval = Reflection.GetFieldValue<TimeSpan, BatchEventProcessor>(eventProcessor, "FlushInterval", fieldsInfo);
-            TimeoutInterval = Reflection.GetFieldValue<TimeSpan, BatchEventProcessor>(eventProcessor, "TimeoutInterval", fieldsInfo);
+            BatchSize =
+                Reflection.GetFieldValue<int, BatchEventProcessor>(eventProcessor, "BatchSize",
+                    fieldsInfo);
+            FlushInterval =
+                Reflection.GetFieldValue<TimeSpan, BatchEventProcessor>(eventProcessor,
+                    "FlushInterval", fieldsInfo);
+            TimeoutInterval =
+                Reflection.GetFieldValue<TimeSpan, BatchEventProcessor>(eventProcessor,
+                    "TimeoutInterval", fieldsInfo);
         }
 
         /// <summary>
         /// To create default instance of expected values.
         /// </summary>
-        public EventProcessorProps()
-        {
-
-        }
+        public EventProcessorProps() { }
 
         public override bool Equals(object obj)
         {
             if (obj == null)
+            {
                 return false;
+            }
 
             var eventProcessor = obj as EventProcessorProps;
             if (eventProcessor == null)
@@ -59,7 +64,8 @@ namespace OptimizelySDK.Tests.EventTest
 
             if (BatchSize != eventProcessor.BatchSize ||
                 FlushInterval.TotalMilliseconds != eventProcessor.FlushInterval.TotalMilliseconds ||
-                TimeoutInterval.TotalMilliseconds != eventProcessor.TimeoutInterval.TotalMilliseconds)
+                TimeoutInterval.TotalMilliseconds !=
+                eventProcessor.TimeoutInterval.TotalMilliseconds)
             {
                 return false;
             }

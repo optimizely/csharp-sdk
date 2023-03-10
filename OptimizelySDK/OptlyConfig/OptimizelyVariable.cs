@@ -18,7 +18,7 @@ using OptimizelySDK.Entity;
 
 namespace OptimizelySDK.OptlyConfig
 {
-    public class OptimizelyVariable : Entity.IdKeyEntity
+    public class OptimizelyVariable : IdKeyEntity
     {
         public string Type { get; private set; }
         public string Value { get; private set; }
@@ -31,7 +31,9 @@ namespace OptimizelySDK.OptlyConfig
             Value = value;
         }
 
-        public OptimizelyVariable(FeatureVariable featureVariable, FeatureVariableUsage featureVariableUsage)
+        public OptimizelyVariable(FeatureVariable featureVariable,
+            FeatureVariableUsage featureVariableUsage
+        )
         {
             Id = featureVariable.Id;
             Key = featureVariable.Key;
@@ -42,7 +44,7 @@ namespace OptimizelySDK.OptlyConfig
 
         public static explicit operator OptimizelyVariable(FeatureVariable featureVariable)
         {
-            return new OptimizelyVariable(featureVariable, null);            
+            return new OptimizelyVariable(featureVariable, null);
         }
     }
 }

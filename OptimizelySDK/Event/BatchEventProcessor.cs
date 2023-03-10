@@ -17,14 +17,14 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using OptimizelySDK.Event.Entity;
-using System.Threading;
-using OptimizelySDK.Utils;
-using OptimizelySDK.Logger;
-using OptimizelySDK.ErrorHandler;
 using System.Linq;
+using System.Threading;
+using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Event.Dispatcher;
+using OptimizelySDK.Event.Entity;
+using OptimizelySDK.Logger;
 using OptimizelySDK.Notifications;
+using OptimizelySDK.Utils;
 
 namespace OptimizelySDK.Event
 {
@@ -37,7 +37,7 @@ namespace OptimizelySDK.Event
      * the BlockingQueue and buffers them for either a configured batch size or for a
      * maximum duration before the resulting LogEvent is sent to the NotificationManager.
      */
-    public class BatchEventProcessor: EventProcessor, IDisposable
+    public class BatchEventProcessor : EventProcessor, IDisposable
     {
         private const int DEFAULT_BATCH_SIZE = 10;
         private const int DEFAULT_QUEUE_CAPACITY = 1000;
@@ -56,7 +56,7 @@ namespace OptimizelySDK.Event
 
         public bool IsStarted { get; private set; }
         private Thread Executer;
-        
+
         public ILogger Logger { get; protected set; }
         public IErrorHandler ErrorHandler { get; protected set; }
         public NotificationCenter NotificationCenter { get; set; }
@@ -64,10 +64,10 @@ namespace OptimizelySDK.Event
         private readonly object mutex = new object();
 
         public IEventDispatcher EventDispatcher { get; private set; }
-        public BlockingCollection<object> EventQueue { get; private set; } 
+        public BlockingCollection<object> EventQueue { get; private set; }
         private List<UserEvent> CurrentBatch = new List<UserEvent>();
         private long FlushingIntervalDeadline;
-              
+
         public void Start()
         {
             if (IsStarted && !Disposed)
@@ -76,7 +76,8 @@ namespace OptimizelySDK.Event
                 return;
             }
 
-            FlushingIntervalDeadline = DateTime.Now.MillisecondsSince1970() + (long)FlushInterval.TotalMilliseconds;
+            FlushingIntervalDeadline = DateTime.Now.MillisecondsSince1970() +
+                                       (long)FlushInterval.TotalMilliseconds;
             Executer = new Thread(() => Run());
             Executer.Start();
             IsStarted = true;
@@ -94,12 +95,13 @@ namespace OptimizelySDK.Event
                 {
                     if (DateTime.Now.MillisecondsSince1970() > FlushingIntervalDeadline)
                     {
-                        Logger.Log(LogLevel.DEBUG, $"Deadline exceeded flushing current batch, {DateTime.Now.Millisecond}, {FlushingIntervalDeadline}.");
+                        Logger.Log(LogLevel.DEBUG,
+                            $"Deadline exceeded flushing current batch, {DateTime.Now.Millisecond}, {FlushingIntervalDeadline}.");
                         FlushQueue();
                     }
-                    
-                    if (!EventQueue.TryTake(out object item, 50))
-                    {                        
+
+                    if (!EventQueue.TryTake(out var item, 50))
+                    {
                         Thread.Sleep(50);
                         continue;
                     }
@@ -118,34 +120,41 @@ namespace OptimizelySDK.Event
                     }
 
                     if (item is UserEvent userEvent)
+                    {
                         AddToBatch(userEvent);
+                    }
                 }
             }
             catch (InvalidOperationException e)
             {
                 // An InvalidOperationException means that Take() was called on a completed collection
-                Logger.Log(LogLevel.DEBUG, "Unable to take item from eventQueue: " + e.GetAllMessages());
+                Logger.Log(LogLevel.DEBUG,
+                    "Unable to take item from eventQueue: " + e.GetAllMessages());
             }
             catch (Exception exception)
             {
-                Logger.Log(LogLevel.ERROR, "Uncaught exception processing buffer. Error: " + exception.GetAllMessages());
+                Logger.Log(LogLevel.ERROR,
+                    "Uncaught exception processing buffer. Error: " + exception.GetAllMessages());
             }
             finally
             {
-                Logger.Log(LogLevel.INFO, "Exiting processing loop. Attempting to flush pending events.");
+                Logger.Log(LogLevel.INFO,
+                    "Exiting processing loop. Attempting to flush pending events.");
                 FlushQueue();
             }
         }
 
         public void Flush()
         {
-            FlushingIntervalDeadline = DateTime.Now.MillisecondsSince1970() + (long)FlushInterval.TotalMilliseconds;
+            FlushingIntervalDeadline = DateTime.Now.MillisecondsSince1970() +
+                                       (long)FlushInterval.TotalMilliseconds;
             EventQueue.Add(FLUSH_SIGNAL);
         }
 
         private void FlushQueue()
         {
-            FlushingIntervalDeadline = DateTime.Now.MillisecondsSince1970() + (long)FlushInterval.TotalMilliseconds;
+            FlushingIntervalDeadline = DateTime.Now.MillisecondsSince1970() +
+                                       (long)FlushInterval.TotalMilliseconds;
 
             if (CurrentBatch.Count == 0)
             {
@@ -158,11 +167,12 @@ namespace OptimizelySDK.Event
                 toProcessBatch = new List<UserEvent>(CurrentBatch);
                 CurrentBatch.Clear();
             }
-            
 
-            LogEvent logEvent = EventFactory.CreateLogEvent(toProcessBatch.ToArray(), Logger);
 
-            NotificationCenter?.SendNotifications(NotificationCenter.NotificationType.LogEvent, logEvent);
+            var logEvent = EventFactory.CreateLogEvent(toProcessBatch.ToArray(), Logger);
+
+            NotificationCenter?.SendNotifications(NotificationCenter.NotificationType.LogEvent,
+                logEvent);
 
             try
             {
@@ -179,21 +189,29 @@ namespace OptimizelySDK.Event
         /// </summary>
         public void Stop()
         {
-            if (Disposed) return;
+            if (Disposed)
+            {
+                return;
+            }
 
             EventQueue.Add(SHUTDOWN_SIGNAL);
-            
+
             if (!Executer.Join(TimeoutInterval))
-                Logger.Log(LogLevel.ERROR, $"Timeout exceeded attempting to close for {TimeoutInterval.Milliseconds} ms");
+            {
+                Logger.Log(LogLevel.ERROR,
+                    $"Timeout exceeded attempting to close for {TimeoutInterval.Milliseconds} ms");
+            }
 
             IsStarted = false;
             Logger.Log(LogLevel.WARN, $"Stopping scheduler.");
         }
-        
-        public void Process(UserEvent userEvent) {
+
+        public void Process(UserEvent userEvent)
+        {
             Logger.Log(LogLevel.DEBUG, "Received userEvent: " + userEvent);
 
-            if (Disposed) { 
+            if (Disposed)
+            {
                 Logger.Log(LogLevel.WARN, "Executor shutdown, not accepting tasks.");
                 return;
             }
@@ -203,7 +221,7 @@ namespace OptimizelySDK.Event
                 Logger.Log(LogLevel.WARN, "Payload not accepted by the queue.");
             }
         }
-        
+
         private void AddToBatch(UserEvent userEvent)
         {
             if (ShouldSplit(userEvent))
@@ -214,19 +232,26 @@ namespace OptimizelySDK.Event
 
             // Reset the deadline if starting a new batch.
             if (CurrentBatch.Count == 0)
-                FlushingIntervalDeadline = DateTime.Now.MillisecondsSince1970() + (long)FlushInterval.TotalMilliseconds;
+            {
+                FlushingIntervalDeadline = DateTime.Now.MillisecondsSince1970() +
+                                           (long)FlushInterval.TotalMilliseconds;
+            }
 
-            lock (mutex) {
+            lock (mutex)
+            {
                 CurrentBatch.Add(userEvent);
             }
-            
-            if (CurrentBatch.Count >= BatchSize) {
+
+            if (CurrentBatch.Count >= BatchSize)
+            {
                 FlushQueue();
             }
         }
 
-        private bool ShouldSplit(UserEvent userEvent) {
-            if (CurrentBatch.Count == 0) {
+        private bool ShouldSplit(UserEvent userEvent)
+        {
+            if (CurrentBatch.Count == 0)
+            {
                 return false;
             }
 
@@ -236,10 +261,11 @@ namespace OptimizelySDK.Event
                 currentContext = CurrentBatch.Last().Context;
             }
 
-            EventContext newContext = userEvent.Context;
+            var newContext = userEvent.Context;
 
             // Revisions should match
-            if (currentContext.Revision != newContext.Revision) {
+            if (currentContext.Revision != newContext.Revision)
+            {
                 return true;
             }
 
@@ -251,10 +277,13 @@ namespace OptimizelySDK.Event
 
             return false;
         }
-        
+
         public void Dispose()
         {
-            if (Disposed) return;
+            if (Disposed)
+            {
+                return;
+            }
 
             Stop();
             Disposed = true;
@@ -262,7 +291,8 @@ namespace OptimizelySDK.Event
 
         public class Builder
         {
-            private BlockingCollection<object> EventQueue = new BlockingCollection<object>(DEFAULT_QUEUE_CAPACITY);
+            private BlockingCollection<object> EventQueue =
+                new BlockingCollection<object>(DEFAULT_QUEUE_CAPACITY);
 
             private IEventDispatcher EventDispatcher;
             private int BatchSize;
@@ -306,7 +336,7 @@ namespace OptimizelySDK.Event
 
                 return this;
             }
-            
+
             public Builder WithLogger(ILogger logger = null)
             {
                 Logger = logger;
@@ -347,19 +377,25 @@ namespace OptimizelySDK.Event
                 var batchEventProcessor = new BatchEventProcessor();
                 batchEventProcessor.Logger = Logger ?? new NoOpLogger();
                 batchEventProcessor.ErrorHandler = ErrorHandler ?? new NoOpErrorHandler(Logger);
-                batchEventProcessor.EventDispatcher = EventDispatcher ?? new DefaultEventDispatcher(Logger);
+                batchEventProcessor.EventDispatcher =
+                    EventDispatcher ?? new DefaultEventDispatcher(Logger);
                 batchEventProcessor.EventQueue = EventQueue;
-                batchEventProcessor.NotificationCenter = NotificationCenter;                
-                batchEventProcessor.BatchSize = BatchSize < 1 ? BatchEventProcessor.DEFAULT_BATCH_SIZE : BatchSize;
-                batchEventProcessor.FlushInterval = FlushInterval <= TimeSpan.FromSeconds(0) ? BatchEventProcessor.DEFAULT_FLUSH_INTERVAL : FlushInterval;
-                batchEventProcessor.TimeoutInterval = TimeoutInterval <= TimeSpan.FromSeconds(0) ? BatchEventProcessor.DEFAULT_TIMEOUT_INTERVAL : TimeoutInterval;
+                batchEventProcessor.NotificationCenter = NotificationCenter;
+                batchEventProcessor.BatchSize = BatchSize < 1 ? DEFAULT_BATCH_SIZE : BatchSize;
+                batchEventProcessor.FlushInterval = FlushInterval <= TimeSpan.FromSeconds(0) ?
+                    DEFAULT_FLUSH_INTERVAL :
+                    FlushInterval;
+                batchEventProcessor.TimeoutInterval = TimeoutInterval <= TimeSpan.FromSeconds(0) ?
+                    DEFAULT_TIMEOUT_INTERVAL :
+                    TimeoutInterval;
 
                 if (start)
+                {
                     batchEventProcessor.Start();
+                }
 
                 return batchEventProcessor;
             }
         }
-
     }
 }

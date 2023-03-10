@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
+using System;
 using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Event.Dispatcher;
 using OptimizelySDK.Event.Entity;
 using OptimizelySDK.Logger;
 using OptimizelySDK.Notifications;
-using System;
 
 namespace OptimizelySDK.Event
 {
@@ -30,7 +30,10 @@ namespace OptimizelySDK.Event
         private IEventDispatcher EventDispatcher;
         private NotificationCenter NotificationCenter;
 
-        public ForwardingEventProcessor(IEventDispatcher eventDispatcher, NotificationCenter notificationCenter, ILogger logger= null, IErrorHandler errorHandler = null)
+        public ForwardingEventProcessor(IEventDispatcher eventDispatcher,
+            NotificationCenter notificationCenter, ILogger logger = null,
+            IErrorHandler errorHandler = null
+        )
         {
             EventDispatcher = eventDispatcher;
             NotificationCenter = notificationCenter;
@@ -40,16 +43,18 @@ namespace OptimizelySDK.Event
 
         public void Process(UserEvent userEvent)
         {
-            var logEvent = EventFactory.CreateLogEvent(userEvent, Logger);            
+            var logEvent = EventFactory.CreateLogEvent(userEvent, Logger);
 
             try
             {
                 EventDispatcher.DispatchEvent(logEvent);
-                NotificationCenter?.SendNotifications(NotificationCenter.NotificationType.LogEvent, logEvent);
+                NotificationCenter?.SendNotifications(NotificationCenter.NotificationType.LogEvent,
+                    logEvent);
             }
             catch (Exception ex)
             {
-                Logger.Log(LogLevel.ERROR, $"Error dispatching event: {logEvent.GetParamsAsJson()}. {ex.Message}");
+                Logger.Log(LogLevel.ERROR,
+                    $"Error dispatching event: {logEvent.GetParamsAsJson()}. {ex.Message}");
                 ErrorHandler.HandleError(ex);
             }
         }

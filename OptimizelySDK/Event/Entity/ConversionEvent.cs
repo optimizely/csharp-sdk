@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+using System;
 using OptimizelySDK.Entity;
 using OptimizelySDK.Utils;
-using System;
 
 namespace OptimizelySDK.Event.Entity
 {
@@ -48,7 +49,7 @@ namespace OptimizelySDK.Event.Entity
                 UserId = userId;
 
                 return this;
-            }            
+            }
 
             public Builder WithEventContext(EventContext eventContext)
             {
@@ -106,6 +107,5 @@ namespace OptimizelySDK.Event.Entity
                 return conversionEvent;
             }
         }
-
     }
 }

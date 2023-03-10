@@ -31,7 +31,9 @@ namespace OptimizelySDK.Bucketing
             // The Map must contain a value for the user ID and experiment bucket map
             if (!map.ContainsKey(UserProfile.USER_ID_KEY) ||
                 !map.ContainsKey(UserProfile.EXPERIMENT_BUCKET_MAP_KEY))
+            {
                 return false;
+            }
 
             // the map is good enough for us to use
             return true;
@@ -44,14 +46,16 @@ namespace OptimizelySDK.Bucketing
         /// <returns>A UserProfile instance.</returns>
         public static UserProfile ConvertMapToUserProfile(Dictionary<string, object> map)
         {
-            var experimentBucketMap = (Dictionary<string, Dictionary<string, string>>)map[UserProfile.EXPERIMENT_BUCKET_MAP_KEY];
-            Dictionary<string, Decision> decisions = experimentBucketMap.ToDictionary(
-                keySelector: kvp => kvp.Key, 
-                elementSelector: kvp => new Decision(kvp.Value[UserProfile.VARIATION_ID_KEY]));
+            var experimentBucketMap =
+                (Dictionary<string, Dictionary<string, string>>)map[
+                    UserProfile.EXPERIMENT_BUCKET_MAP_KEY];
+            var decisions = experimentBucketMap.ToDictionary(
+                kvp => kvp.Key,
+                kvp => new Decision(kvp.Value[UserProfile.VARIATION_ID_KEY]));
 
             return new UserProfile(
-                userId: (string)map[UserProfile.USER_ID_KEY], 
-                experimentBucketMap: decisions);
+                (string)map[UserProfile.USER_ID_KEY],
+                decisions);
         }
     }
 }

@@ -12,7 +12,7 @@ using OptimizelySDK.Notifications;
 namespace OptimizelySDK.Tests.EventTests
 {
     [TestFixture]
-    class ForwardingEventProcessorTest
+    internal class ForwardingEventProcessorTest
     {
         private const string UserId = "userId";
         private const string EventName = "purchase";
@@ -21,10 +21,10 @@ namespace OptimizelySDK.Tests.EventTests
         private TestForwardingEventDispatcher EventDispatcher;
         private NotificationCenter NotificationCenter = new NotificationCenter();
 
-        Mock<ILogger> LoggerMock;
-        Mock<IErrorHandler> ErrorHandlerMock;
+        private Mock<ILogger> LoggerMock;
+        private Mock<IErrorHandler> ErrorHandlerMock;
 
-        ProjectConfig ProjectConfig;
+        private ProjectConfig ProjectConfig;
 
         [SetUp]
         public void Setup()
@@ -35,17 +35,19 @@ namespace OptimizelySDK.Tests.EventTests
             ErrorHandlerMock = new Mock<IErrorHandler>();
             ErrorHandlerMock.Setup(e => e.HandleError(It.IsAny<Exception>()));
 
-            ProjectConfig = DatafileProjectConfig.Create(TestData.Datafile, LoggerMock.Object, new NoOpErrorHandler());
+            ProjectConfig = DatafileProjectConfig.Create(TestData.Datafile, LoggerMock.Object,
+                new NoOpErrorHandler());
 
             EventDispatcher = new TestForwardingEventDispatcher { IsUpdated = false };
-            EventProcessor = new ForwardingEventProcessor(EventDispatcher, NotificationCenter, LoggerMock.Object, ErrorHandlerMock.Object);
+            EventProcessor = new ForwardingEventProcessor(EventDispatcher, NotificationCenter,
+                LoggerMock.Object, ErrorHandlerMock.Object);
         }
 
         [Test]
         public void TestEventHandlerWithConversionEvent()
         {
             var userEvent = CreateConversionEvent(EventName);
-            EventProcessor.Process(userEvent);            
+            EventProcessor.Process(userEvent);
 
             Assert.True(EventDispatcher.IsUpdated);
         }
@@ -54,19 +56,22 @@ namespace OptimizelySDK.Tests.EventTests
         [Test]
         public void TestExceptionWhileDispatching()
         {
-            var eventProcessor = new ForwardingEventProcessor(new InvalidEventDispatcher(), NotificationCenter, LoggerMock.Object, ErrorHandlerMock.Object);
+            var eventProcessor = new ForwardingEventProcessor(new InvalidEventDispatcher(),
+                NotificationCenter, LoggerMock.Object, ErrorHandlerMock.Object);
             var userEvent = CreateConversionEvent(EventName);
 
             eventProcessor.Process(userEvent);
-            
-            ErrorHandlerMock.Verify(errorHandler => errorHandler.HandleError(It.IsAny<Exception>()), Times.Once );            
+
+            ErrorHandlerMock.Verify(errorHandler => errorHandler.HandleError(It.IsAny<Exception>()),
+                Times.Once);
         }
 
         [Test]
         public void TestNotifications()
         {
-            bool notificationTriggered = false;
-            NotificationCenter.AddNotification(NotificationCenter.NotificationType.LogEvent, logEvent => notificationTriggered = true);
+            var notificationTriggered = false;
+            NotificationCenter.AddNotification(NotificationCenter.NotificationType.LogEvent,
+                logEvent => notificationTriggered = true);
             var userEvent = CreateConversionEvent(EventName);
 
             EventProcessor.Process(userEvent);
@@ -77,7 +82,8 @@ namespace OptimizelySDK.Tests.EventTests
 
         private ConversionEvent CreateConversionEvent(string eventName)
         {
-            return UserEventFactory.CreateConversionEvent(ProjectConfig, eventName, UserId, new UserAttributes(), new EventTags());
+            return UserEventFactory.CreateConversionEvent(ProjectConfig, eventName, UserId,
+                new UserAttributes(), new EventTags());
         }
     }
 }

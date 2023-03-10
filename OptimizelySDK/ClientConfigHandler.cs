@@ -21,79 +21,46 @@ namespace OptimizelySDK
     public class HttpProjectConfigElement : ConfigurationElement
     {
         [ConfigurationProperty("sdkKey", IsRequired = true, IsKey = true)]
-        public string SDKKey
-        {
-            get { return (string)base["sdkKey"]; }
-        }
+        public string SDKKey => (string)base["sdkKey"];
 
         [ConfigurationProperty("url")]
-        public string Url
-        {
-            get { return (string)base["url"]; }
-        }
+        public string Url => (string)base["url"];
 
         [ConfigurationProperty("format")]
-        public string Format
-        {
-            get { return (string)base["format"]; }
-        }
+        public string Format => (string)base["format"];
 
         [ConfigurationProperty("pollingInterval")]
-        public int PollingInterval
-        {
-            get { return base["pollingInterval"] is int ? (int)base["pollingInterval"] : 0; }
-        }
+        public int PollingInterval =>
+            base["pollingInterval"] is int ? (int)base["pollingInterval"] : 0;
 
         [ConfigurationProperty("blockingTimeOutPeriod")]
-        public int BlockingTimeOutPeriod
-        {
-            get { return base["blockingTimeOutPeriod"] is int ? (int)base["blockingTimeOutPeriod"] : 0; }
-        }
+        public int BlockingTimeOutPeriod =>
+            base["blockingTimeOutPeriod"] is int ? (int)base["blockingTimeOutPeriod"] : 0;
 
         [ConfigurationProperty("autoUpdate")]
-        public bool AutoUpdate
-        {
-            get { return (bool)base["autoUpdate"]; }
-        }
+        public bool AutoUpdate => (bool)base["autoUpdate"];
 
         [ConfigurationProperty("defaultStart")]
-        public bool DefaultStart
-        {
-            get { return (bool)base["defaultStart"]; }
-        }
+        public bool DefaultStart => (bool)base["defaultStart"];
 
         [ConfigurationProperty("datafileAccessToken")]
-        public string DatafileAccessToken
-        {
-            get { return (string)base["datafileAccessToken"]; }
-        }
+        public string DatafileAccessToken => (string)base["datafileAccessToken"];
     }
 
     public class BatchEventProcessorElement : ConfigurationElement
     {
         [ConfigurationProperty("batchSize")]
-        public int BatchSize
-        {
-            get { return (int)base["batchSize"]; }
-        }
+        public int BatchSize => (int)base["batchSize"];
 
         [ConfigurationProperty("flushInterval")]
-        public int FlushInterval
-        {
-            get { return base["flushInterval"] is int ? (int)base["flushInterval"] : 0; }
-        }
+        public int FlushInterval => base["flushInterval"] is int ? (int)base["flushInterval"] : 0;
 
         [ConfigurationProperty("timeoutInterval")]
-        public int TimeoutInterval
-        {
-            get { return base["timeoutInterval"] is int ? (int)base["timeoutInterval"] : 0; }
-        }
+        public int TimeoutInterval =>
+            base["timeoutInterval"] is int ? (int)base["timeoutInterval"] : 0;
 
         [ConfigurationProperty("defaultStart")]
-        public bool DefaultStart
-        {
-            get { return (bool)base["defaultStart"]; }
-        }
+        public bool DefaultStart => (bool)base["defaultStart"];
     }
 
     public class OptimizelySDKConfigSection : ConfigurationSection
@@ -101,14 +68,15 @@ namespace OptimizelySDK
         [ConfigurationProperty("HttpProjectConfig")]
         public HttpProjectConfigElement HttpProjectConfig
         {
-            get { return (HttpProjectConfigElement)base["HttpProjectConfig"]; }
-            set { base["HttpProjectConfig"] = value; }
+            get => (HttpProjectConfigElement)base["HttpProjectConfig"];
+            set => base["HttpProjectConfig"] = value;
         }
 
         [ConfigurationProperty("BatchEventProcessor")]
-        public BatchEventProcessorElement BatchEventProcessor {
-            get { return (BatchEventProcessorElement)(base["BatchEventProcessor"]); }
-            set { base["BatchEventProcessor"] = value; }
+        public BatchEventProcessorElement BatchEventProcessor
+        {
+            get => (BatchEventProcessorElement)base["BatchEventProcessor"];
+            set => base["BatchEventProcessor"] = value;
         }
     }
 }

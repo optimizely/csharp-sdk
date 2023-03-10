@@ -29,6 +29,7 @@ namespace OptimizelySDK.Tests.UtilsTests
             instanceType = privateObject;
             createdInstance = Activator.CreateInstance(instanceType, parameterValues);
         }
+
         private PrivateObject(Type privateObject, object[] parameterValues)
         {
             instanceType = privateObject;
@@ -37,26 +38,34 @@ namespace OptimizelySDK.Tests.UtilsTests
 
         public void SetFieldOrProperty(string propertyName, object value)
         {
-            instanceType.InvokeMember(propertyName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.SetProperty | BindingFlags.NonPublic | BindingFlags.SetField,
+            instanceType.InvokeMember(propertyName,
+                BindingFlags.Instance | BindingFlags.Public | BindingFlags.SetProperty |
+                BindingFlags.NonPublic | BindingFlags.SetField,
                 Type.DefaultBinder, createdInstance, new object[] { value });
         }
 
         public Type GetFieldOrProperyType(string propertyName)
         {
-            return instanceType.GetField(propertyName, BindingFlags.NonPublic | BindingFlags.Instance).FieldType;
+            return instanceType.
+                GetField(propertyName, BindingFlags.NonPublic | BindingFlags.Instance).
+                FieldType;
         }
 
         public object Invoke(string name, params object[] args)
         {
-            return instanceType.InvokeMember(name, BindingFlags.Instance | BindingFlags.Public | BindingFlags.InvokeMethod | BindingFlags.NonPublic,
+            return instanceType.InvokeMember(name,
+                BindingFlags.Instance | BindingFlags.Public | BindingFlags.InvokeMethod |
+                BindingFlags.NonPublic,
                 Type.DefaultBinder, createdInstance, args);
         }
 
         public object InvokeGeneric(string name, Type[] genericTypes, params object[] args)
         {
-            MethodInfo method = instanceType.GetMethod(name);
-            MethodInfo genericMethod = method.MakeGenericMethod(genericTypes);
-            return genericMethod.Invoke(createdInstance, BindingFlags.Instance | BindingFlags.Public | BindingFlags.InvokeMethod | BindingFlags.NonPublic,
+            var method = instanceType.GetMethod(name);
+            var genericMethod = method.MakeGenericMethod(genericTypes);
+            return genericMethod.Invoke(createdInstance,
+                BindingFlags.Instance | BindingFlags.Public | BindingFlags.InvokeMethod |
+                BindingFlags.NonPublic,
                 Type.DefaultBinder, args, null);
         }
 

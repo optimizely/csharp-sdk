@@ -34,8 +34,10 @@ namespace OptimizelySDK.Tests
             forcedDecisionStore[context2] = expectedForcedDecision2;
 
             Assert.AreEqual(forcedDecisionStore.Count, 2);
-            Assert.AreEqual(forcedDecisionStore[context1].VariationKey, expectedForcedDecision1.VariationKey);
-            Assert.AreEqual(forcedDecisionStore[context2].VariationKey, expectedForcedDecision2.VariationKey);
+            Assert.AreEqual(forcedDecisionStore[context1].VariationKey,
+                expectedForcedDecision1.VariationKey);
+            Assert.AreEqual(forcedDecisionStore[context2].VariationKey,
+                expectedForcedDecision2.VariationKey);
         }
 
         [Test]
@@ -70,7 +72,8 @@ namespace OptimizelySDK.Tests
             forcedDecisionStore[context1] = expectedForcedDecision1;
 
             Assert.AreEqual(forcedDecisionStore.Count, 1);
-            Assert.AreEqual(forcedDecisionStore[context1].VariationKey, expectedForcedDecision1.VariationKey);
+            Assert.AreEqual(forcedDecisionStore[context1].VariationKey,
+                expectedForcedDecision1.VariationKey);
             Assert.IsNull(forcedDecisionStore[NullFlagKeyContext]);
         }
 
@@ -88,7 +91,8 @@ namespace OptimizelySDK.Tests
             Assert.AreEqual(forcedDecisionStore.Count, 2);
             Assert.IsTrue(forcedDecisionStore.Remove(context2));
             Assert.AreEqual(forcedDecisionStore.Count, 1);
-            Assert.AreEqual(forcedDecisionStore[context1].VariationKey, expectedForcedDecision1.VariationKey);
+            Assert.AreEqual(forcedDecisionStore[context1].VariationKey,
+                expectedForcedDecision1.VariationKey);
             Assert.IsNull(forcedDecisionStore[context2]);
         }
 
@@ -118,6 +122,5 @@ namespace OptimizelySDK.Tests
             forcedDecisionStore.RemoveAll();
             Assert.AreEqual(forcedDecisionStore.Count, 0);
         }
-
     }
 }

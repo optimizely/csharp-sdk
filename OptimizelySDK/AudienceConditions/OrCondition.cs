@@ -38,13 +38,19 @@ namespace OptimizelySDK.AudienceConditions
             {
                 var result = condition.Evaluate(config, attributes, logger);
                 if (result == null)
+                {
                     foundNull = true;
+                }
                 else if (result == true)
+                {
                     return true;
+                }
             }
 
             if (foundNull)
+            {
                 return null;
+            }
 
             return false;
         }

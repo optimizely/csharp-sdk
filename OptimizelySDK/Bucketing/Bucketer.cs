@@ -13,12 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-using OptimizelySDK.Entity;
-using OptimizelySDK.Logger;
-using OptimizelySDK.OptimizelyDecisions;
+
 using System;
 using System.Collections.Generic;
 using System.Text;
+using OptimizelySDK.Entity;
+using OptimizelySDK.Logger;
+using OptimizelySDK.OptimizelyDecisions;
 
 namespace OptimizelySDK.Bucketing
 {
@@ -54,9 +55,9 @@ namespace OptimizelySDK.Bucketing
         /// <returns>integer Unsigned value denoting the hash value for the user</returns>
         private uint GenerateHashCode(string bucketingKey)
         {
-            var murmer32 = Murmur.MurmurHash.Create32(seed: HASH_SEED, managed: true);
-            byte[] data = Encoding.UTF8.GetBytes(bucketingKey);
-            byte[] hash = murmer32.ComputeHash(data);
+            var murmer32 = Murmur.MurmurHash.Create32(HASH_SEED, true);
+            var data = Encoding.UTF8.GetBytes(bucketingKey);
+            var hash = murmer32.ComputeHash(data);
             return BitConverter.ToUInt32(hash, 0);
         }
 
@@ -68,8 +69,8 @@ namespace OptimizelySDK.Bucketing
         /// <returns>integer Value in the closed range [0, 9999] denoting the bucket the user belongs to</returns>
         public virtual int GenerateBucketValue(string bucketingKey)
         {
-            uint hashCode = GenerateHashCode(bucketingKey);
-            double ratio = hashCode / (double)MAX_HASH_VALUE;
+            var hashCode = GenerateHashCode(bucketingKey);
+            var ratio = hashCode / (double)MAX_HASH_VALUE;
             return (int)(ratio * MAX_TRAFFIC_VALUE);
         }
 
@@ -81,17 +82,24 @@ namespace OptimizelySDK.Bucketing
         /// <param name="parentId">mixed ID representing Experiment or Group</param>
         /// <param name="trafficAllocations">array Traffic allocations for variation or experiment</param>
         /// <returns>string ID representing experiment or variation, returns null if not found</returns>
-        private string FindBucket(string bucketingId, string userId, string parentId, IEnumerable<TrafficAllocation> trafficAllocations)
+        private string FindBucket(string bucketingId, string userId, string parentId,
+            IEnumerable<TrafficAllocation> trafficAllocations
+        )
         {
             // Generate the bucketing key based on combination of user ID and experiment ID or group ID.
-            string bucketingKey = bucketingId + parentId;
-            int bucketingNumber = GenerateBucketValue(bucketingKey);
+            var bucketingKey = bucketingId + parentId;
+            var bucketingNumber = GenerateBucketValue(bucketingKey);
 
-            Logger.Log(LogLevel.DEBUG, $"Assigned bucket [{bucketingNumber}] to user [{userId}] with bucketing ID [{bucketingId}].");
+            Logger.Log(LogLevel.DEBUG,
+                $"Assigned bucket [{bucketingNumber}] to user [{userId}] with bucketing ID [{bucketingId}].");
 
             foreach (var ta in trafficAllocations)
+            {
                 if (bucketingNumber < ta.EndOfRange)
+                {
                     return ta.EntityId;
+                }
+            }
 
             return null;
         }
@@ -104,7 +112,9 @@ namespace OptimizelySDK.Bucketing
         /// <param name="bucketingId">A customer-assigned value used to create the key for the murmur hash.</param>
         /// <param name="userId">User identifier</param>
         /// <returns>Variation which will be shown to the user</returns>
-        public virtual Result<Variation> Bucket(ProjectConfig config, Experiment experiment, string bucketingId, string userId)
+        public virtual Result<Variation> Bucket(ProjectConfig config, Experiment experiment,
+            string bucketingId, string userId
+        )
         {
             string message;
             Variation variation;
@@ -112,16 +122,21 @@ namespace OptimizelySDK.Bucketing
             var reasons = new DecisionReasons();
 
             if (string.IsNullOrEmpty(experiment.Key))
+            {
                 return Result<Variation>.NewResult(new Variation(), reasons);
+            }
 
             // Determine if experiment is in a mutually exclusive group.
             if (experiment.IsInMutexGroup)
             {
-                Group group = config.GetGroup(experiment.GroupId);
+                var group = config.GetGroup(experiment.GroupId);
                 if (string.IsNullOrEmpty(group.Id))
+                {
                     return Result<Variation>.NewResult(new Variation(), reasons);
+                }
 
-                string userExperimentId = FindBucket(bucketingId, userId, group.Id, group.TrafficAllocation);
+                var userExperimentId =
+                    FindBucket(bucketingId, userId, group.Id, group.TrafficAllocation);
                 if (string.IsNullOrEmpty(userExperimentId))
                 {
                     message = $"User [{userId}] is in no experiment.";
@@ -131,27 +146,30 @@ namespace OptimizelySDK.Bucketing
 
                 if (userExperimentId != experiment.Id)
                 {
-                    message = $"User [{userId}] is not in experiment [{experiment.Key}] of group [{experiment.GroupId}].";
+                    message =
+                        $"User [{userId}] is not in experiment [{experiment.Key}] of group [{experiment.GroupId}].";
                     Logger.Log(LogLevel.INFO, reasons.AddInfo(message));
                     return Result<Variation>.NewResult(new Variation(), reasons);
                 }
 
-                message = $"User [{userId}] is in experiment [{experiment.Key}] of group [{experiment.GroupId}].";
+                message =
+                    $"User [{userId}] is in experiment [{experiment.Key}] of group [{experiment.GroupId}].";
                 Logger.Log(LogLevel.INFO, reasons.AddInfo(message));
             }
 
             // Bucket user if not in whitelist and in group (if any).
-            string variationId = FindBucket(bucketingId, userId, experiment.Id, experiment.TrafficAllocation);
+            var variationId = FindBucket(bucketingId, userId, experiment.Id,
+                experiment.TrafficAllocation);
             if (string.IsNullOrEmpty(variationId))
             {
                 Logger.Log(LogLevel.INFO, reasons.AddInfo($"User [{userId}] is in no variation."));
                 return Result<Variation>.NewResult(new Variation(), reasons);
-
             }
 
             // success!
             variation = config.GetVariationFromIdByExperimentId(experiment.Id, variationId);
-            message = $"User [{userId}] is in variation [{variation.Key}] of experiment [{experiment.Key}].";
+            message =
+                $"User [{userId}] is in variation [{variation.Key}] of experiment [{experiment.Key}].";
             Logger.Log(LogLevel.INFO, reasons.AddInfo(message));
             return Result<Variation>.NewResult(variation, reasons);
         }

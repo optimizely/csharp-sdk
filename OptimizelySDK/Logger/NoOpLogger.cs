@@ -13,12 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 namespace OptimizelySDK.Logger
 {
     public class NoOpLogger : ILogger
     {
-        public void Log(LogLevel level, string message)
-        {
-        }
+        public void Log(LogLevel level, string message) { }
     }
 }

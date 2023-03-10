@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 using System;
 
 namespace OptimizelySDK.Entity
@@ -36,7 +37,9 @@ namespace OptimizelySDK.Entity
         {
             var entity = other as IdKeyEntity;
             if (entity == null || other.GetType() != GetType())
+            {
                 return false;
+            }
 
             return Id == entity.Id && Key == entity.Key;
         }

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+using System.Collections.Generic;
 using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Logger;
-using System.Collections.Generic;
 
 namespace OptimizelySDK.OptimizelyDecisions
 {
@@ -29,7 +29,7 @@ namespace OptimizelySDK.OptimizelyDecisions
         /// variation key for optimizely decision.
         /// </summary>
         public string VariationKey { get; private set; }
-        
+
         /// <summary>
         /// boolean value indicating if the flag is enabled or not.
         /// </summary>
@@ -39,34 +39,35 @@ namespace OptimizelySDK.OptimizelyDecisions
         /// collection of variables associated with the decision.
         /// </summary>
         public OptimizelyJSON Variables { get; private set; }
-        
+
         /// <summary>
         /// rule key of the decision.
         /// </summary>
         public string RuleKey { get; private set; }
-        
+
         /// <summary>
         /// flag key for which the decision was made.
         /// </summary>
         public string FlagKey { get; private set; }
-        
+
         /// <summary>
         /// user context for which the  decision was made.
         /// </summary>
         public OptimizelyUserContext UserContext { get; private set; }
-        
+
         /// <summary>
         /// an array of error/info/debug messages describing why the decision has been made.
         /// </summary>
         public string[] Reasons { get; private set; }
 
         public OptimizelyDecision(string variationKey,
-                              bool enabled,
-                              OptimizelyJSON variables,
-                              string ruleKey,
-                              string flagKey,
-                              OptimizelyUserContext userContext,
-                              string[] reasons)
+            bool enabled,
+            OptimizelyJSON variables,
+            string ruleKey,
+            string flagKey,
+            OptimizelyUserContext userContext,
+            string[] reasons
+        )
         {
             VariationKey = variationKey;
             Enabled = enabled;
@@ -87,7 +88,8 @@ namespace OptimizelySDK.OptimizelyDecisions
             OptimizelyUserContext optimizelyUserContext,
             string error,
             IErrorHandler errorHandler,
-            ILogger logger)
+            ILogger logger
+        )
         {
             return new OptimizelyDecision(
                 null,

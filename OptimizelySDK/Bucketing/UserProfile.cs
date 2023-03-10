@@ -55,7 +55,7 @@ namespace OptimizelySDK.Bucketing
             UserId = userId;
             ExperimentBucketMap = experimentBucketMap;
         }
-        
+
         /// <summary>
         /// Convert a User Profile instance to a Map.
         /// </summary>
@@ -64,9 +64,11 @@ namespace OptimizelySDK.Bucketing
         {
             return new Dictionary<string, object>
             {
-                { UserProfile.USER_ID_KEY, UserId },
-                { UserProfile.EXPERIMENT_BUCKET_MAP_KEY,
-                    ExperimentBucketMap.ToDictionary(row => row.Key, row => row.Value.ToMap()) }
+                { USER_ID_KEY, UserId },
+                {
+                    EXPERIMENT_BUCKET_MAP_KEY,
+                    ExperimentBucketMap.ToDictionary(row => row.Key, row => row.Value.ToMap())
+                },
             };
         }
     }

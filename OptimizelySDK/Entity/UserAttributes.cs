@@ -13,18 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 using System.Collections.Generic;
 
 namespace OptimizelySDK.Entity
 {
     public class UserAttributes : Dictionary<string, object>
     {
-        public UserAttributes() : base()
-        {
-        }
+        public UserAttributes() : base() { }
 
-        public UserAttributes(IDictionary<string, object> dictionary) : base(dictionary)
-        {
-        }
+        public UserAttributes(IDictionary<string, object> dictionary) : base(dictionary) { }
     }
 }

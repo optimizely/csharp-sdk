@@ -1,4 +1,7 @@
-﻿using Moq;
+﻿using System;
+using System.Collections.Concurrent;
+using System.Threading;
+using Moq;
 using NUnit.Framework;
 using OptimizelySDK.Config;
 using OptimizelySDK.Entity;
@@ -9,14 +12,11 @@ using OptimizelySDK.Event.Entity;
 using OptimizelySDK.Logger;
 using OptimizelySDK.Notifications;
 using OptimizelySDK.Tests.NotificationTests;
-using System;
-using System.Collections.Concurrent;
-using System.Threading;
 
 namespace OptimizelySDK.Tests.EventTests
 {
     [TestFixture]
-    class BatchEventProcessorTest
+    internal class BatchEventProcessorTest
     {
         private static string TestUserId = "testUserId";
         private const string EventName = "purchase";
@@ -24,12 +24,12 @@ namespace OptimizelySDK.Tests.EventTests
         public const int MAX_BATCH_SIZE = 10;
         public const int MAX_DURATION_MS = 1000;
         public const int TIMEOUT_INTERVAL_MS = 5000;
-        
+
         private ProjectConfig Config;
         private Mock<ILogger> LoggerMock;
         private BlockingCollection<object> eventQueue;
         private BatchEventProcessor EventProcessor;
-        private Mock<IEventDispatcher> EventDispatcherMock;        
+        private Mock<IEventDispatcher> EventDispatcherMock;
         private NotificationCenter NotificationCenter = new NotificationCenter();
         private Mock<TestNotificationCallbacks> NotificationCallbackMock;
 
@@ -39,8 +39,9 @@ namespace OptimizelySDK.Tests.EventTests
             LoggerMock = new Mock<ILogger>();
             LoggerMock.Setup(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()));
 
-            Config = DatafileProjectConfig.Create(TestData.Datafile, LoggerMock.Object, new ErrorHandler.NoOpErrorHandler());
-            
+            Config = DatafileProjectConfig.Create(TestData.Datafile, LoggerMock.Object,
+                new NoOpErrorHandler());
+
             eventQueue = new BlockingCollection<object>(100);
             EventDispatcherMock = new Mock<IEventDispatcher>();
 
@@ -56,7 +57,7 @@ namespace OptimizelySDK.Tests.EventTests
         {
             EventProcessor.Stop();
         }
-        
+
         [Test]
         public void TestDrainOnClose()
         {
@@ -68,7 +69,7 @@ namespace OptimizelySDK.Tests.EventTests
             eventDispatcher.ExpectConversion(EventName, TestUserId);
 
             Thread.Sleep(1500);
-            
+
             Assert.True(eventDispatcher.CompareEvents());
             Assert.AreEqual(0, EventProcessor.EventQueue.Count);
         }
@@ -87,7 +88,8 @@ namespace OptimizelySDK.Tests.EventTests
             Thread.Sleep(1500);
 
             Assert.True(eventDispatcher.CompareEvents());
-            Assert.True(countdownEvent.Wait(TimeSpan.FromMilliseconds(MAX_DURATION_MS * 3)), "Exceeded timeout waiting for notification.");
+            Assert.True(countdownEvent.Wait(TimeSpan.FromMilliseconds(MAX_DURATION_MS * 3)),
+                "Exceeded timeout waiting for notification.");
             Assert.AreEqual(0, EventProcessor.EventQueue.Count);
         }
 
@@ -95,10 +97,11 @@ namespace OptimizelySDK.Tests.EventTests
         public void TestFlushMaxBatchSize()
         {
             var countdownEvent = new CountdownEvent(1);
-            var eventDispatcher = new TestEventDispatcher(countdownEvent) { Logger = LoggerMock.Object };
+            var eventDispatcher = new TestEventDispatcher(countdownEvent)
+            { Logger = LoggerMock.Object };
             SetEventProcessor(eventDispatcher);
 
-            for (int i = 0; i < MAX_BATCH_SIZE; i++)
+            for (var i = 0; i < MAX_BATCH_SIZE; i++)
             {
                 UserEvent userEvent = BuildConversionEvent(EventName);
                 EventProcessor.Process(userEvent);
@@ -133,7 +136,8 @@ namespace OptimizelySDK.Tests.EventTests
             Thread.Sleep(1500);
 
             Assert.True(eventDispatcher.CompareEvents());
-            Assert.True(countdownEvent.Wait(TimeSpan.FromMilliseconds(MAX_DURATION_MS / 2)), "Exceeded timeout waiting for notification.");
+            Assert.True(countdownEvent.Wait(TimeSpan.FromMilliseconds(MAX_DURATION_MS / 2)),
+                "Exceeded timeout waiting for notification.");
             Assert.AreEqual(0, EventProcessor.EventQueue.Count);
         }
 
@@ -150,7 +154,7 @@ namespace OptimizelySDK.Tests.EventTests
         {
             EventProcessor = new BatchEventProcessor.Builder().Build();
 
-            Assert.True(EventProcessor.Logger is OptimizelySDK.Logger.NoOpLogger);
+            Assert.True(EventProcessor.Logger is NoOpLogger);
         }
 
         [Test]
@@ -182,7 +186,8 @@ namespace OptimizelySDK.Tests.EventTests
             Thread.Sleep(1500);
 
             Assert.True(eventDispatcher.CompareEvents());
-            Assert.True(countdownEvent.Wait(TimeSpan.FromMilliseconds(MAX_DURATION_MS * 3)), "Exceeded timeout waiting for notification.");
+            Assert.True(countdownEvent.Wait(TimeSpan.FromMilliseconds(MAX_DURATION_MS * 3)),
+                "Exceeded timeout waiting for notification.");
         }
 
         [Test]
@@ -207,7 +212,8 @@ namespace OptimizelySDK.Tests.EventTests
             Thread.Sleep(1500);
 
             Assert.True(eventDispatcher.CompareEvents());
-            Assert.True(countdownEvent.Wait(TimeSpan.FromMilliseconds(MAX_DURATION_MS * 3)), "Exceeded timeout waiting for notification.");
+            Assert.True(countdownEvent.Wait(TimeSpan.FromMilliseconds(MAX_DURATION_MS * 3)),
+                "Exceeded timeout waiting for notification.");
             Assert.AreEqual(0, EventProcessor.EventQueue.Count);
         }
 
@@ -231,7 +237,8 @@ namespace OptimizelySDK.Tests.EventTests
             EventProcessor.Start();
             EventProcessor.Stop();
 
-            Assert.True(countdownEvent.Wait(TimeSpan.FromMilliseconds(MAX_DURATION_MS * 3)), "Exceeded timeout waiting for notification.");
+            Assert.True(countdownEvent.Wait(TimeSpan.FromMilliseconds(MAX_DURATION_MS * 3)),
+                "Exceeded timeout waiting for notification.");
         }
 
         [Test]
@@ -277,21 +284,22 @@ namespace OptimizelySDK.Tests.EventTests
 
             // Need to make sure, after dispose, process shouldn't raise exception
             EventProcessor.Process(userEvent);
-
         }
 
         [Test]
         public void TestNotificationCenter()
         {
             var countdownEvent = new CountdownEvent(1);
-            NotificationCenter.AddNotification(NotificationCenter.NotificationType.LogEvent, logEvent => countdownEvent.Signal());
+            NotificationCenter.AddNotification(NotificationCenter.NotificationType.LogEvent,
+                logEvent => countdownEvent.Signal());
             SetEventProcessor(EventDispatcherMock.Object);
 
             UserEvent userEvent = BuildConversionEvent(EventName);
             EventProcessor.Process(userEvent);
-            
+
             EventProcessor.Stop();
-            Assert.True(countdownEvent.Wait(TimeSpan.FromMilliseconds(MAX_DURATION_MS * 3)), "Exceeded timeout waiting for notification.");
+            Assert.True(countdownEvent.Wait(TimeSpan.FromMilliseconds(MAX_DURATION_MS * 3)),
+                "Exceeded timeout waiting for notification.");
         }
 
         [Test]
@@ -310,15 +318,14 @@ namespace OptimizelySDK.Tests.EventTests
 
         private void SetEventProcessor(IEventDispatcher eventDispatcher)
         {
-            EventProcessor = new BatchEventProcessor.Builder()
-                .WithEventQueue(eventQueue)
-                .WithEventDispatcher(eventDispatcher)
-                .WithMaxBatchSize(MAX_BATCH_SIZE)
-                .WithFlushInterval(TimeSpan.FromMilliseconds(MAX_DURATION_MS))
-                .WithTimeoutInterval(TimeSpan.FromMilliseconds(TIMEOUT_INTERVAL_MS))
-                .WithLogger(LoggerMock.Object)
-                .WithNotificationCenter(NotificationCenter)
-                .Build();
+            EventProcessor = new BatchEventProcessor.Builder().WithEventQueue(eventQueue).
+                WithEventDispatcher(eventDispatcher).
+                WithMaxBatchSize(MAX_BATCH_SIZE).
+                WithFlushInterval(TimeSpan.FromMilliseconds(MAX_DURATION_MS)).
+                WithTimeoutInterval(TimeSpan.FromMilliseconds(TIMEOUT_INTERVAL_MS)).
+                WithLogger(LoggerMock.Object).
+                WithNotificationCenter(NotificationCenter).
+                Build();
         }
 
         private ConversionEvent BuildConversionEvent(string eventName)
@@ -326,17 +333,24 @@ namespace OptimizelySDK.Tests.EventTests
             return BuildConversionEvent(eventName, Config);
         }
 
-        private static ConversionEvent BuildConversionEvent(string eventName, ProjectConfig projectConfig)
+        private static ConversionEvent BuildConversionEvent(string eventName,
+            ProjectConfig projectConfig
+        )
         {
             return UserEventFactory.CreateConversionEvent(projectConfig, eventName, TestUserId,
                 new UserAttributes(), new EventTags());
         }
     }
 
-    class CountdownEventDispatcher : IEventDispatcher
+    internal class CountdownEventDispatcher : IEventDispatcher
     {
         public ILogger Logger { get; set; }
         public CountdownEvent CountdownEvent { get; set; }
-        public void DispatchEvent(LogEvent logEvent) => Assert.False(!CountdownEvent.Wait(TimeSpan.FromMilliseconds(BatchEventProcessorTest.TIMEOUT_INTERVAL_MS * 2)));
+
+        public void DispatchEvent(LogEvent logEvent)
+        {
+            Assert.False(!CountdownEvent.Wait(
+                TimeSpan.FromMilliseconds(BatchEventProcessorTest.TIMEOUT_INTERVAL_MS * 2)));
+        }
     }
 }

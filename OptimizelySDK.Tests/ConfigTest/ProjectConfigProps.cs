@@ -14,6 +14,7 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
+
 using System;
 using OptimizelySDK.Config;
 using OptimizelySDK.Tests.Utils;
@@ -34,27 +35,37 @@ namespace OptimizelySDK.Tests.ConfigTest
 
         public ProjectConfigManagerProps(HttpProjectConfigManager projectConfigManager)
         {
-            LastModified = Reflection.GetFieldValue<string, HttpProjectConfigManager>(projectConfigManager, "LastModifiedSince");
-            Url = Reflection.GetFieldValue<string, HttpProjectConfigManager>(projectConfigManager, "Url");
-            DatafileAccessToken = Reflection.GetFieldValue<string, HttpProjectConfigManager>(projectConfigManager, "DatafileAccessToken");
+            LastModified =
+                Reflection.GetFieldValue<string, HttpProjectConfigManager>(projectConfigManager,
+                    "LastModifiedSince");
+            Url = Reflection.GetFieldValue<string, HttpProjectConfigManager>(projectConfigManager,
+                "Url");
+            DatafileAccessToken =
+                Reflection.GetFieldValue<string, HttpProjectConfigManager>(projectConfigManager,
+                    "DatafileAccessToken");
 
-            AutoUpdate = Reflection.GetPropertyValue<bool, HttpProjectConfigManager>(projectConfigManager, "AutoUpdate");
-            PollingInterval = Reflection.GetFieldValue<TimeSpan, HttpProjectConfigManager>(projectConfigManager, "PollingInterval");
-            BlockingTimeout = Reflection.GetFieldValue<TimeSpan, HttpProjectConfigManager>(projectConfigManager, "BlockingTimeout");
+            AutoUpdate =
+                Reflection.GetPropertyValue<bool, HttpProjectConfigManager>(projectConfigManager,
+                    "AutoUpdate");
+            PollingInterval =
+                Reflection.GetFieldValue<TimeSpan, HttpProjectConfigManager>(projectConfigManager,
+                    "PollingInterval");
+            BlockingTimeout =
+                Reflection.GetFieldValue<TimeSpan, HttpProjectConfigManager>(projectConfigManager,
+                    "BlockingTimeout");
         }
 
         /// <summary>
         /// To create default instance of expected values.
         /// </summary>
-        public ProjectConfigManagerProps()
-        {
-
-        }
+        public ProjectConfigManagerProps() { }
 
         public override bool Equals(object obj)
         {
             if (obj == null)
+            {
                 return false;
+            }
 
             var projectConfigManager = obj as ProjectConfigManagerProps;
             if (projectConfigManager == null)

@@ -13,11 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-using Newtonsoft.Json.Linq;
+
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using Newtonsoft.Json.Linq;
 
 namespace OptimizelySDK.Tests
 {
@@ -32,70 +33,45 @@ namespace OptimizelySDK.Tests
         private static string duplicateExpKeysDatafile = null;
         private static string duplicateRuleKeysDatafile = null;
 
-        public static string Datafile
-        {
-            get
-            {
-                return cachedDataFile ?? (cachedDataFile = LoadJsonData());
-            }
-        }
+        public static string Datafile => cachedDataFile ?? (cachedDataFile = LoadJsonData());
 
-        public static string DuplicateExpKeysDatafile {
-            get {
-                return duplicateExpKeysDatafile ?? (duplicateExpKeysDatafile = LoadJsonData("similar_exp_keys.json"));
-            }
-        }
+        public static string DuplicateExpKeysDatafile =>
+            duplicateExpKeysDatafile ??
+            (duplicateExpKeysDatafile = LoadJsonData("similar_exp_keys.json"));
 
-        public static string DuplicateRuleKeysDatafile {
-            get {
-                return duplicateRuleKeysDatafile ?? (duplicateRuleKeysDatafile = LoadJsonData("similar_rule_keys_bucketing.json"));
-            }
-        }
+        public static string DuplicateRuleKeysDatafile =>
+            duplicateRuleKeysDatafile ?? (duplicateRuleKeysDatafile =
+                LoadJsonData("similar_rule_keys_bucketing.json"));
 
-        public static string SimpleABExperimentsDatafile
-        {
-            get 
-            {
-                return simpleABExperimentsDatafile ?? (simpleABExperimentsDatafile = LoadJsonData("simple_ab_experiments.json"));                
-            }
-        }
+        public static string SimpleABExperimentsDatafile =>
+            simpleABExperimentsDatafile ?? (simpleABExperimentsDatafile =
+                LoadJsonData("simple_ab_experiments.json"));
 
-        public static string UnsupportedVersionDatafile
-        {
-            get
-            {
-                return unsupportedVersionDatafile ?? (unsupportedVersionDatafile = LoadJsonData("unsupported_version_datafile.json"));
-            }
-        }
+        public static string UnsupportedVersionDatafile =>
+            unsupportedVersionDatafile ?? (unsupportedVersionDatafile =
+                LoadJsonData("unsupported_version_datafile.json"));
 
-        public static string EmptyRolloutDatafile {
-            get {
-                return emptyRolloutDatafile ?? (emptyRolloutDatafile = LoadJsonData("EmptyRolloutRule.json"));
-            }
-        }
+        public static string EmptyRolloutDatafile =>
+            emptyRolloutDatafile ??
+            (emptyRolloutDatafile = LoadJsonData("EmptyRolloutRule.json"));
 
-        public static string EmptyDatafile {
-            get {
-                return emptyDatafile ?? (emptyDatafile = LoadJsonData("emptydatafile.json"));
-            }
-        }
+        public static string EmptyDatafile =>
+            emptyDatafile ?? (emptyDatafile = LoadJsonData("emptydatafile.json"));
 
-        public static string TypedAudienceDatafile
-        {
-            get
-            {
-                return typedAudienceDatafile ?? (typedAudienceDatafile = LoadJsonData("typed_audience_datafile.json"));
-            }
-        }
+        public static string TypedAudienceDatafile =>
+            typedAudienceDatafile ?? (typedAudienceDatafile =
+                LoadJsonData("typed_audience_datafile.json"));
 
         private static string LoadJsonData(string fileName = "TestData.json")
         {
             var assembly = Assembly.GetExecutingAssembly();
             var resourceName = string.Format("OptimizelySDK.Tests.{0}", fileName);
 
-            using (Stream stream = assembly.GetManifestResourceStream(resourceName))
-            using (StreamReader reader = new StreamReader(stream))
+            using (var stream = assembly.GetManifestResourceStream(resourceName))
+            using (var reader = new StreamReader(stream))
+            {
                 return reader.ReadToEnd();
+            }
         }
 
         public static bool CompareObjects(object o1, object o2)

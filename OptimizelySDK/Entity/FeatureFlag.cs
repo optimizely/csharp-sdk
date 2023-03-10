@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-using OptimizelySDK.Utils;
 using System.Collections.Generic;
+using OptimizelySDK.Utils;
 
 namespace OptimizelySDK.Entity
 {
@@ -26,27 +26,29 @@ namespace OptimizelySDK.Entity
         public List<string> ExperimentIds { get; set; }
 
         private List<FeatureVariable> _Variables;
+
         public List<FeatureVariable> Variables
         {
-            get
-            {
-                return _Variables;
-            }
+            get => _Variables;
             set
             {
                 _Variables = value;
 
                 // Generating Feature Variable key map.
                 if (_Variables != null)
-                    VariableKeyToFeatureVariableMap = ConfigParser<FeatureVariable>.GenerateMap(entities: _Variables, getKey: v => v.Key, clone: true);
+                {
+                    VariableKeyToFeatureVariableMap =
+                        ConfigParser<FeatureVariable>.GenerateMap(_Variables, v => v.Key, true);
+                }
             }
         }
-        
+
         public Dictionary<string, FeatureVariable> VariableKeyToFeatureVariableMap { get; set; }
 
         public FeatureVariable GetFeatureVariableFromKey(string variableKey)
         {
-            if (VariableKeyToFeatureVariableMap != null && VariableKeyToFeatureVariableMap.ContainsKey(variableKey))
+            if (VariableKeyToFeatureVariableMap != null &&
+                VariableKeyToFeatureVariableMap.ContainsKey(variableKey))
             {
                 return VariableKeyToFeatureVariableMap[variableKey];
             }

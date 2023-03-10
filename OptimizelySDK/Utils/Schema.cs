@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 using System.IO;
 using System.Reflection;
 
@@ -25,7 +26,9 @@ namespace OptimizelySDK.Utils
         public static string GetSchemaJson()
         {
             if (cache != null)
+            {
                 return cache;
+            }
 #if NET35 || NET40
             var assembly = Assembly.GetExecutingAssembly();
 #else
@@ -33,9 +36,11 @@ namespace OptimizelySDK.Utils
 #endif
             const string resourceName = "OptimizelySDK.Utils.schema.json";
 
-            using (Stream stream = assembly.GetManifestResourceStream(resourceName))
-            using (StreamReader reader = new StreamReader(stream))
+            using (var stream = assembly.GetManifestResourceStream(resourceName))
+            using (var reader = new StreamReader(stream))
+            {
                 return cache = reader.ReadToEnd();
+            }
         }
     }
 }

@@ -46,14 +46,18 @@
   "variables": [],
   "featureFlags": [
     {
-      "experimentIds": ["9300000007569"],
+      "experimentIds": [
+        "9300000007569"
+      ],
       "rolloutId": "",
       "variables": [],
       "id": "3045",
       "key": "flag1"
     },
     {
-      "experimentIds": ["9300000007573"],
+      "experimentIds": [
+        "9300000007573"
+      ],
       "rolloutId": "",
       "variables": [],
       "id": "3046",
@@ -63,8 +67,13 @@
   "experiments": [
     {
       "status": "Running",
-      "audienceConditions": ["or", "20415611520"],
-      "audienceIds": ["20415611520"],
+      "audienceConditions": [
+        "or",
+        "20415611520"
+      ],
+      "audienceIds": [
+        "20415611520"
+      ],
       "variations": [
         {
           "variables": [],
@@ -76,13 +85,23 @@
       "forcedVariations": {},
       "key": "targeted_delivery",
       "layerId": "9300000007569",
-      "trafficAllocation": [{ "entityId": "8045", "endOfRange": 10000 }],
+      "trafficAllocation": [
+        {
+          "entityId": "8045",
+          "endOfRange": 10000
+        }
+      ],
       "id": "9300000007569"
     },
     {
       "status": "Running",
-      "audienceConditions": ["or", "20406066925"],
-      "audienceIds": ["20406066925"],
+      "audienceConditions": [
+        "or",
+        "20406066925"
+      ],
+      "audienceIds": [
+        "20406066925"
+      ],
       "variations": [
         {
           "variables": [],
@@ -94,7 +113,12 @@
       "forcedVariations": {},
       "key": "targeted_delivery",
       "layerId": "9300000007573",
-      "trafficAllocation": [{ "entityId": "8048", "endOfRange": 10000 }],
+      "trafficAllocation": [
+        {
+          "entityId": "8048",
+          "endOfRange": 10000
+        }
+      ],
       "id": "9300000007573"
     }
   ],
@@ -116,7 +140,12 @@
     }
   ],
   "groups": [],
-  "attributes": [{ "id": "20408641883", "key": "hiddenLiveEnabled" }],
+  "attributes": [
+    {
+      "id": "20408641883",
+      "key": "hiddenLiveEnabled"
+    }
+  ],
   "botFiltering": false,
   "accountId": "17882702980",
   "events": [],

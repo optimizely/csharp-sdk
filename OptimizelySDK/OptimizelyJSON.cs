@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-using OptimizelySDK.Logger;
 using System;
 using System.Collections.Generic;
-using Newtonsoft.Json.Linq;
-using OptimizelySDK.ErrorHandler;
 using System.Linq;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using OptimizelySDK.ErrorHandler;
+using OptimizelySDK.Logger;
 
 namespace OptimizelySDK
 {
@@ -48,7 +48,9 @@ namespace OptimizelySDK
             }
         }
 
-        public OptimizelyJSON(Dictionary<string, object> dict, IErrorHandler errorHandler, ILogger logger)
+        public OptimizelyJSON(Dictionary<string, object> dict, IErrorHandler errorHandler,
+            ILogger logger
+        )
         {
             try
             {
@@ -64,7 +66,7 @@ namespace OptimizelySDK
             }
         }
 
-        override public string ToString()
+        public override string ToString()
         {
             return Payload;
         }
@@ -93,26 +95,32 @@ namespace OptimizelySDK
                 {
                     return GetObject<T>(Dict);
                 }
+
                 var path = jsonPath.Split('.');
 
                 var currentObject = Dict;
-                for (int i = 0; i < path.Length - 1; i++)
+                for (var i = 0; i < path.Length - 1; i++)
                 {
                     currentObject = currentObject[path[i]] as Dictionary<string, object>;
                 }
+
                 return GetObject<T>(currentObject[path[path.Length - 1]]);
             }
             catch (KeyNotFoundException exception)
             {
                 Logger.Log(LogLevel.ERROR, "Value for JSON key not found.");
-                ErrorHandler.HandleError(new Exceptions.OptimizelyRuntimeException(exception.Message));
+                ErrorHandler.HandleError(
+                    new Exceptions.OptimizelyRuntimeException(exception.Message));
             }
             catch (Exception exception)
             {
-                Logger.Log(LogLevel.ERROR, "Value for path could not be assigned to provided type.");
-                ErrorHandler.HandleError(new Exceptions.OptimizelyRuntimeException(exception.Message));
+                Logger.Log(LogLevel.ERROR,
+                    "Value for path could not be assigned to provided type.");
+                ErrorHandler.HandleError(
+                    new Exceptions.OptimizelyRuntimeException(exception.Message));
             }
-            return default(T);
+
+            return default;
         }
 
         private T GetObject<T>(object o)
@@ -121,6 +129,7 @@ namespace OptimizelySDK
             {
                 deserializedObj = JsonConvert.DeserializeObject<T>(JsonConvert.SerializeObject(o));
             }
+
             return deserializedObj;
         }
 
@@ -133,12 +142,14 @@ namespace OptimizelySDK
         {
             if (o is JObject jo)
             {
-                return jo.ToObject<IDictionary<string, object>>().ToDictionary(k => k.Key, v => ConvertIntoCollection(v.Value));
+                return jo.ToObject<IDictionary<string, object>>().
+                    ToDictionary(k => k.Key, v => ConvertIntoCollection(v.Value));
             }
             else if (o is JArray ja)
             {
                 return ja.ToObject<List<object>>().Select(ConvertIntoCollection).ToList();
             }
+
             return o;
         }
     }

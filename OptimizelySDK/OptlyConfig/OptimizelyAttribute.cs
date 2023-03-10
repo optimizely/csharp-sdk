@@ -18,7 +18,5 @@ using OptimizelySDK.Entity;
 
 namespace OptimizelySDK.OptlyConfig
 {
-    public class OptimizelyAttribute : IdKeyEntity
-    {
-    }
+    public class OptimizelyAttribute : IdKeyEntity { }
 }

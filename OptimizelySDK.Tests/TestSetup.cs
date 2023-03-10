@@ -1,6 +1,6 @@
-﻿using NUnit.Framework;
-using System.Globalization;
+﻿using System.Globalization;
 using System.Threading;
+using NUnit.Framework;
 
 namespace OptimizelySDK.Tests
 {

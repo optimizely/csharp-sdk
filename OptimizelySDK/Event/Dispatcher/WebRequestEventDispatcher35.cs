@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #if NET35 || NET40
 using System;
 using System.IO;
@@ -41,9 +42,12 @@ namespace OptimizelySDK.Event.Dispatcher
             Request.Method = logEvent.HttpVerb;
 
             foreach (var h in logEvent.Headers)
-                if(!WebHeaderCollection.IsRestricted(h.Key)){
+            {
+                if (!WebHeaderCollection.IsRestricted(h.Key))
+                {
                     Request.Headers[h.Key] = h.Value;
-                } 
+                }
+            }
 
             Request.ContentType = "application/json";
 
@@ -54,7 +58,8 @@ namespace OptimizelySDK.Event.Dispatcher
                 streamWriter.Close();
             }
 
-            IAsyncResult result = Request.BeginGetResponse(new AsyncCallback(FinaliseHttpAsyncRequest), this);
+            var result =
+                Request.BeginGetResponse(new AsyncCallback(FinaliseHttpAsyncRequest), this);
         }
 
         private static void FinaliseHttpAsyncRequest(IAsyncResult result)
@@ -70,10 +75,10 @@ namespace OptimizelySDK.Event.Dispatcher
             if (response.StatusCode == HttpStatusCode.OK)
             {
                 // Read the results, even though we don't need it.
-                Stream responseStream = response.GetResponseStream();
+                var responseStream = response.GetResponseStream();
                 var streamEncoder = System.Text.Encoding.UTF8;
-                StreamReader responseReader = new StreamReader(responseStream, streamEncoder);
-                string data = responseReader.ReadToEnd();
+                var responseReader = new StreamReader(responseStream, streamEncoder);
+                var data = responseReader.ReadToEnd();
             }
             else
             {

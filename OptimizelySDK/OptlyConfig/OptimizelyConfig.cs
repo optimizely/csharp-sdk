@@ -39,7 +39,10 @@ namespace OptimizelySDK.OptlyConfig
 
         private string _datafile;
 
-        public OptimizelyConfig(string revision, IDictionary<string, OptimizelyExperiment> experimentsMap, IDictionary<string, OptimizelyFeature> featuresMap, string datafile = null)
+        public OptimizelyConfig(string revision,
+            IDictionary<string, OptimizelyExperiment> experimentsMap,
+            IDictionary<string, OptimizelyFeature> featuresMap, string datafile = null
+        )
         {
             Revision = revision;
             ExperimentsMap = experimentsMap;
@@ -47,7 +50,11 @@ namespace OptimizelySDK.OptlyConfig
             _datafile = datafile;
         }
 
-        public OptimizelyConfig(string revision, string sdkKey, string environmentKey, OptimizelyAttribute[] attributes, OptimizelyAudience[] audiences, OptimizelyEvent[] events, IDictionary<string, OptimizelyExperiment> experimentsMap, IDictionary<string, OptimizelyFeature> featuresMap, string datafile = null)
+        public OptimizelyConfig(string revision, string sdkKey, string environmentKey,
+            OptimizelyAttribute[] attributes, OptimizelyAudience[] audiences,
+            OptimizelyEvent[] events, IDictionary<string, OptimizelyExperiment> experimentsMap,
+            IDictionary<string, OptimizelyFeature> featuresMap, string datafile = null
+        )
         {
             Revision = revision;
             SDKKey = sdkKey;

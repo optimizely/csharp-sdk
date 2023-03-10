@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,7 +29,9 @@ namespace OptimizelySDK.Utils
         /// <param name="getKey">A function to return the key value from the entity</param>
         /// <param name="clone">Whether or not to clone the original entity</param>
         /// <returns>associative array of key => entity</returns>
-        public static Dictionary<string, T> GenerateMap(IEnumerable<T> entities, Func<T, string> getKey, bool clone)
+        public static Dictionary<string, T> GenerateMap(IEnumerable<T> entities,
+            Func<T, string> getKey, bool clone
+        )
         {
             return entities.ToDictionary(e => getKey(e), e => clone ? (T)e.Clone() : e);
         }

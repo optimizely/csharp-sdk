@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 using Newtonsoft.Json;
 
 namespace OptimizelySDK.Event.Entity
@@ -25,7 +26,7 @@ namespace OptimizelySDK.Event.Entity
         [JsonProperty("events")]
         public SnapshotEvent[] Events { get; private set; }
 
-        public Snapshot(SnapshotEvent[] events, Decision[] decisions= null)
+        public Snapshot(SnapshotEvent[] events, Decision[] decisions = null)
         {
             Events = events;
             Decisions = decisions;
