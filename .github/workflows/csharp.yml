@@ -28,7 +28,6 @@ jobs:
           VALIDATE_ALL_CODEBASE: false
           DEFAULT_BRANCH: master
           VALIDATE_CSHARP: true
-          VALIDATE_MARKDOWN: false
 
   integration_tests:
     name: Run Integration Tests
