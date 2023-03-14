@@ -4,15 +4,18 @@
 [![NuGet](https://img.shields.io/nuget/v/Optimizely.SDK.svg?style=plastic)](https://www.nuget.org/packages/Optimizely.SDK/)
 [![Apache 2.0](https://img.shields.io/github/license/nebula-plugins/gradle-extra-configurations-plugin.svg)](http://www.apache.org/licenses/LICENSE-2.0)
 
-This repository houses the .Net based C# SDK for use with Optimizely Full Stack and Optimizely Rollouts.
+This repository houses the .Net based C# SDK for use with Optimizely Feature Experimentation and Optimizely Full Stack (legacy).
 
-Optimizely Full Stack is A/B testing and feature flag management for product development teams. Experiment in any application. Make every feature on your roadmap an opportunity to learn. Learn more at https://www.optimizely.com/platform/full-stack/, or see the [documentation](https://docs.developers.optimizely.com/experimentation/v4.0.0-full-stack/docs/welcome).
+Optimizely Feature Experimentation is an A/B testing and feature management tool for product development teams, letting you experiment at every step. Using Optimizely Feature Experimentation allows for every feature on your roadmap to be an opportunity to discover hidden insights. Learn more at [Optimizely.com](https://www.optimizely.com/products/experiment/feature-experimentation/), or see the [developer documentation](https://docs.developers.optimizely.com/experimentation/v4.0.0-full-stack/docs/welcome).
 
-Optimizely Rollouts is free feature flags for development teams. Easily roll out and roll back features in any application without code deploys. Mitigate risk for every feature on your roadmap. Learn more at https://www.optimizely.com/rollouts/, or see the [documentation](https://docs.developers.optimizely.com/experimentation/v3.1.0-full-stack/docs/introduction-to-rollouts).
+Optimizely Rollouts is [free feature flags](https://www.optimizely.com/free-feature-flagging/) for development teams. You can easily roll out and roll back features in any application without code deploys, mitigating risk for every feature on your roadmap.
 
-## Getting Started
 
-### Installing the SDK
+## Get Started
+
+Refer to the [C# SDK's developer documentation](https://docs.developers.optimizely.com/experimentation/v4.0.0-full-stack/docs/csharp-sdk) for detailed instructions on getting started with using the SDK.
+
+### Install the C# SDK
 
 The SDK can be installed through [NuGet](https://www.nuget.org):
 
@@ -30,13 +33,16 @@ Simply compile and run the Sample application to see it in use.
 Note that the way the Demo App stores data in memory is not recommended for production use
 and is merely illustrates how to use the SDK.
 
-### Using the SDK
 
-#### Documentation
+### Feature Management Access
 
-See the Optimizely Full Stack C# SDK [developer documentation](https://docs.developers.optimizely.com/experimentation/v4.0.0-full-stack/docs/csharp-sdk) to learn how to set up your first Full Stack project and use the SDK.
+To access the Feature Management configuration in the Optimizely dashboard, please contact your Optimizely customer success manager.
 
-#### Initialization
+## Use the C# SDK
+
+See the Optimizely Feature Experimentation [developer documentation](https://docs.developers.optimizely.com/experimentation/v4.0-full-stack/docs/csharp-sdk) to learn how to set up your first C# project and use the SDK.
+
+### Initialization
 
 Create the Optimizely Client, for example:
 
@@ -210,19 +216,39 @@ This option is used to specify whether to start the config manager on initializa
 
 This option is used to provide token for datafile belonging to a secure environment.
 
-## Development
-
-### Unit tests
-
-The sample project contains unit tests as well which can be run from the built-in Visual Studio Test Runner.
+## SDK Development
 
 ### Contributing
 
 Please see [CONTRIBUTING](CONTRIBUTING.md).
 
-## Third Party Licenses
+### Third Party Licenses
 
 Optimizely SDK uses third party software:
 [murmurhash-signed](https://www.nuget.org/packages/murmurhash-signed/),
 [Newtonsoft.Json](https://www.nuget.org/packages/Newtonsoft.Json/), and
 [NJsonSchema](https://www.nuget.org/packages/NJsonSchema/).
+
+### Other Optimzely SDKs
+
+- Agent - https://github.com/optimizely/agent
+
+- Android - https://github.com/optimizely/android-sdk
+
+- Flutter - https://github.com/optimizely/optimizely-flutter-sdk
+
+- Go - https://github.com/optimizely/go-sdk
+
+- Java - https://github.com/optimizely/java-sdk
+
+- JavaScript - https://github.com/optimizely/javascript-sdk
+
+- PHP - https://github.com/optimizely/php-sdk
+
+- Python - https://github.com/optimizely/python-sdk
+
+- React - https://github.com/optimizely/react-sdk
+
+- Ruby - https://github.com/optimizely/ruby-sdk
+
+- Swift - https://github.com/optimizely/swift-sdk
