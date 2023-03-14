@@ -1,6 +1,14 @@
 # Optimizely C# SDK Changelog
 ## [Unreleased]	
 
+## 3.11.2
+March 15th, 2023
+
+- Update README.md and other non-functional code to reflect that this SDK supports both Optimizely Feature Experimentation and Optimizely Full Stack. ([#331](https://github.com/optimizely/csharp-sdk/pull/331), [#332](https://github.com/optimizely/csharp-sdk/pull/332)).
+
+### Bug Fixes
+- Fix for incorrect documentation on Optimizely.IsFeatureEnabled ([#304](https://github.com/optimizely/csharp-sdk/pull/329))
+
 ## 3.11.1
 July 27th, 2022
 
