@@ -102,7 +102,7 @@ namespace OptimizelySDK
         public bool Disposed { get; private set; }
 
         /// <summary>
-        /// Optimizely constructor for managing Full Stack .NET projects.
+        /// Optimizely constructor for managing Optimizely Feature Experimentation .NET projects.
         /// </summary>
         /// <param name="datafile">string JSON string representing the project</param>
         /// <param name="eventDispatcher">EventDispatcherInterface</param>
