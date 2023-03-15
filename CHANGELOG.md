@@ -1,5 +1,4 @@
 # Optimizely C# SDK Changelog
-## [Unreleased]	
 
 ## 3.11.2
 March 15th, 2023
