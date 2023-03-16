@@ -13,9 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-using Newtonsoft.Json;
-using NJsonSchema;
 using OptimizelySDK.Entity;
 using System;
 using System.Collections.Generic;
@@ -40,11 +37,11 @@ namespace OptimizelySDK.Utils
         {
             try
             {
-                return !JsonSchema.FromJsonAsync(schemaJson ?? Schema.GetSchemaJson()).
+                return !NJsonSchema.JsonSchema.FromJsonAsync(schemaJson ?? Schema.GetSchemaJson()).
                     Result.Validate(configJson).
                     Any();
             }
-            catch (JsonReaderException)
+            catch (Newtonsoft.Json.JsonReaderException)
             {
                 return false;
             }
