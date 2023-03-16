@@ -1,16 +1,14 @@
-name: Jira ticket reference check
+name: Jira Ticket Reference Check
 
 on:
   pull_request:
-     types: [opened, edited, reopened, synchronize]
+    types: [opened, edited, reopened, synchronize]
 
 jobs:
-
   jira_ticket_reference_check:
     runs-on: ubuntu-latest
-
     steps:
       - name: Check for Jira ticket reference
         uses: optimizely/github-action-ticket-reference-checker-public@master
         with:
-          bodyRegex: 'OASIS-(?<ticketNumber>\d+)' 
+          bodyRegex: 'FSSDK-(?<ticketNumber>\d+)' 

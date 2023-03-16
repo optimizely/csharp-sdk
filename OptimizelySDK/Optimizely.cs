@@ -111,7 +111,7 @@ namespace OptimizelySDK
         public bool Disposed { get; private set; }
 
         /// <summary>
-        /// Optimizely constructor for managing Full Stack .NET projects.
+        /// Optimizely constructor for managing Optimizely Feature Experimentation .NET projects.
         /// </summary>
         /// <param name="datafile">string JSON string representing the project</param>
         /// <param name="eventDispatcher">EventDispatcherInterface</param>
@@ -447,8 +447,10 @@ namespace OptimizelySDK
         /// <param name="featureKey">The feature key</param>
         /// <param name="userId">The user ID</param>
         /// <param name="userAttributes">The user's attributes.</param>
-        /// <returns>True if feature is enabled, false or null otherwise</returns>
-        public virtual bool IsFeatureEnabled(string featureKey, string userId, UserAttributes userAttributes = null)
+        /// <returns>True if feature is enabled, otherwise false</returns>
+        public virtual bool IsFeatureEnabled(string featureKey, string userId,
+            UserAttributes userAttributes = null
+        )
         {
             var config = ProjectConfigManager?.GetConfig();
 

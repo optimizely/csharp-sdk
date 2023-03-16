@@ -5,7 +5,7 @@ hidden: false
 createdAt: "2019-09-12T13:44:04.059Z"
 updatedAt: "2019-12-13T00:25:39.892Z"
 ---
-The [Optimizely Full Stack C# SDK](https://github.com/optimizely/csharp-sdk) now batches impression and conversion events into a single payload before sending it to Optimizely. This is achieved through a new SDK component called the event processor.
+The [Optimizely Feature Experimentation C# SDK](https://github.com/optimizely/csharp-sdk) now batches impression and conversion events into a single payload before sending it to Optimizely. This is achieved through a new SDK component called the event processor.
 
 Event batching has the advantage of reducing the number of outbound requests to Optimizely depending on how you define, configure, and use the event processor. It means less network traffic for the same number of Impression and conversion events tracked.
 

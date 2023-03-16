@@ -10,7 +10,7 @@ updatedAt: "2020-01-28T21:53:11.290Z"
   "title": "Overview"
 }
 [/block]
-Full Stack SDKs open a well-defined set of public APIs, hiding all implementation details. However, some clients may need access to project configuration data within the "datafile". 
+Optimizely Feature Experimentation SDKs open a well-defined set of public APIs, hiding all implementation details. However, some clients may need access to project configuration data within the "datafile". 
 
 In this document, we extend our public APIs to define data models and access methods, which clients can use to access project configuration data. 
 
