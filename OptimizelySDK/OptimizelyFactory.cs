@@ -26,6 +26,7 @@ using OptimizelySDK.Event;
 using OptimizelySDK.Event.Dispatcher;
 using OptimizelySDK.Logger;
 using OptimizelySDK.Notifications;
+using OptimizelySDK.Odp;
 
 namespace OptimizelySDK
 {
@@ -215,8 +216,12 @@ namespace OptimizelySDK
             UserProfileService userprofileService = null, EventProcessor eventProcessor = null
         )
         {
+            var odpManager = new OdpManager.Builder()
+                 .WithErrorHandler(errorHandler)
+                 .WithLogger(logger)
+                 .Build();
             return new Optimizely(configManager, notificationCenter, eventDispatcher, logger,
-                errorHandler, userprofileService, eventProcessor);
+                errorHandler, userprofileService, eventProcessor, null, odpManager);
         }
     }
 }
