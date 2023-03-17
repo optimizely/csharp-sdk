@@ -86,9 +86,9 @@ jobs:
         run: |
           Install-Module -Name AWS.Tools.Installer -Force;
           Install-AWSToolsModule AWS.Tools.S3 -Force -CleanUp;
-          Get-ChildItem -Recurse -Exclude '.*Tests.*' -include 'OptimizelySDK*.dll' | Where-Object { $_.DirectoryName -match '\\bin\\Release' } | Foreach-Object { aws s3 cp $_.FullName s3://optly-fs-travisci-artifacts/${{ env.REPO_SLUG }}/${{ env.BUILD_NUMBER }}/${{ env.RUN_NUMBER }}/${{ env.ATTEMPT_NUM }}/$(basename $file)-unsigned }
-  
-  netStandard16:
+          Get-ChildItem -Recurse -Exclude '.*Tests.*' -include 'OptimizelySDK*.dll' | Where-Object { $_.DirectoryName -match '\\bin\\Release' } | Foreach-Object { aws s3 cp $_.FullName s3://optly-fs-travisci-artifacts/${{ env.REPO_SLUG }}/${{ env.BUILD_NUMBER }}/${{ env.RUN_NUMBER }}/${{ env.ATTEMPT_NUM }}/$($_.Name)-unsigned }
+
+netStandard16:
     name: Build For .NET Standard 1.6
     runs-on: windows-2022
     env:
