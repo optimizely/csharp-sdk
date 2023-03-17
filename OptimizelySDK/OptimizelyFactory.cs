@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2019-2021, Optimizely
+ * Copyright 2019-2021, 2023, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use file except in compliance with the License.
@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+#if !(NET35 || NET40 || NETSTANDARD1_6)
+#define USE_ODP
+#endif
+
 using System;
 #if !NETSTANDARD1_6 && !NET35
 using System.Configuration;
@@ -26,6 +30,11 @@ using OptimizelySDK.Event;
 using OptimizelySDK.Event.Dispatcher;
 using OptimizelySDK.Logger;
 using OptimizelySDK.Notifications;
+
+#if USE_ODP
+using OptimizelySDK.Odp;
+#endif
+
 
 namespace OptimizelySDK
 {
@@ -215,8 +224,18 @@ namespace OptimizelySDK
             UserProfileService userprofileService = null, EventProcessor eventProcessor = null
         )
         {
+#if USE_ODP
+            var odpManager = new OdpManager.Builder()
+                                .WithErrorHandler(errorHandler)
+                                .WithLogger(logger)
+                                .Build();
+            return new Optimizely(configManager, notificationCenter, eventDispatcher, logger,
+                errorHandler, userprofileService, eventProcessor, null, odpManager);
+#else
             return new Optimizely(configManager, notificationCenter, eventDispatcher, logger,
                 errorHandler, userprofileService, eventProcessor);
+#endif
+
         }
     }
 }
