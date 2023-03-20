@@ -4,9 +4,12 @@
 March 16th, 2023
 
 - Update README.md and other non-functional code to reflect that this SDK supports both Optimizely Feature Experimentation and Optimizely Full Stack. ([#331](https://github.com/optimizely/csharp-sdk/pull/331), [#332](https://github.com/optimizely/csharp-sdk/pull/332)).
+- Changes to GitHub Actions jobs
+- Small edits .editorconfig (more complete linting rules coming)
 
 ### Bug Fixes
 - Fix for incorrect documentation on Optimizely.IsFeatureEnabled ([#304](https://github.com/optimizely/csharp-sdk/pull/329))
+- Update version of Newtonsoft.Json & NJsonSchema ([#330](https://github.com/optimizely/csharp-sdk/pull/330)) to address [Issue #328](https://github.com/optimizely/csharp-sdk/issues/328)
 
 ## 3.11.1
 July 27th, 2022
