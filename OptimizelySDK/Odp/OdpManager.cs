@@ -116,7 +116,7 @@ namespace OptimizelySDK.Odp
         /// </summary>
         /// <param name="type">Type of event (typically `fullstack` from server-side SDK events)</param>
         /// <param name="action">Subcategory of the event type</param>
-        /// <param name="identifiers">Key-value map of user identifiers</param>
+        /// <param name="identifiers">Dictionary for identifiers. The caller must provide at least one key-value pair.</param>
         /// <param name="data">Event data in a key-value pair format</param>
         public void SendEvent(string type, string action, Dictionary<string, string> identifiers,
             Dictionary<string, object> data

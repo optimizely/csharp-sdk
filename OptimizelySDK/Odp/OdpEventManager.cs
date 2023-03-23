@@ -296,6 +296,12 @@ namespace OptimizelySDK.Odp
                 return;
             }
 
+            if (!IsIdentifiersValid(odpEvent.Identifiers))
+            {
+                _logger.Log(LogLevel.ERROR, Constants.ODP_INVALID_IDENTIFIERS_MESSAGE);
+                return;
+            }
+
             if (InvalidDataFound(odpEvent.Data))
             {
                 _logger.Log(LogLevel.ERROR, Constants.ODP_INVALID_DATA_MESSAGE);
@@ -378,6 +384,20 @@ namespace OptimizelySDK.Odp
             {
                 Start();
             }
+        }
+
+        /// <summary>
+        /// ODP event identifiers should not be null or empty
+        /// </summary>
+        /// <param name="Identifiers">Identifiers to be analyzed</param>
+        /// <returns>True if identifiers dictionary is not null or empty otherwise False</returns>
+        private bool IsIdentifiersValid(Dictionary<string, string> Identifiers) 
+        {
+            if (Identifiers == null || Identifiers.Count == 0)
+            {
+                return false;
+            }
+            return true;
         }
 
         /// <summary>

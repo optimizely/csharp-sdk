@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2022 Optimizely
+ * Copyright 2022-2023 Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ namespace OptimizelySDK.Odp
         /// </summary>
         /// <param name="type">Type of event (typically `fullstack` from server-side SDK events)</param>
         /// <param name="action">Subcategory of the event type</param>
-        /// <param name="identifiers">Key-value map of user identifiers</param>
+        /// <param name="identifiers">Dictionary for identifiers. The caller must provide at least one key-value pair.</param>
         /// <param name="data">Event data in a key-value pair format</param>
         void SendEvent(string type, string action, Dictionary<string, string> identifiers,
             Dictionary<string, object> data

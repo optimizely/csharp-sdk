@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2022 Optimizely
+ * Copyright 2022-2023 Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,7 +65,12 @@ namespace OptimizelySDK.Odp
         /// <summary>
         /// Default message to log when an ODP Event contains invalid data
         /// </summary>
-        public const string ODP_INVALID_DATA_MESSAGE = "ODP data is not valid.";
+        public const string ODP_INVALID_DATA_MESSAGE = "ODP event send failed (event data is not valid).";
+
+        /// <summary>
+        /// Default message to log when an ODP Identifiers is invalid
+        /// </summary>
+        public const string ODP_INVALID_IDENTIFIERS_MESSAGE = "ODP event send failed (event identifiers must have at least one key-value pair).";
 
         /// <summary>
         /// Default message to log when sending ODP event fails

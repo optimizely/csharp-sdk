@@ -272,6 +272,43 @@ namespace OptimizelySDK.Tests.OdpTests
         }
 
         [Test]
+        public void ShouldDiscardEventsWithInvalidIdentifiersDictionary()
+        {
+            var eventWithemptyIdentifiers = new OdpEvent("t3", "a3",
+                new Dictionary<string, string>(),
+                new Dictionary<string, object>
+                {
+                    {
+                        "data1", $"data1-value1-1"
+                    },
+                    {
+                        "data2", 1
+                    },
+                });
+            var eventWithNullIdentifiers = new OdpEvent("t3", "a3",
+                null, new Dictionary<string, object>
+                {
+                    {
+                        "data1", $"data1-value1-1"
+                    },
+                    {
+                        "data2", 1
+                    },
+                });
+            var eventManager = new OdpEventManager.Builder().
+                WithOdpEventApiManager(_mockApiManager.Object).
+                WithLogger(_mockLogger.Object).
+                Build();
+            eventManager.UpdateSettings(_odpConfig);
+
+            eventManager.SendEvent(eventWithemptyIdentifiers);
+            eventManager.SendEvent(eventWithNullIdentifiers);
+
+            _mockLogger.Verify(l => l.Log(LogLevel.ERROR, Constants.ODP_INVALID_IDENTIFIERS_MESSAGE),
+                Times.Exactly(2));
+        }
+
+        [Test]
         public void ShouldAddAdditionalInformationToEachEvent()
         {
             var expectedEvent = _processedEvents[0];
