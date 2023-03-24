@@ -391,13 +391,9 @@ namespace OptimizelySDK.Odp
         /// </summary>
         /// <param name="Identifiers">Identifiers to be analyzed</param>
         /// <returns>True if identifiers dictionary is not null or empty otherwise False</returns>
-        private bool IsIdentifiersValid(Dictionary<string, string> Identifiers) 
+        private bool IsIdentifiersValid(Dictionary<string, string> Identifiers)
         {
-            if (Identifiers == null || Identifiers.Count == 0)
-            {
-                return false;
-            }
-            return true;
+            return Identifiers?.Count > 0;
         }
 
         /// <summary>
