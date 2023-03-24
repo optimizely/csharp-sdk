@@ -1,5 +1,13 @@
 # Optimizely C# SDK Changelog
 
+## 3.11.2.1
+March 24, 2023
+
+NuGet requires a semantic version increase to "republish".
+
+### Bug Fix
+- Corrections to nuspec generated during signing and upload.
+
 ## 3.11.2
 March 16th, 2023
 
