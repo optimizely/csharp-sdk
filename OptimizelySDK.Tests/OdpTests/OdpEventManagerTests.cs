@@ -304,7 +304,7 @@ namespace OptimizelySDK.Tests.OdpTests
             eventManager.SendEvent(eventWithemptyIdentifiers);
             eventManager.SendEvent(eventWithNullIdentifiers);
 
-            _mockLogger.Verify(l => l.Log(LogLevel.ERROR, Constants.ODP_INVALID_IDENTIFIERS_MESSAGE),
+            _mockLogger.Verify(l => l.Log(LogLevel.ERROR, Constants.ODP_INVALID_DATA_MESSAGE),
                 Times.Exactly(2));
         }
 

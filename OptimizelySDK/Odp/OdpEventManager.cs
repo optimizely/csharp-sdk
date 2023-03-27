@@ -296,13 +296,7 @@ namespace OptimizelySDK.Odp
                 return;
             }
 
-            if (!IsIdentifiersValid(odpEvent.Identifiers))
-            {
-                _logger.Log(LogLevel.ERROR, Constants.ODP_INVALID_IDENTIFIERS_MESSAGE);
-                return;
-            }
-
-            if (InvalidDataFound(odpEvent.Data))
+            if (InvalidDataFound(odpEvent.Data) || !IsIdentifiersValid(odpEvent.Identifiers))
             {
                 _logger.Log(LogLevel.ERROR, Constants.ODP_INVALID_DATA_MESSAGE);
                 return;

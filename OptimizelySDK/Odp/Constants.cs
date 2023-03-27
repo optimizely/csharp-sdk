@@ -65,12 +65,7 @@ namespace OptimizelySDK.Odp
         /// <summary>
         /// Default message to log when an ODP Event contains invalid data
         /// </summary>
-        public const string ODP_INVALID_DATA_MESSAGE = "ODP event send failed (event data is not valid).";
-
-        /// <summary>
-        /// Default message to log when an ODP Identifiers is invalid
-        /// </summary>
-        public const string ODP_INVALID_IDENTIFIERS_MESSAGE = "ODP event send failed (event identifiers must have at least one key-value pair).";
+        public const string ODP_INVALID_DATA_MESSAGE = "ODP event send failed.";
 
         /// <summary>
         /// Default message to log when sending ODP event fails
