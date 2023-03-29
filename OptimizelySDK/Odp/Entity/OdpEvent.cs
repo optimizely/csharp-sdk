@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2022 Optimizely
+ * Copyright 2022-2023 Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ namespace OptimizelySDK.Odp.Entity
         public string Action { get; }
 
         /// <summary>
-        /// Key-value map of user identifiers
+        /// Dictionary for identifiers. The caller must provide at least one key-value pair.
         /// </summary>
         public Dictionary<string, string> Identifiers { get; }
 
