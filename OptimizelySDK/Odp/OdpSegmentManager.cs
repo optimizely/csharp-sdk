@@ -99,7 +99,7 @@ namespace OptimizelySDK.Odp
             options = options ?? new List<OdpSegmentOption>();
 
             List<string> qualifiedSegments;
-            var cacheKey = GetCacheKey(OdpUserKeyType.FS_USER_ID.ToString().ToLower(), fsUserId);
+            var cacheKey = GetCacheKey(Constants.FS_USER_ID, fsUserId);
 
             if (options.Contains(OdpSegmentOption.RESET_CACHE))
             {
@@ -121,7 +121,7 @@ namespace OptimizelySDK.Odp
             qualifiedSegments = _apiManager.FetchSegments(
                     _odpConfig.ApiKey,
                     _odpConfig.ApiHost,
-                    OdpUserKeyType.FS_USER_ID,
+                    Constants.FS_USER_ID,
                     fsUserId,
                     _odpConfig.SegmentsToCheck)?.
                 ToList();

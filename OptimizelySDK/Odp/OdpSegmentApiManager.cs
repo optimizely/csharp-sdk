@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2022 Optimizely
+ * Copyright 2022-2023 Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,11 +74,11 @@ namespace OptimizelySDK.Odp
         /// </summary>
         /// <param name="apiKey">ODP public key</param>
         /// <param name="apiHost">Host of ODP endpoint</param>
-        /// <param name="userKey">Either `vuid` or `fs_user_id key`</param>
+        /// <param name="userKey">`fs_user_id key` for server-side SDKs</param>
         /// <param name="userValue">Associated value to query for the user key</param>
         /// <param name="segmentsToCheck">Audience segments to check for experiment inclusion</param>
         /// <returns>Array of audience segments</returns>
-        public string[] FetchSegments(string apiKey, string apiHost, OdpUserKeyType userKey,
+        public string[] FetchSegments(string apiKey, string apiHost, string userKey,
             string userValue, List<string> segmentsToCheck
         )
         {

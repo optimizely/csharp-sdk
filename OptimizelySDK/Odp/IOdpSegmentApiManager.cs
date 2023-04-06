@@ -25,13 +25,13 @@ namespace OptimizelySDK.Odp
         /// </summary>
         /// <param name="apiKey">ODP public key</param>
         /// <param name="apiHost">Fully-qualified URL of ODP</param>
-        /// <param name="userKey">'vuid' or 'fs_user_id key'</param>
+        /// <param name="userKey">Server-side should be 'fs_user_id key'</param>
         /// <param name="userValue">Associated value to query for the user key</param>
         /// <param name="segmentsToCheck">Audience segments to check for experiment inclusion</param>
         /// <returns>Array of audience segments</returns>
         string[] FetchSegments(string apiKey,
             string apiHost,
-            OdpUserKeyType userKey,
+            string userKey,
             string userValue,
             List<string> segmentsToCheck
         );
