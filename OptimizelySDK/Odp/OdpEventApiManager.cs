@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2022 Optimizely
+ * Copyright 2022-2023 Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Logger;
 using OptimizelySDK.Odp.Entity;
@@ -89,7 +90,10 @@ namespace OptimizelySDK.Odp
             }
 
             var endpoint = $"{apiHost}{Constants.ODP_EVENTS_API_ENDPOINT_PATH}";
-            var data = JsonConvert.SerializeObject(events);
+            var data = JsonConvert.SerializeObject(events, settings: new JsonSerializerSettings
+            {
+                ContractResolver = new CamelCasePropertyNamesContractResolver(),
+            });
             var shouldRetry = false;
 
             HttpResponseMessage response = default;
