@@ -92,7 +92,10 @@ namespace OptimizelySDK.Odp
             var endpoint = $"{apiHost}{Constants.ODP_EVENTS_API_ENDPOINT_PATH}";
             var data = JsonConvert.SerializeObject(events, settings: new JsonSerializerSettings
             {
-                ContractResolver = new CamelCasePropertyNamesContractResolver(),
+                ContractResolver = new DefaultContractResolver
+                {
+                    NamingStrategy = new SnakeCaseNamingStrategy(),
+                },
             });
             var shouldRetry = false;
 
