@@ -515,7 +515,7 @@ namespace OptimizelySDK.Tests.OdpTests
             Assert.IsNotNull(actualEvent);
             Assert.AreEqual(Constants.ODP_EVENT_TYPE, actualEvent.Type);
             Assert.AreEqual("identified", actualEvent.Action);
-            Assert.AreEqual(USER_ID, actualEvent.Identifiers[OdpUserKeyType.FS_USER_ID.ToString()]);
+            Assert.AreEqual(USER_ID, actualEvent.Identifiers[Constants.FS_USER_ID]);
             var eventData = actualEvent.Data;
             Assert.AreEqual(Guid.NewGuid().ToString().Length,
                 eventData["idempotence_id"].ToString().Length);

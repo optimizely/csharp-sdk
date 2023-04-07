@@ -352,7 +352,7 @@ namespace OptimizelySDK.Odp
         {
             var identifiers = new Dictionary<string, string>
             {
-                { OdpUserKeyType.FS_USER_ID.ToString(), userId },
+                { Constants.FS_USER_ID, userId },
             };
 
             var odpEvent = new OdpEvent(Constants.ODP_EVENT_TYPE, "identified", identifiers);

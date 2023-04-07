@@ -111,5 +111,10 @@ namespace OptimizelySDK.Odp
         /// Default number of seconds to cache
         /// </summary>
         public const int DEFAULT_CACHE_SECONDS = 600;
+
+        /// <summary>
+        /// Type of ODP key used for fetching segments & sending events
+        /// </summary>
+        public const string FS_USER_ID = "fs_user_id";
     }
 }
