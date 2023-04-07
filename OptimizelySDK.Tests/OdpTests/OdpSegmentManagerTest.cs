@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2022, 2023 Optimizely
+ * Copyright 2022-2023 Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,10 @@
  * limitations under the License.
  */
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using Moq;
 using NUnit.Framework;
-using OptimizelySDK.AudienceConditions;
-using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Logger;
 using OptimizelySDK.Odp;
 
@@ -64,7 +60,7 @@ namespace OptimizelySDK.Tests.OdpTests
             _mockCache.Setup(c => c.Lookup(Capture.In(keyCollector))).
                 Returns(default(List<string>));
             _mockApiManager.Setup(a => a.FetchSegments(It.IsAny<string>(), It.IsAny<string>(),
-                    It.IsAny<OdpUserKeyType>(), It.IsAny<string>(), It.IsAny<List<string>>())).
+                    It.IsAny<string>(), It.IsAny<string>(), It.IsAny<List<string>>())).
                 Returns(segmentsToCheck.ToArray());
             var manager = new OdpSegmentManager(_mockApiManager.Object, _mockCache.Object,
                 _mockLogger.Object);
@@ -82,7 +78,7 @@ namespace OptimizelySDK.Tests.OdpTests
                 a => a.FetchSegments(
                     API_KEY,
                     API_HOST,
-                    OdpUserKeyType.FS_USER_ID,
+                    Constants.FS_USER_ID,
                     FS_USER_ID,
                     _odpConfig.SegmentsToCheck), Times.Once);
             _mockCache.Verify(c => c.Save(cacheKey, It.IsAny<List<string>>()), Times.Once);
@@ -95,7 +91,7 @@ namespace OptimizelySDK.Tests.OdpTests
             var keyCollector = new List<string>();
             _mockCache.Setup(c => c.Lookup(Capture.In(keyCollector))).Returns(segmentsToCheck);
             _mockApiManager.Setup(a => a.FetchSegments(It.IsAny<string>(), It.IsAny<string>(),
-                It.IsAny<OdpUserKeyType>(), It.IsAny<string>(), It.IsAny<List<string>>()));
+                It.IsAny<string>(), It.IsAny<string>(), It.IsAny<List<string>>()));
             var manager = new OdpSegmentManager(_mockApiManager.Object, _mockCache.Object,
                 _mockLogger.Object);
             manager.UpdateSettings(_odpConfig);
@@ -110,7 +106,7 @@ namespace OptimizelySDK.Tests.OdpTests
                 l.Log(LogLevel.DEBUG, "ODP Cache Hit. Returning segments from Cache."), Times.Once);
             _mockApiManager.Verify(
                 a => a.FetchSegments(It.IsAny<string>(), It.IsAny<string>(),
-                    It.IsAny<OdpUserKeyType>(), It.IsAny<string>(), It.IsAny<List<string>>()),
+                    It.IsAny<string>(), It.IsAny<string>(), It.IsAny<List<string>>()),
                 Times.Never);
             _mockCache.Verify(c => c.Save(expectedCacheKey, It.IsAny<List<string>>()), Times.Never);
             Assert.AreEqual(segmentsToCheck, segments);
@@ -121,7 +117,7 @@ namespace OptimizelySDK.Tests.OdpTests
         {
             // OdpSegmentApiManager.FetchSegments() return null on any error
             _mockApiManager.Setup(a => a.FetchSegments(It.IsAny<string>(), It.IsAny<string>(),
-                    It.IsAny<OdpUserKeyType>(), It.IsAny<string>(), It.IsAny<List<string>>())).
+                    It.IsAny<string>(), It.IsAny<string>(), It.IsAny<List<string>>())).
                 Returns(null as string[]);
             var manager = new OdpSegmentManager(_mockApiManager.Object, _mockCache.Object,
                 _mockLogger.Object);
@@ -133,7 +129,7 @@ namespace OptimizelySDK.Tests.OdpTests
             _mockCache.Verify(c => c.Lookup(expectedCacheKey), Times.Once);
             _mockApiManager.Verify(
                 a => a.FetchSegments(It.IsAny<string>(), It.IsAny<string>(),
-                    It.IsAny<OdpUserKeyType>(), It.IsAny<string>(), It.IsAny<List<string>>()),
+                    It.IsAny<string>(), It.IsAny<string>(), It.IsAny<List<string>>()),
                 Times.Once);
             _mockCache.Verify(c => c.Save(expectedCacheKey, It.IsAny<List<string>>()), Times.Never);
             Assert.IsNull(segments);
@@ -187,7 +183,7 @@ namespace OptimizelySDK.Tests.OdpTests
             _mockCache.Verify(c => c.Lookup(It.IsAny<string>()), Times.Never);
             _mockApiManager.Verify(
                 a => a.FetchSegments(It.IsAny<string>(), It.IsAny<string>(),
-                    It.IsAny<OdpUserKeyType>(), It.IsAny<string>(), It.IsAny<List<string>>()),
+                    It.IsAny<string>(), It.IsAny<string>(), It.IsAny<List<string>>()),
                 Times.Once);
             _mockCache.Verify(c => c.Save(expectedCacheKey, It.IsAny<List<string>>()), Times.Never);
         }
@@ -206,7 +202,7 @@ namespace OptimizelySDK.Tests.OdpTests
             _mockCache.Verify(c => c.Lookup(It.IsAny<string>()), Times.Once);
             _mockApiManager.Verify(
                 a => a.FetchSegments(It.IsAny<string>(), It.IsAny<string>(),
-                    It.IsAny<OdpUserKeyType>(), It.IsAny<string>(), It.IsAny<List<string>>()),
+                    It.IsAny<string>(), It.IsAny<string>(), It.IsAny<List<string>>()),
                 Times.Once);
             _mockCache.Verify(c => c.Save(expectedCacheKey, It.IsAny<List<string>>()), Times.Once);
         }
