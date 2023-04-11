@@ -1071,7 +1071,6 @@ namespace OptimizelySDK.Tests
         public void ShouldFetchQualifiedSegmentsAsyncThenCallCallback()
         {
             var odpManager = new OdpManager.Builder().Build();
-            var cde = new CountdownEvent(1);
             var callbackResult = false;
             var optimizely = new Optimizely(TestData.OdpIntegrationDatafile,
                 EventDispatcherMock.Object, LoggerMock.Object, ErrorHandlerMock.Object,
@@ -1079,12 +1078,11 @@ namespace OptimizelySDK.Tests
             var context = new OptimizelyUserContext(optimizely, UserID, null,
                 ErrorHandlerMock.Object, LoggerMock.Object);
 
-            context.FetchQualifiedSegments(success =>
+            var task = context.FetchQualifiedSegments(success =>
             {
                 callbackResult = success;
-                cde.Signal();
             });
-            cde.Wait(5000);
+            task.Wait();
             context.Dispose();
 
             LoggerMock.Verify(l => l.Log(LogLevel.ERROR, Constants.ODP_NOT_ENABLED_MESSAGE),
