@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright 2020-2022, Optimizely
+ * Copyright 2020-2023, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -199,12 +199,12 @@ namespace OptimizelySDK
         /// </summary>
         /// <param name="callback">Callback function to invoke when results are available</param>
         /// <param name="segmentOptions">Options used during segment cache handling</param>
-        /// <returns>True if ODP segments were fetched successfully otherwise False</returns>
-        public void FetchQualifiedSegments(Action<bool> callback,
+        /// <returns>Handle to the Task/thread to be .Wait-ed on</returns>
+        public Task FetchQualifiedSegments(Action<bool> callback,
             List<OdpSegmentOption> segmentOptions = null
         )
         {
-            Task.Run(() =>
+            return Task.Run(() =>
             {
                 var success = FetchQualifiedSegments(segmentOptions);
 
