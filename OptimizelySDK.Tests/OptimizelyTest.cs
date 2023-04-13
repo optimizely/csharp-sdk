@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright 2017-2023, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -6172,7 +6172,7 @@ namespace OptimizelySDK.Tests
         public void TestSendOdpEventInvalidOptimizelyObject()
         {
             var optly = new Optimizely("Random datafile", null, LoggerMock.Object);
-            optly.SendOdpEvent("some_event", "some_action", new Dictionary<string, string>() { { "some_key", "some_value" } }, null);
+            optly.SendOdpEvent("some_event", "some_action", new Dictionary<string, string>(){{"some_key", "some_value"}}, null);
             LoggerMock.Verify(
                 l => l.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'SendOdpEvent'."),
                 Times.Once);
