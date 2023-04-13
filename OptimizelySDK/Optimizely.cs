@@ -1360,7 +1360,7 @@ namespace OptimizelySDK
 
             if (config == null)
             {
-                Logger.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'Identify'.");
+                Logger.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'IdentifyUser'.");
                 return;
             }
 
