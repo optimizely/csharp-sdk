@@ -302,6 +302,8 @@ namespace OptimizelySDK.Odp
                 return;
             }
 
+            odpEvent.Identifiers = ConvertIdentifiers(odpEvent.Identifiers);
+
             odpEvent.Data = AugmentCommonData(odpEvent.Data);
             if (!_eventQueue.TryAdd(odpEvent))
             {
@@ -438,6 +440,36 @@ namespace OptimizelySDK.Odp
         }
 
         /// <summary>
+        /// Add additional common data including an idempotent ID and execution context to event
+        /// data. Note: sourceData takes precedence over commonData in the event of a key conflict.
+        /// </summary>
+        /// <param name="sourceData">Existing event data to augment</param>
+        /// <returns>Updated Dictionary with new key-values added</returns>
+        private Dictionary<string, string> ConvertIdentifiers(
+            Dictionary<string, string> identifiers
+        )
+        {
+            if (identifiers.ContainsKey(Constants.FS_USER_ID))
+            {
+                return identifiers;
+            }
+
+            var identList = new List<KeyValuePair<string, string>>(identifiers);
+            foreach (var kvp in identList)
+            {
+                var lowerCaseKey = kvp.Key.ToLower();
+                if (lowerCaseKey == Constants.FS_USER_ID_ALIAS || lowerCaseKey ==  Constants.FS_USER_ID)
+                {
+                    identifiers.Remove(kvp.Key);
+                    identifiers[Constants.FS_USER_ID] = kvp.Value;
+                    break;
+                }
+            }
+
+            return identifiers;
+        }
+
+        /// <summary>
         /// Builder pattern to create an instances of OdpEventManager
         /// </summary>
         public class Builder
@@ -567,7 +599,6 @@ namespace OptimizelySDK.Odp
 
                 manager._commonData = new Dictionary<string, object>
                 {
-                    { "idempotence_id", Guid.NewGuid() },
                     { "data_source_type", "sdk" },
                     { "data_source", Optimizely.SDK_TYPE },
                     { "data_source_version", Optimizely.SDK_VERSION },

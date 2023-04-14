@@ -123,6 +123,11 @@ namespace OptimizelySDK.Odp
         public const string FS_USER_ID = "fs_user_id";
 
         /// <summary>
+        /// Alternate form of ODP key that is auto-converted to FS_USER_ID
+        /// </summary>
+        public const string FS_USER_ID_ALIAS = "fs-user-id";
+
+        /// <summary>
         /// Unique identifier used for ODP events
         /// </summary>
         public const string IDEMPOTENCE_ID = "idempotence_id";

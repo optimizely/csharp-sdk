@@ -1,4 +1,4 @@
-﻿/* 
+/* 
  * Copyright 2022-2023 Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -36,7 +36,7 @@ namespace OptimizelySDK.Odp.Entity
         /// <summary>
         /// Dictionary for identifiers. The caller must provide at least one key-value pair.
         /// </summary>
-        public Dictionary<string, string> Identifiers { get; }
+        public Dictionary<string, string> Identifiers { get; set; }
 
         /// <summary>
         /// Event data in a key-value pair format
