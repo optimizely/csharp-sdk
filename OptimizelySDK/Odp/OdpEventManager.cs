@@ -1,4 +1,4 @@
-/* 
+﻿/* 
  * Copyright 2022-2023, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -432,7 +432,7 @@ namespace OptimizelySDK.Odp
         )
         {
             sourceData.MergeInPlace<string, object>(_commonData);
-            if(!sourceData.ContainsKey(Constants.IDEMPOTENCE_ID))
+            if (!sourceData.ContainsKey(Constants.IDEMPOTENCE_ID))
             {
                 sourceData.Add(Constants.IDEMPOTENCE_ID, Guid.NewGuid());
             }
@@ -458,7 +458,7 @@ namespace OptimizelySDK.Odp
             foreach (var kvp in identList)
             {
                 var lowerCaseKey = kvp.Key.ToLower();
-                if (lowerCaseKey == Constants.FS_USER_ID_ALIAS || lowerCaseKey ==  Constants.FS_USER_ID)
+                if (lowerCaseKey == Constants.FS_USER_ID_ALIAS || lowerCaseKey == Constants.FS_USER_ID)
                 {
                     identifiers.Remove(kvp.Key);
                     identifiers[Constants.FS_USER_ID] = kvp.Value;
