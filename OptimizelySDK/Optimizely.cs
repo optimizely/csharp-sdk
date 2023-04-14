@@ -1362,6 +1362,17 @@ namespace OptimizelySDK
             Dictionary<string, object> data
         )
         {
+            if (String.IsNullOrEmpty(action))
+            {
+                Logger.Log(LogLevel.ERROR, Constants.ODP_INVALID_ACTION_MESSAGE);
+                return;
+            }
+
+            if (String.IsNullOrEmpty(type))
+            {
+                type = Constants.ODP_EVENT_TYPE;
+            }
+
             OdpManager?.SendEvent(type, action, identifiers, data);
         }
 #endif

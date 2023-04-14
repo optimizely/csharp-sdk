@@ -1,4 +1,4 @@
-﻿/* 
+/* 
  * Copyright 2022-2023 Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -66,6 +66,11 @@ namespace OptimizelySDK.Odp
         /// Default message to log when an ODP Event contains invalid data
         /// </summary>
         public const string ODP_INVALID_DATA_MESSAGE = "ODP event send failed.";
+
+        /// <summary>
+        /// Default message to log when an ODP Event contains invalid action
+        /// </summary>
+        public const string ODP_INVALID_ACTION_MESSAGE = "ODP action is not valid (cannot be empty).";
 
         /// <summary>
         /// Default message to log when sending ODP event fails
