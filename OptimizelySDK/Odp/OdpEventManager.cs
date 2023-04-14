@@ -1,4 +1,4 @@
-﻿/* 
+/* 
  * Copyright 2022-2023, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -429,7 +429,12 @@ namespace OptimizelySDK.Odp
             Dictionary<string, dynamic> sourceData
         )
         {
-            return sourceData.MergeInPlace<string, object>(_commonData);
+            sourceData.MergeInPlace<string, object>(_commonData);
+            if(!sourceData.ContainsKey(Constants.IDEMPOTENCE_ID))
+            {
+                sourceData.Add(Constants.IDEMPOTENCE_ID, Guid.NewGuid());
+            }
+            return sourceData;
         }
 
         /// <summary>

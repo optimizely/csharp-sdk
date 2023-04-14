@@ -121,5 +121,10 @@ namespace OptimizelySDK.Odp
         /// Type of ODP key used for fetching segments & sending events
         /// </summary>
         public const string FS_USER_ID = "fs_user_id";
+
+        /// <summary>
+        /// Unique identifier used for ODP events
+        /// </summary>
+        public const string IDEMPOTENCE_ID = "idempotence_id";
     }
 }
