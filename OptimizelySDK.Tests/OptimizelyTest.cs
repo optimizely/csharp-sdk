@@ -55,6 +55,7 @@ namespace OptimizelySDK.Tests
         private Mock<EventProcessor> EventProcessorMock;
         private NotificationCenter NotificationCenter;
         private Mock<TestNotificationCallbacks> NotificationCallbackMock;
+        private Mock<IOdpManager> OdpManagerMock;
         private Variation VariationWithKeyControl;
         private Variation VariationWithKeyVariation;
         private Variation GroupVariation;
@@ -108,6 +109,8 @@ namespace OptimizelySDK.Tests
             {
                 CallBase = true,
             };
+
+            OdpManagerMock = new Mock<IOdpManager>();
 
             DecisionServiceMock = new Mock<DecisionService>(new Bucketer(LoggerMock.Object),
                 ErrorHandlerMock.Object,
@@ -6166,5 +6169,64 @@ namespace OptimizelySDK.Tests
         }
 
         #endregion Test Culture
+
+        #region Test SendOdpEvent
+
+        [Test]
+        public void TestSendOdpEventNullAction()
+        {
+            var optly = new Optimizely(TestData.OdpIntegrationDatafile, logger: LoggerMock.Object, odpManager: OdpManagerMock.Object);
+            optly.SendOdpEvent("type", null, identifiers: new Dictionary<string, string>(), data: new Dictionary<string, object>());
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "ODP action is not valid (cannot be empty)."),
+                Times.Exactly(1));
+
+            optly.Dispose();
+        }
+
+        [Test]
+        public void TestSendOdpEventEmptyStringAction()
+        {
+            var optly = new Optimizely(TestData.OdpIntegrationDatafile, logger: LoggerMock.Object, odpManager: OdpManagerMock.Object);
+            optly.SendOdpEvent("type", "", identifiers: new Dictionary<string, string>(), data: new Dictionary<string, object>());
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "ODP action is not valid (cannot be empty)."),
+                Times.Exactly(1));
+
+            optly.Dispose();
+        }
+        [Test]
+        public void TestSendOdpEventNullType()
+        {
+            var identifiers = new Dictionary<string, string>();
+            var data = new Dictionary<string, object>();
+            var optly = new Optimizely(TestData.OdpIntegrationDatafile, logger: LoggerMock.Object, odpManager: OdpManagerMock.Object);
+
+            optly.SendOdpEvent(null, "action", identifiers: identifiers, data: data);
+
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, It.IsAny<string>()),
+                Times.Never);
+            OdpManagerMock.Verify(e => e.SendEvent("fullstack", "action", identifiers, data),
+                Times.Once);
+
+            optly.Dispose();
+        }
+
+        [Test]
+        public void TestSendOdpEventEmptyStringType()
+        {
+            var identifiers = new Dictionary<string, string>();
+            var data = new Dictionary<string, object>();
+            var optly = new Optimizely(TestData.OdpIntegrationDatafile, logger: LoggerMock.Object, odpManager: OdpManagerMock.Object);
+
+            optly.SendOdpEvent("", "action", identifiers: identifiers, data: data);
+
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, It.IsAny<string>()),
+                Times.Never);
+            OdpManagerMock.Verify(e => e.SendEvent("fullstack", "action", identifiers, data),
+                Times.Once);
+
+            optly.Dispose();
+        }
+
+        #endregion Test SendOdpEvent
     }
 }

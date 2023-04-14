@@ -1,4 +1,4 @@
-﻿/* 
+﻿/*
  * Copyright 2022-2023, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -306,6 +306,118 @@ namespace OptimizelySDK.Tests.OdpTests
 
             _mockLogger.Verify(l => l.Log(LogLevel.ERROR, Constants.ODP_INVALID_DATA_MESSAGE),
                 Times.Exactly(2));
+        }
+
+        [Test]
+        public void ShouldConvertFsUserIdIdentifier()
+        {
+            var event1 = new OdpEvent("t3", "a3",
+                new Dictionary<string, string>
+                {
+                    {
+                        "fs-user-id", "123"
+                    }
+                },
+                new Dictionary<string, object>()
+            );
+
+            var event2 = new OdpEvent("t3", "a3",
+                new Dictionary<string, string>
+                {
+                    {
+                        "FS-user-ID", "123"
+                    }
+                },
+                new Dictionary<string, object>()
+            );
+
+            var event3 = new OdpEvent("t3", "a3",
+                new Dictionary<string, string>
+                {
+                    {
+                        "FS_USER_ID", "123"
+                    },
+                    {
+                        "fs.user.id", "456"
+                    }
+                },
+                new Dictionary<string, object>()
+            );
+
+            var event4 = new OdpEvent("t3", "a3",
+                new Dictionary<string, string>
+                {
+                    {
+                        "fs_user_id", "123"
+                    },
+                    {
+                        "fsuserid", "456"
+                    }
+                },
+                new Dictionary<string, object>()
+            );
+
+            var expectedIdentifiers = new List<Dictionary<string, string>> {
+                new Dictionary<string, string> {
+                    {
+                        "fs_user_id", "123"
+                    }
+                },
+                new Dictionary<string, string> {
+                    {
+                        "fs_user_id", "123"
+                    }
+                },
+                new Dictionary<string, string> {
+                    {
+                        "fs_user_id", "123"
+                    },
+                    {
+                        "fs.user.id", "456"
+                    }
+                },
+                new Dictionary<string, string>
+                {
+                    {
+                        "fs_user_id", "123"
+                    },
+                                        {
+                        "fsuserid", "456"
+                    }
+                },
+            };
+
+            var cde = new CountdownEvent(4);
+            var eventsCollector = new List<List<OdpEvent>>();
+            _mockApiManager.Setup(api => api.SendEvents(
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                Capture.In(eventsCollector))
+            ).Callback(() => cde.Signal());
+
+            var eventManager = new OdpEventManager.Builder().
+                WithOdpEventApiManager(_mockApiManager.Object).
+                WithLogger(_mockLogger.Object).
+                WithEventQueue(new BlockingCollection<object>(10)). // max capacity of 10
+                WithFlushInterval(TimeSpan.FromMilliseconds(0)).
+                Build();
+            eventManager.UpdateSettings(_odpConfig);
+
+            eventManager.SendEvent(event1);
+            eventManager.SendEvent(event2);
+            eventManager.SendEvent(event3);
+            eventManager.SendEvent(event4);
+            cde.Wait(MAX_COUNT_DOWN_EVENT_WAIT_MS);
+
+
+            foreach (int i in Enumerable.Range(0, 4))
+            {
+                CollectionAssert.AreEquivalent(
+                    expectedIdentifiers[i],
+                    eventsCollector[i][0].Identifiers
+                );
+
+            }
         }
 
         [Test]
