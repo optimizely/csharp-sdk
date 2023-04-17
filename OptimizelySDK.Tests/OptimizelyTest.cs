@@ -17,6 +17,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Reflection;
 using System.Threading;
 using Moq;
 using NUnit.Framework;
@@ -6166,5 +6167,33 @@ namespace OptimizelySDK.Tests
         }
 
         #endregion Test Culture
+
+        #region Test Optimizely & ODP
+    
+        [Test]
+        public void TestConstructedOptimizelyWithConfigManagerShouldHaveOdpEnabledByDefault()
+        {
+            var configManager = new Mock<ProjectConfigManager>();
+            
+            var optimizely = new Optimizely(configManager: configManager.Object);
+            
+            var odpManagerField = optimizely.GetType().GetField("OdpManager", BindingFlags.NonPublic | BindingFlags.Instance);
+            Assert.NotNull(odpManagerField);
+            var odpManagerValue = odpManagerField.GetValue(optimizely);
+            Assert.NotNull(odpManagerValue);
+        }
+        
+        [Test]
+        public void TestConstructedOptimizelyWithDatafileShouldHaveOdpEnabledByDefault()
+        {
+            var optimizely = new Optimizely(TestData.Datafile);
+            
+            var odpManagerField = optimizely.GetType().GetField("OdpManager", BindingFlags.NonPublic | BindingFlags.Instance);
+            Assert.NotNull(odpManagerField);
+            var odpManagerValue = odpManagerField.GetValue(optimizely);
+            Assert.NotNull(odpManagerValue);
+        }
+        
+        #endregion
     }
 }
