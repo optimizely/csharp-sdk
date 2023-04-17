@@ -40,6 +40,10 @@ namespace OptimizelySDK.Odp
         private ILogger _logger;
         private IErrorHandler _errorHandler;
         private BlockingCollection<object> _eventQueue;
+        private static readonly string[] fsUserIdMatches = {
+            Constants.FS_USER_ID,
+            Constants.FS_USER_ID_ALIAS,
+        };
 
         /// <summary>
         /// Object to ensure mutually exclusive locking for thread safety
@@ -302,7 +306,7 @@ namespace OptimizelySDK.Odp
                 return;
             }
 
-            odpEvent.Identifiers = ConvertIdentifiers(odpEvent.Identifiers);
+            odpEvent.Identifiers = ConvertCriticalIdentifiers(odpEvent.Identifiers);
 
             odpEvent.Data = AugmentCommonData(odpEvent.Data);
             if (!_eventQueue.TryAdd(odpEvent))
@@ -440,12 +444,11 @@ namespace OptimizelySDK.Odp
         }
 
         /// <summary>
-        /// Add additional common data including an idempotent ID and execution context to event
-        /// data. Note: sourceData takes precedence over commonData in the event of a key conflict.
+        /// Convert critical identifiers to the correct format for ODP
         /// </summary>
-        /// <param name="sourceData">Existing event data to augment</param>
-        /// <returns>Updated Dictionary with new key-values added</returns>
-        private Dictionary<string, string> ConvertIdentifiers(
+        /// <param name="identifiers">Collection of identifiers to validate</param>
+        /// <returns>New version of identifiers with corrected values</returns>
+        private static Dictionary<string, string> ConvertCriticalIdentifiers(
             Dictionary<string, string> identifiers
         )
         {
@@ -457,8 +460,7 @@ namespace OptimizelySDK.Odp
             var identList = new List<KeyValuePair<string, string>>(identifiers);
             foreach (var kvp in identList)
             {
-                var lowerCaseKey = kvp.Key.ToLower();
-                if (lowerCaseKey == Constants.FS_USER_ID_ALIAS || lowerCaseKey == Constants.FS_USER_ID)
+                if (fsUserIdMatches.Contains(kvp.Key, StringComparer.OrdinalIgnoreCase))
                 {
                     identifiers.Remove(kvp.Key);
                     identifiers[Constants.FS_USER_ID] = kvp.Value;

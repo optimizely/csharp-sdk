@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2022, Optimizely
+ * Copyright 2022-2023, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,10 +29,9 @@ namespace OptimizelySDK.Utils
         /// <param name="right">Dictionary to merge into another</param>
         /// <typeparam name="TKey">Key type</typeparam>
         /// <typeparam name="TValue">Value type</typeparam>
-        /// <returns>Merged Dictionary</returns>
         /// <exception cref="ArgumentNullException">Thrown if target Dictionary is null</exception>
-        public static Dictionary<TKey, TValue> MergeInPlace<TKey, TValue>(
-            this Dictionary<TKey, TValue> left, Dictionary<TKey, TValue> right
+        public static void MergeInPlace<TKey, TValue>(this Dictionary<TKey, TValue> left,
+            Dictionary<TKey, TValue> right
         )
         {
             if (left == null)
@@ -43,7 +42,7 @@ namespace OptimizelySDK.Utils
 
             if (right == null)
             {
-                return left;
+                return;
             }
 
             foreach (var kvp in right.Where(
@@ -51,8 +50,6 @@ namespace OptimizelySDK.Utils
             {
                 left.Add(kvp.Key, kvp.Value);
             }
-
-            return left;
         }
     }
 }
