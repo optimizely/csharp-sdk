@@ -6177,7 +6177,7 @@ namespace OptimizelySDK.Tests
         {
             var optly = new Optimizely(TestData.OdpIntegrationDatafile, logger: LoggerMock.Object, odpManager: OdpManagerMock.Object);
             optly.SendOdpEvent("type", null, identifiers: new Dictionary<string, string>(), data: new Dictionary<string, object>());
-            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "ODP action is not valid (cannot be empty)."),
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, Constants.ODP_INVALID_ACTION_MESSAGE),
                 Times.Exactly(1));
 
             optly.Dispose();
@@ -6188,7 +6188,7 @@ namespace OptimizelySDK.Tests
         {
             var optly = new Optimizely(TestData.OdpIntegrationDatafile, logger: LoggerMock.Object, odpManager: OdpManagerMock.Object);
             optly.SendOdpEvent("type", "", identifiers: new Dictionary<string, string>(), data: new Dictionary<string, object>());
-            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "ODP action is not valid (cannot be empty)."),
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, Constants.ODP_INVALID_ACTION_MESSAGE),
                 Times.Exactly(1));
 
             optly.Dispose();
