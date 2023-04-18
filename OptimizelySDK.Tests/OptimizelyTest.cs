@@ -5411,7 +5411,8 @@ namespace OptimizelySDK.Tests
             TestHttpProjectConfigManagerUtil.SetClientFieldValue(httpClientMock.Object);
 
             var notificationCenter = new NotificationCenter();
-            NotificationCallbackMock.Setup(notification => notification.TestConfigUpdateCallback());
+            var cde = new CountdownEvent(1);
+            NotificationCallbackMock.Setup(notification=>notification.TestConfigUpdateCallback(cde));
 
             var httpManager = new HttpProjectConfigManager.Builder()
                 .WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z")
@@ -5432,6 +5433,7 @@ namespace OptimizelySDK.Tests
             httpManager.OnReady().Wait(10000);
 
             t.Wait();
+            cde.Wait(2000);
             NotificationCallbackMock.Verify(nc => nc.TestConfigUpdateCallback(), Times.Once);
             httpManager.Dispose();
         }
