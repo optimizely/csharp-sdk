@@ -40,6 +40,10 @@ namespace OptimizelySDK.Odp
         private ILogger _logger;
         private IErrorHandler _errorHandler;
         private BlockingCollection<object> _eventQueue;
+        private static readonly string[] fsUserIdMatches = {
+            Constants.FS_USER_ID,
+            Constants.FS_USER_ID_ALIAS,
+        };
 
         /// <summary>
         /// Object to ensure mutually exclusive locking for thread safety
@@ -302,6 +306,8 @@ namespace OptimizelySDK.Odp
                 return;
             }
 
+            odpEvent.Identifiers = ConvertCriticalIdentifiers(odpEvent.Identifiers);
+
             odpEvent.Data = AugmentCommonData(odpEvent.Data);
             if (!_eventQueue.TryAdd(odpEvent))
             {
@@ -429,7 +435,40 @@ namespace OptimizelySDK.Odp
             Dictionary<string, dynamic> sourceData
         )
         {
-            return sourceData.MergeInPlace<string, object>(_commonData);
+            sourceData.MergeInPlace<string, object>(_commonData);
+            if (!sourceData.ContainsKey(Constants.IDEMPOTENCE_ID))
+            {
+                sourceData.Add(Constants.IDEMPOTENCE_ID, Guid.NewGuid());
+            }
+            return sourceData;
+        }
+
+        /// <summary>
+        /// Convert critical identifiers to the correct format for ODP
+        /// </summary>
+        /// <param name="identifiers">Collection of identifiers to validate</param>
+        /// <returns>New version of identifiers with corrected values</returns>
+        private static Dictionary<string, string> ConvertCriticalIdentifiers(
+            Dictionary<string, string> identifiers
+        )
+        {
+            if (identifiers.ContainsKey(Constants.FS_USER_ID))
+            {
+                return identifiers;
+            }
+
+            var identList = new List<KeyValuePair<string, string>>(identifiers);
+            foreach (var kvp in identList)
+            {
+                if (fsUserIdMatches.Contains(kvp.Key, StringComparer.OrdinalIgnoreCase))
+                {
+                    identifiers.Remove(kvp.Key);
+                    identifiers[Constants.FS_USER_ID] = kvp.Value;
+                    break;
+                }
+            }
+
+            return identifiers;
         }
 
         /// <summary>
@@ -562,7 +601,6 @@ namespace OptimizelySDK.Odp
 
                 manager._commonData = new Dictionary<string, object>
                 {
-                    { "idempotence_id", Guid.NewGuid() },
                     { "data_source_type", "sdk" },
                     { "data_source", Optimizely.SDK_TYPE },
                     { "data_source_version", Optimizely.SDK_VERSION },

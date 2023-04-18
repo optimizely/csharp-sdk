@@ -83,7 +83,7 @@ namespace OptimizelySDK
         bool SetForcedVariation(string experimentKey, string userId, string variationKey);
 
         /// <summary>
-        /// Gets the forced variation key for the given user and experiment.  
+        /// Gets the forced variation key for the given user and experiment.
         /// </summary>
         /// <param name="experimentKey">The experiment key</param>
         /// <param name="userId">The user ID</param>
@@ -162,7 +162,7 @@ namespace OptimizelySDK
         #endregion
 
 #if USE_ODP
-        void SendOdpEvent(string type, string action, Dictionary<string, string> identifiers,
+        void SendOdpEvent(string action, Dictionary<string, string> identifiers, string type,
             Dictionary<string, object> data
         );
 #endif

@@ -68,6 +68,11 @@ namespace OptimizelySDK.Odp
         public const string ODP_INVALID_DATA_MESSAGE = "ODP event send failed.";
 
         /// <summary>
+        /// Default message to log when an ODP Event contains invalid action
+        /// </summary>
+        public const string ODP_INVALID_ACTION_MESSAGE = "ODP action is not valid (cannot be empty).";
+
+        /// <summary>
         /// Default message to log when sending ODP event fails
         /// </summary>
         public const string ODP_SEND_FAILURE_MESSAGE = "ODP event send failed";
@@ -116,5 +121,15 @@ namespace OptimizelySDK.Odp
         /// Type of ODP key used for fetching segments & sending events
         /// </summary>
         public const string FS_USER_ID = "fs_user_id";
+
+        /// <summary>
+        /// Alternate form of ODP key that is auto-converted to FS_USER_ID
+        /// </summary>
+        public const string FS_USER_ID_ALIAS = "fs-user-id";
+
+        /// <summary>
+        /// Unique identifier used for ODP events
+        /// </summary>
+        public const string IDEMPOTENCE_ID = "idempotence_id";
     }
 }

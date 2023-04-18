@@ -1370,14 +1370,25 @@ namespace OptimizelySDK
         /// <summary>
         /// Add event to queue for sending to ODP
         /// </summary>
-        /// <param name="type">Type of event (typically `fullstack` from server-side SDK events)</param>
         /// <param name="action">Subcategory of the event type</param>
         /// <param name="identifiers">Dictionary for identifiers. The caller must provide at least one key-value pair.</param>
-        /// <param name="data">Event data in a key-value pair format</param>
-        public void SendOdpEvent(string type, string action, Dictionary<string, string> identifiers,
-            Dictionary<string, object> data
+        /// <param name="type">Type of event (defaults to `fullstack`)</param>
+        /// <param name="data">Optional event data in a key-value pair format</param>
+        public void SendOdpEvent(string action, Dictionary<string, string> identifiers, string type = Constants.ODP_EVENT_TYPE,
+            Dictionary<string, object> data = null
         )
         {
+            if (String.IsNullOrEmpty(action))
+            {
+                Logger.Log(LogLevel.ERROR, Constants.ODP_INVALID_ACTION_MESSAGE);
+                return;
+            }
+
+            if (String.IsNullOrEmpty(type))
+            {
+                type = Constants.ODP_EVENT_TYPE;
+            }
+
             var config = ProjectConfigManager?.GetConfig();
 
             if (config == null)
