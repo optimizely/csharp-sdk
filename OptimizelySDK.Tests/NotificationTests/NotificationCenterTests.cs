@@ -327,7 +327,7 @@ namespace OptimizelySDK.Tests.NotificationTests
         ) { }
 
         public virtual void TestConfigUpdateCallback() { }
-        
+
         public virtual void TestConfigUpdateCallback(CountdownEvent cde) { cde.Signal(); }
 
         public virtual void TestLogEventCallback(LogEvent logEvent) { }
