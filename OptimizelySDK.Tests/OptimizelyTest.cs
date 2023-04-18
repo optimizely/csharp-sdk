@@ -6148,6 +6148,16 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
+        public void TestSendOdpEventInvalidOptimizelyObject()
+        {
+            var optly = new Optimizely("Random datafile", null, LoggerMock.Object);
+            optly.SendOdpEvent("some_action", new Dictionary<string, string>() { { "some_key", "some_value" } }, "some_event");
+            LoggerMock.Verify(
+                l => l.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'SendOdpEvent'."),
+                Times.Once);
+        }
+
+        [Test]
         public void TestSendOdpEventEmptyStringAction()
         {
             var optly = new Optimizely(TestData.OdpIntegrationDatafile, logger: LoggerMock.Object, odpManager: OdpManagerMock.Object);
@@ -6157,6 +6167,7 @@ namespace OptimizelySDK.Tests
 
             optly.Dispose();
         }
+
         [Test]
         public void TestSendOdpEventNullType()
         {
@@ -6190,6 +6201,34 @@ namespace OptimizelySDK.Tests
         }
 
         #endregion Test SendOdpEvent
+
+        #region Test FetchQualifiedSegments
+
+        [Test]
+        public void TestFetchQualifiedSegmentsInvalidOptimizelyObject()
+        {
+            var optly = new Optimizely("Random datafile", null, LoggerMock.Object);
+            optly.FetchQualifiedSegments("some_user", null);
+            LoggerMock.Verify(
+                l => l.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'FetchQualifiedSegments'."),
+                Times.Once);
+        }
+
+        #endregion Test FetchQualifiedSegments
+
+        #region Test IdentifyUser
+
+        [Test]
+        public void TestIdentifyUserInvalidOptimizelyObject()
+        {
+            var optly = new Optimizely("Random datafile", null, LoggerMock.Object);
+            optly.IdentifyUser("some_user");
+            LoggerMock.Verify(
+                l => l.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'IdentifyUser'."),
+                Times.Once);
+        }
+
+        #endregion Test IdentifyUser
 
         #region Test Optimizely & ODP
 

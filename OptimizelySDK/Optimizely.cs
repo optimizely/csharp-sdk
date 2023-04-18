@@ -1343,6 +1343,14 @@ namespace OptimizelySDK
             List<OdpSegmentOption> segmentOptions
         )
         {
+            var config = ProjectConfigManager?.GetConfig();
+
+            if (config == null)
+            {
+                Logger.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'FetchQualifiedSegments'.");
+                return null;
+            }
+
             return OdpManager?.FetchQualifiedSegments(userId, segmentOptions);
         }
 
@@ -1352,6 +1360,14 @@ namespace OptimizelySDK
         /// <param name="userId">FS User ID to send</param>
         internal void IdentifyUser(string userId)
         {
+            var config = ProjectConfigManager?.GetConfig();
+
+            if (config == null)
+            {
+                Logger.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'IdentifyUser'.");
+                return;
+            }
+
             OdpManager?.IdentifyUser(userId);
         }
 
@@ -1375,6 +1391,14 @@ namespace OptimizelySDK
             if (String.IsNullOrEmpty(type))
             {
                 type = Constants.ODP_EVENT_TYPE;
+            }
+
+            var config = ProjectConfigManager?.GetConfig();
+
+            if (config == null)
+            {
+                Logger.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'SendOdpEvent'.");
+                return;
             }
 
             OdpManager?.SendEvent(type, action, identifiers, data);
