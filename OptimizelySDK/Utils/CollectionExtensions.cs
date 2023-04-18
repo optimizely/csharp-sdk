@@ -1,4 +1,4 @@
-﻿/* 
+﻿/*
  * Copyright 2022-2023, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -45,6 +45,7 @@ namespace OptimizelySDK.Utils
                 return;
             }
 
+            // Only update the left dictionary when the key doesn't exist
             foreach (var kvp in right.Where(
                          kvp => !left.ContainsKey(kvp.Key)))
             {
