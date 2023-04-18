@@ -28,8 +28,10 @@ jobs:
           VALIDATE_ALL_CODEBASE: false
           DEFAULT_BRANCH: master
           VALIDATE_CSHARP: true
-          EDITORCONFIG_FILE_NAME: ${{ github.workspace }}/.editorconfig
-
+          EDITORCONFIG: true
+          EDITORCONFIG_FILE_NAME: .editorconfig
+          EDITORCONFIG_LINTER_RULES: ${{ github.workspace }}/.editorconfig
+          
   integration_tests:
     name: Run Integration Tests
     uses: optimizely/csharp-sdk/.github/workflows/integration_test.yml@master
