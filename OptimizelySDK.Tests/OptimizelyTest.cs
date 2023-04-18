@@ -5412,7 +5412,8 @@ namespace OptimizelySDK.Tests
 
             var notificationCenter = new NotificationCenter();
             var cde = new CountdownEvent(1);
-            NotificationCallbackMock.Setup(notification=>notification.TestConfigUpdateCallback(cde));
+            NotificationCallbackMock.Setup(notification =>
+                notification.TestConfigUpdateCallback(cde));
 
             var httpManager = new HttpProjectConfigManager.Builder()
                 .WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z")
