@@ -304,27 +304,32 @@ namespace OptimizelySDK.Tests.NotificationTests
         public virtual void TestActivateCallback(Experiment experiment, string userId,
             UserAttributes userAttributes,
             Variation variation, LogEvent logEvent
-        ) { }
+        )
+        { }
 
         public virtual void TestAnotherActivateCallback(Experiment experiment, string userId,
             UserAttributes userAttributes,
             Variation variation, LogEvent logEvent
-        ) { }
+        )
+        { }
 
         public virtual void TestTrackCallback(string eventKey, string userId,
             UserAttributes userAttributes,
             EventTags eventTags, LogEvent logEvent
-        ) { }
+        )
+        { }
 
         public virtual void TestAnotherTrackCallback(string eventKey, string userId,
             UserAttributes userAttributes,
             EventTags eventTags, LogEvent logEvent
-        ) { }
+        )
+        { }
 
         public virtual void TestDecisionCallback(string type, string userId,
             UserAttributes userAttributes,
             Dictionary<string, object> decisionInfo
-        ) { }
+        )
+        { }
 
         public virtual void TestConfigUpdateCallback() { }
 
