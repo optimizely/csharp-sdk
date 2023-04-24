@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2022 Optimizely
+ * Copyright 2022-2023 Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,5 +25,10 @@ namespace OptimizelySDK.Odp.Entity
         /// Named exception type from the error
         /// </summary>
         public string Classification { get; set; }
+
+        /// <summary>
+        /// Code of exception
+        /// </summary>
+        public string Code { get; set; }
     }
 }
