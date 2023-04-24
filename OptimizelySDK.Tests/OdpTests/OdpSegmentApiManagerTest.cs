@@ -113,35 +113,39 @@ namespace OptimizelySDK.Tests.OdpTests
         public void ShouldParseErrorResponse()
         {
             const string RESPONSE_JSON = @"
-{
-   ""errors"": [
-        {
-            ""message"": ""Exception while fetching data (/customer) : Exception: could not resolve _fs_user_id = not-real-user-id"",
-            ""locations"": [
-                {
-                    ""line"": 2,
-                    ""column"": 3
+            {
+               ""errors"": [
+                    {
+                        ""message"": ""Exception while fetching data (/customer) : Exception: could not resolve _fs_user_id = not-real-user-id"",
+                        ""locations"": [
+                            {
+                                ""line"": 2,
+                                ""column"": 3
+                            }
+                        ],
+                        ""path"": [
+                            ""customer""
+                        ],
+                        ""extensions"": {
+                            ""code"": ""INVALID_IDENTIFIER_EXCEPTION"",
+                            ""classification"": ""DataFetchingException""
+                        }
+                    }
+                ],
+                ""data"": {
+                    ""customer"": null
                 }
-            ],
-            ""path"": [
-                ""customer""
-            ],
-            ""extensions"": {
-                ""classification"": ""InvalidIdentifierException""
-            }
-        }
-    ],
-    ""data"": {
-        ""customer"": null
-    }
-}";
+            }";
 
             var response = new OdpSegmentApiManager().DeserializeSegmentsFromJson(RESPONSE_JSON);
 
             Assert.IsNull(response.Data.Customer);
             Assert.IsNotNull(response.Errors);
-            Assert.AreEqual(response.Errors[0].Extensions.Classification,
-                "InvalidIdentifierException");
+            Assert.AreEqual("DataFetchingException",
+                response.Errors[0].Extensions.Classification);
+            Assert.AreEqual("INVALID_IDENTIFIER_EXCEPTION",
+                response.Errors[0].Extensions.Code
+            );
         }
 
         [Test]
