@@ -68,6 +68,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
                 {
                     POLL_EVERY_MILLISECONDS,
                 });
+            configManager.Start();
 
             stopwatch.Start();
             configManager.GetConfig();

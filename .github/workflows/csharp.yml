@@ -28,7 +28,7 @@ jobs:
           VALIDATE_ALL_CODEBASE: false
           DEFAULT_BRANCH: master
           VALIDATE_CSHARP: true
-
+          
   integration_tests:
     name: Run Integration Tests
     uses: optimizely/csharp-sdk/.github/workflows/integration_test.yml@master

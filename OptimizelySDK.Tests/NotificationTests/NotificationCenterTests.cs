@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2017, 2019, Optimizely
+ * Copyright 2017, 2019, 2023, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using Moq;
 using NUnit.Framework;
 using OptimizelySDK.Config;
@@ -332,8 +333,10 @@ namespace OptimizelySDK.Tests.NotificationTests
 
         public virtual void TestConfigUpdateCallback() { }
 
+        public virtual void TestConfigUpdateCallback(CountdownEvent cde) { cde.Signal(); }
+
         public virtual void TestLogEventCallback(LogEvent logEvent) { }
     }
 
-    #endregion // Test Notification callbacks class.
+    #endregion
 }
