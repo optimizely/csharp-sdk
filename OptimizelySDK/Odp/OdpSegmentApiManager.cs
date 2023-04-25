@@ -118,14 +118,15 @@ namespace OptimizelySDK.Odp
             if (segments.HasErrors)
             {
                 var firstError = segments.Errors.First();
-                if (firstError.Extensions.Code == "INVALID_IDENTIFIER_EXCEPTION")
+                if (firstError.Extensions?.Code == "INVALID_IDENTIFIER_EXCEPTION")
                 {
                     var message = $"{AUDIENCE_FETCH_FAILURE_MESSAGE} (invalid identifier)";
                     _logger.Log(LogLevel.WARN, message);
                 }
                 else
                 {
-                    _logger.Log(LogLevel.ERROR, $"{AUDIENCE_FETCH_FAILURE_MESSAGE} ({firstError})");
+                    var errorMessage = firstError.Extensions?.Classification ?? "decode error";
+                    _logger.Log(LogLevel.ERROR, $"{AUDIENCE_FETCH_FAILURE_MESSAGE} ({errorMessage})");
                 }
 
                 return null;

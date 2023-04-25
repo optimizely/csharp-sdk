@@ -227,7 +227,6 @@ namespace OptimizelySDK.Tests.OdpTests
                             ""chair/musical""
                         ],
                         ""extensions"": {
-                            ""code"": ""SOME_UNPLANNED_EXCEPTION"",
                             ""classification"": ""YetKnownOdpException""
                         }
                     },
@@ -267,7 +266,50 @@ namespace OptimizelySDK.Tests.OdpTests
             Assert.IsNull(segments);
             _mockLogger.Verify(
                 l => l.Log(LogLevel.ERROR,
-                    "Audience segments fetch failed (Exception while fetching data (/chairs) : Exception: could not the chair = musical)"),
+                    "Audience segments fetch failed (YetKnownOdpException)"),
+                Times.Once);
+        }
+
+
+        [Test]
+        public void ShouldParseBadExtensionsShapeInResponse()
+        {
+            const string RESPONSE_JSON = @"
+            {
+               ""errors"": [
+                    {
+                        ""message"": ""Exception while fetching data (/chairs) : Exception: could not the chair = musical"",
+                        ""locations"": [
+                            {
+                                ""line"": 4,
+                                ""column"": 1
+                            }
+                        ],
+                        ""path"": [
+                            ""chair/musical""
+                        ],
+                        ""extensions"": { }
+                    }
+                ],
+                ""data"": {
+                    ""customer"": null
+                }
+            }";
+            var httpClient = HttpClientTestUtil.MakeHttpClient(HttpStatusCode.OK, RESPONSE_JSON);
+            var manager =
+                new OdpSegmentApiManager(_mockLogger.Object, _mockErrorHandler.Object, httpClient);
+
+            var segments = manager.FetchSegments(
+                VALID_ODP_PUBLIC_KEY,
+                ODP_GRAPHQL_HOST,
+                Constants.FS_USER_ID,
+                "tester-895",
+                _segmentsToCheck);
+
+
+            Assert.IsNull(segments);
+            _mockLogger.Verify(
+                l => l.Log(LogLevel.ERROR, "Audience segments fetch failed (decode error)"),
                 Times.Once);
         }
 
