@@ -117,9 +117,16 @@ namespace OptimizelySDK.Odp
 
             if (segments.HasErrors)
             {
-                var errors = string.Join(";", segments.Errors.Select(e => e.ToString()));
-
-                _logger.Log(LogLevel.ERROR, $"{AUDIENCE_FETCH_FAILURE_MESSAGE} ({errors})");
+                var firstError = segments.Errors.First();
+                if (firstError.Extensions.Code == "INVALID_IDENTIFIER_EXCEPTION")
+                {
+                    var message = $"{AUDIENCE_FETCH_FAILURE_MESSAGE} (invalid identifier)";
+                    _logger.Log(LogLevel.WARN, message);
+                }
+                else
+                {
+                    _logger.Log(LogLevel.ERROR, $"{AUDIENCE_FETCH_FAILURE_MESSAGE} ({firstError})");
+                }
 
                 return null;
             }
@@ -131,10 +138,10 @@ namespace OptimizelySDK.Odp
                 return null;
             }
 
-            return segments.Data.Customer.Audiences.Edges.
-                Where(e => e.Node.State == BaseCondition.QUALIFIED).
-                Select(e => e.Node.Name).
-                ToArray();
+            return segments.Data.Customer.Audiences.Edges
+                .Where(e => e.Node.State == BaseCondition.QUALIFIED)
+                .Select(e => e.Node.Name)
+                .ToArray();
         }
 
         /// <summary>
@@ -155,9 +162,9 @@ namespace OptimizelySDK.Odp
                         ""userId"": ""{userValue}"",
                         ""audiences"": {audiences}
                     }
-                }".Replace("{userKey}", userKey).
-                    Replace("{userValue}", userValue).
-                    Replace("{audiences}", JsonConvert.SerializeObject(segmentsToCheck));
+                }".Replace("{userKey}", userKey)
+                    .Replace("{userValue}", userValue)
+                    .Replace("{audiences}", JsonConvert.SerializeObject(segmentsToCheck));
         }
 
         /// <summary>

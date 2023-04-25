@@ -53,28 +53,28 @@ namespace OptimizelySDK.Tests.OdpTests
         public void ShouldParseSuccessfulResponse()
         {
             const string RESPONSE_JSON = @"
-{
-    ""data"": {
-        ""customer"": {
-            ""audiences"": {
-                ""edges"": [
-                {
-                    ""node"": {
-                        ""name"": ""has_email"",
-                        ""state"": ""qualified"",
+            {
+                ""data"": {
+                    ""customer"": {
+                        ""audiences"": {
+                            ""edges"": [
+                            {
+                                ""node"": {
+                                    ""name"": ""has_email"",
+                                    ""state"": ""qualified"",
+                                }
+                            },
+                            {
+                                ""node"": {
+                                    ""name"": ""has_email_opted_in"",
+                                    ""state"": ""not-qualified""
+                                }
+                            },
+                          ]
+                        },
                     }
-                },
-                {
-                    ""node"": {
-                        ""name"": ""has_email_opted_in"",
-                        ""state"": ""not-qualified""
-                    }
-                },
-              ]
-            },
-        }
-    }
-}";
+                }
+            }";
 
             var response = new OdpSegmentApiManager().DeserializeSegmentsFromJson(RESPONSE_JSON);
 
@@ -110,7 +110,7 @@ namespace OptimizelySDK.Tests.OdpTests
         }
 
         [Test]
-        public void ShouldParseErrorResponse()
+        public void ShouldParseInvalidIdentifierExceptionResponse()
         {
             const string RESPONSE_JSON = @"
             {
@@ -146,6 +146,124 @@ namespace OptimizelySDK.Tests.OdpTests
             Assert.AreEqual("INVALID_IDENTIFIER_EXCEPTION",
                 response.Errors[0].Extensions.Code
             );
+        }
+        
+        [Test]
+        public void ShouldParseOnlyFirstErrorInvalidIdentifierExceptionResponse()
+        {
+            const string RESPONSE_JSON = @"
+            {
+               ""errors"": [
+                    {
+                        ""message"": ""Exception while fetching data (/customer) : Exception: could not resolve _fs_user_id = not-real-user-id"",
+                        ""locations"": [
+                            {
+                                ""line"": 2,
+                                ""column"": 3
+                            }
+                        ],
+                        ""path"": [
+                            ""customer""
+                        ],
+                        ""extensions"": {
+                            ""code"": ""INVALID_IDENTIFIER_EXCEPTION"",
+                            ""classification"": ""DataFetchingException""
+                        }
+                    },
+                    {
+                        ""message"": ""Second Ignored Exception while fetching data (/desks) : Exception: yet another exception not yet known"",
+                        ""locations"": [
+                            {
+                                ""line"": 4,
+                                ""column"": 5
+                            }
+                        ],
+                        ""path"": [
+                            ""desks/wooden""
+                        ],
+                        ""extensions"": {
+                            ""code"": ""SECOND_IGNORED_UNPLANNED_EXCEPTION"",
+                            ""classification"": ""IgnoredNewException""
+                        }
+                    }
+                ],
+                ""data"": {
+                    ""customer"": null
+                }
+            }";
+            var httpClient = HttpClientTestUtil.MakeHttpClient(HttpStatusCode.OK, RESPONSE_JSON);
+            var manager =
+                new OdpSegmentApiManager(_mockLogger.Object, _mockErrorHandler.Object, httpClient);
+
+            var segments = manager.FetchSegments(
+                VALID_ODP_PUBLIC_KEY,
+                ODP_GRAPHQL_HOST,
+                Constants.FS_USER_ID,
+                "tester-156",
+                _segmentsToCheck);
+
+
+            Assert.IsNull(segments);
+            _mockLogger.Verify(l=>l.Log(LogLevel.WARN, "Audience segments fetch failed (invalid identifier)"), Times.Once);
+        }
+        
+        [Test]
+        public void ShouldParseOnlyFirstErrorThatOdpThrowsAtUsResponse()
+        {
+            const string RESPONSE_JSON = @"
+            {
+               ""errors"": [
+                    {
+                        ""message"": ""Exception while fetching data (/chairs) : Exception: could not the chair = musical"",
+                        ""locations"": [
+                            {
+                                ""line"": 4,
+                                ""column"": 1
+                            }
+                        ],
+                        ""path"": [
+                            ""chair/musical""
+                        ],
+                        ""extensions"": {
+                            ""code"": ""SOME_UNPLANNED_EXCEPTION"",
+                            ""classification"": ""YetKnownOdpException""
+                        }
+                    },
+                    {
+                        ""message"": ""Second Ignored Exception while fetching data (/desks) : Exception: yet another exception not yet known"",
+                        ""locations"": [
+                            {
+                                ""line"": 4,
+                                ""column"": 5
+                            }
+                        ],
+                        ""path"": [
+                            ""desks/wooden""
+                        ],
+                        ""extensions"": {
+                            ""code"": ""SECOND_IGNORED_UNPLANNED_EXCEPTION"",
+                            ""classification"": ""IgnoredNewException""
+                        }
+                    }
+                ],
+                ""data"": {
+                    ""customer"": null
+                }
+            }";
+            var httpClient = HttpClientTestUtil.MakeHttpClient(HttpStatusCode.OK, RESPONSE_JSON);
+            var manager =
+                new OdpSegmentApiManager(_mockLogger.Object, _mockErrorHandler.Object, httpClient);
+
+            var segments = manager.FetchSegments(
+                VALID_ODP_PUBLIC_KEY,
+                ODP_GRAPHQL_HOST,
+                Constants.FS_USER_ID,
+                "tester-325",
+                _segmentsToCheck);
+
+
+            Assert.IsNull(segments);
+            _mockLogger.Verify(l=>l.Log(LogLevel.ERROR, "Audience segments fetch failed (Exception while fetching data (/chairs) : Exception: could not the chair = musical)"), Times.Once);
         }
 
         [Test]
