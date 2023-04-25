@@ -147,7 +147,7 @@ namespace OptimizelySDK.Tests.OdpTests
                 response.Errors[0].Extensions.Code
             );
         }
-        
+
         [Test]
         public void ShouldParseOnlyFirstErrorInvalidIdentifierExceptionResponse()
         {
@@ -204,9 +204,11 @@ namespace OptimizelySDK.Tests.OdpTests
 
 
             Assert.IsNull(segments);
-            _mockLogger.Verify(l=>l.Log(LogLevel.WARN, "Audience segments fetch failed (invalid identifier)"), Times.Once);
+            _mockLogger.Verify(
+                l => l.Log(LogLevel.WARN, "Audience segments fetch failed (invalid identifier)"),
+                Times.Once);
         }
-        
+
         [Test]
         public void ShouldParseOnlyFirstErrorThatOdpThrowsAtUsResponse()
         {
@@ -263,7 +265,10 @@ namespace OptimizelySDK.Tests.OdpTests
 
 
             Assert.IsNull(segments);
-            _mockLogger.Verify(l=>l.Log(LogLevel.ERROR, "Audience segments fetch failed (Exception while fetching data (/chairs) : Exception: could not the chair = musical)"), Times.Once);
+            _mockLogger.Verify(
+                l => l.Log(LogLevel.ERROR,
+                    "Audience segments fetch failed (Exception while fetching data (/chairs) : Exception: could not the chair = musical)"),
+                Times.Once);
         }
 
         [Test]
