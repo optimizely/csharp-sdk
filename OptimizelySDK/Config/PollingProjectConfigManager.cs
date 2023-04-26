@@ -1,4 +1,4 @@
-﻿/* 
+﻿/*
  * Copyright 2019-2020, 2022-2023 Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,7 +25,7 @@ using OptimizelySDK.Utils;
 namespace OptimizelySDK.Config
 {
     /// <summary>
-    /// Abstract class that implements ProjectConfigManager interface and provides 
+    /// Abstract class that implements ProjectConfigManager interface and provides
     /// basic scheduling and caching.
     /// Instances of this class, must implement the <see cref="Poll()"/> method
     /// which is responsible for fetching a given ProjectConfig.
@@ -181,11 +181,10 @@ namespace OptimizelySDK.Config
             CurrentProjectConfig = projectConfig;
             SetOptimizelyConfig(CurrentProjectConfig);
 
-            // SetResult raise exception if called again, that's why Try is used.
-            CompletableConfigManager.TrySetResult(true);
-
             NotifyOnProjectConfigUpdate?.Invoke();
 
+            // SetResult raise exception if called again, that's why Try is used.
+            CompletableConfigManager.TrySetResult(true);
 
             return true;
         }
