@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("OptimizelySDK.Net40")]
-[assembly: AssemblyCopyright("Copyright © 2017-2020")]
+[assembly: AssemblyCopyright("Copyright © 2017-2023")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
