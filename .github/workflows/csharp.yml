@@ -78,7 +78,7 @@ jobs:
           Where-Object { $_.DirectoryName -match '\\bin\\Release' } |
           Foreach-Object { & $env:WINDOWS_2019_SN_PATH -R $_.FullName ./keypair.snk }       
       - name: Install AWS CLI, deploy to S3 on successful tests & for release
-        #if: steps.unit_tests.outcome == 'success' && env.CURRENT_BRANCH == env.RELEASE_BRANCH && env.EVENT_TYPE == 'push'
+        if: steps.unit_tests.outcome == 'success' && env.CURRENT_BRANCH == env.RELEASE_BRANCH && env.EVENT_TYPE == 'push'
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.OFTA_KEY }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.OFTA_SECRET }}
