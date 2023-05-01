@@ -41,6 +41,8 @@ For details, refer to our documentation pages:
 
 ### Breaking Changes
 - `OdpManager` in the SDK is enabled by default. Unless an ODP account is integrated into the Optimizely projects, most `OdpManager` functions will be ignored. If needed, `OdpManager` can be disabled when `OptimizelyClient` is instantiated.
+- `ProjectConfigManager` interface additions + implementing class updates
+- `Evaluate()` updates in `BaseCondition`
 
 ## 3.11.2
 March 15th, 2023
