@@ -20,6 +20,7 @@
 
 using System.Collections.Generic;
 using OptimizelySDK.Entity;
+using OptimizelySDK.OptlyConfig;
 
 namespace OptimizelySDK
 {
@@ -152,6 +153,29 @@ namespace OptimizelySDK
         );
 
         /// <summary>
+        /// Gets json sub type feature variable value.
+        /// </summary>
+        /// <param name="featureKey">The feature flag key</param>
+        /// <param name="variableKey">The variable key</param>
+        /// <param name="userId">The user ID</param>
+        /// <param name="userAttributes">The user's attributes</param>
+        /// <returns>OptimizelyJson | Feature variable value or null</returns>
+        OptimizelyJSON GetFeatureVariableJSON(string featureKey, string variableKey,
+            string userId, UserAttributes userAttributes = null
+        );
+
+        /// <summary>
+        /// Get the values of all variables in the feature.
+        /// </summary>
+        /// <param name="featureKey">The feature flag key</param>
+        /// <param name="userId">The user ID</param>
+        /// <param name="userAttributes">The user's attributes</param>
+        /// <returns>string | null An OptimizelyJSON instance for all variable values.</returns>
+        OptimizelyJSON GetAllFeatureVariables(string featureKey, string userId,
+            UserAttributes userAttributes = null
+        );
+
+        /// <summary>
         /// Get the list of features that are enabled for the user.
         /// </summary>
         /// <param name="userId">The user Id</param>
@@ -159,6 +183,11 @@ namespace OptimizelySDK
         /// <returns>List of the feature keys that are enabled for the user.</returns>
         List<string> GetEnabledFeatures(string userId, UserAttributes userAttributes = null);
 
+        /// <summary>
+        /// Get OptimizelyConfig containing experiments and features map
+        /// </summary>
+        /// <returns>OptimizelyConfig Object</returns>
+        OptimizelyConfig GetOptimizelyConfig();
         #endregion
 
 #if USE_ODP
