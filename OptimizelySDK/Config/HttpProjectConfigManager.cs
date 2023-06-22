@@ -19,8 +19,6 @@
 #endif
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Logger;
@@ -141,10 +139,7 @@ namespace OptimizelySDK.Config
             }
 
             // Update Last-Modified header if provided.
-            if (result.Headers.TryGetValues("Last-Modified", out var values))
-            {
-                LastModifiedSince = values.First();
-            }
+            LastModifiedSince = result.Content.Headers.LastModified?.ToString();
 
             if (result.StatusCode == System.Net.HttpStatusCode.NotModified)
             {
@@ -426,12 +421,12 @@ namespace OptimizelySDK.Config
                 configManager.NotifyOnProjectConfigUpdate += () =>
                 {
 #if USE_ODP
-                    NotificationCenterRegistry.GetNotificationCenter(SdkKey).
-                        SendNotifications(
+                    NotificationCenterRegistry.GetNotificationCenter(SdkKey)
+                        .SendNotifications(
                             NotificationCenter.NotificationType.OptimizelyConfigUpdate);
 #endif
-                    NotificationCenter?.SendNotifications(NotificationCenter.NotificationType.
-                        OptimizelyConfigUpdate);
+                    NotificationCenter?.SendNotifications(NotificationCenter.NotificationType
+                        .OptimizelyConfigUpdate);
                 };
 
 
