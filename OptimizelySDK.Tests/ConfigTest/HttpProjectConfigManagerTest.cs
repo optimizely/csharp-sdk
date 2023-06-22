@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright 2019-2021, Optimizely
+ * Copyright 2019-2021, 2023, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,8 @@
  */
 
 using System;
-using System.Diagnostics;
 using System.Net;
 using System.Net.Http;
-using System.Threading;
 using System.Threading.Tasks;
 using Moq;
 using NUnit.Framework;
@@ -50,7 +48,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         }
 
         [Test]
-        public void TestHttpConfigManagerRetreiveProjectConfigByURL()
+        public void TestHttpConfigManagerRetrieveProjectConfigByURL()
         {
             var t = MockSendAsync(TestData.Datafile);
             var httpManager = new HttpProjectConfigManager.Builder().
@@ -76,7 +74,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         [Test]
         public void TestHttpConfigManagerWithInvalidStatus()
         {
-            var t = MockSendAsync(statusCode: HttpStatusCode.Forbidden);
+            MockSendAsync(statusCode: HttpStatusCode.Forbidden);
 
             var httpManager = new HttpProjectConfigManager.Builder().
                 WithUrl("https://cdn.optimizely.com/datafiles/QBw9gFM8oTn7ogY9ANCC1z.json").
@@ -102,7 +100,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         }
 
         [Test]
-        public void TestHttpConfigManagerRetreiveProjectConfigGivenEmptyFormatUseDefaultFormat()
+        public void TestHttpConfigManagerRetrieveProjectConfigGivenEmptyFormatUseDefaultFormat()
         {
             var t = MockSendAsync(TestData.Datafile);
 
@@ -127,7 +125,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         }
 
         [Test]
-        public void TestHttpConfigManagerRetreiveProjectConfigBySDKKey()
+        public void TestHttpConfigManagerRetrieveProjectConfigBySDKKey()
         {
             var t = MockSendAsync(TestData.Datafile);
 
@@ -150,7 +148,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         }
 
         [Test]
-        public void TestHttpConfigManagerRetreiveProjectConfigByFormat()
+        public void TestHttpConfigManagerRetrieveProjectConfigByFormat()
         {
             var t = MockSendAsync(TestData.Datafile);
 
@@ -289,7 +287,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         [Test]
         public void TestHttpConfigManagerSendConfigUpdateNotificationWhenProjectConfigGetsUpdated()
         {
-            var t = MockSendAsync(TestData.Datafile);
+            MockSendAsync(TestData.Datafile);
 
             var httpManager = new HttpProjectConfigManager.Builder().
                 WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z").
@@ -312,7 +310,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         [Test]
         public void TestHttpConfigManagerDoesNotSendConfigUpdateNotificationWhenDatafileIsProvided()
         {
-            var t = MockSendAsync(TestData.Datafile, TimeSpan.FromMilliseconds(100));
+            MockSendAsync(TestData.Datafile, TimeSpan.FromMilliseconds(100));
 
             var httpManager = new HttpProjectConfigManager.Builder().
                 WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z").
