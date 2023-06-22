@@ -139,7 +139,11 @@ namespace OptimizelySDK.Config
             }
 
             // Update Last-Modified header if provided.
-            LastModifiedSince = result.Content.Headers.LastModified?.ToString();
+            if (result.Content.Headers.LastModified.HasValue)
+            {
+                LastModifiedSince = result.Content.Headers.LastModified.ToString();
+                Logger.Log(LogLevel.DEBUG, $"Set LastModifiedSince from response header.");
+            }
 
             if (result.StatusCode == System.Net.HttpStatusCode.NotModified)
             {
