@@ -131,7 +131,6 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
                     { "Last-Modified", new DateTime(2050, 10, 10).ToString("R") },
                 }
             );
-
             var httpManager = new HttpProjectConfigManager.Builder()
                 .WithUrl("https://cdn.optimizely.com/datafiles/QBw9gFM8oTn7ogY9ANCC1z.json")
                 .WithLogger(LoggerMock.Object)

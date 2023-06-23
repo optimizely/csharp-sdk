@@ -37,21 +37,21 @@ namespace OptimizelySDK.Tests.Utils
         {
             var t = new TaskCompletionSource<bool>();
 
-            httpClientMock.Setup(_ => _.SendAsync(It.IsAny<HttpRequestMessage>())).
-                Returns(() =>
+            httpClientMock.Setup(_ => _.SendAsync(It.IsAny<HttpRequestMessage>()))
+                .Returns(() =>
                 {
                     if (delay != null)
                     {
                         // This delay mocks the networking delay. And help to see the behavior when get a datafile with some delay.
                         Task.Delay(delay.Value).Wait();
                     }
-                    
+
                     var responseMessage = new HttpResponseMessage
                     {
                         StatusCode = statusCode,
                         Content = new StringContent(datafile ?? string.Empty),
                     };
-                    
+
                     if (responseContentHeaders != null)
                     {
                         foreach (var header in responseContentHeaders)
@@ -61,8 +61,8 @@ namespace OptimizelySDK.Tests.Utils
                     }
 
                     return Task.FromResult(responseMessage);
-                }).
-                Callback(()
+                })
+                .Callback(()
                     =>
                 {
                     t.SetResult(true);
