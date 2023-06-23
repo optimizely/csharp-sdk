@@ -97,18 +97,22 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         {
             var t = MockSendAsync(
                 datafile: string.Empty,
-                statusCode: HttpStatusCode.NotModified
+                statusCode: HttpStatusCode.NotModified,
+                responseContentHeaders: new Dictionary<string, string>
+                {
+                    { "Last-Modified", new DateTime(2050, 10, 10).ToString("R") },
+                }
             );
 
             var httpManager = new HttpProjectConfigManager.Builder()
                 .WithDatafile(string.Empty)
                 .WithLogger(LoggerMock.Object)
                 .WithPollingInterval(TimeSpan.FromMilliseconds(1000))
-                .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(4000))
+                .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(2000))
                 .WithStartByDefault()
-                .Build();
+                .Build(defer: true);
             httpManager.LastModifiedSince = new DateTime(2020, 4, 4).ToString("R");
-            t.Wait(5000);
+            t.Wait(3000);
 
             LoggerMock.Verify(
                 _ => _.Log(LogLevel.DEBUG, "Set If-Modified-Since in request header."),
@@ -116,7 +120,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
 
             httpManager.Dispose();
         }
-        
+
         [Test]
         public void TestSettingLastModifiedFromResponseHeader()
         {
