@@ -15,6 +15,7 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -92,10 +93,40 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         }
 
         [Test]
-        public void TestSettingLastModifiedHeader()
+        public void TestSettingIfModifiedSinceInRequestHeader()
         {
-            // TODO: Start here
-            MockSendAsync(statusCode: HttpStatusCode.NotModified);
+            var t = MockSendAsync(
+                datafile: string.Empty,
+                statusCode: HttpStatusCode.NotModified
+            );
+
+            var httpManager = new HttpProjectConfigManager.Builder()
+                .WithDatafile(string.Empty)
+                .WithLogger(LoggerMock.Object)
+                .WithPollingInterval(TimeSpan.FromMilliseconds(1000))
+                .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(4000))
+                .WithStartByDefault()
+                .Build();
+            httpManager.LastModifiedSince = new DateTime(2020, 4, 4).ToString("R");
+            t.Wait(5000);
+
+            LoggerMock.Verify(
+                _ => _.Log(LogLevel.DEBUG, "Set If-Modified-Since in request header."),
+                Times.AtLeastOnce);
+
+            httpManager.Dispose();
+        }
+        
+        [Test]
+        public void TestSettingLastModifiedFromResponseHeader()
+        {
+            MockSendAsync(
+                statusCode: HttpStatusCode.OK,
+                responseContentHeaders: new Dictionary<string, string>
+                {
+                    { "Last-Modified", new DateTime(2050, 10, 10).ToString("R") },
+                }
+            );
 
             var httpManager = new HttpProjectConfigManager.Builder()
                 .WithUrl("https://cdn.optimizely.com/datafiles/QBw9gFM8oTn7ogY9ANCC1z.json")
@@ -561,12 +592,13 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
             httpManager.Dispose();
         }
 
-        public Task MockSendAsync(string datafile = null, TimeSpan? delay = null,
-            HttpStatusCode statusCode = HttpStatusCode.OK
+        private Task MockSendAsync(string datafile = null, TimeSpan? delay = null,
+            HttpStatusCode statusCode = HttpStatusCode.OK,
+            Dictionary<string, string> responseContentHeaders = null
         )
         {
             return TestHttpProjectConfigManagerUtil.MockSendAsync(HttpClientMock, datafile, delay,
-                statusCode);
+                statusCode, responseContentHeaders);
         }
 
         #endregion

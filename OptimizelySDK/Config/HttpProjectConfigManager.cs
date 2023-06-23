@@ -19,6 +19,7 @@
 #endif
 
 using System;
+using System.Net;
 using System.Threading.Tasks;
 using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Logger;
@@ -29,7 +30,7 @@ namespace OptimizelySDK.Config
     public class HttpProjectConfigManager : PollingProjectConfigManager
     {
         private string Url;
-        private string LastModifiedSince = string.Empty;
+        internal string LastModifiedSince = string.Empty;
         private string DatafileAccessToken = string.Empty;
 
         private HttpProjectConfigManager(TimeSpan period, string url, TimeSpan blockingTimeout,
@@ -118,6 +119,7 @@ namespace OptimizelySDK.Config
             if (!string.IsNullOrEmpty(LastModifiedSince))
             {
                 request.Headers.Add("If-Modified-Since", LastModifiedSince);
+                Logger.Log(LogLevel.DEBUG, $"Set If-Modified-Since in request header.");
             }
 
             if (!string.IsNullOrEmpty(DatafileAccessToken))
@@ -132,6 +134,12 @@ namespace OptimizelySDK.Config
 
             // Return from here if datafile is not modified.
             var result = httpResponse.Result;
+
+            if (result.StatusCode == HttpStatusCode.NotModified)
+            {
+                return null;
+            }
+            
             if (!result.IsSuccessStatusCode)
             {
                 Logger.Log(LogLevel.ERROR, $"Error fetching datafile \"{result.StatusCode}\"");
@@ -143,11 +151,6 @@ namespace OptimizelySDK.Config
             {
                 LastModifiedSince = result.Content.Headers.LastModified.ToString();
                 Logger.Log(LogLevel.DEBUG, $"Set LastModifiedSince from response header.");
-            }
-
-            if (result.StatusCode == System.Net.HttpStatusCode.NotModified)
-            {
-                return null;
             }
 
             var content = result.Content.ReadAsStringAsync();

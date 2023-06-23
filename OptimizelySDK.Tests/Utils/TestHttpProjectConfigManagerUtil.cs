@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright 2019-2020, Optimizely
+ * Copyright 2019-2020, 2023 Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -28,14 +29,15 @@ namespace OptimizelySDK.Tests.Utils
     /// </summary>
     public static class TestHttpProjectConfigManagerUtil
     {
-        public static Task MockSendAsync(Mock<HttpProjectConfigManager.HttpClient> HttpClientMock,
+        public static Task MockSendAsync(Mock<HttpProjectConfigManager.HttpClient> httpClientMock,
             string datafile = null, TimeSpan? delay = null,
-            HttpStatusCode statusCode = HttpStatusCode.OK
+            HttpStatusCode statusCode = HttpStatusCode.OK,
+            Dictionary<string, string> responseContentHeaders = null
         )
         {
             var t = new TaskCompletionSource<bool>();
 
-            HttpClientMock.Setup(_ => _.SendAsync(It.IsAny<HttpRequestMessage>())).
+            httpClientMock.Setup(_ => _.SendAsync(It.IsAny<HttpRequestMessage>())).
                 Returns(() =>
                 {
                     if (delay != null)
@@ -43,12 +45,22 @@ namespace OptimizelySDK.Tests.Utils
                         // This delay mocks the networking delay. And help to see the behavior when get a datafile with some delay.
                         Task.Delay(delay.Value).Wait();
                     }
-
-                    return Task.FromResult<HttpResponseMessage>(new HttpResponseMessage
+                    
+                    var responseMessage = new HttpResponseMessage
                     {
                         StatusCode = statusCode,
                         Content = new StringContent(datafile ?? string.Empty),
-                    });
+                    };
+                    
+                    if (responseContentHeaders != null)
+                    {
+                        foreach (var header in responseContentHeaders)
+                        {
+                            responseMessage.Content.Headers.Add(header.Key, header.Value);
+                        }
+                    }
+
+                    return Task.FromResult(responseMessage);
                 }).
                 Callback(()
                     =>
@@ -69,7 +81,10 @@ namespace OptimizelySDK.Tests.Utils
             var field = type.GetField("Client",
                 System.Reflection.BindingFlags.Static |
                 System.Reflection.BindingFlags.NonPublic);
-            field.SetValue(new object(), value);
+            if (field != null)
+            {
+                field.SetValue(new object(), value);
+            }
         }
     }
 }
