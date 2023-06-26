@@ -139,7 +139,7 @@ namespace OptimizelySDK.Config
             {
                 return null;
             }
-            
+
             if (!result.IsSuccessStatusCode)
             {
                 Logger.Log(LogLevel.ERROR, $"Error fetching datafile \"{result.StatusCode}\"");
