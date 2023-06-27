@@ -1,11 +1,11 @@
 ﻿/* 
- * Copyright 2019-2021, Optimizely
+ * Copyright 2019-2021, 2023 Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,16 +18,19 @@ using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Logger;
 using OptimizelySDK.Notifications;
 using System;
-using System.Collections.Generic;
+using System.Net;
 using System.Linq;
 using System.Threading.Tasks;
+using OptimizelySDK.ErrorHandler;
+using OptimizelySDK.Logger;
+using OptimizelySDK.Notifications;
 
 namespace OptimizelySDK.Config
 {
     public class HttpProjectConfigManager : PollingProjectConfigManager
     {
         private string Url;
-        private string LastModifiedSince = string.Empty;
+        internal string LastModifiedSince = string.Empty;
         private string DatafileAccessToken = string.Empty;
         private HttpProjectConfigManager(TimeSpan period, string url, TimeSpan blockingTimeout, bool autoUpdate, ILogger logger, IErrorHandler errorHandler) 
             : base(period, blockingTimeout, autoUpdate, logger, errorHandler)
@@ -84,45 +87,59 @@ namespace OptimizelySDK.Config
         static HttpProjectConfigManager()
         {
             Client = new HttpClient();
-        }        
+        }
 
         private string GetRemoteDatafileResponse()
         {
             Logger.Log(LogLevel.DEBUG, $"Making datafile request to url \"{Url}\"");
-            var request = new System.Net.Http.HttpRequestMessage {
+            var request = new System.Net.Http.HttpRequestMessage
+            {
                 RequestUri = new Uri(Url),
                 Method = System.Net.Http.HttpMethod.Get,
             };
 
             // Send If-Modified-Since header if Last-Modified-Since header contains any value.
             if (!string.IsNullOrEmpty(LastModifiedSince))
+            {
                 request.Headers.Add("If-Modified-Since", LastModifiedSince);
-
-            if (!string.IsNullOrEmpty(DatafileAccessToken)) {
-                request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", DatafileAccessToken);
+                Logger.Log(LogLevel.DEBUG, $"Set If-Modified-Since in request header.");
             }
 
-            var httpResponse =  Client.SendAsync(request);
+            if (!string.IsNullOrEmpty(DatafileAccessToken))
+            {
+                request.Headers.Authorization =
+                    new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer",
+                        DatafileAccessToken);
+            }
+
+            var httpResponse = Client.SendAsync(request);
             httpResponse.Wait();
 
             // Return from here if datafile is not modified.
             var result = httpResponse.Result;
-            if (!result.IsSuccessStatusCode) {
+
+            if (result.StatusCode == HttpStatusCode.NotModified)
+            {
+                return null;
+            }
+
+            if (!result.IsSuccessStatusCode)
+            {
                 Logger.Log(LogLevel.ERROR, $"Error fetching datafile \"{result.StatusCode}\"");
                 return null;
             }
 
             // Update Last-Modified header if provided.
-            if (result.Headers.TryGetValues("Last-Modified", out IEnumerable<string> values))
-                LastModifiedSince = values.First();
-
-            if (result.StatusCode == System.Net.HttpStatusCode.NotModified)
-                return null;
+            if (result.Content.Headers.LastModified.HasValue)
+            {
+                LastModifiedSince = result.Content.Headers.LastModified.ToString();
+                Logger.Log(LogLevel.DEBUG, $"Set LastModifiedSince from response header.");
+            }
 
             var content = result.Content.ReadAsStringAsync();
             content.Wait();
 
-            return content.Result;  
+            return content.Result;
         }
 #elif NET40      
         private string GetRemoteDatafileResponse()

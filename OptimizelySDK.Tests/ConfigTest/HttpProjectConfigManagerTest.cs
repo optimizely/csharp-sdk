@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright 2019-2021, Optimizely
+ * Copyright 2019-2021, 2023, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         }
 
         [Test]
-        public void TestHttpConfigManagerRetreiveProjectConfigByURL()
+        public void TestHttpConfigManagerRetrieveProjectConfigByURL()
         {
             var t = MockSendAsync(TestData.Datafile);
             HttpProjectConfigManager httpManager = new HttpProjectConfigManager.Builder()
@@ -90,6 +90,60 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         }
 
         [Test]
+        public void TestSettingIfModifiedSinceInRequestHeader()
+        {
+            var t = MockSendAsync(
+                datafile: string.Empty,
+                statusCode: HttpStatusCode.NotModified,
+                responseContentHeaders: new Dictionary<string, string>
+                {
+                    { "Last-Modified", new DateTime(2050, 10, 10).ToString("R") },
+                }
+            );
+
+            var httpManager = new HttpProjectConfigManager.Builder()
+                .WithDatafile(string.Empty)
+                .WithLogger(LoggerMock.Object)
+                .WithPollingInterval(TimeSpan.FromMilliseconds(1000))
+                .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(2000))
+                .WithStartByDefault()
+                .Build(defer: true);
+            httpManager.LastModifiedSince = new DateTime(2020, 4, 4).ToString("R");
+            t.Wait(3000);
+
+            LoggerMock.Verify(
+                _ => _.Log(LogLevel.DEBUG, "Set If-Modified-Since in request header."),
+                Times.AtLeastOnce);
+
+            httpManager.Dispose();
+        }
+
+        [Test]
+        public void TestSettingLastModifiedFromResponseHeader()
+        {
+            MockSendAsync(
+                statusCode: HttpStatusCode.OK,
+                responseContentHeaders: new Dictionary<string, string>
+                {
+                    { "Last-Modified", new DateTime(2050, 10, 10).ToString("R") },
+                }
+            );
+            var httpManager = new HttpProjectConfigManager.Builder()
+                .WithUrl("https://cdn.optimizely.com/datafiles/QBw9gFM8oTn7ogY9ANCC1z.json")
+                .WithLogger(LoggerMock.Object)
+                .WithPollingInterval(TimeSpan.FromMilliseconds(1000))
+                .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(500))
+                .WithStartByDefault()
+                .Build();
+
+            LoggerMock.Verify(
+                _ => _.Log(LogLevel.DEBUG, "Set LastModifiedSince from response header."),
+                Times.AtLeastOnce);
+
+            httpManager.Dispose();
+        }
+
+        [Test]
         public void TestHttpClientHandler()
         {
             var httpConfigHandler = HttpProjectConfigManager.HttpClient.GetHttpClientHandler();
@@ -97,7 +151,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         }
 
         [Test]
-        public void TestHttpConfigManagerRetreiveProjectConfigGivenEmptyFormatUseDefaultFormat()
+        public void TestHttpConfigManagerRetrieveProjectConfigGivenEmptyFormatUseDefaultFormat()
         {
             var t = MockSendAsync(TestData.Datafile);
 
@@ -121,7 +175,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         }
 
         [Test]
-        public void TestHttpConfigManagerRetreiveProjectConfigBySDKKey()
+        public void TestHttpConfigManagerRetrieveProjectConfigBySDKKey()
         {
             var t = MockSendAsync(TestData.Datafile);
 
@@ -143,7 +197,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         }
 
         [Test]
-        public void TestHttpConfigManagerRetreiveProjectConfigByFormat()
+        public void TestHttpConfigManagerRetrieveProjectConfigByFormat()
         {
             var t = MockSendAsync(TestData.Datafile);
 
@@ -509,10 +563,15 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
 
         }
 
-        public Task MockSendAsync(string datafile = null, TimeSpan? delay = null, HttpStatusCode statusCode = HttpStatusCode.OK)
+        private Task MockSendAsync(string datafile = null, TimeSpan? delay = null,
+            HttpStatusCode statusCode = HttpStatusCode.OK,
+            Dictionary<string, string> responseContentHeaders = null
+        )
         {
-            return TestHttpProjectConfigManagerUtil.MockSendAsync(HttpClientMock, datafile, delay, statusCode);
+            return TestHttpProjectConfigManagerUtil.MockSendAsync(HttpClientMock, datafile, delay,
+                statusCode, responseContentHeaders);
         }
+
         #endregion
     }
 }
