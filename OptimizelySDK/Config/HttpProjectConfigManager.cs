@@ -19,8 +19,7 @@
 #endif
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Logger;
@@ -31,7 +30,7 @@ namespace OptimizelySDK.Config
     public class HttpProjectConfigManager : PollingProjectConfigManager
     {
         private string Url;
-        private string LastModifiedSince = string.Empty;
+        internal string LastModifiedSince = string.Empty;
         private string DatafileAccessToken = string.Empty;
 
         private HttpProjectConfigManager(TimeSpan period, string url, TimeSpan blockingTimeout,
@@ -120,6 +119,7 @@ namespace OptimizelySDK.Config
             if (!string.IsNullOrEmpty(LastModifiedSince))
             {
                 request.Headers.Add("If-Modified-Since", LastModifiedSince);
+                Logger.Log(LogLevel.DEBUG, $"Set If-Modified-Since in request header.");
             }
 
             if (!string.IsNullOrEmpty(DatafileAccessToken))
@@ -134,6 +134,12 @@ namespace OptimizelySDK.Config
 
             // Return from here if datafile is not modified.
             var result = httpResponse.Result;
+
+            if (result.StatusCode == HttpStatusCode.NotModified)
+            {
+                return null;
+            }
+
             if (!result.IsSuccessStatusCode)
             {
                 Logger.Log(LogLevel.ERROR, $"Error fetching datafile \"{result.StatusCode}\"");
@@ -141,14 +147,10 @@ namespace OptimizelySDK.Config
             }
 
             // Update Last-Modified header if provided.
-            if (result.Headers.TryGetValues("Last-Modified", out var values))
+            if (result.Content.Headers.LastModified.HasValue)
             {
-                LastModifiedSince = values.First();
-            }
-
-            if (result.StatusCode == System.Net.HttpStatusCode.NotModified)
-            {
-                return null;
+                LastModifiedSince = result.Content.Headers.LastModified.ToString();
+                Logger.Log(LogLevel.DEBUG, $"Set LastModifiedSince from response header.");
             }
 
             var content = result.Content.ReadAsStringAsync();
@@ -426,12 +428,12 @@ namespace OptimizelySDK.Config
                 configManager.NotifyOnProjectConfigUpdate += () =>
                 {
 #if USE_ODP
-                    NotificationCenterRegistry.GetNotificationCenter(SdkKey).
-                        SendNotifications(
+                    NotificationCenterRegistry.GetNotificationCenter(SdkKey)
+                        .SendNotifications(
                             NotificationCenter.NotificationType.OptimizelyConfigUpdate);
 #endif
-                    NotificationCenter?.SendNotifications(NotificationCenter.NotificationType.
-                        OptimizelyConfigUpdate);
+                    NotificationCenter?.SendNotifications(NotificationCenter.NotificationType
+                        .OptimizelyConfigUpdate);
                 };
 
 
