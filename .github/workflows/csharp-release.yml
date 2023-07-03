@@ -1,4 +1,4 @@
-﻿name: Trigger Publish
+﻿name: Trigger Deployment Workflow
 
 on:
   release:

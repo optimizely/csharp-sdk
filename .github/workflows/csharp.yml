@@ -1,4 +1,4 @@
-name: Csharp CI with .NET
+name: Continuous Integration
 
 on:
   push:
