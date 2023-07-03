@@ -75,18 +75,8 @@ jobs:
         run: |
           Get-ChildItem -Recurse -Exclude '.*Tests.*' -Include 'OptimizelySDK*.dll' |
           Where-Object { $_.DirectoryName -match '\\bin\\Release' } |
-          Foreach-Object { & $env:WINDOWS_2019_SN_PATH -R $_.FullName ./keypair.snk }       
-      - name: Upload to AWS S3
-        if: steps.unit_tests.outcome == 'success' && env.CURRENT_BRANCH == env.RELEASE_BRANCH && env.EVENT_TYPE == 'push'
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.OFTA_KEY }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.OFTA_SECRET }}
-          AWS_DEFAULT_REGION: ${{ secrets.OFTA_REGION }}
-        run: |
-          Install-Module -Name AWS.Tools.Installer -Force;
-          Install-AWSToolsModule AWS.Tools.S3 -Force -CleanUp;
-          Get-ChildItem -Recurse -Exclude '.*Tests.*' -include 'OptimizelySDK*.dll' | Where-Object { $_.DirectoryName -match '\\bin\\Release' } | Foreach-Object { aws s3 cp $_.FullName s3://optly-fs-travisci-artifacts/${{ env.REPO_SLUG }}/${{ env.BUILD_NUMBER }}/${{ env.RUN_NUMBER }}/${{ env.ATTEMPT_NUM }}/$($_.Name)-unsigned }
-  
+          Foreach-Object { & $env:WINDOWS_2019_SN_PATH -R $_.FullName ./keypair.snk }
+          
   netStandard16:
     name: Build Standard 1.6
     runs-on: windows-2022
@@ -109,14 +99,6 @@ jobs:
       - name: Build & strongly name assemblies
         id: netStandard16_build
         run: dotnet build OptimizelySDK.NetStandard16/OptimizelySDK.NetStandard16.csproj /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=D:\a\csharp-sdk\csharp-sdk\keypair.snk -c Release
-      - name: Upload to AWS S3
-        if: steps.netStandard16_build.outcome == 'success' && env.CURRENT_BRANCH == env.RELEASE_BRANCH && env.EVENT_TYPE == 'push'
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.OFTA_KEY }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.OFTA_SECRET }}
-          AWS_DEFAULT_REGION: ${{ secrets.OFTA_REGION }}
-        run: |
-          (aws s3 cp ./OptimizelySDK.NetStandard16/bin/Release/netstandard1.6/OptimizelySDK.NetStandard16.dll s3://optly-fs-travisci-artifacts/${{ env.REPO_SLUG }}/${{ env.BUILD_NUMBER }}/${{ env.RUN_NUMBER }}/${{ env.ATTEMPT_NUM }}/OptimizelySDK.NetStandard16.dll-unsigned)
 
   netStandard20:
     name: Build Standard 2.0
@@ -140,11 +122,3 @@ jobs:
       - name: Build & strongly name assemblies
         id: netStandard20_build
         run: dotnet build OptimizelySDK.NetStandard20/OptimizelySDK.NetStandard20.csproj /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=D:\a\csharp-sdk\csharp-sdk\keypair.snk -c Release
-      - name: Upload to AWS S3
-        if: steps.netStandard20_build.outcome == 'success' && env.CURRENT_BRANCH == env.RELEASE_BRANCH && env.EVENT_TYPE == 'push'
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.OFTA_KEY }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.OFTA_SECRET }}
-          AWS_DEFAULT_REGION: ${{ secrets.OFTA_REGION }}
-        run: |
-          (aws s3 cp ./OptimizelySDK.NetStandard20/bin/Release/netstandard2.0/OptimizelySDK.NetStandard20.dll s3://optly-fs-travisci-artifacts/${{ env.REPO_SLUG }}/${{ env.BUILD_NUMBER }}/${{ env.RUN_NUMBER }}/${{ env.ATTEMPT_NUM }}/OptimizelySDK.NetStandard20.dll-unsigned)
