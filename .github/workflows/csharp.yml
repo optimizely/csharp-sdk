@@ -43,15 +43,15 @@ jobs:
       - name: Setup NuGet
         uses: NuGet/setup-nuget@v1
       - name: Restore NuGet packages
-        run: nuget restore ./OptimizelySDK.Travis.sln
-      - name: Build & strongly name assemblies
         # OptimizelySDK.Travis.sln isolates the .NET Framework projects from the .NET Standard projects
-        run: msbuild /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=$(pwd)/keypair.snk /p:Configuration=Release ./OptimizelySDK.Travis.sln
+        run: nuget restore ./OptimizelySDK.Travis.sln
       - name: Install NUnit Console
         run: nuget install NUnit.Console -Version 3.15.2 -DirectDownload -OutputDirectory .
       - name: Run NUnit tests
         # https://docs.nunit.org/articles/nunit/running-tests/Console-Command-Line.html
         run: ./NUnit.ConsoleRunner.3.15.2\tools\nunit3-console.exe /timeout 10000 /process Separate ./OptimizelySDK.Tests/bin/Release/OptimizelySDK.Tests.dll
+      - name: Build & strongly name assemblies
+        run: msbuild /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=$(pwd)/keypair.snk /p:Configuration=Release ./OptimizelySDK.Travis.sln
           
   netStandard16:
     name: Build Standard 1.6
