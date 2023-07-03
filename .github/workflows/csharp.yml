@@ -2,7 +2,7 @@ name: Continuous Integration
 
 on:
   push:
-    branches: [ master, mike/remote-build-on-release ]
+    branches: [ master ]
   pull_request:
     branches: [ master ]
 
@@ -108,7 +108,7 @@ jobs:
       TRAVIS_COM_TOKEN: ${{ secrets.TRAVIS_COM_TOKEN }}
   
   fullstack_production_suite:
-    name: Run Production Performance Tests
+    name: Run Performance Tests
     needs: [ netFrameworksAndUnitTest, netStandard16, netStandard20 ]
     uses: optimizely/csharp-sdk/.github/workflows/integration_test.yml@master
     with:
