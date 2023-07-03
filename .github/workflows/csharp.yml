@@ -35,7 +35,6 @@ jobs:
       RUN_NUMBER: ${{ github.run_number }}
       EVENT_TYPE: ${{ github.event_name }}
       CURRENT_BRANCH: ${{ github.head_ref || github.ref_name }}
-      WINDOWS_2019_SN_PATH: C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.8 Tools\sn.exe
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -45,19 +44,14 @@ jobs:
         uses: NuGet/setup-nuget@v1
       - name: Restore NuGet packages
         run: nuget restore ./OptimizelySDK.Travis.sln
-      - name: Build solution
+      - name: Build & strongly name assemblies
+        # OptimizelySDK.Travis.sln isolates the .NET Framework projects from the .NET Standard projects
         run: msbuild /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=$(pwd)/keypair.snk /p:Configuration=Release ./OptimizelySDK.Travis.sln
       - name: Install NUnit Console
         run: nuget install NUnit.Console -Version 3.15.2 -DirectDownload -OutputDirectory .
       - name: Run NUnit tests
         # https://docs.nunit.org/articles/nunit/running-tests/Console-Command-Line.html
         run: ./NUnit.ConsoleRunner.3.15.2\tools\nunit3-console.exe /timeout 10000 /process Separate ./OptimizelySDK.Tests/bin/Release/OptimizelySDK.Tests.dll
-      - name: Apply strongly named key to DLLs
-        id: unit_tests
-        run: |
-          Get-ChildItem -Recurse -Exclude '.*Tests.*' -Include 'OptimizelySDK*.dll' |
-          Where-Object { $_.DirectoryName -match '\\bin\\Release' } |
-          Foreach-Object { & $env:WINDOWS_2019_SN_PATH -R $_.FullName ./keypair.snk }
           
   netStandard16:
     name: Build Standard 1.6
@@ -80,7 +74,6 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore OptimizelySDK.NetStandard16/OptimizelySDK.NetStandard16.csproj
       - name: Build & strongly name assemblies
-        id: netStandard16_build
         run: dotnet build OptimizelySDK.NetStandard16/OptimizelySDK.NetStandard16.csproj /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=D:\a\csharp-sdk\csharp-sdk\keypair.snk -c Release
 
   netStandard20:
@@ -104,7 +97,6 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore OptimizelySDK.NetStandard20/OptimizelySDK.NetStandard20.csproj
       - name: Build & strongly name assemblies
-        id: netStandard20_build
         run: dotnet build OptimizelySDK.NetStandard20/OptimizelySDK.NetStandard20.csproj /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=D:\a\csharp-sdk\csharp-sdk\keypair.snk -c Release
   
   integration_tests:
