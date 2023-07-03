@@ -25,7 +25,7 @@ jobs:
           VALIDATE_CSHARP: true
 
   netFrameworksAndUnitTest:
-    name: Build & Run Unit Tests
+    name: Build Framework & Run Unit Tests
     needs: [ lintCodebase]
     runs-on: windows-2019 # required version for Framework 4.0
     env:
