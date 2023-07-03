@@ -5,7 +5,7 @@ on:
     branches: [ master, mike/remote-build-on-release ]
   pull_request:
     branches: [ master ]
-    
+
 jobs:
   lintCodebase:
     runs-on: ubuntu-latest
@@ -26,7 +26,7 @@ jobs:
 
   netFrameworksAndUnitTest:
     name: Build Framework & Run Unit Tests
-    needs: [ lintCodebase]
+    needs: [ lintCodebase ]
     runs-on: windows-2019 # required version for Framework 4.0
     env:
       REPO_SLUG: ${{ github.repository }}
@@ -52,7 +52,7 @@ jobs:
         run: ./NUnit.ConsoleRunner.3.15.2\tools\nunit3-console.exe /timeout 10000 /process Separate ./OptimizelySDK.Tests/bin/Release/OptimizelySDK.Tests.dll
       - name: Build & strongly name assemblies
         run: msbuild /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=$(pwd)/keypair.snk /p:Configuration=Release ./OptimizelySDK.Travis.sln
-          
+  
   netStandard16:
     name: Build Standard 1.6
     needs: [ netFrameworksAndUnitTest ]
@@ -108,7 +108,7 @@ jobs:
       TRAVIS_COM_TOKEN: ${{ secrets.TRAVIS_COM_TOKEN }}
   
   fullstack_production_suite:
-    name: Run Feature Experimentation Compatibility Suite
+    name: Run Production Performance Tests
     needs: [ netFrameworksAndUnitTest, netStandard16, netStandard20 ]
     uses: optimizely/csharp-sdk/.github/workflows/integration_test.yml@master
     with:
