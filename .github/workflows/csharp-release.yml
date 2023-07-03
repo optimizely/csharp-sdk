@@ -1,11 +1,11 @@
-﻿name: Trigger Release Publish
+﻿name: Trigger Publish
 
 on:
   release:
     types: [ published ]
-  workflow_dispatch: 
-    inputs: 
-      test_tag: 
+  workflow_dispatch:
+    inputs:
+      test_tag:
         description: 'Tag to test'
         required: true
         default: '0.0.0'
@@ -15,10 +15,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Set TAG environment variable
+      - name: Set TAG environment variable from workflow_dispatch
         if: github.event_name == 'workflow_dispatch' # Check if workflow was manually triggered
         run: echo "TAG=${{ github.event.inputs.test_tag }}" >> $GITHUB_ENV
-      - name: Set TAG environment variable
+      - name: Set TAG environment variable from release tag
         if: github.event_name == 'release' # Check if workflow was triggered by a release event
         run: echo "TAG=${{ github.event.release.tag_name }}" >> $GITHUB_ENV
       - name: Trigger remote workflow

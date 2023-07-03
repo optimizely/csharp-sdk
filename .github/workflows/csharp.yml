@@ -1,11 +1,10 @@
----
 name: Csharp CI with .NET
 
 on:
   push:
-    branches: [master]
+    branches: [ master ]
   pull_request:
-    branches: [master]
+    branches: [ master ]
 
 env:
   RELEASE_BRANCH: "master"
@@ -21,14 +20,14 @@ jobs:
         with:
           # Full git history is needed to get a proper list of changed files
           fetch-depth: 0
-      - name: Lint codebase
+      - name: Run Super-Linter
         uses: github/super-linter@v4
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VALIDATE_ALL_CODEBASE: false
           DEFAULT_BRANCH: master
           VALIDATE_CSHARP: true
-          
+  
   integration_tests:
     name: Run Integration Tests
     uses: optimizely/csharp-sdk/.github/workflows/integration_test.yml@master
@@ -37,7 +36,7 @@ jobs:
       TRAVIS_COM_TOKEN: ${{ secrets.TRAVIS_COM_TOKEN }}
   
   fullstack_production_suite:
-    name: Run Optimizely Feature Experimentation Compatibility Suite
+    name: Run Feature Experimentation Compatibility Suite
     uses: optimizely/csharp-sdk/.github/workflows/integration_test.yml@master
     with:
       FULLSTACK_TEST_REPO: ProdTesting
@@ -46,7 +45,7 @@ jobs:
       TRAVIS_COM_TOKEN: ${{ secrets.TRAVIS_COM_TOKEN }}
 
   unit_test:
-    name: Build and Run Unit Tests
+    name: Build & Run Unit Tests
     runs-on: windows-2019 # required version for Framework 4.0
     env:
       REPO_SLUG: ${{ github.repository }}
@@ -71,13 +70,13 @@ jobs:
       - name: Run NUnit tests
         # https://docs.nunit.org/articles/nunit/running-tests/Console-Command-Line.html
         run: ./NUnit.ConsoleRunner.3.15.2\tools\nunit3-console.exe /timeout 10000 /process Separate ./OptimizelySDK.Tests/bin/Release/OptimizelySDK.Tests.dll
-      - name: Find and sign all DLLs
+      - name: Apply strongly named key to DLLs
         id: unit_tests
         run: |
           Get-ChildItem -Recurse -Exclude '.*Tests.*' -Include 'OptimizelySDK*.dll' |
           Where-Object { $_.DirectoryName -match '\\bin\\Release' } |
           Foreach-Object { & $env:WINDOWS_2019_SN_PATH -R $_.FullName ./keypair.snk }       
-      - name: Install AWS CLI, deploy to S3 on successful tests & for release
+      - name: Upload to AWS S3
         if: steps.unit_tests.outcome == 'success' && env.CURRENT_BRANCH == env.RELEASE_BRANCH && env.EVENT_TYPE == 'push'
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.OFTA_KEY }}
@@ -89,7 +88,7 @@ jobs:
           Get-ChildItem -Recurse -Exclude '.*Tests.*' -include 'OptimizelySDK*.dll' | Where-Object { $_.DirectoryName -match '\\bin\\Release' } | Foreach-Object { aws s3 cp $_.FullName s3://optly-fs-travisci-artifacts/${{ env.REPO_SLUG }}/${{ env.BUILD_NUMBER }}/${{ env.RUN_NUMBER }}/${{ env.ATTEMPT_NUM }}/$($_.Name)-unsigned }
   
   netStandard16:
-    name: Build For .NET Standard 1.6
+    name: Build Standard 1.6
     runs-on: windows-2022
     env:
       REPO_SLUG: ${{ github.repository }}
@@ -107,10 +106,10 @@ jobs:
           dotnet-version: 3.1.x
       - name: Restore dependencies
         run: dotnet restore OptimizelySDK.NetStandard16/OptimizelySDK.NetStandard16.csproj
-      - name: Build and sign Standard 1.6 project
+      - name: Build & strongly name assemblies
         id: netStandard16_build
         run: dotnet build OptimizelySDK.NetStandard16/OptimizelySDK.NetStandard16.csproj /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=D:\a\csharp-sdk\csharp-sdk\keypair.snk -c Release
-      - name: Check on success
+      - name: Upload to AWS S3
         if: steps.netStandard16_build.outcome == 'success' && env.CURRENT_BRANCH == env.RELEASE_BRANCH && env.EVENT_TYPE == 'push'
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.OFTA_KEY }}
@@ -120,7 +119,7 @@ jobs:
           (aws s3 cp ./OptimizelySDK.NetStandard16/bin/Release/netstandard1.6/OptimizelySDK.NetStandard16.dll s3://optly-fs-travisci-artifacts/${{ env.REPO_SLUG }}/${{ env.BUILD_NUMBER }}/${{ env.RUN_NUMBER }}/${{ env.ATTEMPT_NUM }}/OptimizelySDK.NetStandard16.dll-unsigned)
 
   netStandard20:
-    name: Build For .NET Standard 2.0
+    name: Build Standard 2.0
     runs-on: windows-2022
     env:
       REPO_SLUG: ${{ github.repository }}
@@ -138,10 +137,10 @@ jobs:
           dotnet-version: 3.1.x
       - name: Restore dependencies
         run: dotnet restore OptimizelySDK.NetStandard20/OptimizelySDK.NetStandard20.csproj
-      - name: Build and sign Standard 2.0 project
+      - name: Build & strongly name assemblies
         id: netStandard20_build
         run: dotnet build OptimizelySDK.NetStandard20/OptimizelySDK.NetStandard20.csproj /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=D:\a\csharp-sdk\csharp-sdk\keypair.snk -c Release
-      - name: Check on success
+      - name: Upload to AWS S3
         if: steps.netStandard20_build.outcome == 'success' && env.CURRENT_BRANCH == env.RELEASE_BRANCH && env.EVENT_TYPE == 'push'
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.OFTA_KEY }}
