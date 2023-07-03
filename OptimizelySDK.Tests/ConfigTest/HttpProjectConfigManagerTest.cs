@@ -21,6 +21,7 @@ using OptimizelySDK.Logger;
 using OptimizelySDK.Tests.NotificationTests;
 using OptimizelySDK.Tests.Utils;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
 using System.Net.Http;
