@@ -1,0 +1,22 @@
+﻿name: Trigger Release Workflow
+
+on:
+  release:
+    types: [ published ] # Trigger only on published pre-releases and releases
+
+jobs:
+  triggerRemoteWorkflow:
+    runs-on: ubuntu-latest
+    env: 
+      # ⚠️ IMPORTANT: tag should always start with integer & will be used verbatim to string end
+      TAG: ${{ github.event.release.tag_name }}
+    steps:
+      - name: Trigger remote workflow
+        uses: convictional/trigger-workflow-and-wait@v1.6.1
+        with:
+          owner: optimizely
+          repo: csharp-sdk-codesign
+          ref: master
+          github_token: ${{ secrets.CI_USER_TOKEN }
+          workflow_file_name: publish.yml
+          client_payload: '{"tag": "${{ env.TAG }}"}'
