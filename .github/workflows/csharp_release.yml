@@ -1,8 +1,11 @@
-﻿name: Trigger Release Workflow
+﻿name: Publish Release To NuGet
 
 on:
   release:
     types: [ published ] # Trigger on published pre-releases and releases
+  # Testing via push to branch
+  push:
+    branches: [ mike/remote-build-on-release ]
 
 jobs:
   variables:
@@ -10,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       # ⚠️ IMPORTANT: tag should always start with integer & will be used verbatim to string end
-      TAG: ${{ github.event.release.tag_name }}
+      TAG: '3.11.2.1' # Testing using previous release ${{ github.event.release.tag_name }}
     outputs:
       tag: ${{ env.TAG }}
       semanticVersion: ${{ steps.set_version.outputs.semantic_version }}
