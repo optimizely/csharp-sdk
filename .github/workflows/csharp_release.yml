@@ -25,6 +25,11 @@ jobs:
             exit 1
           fi
           echo "semantic_version=${SEMANTIC_VERSION}" >> $GITHUB_OUTPUT
+      - name: Output tag & semantic version
+        id: outputs
+        run: |
+          echo ${ env.TAG }
+          echo ${{ steps.set_version.outputs.semantic_version }}
     outputs:
       tag: ${{ env.TAG }}
       semanticVersion: ${{ steps.set_version.outputs.semantic_version }}
@@ -34,7 +39,7 @@ jobs:
     needs: [ variables ]
     runs-on: windows-2019 # required version for Framework 4.0
     steps:
-      - name: Checkout C# SDK code
+      - name: Checkout code
         uses: actions/checkout@v3
         with:
           ref: ${{ needs.variables.outputs.tag }}
@@ -43,7 +48,7 @@ jobs:
       - name: Setup NuGet
         uses: NuGet/setup-nuget@v1
       - name: Restore NuGet packages
-        run: nuget restore ./OptimizelySDK.Travis.sln     
+        run: nuget restore ./OptimizelySDK.Travis.sln
       - name: Build and strongly name assemblies
         run: msbuild /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=$(pwd)/keypair.snk /p:Configuration=Release ./OptimizelySDK.Travis.sln
       - name: Upload Framework artifacts
@@ -58,7 +63,7 @@ jobs:
     needs: [ variables ]
     runs-on: windows-latest
     steps:
-      - name: Checkout C# SDK code
+      - name: Checkout code
         uses: actions/checkout@v3
         with:
           ref: ${{ needs.variables.outputs.tag }}
@@ -80,7 +85,7 @@ jobs:
     needs: [ variables ]
     runs-on: windows-latest
     steps:
-      - name: Checkout C# SDK code
+      - name: Checkout code
         uses: actions/checkout@v3
         with:
           ref: ${{ needs.variables.outputs.tag }}
@@ -107,8 +112,10 @@ jobs:
       # Used by OptimizelySDK.nuspec.template
       VERSION: ${{ needs.variables.outputs.semanticVersion }}
     steps:
-      - name: Checkout code-sign repo
+      - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          ref: ${{ needs.variables.outputs.tag }}
       - name: Install mono
         run: |
           sudo apt update
