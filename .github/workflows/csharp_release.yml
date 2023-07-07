@@ -19,9 +19,9 @@ jobs:
         id: set_version
         run: |
           TAG=${{ env.TAG }}
-          SEMANTIC_VERSION=$(echo "${TAG}" | grep -Eo "[^0-9]*([0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+)?(-[a-zA-Z]+[0-9]*)?)")
+          SEMANTIC_VERSION=$(echo "${TAG}" | grep -Po "(?<=^|[^0-9])([0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+)?(-[a-zA-Z]+[0-9]*)?)")
           if [ -z "${SEMANTIC_VERSION}" ]; then
-            echo "Tag didn't contain a semantic version number (e.g., #.#.# or #.#.#.#)"
+            echo "Tag did not start with a semantic version number (e.g., #.#.#; #.#.#.#; #.#.#.#-beta)"
             exit 1
           fi
           echo "semantic_version=${SEMANTIC_VERSION}" >> $GITHUB_OUTPUT
