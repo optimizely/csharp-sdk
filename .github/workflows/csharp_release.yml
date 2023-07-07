@@ -44,7 +44,7 @@ jobs:
         uses: NuGet/setup-nuget@v1
       - name: Restore NuGet packages
         run: nuget restore ./OptimizelySDK.Travis.sln     
-      - name: Build solution
+      - name: Build and strongly name assemblies
         run: msbuild /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=$(pwd)/keypair.snk /p:Configuration=Release ./OptimizelySDK.Travis.sln
       - name: Upload Framework artifacts
         uses: actions/upload-artifact@v2
@@ -66,7 +66,7 @@ jobs:
         uses: actions/setup-dotnet@v2
       - name: Restore dependencies
         run: dotnet restore OptimizelySDK.NetStandard16/OptimizelySDK.NetStandard16.csproj
-      - name: Build and sign Standard 1.6 project
+      - name: Build and strongly name assemblies
         run: dotnet build OptimizelySDK.NetStandard16/OptimizelySDK.NetStandard16.csproj /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=$(pwd)/keypair.snk -c Release
       - name: Upload Standard 1.6 artifact
         uses: actions/upload-artifact@v2
@@ -88,9 +88,9 @@ jobs:
         uses: actions/setup-dotnet@v2
       - name: Restore dependencies
         run: dotnet restore OptimizelySDK.NetStandard20/OptimizelySDK.NetStandard20.csproj
-      - name: Build and sign Standard 2.0 project
+      - name: Build and strongly name Standard 2.0 project
         run: dotnet build OptimizelySDK.NetStandard20/OptimizelySDK.NetStandard20.csproj /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=$(pwd)/keypair.snk -c Release
-      - name: Upload Standard 2.0 artifact
+      - name: Build and strongly name assemblies
         uses: actions/upload-artifact@v2
         with:
           name: nuget-files
