@@ -13,10 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       # ⚠️ IMPORTANT: tag should always start with integer & will be used verbatim to string end
-      TAG: '3.11.2.1' # Testing using previous release ${{ github.event.release.tag_name }}
-    outputs:
-      tag: ${{ env.TAG }}
-      semanticVersion: ${{ steps.set_version.outputs.semantic_version }}
+      TAG: 'v3.11.2.1' # Testing using previous release ${{ github.event.release.tag_name }}
     steps:
       - name: Set semantic version variable
         id: set_version
@@ -28,6 +25,9 @@ jobs:
             exit 1
           fi
           echo "semantic_version=${SEMANTIC_VERSION}" >> $GITHUB_OUTPUT
+    outputs:
+      tag: ${{ env.TAG }}
+      semanticVersion: ${{ steps.set_version.outputs.semantic_version }}
   
   buildFrameworkVersions:
     name: Build Framework versions
