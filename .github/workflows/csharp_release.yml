@@ -58,49 +58,49 @@ jobs:
           if-no-files-found: error
           path: ./**/bin/Release/**/Optimizely*.dll
 
-#  buildStandard16:
-#    name: Build Standard 1.6 version
-#    needs: [ variables ]
-#    runs-on: windows-latest
-#    steps:
-#      - name: Checkout code
-#        uses: actions/checkout@v3
-#        with:
-#          ref: ${{ needs.variables.outputs.tag }}
-#      - name: Setup .NET
-#        uses: actions/setup-dotnet@v2
-#      - name: Restore dependencies
-#        run: dotnet restore OptimizelySDK.NetStandard16/OptimizelySDK.NetStandard16.csproj
-#      - name: Build and strongly name assemblies
-#        run: dotnet build OptimizelySDK.NetStandard16/OptimizelySDK.NetStandard16.csproj /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=$(pwd)/keypair.snk -c Release
-#      - name: Upload Standard 1.6 artifact
-#        uses: actions/upload-artifact@v2
-#        with:
-#          name: nuget-files
-#          if-no-files-found: error
-#          path: ./**/bin/Release/**/Optimizely*.dll
-#
-#  buildStandard20:
-#    name: Build Standard 2.0 version
-#    needs: [ variables ]
-#    runs-on: windows-latest
-#    steps:
-#      - name: Checkout code
-#        uses: actions/checkout@v3
-#        with:
-#          ref: ${{ needs.variables.outputs.tag }}
-#      - name: Setup .NET
-#        uses: actions/setup-dotnet@v2
-#      - name: Restore dependencies
-#        run: dotnet restore OptimizelySDK.NetStandard20/OptimizelySDK.NetStandard20.csproj
-#      - name: Build and strongly name Standard 2.0 project
-#        run: dotnet build OptimizelySDK.NetStandard20/OptimizelySDK.NetStandard20.csproj /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=$(pwd)/keypair.snk -c Release
-#      - name: Build and strongly name assemblies
-#        uses: actions/upload-artifact@v2
-#        with:
-#          name: nuget-files
-#          if-no-files-found: error
-#          path: ./**/bin/Release/**/Optimizely*.dll
+  buildStandard16:
+    name: Build Standard 1.6 version
+    needs: [ variables ]
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ needs.variables.outputs.tag }}
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v2
+      - name: Restore dependencies
+        run: dotnet restore OptimizelySDK.NetStandard16/OptimizelySDK.NetStandard16.csproj
+      - name: Build and strongly name assemblies
+        run: dotnet build OptimizelySDK.NetStandard16/OptimizelySDK.NetStandard16.csproj /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=$(pwd)/keypair.snk -c Release
+      - name: Upload Standard 1.6 artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: nuget-files
+          if-no-files-found: error
+          path: ./**/bin/Release/**/Optimizely*.dll
+
+  buildStandard20:
+    name: Build Standard 2.0 version
+    needs: [ variables ]
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ needs.variables.outputs.tag }}
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v2
+      - name: Restore dependencies
+        run: dotnet restore OptimizelySDK.NetStandard20/OptimizelySDK.NetStandard20.csproj
+      - name: Build and strongly name Standard 2.0 project
+        run: dotnet build OptimizelySDK.NetStandard20/OptimizelySDK.NetStandard20.csproj /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=$(pwd)/keypair.snk -c Release
+      - name: Build and strongly name assemblies
+        uses: actions/upload-artifact@v2
+        with:
+          name: nuget-files
+          if-no-files-found: error
+          path: ./**/bin/Release/**/Optimizely*.dll
 
   pack:
     name: Sign & pack NuGet package
@@ -138,6 +138,8 @@ jobs:
           mv ../nuget-files/OptimizelySDK.Net35.dll lib/net35/
           mv ../nuget-files/OptimizelySDK.Net40.dll lib/net40/
           mv ../nuget-files/OptimizelySDK.dll lib/net45/
+          mv ../nuget-files/OptimizelySDK.NetStandard16.dll lib/netstandard1.6/
+          mv ../nuget-files/OptimizelySDK.NetStandard20.dll lib/netstandard2.0/
           popd
       - name: Setup signing prerequisites
         run: |
