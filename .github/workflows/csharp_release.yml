@@ -171,7 +171,7 @@ jobs:
       - name: Create nuspec
         run: |
           chmod +x ./OptimizelySDK.nuspec.template
-          COPYRIGHT_YEAR=$(date +%Y) ./OptimizelySDK.nuspec.template > ./nuget/OptimizelySDK.nuspec
+          ./OptimizelySDK.nuspec.template
       - name: Pack NuGet package
         run: |
           pushd ./nuget

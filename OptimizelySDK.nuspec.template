@@ -1,4 +1,8 @@
-﻿cat <<EOF
+﻿#!/bin/bash
+
+COPYRIGHT_YEAR=$(date +%Y)
+
+cat > ./nuget/OptimizelySDK.nuspec <<EOF
 <?xml version="1.0" encoding="utf-8"?>
 <package>
     <metadata>
