@@ -106,11 +106,6 @@ jobs:
     name: Sign & pack NuGet package
     needs: [ variables, buildFrameworkVersions, buildStandard16, buildStandard20 ]
     runs-on: ubuntu-latest
-    env:
-      CERTIFICATE_P12: ${{ secrets.CERTIFICATE_P12 }}
-      CERTIFICATE_PASSWORD: ${{ secrets.CERTIFICATE_PASSWORD }}
-      # Used by OptimizelySDK.nuspec.template
-      VERSION: ${{ needs.variables.outputs.semanticVersion }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -141,7 +136,10 @@ jobs:
           mv ../nuget-files/OptimizelySDK.NetStandard16.dll lib/netstandard1.6/
           mv ../nuget-files/OptimizelySDK.NetStandard20.dll lib/netstandard2.0/
           popd
-      - name: Setup signing prerequisites
+      - name: Setup signing prerequisites        
+        env:
+          CERTIFICATE_P12: ${{ secrets.CERTIFICATE_P12 }}
+          CERTIFICATE_PASSWORD: ${{ secrets.CERTIFICATE_PASSWORD }}
         run: |
           pushd ./nuget
           echo $CERTIFICATE_P12 | base64 --decode > authenticode.pfx
@@ -169,6 +167,8 @@ jobs:
           rm *.spc *.pem *.pvk *.pfx
           popd
       - name: Create nuspec
+        env:
+          VERSION: ${{ needs.variables.outputs.semanticVersion }}
         run: |
           chmod +x ./OptimizelySDK.nuspec.template
           ./OptimizelySDK.nuspec.template
@@ -198,7 +198,7 @@ jobs:
           path: ./nuget
       - name: Setup .NET
         uses: actions/setup-dotnet@v3
-      - name: Publish NuGet package 
+      - name: Publish NuGet package
         # Unset secrets.NUGET_API_KEY to simulate dry run
         run: |
           dotnet nuget push ./nuget/Optimizely.SDK.${{ env.VERSION }}.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }}
