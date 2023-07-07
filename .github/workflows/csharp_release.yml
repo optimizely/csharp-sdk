@@ -3,9 +3,6 @@
 on:
   release:
     types: [ published ] # Trigger on published pre-releases and releases
-  # Testing via push to branch
-  push:
-    branches: [ mike/remote-build-on-release ]
 
 jobs:
   variables:
@@ -13,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       # ⚠️ IMPORTANT: tag should always start with integer & will be used verbatim to string end
-      TAG: 'v3.11.2.1' # Testing using previous release ${{ github.event.release.tag_name }}
+      TAG: ${{ github.event.release.tag_name }}
     steps:
       - name: Set semantic version variable
         id: set_version
@@ -48,9 +45,9 @@ jobs:
       - name: Setup NuGet
         uses: NuGet/setup-nuget@v1
       - name: Restore NuGet packages
-        run: nuget restore ./OptimizelySDK.Travis.sln
+        run: nuget restore ./OptimizelySDK.NETFramework.sln
       - name: Build and strongly name assemblies
-        run: msbuild /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=$(pwd)/keypair.snk /p:Configuration=Release ./OptimizelySDK.Travis.sln
+        run: msbuild /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=$(pwd)/keypair.snk /p:Configuration=Release ./OptimizelySDK.NETFramework.sln
       - name: Upload Framework artifacts
         uses: actions/upload-artifact@v2
         with:
@@ -106,11 +103,13 @@ jobs:
     name: Sign & pack NuGet package
     needs: [ variables, buildFrameworkVersions, buildStandard16, buildStandard20 ]
     runs-on: ubuntu-latest
+    env:
+      VERSION: ${{ needs.variables.outputs.semanticVersion }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          ref: mike/remote-build-on-release
+          ref: ${{ needs.variables.outputs.tag }}
       - name: Install mono
         run: |
           sudo apt update
@@ -167,8 +166,7 @@ jobs:
           rm *.spc *.pem *.pvk *.pfx
           popd
       - name: Create nuspec
-        env:
-          VERSION: ${{ needs.variables.outputs.semanticVersion }}
+        # Uses env.VERSION in OptimizelySDK.nuspec.template
         run: |
           chmod +x ./OptimizelySDK.nuspec.template
           ./OptimizelySDK.nuspec.template
