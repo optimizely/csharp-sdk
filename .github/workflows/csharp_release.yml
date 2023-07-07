@@ -198,9 +198,7 @@ jobs:
           path: ./nuget
       - name: Setup .NET
         uses: actions/setup-dotnet@v3
-      - name: Publish NuGet package (TODO Set secrets.NUGET_API_KEY; simulating dry-run)
+      - name: Publish NuGet package 
+        # Unset secrets.NUGET_API_KEY to simulate dry run
         run: |
-          dotnet nuget push \ 
-            ./nuget/Optimizely.SDK.${{ env.VERSION }}.nupkg \ 
-            --source https://api.nuget.org/v3/index.json \ 
-            --api-key ${{ secrets.NUGET_API_KEY }}
+          dotnet nuget push ./nuget/Optimizely.SDK.${{ env.VERSION }}.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }}
