@@ -43,9 +43,9 @@ jobs:
       - name: Setup NuGet
         uses: NuGet/setup-nuget@v1
       - name: Restore NuGet packages
-        run: nuget restore ./OptimizelySDK.NETFramework.sln     
+        run: nuget restore ./OptimizelySDK.Travis.sln     
       - name: Build solution
-        run: msbuild /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=$(pwd)/keypair.snk /p:Configuration=Release ./OptimizelySDK.NETFramework.sln
+        run: msbuild /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=$(pwd)/keypair.snk /p:Configuration=Release ./OptimizelySDK.Travis.sln
       - name: Upload Framework artifacts
         uses: actions/upload-artifact@v2
         with:
