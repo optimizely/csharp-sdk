@@ -170,6 +170,7 @@ jobs:
           popd
       - name: Create nuspec
         run: |
+          chmod +x ./OptimizelySDK.nuspec.template
           COPYRIGHT_YEAR=$(date +%Y) ./OptimizelySDK.nuspec.template > ./nuget/OptimizelySDK.nuspec
       - name: Pack NuGet package
         run: |
