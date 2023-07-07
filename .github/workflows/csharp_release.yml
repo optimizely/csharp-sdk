@@ -28,7 +28,7 @@ jobs:
       - name: Output tag & semantic version
         id: outputs
         run: |
-          echo ${ env.TAG }
+          echo ${{ env.TAG }}
           echo ${{ steps.set_version.outputs.semantic_version }}
     outputs:
       tag: ${{ env.TAG }}
