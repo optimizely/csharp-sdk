@@ -1,0 +1,202 @@
+﻿name: Publish Release To NuGet
+
+on:
+  release:
+    types: [ published ] # Trigger on published pre-releases and releases
+
+jobs:
+  variables:
+    name: Set Variables
+    runs-on: ubuntu-latest
+    env:
+      # ⚠️ IMPORTANT: tag should always start with integer & will be used verbatim to string end
+      TAG: ${{ github.event.release.tag_name }}
+    steps:
+      - name: Set semantic version variable
+        id: set_version
+        run: |
+          TAG=${{ env.TAG }}
+          SEMANTIC_VERSION=$(echo "${TAG}" | grep -Po "(?<=^|[^0-9])([0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+)?(-[a-zA-Z]+[0-9]*)?)")
+          if [ -z "${SEMANTIC_VERSION}" ]; then
+            echo "Tag did not start with a semantic version number (e.g., #.#.#; #.#.#.#; #.#.#.#-beta)"
+            exit 1
+          fi
+          echo "semantic_version=${SEMANTIC_VERSION}" >> $GITHUB_OUTPUT
+      - name: Output tag & semantic version
+        id: outputs
+        run: |
+          echo ${{ env.TAG }}
+          echo ${{ steps.set_version.outputs.semantic_version }}
+    outputs:
+      tag: ${{ env.TAG }}
+      semanticVersion: ${{ steps.set_version.outputs.semantic_version }}
+  
+  buildFrameworkVersions:
+    name: Build Framework versions
+    needs: [ variables ]
+    runs-on: windows-2019 # required version for Framework 4.0
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ needs.variables.outputs.tag }}
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v1
+      - name: Setup NuGet
+        uses: NuGet/setup-nuget@v1
+      - name: Restore NuGet packages
+        run: nuget restore ./OptimizelySDK.NETFramework.sln
+      - name: Build and strongly name assemblies
+        run: msbuild /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=$(pwd)/keypair.snk /p:Configuration=Release ./OptimizelySDK.NETFramework.sln
+      - name: Upload Framework artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: nuget-files
+          if-no-files-found: error
+          path: ./**/bin/Release/**/Optimizely*.dll
+
+  buildStandard16:
+    name: Build Standard 1.6 version
+    needs: [ variables ]
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ needs.variables.outputs.tag }}
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v2
+      - name: Restore dependencies
+        run: dotnet restore OptimizelySDK.NetStandard16/OptimizelySDK.NetStandard16.csproj
+      - name: Build and strongly name assemblies
+        run: dotnet build OptimizelySDK.NetStandard16/OptimizelySDK.NetStandard16.csproj /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=$(pwd)/keypair.snk -c Release
+      - name: Upload Standard 1.6 artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: nuget-files
+          if-no-files-found: error
+          path: ./**/bin/Release/**/Optimizely*.dll
+
+  buildStandard20:
+    name: Build Standard 2.0 version
+    needs: [ variables ]
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ needs.variables.outputs.tag }}
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v2
+      - name: Restore dependencies
+        run: dotnet restore OptimizelySDK.NetStandard20/OptimizelySDK.NetStandard20.csproj
+      - name: Build and strongly name Standard 2.0 project
+        run: dotnet build OptimizelySDK.NetStandard20/OptimizelySDK.NetStandard20.csproj /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=$(pwd)/keypair.snk -c Release
+      - name: Build and strongly name assemblies
+        uses: actions/upload-artifact@v2
+        with:
+          name: nuget-files
+          if-no-files-found: error
+          path: ./**/bin/Release/**/Optimizely*.dll
+
+  pack:
+    name: Sign & pack NuGet package
+    needs: [ variables, buildFrameworkVersions, buildStandard16, buildStandard20 ]
+    runs-on: ubuntu-latest
+    env:
+      VERSION: ${{ needs.variables.outputs.semanticVersion }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ needs.variables.outputs.tag }}
+      - name: Install mono
+        run: |
+          sudo apt update
+          sudo apt install -y mono-devel
+      - name: Download NuGet files
+        uses: actions/download-artifact@v2
+        with:
+          name: nuget-files
+          path: ./nuget-files
+      - name: Organize files
+        run: |
+          pushd ./nuget-files
+          # Move all dlls to the root directory
+          find . -type f -name "*.dll" -exec mv {} . \;
+          popd
+          # Create directories
+          mkdir -p nuget/lib/net35/ nuget/lib/net40/ nuget/lib/net45/ nuget/lib/netstandard1.6/ nuget/lib/netstandard2.0/
+          pushd ./nuget
+          # Move files to directories
+          mv ../nuget-files/OptimizelySDK.Net35.dll lib/net35/
+          mv ../nuget-files/OptimizelySDK.Net40.dll lib/net40/
+          mv ../nuget-files/OptimizelySDK.dll lib/net45/
+          mv ../nuget-files/OptimizelySDK.NetStandard16.dll lib/netstandard1.6/
+          mv ../nuget-files/OptimizelySDK.NetStandard20.dll lib/netstandard2.0/
+          popd
+      - name: Setup signing prerequisites        
+        env:
+          CERTIFICATE_P12: ${{ secrets.CERTIFICATE_P12 }}
+          CERTIFICATE_PASSWORD: ${{ secrets.CERTIFICATE_PASSWORD }}
+        run: |
+          pushd ./nuget
+          echo $CERTIFICATE_P12 | base64 --decode > authenticode.pfx
+          openssl pkcs12 -in authenticode.pfx -nocerts -nodes -legacy -out key.pem -password env:CERTIFICATE_PASSWORD
+          openssl rsa -in key.pem -outform PVK -pvk-none -out authenticode.pvk
+          openssl pkcs12 -in authenticode.pfx -nokeys -nodes -legacy -out cert.pem -password env:CERTIFICATE_PASSWORD
+          openssl crl2pkcs7 -nocrl -certfile cert.pem -outform DER -out authenticode.spc
+          popd
+      - name: Sign the DLLs
+        run: |
+          pushd ./nuget
+          find . -type f -name "*.dll" -print0 | while IFS= read -r -d '' file; do
+            echo "Signing ${file}"
+            signcode \
+              -spc ./authenticode.spc \
+              -v ./authenticode.pvk \
+              -a sha1 -$ commercial \
+              -n "Optimizely, Inc" \
+              -i "https://www.optimizely.com/" \
+              -t "http://timestamp.digicert.com" \
+              -tr 10 \
+              ${file}
+            rm ${file}.bak
+          done
+          rm *.spc *.pem *.pvk *.pfx
+          popd
+      - name: Create nuspec
+        # Uses env.VERSION in OptimizelySDK.nuspec.template
+        run: |
+          chmod +x ./OptimizelySDK.nuspec.template
+          ./OptimizelySDK.nuspec.template
+      - name: Pack NuGet package
+        run: |
+          pushd ./nuget
+          nuget pack OptimizelySDK.nuspec
+          popd
+      - name: Upload nupkg artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: nuget-package
+          if-no-files-found: error
+          path: ./nuget/Optimizely.SDK.${{ env.VERSION }}.nupkg
+
+  publish:
+    name: Publish package to NuGet
+    needs: [ variables, pack ]
+    runs-on: ubuntu-latest
+    env:
+      VERSION: ${{ needs.variables.outputs.semanticVersion }}
+    steps:
+      - name: Download NuGet files
+        uses: actions/download-artifact@v2
+        with:
+          name: nuget-package
+          path: ./nuget
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+      - name: Publish NuGet package
+        # Unset secrets.NUGET_API_KEY to simulate dry run
+        run: |
+          dotnet nuget push ./nuget/Optimizely.SDK.${{ env.VERSION }}.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }}
