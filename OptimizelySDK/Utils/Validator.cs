@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2017-2019, Optimizely
+ * Copyright 2017-2019, 2023 Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 using OptimizelySDK.Entity;
 using System;
 using System.Collections.Generic;
@@ -37,9 +38,9 @@ namespace OptimizelySDK.Utils
         {
             try
             {
-                return !NJsonSchema.JsonSchema.FromJsonAsync(schemaJson ?? Schema.GetSchemaJson()).
-                    Result.Validate(configJson).
-                    Any();
+                return !NJsonSchema.JsonSchema.FromJsonAsync(schemaJson ?? Schema.GetSchemaJson())
+                    .Result.Validate(configJson)
+                    .Any();
             }
             catch (Newtonsoft.Json.JsonReaderException)
             {
@@ -73,10 +74,10 @@ namespace OptimizelySDK.Utils
             return !int.TryParse(attribute.Key, out key);
         }
 
-        public static bool AreEventTagsValid(Dictionary<string, object> eventTags) {
+        public static bool AreEventTagsValid(Dictionary<string, object> eventTags)
+        {
             int key;
             return eventTags.All(tag => !int.TryParse(tag.Key, out key));
-
         }
 
         /// <summary>
@@ -112,8 +113,9 @@ namespace OptimizelySDK.Utils
         /// <returns>true if attribute key is not null and value is one of the supported type, false otherwise</returns>
         public static bool IsUserAttributeValid(KeyValuePair<string, object> attribute)
         {
-            return (attribute.Key != null) && 
-                (attribute.Value is string || attribute.Value is bool || IsValidNumericValue(attribute.Value));
+            return (attribute.Key != null) &&
+                   (attribute.Value is string || attribute.Value is bool ||
+                    IsValidNumericValue(attribute.Value));
         }
 
         /// <summary>
@@ -123,9 +125,11 @@ namespace OptimizelySDK.Utils
         /// <returns></returns>
         public static bool IsNumericType(object value)
         {
-            return value is byte || value is sbyte || value is char || value is short || value is ushort
-                || value is int || value is uint || value is long || value is ulong || value is float
-                || value is double || value is decimal;
+            return value is byte || value is sbyte || value is char || value is short ||
+                   value is ushort
+                   || value is int || value is uint || value is long || value is ulong ||
+                   value is float
+                   || value is double || value is decimal;
         }
 
         /// <summary>
@@ -138,7 +142,8 @@ namespace OptimizelySDK.Utils
             if (IsNumericType(value))
             {
                 var doubleValue = Convert.ToDouble(value);
-                if (double.IsInfinity(doubleValue) || double.IsNaN(doubleValue) || Math.Abs(doubleValue) > OPT_NUMBER_LIMIT)
+                if (double.IsInfinity(doubleValue) || double.IsNaN(doubleValue) ||
+                    Math.Abs(doubleValue) > OPT_NUMBER_LIMIT)
                     return false;
 
                 return true;
@@ -148,4 +153,3 @@ namespace OptimizelySDK.Utils
         }
     }
 }
-
