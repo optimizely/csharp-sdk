@@ -1,18 +1,13 @@
----
-name: Csharp CI with .NET
+name: Continuous Integration
 
 on:
   push:
-    branches: [master]
+    branches: [ master ]
   pull_request:
-    branches: [master]
-
-env:
-  RELEASE_BRANCH: "master"
-  WINDOWS_2019_SN_PATH: C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.8 Tools\sn.exe
+    branches: [ master ]
 
 jobs:
-  lint_code_base:
+  lintCodebase:
     runs-on: ubuntu-latest
     name: Lint Codebase
     steps:
@@ -21,32 +16,17 @@ jobs:
         with:
           # Full git history is needed to get a proper list of changed files
           fetch-depth: 0
-      - name: Lint codebase
+      - name: Run Super-Linter
         uses: github/super-linter@v4
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VALIDATE_ALL_CODEBASE: false
           DEFAULT_BRANCH: master
           VALIDATE_CSHARP: true
-          
-  integration_tests:
-    name: Run Integration Tests
-    uses: optimizely/csharp-sdk/.github/workflows/integration_test.yml@master
-    secrets:
-      CI_USER_TOKEN: ${{ secrets.CI_USER_TOKEN }}
-      TRAVIS_COM_TOKEN: ${{ secrets.TRAVIS_COM_TOKEN }}
-  
-  fullstack_production_suite:
-    name: Run Optimizely Feature Experimentation Compatibility Suite
-    uses: optimizely/csharp-sdk/.github/workflows/integration_test.yml@master
-    with:
-      FULLSTACK_TEST_REPO: ProdTesting
-    secrets:
-      CI_USER_TOKEN: ${{ secrets.CI_USER_TOKEN }}
-      TRAVIS_COM_TOKEN: ${{ secrets.TRAVIS_COM_TOKEN }}
 
-  unit_test:
-    name: Build and Run Unit Tests
+  netFrameworksAndUnitTest:
+    name: Build Framework & Run Unit Tests
+    needs: [ lintCodebase ]
     runs-on: windows-2019 # required version for Framework 4.0
     env:
       REPO_SLUG: ${{ github.repository }}
@@ -63,33 +43,18 @@ jobs:
       - name: Setup NuGet
         uses: NuGet/setup-nuget@v1
       - name: Restore NuGet packages
-        run: nuget restore ./OptimizelySDK.Travis.sln
-      - name: Build solution
-        run: msbuild /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=$(pwd)/keypair.snk /p:Configuration=Release ./OptimizelySDK.Travis.sln
-      - name: Install NUnit Console
-        run: nuget install NUnit.Console -Version 3.15.2 -DirectDownload -OutputDirectory .
-      - name: Run NUnit tests
-        # https://docs.nunit.org/articles/nunit/running-tests/Console-Command-Line.html
-        run: ./NUnit.ConsoleRunner.3.15.2\tools\nunit3-console.exe /timeout 10000 /process Separate ./OptimizelySDK.Tests/bin/Release/OptimizelySDK.Tests.dll
-      - name: Find and sign all DLLs
-        id: unit_tests
+        run: nuget restore ./OptimizelySDK.NETFramework.sln
+      - name: Build & strongly name assemblies
+        run: msbuild /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=$(pwd)/keypair.snk /p:Configuration=Release ./OptimizelySDK.NETFramework.sln
+      - name: Install & Run NUnit tests
         run: |
-          Get-ChildItem -Recurse -Exclude '.*Tests.*' -Include 'OptimizelySDK*.dll' |
-          Where-Object { $_.DirectoryName -match '\\bin\\Release' } |
-          Foreach-Object { & $env:WINDOWS_2019_SN_PATH -R $_.FullName ./keypair.snk }       
-      - name: Install AWS CLI, deploy to S3 on successful tests & for release
-        if: steps.unit_tests.outcome == 'success' && env.CURRENT_BRANCH == env.RELEASE_BRANCH && env.EVENT_TYPE == 'push'
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.OFTA_KEY }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.OFTA_SECRET }}
-          AWS_DEFAULT_REGION: ${{ secrets.OFTA_REGION }}
-        run: |
-          Install-Module -Name AWS.Tools.Installer -Force;
-          Install-AWSToolsModule AWS.Tools.S3 -Force -CleanUp;
-          Get-ChildItem -Recurse -Exclude '.*Tests.*' -include 'OptimizelySDK*.dll' | Where-Object { $_.DirectoryName -match '\\bin\\Release' } | Foreach-Object { aws s3 cp $_.FullName s3://optly-fs-travisci-artifacts/${{ env.REPO_SLUG }}/${{ env.BUILD_NUMBER }}/${{ env.RUN_NUMBER }}/${{ env.ATTEMPT_NUM }}/$($_.Name)-unsigned }
+          nuget install NUnit.Console -Version 3.15.2 -DirectDownload -OutputDirectory .
+          # https://docs.nunit.org/articles/nunit/running-tests/Console-Command-Line.html
+          ./NUnit.ConsoleRunner.3.15.2\tools\nunit3-console.exe /timeout 10000 /process Separate ./OptimizelySDK.Tests/bin/Release/OptimizelySDK.Tests.dll
   
   netStandard16:
-    name: Build For .NET Standard 1.6
+    name: Build Standard 1.6
+    needs: [ netFrameworksAndUnitTest ]
     runs-on: windows-2022
     env:
       REPO_SLUG: ${{ github.repository }}
@@ -107,20 +72,12 @@ jobs:
           dotnet-version: 3.1.x
       - name: Restore dependencies
         run: dotnet restore OptimizelySDK.NetStandard16/OptimizelySDK.NetStandard16.csproj
-      - name: Build and sign Standard 1.6 project
-        id: netStandard16_build
+      - name: Build & strongly name assemblies
         run: dotnet build OptimizelySDK.NetStandard16/OptimizelySDK.NetStandard16.csproj /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=D:\a\csharp-sdk\csharp-sdk\keypair.snk -c Release
-      - name: Check on success
-        if: steps.netStandard16_build.outcome == 'success' && env.CURRENT_BRANCH == env.RELEASE_BRANCH && env.EVENT_TYPE == 'push'
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.OFTA_KEY }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.OFTA_SECRET }}
-          AWS_DEFAULT_REGION: ${{ secrets.OFTA_REGION }}
-        run: |
-          (aws s3 cp ./OptimizelySDK.NetStandard16/bin/Release/netstandard1.6/OptimizelySDK.NetStandard16.dll s3://optly-fs-travisci-artifacts/${{ env.REPO_SLUG }}/${{ env.BUILD_NUMBER }}/${{ env.RUN_NUMBER }}/${{ env.ATTEMPT_NUM }}/OptimizelySDK.NetStandard16.dll-unsigned)
 
   netStandard20:
-    name: Build For .NET Standard 2.0
+    name: Build Standard 2.0
+    needs: [ netFrameworksAndUnitTest ]
     runs-on: windows-2022
     env:
       REPO_SLUG: ${{ github.repository }}
@@ -138,14 +95,23 @@ jobs:
           dotnet-version: 3.1.x
       - name: Restore dependencies
         run: dotnet restore OptimizelySDK.NetStandard20/OptimizelySDK.NetStandard20.csproj
-      - name: Build and sign Standard 2.0 project
-        id: netStandard20_build
+      - name: Build & strongly name assemblies
         run: dotnet build OptimizelySDK.NetStandard20/OptimizelySDK.NetStandard20.csproj /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=D:\a\csharp-sdk\csharp-sdk\keypair.snk -c Release
-      - name: Check on success
-        if: steps.netStandard20_build.outcome == 'success' && env.CURRENT_BRANCH == env.RELEASE_BRANCH && env.EVENT_TYPE == 'push'
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.OFTA_KEY }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.OFTA_SECRET }}
-          AWS_DEFAULT_REGION: ${{ secrets.OFTA_REGION }}
-        run: |
-          (aws s3 cp ./OptimizelySDK.NetStandard20/bin/Release/netstandard2.0/OptimizelySDK.NetStandard20.dll s3://optly-fs-travisci-artifacts/${{ env.REPO_SLUG }}/${{ env.BUILD_NUMBER }}/${{ env.RUN_NUMBER }}/${{ env.ATTEMPT_NUM }}/OptimizelySDK.NetStandard20.dll-unsigned)
+  
+  integration_tests:
+    name: Run Integration Tests
+    needs: [ netFrameworksAndUnitTest, netStandard16, netStandard20 ]
+    uses: optimizely/csharp-sdk/.github/workflows/integration_test.yml@master
+    secrets:
+      CI_USER_TOKEN: ${{ secrets.CI_USER_TOKEN }}
+      TRAVIS_COM_TOKEN: ${{ secrets.TRAVIS_COM_TOKEN }}
+  
+  fullstack_production_suite:
+    name: Run Performance Tests
+    needs: [ netFrameworksAndUnitTest, netStandard16, netStandard20 ]
+    uses: optimizely/csharp-sdk/.github/workflows/integration_test.yml@master
+    with:
+      FULLSTACK_TEST_REPO: ProdTesting
+    secrets:
+      CI_USER_TOKEN: ${{ secrets.CI_USER_TOKEN }}
+      TRAVIS_COM_TOKEN: ${{ secrets.TRAVIS_COM_TOKEN }}
