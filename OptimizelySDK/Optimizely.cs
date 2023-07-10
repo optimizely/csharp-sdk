@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using OptimizelySDK.Bucketing;
 using OptimizelySDK.Config;
 using OptimizelySDK.Entity;
@@ -31,6 +27,10 @@ using OptimizelySDK.Notifications;
 using OptimizelySDK.OptimizelyDecisions;
 using OptimizelySDK.OptlyConfig;
 using OptimizelySDK.Utils;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 
 namespace OptimizelySDK
 {
