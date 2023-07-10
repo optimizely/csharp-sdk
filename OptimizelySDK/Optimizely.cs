@@ -14,24 +14,23 @@
  * limitations under the License.
  */
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using OptimizelySDK.Bucketing;
+using OptimizelySDK.Config;
 using OptimizelySDK.Entity;
 using OptimizelySDK.ErrorHandler;
+using OptimizelySDK.Event;
 using OptimizelySDK.Event.Builder;
 using OptimizelySDK.Event.Dispatcher;
 using OptimizelySDK.Exceptions;
 using OptimizelySDK.Logger;
-using OptimizelySDK.Utils;
 using OptimizelySDK.Notifications;
-using System;
-using System.Collections.Generic;
-using System.Reflection;
-using OptimizelySDK.Config;
-using OptimizelySDK.Event;
-using OptimizelySDK.OptlyConfig;
-using System.Net;
 using OptimizelySDK.OptimizelyDecisions;
-using System.Linq;
+using OptimizelySDK.OptlyConfig;
+using OptimizelySDK.Utils;
 
 namespace OptimizelySDK
 {

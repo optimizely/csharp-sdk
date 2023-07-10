@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright 2019-2020, 2023 Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
+using Moq;
+using OptimizelySDK.Config;
 using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Moq;
-using OptimizelySDK.Config;
 
 namespace OptimizelySDK.Tests.Utils
 {
