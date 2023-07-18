@@ -1,11 +1,11 @@
 ﻿/* 
- * Copyright 2019-2021, Optimizely
+ * Copyright 2019-2021, 2023 Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,8 +18,7 @@ using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Logger;
 using OptimizelySDK.Notifications;
 using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace OptimizelySDK.Config
@@ -27,15 +26,20 @@ namespace OptimizelySDK.Config
     public class HttpProjectConfigManager : PollingProjectConfigManager
     {
         private string Url;
-        private string LastModifiedSince = string.Empty;
+        internal string LastModifiedSince = string.Empty;
         private string DatafileAccessToken = string.Empty;
-        private HttpProjectConfigManager(TimeSpan period, string url, TimeSpan blockingTimeout, bool autoUpdate, ILogger logger, IErrorHandler errorHandler) 
+
+        private HttpProjectConfigManager(TimeSpan period, string url, TimeSpan blockingTimeout,
+            bool autoUpdate, ILogger logger, IErrorHandler errorHandler
+        )
             : base(period, blockingTimeout, autoUpdate, logger, errorHandler)
         {
             Url = url;
         }
 
-        private HttpProjectConfigManager(TimeSpan period, string url, TimeSpan blockingTimeout, bool autoUpdate, ILogger logger, IErrorHandler errorHandler, string datafileAccessToken)
+        private HttpProjectConfigManager(TimeSpan period, string url, TimeSpan blockingTimeout,
+            bool autoUpdate, ILogger logger, IErrorHandler errorHandler, string datafileAccessToken
+        )
             : this(period, url, blockingTimeout, autoUpdate, logger, errorHandler)
         {
             DatafileAccessToken = datafileAccessToken;
@@ -59,21 +63,26 @@ namespace OptimizelySDK.Config
 
             public HttpClient(System.Net.Http.HttpClient httpClient) : this()
             {
-                if (httpClient != null) {
+                if (httpClient != null)
+                {
                     Client = httpClient;
                 }
             }
 
             public static System.Net.Http.HttpClientHandler GetHttpClientHandler()
             {
-                var handler = new System.Net.Http.HttpClientHandler() {
-                    AutomaticDecompression = System.Net.DecompressionMethods.GZip | System.Net.DecompressionMethods.Deflate
+                var handler = new System.Net.Http.HttpClientHandler()
+                {
+                    AutomaticDecompression = System.Net.DecompressionMethods.GZip |
+                                             System.Net.DecompressionMethods.Deflate
                 };
 
                 return handler;
             }
 
-            public virtual Task<System.Net.Http.HttpResponseMessage> SendAsync(System.Net.Http.HttpRequestMessage httpRequestMessage)
+            public virtual Task<System.Net.Http.HttpResponseMessage> SendAsync(
+                System.Net.Http.HttpRequestMessage httpRequestMessage
+            )
             {
                 return Client.SendAsync(httpRequestMessage);
             }
@@ -84,47 +93,61 @@ namespace OptimizelySDK.Config
         static HttpProjectConfigManager()
         {
             Client = new HttpClient();
-        }        
+        }
 
         private string GetRemoteDatafileResponse()
         {
             Logger.Log(LogLevel.DEBUG, $"Making datafile request to url \"{Url}\"");
-            var request = new System.Net.Http.HttpRequestMessage {
+            var request = new System.Net.Http.HttpRequestMessage
+            {
                 RequestUri = new Uri(Url),
                 Method = System.Net.Http.HttpMethod.Get,
             };
 
             // Send If-Modified-Since header if Last-Modified-Since header contains any value.
             if (!string.IsNullOrEmpty(LastModifiedSince))
+            {
                 request.Headers.Add("If-Modified-Since", LastModifiedSince);
-
-            if (!string.IsNullOrEmpty(DatafileAccessToken)) {
-                request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", DatafileAccessToken);
+                Logger.Log(LogLevel.DEBUG, $"Set If-Modified-Since in request header.");
             }
 
-            var httpResponse =  Client.SendAsync(request);
+            if (!string.IsNullOrEmpty(DatafileAccessToken))
+            {
+                request.Headers.Authorization =
+                    new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer",
+                        DatafileAccessToken);
+            }
+
+            var httpResponse = Client.SendAsync(request);
             httpResponse.Wait();
 
             // Return from here if datafile is not modified.
             var result = httpResponse.Result;
-            if (!result.IsSuccessStatusCode) {
+
+            if (result.StatusCode == HttpStatusCode.NotModified)
+            {
+                return null;
+            }
+
+            if (!result.IsSuccessStatusCode)
+            {
                 Logger.Log(LogLevel.ERROR, $"Error fetching datafile \"{result.StatusCode}\"");
                 return null;
             }
 
             // Update Last-Modified header if provided.
-            if (result.Headers.TryGetValues("Last-Modified", out IEnumerable<string> values))
-                LastModifiedSince = values.First();
-
-            if (result.StatusCode == System.Net.HttpStatusCode.NotModified)
-                return null;
+            if (result.Content.Headers.LastModified.HasValue)
+            {
+                LastModifiedSince = result.Content.Headers.LastModified.ToString();
+                Logger.Log(LogLevel.DEBUG, $"Set LastModifiedSince from response header.");
+            }
 
             var content = result.Content.ReadAsStringAsync();
             content.Wait();
 
-            return content.Result;  
+            return content.Result;
         }
-#elif NET40      
+#elif NET40
         private string GetRemoteDatafileResponse()
         {
             var request = (System.Net.HttpWebRequest)System.Net.WebRequest.Create(Url);
@@ -164,19 +187,24 @@ namespace OptimizelySDK.Config
 
             return DatafileProjectConfig.Create(datafile, Logger, ErrorHandler);
         }
-        
+
         public class Builder
         {
             private const long MAX_MILLISECONDS_LIMIT = 4294967294;
             private readonly TimeSpan DEFAULT_PERIOD = TimeSpan.FromMinutes(5);
             private readonly TimeSpan DEFAULT_BLOCKINGOUT_PERIOD = TimeSpan.FromSeconds(15);
-            private readonly string DEFAULT_FORMAT = "https://cdn.optimizely.com/datafiles/{0}.json";
-            private readonly string DEFAULT_AUTHENTICATED_DATAFILE_FORMAT = "https://config.optimizely.com/datafiles/auth/{0}.json";
+
+            private readonly string DEFAULT_FORMAT =
+                "https://cdn.optimizely.com/datafiles/{0}.json";
+
+            private readonly string DEFAULT_AUTHENTICATED_DATAFILE_FORMAT =
+                "https://config.optimizely.com/datafiles/auth/{0}.json";
+
             private string Datafile;
-            private string DatafileAccessToken;            
+            private string DatafileAccessToken;
             private string SdkKey;
             private string Url;
-            private string Format;            
+            private string Format;
             private ILogger Logger;
             private IErrorHandler ErrorHandler;
             private TimeSpan Period;
@@ -197,6 +225,7 @@ namespace OptimizelySDK.Config
 
                 return this;
             }
+
             public Builder WithDatafile(string datafile)
             {
                 Datafile = datafile;
@@ -241,7 +270,7 @@ namespace OptimizelySDK.Config
 
                 return this;
             }
-            
+
             public Builder WithLogger(ILogger logger)
             {
                 Logger = logger;
@@ -263,7 +292,7 @@ namespace OptimizelySDK.Config
                 return this;
             }
 
-            public Builder WithStartByDefault(bool startByDefault=true)
+            public Builder WithStartByDefault(bool startByDefault = true)
             {
                 StartByDefault = startByDefault;
 
@@ -303,41 +332,62 @@ namespace OptimizelySDK.Config
                 if (ErrorHandler == null)
                     ErrorHandler = new DefaultErrorHandler(Logger, false);
 
-                if (string.IsNullOrEmpty(Format)) {
-
-                    if (string.IsNullOrEmpty(DatafileAccessToken)) {
+                if (string.IsNullOrEmpty(Format))
+                {
+                    if (string.IsNullOrEmpty(DatafileAccessToken))
+                    {
                         Format = DEFAULT_FORMAT;
-                    } else {
+                    }
+                    else
+                    {
                         Format = DEFAULT_AUTHENTICATED_DATAFILE_FORMAT;
                     }
                 }
 
-                if (string.IsNullOrEmpty(Url)) {
-                    if (string.IsNullOrEmpty(SdkKey)) {
+                if (string.IsNullOrEmpty(Url))
+                {
+                    if (string.IsNullOrEmpty(SdkKey))
+                    {
                         ErrorHandler.HandleError(new Exception("SdkKey cannot be null"));
                     }
+
                     Url = string.Format(Format, SdkKey);
                 }
 
-                if (IsPollingIntervalProvided && (Period.TotalMilliseconds <= 0 || Period.TotalMilliseconds > MAX_MILLISECONDS_LIMIT)) {
-                    Logger.Log(LogLevel.DEBUG, $"Polling interval is not valid for periodic calls, using default period {DEFAULT_PERIOD.TotalMilliseconds}ms");
-                    Period = DEFAULT_PERIOD;
-                } else if(!IsPollingIntervalProvided) {
-                    Logger.Log(LogLevel.DEBUG, $"No polling interval provided, using default period {DEFAULT_PERIOD.TotalMilliseconds}ms");
+                if (IsPollingIntervalProvided && (Period.TotalMilliseconds <= 0 ||
+                                                  Period.TotalMilliseconds >
+                                                  MAX_MILLISECONDS_LIMIT))
+                {
+                    Logger.Log(LogLevel.DEBUG,
+                        $"Polling interval is not valid for periodic calls, using default period {DEFAULT_PERIOD.TotalMilliseconds}ms");
                     Period = DEFAULT_PERIOD;
                 }
-                    
+                else if (!IsPollingIntervalProvided)
+                {
+                    Logger.Log(LogLevel.DEBUG,
+                        $"No polling interval provided, using default period {DEFAULT_PERIOD.TotalMilliseconds}ms");
+                    Period = DEFAULT_PERIOD;
+                }
 
-                if (IsBlockingTimeoutProvided && (BlockingTimeoutSpan.TotalMilliseconds <= 0 || BlockingTimeoutSpan.TotalMilliseconds > MAX_MILLISECONDS_LIMIT)) {
-                    Logger.Log(LogLevel.DEBUG, $"Blocking timeout is not valid, using default blocking timeout {DEFAULT_BLOCKINGOUT_PERIOD.TotalMilliseconds}ms");
-                    BlockingTimeoutSpan = DEFAULT_BLOCKINGOUT_PERIOD;
-                } else if(!IsBlockingTimeoutProvided) {
-                    Logger.Log(LogLevel.DEBUG, $"No Blocking timeout provided, using default blocking timeout {DEFAULT_BLOCKINGOUT_PERIOD.TotalMilliseconds}ms");
+
+                if (IsBlockingTimeoutProvided && (BlockingTimeoutSpan.TotalMilliseconds <= 0 ||
+                                                  BlockingTimeoutSpan.TotalMilliseconds >
+                                                  MAX_MILLISECONDS_LIMIT))
+                {
+                    Logger.Log(LogLevel.DEBUG,
+                        $"Blocking timeout is not valid, using default blocking timeout {DEFAULT_BLOCKINGOUT_PERIOD.TotalMilliseconds}ms");
                     BlockingTimeoutSpan = DEFAULT_BLOCKINGOUT_PERIOD;
                 }
-                    
+                else if (!IsBlockingTimeoutProvided)
+                {
+                    Logger.Log(LogLevel.DEBUG,
+                        $"No Blocking timeout provided, using default blocking timeout {DEFAULT_BLOCKINGOUT_PERIOD.TotalMilliseconds}ms");
+                    BlockingTimeoutSpan = DEFAULT_BLOCKINGOUT_PERIOD;
+                }
 
-                configManager = new HttpProjectConfigManager(Period, Url, BlockingTimeoutSpan, AutoUpdate, Logger, ErrorHandler, DatafileAccessToken);
+
+                configManager = new HttpProjectConfigManager(Period, Url, BlockingTimeoutSpan,
+                    AutoUpdate, Logger, ErrorHandler, DatafileAccessToken);
 
                 if (Datafile != null)
                 {
@@ -351,11 +401,13 @@ namespace OptimizelySDK.Config
                         Logger.Log(LogLevel.WARN, "Error parsing fallback datafile." + ex.Message);
                     }
                 }
-                
-                configManager.NotifyOnProjectConfigUpdate += () => {
-                    NotificationCenter?.SendNotifications(NotificationCenter.NotificationType.OptimizelyConfigUpdate);
+
+                configManager.NotifyOnProjectConfigUpdate += () =>
+                {
+                    NotificationCenter?.SendNotifications(NotificationCenter.NotificationType
+                        .OptimizelyConfigUpdate);
                 };
-                
+
 
                 if (StartByDefault)
                     configManager.Start();
@@ -363,7 +415,7 @@ namespace OptimizelySDK.Config
                 // Optionally block until config is available.
                 if (!defer)
                     configManager.GetConfig();
-                    
+
                 return configManager;
             }
         }

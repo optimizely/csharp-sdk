@@ -1,6 +1,5 @@
-﻿
-/*
- * Copyright 2019-2020, Optimizely
+﻿/*
+ * Copyright 2019-2020, 2023 Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +14,13 @@
  * limitations under the License.
  */
 
+using Moq;
+using OptimizelySDK.Config;
 using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Moq;
-using OptimizelySDK.Config;
 
 namespace OptimizelySDK.Tests.Utils
 {
@@ -29,21 +29,42 @@ namespace OptimizelySDK.Tests.Utils
     /// </summary>
     public static class TestHttpProjectConfigManagerUtil
     {
-        public static Task MockSendAsync(Mock<HttpProjectConfigManager.HttpClient> HttpClientMock, string datafile = null, TimeSpan? delay=null, HttpStatusCode statusCode = HttpStatusCode.OK)
+        public static Task MockSendAsync(Mock<HttpProjectConfigManager.HttpClient> httpClientMock,
+            string datafile = null, TimeSpan? delay = null,
+            HttpStatusCode statusCode = HttpStatusCode.OK,
+            Dictionary<string, string> responseContentHeaders = null
+        )
         {
-            var t = new System.Threading.Tasks.TaskCompletionSource<bool>();
+            var t = new TaskCompletionSource<bool>();
 
-            HttpClientMock.Setup(_ => _.SendAsync(It.IsAny<System.Net.Http.HttpRequestMessage>()))
-                .Returns(() => {
-                    if (delay != null) {
+            httpClientMock.Setup(_ => _.SendAsync(It.IsAny<HttpRequestMessage>()))
+                .Returns(() =>
+                {
+                    if (delay != null)
+                    {
                         // This delay mocks the networking delay. And help to see the behavior when get a datafile with some delay.
                         Task.Delay(delay.Value).Wait();
                     }
-                    
-                    return System.Threading.Tasks.Task.FromResult<HttpResponseMessage>(new HttpResponseMessage { StatusCode = statusCode, Content = new StringContent(datafile ?? string.Empty) });
+
+                    var responseMessage = new HttpResponseMessage
+                    {
+                        StatusCode = statusCode,
+                        Content = new StringContent(datafile ?? string.Empty),
+                    };
+
+                    if (responseContentHeaders != null)
+                    {
+                        foreach (var header in responseContentHeaders)
+                        {
+                            responseMessage.Content.Headers.Add(header.Key, header.Value);
+                        }
+                    }
+
+                    return Task.FromResult(responseMessage);
                 })
                 .Callback(()
-                => {
+                    =>
+                {
                     t.SetResult(true);
                 });
 
@@ -60,7 +81,10 @@ namespace OptimizelySDK.Tests.Utils
             var field = type.GetField("Client",
                 System.Reflection.BindingFlags.Static |
                 System.Reflection.BindingFlags.NonPublic);
-            field.SetValue(new object(), value);
-        }        
+            if (field != null)
+            {
+                field.SetValue(new object(), value);
+            }
+        }
     }
 }
