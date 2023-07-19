@@ -1,5 +1,11 @@
 # Optimizely C# SDK Changelog
 
+## 3.11.3
+July 18, 2023
+
+### Bug Fix
+- Last-Modified in header not found and used to reduce polling payload ([#355](https://github.com/optimizely/csharp-sdk/pull/355)).
+
 ## 3.11.2.1
 March 24, 2023
 
