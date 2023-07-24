@@ -36,9 +36,11 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
 
         private Mock<TestNotificationCallbacks> NotificationCallbackMock =
             new Mock<TestNotificationCallbacks>();
-        
+
         private const string ExpectedRfc1123DateTime = "Thu, 03 Nov 2022 16:00:00 GMT";
-        private readonly DateTime _pastLastModified = new DateTimeOffset(new DateTime(2022, 11, 3, 16, 0, 0, DateTimeKind.Utc)).UtcDateTime;
+
+        private readonly DateTime _pastLastModified =
+            new DateTimeOffset(new DateTime(2022, 11, 3, 16, 0, 0, DateTimeKind.Utc)).UtcDateTime;
 
         [SetUp]
         public void Setup()
@@ -120,10 +122,12 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
             HttpClientMock.Verify(_ => _.SendAsync(
                 It.Is<HttpRequestMessage>(requestMessage =>
                     requestMessage.Headers.IfModifiedSince.HasValue &&
-                    requestMessage.Headers.IfModifiedSince.Value.UtcDateTime.ToString("r") == ExpectedRfc1123DateTime
+                    requestMessage.Headers.IfModifiedSince.Value.UtcDateTime.ToString("r") ==
+                    ExpectedRfc1123DateTime
                 )), Times.Once);
             LoggerMock.Verify(
-                _ => _.Log(LogLevel.DEBUG, $"Set If-Modified-Since in request header: {ExpectedRfc1123DateTime}"),
+                _ => _.Log(LogLevel.DEBUG,
+                    $"Set If-Modified-Since in request header: {ExpectedRfc1123DateTime}"),
                 Times.AtLeastOnce);
 
             httpManager.Dispose();
@@ -147,9 +151,10 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
                 .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(500))
                 .WithStartByDefault()
                 .Build();
-            
+
             LoggerMock.Verify(
-                _ => _.Log(LogLevel.DEBUG, $"Set LastModifiedSince from response header: {ExpectedRfc1123DateTime}"),
+                _ => _.Log(LogLevel.DEBUG,
+                    $"Set LastModifiedSince from response header: {ExpectedRfc1123DateTime}"),
                 Times.AtLeastOnce);
 
             httpManager.Dispose();
