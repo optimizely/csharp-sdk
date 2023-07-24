@@ -119,7 +119,7 @@ namespace OptimizelySDK.Config
             if (!string.IsNullOrEmpty(LastModifiedSince))
             {
                 request.Headers.Add("If-Modified-Since", LastModifiedSince);
-                Logger.Log(LogLevel.DEBUG, $"Set If-Modified-Since in request header.");
+                Logger.Log(LogLevel.DEBUG, $"Set If-Modified-Since in request header: {LastModifiedSince}");
             }
 
             if (!string.IsNullOrEmpty(DatafileAccessToken))
@@ -149,8 +149,8 @@ namespace OptimizelySDK.Config
             // Update Last-Modified header if provided.
             if (result.Content.Headers.LastModified.HasValue)
             {
-                LastModifiedSince = result.Content.Headers.LastModified.ToString();
-                Logger.Log(LogLevel.DEBUG, $"Set LastModifiedSince from response header.");
+                LastModifiedSince = result.Content.Headers.LastModified?.UtcDateTime.ToString("r");
+                Logger.Log(LogLevel.DEBUG, $"Set LastModifiedSince from response header: {LastModifiedSince}");
             }
 
             var content = result.Content.ReadAsStringAsync();
