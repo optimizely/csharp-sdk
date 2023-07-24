@@ -38,7 +38,7 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
             new Mock<TestNotificationCallbacks>();
         
         private const string ExpectedRfc1123DateTime = "Thu, 03 Nov 2022 16:00:00 GMT";
-        private readonly DateTime _pastLastModified = new DateTime(2022, 11, 3, 16, 0, 0, DateTimeKind.Utc);
+        private readonly DateTime _pastLastModified = new DateTimeOffset(new DateTime(2022, 11, 3, 16, 0, 0, DateTimeKind.Utc)).UtcDateTime;
 
         [SetUp]
         public void Setup()
@@ -98,26 +98,30 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         [Test]
         public void TestSettingIfModifiedSinceInRequestHeader()
         {
-            var formattedDateTime = new DateTimeOffset(_pastLastModified).UtcDateTime.ToString("r");
             var t = MockSendAsync(
                 datafile: string.Empty,
                 statusCode: HttpStatusCode.NotModified,
                 responseContentHeaders: new Dictionary<string, string>
                 {
-                    { "Last-Modified", formattedDateTime },
+                    { "Last-Modified", _pastLastModified.ToString("r") },
                 }
             );
 
             var httpManager = new HttpProjectConfigManager.Builder()
-                .WithDatafile(string.Empty)
+                .WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z")
                 .WithLogger(LoggerMock.Object)
                 .WithPollingInterval(TimeSpan.FromMilliseconds(1000))
                 .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(2000))
                 .WithStartByDefault()
                 .Build(defer: true);
-            httpManager.LastModifiedSince = formattedDateTime;
+            httpManager.LastModifiedSince = _pastLastModified.ToString("r");
             t.Wait(3000);
 
+            HttpClientMock.Verify(_ => _.SendAsync(
+                It.Is<HttpRequestMessage>(requestMessage =>
+                    requestMessage.Headers.IfModifiedSince.HasValue &&
+                    requestMessage.Headers.IfModifiedSince.Value.UtcDateTime.ToString("r") == ExpectedRfc1123DateTime
+                )), Times.Once);
             LoggerMock.Verify(
                 _ => _.Log(LogLevel.DEBUG, $"Set If-Modified-Since in request header: {ExpectedRfc1123DateTime}"),
                 Times.AtLeastOnce);
@@ -128,16 +132,16 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         [Test]
         public void TestSettingLastModifiedFromResponseHeader()
         {
-            var formattedDateTime = new DateTimeOffset(_pastLastModified).UtcDateTime.ToString("r");
             MockSendAsync(
+                datafile: TestData.Datafile,
                 statusCode: HttpStatusCode.OK,
                 responseContentHeaders: new Dictionary<string, string>
                 {
-                    { "Last-Modified", formattedDateTime },
+                    { "Last-Modified", _pastLastModified.ToString("r") },
                 }
             );
             var httpManager = new HttpProjectConfigManager.Builder()
-                .WithUrl("https://cdn.optimizely.com/datafiles/QBw9gFM8oTn7ogY9ANCC1z.json")
+                .WithSdkKey("QBw9gFM8oTn7ogY9ANCC1z")
                 .WithLogger(LoggerMock.Object)
                 .WithPollingInterval(TimeSpan.FromMilliseconds(1000))
                 .WithBlockingTimeoutPeriod(TimeSpan.FromMilliseconds(500))
