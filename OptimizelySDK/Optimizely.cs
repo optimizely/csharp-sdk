@@ -346,7 +346,7 @@ namespace OptimizelySDK
             EventTags eventTags = null
         )
         {
-            if (string.IsNullOrEmpty(eventKey))
+            if (string.IsNullOrWhiteSpace(eventKey))
             {
                 Logger.Log(LogLevel.ERROR,
                     "Event key cannot be null or empty string. Failing 'Track'.");
