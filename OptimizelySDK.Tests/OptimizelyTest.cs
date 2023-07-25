@@ -5668,23 +5668,33 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestTrackValidateInputValues()
         {
+            const string GOOD_EVENT_KEY = "purchase";
+            const string GOOD_USER = "test_user";
+            
             // Verify that ValidateStringInputs does not log error for valid values.
-            Optimizely.Track("purchase", "test_user");
+            Optimizely.Track(GOOD_EVENT_KEY, GOOD_USER);
             LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Provided User Id is in invalid format."),
                 Times.Never);
             LoggerMock.Verify(
                 l => l.Log(LogLevel.ERROR, "Event key cannot be null or empty string. Failing 'Track'."),
                 Times.Never);
 
-            // Verify that ValidateStringInputs logs error for invalid event key.
-            Optimizely.Track("", "test_user");
+            // Verify logs error for invalid empty string event key.
+            Optimizely.Track(GOOD_EVENT_KEY, GOOD_USER);
             LoggerMock.Verify(
                 l => l.Log(LogLevel.ERROR,
-                    "Event key cannot be null or empty string. Failing 'Track'."),
+                    "Event key cannot be null, empty or whitespace string. Failing 'Track'."),
+                Times.Once);
+
+            // Verify logs error for invalid whitespace string event key.
+            Optimizely.Track("    ", GOOD_USER);
+            LoggerMock.Verify(
+                l => l.Log(LogLevel.ERROR,
+                    "Event key cannot be null, empty or whitespace string. Failing 'Track'."),
                 Times.Once);
             
             // Verify that ValidateStringInputs logs error for invalid user id.
-            Optimizely.Track("purchase", null);
+            Optimizely.Track(GOOD_EVENT_KEY, null);
             LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Provided User Id is in invalid format."),
                 Times.Once);
         }
