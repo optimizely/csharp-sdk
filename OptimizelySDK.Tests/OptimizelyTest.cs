@@ -5669,33 +5669,39 @@ namespace OptimizelySDK.Tests
         public void TestTrackValidateInputValues()
         {
             const string GOOD_EVENT_KEY = "purchase";
+            const string EXPECTED_EVENT_KEY_ERROR_MESSAGE =
+                "Event key cannot be null, empty, or whitespace string. Failing 'Track'.";
             const string GOOD_USER = "test_user";
+            const string EXPECTED_USER_ID_ERROR_MESSAGE = "Provided User Id is in invalid format.";
             
-            // Verify that ValidateStringInputs does not log error for valid values.
             Optimizely.Track(GOOD_EVENT_KEY, GOOD_USER);
-            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Provided User Id is in invalid format."),
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, EXPECTED_USER_ID_ERROR_MESSAGE),
                 Times.Never);
             LoggerMock.Verify(
-                l => l.Log(LogLevel.ERROR, "Event key cannot be null or empty string. Failing 'Track'."),
+                l => l.Log(LogLevel.ERROR, EXPECTED_EVENT_KEY_ERROR_MESSAGE),
                 Times.Never);
+            LoggerMock.ResetCalls();
 
-            // Verify logs error for invalid empty string event key.
-            Optimizely.Track(GOOD_EVENT_KEY, GOOD_USER);
+            Optimizely.Track("", GOOD_USER);
             LoggerMock.Verify(
-                l => l.Log(LogLevel.ERROR,
-                    "Event key cannot be null, empty or whitespace string. Failing 'Track'."),
+                l => l.Log(LogLevel.ERROR, EXPECTED_EVENT_KEY_ERROR_MESSAGE),
                 Times.Once);
+            LoggerMock.ResetCalls();
 
-            // Verify logs error for invalid whitespace string event key.
             Optimizely.Track("    ", GOOD_USER);
             LoggerMock.Verify(
-                l => l.Log(LogLevel.ERROR,
-                    "Event key cannot be null, empty or whitespace string. Failing 'Track'."),
+                l => l.Log(LogLevel.ERROR, EXPECTED_EVENT_KEY_ERROR_MESSAGE),
                 Times.Once);
+            LoggerMock.ResetCalls();
             
-            // Verify that ValidateStringInputs logs error for invalid user id.
+            Optimizely.Track(null, GOOD_USER);
+            LoggerMock.Verify(
+                l => l.Log(LogLevel.ERROR, EXPECTED_EVENT_KEY_ERROR_MESSAGE),
+                Times.Once);
+            LoggerMock.ResetCalls();
+            
             Optimizely.Track(GOOD_EVENT_KEY, null);
-            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Provided User Id is in invalid format."),
+            LoggerMock.Verify(l => l.Log(LogLevel.ERROR, EXPECTED_USER_ID_ERROR_MESSAGE),
                 Times.Once);
         }
 
