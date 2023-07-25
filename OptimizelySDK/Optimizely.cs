@@ -35,6 +35,7 @@ using OptimizelySDK.Event;
 using OptimizelySDK.OptlyConfig;
 using OptimizelySDK.OptimizelyDecisions;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 #if USE_ODP
 using OptimizelySDK.Odp;
@@ -346,7 +347,7 @@ namespace OptimizelySDK
             EventTags eventTags = null
         )
         {
-            if (string.IsNullOrWhiteSpace(eventKey))
+            if (eventKey == null || Regex.IsMatch(eventKey, @"^\s*$"))
             {
                 Logger.Log(LogLevel.ERROR,
                     "Event key cannot be null, empty, or whitespace string. Failing 'Track'.");
