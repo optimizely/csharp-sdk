@@ -348,7 +348,7 @@ namespace OptimizelySDK
         /// <summary>
         /// Track an event.
         /// </summary>
-        /// <param name="eventName">The event name (must not be null or empty).</param>
+        /// <param name="eventName">The event name (must not be null, empty, or whitespace).</param>
         public virtual void TrackEvent(string eventName)
         {
             TrackEvent(eventName, new EventTags());
@@ -357,7 +357,7 @@ namespace OptimizelySDK
         /// <summary>
         /// Track an event.
         /// </summary>
-        /// <param name="eventName">The event name (must not be null or empty).</param>
+        /// <param name="eventName">The event name (must not be null, empty, or whitespace).</param>
         /// <param name="eventTags">A map of event tag names to event tag values.</param>
         public virtual void TrackEvent(string eventName,
             EventTags eventTags
