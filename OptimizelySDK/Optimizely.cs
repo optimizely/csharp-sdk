@@ -338,7 +338,7 @@ namespace OptimizelySDK
         /// <summary>
         /// Sends conversion event to Optimizely.
         /// </summary>
-        /// <param name="eventKey">Event key representing the event which needs to be recorded</param>
+        /// <param name="eventKey">Event key representing the event (must not be null or empty)</param>
         /// <param name="userId">ID for user</param>
         /// <param name="userAttributes">Attributes of the user</param>
         /// <param name="eventTags">eventTags array Hash representing metadata associated with the event.</param>
