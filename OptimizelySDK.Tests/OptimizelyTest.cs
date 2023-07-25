@@ -5673,7 +5673,7 @@ namespace OptimizelySDK.Tests
                 "Event key cannot be null, empty, or whitespace string. Failing 'Track'.";
             const string GOOD_USER = "test_user";
             const string EXPECTED_USER_ID_ERROR_MESSAGE = "Provided User Id is in invalid format.";
-
+            
             Optimizely.Track(GOOD_EVENT_KEY, GOOD_USER);
             LoggerMock.Verify(l => l.Log(LogLevel.ERROR, EXPECTED_USER_ID_ERROR_MESSAGE),
                 Times.Never);
@@ -5681,25 +5681,25 @@ namespace OptimizelySDK.Tests
                 l => l.Log(LogLevel.ERROR, EXPECTED_EVENT_KEY_ERROR_MESSAGE),
                 Times.Never);
             LoggerMock.ResetCalls();
-
+            
             Optimizely.Track("", GOOD_USER);
             LoggerMock.Verify(
                 l => l.Log(LogLevel.ERROR, EXPECTED_EVENT_KEY_ERROR_MESSAGE),
                 Times.Once);
             LoggerMock.ResetCalls();
-
+            
             Optimizely.Track("    ", GOOD_USER);
             LoggerMock.Verify(
                 l => l.Log(LogLevel.ERROR, EXPECTED_EVENT_KEY_ERROR_MESSAGE),
                 Times.Once);
             LoggerMock.ResetCalls();
-
+            
             Optimizely.Track(null, GOOD_USER);
             LoggerMock.Verify(
                 l => l.Log(LogLevel.ERROR, EXPECTED_EVENT_KEY_ERROR_MESSAGE),
                 Times.Once);
             LoggerMock.ResetCalls();
-
+            
             Optimizely.Track(GOOD_EVENT_KEY, null);
             LoggerMock.Verify(l => l.Log(LogLevel.ERROR, EXPECTED_USER_ID_ERROR_MESSAGE),
                 Times.Once);
