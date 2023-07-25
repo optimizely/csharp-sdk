@@ -87,7 +87,7 @@ namespace OptimizelySDK
         {
             get
             {
-                // Example output: "2.1.0" .  Should be kept in synch with NuGet package version.
+                // Example output: "2.1.0". Should be kept in sync with NuGet package version.
 #if NET35 || NET40
                 var assembly = Assembly.GetExecutingAssembly();
 #else
@@ -346,46 +346,52 @@ namespace OptimizelySDK
             EventTags eventTags = null
         )
         {
-            var config = ProjectConfigManager?.GetConfig();
-
-            if (config == null)
+            if (string.IsNullOrEmpty(eventKey))
             {
-                Logger.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'Track'.");
+                Logger.Log(LogLevel.ERROR,
+                    "Event key cannot be null or empty string. Failing 'Track'.");
                 return;
             }
 
             var inputValues = new Dictionary<string, string>
-                { { USER_ID, userId }, { EVENT_KEY, eventKey } };
+            {
+                { USER_ID, userId },
+                { EVENT_KEY, eventKey },
+            };
 
             if (!ValidateStringInputs(inputValues))
             {
                 return;
             }
 
-            var eevent = config.GetEvent(eventKey);
-
-            if (eevent.Key == null)
+            var config = ProjectConfigManager?.GetConfig();
+            if (config == null)
             {
-                Logger.Log(LogLevel.INFO,
-                    string.Format("Not tracking user {0} for event {1}.", userId, eventKey));
+                Logger.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'Track'.");
                 return;
             }
 
-            if (eventTags != null)
+            var eventToTrack = config.GetEvent(eventKey);
+            if (eventToTrack.Key == null)
             {
-                eventTags = eventTags.FilterNullValues(Logger);
+                Logger.Log(LogLevel.INFO, $"Not tracking user {userId} for event {eventKey}.");
+                return;
             }
+
+            eventTags = eventTags?.FilterNullValues(Logger);
 
             var userEvent = UserEventFactory.CreateConversionEvent(config, eventKey, userId,
                 userAttributes, eventTags);
+
             EventProcessor.Process(userEvent);
-            Logger.Log(LogLevel.INFO,
-                string.Format("Tracking event {0} for user {1}.", eventKey, userId));
+
+            Logger.Log(LogLevel.INFO, $"Tracking event {eventKey} for user {userId}.");
 
             if (NotificationCenter.GetNotificationCount(NotificationCenter.NotificationType.Track) >
                 0)
             {
                 var conversionEvent = EventFactory.CreateLogEvent(userEvent, Logger);
+
                 NotificationCenter.SendNotifications(NotificationCenter.NotificationType.Track,
                     eventKey, userId,
                     userAttributes, eventTags, conversionEvent);
@@ -1347,7 +1353,8 @@ namespace OptimizelySDK
 
             if (config == null)
             {
-                Logger.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'FetchQualifiedSegments'.");
+                Logger.Log(LogLevel.ERROR,
+                    "Datafile has invalid format. Failing 'FetchQualifiedSegments'.");
                 return null;
             }
 
@@ -1378,7 +1385,8 @@ namespace OptimizelySDK
         /// <param name="identifiers">Dictionary for identifiers. The caller must provide at least one key-value pair.</param>
         /// <param name="type">Type of event (defaults to `fullstack`)</param>
         /// <param name="data">Optional event data in a key-value pair format</param>
-        public void SendOdpEvent(string action, Dictionary<string, string> identifiers, string type = Constants.ODP_EVENT_TYPE,
+        public void SendOdpEvent(string action, Dictionary<string, string> identifiers, string type
+                = Constants.ODP_EVENT_TYPE,
             Dictionary<string, object> data = null
         )
         {
