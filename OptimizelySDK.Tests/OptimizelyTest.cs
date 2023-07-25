@@ -624,7 +624,7 @@ namespace OptimizelySDK.Tests
                 Times.Once);
             LoggerMock.Verify(
                 log => log.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'Track'."),
-                Times.Once);
+                Times.Never); // Erroring on null or empty event key takes priority over invalid datafile.
             LoggerMock.Verify(
                 log => log.Log(LogLevel.ERROR,
                     "Datafile has invalid format. Failing 'IsFeatureEnabled'."), Times.Once);
@@ -5673,15 +5673,20 @@ namespace OptimizelySDK.Tests
             LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Provided User Id is in invalid format."),
                 Times.Never);
             LoggerMock.Verify(
-                l => l.Log(LogLevel.ERROR, "Provided Event Key is in invalid format."),
+                l => l.Log(LogLevel.ERROR, "Event key cannot be null or empty string. Failing 'Track'."),
                 Times.Never);
 
-            // Verify that ValidateStringInputs logs error for invalid values.
-            Optimizely.Track("", null);
+            // Verify that ValidateStringInputs logs error for invalid event key.
+            Optimizely.Track("", "test_user");
+            LoggerMock.Verify(
+                l => l.Log(LogLevel.ERROR,
+                    "Event key cannot be null or empty string. Failing 'Track'."),
+                Times.Once);
+            
+            // Verify that ValidateStringInputs logs error for invalid user id.
+            Optimizely.Track("purchase", null);
             LoggerMock.Verify(l => l.Log(LogLevel.ERROR, "Provided User Id is in invalid format."),
                 Times.Once);
-            LoggerMock.Verify(
-                l => l.Log(LogLevel.ERROR, "Provided Event Key is in invalid format."), Times.Once);
         }
 
         #endregion Test ValidateStringInputs
@@ -6139,8 +6144,10 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestSendOdpEventNullAction()
         {
-            var optly = new Optimizely(TestData.OdpIntegrationDatafile, logger: LoggerMock.Object, odpManager: OdpManagerMock.Object);
-            optly.SendOdpEvent(action: null, identifiers: new Dictionary<string, string>(), type: "type");
+            var optly = new Optimizely(TestData.OdpIntegrationDatafile, logger: LoggerMock.Object,
+                odpManager: OdpManagerMock.Object);
+            optly.SendOdpEvent(action: null, identifiers: new Dictionary<string, string>(),
+                type: "type");
             LoggerMock.Verify(l => l.Log(LogLevel.ERROR, Constants.ODP_INVALID_ACTION_MESSAGE),
                 Times.Exactly(1));
 
@@ -6151,7 +6158,8 @@ namespace OptimizelySDK.Tests
         public void TestSendOdpEventInvalidOptimizelyObject()
         {
             var optly = new Optimizely("Random datafile", null, LoggerMock.Object);
-            optly.SendOdpEvent("some_action", new Dictionary<string, string>() { { "some_key", "some_value" } }, "some_event");
+            optly.SendOdpEvent("some_action",
+                new Dictionary<string, string>() { { "some_key", "some_value" } }, "some_event");
             LoggerMock.Verify(
                 l => l.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'SendOdpEvent'."),
                 Times.Once);
@@ -6160,8 +6168,10 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestSendOdpEventEmptyStringAction()
         {
-            var optly = new Optimizely(TestData.OdpIntegrationDatafile, logger: LoggerMock.Object, odpManager: OdpManagerMock.Object);
-            optly.SendOdpEvent(action: "", identifiers: new Dictionary<string, string>(), type: "type");
+            var optly = new Optimizely(TestData.OdpIntegrationDatafile, logger: LoggerMock.Object,
+                odpManager: OdpManagerMock.Object);
+            optly.SendOdpEvent(action: "", identifiers: new Dictionary<string, string>(),
+                type: "type");
             LoggerMock.Verify(l => l.Log(LogLevel.ERROR, Constants.ODP_INVALID_ACTION_MESSAGE),
                 Times.Exactly(1));
 
@@ -6172,7 +6182,8 @@ namespace OptimizelySDK.Tests
         public void TestSendOdpEventNullType()
         {
             var identifiers = new Dictionary<string, string>();
-            var optly = new Optimizely(TestData.OdpIntegrationDatafile, logger: LoggerMock.Object, odpManager: OdpManagerMock.Object);
+            var optly = new Optimizely(TestData.OdpIntegrationDatafile, logger: LoggerMock.Object,
+                odpManager: OdpManagerMock.Object);
 
             optly.SendOdpEvent(action: "action", identifiers: identifiers, type: null);
 
@@ -6188,7 +6199,8 @@ namespace OptimizelySDK.Tests
         public void TestSendOdpEventEmptyStringType()
         {
             var identifiers = new Dictionary<string, string>();
-            var optly = new Optimizely(TestData.OdpIntegrationDatafile, logger: LoggerMock.Object, odpManager: OdpManagerMock.Object);
+            var optly = new Optimizely(TestData.OdpIntegrationDatafile, logger: LoggerMock.Object,
+                odpManager: OdpManagerMock.Object);
 
             optly.SendOdpEvent(action: "action", identifiers: identifiers, type: "");
 
@@ -6210,7 +6222,8 @@ namespace OptimizelySDK.Tests
             var optly = new Optimizely("Random datafile", null, LoggerMock.Object);
             optly.FetchQualifiedSegments("some_user", null);
             LoggerMock.Verify(
-                l => l.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'FetchQualifiedSegments'."),
+                l => l.Log(LogLevel.ERROR,
+                    "Datafile has invalid format. Failing 'FetchQualifiedSegments'."),
                 Times.Once);
         }
 
