@@ -2,9 +2,9 @@ name: Continuous Integration
 
 on:
   push:
-    branches: [ release-3.11.3 ]
+    branches: [ release-3.11.4 ]
   pull_request:
-    branches: [ release-3.11.3 ]
+    branches: [ release-3.11.4 ]
 
 jobs:
   lintCodebase:
