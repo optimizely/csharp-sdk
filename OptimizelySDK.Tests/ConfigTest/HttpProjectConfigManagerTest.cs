@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Net;
-using System.Net.Http;
-using System.Threading.Tasks;
 using Moq;
 using NUnit.Framework;
 using OptimizelySDK.Config;
 using OptimizelySDK.Logger;
 using OptimizelySDK.Tests.NotificationTests;
 using OptimizelySDK.Tests.Utils;
+using System;
+using System.Collections.Generic;
+using System.Net;
+using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace OptimizelySDK.Tests.DatafileManagement_Tests
 {
@@ -105,7 +105,9 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
                 statusCode: HttpStatusCode.NotModified,
                 responseContentHeaders: new Dictionary<string, string>
                 {
-                    { "Last-Modified", _pastLastModified.ToString("r") },
+                    {
+                        "Last-Modified", _pastLastModified.ToString("r")
+                    },
                 }
             );
 
@@ -141,7 +143,9 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
                 statusCode: HttpStatusCode.OK,
                 responseContentHeaders: new Dictionary<string, string>
                 {
-                    { "Last-Modified", _pastLastModified.ToString("r") },
+                    {
+                        "Last-Modified", _pastLastModified.ToString("r")
+                    },
                 }
             );
             var httpManager = new HttpProjectConfigManager.Builder()
