@@ -1,5 +1,11 @@
 # Optimizely C# SDK Changelog
 
+## 3.11.4
+July 26, 2023
+
+### Bug Fix
+- Fix Last-Modified date & time format for If-Modified-Since  ([#361](https://github.com/optimizely/csharp-sdk/pull/361)).
+
 ## 3.11.3
 July 18, 2023
 
