@@ -35,7 +35,7 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("3.11.3.0")]
-[assembly: AssemblyFileVersion("3.11.3.0")]
-[assembly: AssemblyInformationalVersion("3.11.3")] // Used by Nuget.
+[assembly: AssemblyVersion("3.11.4.0")]
+[assembly: AssemblyFileVersion("3.11.4.0")]
+[assembly: AssemblyInformationalVersion("3.11.4")] // Used by Nuget.
 
