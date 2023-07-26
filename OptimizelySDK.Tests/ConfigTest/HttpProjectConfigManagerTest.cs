@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Net;
-using System.Net.Http;
-using System.Threading.Tasks;
 using Moq;
 using NUnit.Framework;
 using OptimizelySDK.Config;
 using OptimizelySDK.Logger;
 using OptimizelySDK.Tests.NotificationTests;
 using OptimizelySDK.Tests.Utils;
+using System;
+using System.Collections.Generic;
+using System.Net;
+using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace OptimizelySDK.Tests.DatafileManagement_Tests
 {
