@@ -101,7 +101,7 @@ jobs:
   integration_tests:
     name: Run Integration Tests
     needs: [ netFrameworksAndUnitTest, netStandard16, netStandard20 ]
-    uses: optimizely/csharp-sdk/.github/workflows/integration_test.yml@release-3.11.4
+    uses: optimizely/csharp-sdk/.github/workflows/integration_test.yml@mike/pick-prep-3.11.4
     secrets:
       CI_USER_TOKEN: ${{ secrets.CI_USER_TOKEN }}
       TRAVIS_COM_TOKEN: ${{ secrets.TRAVIS_COM_TOKEN }}
@@ -109,7 +109,7 @@ jobs:
   fullstack_production_suite:
     name: Run Performance Tests
     needs: [ netFrameworksAndUnitTest, netStandard16, netStandard20 ]
-    uses: optimizely/csharp-sdk/.github/workflows/integration_test.yml@release-3.11.4
+    uses: optimizely/csharp-sdk/.github/workflows/integration_test.yml@mike/pick-prep-3.11.4
     with:
       FULLSTACK_TEST_REPO: ProdTesting
     secrets:
