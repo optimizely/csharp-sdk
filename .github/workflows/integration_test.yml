@@ -52,4 +52,6 @@ jobs:
         HOME: 'home/runner'
       run: |
         echo "$GITHUB_CONTEXT"
+        # Adding the FSC branch that does not include tests for ODP (before-odp)
+        # Remember to also disable the ODP_SERVER and ATS_API features in app-dot
         home/runner/travisci-tools/trigger-script-with-status-update.sh before-odp
