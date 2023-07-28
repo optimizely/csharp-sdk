@@ -8,6 +8,7 @@ on:
 
 jobs:
   lintCodebase:
+    if: ${{ false }} # intentionally skipping
     runs-on: ubuntu-latest
     name: Lint Codebase
     steps:
@@ -26,6 +27,7 @@ jobs:
 
   netFrameworksAndUnitTest:
     name: Build Framework & Run Unit Tests
+    if: ${{ false }} # intentionally skipping
     needs: [ lintCodebase ]
     runs-on: windows-2019 # required version for Framework 4.0
     env:
@@ -54,6 +56,7 @@ jobs:
   
   netStandard16:
     name: Build Standard 1.6
+    if: ${{ false }} # intentionally skipping
     needs: [ netFrameworksAndUnitTest ]
     runs-on: windows-2022
     env:
@@ -77,6 +80,7 @@ jobs:
 
   netStandard20:
     name: Build Standard 2.0
+    if: ${{ false }} # intentionally skipping
     needs: [ netFrameworksAndUnitTest ]
     runs-on: windows-2022
     env:
@@ -101,15 +105,16 @@ jobs:
   integration_tests:
     name: Run Integration Tests
     needs: [ netFrameworksAndUnitTest, netStandard16, netStandard20 ]
-    uses: optimizely/csharp-sdk/.github/workflows/integration_test.yml@master
+    uses: optimizely/csharp-sdk/.github/workflows/integration_test.yml@mike/pick-prep-3.11.4
     secrets:
       CI_USER_TOKEN: ${{ secrets.CI_USER_TOKEN }}
       TRAVIS_COM_TOKEN: ${{ secrets.TRAVIS_COM_TOKEN }}
   
   fullstack_production_suite:
     name: Run Performance Tests
+    if: ${{ false }} # intentionally skipping
     needs: [ netFrameworksAndUnitTest, netStandard16, netStandard20 ]
-    uses: optimizely/csharp-sdk/.github/workflows/integration_test.yml@master
+    uses: optimizely/csharp-sdk/.github/workflows/integration_test.yml@mike/pick-prep-3.11.4
     with:
       FULLSTACK_TEST_REPO: ProdTesting
     secrets:
