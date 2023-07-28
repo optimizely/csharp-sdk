@@ -101,7 +101,7 @@ jobs:
   integration_tests:
     name: Run Integration Tests
 #    needs: [ netFrameworksAndUnitTest, netStandard16, netStandard20 ]
-    uses: optimizely/csharp-sdk/.github/workflows/integration_test.yml@mike/pick-prep-3.11.4
+    uses: optimizely/csharp-sdk/.github/workflows/integration_test.yml@12ff8fbd47855d85e3b6e47461b24a573af92cb9
     secrets:
       CI_USER_TOKEN: ${{ secrets.CI_USER_TOKEN }}
       TRAVIS_COM_TOKEN: ${{ secrets.TRAVIS_COM_TOKEN }}
