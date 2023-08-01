@@ -140,6 +140,26 @@ namespace OptimizelySDK.Tests.DatafileManagement_Tests
         }
 
         [Test]
+        public void TestWarnLogIfPollingTimeIsLessThanThirty()
+        {
+            // period to call is 29 milliseconds
+            var configManager = new TestPollingProjectConfigManager(TimeSpan.FromMilliseconds(29),
+                TimeSpan.FromMilliseconds(20), true, LoggerMock.Object, new int[] { });
+            LoggerMock.Verify(l => l.Log(LogLevel.WARN,
+                "Polling intervals below 30 seconds are not recommended."), Times.Once);
+        }
+
+        [Test]
+        public void TestWarnLogNotTriggeredIfPollingTimeIsGreaterThanThirty()
+        {
+            // period to call is 32 second
+            var configManager = new TestPollingProjectConfigManager(TimeSpan.FromSeconds(32),
+                TimeSpan.FromMilliseconds(31), true, LoggerMock.Object, new int[] { });
+            LoggerMock.Verify(l => l.Log(LogLevel.WARN,
+                "Polling intervals below 30 seconds are not recommended."), Times.Once);
+        }
+
+        [Test]
         public void TestDontTimedoutIfSchedulerNotStarted()
         {
             // period to call is 3 second
