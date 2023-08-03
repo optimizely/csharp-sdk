@@ -65,6 +65,10 @@ namespace OptimizelySDK.Config
             Logger = logger;
             ErrorHandler = errorHandler;
             BlockingTimeout = blockingTimeout;
+            if (period.TotalSeconds < 30)
+            {
+                Logger?.Log(LogLevel.WARN, "Polling intervals below 30 seconds are not recommended.");
+            }
             PollingInterval = period;
             AutoUpdate = autoUpdate;
 
