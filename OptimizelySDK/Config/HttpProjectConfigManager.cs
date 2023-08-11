@@ -19,6 +19,7 @@
 #endif
 
 using System;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using OptimizelySDK.ErrorHandler;
@@ -179,7 +180,7 @@ namespace OptimizelySDK.Config
             }
 
             var lastModified = result.Headers.GetValues("Last-Modified");
-            if (!string.IsNullOrEmpty(lastModified.First()))
+            if (!string.IsNullOrEmpty(lastModified?.First()))
             {
                 LastModifiedSince = lastModified.First();
             }
@@ -201,12 +202,7 @@ namespace OptimizelySDK.Config
         {
             var datafile = GetRemoteDatafileResponse();
 
-            if (datafile == null)
-            {
-                return null;
-            }
-
-            return DatafileProjectConfig.Create(datafile, Logger, ErrorHandler);
+            return datafile == null ? null : DatafileProjectConfig.Create(datafile, Logger, ErrorHandler);
         }
 
         public class Builder
@@ -233,7 +229,6 @@ namespace OptimizelySDK.Config
             private bool AutoUpdate = true;
             private bool StartByDefault = true;
             private NotificationCenter NotificationCenter;
-
 
             private bool IsBlockingTimeoutProvided = false;
             private bool IsPollingIntervalProvided = false;
