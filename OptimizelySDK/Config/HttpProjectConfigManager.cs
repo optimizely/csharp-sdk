@@ -202,7 +202,12 @@ namespace OptimizelySDK.Config
         {
             var datafile = GetRemoteDatafileResponse();
 
-            return datafile == null ? null : DatafileProjectConfig.Create(datafile, Logger, ErrorHandler);
+            if (datafile == null)
+            {
+                return null;
+            }
+
+            return DatafileProjectConfig.Create(datafile, Logger, ErrorHandler);
         }
 
         public class Builder
