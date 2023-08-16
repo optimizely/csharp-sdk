@@ -27,7 +27,6 @@ namespace OptimizelySDK
 
         private string flagKey;
         private string ruleKey;
-        private string decisionKey;
 
         /// <summary>
         /// Represents the object is valid or not.
