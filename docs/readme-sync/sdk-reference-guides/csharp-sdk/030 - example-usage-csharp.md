@@ -13,13 +13,37 @@ This example demonstrates the basic usage of each of these concepts. This exampl
 2. Run an A/B test called `app_redesign`. This experiment has two variations, `control` and `treatment`. It uses the `activate` method to assign the user to a variation, returning its key. As a side effect, the activate function also sends an impression event to Optimizely to record that the current user has been exposed to the experiment. 
 
 3. Use event tracking to track an event called `purchased`. This conversion event measures the impact of an experiment. Using the track method, the purchase is automatically attributed back to the running A/B and feature tests we've activated, and the SDK sends a network request to Optimizely via the customizable event dispatcher so we can count it in your results page.
-[block:code]
+```csharp
+// Import Optimizely SDK
+using OptimizelySDK;
+
+// Instantiate an Optimizely client
+var optimizelyClient = new Optimizely(datafile);
+
+// Evaluate a feature flag and a variable
+bool isFeatureEnabled = optimizelyClient.IsFeatureEnabled("price_filter", userId);
+int? min_price = optimizelyClient.GetFeatureVariableInteger("price_filter", "min_price", userId);
+
+// Activate an A/B test
+var variation = optimizelyClient.Activate("app_redesign", userId);
+
+if (variation != null && !string.IsNullOrEmpty(variation.Key))
 {
-  "codes": [
+    if (variation.Key == "control")
     {
-      "code": "//Import Optimizely SDK\nusing OptimizelySDK;\n\n// Instantiate an Optimizely client\nvar optimizelyClient = new Optimizely(datafile);\n\n// Evaluate a feature flag and a variable\nbool isFeatureEnabled = optimizelyClient.IsFeatureEnabled(\"price_filter\", userId);\nint? min_price = optimizelyClient.GetFeatureVariableInteger(\"price_filter\", \"min_price\", userId);\n\n// Activate an A/B test\nvar variation = optimizelyClient.Activate(\"app_redesign\", userId);\n\tif (variation != null && !string.IsNullOrEmpty(variation.Key))\n\t{\n\t\tif (variation.Key == \"control\")\n\t\t{\n\t\t\t// Execute code for variation A\n\t\t}\n\t\telse if (variation.Key == \"treatment\")\n\t\t{\n\t\t\t// Execute code for variation B\n\t\t}\n\t}\n\telse\n\t{\n\t\t// Execute code for your users who don’t qualify for the experiment\n\t}\n\n// Track an event\noptimizelyClient.Track(\"purchased\", userId);\n\n",
-      "language": "csharp"
+        // Execute code for variation A
     }
-  ]
+    else if (variation.Key == "treatment")
+    {
+        // Execute code for variation B
+    }
 }
-[/block]
+else
+{
+    // Execute code for your users who don’t qualify for the experiment
+}
+
+// Track an event
+optimizelyClient.Track("purchased", userId);
+
+```
