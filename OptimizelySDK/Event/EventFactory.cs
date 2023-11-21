@@ -1,11 +1,11 @@
-﻿/* 
- * Copyright 2019-2020, Optimizely
+﻿/*
+ * Copyright 2019-2020, 2023 Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,7 +21,6 @@ using OptimizelySDK.Entity;
 using OptimizelySDK.Event.Entity;
 using OptimizelySDK.Logger;
 using OptimizelySDK.Utils;
-
 
 namespace OptimizelySDK.Event
 {
@@ -75,7 +74,7 @@ namespace OptimizelySDK.Event
                 }
                 else
                 {
-                    //TODO: Need to log a message, invalid UserEvent added in a list.
+                    logger.Log(LogLevel.WARN, "Invalid UserEvent added in a list.");
                     continue;
                 }
 
@@ -181,9 +180,10 @@ namespace OptimizelySDK.Event
         /// </summary>
         /// <param name="userAttributes">The user's attributes</param>
         /// <param name="config">ProjectConfig instance</param>
+        /// <param name="logger">An optional ILogger implementation</param>
         /// <returns>VisitorAttribute array if config is valid, null otherwise</returns>
         public static VisitorAttribute[] BuildAttributeList(UserAttributes userAttributes,
-            ProjectConfig config
+            ProjectConfig config, ILogger logger = null
         )
         {
             if (config == null)
@@ -192,18 +192,31 @@ namespace OptimizelySDK.Event
             }
 
             var attributesList = new List<VisitorAttribute>();
+            var invalidUserAttributeKeys = new List<string>();
 
             if (userAttributes != null)
             {
-                foreach (var validUserAttribute in userAttributes.Where(attribute =>
-                             Validator.IsUserAttributeValid(attribute)))
+                foreach (var userAttribute in userAttributes)
                 {
-                    var attributeId = config.GetAttributeId(validUserAttribute.Key);
-                    if (!string.IsNullOrEmpty(attributeId))
+                    if (Validator.IsUserAttributeValid(userAttribute))
                     {
-                        attributesList.Add(new VisitorAttribute(attributeId, validUserAttribute.Key,
-                            CUSTOM_ATTRIBUTE_FEATURE_TYPE, validUserAttribute.Value));
+                        var attributeId = config.GetAttributeId(userAttribute.Key);
+                        if (!string.IsNullOrEmpty(attributeId))
+                        {
+                            attributesList.Add(new VisitorAttribute(attributeId, userAttribute.Key,
+                                CUSTOM_ATTRIBUTE_FEATURE_TYPE, userAttribute.Value));
+                        }
                     }
+                    else
+                    {
+                        invalidUserAttributeKeys.Add(userAttribute.Key);
+                    }
+                }
+
+                if (invalidUserAttributeKeys.Count > 0 && !(logger is null))
+                {
+                    logger.Log(LogLevel.WARN,
+                        $"User attributes: {string.Join(", ", invalidUserAttributeKeys.ToArray())} were invalid and omitted.");
                 }
             }
 
