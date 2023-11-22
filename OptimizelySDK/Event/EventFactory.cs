@@ -193,24 +193,33 @@ namespace OptimizelySDK.Event
 
             var attributesList = new List<VisitorAttribute>();
             var invalidUserAttributeKeys = new List<string>();
+            var notRegisteredAttributeKeys = new List<string>();
 
             if (userAttributes != null)
             {
                 foreach (var userAttribute in userAttributes)
                 {
-                    if (Validator.IsUserAttributeValid(userAttribute))
+                    var attributeId = config.GetAttributeId(userAttribute.Key);
+                    if (string.IsNullOrEmpty(attributeId))
                     {
-                        var attributeId = config.GetAttributeId(userAttribute.Key);
-                        if (!string.IsNullOrEmpty(attributeId))
-                        {
-                            attributesList.Add(new VisitorAttribute(attributeId, userAttribute.Key,
-                                CUSTOM_ATTRIBUTE_FEATURE_TYPE, userAttribute.Value));
-                        }
+                        notRegisteredAttributeKeys.Add(userAttribute.Key);
+                        continue;
                     }
-                    else
+
+                    if (!Validator.IsUserAttributeValid(userAttribute))
                     {
                         invalidUserAttributeKeys.Add(userAttribute.Key);
+                        continue;
                     }
+
+                    attributesList.Add(new VisitorAttribute(attributeId, userAttribute.Key,
+                        CUSTOM_ATTRIBUTE_FEATURE_TYPE, userAttribute.Value));
+                }
+                
+                if (notRegisteredAttributeKeys.Count > 0 && !(logger is null))
+                {
+                    logger.Log(LogLevel.WARN,
+                        $"User attributes: {string.Join(", ", notRegisteredAttributeKeys.ToArray())} are not supported by the datafile and will not be used.");
                 }
 
                 if (invalidUserAttributeKeys.Count > 0 && !(logger is null))
