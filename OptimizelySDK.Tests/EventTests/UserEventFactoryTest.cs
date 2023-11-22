@@ -115,7 +115,7 @@ namespace OptimizelySDK.Tests.EventTests
 
             LoggerMock.Verify(l => l.Log(LogLevel.WARN, expectedLogMessage), Times.Once());
         }
-        
+
         [Test]
         public void EventFactoryBuildShouldLogUserAttributesNotInDatafile()
         {

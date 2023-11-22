@@ -215,7 +215,7 @@ namespace OptimizelySDK.Event
                     attributesList.Add(new VisitorAttribute(attributeId, userAttribute.Key,
                         CUSTOM_ATTRIBUTE_FEATURE_TYPE, userAttribute.Value));
                 }
-                
+
                 if (notRegisteredAttributeKeys.Count > 0 && !(logger is null))
                 {
                     logger.Log(LogLevel.WARN,
