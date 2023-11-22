@@ -101,19 +101,38 @@ namespace OptimizelySDK.Tests.EventTests
         public void EventFactoryBuildShouldLogInvalidUserAttributes()
         {
             var projectConfig = Config;
-
             var invalidUserAttributes = new UserAttributes
             {
-                { "invalid_date_object", new DateTime() },
-                { "invalid_array_use", new int[7] },
+                // valid attribute keys in TestData.json but invalid values
+                { "device_type", new DateTime() },
+                { "location", new int[7] },
             };
-            var expectedInvalidMessage =
-                $"User attributes: invalid_date_object, invalid_array_use were invalid and omitted.";
+            var expectedLogMessage =
+                $"User attributes: device_type, location were invalid and omitted.";
 
             EventFactory.BuildAttributeList(invalidUserAttributes, projectConfig,
                 LoggerMock.Object);
 
-            LoggerMock.Verify(l => l.Log(LogLevel.WARN, expectedInvalidMessage), Times.Once());
+            LoggerMock.Verify(l => l.Log(LogLevel.WARN, expectedLogMessage), Times.Once());
+        }
+        
+        [Test]
+        public void EventFactoryBuildShouldLogUserAttributesNotInDatafile()
+        {
+            var projectConfig = Config;
+            var userAttributes = new UserAttributes
+            {
+                { "device_type", "valid_since_device_type_is_in_TestData_json" },
+                { "attribute_not_in_TestData_json", 42 },
+                { "another_attribute_not_in_TestData_json", true },
+            };
+            var expectedLogMessage =
+                $"User attributes: attribute_not_in_TestData_json, another_attribute_not_in_TestData_json are not supported by the datafile and will not be used.";
+
+            EventFactory.BuildAttributeList(userAttributes, projectConfig,
+                LoggerMock.Object);
+
+            LoggerMock.Verify(l => l.Log(LogLevel.WARN, expectedLogMessage), Times.Once());
         }
 
         [Test]
