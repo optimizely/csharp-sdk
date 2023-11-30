@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright 2020-2022, Optimizely
+ * Copyright 2020-2023, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,28 +29,30 @@ namespace OptimizelySDK.Tests.OptimizelyConfigTests
     [TestFixture]
     public class OptimizelyConfigTest
     {
-        private Mock<ILogger> LoggerMock;
+        private Mock<ILogger> _loggerMock;
 
         [SetUp]
         public void Setup()
         {
-            LoggerMock = new Mock<ILogger>();
-            LoggerMock.Setup(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()));
+            _loggerMock = new Mock<ILogger>();
+            _loggerMock.Setup(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()));
         }
 
         #region Test OptimizelyConfigService
 
-        private static Type[] ParameterTypes =
+        private static readonly Type[] parameterTypes =
         {
             typeof(ProjectConfig),
+            typeof(ILogger),
         };
 
         private PrivateObject CreatePrivateOptimizelyConfigService(ProjectConfig projectConfig)
         {
-            return new PrivateObject(typeof(OptimizelyConfigService), ParameterTypes,
+            return new PrivateObject(typeof(OptimizelyConfigService), parameterTypes,
                 new object[]
                 {
                     projectConfig,
+                    new NoOpLogger(),
                 });
         }
 
@@ -144,22 +146,26 @@ namespace OptimizelySDK.Tests.OptimizelyConfigTests
         }
 
         [Test]
-        [Obsolete]
         public void TestGetOptimizelyConfigWithDuplicateExperimentKeys()
         {
+            // OptimizelySDK.Tests/similar_exp_keys.json has DUPLICATED_EXPERIMENT_KEY
+            const string DUPLICATED_EXPERIMENT_KEY = "targeted_delivery";
+            const string SECOND_DUPLICATED_EXPERIMENT_ID = "9300000007573";
             var datafileProjectConfig = DatafileProjectConfig.Create(
-                TestData.DuplicateExpKeysDatafile, new NoOpLogger(),
+                TestData.DuplicateExpKeysDatafile,
+                new NoOpLogger(),
                 new ErrorHandler.NoOpErrorHandler());
-            var optimizelyConfigService = new OptimizelyConfigService(datafileProjectConfig);
-            var optimizelyConfig = optimizelyConfigService.GetOptimizelyConfig();
-            Assert.AreEqual(optimizelyConfig.ExperimentsMap.Count, 1);
+            var optimizelyConfigService =
+                new OptimizelyConfigService(datafileProjectConfig, _loggerMock.Object);
 
-            var experimentMapFlag1 =
-                optimizelyConfig.FeaturesMap["flag1"].ExperimentsMap; //9300000007569
-            var experimentMapFlag2 =
-                optimizelyConfig.FeaturesMap["flag2"].ExperimentsMap; // 9300000007573
-            Assert.AreEqual(experimentMapFlag1["targeted_delivery"].Id, "9300000007569");
-            Assert.AreEqual(experimentMapFlag2["targeted_delivery"].Id, "9300000007573");
+            var optimizelyConfig = optimizelyConfigService.GetOptimizelyConfig();
+
+            Assert.AreEqual(optimizelyConfig.ExperimentsMap.Count, 1);
+            Assert.AreEqual(optimizelyConfig.ExperimentsMap[DUPLICATED_EXPERIMENT_KEY].Id,
+                SECOND_DUPLICATED_EXPERIMENT_ID);
+            _loggerMock.Verify(
+                l => l.Log(LogLevel.WARN,
+                    "Duplicate experiment keys found in datafile: targeted_delivery"), Times.Once);
         }
 
         [Test]
