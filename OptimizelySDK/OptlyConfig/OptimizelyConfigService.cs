@@ -27,9 +27,9 @@ namespace OptimizelySDK.OptlyConfig
 {
     public class OptimizelyConfigService
     {
-        private readonly OptimizelyConfig _optimizelyConfig;
+        private OptimizelyConfig _optimizelyConfig;
 
-        private readonly IDictionary<string, List<FeatureVariable>> _featureIdVariablesMap;
+        private IDictionary<string, List<FeatureVariable>> _featureIdVariablesMap;
 
         private readonly ILogger _logger;
 
