@@ -1,11 +1,11 @@
 ﻿/*
- * Copyright 2019-2021, Optimizely
+ * Copyright 2019-2021, 2023, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,30 +15,34 @@
  */
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using OptimizelySDK.Entity;
+using OptimizelySDK.Logger;
 
 namespace OptimizelySDK.OptlyConfig
 {
     public class OptimizelyConfigService
     {
-        private OptimizelyConfig OptimizelyConfig;
+        private OptimizelyConfig _optimizelyConfig;
 
-        private IDictionary<string, List<FeatureVariable>> featureIdVariablesMap;
+        private IDictionary<string, List<FeatureVariable>> _featureIdVariablesMap;
 
-        public OptimizelyConfigService(ProjectConfig projectConfig)
+        private readonly ILogger _logger;
+
+        public OptimizelyConfigService(ProjectConfig projectConfig, ILogger logger = null)
         {
             if (projectConfig == null)
             {
                 return;
             }
 
-            featureIdVariablesMap = GetFeatureVariablesByIdMap(projectConfig);
+            _logger = logger ?? new DefaultLogger();
+
+            _featureIdVariablesMap = GetFeatureVariablesByIdMap(projectConfig);
             var attributes = GetAttributes(projectConfig);
             var audiences = GetAudiences(projectConfig);
             var experimentsMapById = GetExperimentsMapById(projectConfig);
@@ -47,7 +51,7 @@ namespace OptimizelySDK.OptlyConfig
             var featureMap = GetFeaturesMap(projectConfig, experimentsMapById);
             var events = GetEvents(projectConfig);
 
-            OptimizelyConfig = new OptimizelyConfig(projectConfig.Revision,
+            _optimizelyConfig = new OptimizelyConfig(projectConfig.Revision,
                 projectConfig.SDKKey,
                 projectConfig.EnvironmentKey,
                 attributes,
@@ -118,6 +122,12 @@ namespace OptimizelySDK.OptlyConfig
 
             foreach (var experiment in experimentsMapById.Values)
             {
+                if (experimentKeyMaps.ContainsKey(experiment.Key))
+                {
+                    _logger.Log(LogLevel.WARN,
+                        $"Duplicate experiment keys found in datafile: {experiment.Key}");
+                }
+
                 experimentKeyMaps[experiment.Key] = experiment;
             }
 
@@ -210,7 +220,7 @@ namespace OptimizelySDK.OptlyConfig
 
             if (!string.IsNullOrEmpty(featureId))
             {
-                variablesMap = featureIdVariablesMap[featureId]?.
+                variablesMap = _featureIdVariablesMap[featureId]?.
                     Select(f => new OptimizelyVariable(f.Id,
                         f.Key,
                         f.Type.ToString().ToLower(),
@@ -451,7 +461,7 @@ namespace OptimizelySDK.OptlyConfig
 
         public OptimizelyConfig GetOptimizelyConfig()
         {
-            return OptimizelyConfig;
+            return _optimizelyConfig;
         }
     }
 }
