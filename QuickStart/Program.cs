@@ -4,9 +4,14 @@ using System.Linq;
 using System.Threading;
 using Newtonsoft.Json;
 using OptimizelySDK;
+using OptimizelySDK.Config;
 using OptimizelySDK.Entity;
+using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Event;
+using OptimizelySDK.Event.Dispatcher;
+using OptimizelySDK.Logger;
 using OptimizelySDK.Notifications;
+using OptimizelySDK.Odp;
 
 namespace QuickStart
 {
@@ -14,16 +19,43 @@ namespace QuickStart
     {
         public static void Main()
         {
-            var optimizelyClient = OptimizelyFactory.NewDefaultInstance("TbrfRLeKvLyWGusqANoeR");
-            if (!optimizelyClient.IsValid)
-            {
-                Console.WriteLine("Optimizely client invalid. Verify in Settings>Environments that you used the primary environment's SDK key");
-                optimizelyClient.Dispose();
-                return;
-            }
+            
+            var logger = new DefaultLogger();
+            var errorHandler = new DefaultErrorHandler(logger, false);
+            var eventDispatcher = new DefaultEventDispatcher(logger);
+            var builder = new HttpProjectConfigManager.Builder();
+            var notificationCenter = new NotificationCenter();
+            // Wire ConfigUpdate and LogEvent early
+            // for ConfigUpdate
+            // notificationCenter.AddNotification(
+            //     NotificationCenter.NotificationType.OptimizelyConfigUpdate,
+            //     NotificationCallbacks.ConfigUpdateCallback);
+            // // for LogEvent
+            // notificationCenter.AddNotification(
+            //     NotificationCenter.NotificationType.LogEvent,
+            //     NotificationCallbacks.LogEventCallback);
+
+            var configManager = builder.WithSdkKey("TbrfRLeKvLyWGusqANoeR").
+                WithLogger(logger).
+                WithPollingInterval(TimeSpan.FromSeconds(1)).
+                WithBlockingTimeoutPeriod(TimeSpan.FromSeconds(1)).
+                WithErrorHandler(errorHandler).
+                WithNotificationCenter(notificationCenter).
+                Build();
+            var eventProcessor = new BatchEventProcessor.Builder().WithLogger(logger).
+                WithMaxBatchSize(1).
+                WithFlushInterval(TimeSpan.FromSeconds(1)).
+                WithEventDispatcher(eventDispatcher).
+                WithNotificationCenter(notificationCenter).
+                Build();
+            var odpManager = new OdpManager.Builder()
+                .WithErrorHandler(errorHandler)
+                .WithLogger(logger)
+                .Build();
+            var optimizelyClient = new Optimizely(configManager, notificationCenter, eventDispatcher, logger,
+                errorHandler, null, eventProcessor, null, odpManager);
             
             const string USER_ID = "matjaz-user-2";
-
             var user = optimizelyClient.CreateUserContext(USER_ID);
 
             // Fetch
@@ -65,36 +97,27 @@ namespace QuickStart
             // Console.WriteLine("Variation: " + JsonConvert.SerializeObject(variation));
             
             // NotificationCenter
-            // var callbacks = new TestNotificationCallbacks();
             // // for Activate
-            // optimizelyClient.NotificationCenter.AddNotification(
+            // notificationCenter.AddNotification(
             //     NotificationCenter.NotificationType.Activate,
-            //     TestNotificationCallbacks.ActivateCallback);
+            //     NotificationCallbacks.ActivateCallback);
             // optimizelyClient.Activate("flag1", USER_ID);
             // // for Track
-            // optimizelyClient.NotificationCenter.AddNotification(
+            // notificationCenter.AddNotification(
             //     NotificationCenter.NotificationType.Track,
-            //     TestNotificationCallbacks.TrackCallback);
+            //     NotificationCallbacks.TrackCallback);
             // optimizelyClient.Track("myevent", USER_ID);
             // // for Decision
-            // optimizelyClient.NotificationCenter.AddNotification(
+            // notificationCenter.AddNotification(
             //     NotificationCenter.NotificationType.Decision,
-            //     TestNotificationCallbacks.DecisionCallback);
+            //     NotificationCallbacks.DecisionCallback);
             // user.Decide("flag1");
-            // // for ConfigUpdate
-            // optimizelyClient.NotificationCenter.AddNotification(
-            //     NotificationCenter.NotificationType.OptimizelyConfigUpdate,
-            //     callbacks.ConfigUpdateCallback);
-            // // for LogEvent
-            // optimizelyClient.NotificationCenter.AddNotification(
-            //     NotificationCenter.NotificationType.LogEvent,
-            //     callbacks.LogEventCallback);
             
             optimizelyClient.Dispose();
         }
     }
     
-    public class TestNotificationCallbacks
+    public static class NotificationCallbacks
     {
         public static void ActivateCallback(Experiment experiment, string userId,
             UserAttributes userAttributes,
@@ -134,12 +157,12 @@ namespace QuickStart
             Console.WriteLine(JsonConvert.SerializeObject(decisionInfo));
         }
 
-        public void ConfigUpdateCallback()
+        public static void ConfigUpdateCallback()
         {
             Console.WriteLine(">>> Config Update Callback");
         }
 
-        public void LogEventCallback(LogEvent logEvent)
+        public static void LogEventCallback(LogEvent logEvent)
         {
             Console.WriteLine(">>> Log Event Callback");
             Console.WriteLine(JsonConvert.SerializeObject(logEvent));
