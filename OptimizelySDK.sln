@@ -28,6 +28,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OptimizelySDK.Net40", "Opti
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OptimizelySDK.NetStandard20", "OptimizelySDK.NetStandard20\OptimizelySDK.NetStandard20.csproj", "{CFEC91C6-B6E5-45D5-97D6-7081B0DC7453}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuickStart", "QuickStart\QuickStart.csproj", "{74BAE350-8779-413A-A88E-AFE6A0A84D28}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -62,6 +64,10 @@ Global
 		{CFEC91C6-B6E5-45D5-97D6-7081B0DC7453}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CFEC91C6-B6E5-45D5-97D6-7081B0DC7453}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CFEC91C6-B6E5-45D5-97D6-7081B0DC7453}.Release|Any CPU.Build.0 = Release|Any CPU
+		{74BAE350-8779-413A-A88E-AFE6A0A84D28}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{74BAE350-8779-413A-A88E-AFE6A0A84D28}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{74BAE350-8779-413A-A88E-AFE6A0A84D28}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{74BAE350-8779-413A-A88E-AFE6A0A84D28}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
