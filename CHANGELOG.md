@@ -5,27 +5,26 @@ January 16th, 2024
 
 ### New Features
 - Promote Advanced Audience Targeting to General Availability
-- Add warning to polling intervals below 30 seconds #365
+- Add warning to polling intervals below 30 seconds ([#365](https://github.com/optimizely/csharp-sdk/pull/365))
 
 ### Bug Fixes
-- Return Latest Experiment When Duplicate Keys in Config  enhancement (#370)
-- Fix Last-Modified date & time format for If-Modified-Since (#361)
+- Return Latest Experiment When Duplicate Keys in Config  enhancement 
 
 ### Documentation
-- Corrections to markdown files in docs directory (#368)
-- GitHub template updates (#366)
+- Corrections to markdown files in docs directory ([#368](https://github.com/optimizely/csharp-sdk/pull/368))
+- GitHub template updates ([#366](https://github.com/optimizely/csharp-sdk/pull/366))
 
 ## 3.11.4
 July 26th, 2023
 
 ### Bug Fixes
-- Fix Last-Modified date & time format for If-Modified-Since (#361).
+- Fix Last-Modified date & time format for If-Modified-Since ([#361](https://github.com/optimizely/csharp-sdk/pull/361))
 
 ## 3.11.3
 July 18th, 2023
 
 ### Bug Fixes
-- Last-Modified in header not found and used to reduce polling payload (#355).
+- Last-Modified in header not found and used to reduce polling payload ([#355](https://github.com/optimizely/csharp-sdk/pull/355)).
 
 ## 4.0.0-beta
 April 28th, 2023
