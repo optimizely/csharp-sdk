@@ -5,7 +5,7 @@ January 16th, 2024
 
 ### New Features
 - Promote Advanced Audience Targeting to General Availability
-- Add warning to polling intervals below 30 seconds (#365)
+- Add warning to polling intervals below 30 seconds #365
 
 ### Bug Fixes
 - Return Latest Experiment When Duplicate Keys in Config  enhancement (#370)
