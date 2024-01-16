@@ -1,5 +1,32 @@
 # Optimizely C# SDK Changelog
 
+## 4.0.0
+January 16th, 2024
+
+### New Features
+- Promote Advanced Audience Targeting to General Availability
+- Add warning to polling intervals below 30 seconds (#365)
+
+### Bug Fixes
+- Return Latest Experiment When Duplicate Keys in Config  enhancement (#370)
+- Fix Last-Modified date & time format for If-Modified-Since (#361)
+
+### Documentation
+- Corrections to markdown files in docs directory (#368)
+- GitHub template updates (#366)
+
+## 3.11.4
+July 26th, 2023
+
+### Bug Fixes
+- Fix Last-Modified date & time format for If-Modified-Since (#361).
+
+## 3.11.3
+July 18th, 2023
+
+### Bug Fixes
+- Last-Modified in header not found and used to reduce polling payload (#355).
+
 ## 4.0.0-beta
 April 28th, 2023
 
