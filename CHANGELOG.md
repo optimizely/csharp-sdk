@@ -4,8 +4,52 @@
 January 16th, 2024
 
 ### New Features
-- Promote Advanced Audience Targeting to General Availability
-- Add warning to polling intervals below 30 seconds ([#365](https://github.com/optimizely/csharp-sdk/pull/365))
+
+#### Polling warning
+
+Add warning to polling intervals below 30 seconds ([#365](https://github.com/optimizely/csharp-sdk/pull/365))
+
+#### Advanced Audience Targeting
+
+The 4.0.0 release introduces a new primary feature, [Advanced Audience Targeting]( https://docs.developers.optimizely.com/feature-experimentation/docs/optimizely-data-platform-advanced-audience-targeting)
+  enabled through integration with [Optimizely Data Platform (ODP)](https://docs.developers.optimizely.com/optimizely-data-platform/docs) (
+  [#305](https://github.com/optimizely/csharp-sdk/pull/305),
+  [#310](https://github.com/optimizely/csharp-sdk/pull/310),
+  [#311](https://github.com/optimizely/csharp-sdk/pull/311),
+  [#315](https://github.com/optimizely/csharp-sdk/pull/315),
+  [#321](https://github.com/optimizely/csharp-sdk/pull/321),
+  [#322](https://github.com/optimizely/csharp-sdk/pull/322),
+  [#323](https://github.com/optimizely/csharp-sdk/pull/323),
+  [#324](https://github.com/optimizely/csharp-sdk/pull/324)
+  ).
+
+You can use ODP, a high-performance [Customer Data Platform (CDP)]( https://www.optimizely.com/optimization-glossary/customer-data-platform/), to easily create complex
+real-time segments (RTS) using first-party and 50+ third-party data sources out of the box. You    can create custom schemas that support the user attributes important
+for your business, and stitch together user behavior done on different devices to better understand and target your customers for personalized user experiences. ODP can
+be used as a single source of truth for these segments in any Optimizely or 3rd party tool.
+
+With ODP accounts integrated into Optimizely projects, you can build audiences using segments pre-defined in ODP. The SDK will fetch the segments for given users and
+make decisions using the segments. For access to ODP audience targeting in your Feature Experimentation account, please contact your Optimizely Customer Success Manager.
+
+This version includes the following changes:
+- New API added to `OptimizelyUserContext`:
+    - `FetchQualifiedSegments()`: this API will retrieve user segments from the ODP server. The fetched segments will be used for audience evaluation. The fetched data will be stored in the local cache to avoid repeated network delays.
+    - When an `OptimizelyUserContext` is created, the SDK will automatically send an identify request  to the ODP server to facilitate observing user activities.
+- New APIs added to `OptimizelyClient`:
+    - `SendOdpEvent()`: customers can build/send arbitrary ODP events that will bind user identifiers and data to user profiles in ODP.
+
+For details, refer to our documentation pages:
+- [Advanced Audience Targeting](https://docs.developers.optimizely.com/feature-experimentation/docs/optimizely-data-platform-advanced-audience-targeting)
+- [Server SDK Support](https://docs.developers.optimizely.com/feature-experimentation/v1.0/docs/advanced-audience-targeting-for-server-side-sdks)
+- [Initialize C# SDK](https://docs.developers.optimizely.com/feature-experimentation/docs/initialize-sdk-csharp)
+- [OptimizelyUserContext C# SDK](https://docs.developers.optimizely.com/feature-experimentation/docs/optimizelyusercontext-csharp)
+- [Advanced Audience Targeting segment qualification methods](https://docs.developers.optimizely.com/feature-experimentation/docs/advanced-audience-targeting-segment-qualification-methods-csharp)
+- [Send Optimizely Data Platform data using Advanced Audience Targeting](https://docs.developers.optimizely.com/feature-experimentation/docs/send-odp-data-using-advanced-audience-targeting-csharp)
+
+### Breaking Changes
+- `OdpManager` in the SDK is enabled by default. Unless an ODP account is integrated into the Optimizely projects, most `OdpManager` functions will be ignored. If needed, `OdpManager` can be disabled when `OptimizelyClient` is instantiated.
+- `ProjectConfigManager` interface additions + implementing class updates
+- `Evaluate()` updates in `BaseCondition`
 
 ### Bug Fixes
 - Return Latest Experiment When Duplicate Keys in Config  enhancement 
