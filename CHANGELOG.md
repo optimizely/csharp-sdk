@@ -5,10 +5,6 @@ January 16th, 2024
 
 ### New Features
 
-#### Polling warning
-
-Add warning to polling intervals below 30 seconds ([#365](https://github.com/optimizely/csharp-sdk/pull/365))
-
 #### Advanced Audience Targeting
 
 The 4.0.0 release introduces a new primary feature, [Advanced Audience Targeting]( https://docs.developers.optimizely.com/feature-experimentation/docs/optimizely-data-platform-advanced-audience-targeting)
@@ -45,6 +41,10 @@ For details, refer to our documentation pages:
 - [OptimizelyUserContext C# SDK](https://docs.developers.optimizely.com/feature-experimentation/docs/optimizelyusercontext-csharp)
 - [Advanced Audience Targeting segment qualification methods](https://docs.developers.optimizely.com/feature-experimentation/docs/advanced-audience-targeting-segment-qualification-methods-csharp)
 - [Send Optimizely Data Platform data using Advanced Audience Targeting](https://docs.developers.optimizely.com/feature-experimentation/docs/send-odp-data-using-advanced-audience-targeting-csharp)
+
+#### Polling warning
+
+Add warning to polling intervals below 30 seconds ([#365](https://github.com/optimizely/csharp-sdk/pull/365))
 
 ### Breaking Changes
 - `OdpManager` in the SDK is enabled by default. Unless an ODP account is integrated into the Optimizely projects, most `OdpManager` functions will be ignored. If needed, `OdpManager` can be disabled when `OptimizelyClient` is instantiated.
