@@ -116,11 +116,14 @@ jobs:
           ssh-private-key: ${{ secrets.SIGNING_SERVER_SSH_PRIVATE_KEY }}
       - name: Send files to signing server
         run: scp -r ./unsigned-dlls ${{ secrets.SIGNING_SERVER_URI }}:/path/to/blackhole/directory  # TODO: Replace with actual path
-      - name: Wait for artifact to be published
+      - name: Wait for artifact to be published for a maximum of 10 minutes
         run: |
-          # TODO: Replace with actual path
-          while [ ! -f /path/to/output/directory ]; do
-            sleep 10
+          for i in {1..60}; do
+              # Replace with actual path
+              if ssh ${{ secrets.SIGNING_SERVER_URI }} "ls /path/to/output/directory"; then
+                break
+              fi
+              sleep 10
           done
       - name: Download signed files
         # TODO: Replace with actual path
