@@ -111,17 +111,28 @@ jobs:
           if-no-files-found: error
           path: ./unsigned-dlls
       - name: Setup SSH
-        uses: webfactory/ssh-agent@v0.5.3
+        uses: webfactory/ssh-agent@v0.9.0
         with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          ssh-private-key: ${{ secrets.SIGNING_SERVER_SSH_PRIVATE_KEY }}
       - name: Send files to signing server
-        run: scp -r ./unsigned-dlls ${{ secrets.SIGNING_SERVER }}:/path/to/signing/directory  # TODO: Replace with actual path
+        run: scp -r ./unsigned-dlls ${{ secrets.SIGNING_SERVER_URI }}:/path/to/signing/directory  # TODO: Replace with actual path
       - name: Wait for artifact to be published
         run: |
-          # Path signed files to be available
+          # TODO: Replace with actual path
           while [ ! -f /path/to/signed/dlls ]; do
             sleep 10
           done
+      - name: Download signed files
+        # TODO: Replace with actual path
+        run: scp -r ${{ secrets.SIGNING_SERVER_URI }}:/path/to/signed/dlls ./signed-dlls
+      - name: Delete signed files from server
+        # TODO: Replace with actual path
+        run: ssh ${{ secrets.SIGNING_SERVER_URI }} "rm -rf /path/to/signed/dlls"
+      - name: Upload signed files
+        uses: actions/upload-artifact@v2
+        with:
+          name: signed-dlls
+          if-no-files-found: error
 
   pack:
     name: Pack NuGet package
