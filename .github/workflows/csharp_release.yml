@@ -115,24 +115,25 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SIGNING_SERVER_SSH_PRIVATE_KEY }}
       - name: Send files to signing server
-        run: scp -r ./unsigned-dlls ${{ secrets.SIGNING_SERVER_URI }}:/path/to/signing/directory  # TODO: Replace with actual path
+        run: scp -r ./unsigned-dlls ${{ secrets.SIGNING_SERVER_URI }}:/path/to/blackhole/directory  # TODO: Replace with actual path
       - name: Wait for artifact to be published
         run: |
           # TODO: Replace with actual path
-          while [ ! -f /path/to/signed/dlls ]; do
+          while [ ! -f /path/to/output/directory ]; do
             sleep 10
           done
       - name: Download signed files
         # TODO: Replace with actual path
-        run: scp -r ${{ secrets.SIGNING_SERVER_URI }}:/path/to/signed/dlls ./signed-dlls
+        run: scp -r ${{ secrets.SIGNING_SERVER_URI }}:/path/to/output/directory ./signed-dlls
       - name: Delete signed files from server
         # TODO: Replace with actual path
-        run: ssh ${{ secrets.SIGNING_SERVER_URI }} "rm -rf /path/to/signed/dlls"
+        run: ssh ${{ secrets.SIGNING_SERVER_URI }} "rm -rf /path/to/output/directory"
       - name: Upload signed files
         uses: actions/upload-artifact@v2
         with:
           name: signed-dlls
           if-no-files-found: error
+          path: ./signed-dlls
 
   pack:
     name: Pack NuGet package
