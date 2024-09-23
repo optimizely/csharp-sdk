@@ -48,9 +48,9 @@ jobs:
         run: msbuild /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=$(pwd)/keypair.snk /p:Configuration=Release ./OptimizelySDK.NETFramework.sln
       - name: Install & Run NUnit tests
         run: |
-          nuget install NUnit.Console -Version 3.18.2 -DirectDownload -OutputDirectory .
+          nuget install NUnit.Console -Version 3.18.1 -DirectDownload -OutputDirectory .
           # https://docs.nunit.org/articles/nunit/running-tests/Console-Command-Line.html
-          ./NUnit.ConsoleRunner.3.18.2\tools\nunit3-console.exe /timeout 10000 /process Separate ./OptimizelySDK.Tests/bin/Release/OptimizelySDK.Tests.dll
+          ./NUnit.ConsoleRunner.3.18.1\tools\nunit3-console.exe /timeout 10000 /process Separate ./OptimizelySDK.Tests/bin/Release/OptimizelySDK.Tests.dll
   
   netStandard16:
     name: Build Standard 1.6
