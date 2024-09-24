@@ -15,8 +15,7 @@ jobs:
       - name: Set semantic version variable
         id: set_version
         run: |
-          TAG=${{ env.TAG }}
-          SEMANTIC_VERSION=$(echo "${TAG}" | grep -Po "(?<=^|[^0-9])([0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+)?(-[a-zA-Z]+[0-9]*)?)")
+          SEMANTIC_VERSION=$(echo "$TAG" | grep -Po "(?<=^|[^0-9])([0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+)?(-[a-zA-Z]+[0-9]*)?)")
           if [ -z "${SEMANTIC_VERSION}" ]; then
             echo "Tag did not start with a semantic version number (e.g., #.#.#; #.#.#.#; #.#.#.#-beta)"
             exit 1
@@ -25,10 +24,10 @@ jobs:
       - name: Output tag & semantic version
         id: outputs
         run: |
-          echo ${{ env.TAG }}
+          echo "$TAG"
           echo ${{ steps.set_version.outputs.semantic_version }}
     outputs:
-      tag: ${{ env.TAG }}
+      tag: $TAG
       semanticVersion: ${{ steps.set_version.outputs.semantic_version }}
   
   buildFrameworkVersions:
