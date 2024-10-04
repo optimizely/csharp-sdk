@@ -1,18 +1,18 @@
 ﻿/*
-* Copyright 2017-2022, Optimizely
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-* https://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright 2017-2022, 2024 Optimizely
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 using System;
 using System.Collections.Generic;
@@ -43,6 +43,22 @@ namespace OptimizelySDK.Bucketing
         private IErrorHandler ErrorHandler;
         private UserProfileService UserProfileService;
         private ILogger Logger;
+        private UserProfile _userProfile;
+
+        private bool _decisionBatchInProgress = false;
+
+        public bool DecisionBatchInProgress
+        {
+            get => _decisionBatchInProgress;
+            set
+            {
+                _decisionBatchInProgress = value;
+                if (!_decisionBatchInProgress)
+                {
+                    SaveToUserProfileService();
+                }
+            }
+        }
 
         /// <summary>
         /// Associative array of user IDs to an associative array
@@ -60,10 +76,10 @@ namespace OptimizelySDK.Bucketing
         /// <summary>
         ///  Initialize a decision service for the Optimizely client.
         /// </summary>
-        /// <param name = "bucketer" > Base bucketer to allocate new users to an experiment.</param>
-        /// <param name = "errorHandler" > The error handler of the Optimizely client.</param>
-        /// <param name = "userProfileService" ></ param >
-        /// < param name= "logger" > UserProfileService implementation for storing user info.</param>
+        /// <param name="bucketer"> Base bucketer to allocate new users to an experiment.</param>
+        /// <param name="errorHandler"> The error handler of the Optimizely client.</param>
+        /// <param name="userProfileService">The injected implementation providing control over the bucketing.</param >
+        /// < param name="logger"> UserProfileService implementation for storing user info.</param>
         public DecisionService(Bucketer bucketer, IErrorHandler errorHandler,
             UserProfileService userProfileService, ILogger logger
         )
@@ -85,7 +101,7 @@ namespace OptimizelySDK.Bucketing
         /// Get a Variation of an Experiment for a user to be allocated into.
         /// </summary>
         /// <param name = "experiment" > The Experiment the user will be bucketed into.</param>
-        /// <param name = "user" > Optimizely user context.
+        /// <param name = "user" > Optimizely user context.</param>
         /// <param name = "config" > Project config.</param>
         /// <returns>The Variation the user is allocated into.</returns>
         public virtual Result<Variation> GetVariation(Experiment experiment,
@@ -99,10 +115,10 @@ namespace OptimizelySDK.Bucketing
         /// <summary>
         /// Get a Variation of an Experiment for a user to be allocated into.
         /// </summary>
-        /// <param name = "experiment" > The Experiment the user will be bucketed into.</param>
-        /// <param name = "user" > optimizely user context.
-        /// <param name = "config" > Project Config.</param>
-        /// <param name = "options" >An array of decision options.</param>
+        /// <param name="experiment">The Experiment the user will be bucketed into.</param>
+        /// <param name="user">optimizely user context.</param>
+        /// <param name="config">Project Config.</param>
+        /// <param name="options">An array of decision options.</param>
         /// <returns>The Variation the user is allocated into.</returns>
         public virtual Result<Variation> GetVariation(Experiment experiment,
             OptimizelyUserContext user,
@@ -140,34 +156,41 @@ namespace OptimizelySDK.Bucketing
             var ignoreUPS = Array.Exists(options,
                 option => option == OptimizelyDecideOption.IGNORE_USER_PROFILE_SERVICE);
 
-            UserProfile userProfile = null;
+
             if (!ignoreUPS && UserProfileService != null)
             {
                 try
                 {
-                    var userProfileMap = UserProfileService.Lookup(user.GetUserId());
-                    if (userProfileMap != null &&
-                        UserProfileUtil.IsValidUserProfileMap(userProfileMap))
+                    if (_userProfile == null)
                     {
-                        userProfile = UserProfileUtil.ConvertMapToUserProfile(userProfileMap);
+                        var userProfileMap = UserProfileService.Lookup(user.GetUserId());
+                        if (userProfileMap != null &&
+                            UserProfileUtil.IsValidUserProfileMap(userProfileMap))
+                        {
+                            _userProfile = UserProfileUtil.ConvertMapToUserProfile(userProfileMap);
+                        }
+                        else if (userProfileMap == null)
+                        {
+                            Logger.Log(LogLevel.INFO,
+                                reasons.AddInfo(
+                                    "We were unable to get a user profile map from the UserProfileService."));
+                        }
+                        else
+                        {
+                            Logger.Log(LogLevel.ERROR,
+                                reasons.AddInfo("The UserProfileService returned an invalid map."));
+                        }
+                    }
+
+                    if (_userProfile != null)
+                    {
                         decisionVariationResult =
-                            GetStoredVariation(experiment, userProfile, config);
+                            GetStoredVariation(experiment, _userProfile, config);
                         reasons += decisionVariationResult.DecisionReasons;
                         if (decisionVariationResult.ResultObject != null)
                         {
                             return decisionVariationResult.SetReasons(reasons);
                         }
-                    }
-                    else if (userProfileMap == null)
-                    {
-                        Logger.Log(LogLevel.INFO,
-                            reasons.AddInfo(
-                                "We were unable to get a user profile map from the UserProfileService."));
-                    }
-                    else
-                    {
-                        Logger.Log(LogLevel.ERROR,
-                            reasons.AddInfo("The UserProfileService returned an invalid map."));
                     }
                 }
                 catch (Exception exception)
@@ -197,11 +220,7 @@ namespace OptimizelySDK.Bucketing
                 {
                     if (UserProfileService != null && !ignoreUPS)
                     {
-                        var bucketerUserProfile = userProfile ??
-                                                  new UserProfile(userId,
-                                                      new Dictionary<string, Decision>());
-                        SaveVariation(experiment, decisionVariationResult.ResultObject,
-                            bucketerUserProfile);
+                        SaveVariation(experiment, decisionVariationResult.ResultObject);
                     }
                     else
                     {
@@ -454,12 +473,9 @@ namespace OptimizelySDK.Bucketing
         /// <summary>
         /// Save a { @link Variation } of an { @link Experiment } for a user in the {@link UserProfileService}.
         /// </summary>
-        /// <param name = "experiment" > The experiment the user was buck</param>
-        /// <param name = "variation" > The Variation to save.</param>
-        /// <param name = "userProfile" > instance of the user information.</param>
-        public void SaveVariation(Experiment experiment, Variation variation,
-            UserProfile userProfile
-        )
+        /// <param name="experiment">The experiment the user was buck</param>
+        /// <param name="variation">The Variation to save.</param>
+        public void SaveVariation(Experiment experiment, Variation variation)
         {
             //only save if the user has implemented a user profile service
             if (UserProfileService == null)
@@ -468,9 +484,9 @@ namespace OptimizelySDK.Bucketing
             }
 
             Decision decision;
-            if (userProfile.ExperimentBucketMap.ContainsKey(experiment.Id))
+            if (_userProfile.ExperimentBucketMap.ContainsKey(experiment.Id))
             {
-                decision = userProfile.ExperimentBucketMap[experiment.Id];
+                decision = _userProfile.ExperimentBucketMap[experiment.Id];
                 decision.VariationId = variation.Id;
             }
             else
@@ -478,18 +494,48 @@ namespace OptimizelySDK.Bucketing
                 decision = new Decision(variation.Id);
             }
 
-            userProfile.ExperimentBucketMap[experiment.Id] = decision;
+            _userProfile.ExperimentBucketMap[experiment.Id] = decision;
 
+            if (!_decisionBatchInProgress)
+            {
+                SaveToUserProfileService(experiment, variation);
+            }
+        }
+
+        private void SaveToUserProfileService(Experiment experiment = null,
+            Variation variation = null
+        )
+        {
+            var useSpecificLogEntry = experiment != null && variation != null &&
+                                       !string.IsNullOrEmpty(_userProfile?.UserId);
+            
             try
             {
-                UserProfileService.Save(userProfile.ToMap());
-                Logger.Log(LogLevel.INFO,
-                    $"Saved variation \"{variation.Id}\" of experiment \"{experiment.Id}\" for user \"{userProfile.UserId}\".");
+                if (_userProfile != null)
+                {
+                    UserProfileService.Save(_userProfile.ToMap());
+                    if (useSpecificLogEntry)
+                    {
+                        Logger.Log(LogLevel.INFO,
+                            $"Saved variation \"{variation.Id}\" of experiment \"{experiment.Id}\" for user \"{_userProfile.UserId}\".");
+                    }
+                    else
+                    {
+                        Logger.Log(LogLevel.INFO, "Saved user profile after batch decision.");
+                    }
+                }
             }
             catch (Exception exception)
             {
-                Logger.Log(LogLevel.ERROR,
-                    $"Failed to save variation \"{variation.Id}\" of experiment \"{experiment.Id}\" for user \"{userProfile.UserId}\".");
+                if (useSpecificLogEntry)
+                {
+                    Logger.Log(LogLevel.ERROR,
+                        $"Failed to save variation \"{variation.Id}\" of experiment \"{experiment.Id}\" for user \"{_userProfile.UserId}\".");
+                }
+                else
+                {
+                    Logger.Log(LogLevel.ERROR, "Failed to save user profile after batch decision.");
+                }
                 ErrorHandler.HandleError(
                     new Exceptions.OptimizelyRuntimeException(exception.Message));
             }
