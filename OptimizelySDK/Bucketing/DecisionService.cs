@@ -220,7 +220,11 @@ namespace OptimizelySDK.Bucketing
                 {
                     if (UserProfileService != null && !ignoreUPS)
                     {
-                        SaveVariation(experiment, decisionVariationResult.ResultObject);
+                        var bucketerUserProfile = _userProfile ??
+                                                  new UserProfile(userId,
+                                                      new Dictionary<string, Decision>());
+                        SaveVariation(experiment, decisionVariationResult.ResultObject,
+                            bucketerUserProfile);
                     }
                     else
                     {
@@ -475,12 +479,20 @@ namespace OptimizelySDK.Bucketing
         /// </summary>
         /// <param name="experiment">The experiment the user was buck</param>
         /// <param name="variation">The Variation to save.</param>
-        public void SaveVariation(Experiment experiment, Variation variation)
+        /// <param name = "userProfile" > instance of the user information.</param>
+        public void SaveVariation(Experiment experiment, Variation variation,
+            UserProfile userProfile
+        )
         {
             //only save if the user has implemented a user profile service
             if (UserProfileService == null)
             {
                 return;
+            }
+
+            if (_userProfile == null)
+            {
+                _userProfile = userProfile;
             }
 
             Decision decision;
@@ -507,8 +519,8 @@ namespace OptimizelySDK.Bucketing
         )
         {
             var useSpecificLogEntry = experiment != null && variation != null &&
-                                       !string.IsNullOrEmpty(_userProfile?.UserId);
-            
+                                      !string.IsNullOrEmpty(_userProfile?.UserId);
+
             try
             {
                 if (_userProfile != null)
@@ -536,6 +548,7 @@ namespace OptimizelySDK.Bucketing
                 {
                     Logger.Log(LogLevel.ERROR, "Failed to save user profile after batch decision.");
                 }
+
                 ErrorHandler.HandleError(
                     new Exceptions.OptimizelyRuntimeException(exception.Message));
             }
