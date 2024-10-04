@@ -1394,19 +1394,19 @@ namespace OptimizelySDK.Tests
             LoggerMock.Verify(
                 l => l.Log(LogLevel.INFO,
                     "No previously activated variation of experiment \"etag1\" for user \"testUser3\" found in user profile."),
-                Times.Exactly(2));
+                Times.Once);
             LoggerMock.Verify(
                 l => l.Log(LogLevel.DEBUG,
                     "Assigned bucket [4969] to user [testUser3] with bucketing ID [testUser3]."),
-                Times.Exactly(2));
+                Times.Once);
             LoggerMock.Verify(
                 l => l.Log(LogLevel.INFO,
                     "User [testUser3] is in variation [vtag2] of experiment [etag1]."),
-                Times.Exactly(2));
+                Times.Once);
             LoggerMock.Verify(
                 l => l.Log(LogLevel.INFO,
                     "Saved variation \"277\" of experiment \"223\" for user \"testUser3\"."),
-                Times.Exactly(2));
+                Times.Once);
             LoggerMock.Verify(
                 l => l.Log(LogLevel.DEBUG,
                     "Set variation \"276\" for experiment \"223\" and user \"testUser3\" in the forced variation map."),
