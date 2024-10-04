@@ -223,8 +223,8 @@ namespace OptimizelySDK
 
             if (ProjectConfigManager.SdkKey != null)
             {
-                NotificationCenterRegistry.GetNotificationCenter(configManager.SdkKey, logger)?.
-                    AddNotification(NotificationCenter.NotificationType.OptimizelyConfigUpdate,
+                NotificationCenterRegistry.GetNotificationCenter(configManager.SdkKey, logger)
+                    ?.AddNotification(NotificationCenter.NotificationType.OptimizelyConfigUpdate,
                         () =>
                         {
                             projectConfig = ProjectConfigManager.CachedProjectConfig;
@@ -268,9 +268,9 @@ namespace OptimizelySDK
                 Logger);
             DefaultDecideOptions = defaultDecideOptions ?? new OptimizelyDecideOption[] { };
 #if USE_ODP
-            OdpManager = odpManager ?? new OdpManager.Builder().WithErrorHandler(errorHandler).
-                WithLogger(logger).
-                Build();
+            OdpManager = odpManager ?? new OdpManager.Builder().WithErrorHandler(errorHandler)
+                .WithLogger(logger)
+                .Build();
 #endif
         }
 
@@ -441,8 +441,8 @@ namespace OptimizelySDK
             userAttributes = userAttributes ?? new UserAttributes();
 
             var userContext = CreateUserContextCopy(userId, userAttributes);
-            var variation = DecisionService.GetVariation(experiment, userContext, config)?.
-                ResultObject;
+            var variation = DecisionService.GetVariation(experiment, userContext, config)
+                ?.ResultObject;
             var decisionInfo = new Dictionary<string, object>
             {
                 { "experimentKey", experimentKey }, { "variationKey", variation?.Key },
@@ -552,8 +552,8 @@ namespace OptimizelySDK
             var sourceInfo = new Dictionary<string, string>();
             var decision = DecisionService.GetVariationForFeature(featureFlag,
                     CreateUserContextCopy(userId, userAttributes),
-                    config).
-                ResultObject;
+                    config)
+                .ResultObject;
             var variation = decision?.Variation;
             var decisionSource = decision?.Source ?? FeatureDecision.DECISION_SOURCE_ROLLOUT;
 
@@ -664,8 +664,8 @@ namespace OptimizelySDK
             var variableValue = featureVariable.DefaultValue;
             var decision = DecisionService.GetVariationForFeature(featureFlag,
                     CreateUserContextCopy(userId, userAttributes),
-                    config).
-                ResultObject;
+                    config)
+                .ResultObject;
 
             if (decision?.Variation != null)
             {
@@ -980,9 +980,9 @@ namespace OptimizelySDK
                     featureEnabled);
             }
 
-            var reasonsToReport = decisionReasons.
-                ToReport(allOptions.Contains(OptimizelyDecideOption.INCLUDE_REASONS)).
-                ToArray();
+            var reasonsToReport = decisionReasons
+                .ToReport(allOptions.Contains(OptimizelyDecideOption.INCLUDE_REASONS))
+                .ToArray();
             var variationKey = decision?.Variation?.Key;
 
             // TODO: add ruleKey values when available later. use a copy of experimentKey until then.
@@ -1349,8 +1349,7 @@ namespace OptimizelySDK
 
             if (config == null)
             {
-                Logger.Log(LogLevel.ERROR,
-                    "Datafile has invalid format. Failing 'FetchQualifiedSegments'.");
+                Logger.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'FetchQualifiedSegments'.");
                 return null;
             }
 
@@ -1381,8 +1380,7 @@ namespace OptimizelySDK
         /// <param name="identifiers">Dictionary for identifiers. The caller must provide at least one key-value pair.</param>
         /// <param name="type">Type of event (defaults to `fullstack`)</param>
         /// <param name="data">Optional event data in a key-value pair format</param>
-        public void SendOdpEvent(string action, Dictionary<string, string> identifiers,
-            string type = Constants.ODP_EVENT_TYPE,
+        public void SendOdpEvent(string action, Dictionary<string, string> identifiers, string type = Constants.ODP_EVENT_TYPE,
             Dictionary<string, object> data = null
         )
         {
