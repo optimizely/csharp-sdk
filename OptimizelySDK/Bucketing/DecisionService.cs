@@ -479,7 +479,7 @@ namespace OptimizelySDK.Bucketing
         /// </summary>
         /// <param name="experiment">The experiment the user was buck</param>
         /// <param name="variation">The Variation to save.</param>
-        /// <param name = "userProfile" > instance of the user information.</param>
+        /// <param name="userProfile">Instance of the user information.</param>
         public void SaveVariation(Experiment experiment, Variation variation,
             UserProfile userProfile
         )
