@@ -268,7 +268,8 @@ namespace OptimizelySDK
                 Logger);
             DefaultDecideOptions = defaultDecideOptions ?? new OptimizelyDecideOption[] { };
 #if USE_ODP
-            OdpManager = odpManager ?? new OdpManager.Builder().WithErrorHandler(errorHandler)
+            OdpManager = odpManager ?? new OdpManager.Builder()
+                .WithErrorHandler(errorHandler)
                 .WithLogger(logger)
                 .Build();
 #endif
