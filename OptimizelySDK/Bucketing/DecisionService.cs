@@ -518,36 +518,28 @@ namespace OptimizelySDK.Bucketing
             Variation variation = null
         )
         {
-            var useSpecificLogEntry = experiment != null && variation != null &&
-                                      !string.IsNullOrEmpty(_userProfile?.UserId);
-
+            var hasExperimentDetails = experiment != null && variation != null &&
+                                       !string.IsNullOrEmpty(_userProfile.UserId);
             try
             {
-                if (_userProfile != null)
+                if (_userProfile == null)
                 {
-                    UserProfileService.Save(_userProfile.ToMap());
-                    if (useSpecificLogEntry)
-                    {
-                        Logger.Log(LogLevel.INFO,
-                            $"Saved variation \"{variation.Id}\" of experiment \"{experiment.Id}\" for user \"{_userProfile.UserId}\".");
-                    }
-                    else
-                    {
-                        Logger.Log(LogLevel.INFO, "Saved user profile after batch decision.");
-                    }
+                    return;
                 }
+
+                UserProfileService.Save(_userProfile.ToMap());
+
+                Logger.Log(LogLevel.INFO,
+                    hasExperimentDetails ?
+                        $"Saved variation \"{variation.Id}\" of experiment \"{experiment.Id}\" for user \"{_userProfile.UserId}\"." :
+                        "Saved user profile after batch decision.");
             }
             catch (Exception exception)
             {
-                if (useSpecificLogEntry)
-                {
-                    Logger.Log(LogLevel.ERROR,
-                        $"Failed to save variation \"{variation.Id}\" of experiment \"{experiment.Id}\" for user \"{_userProfile.UserId}\".");
-                }
-                else
-                {
-                    Logger.Log(LogLevel.ERROR, "Failed to save user profile after batch decision.");
-                }
+                Logger.Log(LogLevel.ERROR,
+                    hasExperimentDetails ?
+                        $"Failed to save variation \"{variation.Id}\" of experiment \"{experiment.Id}\" for user \"{_userProfile.UserId}\"." :
+                        "Failed to save user profile after batch decision.");
 
                 ErrorHandler.HandleError(
                     new Exceptions.OptimizelyRuntimeException(exception.Message));
