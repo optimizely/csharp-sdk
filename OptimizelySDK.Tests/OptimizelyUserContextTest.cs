@@ -1,5 +1,5 @@
 ﻿/*
- *    Copyright 2020-2021, 2022-2023 Optimizely and contributors
+ *    Copyright 2020-2024 Optimizely and contributors
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Threading;
 using Castle.Core.Internal;
 using Moq;
 using NUnit.Framework;
@@ -193,7 +192,7 @@ namespace OptimizelySDK.Tests
             Assert.AreEqual(user.GetAttributes()["k1"], true);
         }
 
-        #region decide
+        #region Decide
 
         [Test]
         public void TestDecide()
@@ -408,11 +407,43 @@ namespace OptimizelySDK.Tests
 
             Assert.IsTrue(TestData.CompareObjects(decision, decisionExpected));
         }
+        
+        [Test]
+        public void DecideWithUspShouldOnlyLookupSaveOnce()
+        {
+            var flagKeyFromTestDataJson = "double_single_variable_feature";
+            var userProfileServiceMock = new Mock<UserProfileService>();
+            var optimizely = new Optimizely(TestData.Datafile, EventDispatcherMock.Object,
+                LoggerMock.Object, ErrorHandlerMock.Object, userProfileServiceMock.Object);
+            var user = optimizely.CreateUserContext(UserID);
+            
+            _ = user.Decide(flagKeyFromTestDataJson);
+            
+            userProfileServiceMock.Verify(l => l.Lookup(UserID), Times.Once);
+            userProfileServiceMock.Verify(l => l.Save(It.IsAny<Dictionary<string, object>>()),
+                Times.Once);
+        }
 
-        #endregion decide
+        #endregion Decide
 
-        #region decideAll
+        #region DecideForKeys
 
+        [Test]
+        public void DecideForKeysWithUspShouldOnlyLookupSaveOnceWithMultipleFlags()
+        {
+            var flagKeys = new [] { "double_single_variable_feature", "boolean_feature" };
+            var userProfileServiceMock = new Mock<UserProfileService>();
+            var optimizely = new Optimizely(TestData.Datafile, EventDispatcherMock.Object,
+                LoggerMock.Object, ErrorHandlerMock.Object, userProfileServiceMock.Object);
+            var userContext = optimizely.CreateUserContext(UserID);
+            
+            _ = userContext.DecideForKeys(flagKeys);
+            
+            userProfileServiceMock.Verify(l => l.Lookup(UserID), Times.Once);
+            userProfileServiceMock.Verify(l => l.Save(It.IsAny<Dictionary<string, object>>()),
+                Times.Once);
+        }
+        
         [Test]
         public void DecideForKeysWithOneFlag()
         {
@@ -441,6 +472,25 @@ namespace OptimizelySDK.Tests
                 user,
                 new string[0]);
             Assert.IsTrue(TestData.CompareObjects(decision, expDecision));
+        }
+        
+        #endregion DecideForKeys
+        
+        #region DecideAll
+        
+        [Test]
+        public void DecideAllWithUspShouldOnlyLookupSaveOnce()
+        {
+            var userProfileServiceMock = new Mock<UserProfileService>();
+            var optimizely = new Optimizely(TestData.Datafile, EventDispatcherMock.Object,
+                LoggerMock.Object, ErrorHandlerMock.Object, userProfileServiceMock.Object);
+            var user = optimizely.CreateUserContext(UserID);
+            
+            _ = user.DecideAll();
+            
+            userProfileServiceMock.Verify(l => l.Lookup(UserID), Times.Once);
+            userProfileServiceMock.Verify(l => l.Save(It.IsAny<Dictionary<string, object>>()),
+                Times.Once);
         }
 
         [Test]
