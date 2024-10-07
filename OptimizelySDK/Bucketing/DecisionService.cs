@@ -49,14 +49,14 @@ namespace OptimizelySDK.Bucketing
 
         public bool DecisionBatchInProgress
         {
-            get => _decisionBatchInProgress;
             set
             {
-                _decisionBatchInProgress = value;
-                if (!_decisionBatchInProgress)
+                // Only save if the value is changing from true to false
+                if (_decisionBatchInProgress && !value)
                 {
                     SaveToUserProfileService();
                 }
+                _decisionBatchInProgress = value;
             }
         }
 
