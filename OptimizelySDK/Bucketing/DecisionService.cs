@@ -45,7 +45,7 @@ namespace OptimizelySDK.Bucketing
         private ILogger Logger;
         private UserProfile _userProfile;
 
-        private bool _decisionBatchInProgress = false;
+        private bool _decisionBatchInProgress;
 
         public bool DecisionBatchInProgress
         {
