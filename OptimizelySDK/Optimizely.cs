@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright 2017-2023, Optimizely
+ * Copyright 2017-2024, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use file except in compliance with the License.
@@ -1056,6 +1056,7 @@ namespace OptimizelySDK
 
             var allOptions = GetAllOptions(options);
 
+            DecisionService.DecisionBatchInProgress = true;
             foreach (var key in keys)
             {
                 var decision = Decide(user, key, options);
@@ -1065,6 +1066,8 @@ namespace OptimizelySDK
                     decisionDictionary.Add(key, decision);
                 }
             }
+
+            DecisionService.DecisionBatchInProgress = false;
 
             return decisionDictionary;
         }
