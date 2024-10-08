@@ -56,7 +56,6 @@ namespace OptimizelySDK.Bucketing
                 {
                     SaveToUserProfileService();
                 }
-
                 _decisionBatchInProgress = value;
             }
         }
@@ -169,13 +168,6 @@ namespace OptimizelySDK.Bucketing
                             UserProfileUtil.IsValidUserProfileMap(userProfileMap))
                         {
                             _userProfile = UserProfileUtil.ConvertMapToUserProfile(userProfileMap);
-                            decisionVariationResult =
-                                GetStoredVariation(experiment, _userProfile, config);
-                            reasons += decisionVariationResult.DecisionReasons;
-                            if (decisionVariationResult.ResultObject != null)
-                            {
-                                return decisionVariationResult.SetReasons(reasons);
-                            }
                         }
                         else if (userProfileMap == null)
                         {
@@ -187,6 +179,17 @@ namespace OptimizelySDK.Bucketing
                         {
                             Logger.Log(LogLevel.ERROR,
                                 reasons.AddInfo("The UserProfileService returned an invalid map."));
+                        }
+                    }
+
+                    if (_userProfile != null)
+                    {
+                        decisionVariationResult =
+                            GetStoredVariation(experiment, _userProfile, config);
+                        reasons += decisionVariationResult.DecisionReasons;
+                        if (decisionVariationResult.ResultObject != null)
+                        {
+                            return decisionVariationResult.SetReasons(reasons);
                         }
                     }
                 }
