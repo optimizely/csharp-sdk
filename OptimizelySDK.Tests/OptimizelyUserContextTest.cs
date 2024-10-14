@@ -425,7 +425,7 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
-        public void DecideWithUspShouldOnlyLookupSaveOnce()
+        public void DecideWithUpsShouldOnlyLookupSaveOnce()
         {
             var flagKeyFromTestDataJson = "double_single_variable_feature";
             var userProfileServiceMock = makeUserProfileServiceMock();
