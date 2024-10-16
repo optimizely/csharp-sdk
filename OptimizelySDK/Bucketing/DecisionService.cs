@@ -55,6 +55,7 @@ namespace OptimizelySDK.Bucketing
                 if (_decisionBatchInProgress && !value)
                 {
                     SaveToUserProfileService();
+                    _userProfile = null;
                 }
                 _decisionBatchInProgress = value;
             }
