@@ -16,6 +16,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Castle.Core.Internal;
 using Moq;
 using NUnit.Framework;
@@ -61,7 +62,7 @@ namespace OptimizelySDK.Tests
                 LoggerMock.Object, ErrorHandlerMock.Object);
         }
 
-        private Mock<UserProfileService> makeUserProfileServiceMock()
+        private Mock<UserProfileService> MakeUserProfileServiceMock()
         {
             var projectConfig = DatafileProjectConfig.Create(TestData.Datafile, LoggerMock.Object,
                 ErrorHandlerMock.Object);
@@ -425,13 +426,20 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
-        public void DecideWithUspShouldOnlyLookupSaveOnce()
+        public void DecideWithUpsShouldOnlyLookupSaveOnce()
         {
             var flagKeyFromTestDataJson = "double_single_variable_feature";
-            var userProfileServiceMock = makeUserProfileServiceMock();
+            var userProfileServiceMock = MakeUserProfileServiceMock();
+            var saveArgsCollector = new List<Dictionary<string, object>>();
+            userProfileServiceMock.Setup(up => up.Save(Capture.In(saveArgsCollector)));
             var optimizely = new Optimizely(TestData.Datafile, EventDispatcherMock.Object,
                 LoggerMock.Object, ErrorHandlerMock.Object, userProfileServiceMock.Object);
             var user = optimizely.CreateUserContext(UserID);
+            var expectedUserProfile = new UserProfile(UserID, new Dictionary<string, Decision>
+            {
+                { "224", new Decision("280") },
+                { "122238", new Decision("122240") },
+            });
 
             _ = user.Decide(flagKeyFromTestDataJson);
 
@@ -445,6 +453,7 @@ namespace OptimizelySDK.Tests
             userProfileServiceMock.Verify(l => l.Lookup(UserID), Times.Once);
             userProfileServiceMock.Verify(l => l.Save(It.IsAny<Dictionary<string, object>>()),
                 Times.Once);
+            Assert.AreEqual(saveArgsCollector.First(), expectedUserProfile.ToMap());
         }
 
         #endregion Decide
@@ -452,13 +461,20 @@ namespace OptimizelySDK.Tests
         #region DecideForKeys
 
         [Test]
-        public void DecideForKeysWithUspShouldOnlyLookupSaveOnceWithMultipleFlags()
+        public void DecideForKeysWithUpsShouldOnlyLookupSaveOnceWithMultipleFlags()
         {
             var flagKeys = new[] { "double_single_variable_feature", "boolean_feature" };
-            var userProfileServiceMock = makeUserProfileServiceMock();
+            var userProfileServiceMock = MakeUserProfileServiceMock();
+            var saveArgsCollector = new List<Dictionary<string, object>>();
+            userProfileServiceMock.Setup(up => up.Save(Capture.In(saveArgsCollector)));
             var optimizely = new Optimizely(TestData.Datafile, EventDispatcherMock.Object,
                 LoggerMock.Object, ErrorHandlerMock.Object, userProfileServiceMock.Object);
             var userContext = optimizely.CreateUserContext(UserID);
+            var expectedUserProfile = new UserProfile(UserID, new Dictionary<string, Decision>
+            {
+                { "224", new Decision("280") },
+                { "122238", new Decision("122240") },
+            });
 
             _ = userContext.DecideForKeys(flagKeys);
 
@@ -472,6 +488,7 @@ namespace OptimizelySDK.Tests
             userProfileServiceMock.Verify(l => l.Lookup(UserID), Times.Once);
             userProfileServiceMock.Verify(l => l.Save(It.IsAny<Dictionary<string, object>>()),
                 Times.Once);
+            Assert.AreEqual(saveArgsCollector.First(), expectedUserProfile.ToMap());
         }
 
         [Test]
@@ -507,14 +524,23 @@ namespace OptimizelySDK.Tests
         #endregion DecideForKeys
 
         #region DecideAll
-
+        
         [Test]
-        public void DecideAllWithUspShouldOnlyLookupSaveOnce()
+        public void DecideAllWithUpsShouldOnlyLookupSaveOnce()
         {
-            var userProfileServiceMock = makeUserProfileServiceMock();
+            var userProfileServiceMock = MakeUserProfileServiceMock();
+            var saveArgsCollector = new List<Dictionary<string, object>>();
+            userProfileServiceMock.Setup(up => up.Save(Capture.In(saveArgsCollector)));
             var optimizely = new Optimizely(TestData.Datafile, EventDispatcherMock.Object,
                 LoggerMock.Object, ErrorHandlerMock.Object, userProfileServiceMock.Object);
             var user = optimizely.CreateUserContext(UserID);
+            var expectedUserProfile = new UserProfile(UserID, new Dictionary<string, Decision>
+            {
+                { "224", new Decision("280") },
+                { "122238", new Decision("122240") },
+                { "122241", new Decision("122242") },
+                { "122235", new Decision("122236") },
+            });
 
             _ = user.DecideAll();
 
@@ -526,8 +552,8 @@ namespace OptimizelySDK.Tests
                 l => l.Log(LogLevel.ERROR, "The UserProfileService returned an invalid map."),
                 Times.Never);
             userProfileServiceMock.Verify(l => l.Lookup(UserID), Times.Once);
-            userProfileServiceMock.Verify(l => l.Save(It.IsAny<Dictionary<string, object>>()),
-                Times.Once);
+            userProfileServiceMock.Verify(l => l.Save(It.IsAny<Dictionary<string,object>>()), Times.Once);
+            Assert.AreEqual(saveArgsCollector.First(), expectedUserProfile.ToMap());    
         }
 
         [Test]
