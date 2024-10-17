@@ -426,6 +426,52 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
+        public void SeparateDecideShouldHaveSameNumberOfUpsSaveOnlyOneLookup()
+        {
+            var experimentFlagKeys = new[] { "double_single_variable_feature", "integer_single_variable_feature" };
+            // var rolloutFlagKey = "boolean_single_variable_feature";
+            var userProfileServiceMock = MakeUserProfileServiceMock();
+            var saveArgsCollector = new List<Dictionary<string, object>>();
+            userProfileServiceMock.Setup(up => up.Save(Capture.In(saveArgsCollector)));
+            var optimizely = new Optimizely(TestData.Datafile, EventDispatcherMock.Object,
+                LoggerMock.Object, ErrorHandlerMock.Object, userProfileServiceMock.Object);
+            var user = optimizely.CreateUserContext(UserID);
+            var expectedUserProfileExperiment1 = new UserProfile(UserID, new Dictionary<string, Decision>
+            {
+                { "224", new Decision("280") },
+                { "122238", new Decision("122240") },
+            });
+            var expectedUserProfileExperiment2 = new UserProfile(UserID, new Dictionary<string, Decision>
+            {
+                { "224", new Decision("280") },
+                { "122238", new Decision("122240") },
+                { "122241", new Decision("122242") },
+            });
+            // var expectedUserProfileRollout = new UserProfile(UserID, new Dictionary<string, Decision>
+            // {
+            //     // expected decisions for rollout
+            // });
+            
+            user.Decide(experimentFlagKeys[0]);
+            user.Decide(experimentFlagKeys[1]);
+            // user.Decide(rolloutFlagKey); // TODO: Test UPS with rollout?
+            
+            LoggerMock.Verify(
+                l => l.Log(LogLevel.INFO,
+                    "We were unable to get a user profile map from the UserProfileService."),
+                Times.Never);
+            LoggerMock.Verify(
+                l => l.Log(LogLevel.ERROR, "The UserProfileService returned an invalid map."),
+                Times.Never);
+            userProfileServiceMock.Verify(l => l.Lookup(UserID), Times.Once);
+            userProfileServiceMock.Verify(l => l.Save(It.IsAny<Dictionary<string, object>>()),
+                Times.Exactly(2));
+            Assert.AreEqual(saveArgsCollector[0], expectedUserProfileExperiment1.ToMap());
+            Assert.AreEqual(saveArgsCollector[1], expectedUserProfileExperiment2.ToMap());
+            // Assert.AreEqual(saveArgsCollector[2], expectedUserProfileRollout.ToMap());
+        }
+
+        [Test]
         public void DecideWithUpsShouldOnlyLookupSaveOnce()
         {
             var flagKeyFromTestDataJson = "double_single_variable_feature";
@@ -441,7 +487,7 @@ namespace OptimizelySDK.Tests
                 { "122238", new Decision("122240") },
             });
 
-            _ = user.Decide(flagKeyFromTestDataJson);
+            user.Decide(flagKeyFromTestDataJson);
 
             LoggerMock.Verify(
                 l => l.Log(LogLevel.INFO,
@@ -476,7 +522,7 @@ namespace OptimizelySDK.Tests
                 { "122238", new Decision("122240") },
             });
 
-            _ = userContext.DecideForKeys(flagKeys);
+            userContext.DecideForKeys(flagKeys);
 
             LoggerMock.Verify(
                 l => l.Log(LogLevel.INFO,
@@ -543,7 +589,7 @@ namespace OptimizelySDK.Tests
                 { "188880", new Decision("188881") },
             });
 
-            _ = user.DecideAll();
+            user.DecideAll();
 
             LoggerMock.Verify(
                 l => l.Log(LogLevel.INFO,

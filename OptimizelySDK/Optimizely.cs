@@ -927,13 +927,15 @@ namespace OptimizelySDK
                 decision = flagDecisionResult.ResultObject;
             }
 
+            // TODO: Fix when the flag is a rollout instead of an experiment
+            DecisionService.AddDecisionToUnitOfWork(userId, decision.Experiment?.Id,
+                new Decision(decision.Variation?.Id ?? ""));
+            
             var featureEnabled = false;
 
             if (decision?.Variation != null)
             {
                 featureEnabled = decision.Variation.FeatureEnabled.GetValueOrDefault();
-                DecisionService.AddDecisionToUnitOfWork(userId, decision.Experiment?.Id,
-                    new Decision(decision.Variation.Id));
             }
 
             if (featureEnabled)
@@ -1077,7 +1079,7 @@ namespace OptimizelySDK
                     decisionDictionary.Add(key, decision);
                 }
             }
-            
+
             DecisionService.CommitDecisionsToUserProfileService();
 
             return decisionDictionary;
