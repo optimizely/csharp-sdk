@@ -540,6 +540,7 @@ namespace OptimizelySDK.Tests
                 { "122238", new Decision("122240") },
                 { "122241", new Decision("122242") },
                 { "122235", new Decision("122236") },
+                { "188880", new Decision("188881") },
             });
 
             _ = user.DecideAll();

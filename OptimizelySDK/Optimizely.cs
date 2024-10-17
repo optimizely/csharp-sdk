@@ -861,12 +861,15 @@ namespace OptimizelySDK
         /// <li>If the SDK finds an error, it’ll return a decision with <b>null</b> for <b>variationKey</b>. The decision will include an error message in <b>reasons</b>.
         /// </ul>
         /// </summary>
+        /// <param name="user">User context.</param>
         /// <param name="key">A flag key for which a decision will be made.</param>
         /// <param name="options">A list of options for decision-making.</param>
+        /// <param name="commitImmediately">Whether to commit decisions to the user profile service (if in use) immediately.</param>
         /// <returns>A decision result.</returns>
         internal OptimizelyDecision Decide(OptimizelyUserContext user,
             string key,
-            OptimizelyDecideOption[] options
+            OptimizelyDecideOption[] options,
+            bool commitImmediately = true
         )
         {
             var config = ProjectConfigManager?.GetConfig();
@@ -929,6 +932,8 @@ namespace OptimizelySDK
             if (decision?.Variation != null)
             {
                 featureEnabled = decision.Variation.FeatureEnabled.GetValueOrDefault();
+                DecisionService.AddDecisionToUnitOfWork(userId, decision.Experiment?.Id,
+                    new Decision(decision.Variation.Id));
             }
 
             if (featureEnabled)
@@ -1004,7 +1009,7 @@ namespace OptimizelySDK
                 DecisionNotificationTypes.FLAG, userId,
                 userAttributes ?? new UserAttributes(), decisionInfo);
 
-            return new OptimizelyDecision(
+            var result = new OptimizelyDecision(
                 variationKey,
                 featureEnabled,
                 optimizelyJSON,
@@ -1012,6 +1017,13 @@ namespace OptimizelySDK
                 key,
                 user,
                 reasonsToReport);
+
+            if (commitImmediately)
+            {
+                DecisionService.CommitDecisionsToUserProfileService();
+            }
+
+            return result;
         }
 
         internal Dictionary<string, OptimizelyDecision> DecideAll(OptimizelyUserContext user,
@@ -1056,18 +1068,17 @@ namespace OptimizelySDK
 
             var allOptions = GetAllOptions(options);
 
-            DecisionService.DecisionBatchInProgress = true;
             foreach (var key in keys)
             {
-                var decision = Decide(user, key, options);
+                var decision = Decide(user, key, options, false);
                 if (!allOptions.Contains(OptimizelyDecideOption.ENABLED_FLAGS_ONLY) ||
                     decision.Enabled)
                 {
                     decisionDictionary.Add(key, decision);
                 }
             }
-
-            DecisionService.DecisionBatchInProgress = false;
+            
+            DecisionService.CommitDecisionsToUserProfileService();
 
             return decisionDictionary;
         }

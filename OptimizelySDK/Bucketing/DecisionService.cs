@@ -43,23 +43,8 @@ namespace OptimizelySDK.Bucketing
         private IErrorHandler ErrorHandler;
         private UserProfileService UserProfileService;
         private ILogger Logger;
-        private UserProfile _userProfile;
-
-        private bool _decisionBatchInProgress;
-
-        public bool DecisionBatchInProgress
-        {
-            set
-            {
-                // Only save if the value is changing from true to false
-                if (_decisionBatchInProgress && !value)
-                {
-                    SaveToUserProfileService();
-                    _userProfile = null;
-                }
-                _decisionBatchInProgress = value;
-            }
-        }
+        private readonly DecisionUnitOfWork _decisionUnitOfWork;
+        private readonly UserProfileCache _userProfileCache;
 
         /// <summary>
         /// Associative array of user IDs to an associative array
@@ -89,6 +74,8 @@ namespace OptimizelySDK.Bucketing
             ErrorHandler = errorHandler;
             UserProfileService = userProfileService;
             Logger = logger;
+            _decisionUnitOfWork = new DecisionUnitOfWork();
+            _userProfileCache = new UserProfileCache(userProfileService, logger);
 #if NET35
             ForcedVariationMap = new Dictionary<string, Dictionary<string, string>>();
 #else
@@ -157,41 +144,17 @@ namespace OptimizelySDK.Bucketing
             var ignoreUPS = Array.Exists(options,
                 option => option == OptimizelyDecideOption.IGNORE_USER_PROFILE_SERVICE);
 
-
+            UserProfile userProfile = null;
             if (!ignoreUPS && UserProfileService != null)
             {
                 try
                 {
-                    if (_userProfile == null)
+                    userProfile = _userProfileCache.GetUserProfile(userId);
+                    decisionVariationResult = GetStoredVariation(experiment, userProfile, config);
+                    reasons += decisionVariationResult.DecisionReasons;
+                    if (decisionVariationResult.ResultObject != null)
                     {
-                        var userProfileMap = UserProfileService.Lookup(user.GetUserId());
-                        if (userProfileMap != null &&
-                            UserProfileUtil.IsValidUserProfileMap(userProfileMap))
-                        {
-                            _userProfile = UserProfileUtil.ConvertMapToUserProfile(userProfileMap);
-                        }
-                        else if (userProfileMap == null)
-                        {
-                            Logger.Log(LogLevel.INFO,
-                                reasons.AddInfo(
-                                    "We were unable to get a user profile map from the UserProfileService."));
-                        }
-                        else
-                        {
-                            Logger.Log(LogLevel.ERROR,
-                                reasons.AddInfo("The UserProfileService returned an invalid map."));
-                        }
-                    }
-
-                    if (_userProfile != null)
-                    {
-                        decisionVariationResult =
-                            GetStoredVariation(experiment, _userProfile, config);
-                        reasons += decisionVariationResult.DecisionReasons;
-                        if (decisionVariationResult.ResultObject != null)
-                        {
-                            return decisionVariationResult.SetReasons(reasons);
-                        }
+                        return decisionVariationResult.SetReasons(reasons);
                     }
                 }
                 catch (Exception exception)
@@ -221,7 +184,7 @@ namespace OptimizelySDK.Bucketing
                 {
                     if (UserProfileService != null && !ignoreUPS)
                     {
-                        var bucketerUserProfile = _userProfile ??
+                        var bucketerUserProfile = userProfile ??
                                                   new UserProfile(userId,
                                                       new Dictionary<string, Decision>());
                         SaveVariation(experiment, decisionVariationResult.ResultObject,
@@ -491,60 +454,55 @@ namespace OptimizelySDK.Bucketing
                 return;
             }
 
-            if (_userProfile == null)
-            {
-                _userProfile = userProfile;
-            }
+            var decision = new Decision(variation.Id);
+            _decisionUnitOfWork.AddDecision(userProfile.UserId, experiment.Id, decision);
 
-            Decision decision;
-            if (_userProfile.ExperimentBucketMap.ContainsKey(experiment.Id))
-            {
-                decision = _userProfile.ExperimentBucketMap[experiment.Id];
-                decision.VariationId = variation.Id;
-            }
-            else
-            {
-                decision = new Decision(variation.Id);
-            }
-
-            _userProfile.ExperimentBucketMap[experiment.Id] = decision;
-
-            if (!_decisionBatchInProgress)
-            {
-                SaveToUserProfileService(experiment, variation);
-            }
+            var cachedProfile = _userProfileCache.GetUserProfile(userProfile.UserId);
+            cachedProfile.ExperimentBucketMap[experiment.Id] = decision;
+        }
+        
+        public void AddDecisionToUnitOfWork(string userId, string experimentId, Decision decision)
+        {
+            _decisionUnitOfWork.AddDecision(userId, experimentId, decision);
         }
 
-        private void SaveToUserProfileService(Experiment experiment = null,
-            Variation variation = null
-        )
+        /// <summary>
+        /// Commits the decisions to the user profile service.
+        /// </summary>
+        public void CommitDecisionsToUserProfileService()
         {
-            var hasExperimentDetails = experiment != null && variation != null &&
-                                       !string.IsNullOrEmpty(_userProfile.UserId);
-            try
+            if (UserProfileService == null || !_decisionUnitOfWork.HasDecisions)
             {
-                if (_userProfile == null)
+                return;
+            }
+
+            var decisions = _decisionUnitOfWork.GetDecisions();
+            foreach (var userDecisions in decisions)
+            {
+                var userId = userDecisions.Key;
+                var experimentDecisions = userDecisions.Value;
+
+                var userProfile = _userProfileCache.GetUserProfile(userId);
+                foreach (var experimentDecision in experimentDecisions)
                 {
-                    return;
+                    userProfile.ExperimentBucketMap[experimentDecision.Key] =
+                        experimentDecision.Value;
                 }
 
-                UserProfileService.Save(_userProfile.ToMap());
-
-                Logger.Log(LogLevel.INFO,
-                    hasExperimentDetails ?
-                        $"Saved variation \"{variation.Id}\" of experiment \"{experiment.Id}\" for user \"{_userProfile.UserId}\"." :
-                        "Saved user profile after batch decision.");
+                try
+                {
+                    UserProfileService.Save(userProfile.ToMap());
+                    Logger.Log(LogLevel.INFO, $"Saved decisions for user \"{userId}\".");
+                }
+                catch (Exception exception)
+                {
+                    Logger.Log(LogLevel.ERROR, $"Failed to save decisions for user \"{userId}\".");
+                    ErrorHandler.HandleError(
+                        new Exceptions.OptimizelyRuntimeException(exception.Message));
+                }
             }
-            catch (Exception exception)
-            {
-                Logger.Log(LogLevel.ERROR,
-                    hasExperimentDetails ?
-                        $"Failed to save variation \"{variation.Id}\" of experiment \"{experiment.Id}\" for user \"{_userProfile.UserId}\"." :
-                        "Failed to save user profile after batch decision.");
 
-                ErrorHandler.HandleError(
-                    new Exceptions.OptimizelyRuntimeException(exception.Message));
-            }
+            _decisionUnitOfWork.ClearDecisions();
         }
 
         /// <summary>

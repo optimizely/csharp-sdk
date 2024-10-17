@@ -75,6 +75,8 @@
     <Compile Include="AudienceConditions\OrCondition.cs"/>
     <Compile Include="Bucketing\Bucketer.cs"/>
     <Compile Include="Bucketing\Decision.cs"/>
+    <Compile Include="Bucketing\DecisionUnitOfWork.cs" />
+    <Compile Include="Bucketing\UserProfileCache.cs" />
     <Compile Include="ClientConfigHandler.cs"/>
     <Compile Include="Entity\Attribute.cs"/>
     <Compile Include="Entity\Audience.cs"/>
