@@ -7,9 +7,19 @@ on:
     branches: [ master ]
 
 jobs:
-  lintCodebase:
+  failOnDraftPullRequest:
+    if: github.event.pull_request.draft == true
     runs-on: ubuntu-latest
-    name: Lint Codebase
+    steps:
+      - name: Fails Draft pull request.
+        run: |
+          echo "Draft pull requests are not allowed. Please mark the pull request as ready for review."
+          exit 1
+  
+  lintCodebase:
+    name: Lint Codebase      
+    needs: [ failOnDraftPullRequest ]
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
