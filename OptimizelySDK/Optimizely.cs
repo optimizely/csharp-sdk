@@ -926,10 +926,9 @@ namespace OptimizelySDK
                 decisionReasons += flagDecisionResult.DecisionReasons;
                 decision = flagDecisionResult.ResultObject;
             }
-
-            // TODO: Fix when the flag is a rollout instead of an experiment
+            
             DecisionService.AddDecisionToUnitOfWork(userId, decision.Experiment?.Id,
-                new Decision(decision.Variation?.Id ?? ""));
+                new Decision(decision.Variation?.Id));
             
             var featureEnabled = false;
 

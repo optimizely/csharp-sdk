@@ -463,7 +463,15 @@ namespace OptimizelySDK.Bucketing
         
         public void AddDecisionToUnitOfWork(string userId, string experimentId, Decision decision)
         {
-            _decisionUnitOfWork.AddDecision(userId, experimentId, decision);
+            if (UserProfileService == null)
+            {
+                return;
+            }
+            
+            if (!string.IsNullOrEmpty(experimentId))
+            {
+                _decisionUnitOfWork.AddDecision(userId, experimentId, decision);
+            }
         }
 
         /// <summary>

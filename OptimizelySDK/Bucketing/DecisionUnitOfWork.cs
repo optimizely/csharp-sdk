@@ -25,6 +25,11 @@ namespace OptimizelySDK.Bucketing
 
         public void AddDecision(string userId, string experimentId, Decision decision)
         {
+            if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(experimentId))
+            {
+                return;
+            }
+
             if (!_decisions.ContainsKey(userId))
             {
                 _decisions[userId] = new Dictionary<string, Decision>();
