@@ -13,7 +13,7 @@ jobs:
     steps:
       - name: Fails Draft pull request.
         run: |
-          echo "Draft pull requests are not allowed. Please mark the pull request as ready for review."
+          echo "Draft pull requests should not trigger CI. Please mark the pull request as Ready for review to continue."
           exit 1
   
   lintCodebase:
