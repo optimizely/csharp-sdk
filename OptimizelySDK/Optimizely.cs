@@ -310,7 +310,8 @@ namespace OptimizelySDK
                 return null;
             }
 
-            var variation = GetVariation(experimentKey, userId, config, userAttributes);
+            var variation = GetVariation(experimentKey, userId, config, userAttributes,
+                forceUserProfileLookup: true);
 
             if (variation == null || variation.Key == null)
             {
@@ -404,7 +405,8 @@ namespace OptimizelySDK
         )
         {
             var config = ProjectConfigManager?.GetConfig();
-            return GetVariation(experimentKey, userId, config, userAttributes);
+            return GetVariation(experimentKey, userId, config, userAttributes,
+                forceUserProfileLookup: true);
         }
 
         /// <summary>
@@ -414,9 +416,10 @@ namespace OptimizelySDK
         /// <param name="userId">ID for the user</param>
         /// <param name="config">ProjectConfig to be used for variation</param>
         /// <param name="userAttributes">Attributes for the users</param>
+        /// <param name="forceUserProfileLookup">Whether to force a lookup of the user profile when UPS is enabled.</param>
         /// <returns>null|Variation Representing variation</returns>
         private Variation GetVariation(string experimentKey, string userId, ProjectConfig config,
-            UserAttributes userAttributes = null
+            UserAttributes userAttributes = null, bool forceUserProfileLookup = false
         )
         {
             if (config == null)
@@ -442,8 +445,10 @@ namespace OptimizelySDK
             userAttributes = userAttributes ?? new UserAttributes();
 
             var userContext = CreateUserContextCopy(userId, userAttributes);
-            var variation = DecisionService.GetVariation(experiment, userContext, config)
-                ?.ResultObject;
+            var variation = DecisionService.
+                GetVariation(experiment, userContext, config,
+                    forceUserProfileLookup: forceUserProfileLookup)?.
+                ResultObject;
             var decisionInfo = new Dictionary<string, object>
             {
                 { "experimentKey", experimentKey }, { "variationKey", variation?.Key },

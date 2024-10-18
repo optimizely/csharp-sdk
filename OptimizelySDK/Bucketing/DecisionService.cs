@@ -88,32 +88,23 @@ namespace OptimizelySDK.Bucketing
         /// <summary>
         /// Get a Variation of an Experiment for a user to be allocated into.
         /// </summary>
-        /// <param name = "experiment" > The Experiment the user will be bucketed into.</param>
-        /// <param name = "user" > Optimizely user context.</param>
-        /// <param name = "config" > Project config.</param>
-        /// <returns>The Variation the user is allocated into.</returns>
-        public virtual Result<Variation> GetVariation(Experiment experiment,
-            OptimizelyUserContext user,
-            ProjectConfig config
-        )
-        {
-            return GetVariation(experiment, user, config, new OptimizelyDecideOption[] { });
-        }
-
-        /// <summary>
-        /// Get a Variation of an Experiment for a user to be allocated into.
-        /// </summary>
         /// <param name="experiment">The Experiment the user will be bucketed into.</param>
         /// <param name="user">optimizely user context.</param>
         /// <param name="config">Project Config.</param>
         /// <param name="options">An array of decision options.</param>
+        /// <param name="forceUserProfileLookup">Whether to force a lookup of the user profile when UPS is enabled.</param>
         /// <returns>The Variation the user is allocated into.</returns>
         public virtual Result<Variation> GetVariation(Experiment experiment,
             OptimizelyUserContext user,
             ProjectConfig config,
-            OptimizelyDecideOption[] options
+            OptimizelyDecideOption[] options = null, 
+            bool forceUserProfileLookup = false
         )
         {
+            if (options == null)
+            {
+                options = new OptimizelyDecideOption[] { };
+            }
             var reasons = new DecisionReasons();
             var userId = user.GetUserId();
             if (!ExperimentUtils.IsExperimentActive(experiment, Logger))
@@ -149,7 +140,7 @@ namespace OptimizelySDK.Bucketing
             {
                 try
                 {
-                    userProfile = _userProfileCache.GetUserProfile(userId);
+                    userProfile = _userProfileCache.GetUserProfile(userId, forceUserProfileLookup);
                     decisionVariationResult = GetStoredVariation(experiment, userProfile, config);
                     reasons += decisionVariationResult.DecisionReasons;
                     if (decisionVariationResult.ResultObject != null)

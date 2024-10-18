@@ -8,6 +8,7 @@ on:
 
 jobs:
   failOnDraftPullRequest:
+    name: Fail If Draft Pull Request
     if: github.event.pull_request.draft == true
     runs-on: ubuntu-latest
     steps:

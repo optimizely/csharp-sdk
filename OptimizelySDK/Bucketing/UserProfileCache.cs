@@ -33,9 +33,9 @@ namespace OptimizelySDK.Bucketing
             _logger = logger;
         }
 
-        public UserProfile GetUserProfile(string userId)
+        public UserProfile GetUserProfile(string userId, bool forceLookup = false)
         {
-            if (_cache.TryGetValue(userId, out var userProfile))
+            if (_cache.TryGetValue(userId, out var userProfile) && !forceLookup)
             {
                 return _cache[userId];
             }
