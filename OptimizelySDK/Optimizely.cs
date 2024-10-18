@@ -931,10 +931,13 @@ namespace OptimizelySDK
                 decisionReasons += flagDecisionResult.DecisionReasons;
                 decision = flagDecisionResult.ResultObject;
             }
-            
-            DecisionService.AddDecisionToUnitOfWork(userId, decision.Experiment?.Id,
-                new Decision(decision.Variation?.Id));
-            
+
+            if (!options.Contains(OptimizelyDecideOption.IGNORE_USER_PROFILE_SERVICE))
+            {
+                DecisionService.AddDecisionToUnitOfWork(userId, decision.Experiment?.Id,
+                    new Decision(decision.Variation?.Id));
+            }
+
             var featureEnabled = false;
 
             if (decision?.Variation != null)

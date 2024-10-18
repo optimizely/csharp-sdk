@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright 2017-2023, Optimizely
+ * Copyright 2017-2024, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -3395,8 +3395,9 @@ namespace OptimizelySDK.Tests
             mockUserContext.Setup(ouc => ouc.GetUserId()).Returns(TestUserId);
 
             DecisionServiceMock.Setup(ds => ds.GetVariation(experiment,
-                    It.IsAny<OptimizelyUserContext>(), It.IsAny<ProjectConfig>()))
-                .Returns(variation);
+                    It.IsAny<OptimizelyUserContext>(), It.IsAny<ProjectConfig>(),
+                    It.IsAny<OptimizelyDecideOption[]>(), It.IsAny<bool>())).
+                Returns(variation);
             DecisionServiceMock.Setup(ds => ds.GetVariationForFeature(featureFlag,
                     It.IsAny<OptimizelyUserContext>(), It.IsAny<ProjectConfig>()))
                 .Returns(decision);
@@ -3509,9 +3510,10 @@ namespace OptimizelySDK.Tests
                     ErrorHandlerMock.Object, LoggerMock.Object);
             mockUserContext.Setup(ouc => ouc.GetUserId()).Returns(TestUserId);
 
-            DecisionServiceMock
-                .Setup(ds => ds.GetVariation(experiment, It.IsAny<OptimizelyUserContext>(), Config))
-                .Returns(variation);
+            DecisionServiceMock.Setup(ds => ds.GetVariation(experiment,
+                    It.IsAny<OptimizelyUserContext>(), Config, It.IsAny<OptimizelyDecideOption[]>(),
+                    It.IsAny<bool>())).
+                Returns(variation);
 
             // Adding notification listeners.
             var notificationType = NotificationCenter.NotificationType.Track;
@@ -3565,9 +3567,10 @@ namespace OptimizelySDK.Tests
                 It.IsAny<string>(),
                 It.IsAny<UserAttributes>(), It.IsAny<Dictionary<string, object>>()));
 
-            DecisionServiceMock
-                .Setup(ds => ds.GetVariation(experiment, It.IsAny<OptimizelyUserContext>(), Config))
-                .Returns(variation);
+            DecisionServiceMock.Setup(ds => ds.GetVariation(experiment,
+                    It.IsAny<OptimizelyUserContext>(), Config, It.IsAny<OptimizelyDecideOption[]>(),
+                    It.IsAny<bool>())).
+                Returns(variation);
 
             var optly = Helper.CreatePrivateOptimizely();
             optly.SetFieldOrProperty("ProjectConfigManager", ConfigManager);
@@ -3622,9 +3625,10 @@ namespace OptimizelySDK.Tests
                 It.IsAny<string>(),
                 It.IsAny<UserAttributes>(), It.IsAny<Dictionary<string, object>>()));
 
-            DecisionServiceMock
-                .Setup(ds => ds.GetVariation(experiment, It.IsAny<OptimizelyUserContext>(), Config))
-                .Returns(variation);
+            DecisionServiceMock.Setup(ds => ds.GetVariation(experiment,
+                    It.IsAny<OptimizelyUserContext>(), Config, It.IsAny<OptimizelyDecideOption[]>(),
+                    It.IsAny<bool>())).
+                Returns(variation);
 
             var optly = Helper.CreatePrivateOptimizely();
             optly.SetFieldOrProperty("ProjectConfigManager", ConfigManager);
@@ -3666,8 +3670,9 @@ namespace OptimizelySDK.Tests
 
             DecisionServiceMock.Setup(ds => ds.GetVariation(experiment,
                     It.IsAny<OptimizelyUserContext>(),
-                    It.IsAny<ProjectConfig>(), null))
-                .Returns(Result<Variation>.NullResult(null));
+                    It.IsAny<ProjectConfig>(), It.IsAny<OptimizelyDecideOption[]>(),
+                    It.IsAny<bool>())).
+                Returns(Result<Variation>.NullResult(null));
 
             optStronglyTyped.NotificationCenter.AddNotification(
                 NotificationCenter.NotificationType.Decision,
@@ -3727,9 +3732,10 @@ namespace OptimizelySDK.Tests
                     ErrorHandlerMock.Object, LoggerMock.Object);
             mockUserContext.Setup(ouc => ouc.GetUserId()).Returns(TestUserId);
 
-            DecisionServiceMock
-                .Setup(ds => ds.GetVariation(experiment, It.IsAny<OptimizelyUserContext>(), Config))
-                .Returns(variation);
+            DecisionServiceMock.Setup(ds => ds.GetVariation(experiment,
+                    It.IsAny<OptimizelyUserContext>(), Config, It.IsAny<OptimizelyDecideOption[]>(),
+                    It.IsAny<bool>())).
+                Returns(variation);
 
             optStronglyTyped.NotificationCenter.AddNotification(
                 NotificationCenter.NotificationType.Decision,
@@ -3788,9 +3794,10 @@ namespace OptimizelySDK.Tests
                     ErrorHandlerMock.Object, LoggerMock.Object);
             mockUserContext.Setup(ouc => ouc.GetUserId()).Returns(TestUserId);
 
-            DecisionServiceMock
-                .Setup(ds => ds.GetVariation(experiment, It.IsAny<OptimizelyUserContext>(), Config))
-                .Returns(variation);
+            DecisionServiceMock.
+                Setup(ds => ds.GetVariation(experiment, It.IsAny<OptimizelyUserContext>(), Config
+                    , It.IsAny<OptimizelyDecideOption[]>(), It.IsAny<bool>())).
+                Returns(variation);
 
             optStronglyTyped.NotificationCenter.AddNotification(
                 NotificationCenter.NotificationType.Decision,
@@ -3828,8 +3835,9 @@ namespace OptimizelySDK.Tests
                 It.IsAny<UserAttributes>(), It.IsAny<Dictionary<string, object>>()));
 
             DecisionServiceMock.Setup(ds => ds.GetVariation(It.IsAny<Experiment>(),
-                    It.IsAny<OptimizelyUserContext>(), It.IsAny<ProjectConfig>()))
-                .Returns(Result<Variation>.NullResult(null));
+                    It.IsAny<OptimizelyUserContext>(), It.IsAny<ProjectConfig>()
+                    , It.IsAny<OptimizelyDecideOption[]>(), It.IsAny<bool>())).
+                Returns(Result<Variation>.NullResult(null));
             //DecisionServiceMock.Setup(ds => ds.GetVariation(experiment, TestUserId, Config, null)).Returns(Result<Variation>.NullResult(null));
 
             optStronglyTyped.NotificationCenter.AddNotification(
@@ -3875,8 +3883,9 @@ namespace OptimizelySDK.Tests
                 It.IsAny<UserAttributes>(), It.IsAny<Dictionary<string, object>>()));
 
             DecisionServiceMock.Setup(ds => ds.GetVariation(experiment,
-                    It.IsAny<OptimizelyUserContext>(), ConfigManager.GetConfig(), null))
-                .Returns(variation);
+                    It.IsAny<OptimizelyUserContext>(), ConfigManager.GetConfig()
+                    , It.IsAny<OptimizelyDecideOption[]>(), It.IsAny<bool>())).
+                Returns(variation);
 
             var optly = Helper.CreatePrivateOptimizely();
             var optStronglyTyped = optly.GetObject() as Optimizely;
@@ -3936,8 +3945,9 @@ namespace OptimizelySDK.Tests
                 It.IsAny<UserAttributes>(), It.IsAny<Dictionary<string, object>>()));
 
             DecisionServiceMock.Setup(ds =>
-                    ds.GetVariation(experiment, It.IsAny<OptimizelyUserContext>(), Config, null))
-                .Returns(variation);
+                    ds.GetVariation(experiment, It.IsAny<OptimizelyUserContext>(), Config
+                        , It.IsAny<OptimizelyDecideOption[]>(), It.IsAny<bool>())).
+                Returns(variation);
 
             var optly = Helper.CreatePrivateOptimizely();
             var optStronglyTyped = optly.GetObject() as Optimizely;
@@ -5322,7 +5332,8 @@ namespace OptimizelySDK.Tests
 
             LoggerMock.Verify(
                 log => log.Log(LogLevel.ERROR,
-                    "Optimizely instance is not valid, failing getAllFeatureVariableValues call. type"),
+                    "Optimizely instance is not valid, failing getAllFeatureVariableValues call. type")
+                ,
                 Times.Once);
         }
 

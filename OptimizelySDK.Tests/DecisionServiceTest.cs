@@ -700,7 +700,7 @@ namespace OptimizelySDK.Tests
 
             DecisionServiceMock.
                 Setup(ds => ds.GetVariation(multiVariateExp, OptimizelyUserContextMock.Object,
-                    ProjectConfig, null)).
+                    ProjectConfig, It.IsAny<OptimizelyDecideOption[]>(), It.IsAny<bool>())).
                 Returns<Variation>(null);
             var featureFlag = ProjectConfig.GetFeatureFlagFromKey("multi_variate_feature");
 
@@ -736,7 +736,7 @@ namespace OptimizelySDK.Tests
             DecisionServiceMock.Setup(ds => ds.GetVariation(
                     ProjectConfig.GetExperimentFromKey("test_experiment_multivariate"),
                     OptimizelyUserContextMock.Object, ProjectConfig,
-                    It.IsAny<OptimizelyDecideOption[]>())).
+                    It.IsAny<OptimizelyDecideOption[]>(), It.IsAny<bool>())).
                 Returns(variation);
 
             var featureFlag = ProjectConfig.GetFeatureFlagFromKey("multi_variate_feature");
@@ -771,7 +771,7 @@ namespace OptimizelySDK.Tests
             DecisionServiceMock.
                 Setup(ds =>
                     ds.GetVariation(ProjectConfig.GetExperimentFromKey("group_experiment_1"),
-                        OptimizelyUserContextMock.Object, ProjectConfig)).
+                        OptimizelyUserContextMock.Object, ProjectConfig, It.IsAny<OptimizelyDecideOption[]>(), It.IsAny<bool>())).
                 Returns(variation);
 
             var featureFlag = ProjectConfig.GetFeatureFlagFromKey("boolean_feature");
@@ -795,7 +795,7 @@ namespace OptimizelySDK.Tests
             DecisionServiceMock.
                 Setup(ds => ds.GetVariation(It.IsAny<Experiment>(),
                     It.IsAny<OptimizelyUserContext>(), ProjectConfig,
-                    It.IsAny<OptimizelyDecideOption[]>())).
+                    It.IsAny<OptimizelyDecideOption[]>(), It.IsAny<bool>())).
                 Returns(Result<Variation>.NullResult(null));
 
             var featureFlag = ProjectConfig.GetFeatureFlagFromKey("boolean_feature");
@@ -1311,7 +1311,7 @@ namespace OptimizelySDK.Tests
 
             DecisionServiceMock.Setup(ds => ds.GetVariation(experiment,
                     OptimizelyUserContextMock.Object, ProjectConfig,
-                    It.IsAny<OptimizelyDecideOption[]>())).
+                    It.IsAny<OptimizelyDecideOption[]>(), It.IsAny<bool>())).
                 Returns(variation);
             var actualDecision = DecisionServiceMock.Object.GetVariationForFeatureExperiment(
                 featureFlag, OptimizelyUserContextMock.Object, userAttributes, ProjectConfig,
