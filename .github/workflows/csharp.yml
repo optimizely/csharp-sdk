@@ -7,9 +7,20 @@ on:
     branches: [ master ]
 
 jobs:
-  lintCodebase:
+  failOnDraftPullRequest:
+    name: Fail If Draft Pull Request
+    if: github.event.pull_request.draft == true
     runs-on: ubuntu-latest
+    steps:
+      - name: Fails Draft pull request.
+        run: |
+          echo "Draft pull requests should not trigger CI. Please mark the pull request as Ready for review to continue."
+          exit 1
+          
+  lintCodebase:
     name: Lint Codebase
+    needs: [ failOnDraftPullRequest ]
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
