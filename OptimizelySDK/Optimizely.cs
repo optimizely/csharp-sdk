@@ -869,6 +869,8 @@ namespace OptimizelySDK
             OptimizelyDecideOption[] options
         )
         {
+            return DecideForKeys(user, new[] { key }, options)[key];
+
             var config = ProjectConfigManager?.GetConfig();
 
             if (config == null)
@@ -1024,7 +1026,7 @@ namespace OptimizelySDK
             if (projectConfig == null)
             {
                 Logger.Log(LogLevel.ERROR,
-                    "Optimizely instance is not valid, failing isFeatureEnabled call.");
+                    "Optimizely instance is not valid, failing DecideAll call.");
                 return decisionMap;
             }
 
@@ -1041,23 +1043,61 @@ namespace OptimizelySDK
         {
             var decisionDictionary = new Dictionary<string, OptimizelyDecision>();
 
-            var projectConfig = ProjectConfigManager?.GetConfig();
-            if (projectConfig == null)
-            {
-                Logger.Log(LogLevel.ERROR,
-                    "Optimizely instance is not valid, failing isFeatureEnabled call.");
-                return decisionDictionary;
-            }
-
             if (keys.Length == 0)
             {
                 return decisionDictionary;
             }
 
+            var projectConfig = ProjectConfigManager?.GetConfig();
+            if (projectConfig == null)
+            {
+                Logger.Log(LogLevel.ERROR,
+                    "Optimizely instance is not valid, failing DecideForKeys call.");
+                return decisionDictionary;
+            }
+
             var allOptions = GetAllOptions(options);
+
+            var flagDecisions = new Dictionary<string, FeatureDecision>();
+            var decisionReasons = new Dictionary<string, DecisionReasons>();
+
+            var flagsWithoutForcedDecisions = new List<FeatureFlag>();
 
             foreach (var key in keys)
             {
+                var flag = projectConfig.GetFeatureFlagFromKey(key);
+                if (flag.Key == null)
+                {
+                    decisionDictionary.Add(key,
+                        OptimizelyDecision.NewErrorDecision(key, user,
+                            DecisionMessage.Reason(DecisionMessage.FLAG_KEY_INVALID, key),
+                            ErrorHandler, Logger));
+                    continue;
+                }
+
+                var decisionContext = new OptimizelyDecisionContext(flag.Key);
+                var forcedDecisionVariation =
+                    DecisionService.ValidatedForcedDecision(decisionContext, projectConfig, user);
+                decisionReasons.Add(key, forcedDecisionVariation.DecisionReasons);
+
+                if (forcedDecisionVariation.ResultObject != null)
+                {
+                    var experiment = projectConfig.GetExperimentFromKey(flag.Key);
+                    var featureDecision = Result<FeatureDecision>.NewResult(
+                        new FeatureDecision(experiment, forcedDecisionVariation.ResultObject,
+                            FeatureDecision.DECISION_SOURCE_FEATURE_TEST),
+                        forcedDecisionVariation.DecisionReasons);
+                    flagDecisions.Add(key, featureDecision.ResultObject);
+                }
+                else
+                {
+                    flagsWithoutForcedDecisions.Add(flag);
+                }
+
+                var decisionsList = DecisionService.GetVariationsForFeatureList(
+                    flagsWithoutForcedDecisions, user, projectConfig, user.GetAttributes(),
+                    options);
+
                 var decision = Decide(user, key, options);
                 if (!allOptions.Contains(OptimizelyDecideOption.ENABLED_FLAGS_ONLY) ||
                     decision.Enabled)
@@ -1347,7 +1387,8 @@ namespace OptimizelySDK
 
             if (config == null)
             {
-                Logger.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'FetchQualifiedSegments'.");
+                Logger.Log(LogLevel.ERROR,
+                    "Datafile has invalid format. Failing 'FetchQualifiedSegments'.");
                 return null;
             }
 
@@ -1378,7 +1419,8 @@ namespace OptimizelySDK
         /// <param name="identifiers">Dictionary for identifiers. The caller must provide at least one key-value pair.</param>
         /// <param name="type">Type of event (defaults to `fullstack`)</param>
         /// <param name="data">Optional event data in a key-value pair format</param>
-        public void SendOdpEvent(string action, Dictionary<string, string> identifiers, string type = Constants.ODP_EVENT_TYPE,
+        public void SendOdpEvent(string action, Dictionary<string, string> identifiers,
+            string type = Constants.ODP_EVENT_TYPE,
             Dictionary<string, object> data = null
         )
         {
