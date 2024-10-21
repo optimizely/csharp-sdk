@@ -1081,9 +1081,9 @@ namespace OptimizelySDK
 
             var decisionInfo = new Dictionary<string, object>
             {
-                { "featureKey", flagKey },
-                { "featureEnabled", flagEnabled },
-                { "variableValues", variableMap },
+                { "flagKey", flagKey },
+                { "enabled", flagEnabled },
+                { "variables", variableMap },
                 { "variationKey", variationKey },
                 { "ruleKey", ruleKey },
                 { "reasons", reasonsToReport },
@@ -1091,7 +1091,7 @@ namespace OptimizelySDK
             };
             
             NotificationCenter.SendNotifications(NotificationCenter.NotificationType.Decision, 
-                userId, user.GetAttributes(), decisionInfo);
+                DecisionNotificationTypes.FLAG, userId, user.GetAttributes(), decisionInfo);
 
             return new OptimizelyDecision(
                 variationKey,
@@ -1414,7 +1414,7 @@ namespace OptimizelySDK
 
             if (config == null)
             {
-                Logger.Log(LogLevel.ERROR,"Datafile has invalid format. Failing 'FetchQualifiedSegments'.");
+                Logger.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'FetchQualifiedSegments'.");
                 return null;
             }
 
