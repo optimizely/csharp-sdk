@@ -1089,14 +1089,9 @@ namespace OptimizelySDK
                 { "reasons", reasonsToReport },
                 { "decisionEventDispatched", decisionEventDispatched },
             };
-
-            // var decisionNotificationType =
-            //     projectConfig.IsFeatureExperiment(flagDecision.Experiment?.Id) ?
-            //         DecisionNotificationTypes.FEATURE_TEST :
-            //         DecisionNotificationTypes.AB_TEST;
-            NotificationCenter.SendNotifications(NotificationCenter.NotificationType.Decision,
-                 userId,
-                user.GetAttributes(), decisionInfo);
+            
+            NotificationCenter.SendNotifications(NotificationCenter.NotificationType.Decision, 
+                userId, user.GetAttributes(), decisionInfo);
 
             return new OptimizelyDecision(
                 variationKey,
@@ -1419,8 +1414,7 @@ namespace OptimizelySDK
 
             if (config == null)
             {
-                Logger.Log(LogLevel.ERROR,
-                    "Datafile has invalid format. Failing 'FetchQualifiedSegments'.");
+                Logger.Log(LogLevel.ERROR,"Datafile has invalid format. Failing 'FetchQualifiedSegments'.");
                 return null;
             }
 
