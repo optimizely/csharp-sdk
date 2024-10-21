@@ -855,6 +855,14 @@ namespace OptimizelySDK
             );
         }
 
+        /// <summary>
+        /// Get forced decision for the given flag key.
+        /// </summary>
+        /// <param name="flagKey">Flag key</param>
+        /// <param name="decisionReasons">A collection of decision reasons</param>
+        /// <param name="projectConfig">The project config</param>
+        /// <param name="user">The user context</param>
+        /// <returns>Feature decision</returns>
         public FeatureDecision GetForcedDecision(string flagKey, DecisionReasons decisionReasons,
             ProjectConfig projectConfig, OptimizelyUserContext user
         )
@@ -1443,8 +1451,7 @@ namespace OptimizelySDK
         /// <param name="identifiers">Dictionary for identifiers. The caller must provide at least one key-value pair.</param>
         /// <param name="type">Type of event (defaults to `fullstack`)</param>
         /// <param name="data">Optional event data in a key-value pair format</param>
-        public void SendOdpEvent(string action, Dictionary<string, string> identifiers,
-            string type = Constants.ODP_EVENT_TYPE,
+        public void SendOdpEvent(string action, Dictionary<string, string> identifiers, string type = Constants.ODP_EVENT_TYPE,
             Dictionary<string, object> data = null
         )
         {
