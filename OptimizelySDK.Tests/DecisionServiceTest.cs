@@ -856,7 +856,7 @@ namespace OptimizelySDK.Tests
                     ds.GetVariationForFeatureExperiment(It.IsAny<FeatureFlag>(),
                         It.IsAny<OptimizelyUserContext>(), It.IsAny<UserAttributes>(),
                         ProjectConfig,
-                        new OptimizelyDecideOption[] { })).
+                        new OptimizelyDecideOption[] { }, null)).
                 Returns<Variation>(null);
             var optlyObject = new Optimizely(TestData.Datafile, new ValidEventDispatcher(),
                 LoggerMock.Object);
@@ -1201,7 +1201,7 @@ namespace OptimizelySDK.Tests
             DecisionServiceMock.Setup(ds => ds.GetVariationForFeatureExperiment(
                     It.IsAny<FeatureFlag>(), It.IsAny<OptimizelyUserContext>(),
                     It.IsAny<UserAttributes>(), ProjectConfig,
-                    It.IsAny<OptimizelyDecideOption[]>())).
+                    It.IsAny<OptimizelyDecideOption[]>(), null)).
                 Returns(expectedDecision);
             OptimizelyUserContextMock.Setup(ouc => ouc.GetUserId()).Returns("user1");
 
@@ -1228,7 +1228,7 @@ namespace OptimizelySDK.Tests
             DecisionServiceMock.Setup(ds => ds.GetVariationForFeatureExperiment(
                     It.IsAny<FeatureFlag>(), It.IsAny<OptimizelyUserContext>(),
                     It.IsAny<UserAttributes>(), ProjectConfig,
-                    It.IsAny<OptimizelyDecideOption[]>())).
+                    It.IsAny<OptimizelyDecideOption[]>(), null)).
                 Returns(Result<FeatureDecision>.NullResult(null));
             DecisionServiceMock.Setup(ds => ds.GetVariationForFeatureRollout(
                     It.IsAny<FeatureFlag>(), It.IsAny<OptimizelyUserContext>(),
@@ -1262,7 +1262,7 @@ namespace OptimizelySDK.Tests
                     ds.GetVariationForFeatureExperiment(It.IsAny<FeatureFlag>(),
                         It.IsAny<OptimizelyUserContext>(), It.IsAny<UserAttributes>(),
                         ProjectConfig,
-                        new OptimizelyDecideOption[] { })).
+                        new OptimizelyDecideOption[] { }, null)).
                 Returns(Result<FeatureDecision>.NullResult(null));
             DecisionServiceMock.
                 Setup(ds => ds.GetVariationForFeatureRollout(It.IsAny<FeatureFlag>(),

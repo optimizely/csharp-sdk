@@ -166,33 +166,32 @@ namespace OptimizelySDK.Bucketing
 
             var userId = user.GetUserId();
 
-            var decisionVariationResult = GetForcedVariation(experiment.Key, userId, config);
-            reasons += decisionVariationResult.DecisionReasons;
-            var variation = decisionVariationResult.ResultObject;
+            var decisionVariation = GetForcedVariation(experiment.Key, userId, config);
+            reasons += decisionVariation.DecisionReasons;
+            var variation = decisionVariation.ResultObject;
 
             if (variation == null)
             {
-                decisionVariationResult = GetWhitelistedVariation(experiment, user.GetUserId());
-                reasons += decisionVariationResult.DecisionReasons;
-
-                variation = decisionVariationResult.ResultObject;
+                decisionVariation = GetWhitelistedVariation(experiment, user.GetUserId());
+                reasons += decisionVariation.DecisionReasons;
+                variation = decisionVariation.ResultObject;
             }
 
             if (variation != null)
             {
-                decisionVariationResult.SetReasons(reasons);
-                return decisionVariationResult;
+                decisionVariation.SetReasons(reasons);
+                return decisionVariation;
             }
 
             if (userProfileTracker != null)
             {
-                decisionVariationResult =
+                decisionVariation =
                     GetStoredVariation(experiment, userProfileTracker.UserProfile, config);
-                reasons += decisionVariationResult.DecisionReasons;
-                variation = decisionVariationResult.ResultObject;
+                reasons += decisionVariation.DecisionReasons;
+                variation = decisionVariation.ResultObject;
                 if (variation != null)
                 {
-                    return decisionVariationResult;
+                    return decisionVariation;
                 }
             }
 
@@ -202,13 +201,11 @@ namespace OptimizelySDK.Bucketing
             reasons += decisionMeetAudience.DecisionReasons;
             if (decisionMeetAudience.ResultObject)
             {
-                var bucketingIdResult = GetBucketingId(userId, user.GetAttributes());
-                reasons += bucketingIdResult.DecisionReasons;
+                var bucketingId = GetBucketingId(userId, user.GetAttributes()).ResultObject;
 
-                decisionVariationResult = Bucketer.Bucket(config, experiment,
-                    bucketingIdResult.ResultObject, userId);
-                reasons += decisionVariationResult.DecisionReasons;
-                variation = decisionVariationResult.ResultObject;
+                decisionVariation = Bucketer.Bucket(config, experiment, bucketingId, userId);
+                reasons += decisionVariation.DecisionReasons;
+                variation = decisionVariation.ResultObject;
 
                 if (variation != null)
                 {
@@ -218,12 +215,12 @@ namespace OptimizelySDK.Bucketing
                     }
                     else
                     {
-                        Logger.Log(LogLevel.DEBUG,
+                        Logger.Log(LogLevel.INFO,
                             "This decision will not be saved since the UserProfileService is null.");
                     }
                 }
 
-                return decisionVariationResult.SetReasons(reasons);
+                return decisionVariation.SetReasons(reasons);
             }
 
             Logger.Log(LogLevel.INFO,
@@ -651,7 +648,8 @@ namespace OptimizelySDK.Bucketing
             OptimizelyUserContext user,
             UserAttributes filteredAttributes,
             ProjectConfig config,
-            OptimizelyDecideOption[] options
+            OptimizelyDecideOption[] options,
+            UserProfileTracker userProfileTracker = null
         )
         {
             var reasons = new DecisionReasons();
@@ -692,7 +690,7 @@ namespace OptimizelySDK.Bucketing
                 }
                 else
                 {
-                    var decisionResponse = GetVariation(experiment, user, config, options);
+                    var decisionResponse = GetVariation(experiment, user, config, options, userProfileTracker);
 
                     reasons += decisionResponse?.DecisionReasons;
                     decisionVariation = decisionResponse.ResultObject;
@@ -736,7 +734,7 @@ namespace OptimizelySDK.Bucketing
         {
             public UserProfile UserProfile { get; private set; }
             public bool ProfileUpdated { get; private set; }
-            private string UserId { get; set; }
+            private string UserId { get; }
 
             public UserProfileTracker(string userId)
             {
@@ -798,7 +796,7 @@ namespace OptimizelySDK.Bucketing
                 ProfileUpdated = true;
 
                 Logger.Log(LogLevel.INFO,
-                    $"Updated variation \"{variationId}\" of experiment \"{experimentId}\" for user \"{UserProfile.UserId}\".");
+                    $"Saved variation \"{variationId}\" of experiment \"{experimentId}\" for user \"{UserProfile.UserId}\".");
             }
             
             public void SaveUserProfile() 
@@ -852,7 +850,7 @@ namespace OptimizelySDK.Bucketing
 
                 // Check if the feature flag has an experiment and the user is bucketed into that experiment.
                 var decisionResult = GetVariationForFeatureExperiment(featureFlag, user,
-                    filteredAttributes, projectConfig, options);
+                    filteredAttributes, projectConfig, options, userProfileTracker);
                 reasons += decisionResult.DecisionReasons;
 
                 if (decisionResult.ResultObject != null)
