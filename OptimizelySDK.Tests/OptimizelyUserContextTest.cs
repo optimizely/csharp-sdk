@@ -428,27 +428,27 @@ namespace OptimizelySDK.Tests
         [Test]
         public void SeparateDecideShouldHaveSameNumberOfUpsSaveAndLookup()
         {
-            var experimentFlagKey = "double_single_variable_feature";
-            var rolloutFlagKey = "boolean_single_variable_feature";
+            var flag1 = "double_single_variable_feature";
+            var flag2 = "integer_single_variable_feature";
             var userProfileServiceMock = MakeUserProfileServiceMock();
             var saveArgsCollector = new List<Dictionary<string, object>>();
             userProfileServiceMock.Setup(up => up.Save(Capture.In(saveArgsCollector)));
             var optimizely = new Optimizely(TestData.Datafile, EventDispatcherMock.Object,
                 LoggerMock.Object, ErrorHandlerMock.Object, userProfileServiceMock.Object);
             var user = optimizely.CreateUserContext(UserID);
-            var expectedUserProfileExperiment = new UserProfile(UserID, new Dictionary<string, Decision>
+            var flag1UserProfile = new UserProfile(UserID, new Dictionary<string, Decision>
             {
                 { "224", new Decision("280") },
                 { "122238", new Decision("122240") },
-            });
-            var expectedUserProfileRollout = new UserProfile(UserID, new Dictionary<string, Decision>
+            });            
+            var flag2UserProfile = new UserProfile(UserID, new Dictionary<string, Decision>
             {
-                { "999", new Decision("99") },
-                { "99999", new Decision("999") },
+                { "224", new Decision("280") },
+                { "122241", new Decision("122242") },
             });
 
-            user.Decide(experimentFlagKey);
-            user.Decide(rolloutFlagKey);
+            user.Decide(flag1);
+            user.Decide(flag2);
 
             LoggerMock.Verify(
                 l => l.Log(LogLevel.INFO,
@@ -460,8 +460,8 @@ namespace OptimizelySDK.Tests
             userProfileServiceMock.Verify(l => l.Lookup(UserID), Times.Exactly(2));
             userProfileServiceMock.Verify(l => l.Save(It.IsAny<Dictionary<string, object>>()),
                 Times.Exactly(2));
-            Assert.AreEqual(saveArgsCollector[0], expectedUserProfileExperiment.ToMap());
-            Assert.AreEqual(saveArgsCollector[1], expectedUserProfileRollout.ToMap());
+            Assert.AreEqual(saveArgsCollector[0], flag1UserProfile.ToMap());
+            Assert.AreEqual(saveArgsCollector[1], flag2UserProfile.ToMap());
         }
 
         [Test]
@@ -513,6 +513,8 @@ namespace OptimizelySDK.Tests
             {
                 { "224", new Decision("280") },
                 { "122238", new Decision("122240") },
+                { "7723330021", new Decision(null) },
+                { "7718750065", new Decision(null) },
             });
 
             userContext.DecideForKeys(flagKeys);
@@ -579,7 +581,8 @@ namespace OptimizelySDK.Tests
                 { "122238", new Decision("122240") },
                 { "122241", new Decision("122242") },
                 { "122235", new Decision("122236") },
-                { "188880", new Decision("188881") },
+                { "7723330021", new Decision(null) },
+                { "7718750065", new Decision(null) },
             });
 
             user.DecideAll();

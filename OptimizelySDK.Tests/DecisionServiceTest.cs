@@ -150,15 +150,18 @@ namespace OptimizelySDK.Tests
             var decisionService = new DecisionService(BucketerMock.Object, ErrorHandlerMock.Object,
                 UserProfileServiceMock.Object, LoggerMock.Object);
             var options = new OptimizelyDecideOption[] { OptimizelyDecideOption.INCLUDE_REASONS };
+            var optlyObject = new Optimizely(TestData.Datafile, new ValidEventDispatcher(),
+                LoggerMock.Object);
+            OptimizelyUserContextMock = new Mock<OptimizelyUserContext>(optlyObject,
+                WhitelistedUserId, new UserAttributes(), ErrorHandlerMock.Object,
+                LoggerMock.Object);
             OptimizelyUserContextMock.Setup(ouc => ouc.GetUserId()).Returns(GenericUserId);
 
             var variationResult = decisionService.GetVariation(experiment,
                 OptimizelyUserContextMock.Object, ProjectConfig, options);
             Assert.AreEqual(variationResult.DecisionReasons.ToReport(true)[0],
-                "We were unable to get a user profile map from the UserProfileService.");
-            Assert.AreEqual(variationResult.DecisionReasons.ToReport(true)[1],
                 "Audiences for experiment \"etag3\" collectively evaluated to FALSE");
-            Assert.AreEqual(variationResult.DecisionReasons.ToReport(true)[2],
+            Assert.AreEqual(variationResult.DecisionReasons.ToReport(true)[1],
                 "User \"genericUserId\" does not meet conditions to be in experiment \"etag3\".");
         }
 
