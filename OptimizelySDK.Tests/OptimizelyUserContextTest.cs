@@ -61,7 +61,7 @@ namespace OptimizelySDK.Tests
             Optimizely = new Optimizely(TestData.Datafile, EventDispatcherMock.Object,
                 LoggerMock.Object, ErrorHandlerMock.Object);
         }
-        
+
         private Mock<UserProfileService> MakeUserProfileServiceMock()
         {
             var projectConfig = DatafileProjectConfig.Create(TestData.Datafile, LoggerMock.Object,
@@ -440,7 +440,7 @@ namespace OptimizelySDK.Tests
             {
                 { "224", new Decision("280") },
                 { "122238", new Decision("122240") },
-            });            
+            });
             var flag2UserProfile = new UserProfile(UserID, new Dictionary<string, Decision>
             {
                 { "224", new Decision("280") },
@@ -531,7 +531,7 @@ namespace OptimizelySDK.Tests
                 Times.Once);
             Assert.AreEqual(saveArgsCollector.First(), expectedUserProfile.ToMap());
         }
-        
+
         [Test]
         public void DecideForKeysWithOneFlag()
         {
@@ -561,11 +561,11 @@ namespace OptimizelySDK.Tests
                 new string[0]);
             Assert.IsTrue(TestData.CompareObjects(decision, expDecision));
         }
-        
+
         #endregion DecideForKeys
-        
+
         #region DecideAll
-        
+
         [Test]
         public void DecideAllWithUpsShouldOnlyLookupSaveOnce()
         {
@@ -595,8 +595,9 @@ namespace OptimizelySDK.Tests
                 l => l.Log(LogLevel.ERROR, "The UserProfileService returned an invalid map."),
                 Times.Never);
             userProfileServiceMock.Verify(l => l.Lookup(UserID), Times.Once);
-            userProfileServiceMock.Verify(l => l.Save(It.IsAny<Dictionary<string,object>>()), Times.Once);
-            Assert.AreEqual(saveArgsCollector.First(), expectedUserProfile.ToMap());    
+            userProfileServiceMock.Verify(l => l.Save(It.IsAny<Dictionary<string, object>>()),
+                Times.Once);
+            Assert.AreEqual(saveArgsCollector.First(), expectedUserProfile.ToMap());
         }
 
         [Test]
@@ -806,7 +807,7 @@ namespace OptimizelySDK.Tests
                 null,
                 flagKey10,
                 user,
-                new string[0]);
+                new[] { "Variable value for key \"any_key\" is invalid or wrong type." });
             Assert.IsTrue(TestData.CompareObjects(decisions[flagKey10], expDecision10));
         }
 

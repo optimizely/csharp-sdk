@@ -1040,7 +1040,8 @@ namespace OptimizelySDK
                 decisionSource = flagDecision.Source;
             }
 
-            var reasonsToReport = decisionReasons.ToReport().ToArray();
+            var includeReasons= allOptions.Contains(OptimizelyDecideOption.INCLUDE_REASONS);
+            var reasonsToReport = decisionReasons.ToReport(includeReasons).ToArray();
             var variationKey = flagDecision.Variation?.Key;
             // TODO: add ruleKey values when available later. use a copy of experimentKey until then.
             //       add to event metadata as well (currently set to experimentKey)
