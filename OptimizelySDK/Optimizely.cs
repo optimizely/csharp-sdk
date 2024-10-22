@@ -878,11 +878,11 @@ namespace OptimizelySDK
                     ErrorHandler, Logger);
             }
 
-            var filteredOptions = GetAllOptions(options).
+            var allOptions = GetAllOptions(options).
                 Where(opt => opt != OptimizelyDecideOption.ENABLED_FLAGS_ONLY).
                 ToArray();
 
-            return DecideForKeys(user, new[] { key }, filteredOptions, true)[key];
+            return DecideForKeys(user, new[] { key }, allOptions, true)[key];
         }
 
         internal Dictionary<string, OptimizelyDecision> DecideAll(OptimizelyUserContext user,
