@@ -856,31 +856,6 @@ namespace OptimizelySDK
         }
 
         /// <summary>
-        /// Get forced decision for the given flag key.
-        /// </summary>
-        /// <param name="flagKey">Flag key</param>
-        /// <param name="decisionReasons">A collection of decision reasons</param>
-        /// <param name="projectConfig">The project config</param>
-        /// <param name="user">The user context</param>
-        /// <returns>Feature decision</returns>
-        public FeatureDecision GetForcedDecision(string flagKey, DecisionReasons decisionReasons,
-            ProjectConfig projectConfig, OptimizelyUserContext user
-        )
-        {
-            var context = new OptimizelyDecisionContext(flagKey);
-            var forcedDecisionVariation =
-                DecisionService.ValidatedForcedDecision(context, projectConfig, user);
-            decisionReasons += forcedDecisionVariation.DecisionReasons;
-            if (forcedDecisionVariation.ResultObject != null)
-            {
-                return new FeatureDecision(null, forcedDecisionVariation.ResultObject,
-                    FeatureDecision.DECISION_SOURCE_FEATURE_TEST);
-            }
-
-            return null;
-        }
-
-        /// <summary>
         /// Returns a decision result ({@link OptimizelyDecision}) for a given flag key and a user context, which contains all data required to deliver the flag.
         /// <ul>
         /// <li>If the SDK finds an error, it’ll return a decision with <b>null</b> for <b>variationKey</b>. The decision will include an error message in <b>reasons</b>.
@@ -975,12 +950,18 @@ namespace OptimizelySDK
                 validKeys.Add(key);
 
                 var decisionReasons = new DecisionReasons();
-                var forcedDecision = GetForcedDecision(key, decisionReasons, projectConfig, user);
                 decisionReasonsMap.Add(key, decisionReasons);
-
-                if (forcedDecision != null)
+                
+                var optimizelyDecisionContext = new OptimizelyDecisionContext(key);
+                var forcedDecisionVariation =
+                    DecisionService.ValidatedForcedDecision(optimizelyDecisionContext, projectConfig, user);
+                decisionReasons += forcedDecisionVariation.DecisionReasons;
+                
+                if (forcedDecisionVariation.ResultObject != null)
                 {
-                    flagDecisions.Add(key, forcedDecision);
+                    flagDecisions.Add(key, new FeatureDecision(null,
+                        forcedDecisionVariation.ResultObject,
+                        FeatureDecision.DECISION_SOURCE_FEATURE_TEST));
                 }
                 else
                 {

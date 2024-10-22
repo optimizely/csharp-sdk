@@ -41,8 +41,8 @@ namespace OptimizelySDK.Bucketing
         public const string LOGGING_KEY_TYPE_RULE = "rule";
 
         private Bucketer Bucketer;
-        private IErrorHandler ErrorHandler;
-        private UserProfileService UserProfileService;
+        private static IErrorHandler ErrorHandler;
+        private static UserProfileService UserProfileService;
         private static ILogger Logger;
 
         /// <summary>
@@ -118,8 +118,8 @@ namespace OptimizelySDK.Bucketing
 
             if (UserProfileService != null && !ignoreUps)
             {
-                var userProfile = GetUserProfile(user.GetUserId(), reasons);
-                userProfileTracker = new UserProfileTracker(userProfile, false);
+                userProfileTracker = new UserProfileTracker(user.GetUserId());
+                userProfileTracker.LoadUserProfile(reasons);
             }
 
             var response = GetVariation(experiment, user, config, options, userProfileTracker,
@@ -128,7 +128,7 @@ namespace OptimizelySDK.Bucketing
             if (UserProfileService != null && !ignoreUps &&
                 userProfileTracker?.ProfileUpdated == true)
             {
-                SaveUserProfile(userProfileTracker.UserProfile);
+                userProfileTracker.SaveUserProfile();
             }
 
             return response;
@@ -166,7 +166,6 @@ namespace OptimizelySDK.Bucketing
 
             var userId = user.GetUserId();
 
-            // check if a forced variation is set
             var decisionVariationResult = GetForcedVariation(experiment.Key, userId, config);
             reasons += decisionVariationResult.DecisionReasons;
             var variation = decisionVariationResult.ResultObject;
@@ -733,74 +732,51 @@ namespace OptimizelySDK.Bucketing
                 new OptimizelyDecideOption[] { });
         }
 
-        void SaveUserProfile(UserProfile userProfile)
-        {
-            if (UserProfileService == null)
-            {
-                return;
-            }
-
-            try
-            {
-                UserProfileService.Save(userProfile.ToMap());
-                Logger.Log(LogLevel.INFO,
-                    $"Saved user profile of user \"{userProfile.UserId}\".");
-            }
-            catch (Exception exception)
-            {
-                Logger.Log(LogLevel.WARN,
-                    $"Failed to save user profile of user \"{userProfile.UserId}\".");
-                ErrorHandler.HandleError(new Exceptions.OptimizelyRuntimeException(exception.Message));
-            }
-        }
-
-        private UserProfile GetUserProfile(String userId, DecisionReasons reasons)
-        {
-            UserProfile userProfile = null;
-
-            try
-            {
-                var userProfileMap = UserProfileService.Lookup(userId);
-                if (userProfileMap == null)
-                {
-                    Logger.Log(LogLevel.INFO,
-                        reasons.AddInfo(
-                            "We were unable to get a user profile map from the UserProfileService."));
-                }
-                else if (UserProfileUtil.IsValidUserProfileMap(userProfileMap))
-                {
-                    userProfile = UserProfileUtil.ConvertMapToUserProfile(userProfileMap);
-                }
-                else
-                {
-                    Logger.Log(LogLevel.WARN,
-                        reasons.AddInfo("The UserProfileService returned an invalid map."));
-                }
-            }
-            catch (Exception exception)
-            {
-                Logger.Log(LogLevel.ERROR, reasons.AddInfo(exception.Message));
-                ErrorHandler.HandleError(
-                    new Exceptions.OptimizelyRuntimeException(exception.Message));
-            }
-
-            if (userProfile == null)
-            {
-                userProfile = new UserProfile(userId, new Dictionary<string, Decision>());
-            }
-
-            return userProfile;
-        }
-
         public class UserProfileTracker
         {
-            public UserProfile UserProfile { get; set; }
-            public bool ProfileUpdated { get; set; }
+            public UserProfile UserProfile { get; private set; }
+            public bool ProfileUpdated { get; private set; }
+            private string UserId { get; set; }
 
-            public UserProfileTracker(UserProfile userProfile, bool profileUpdated)
+            public UserProfileTracker(string userId)
             {
-                UserProfile = userProfile;
-                ProfileUpdated = profileUpdated;
+                UserId = userId;
+                ProfileUpdated = false;
+                UserProfile = null;
+            }
+            
+            public void LoadUserProfile(DecisionReasons reasons)
+            {
+                try
+                {
+                    var userProfileMap = UserProfileService.Lookup(UserId);
+                    if (userProfileMap == null)
+                    {
+                        Logger.Log(LogLevel.INFO,
+                            reasons.AddInfo(
+                                "We were unable to get a user profile map from the UserProfileService."));
+                    }
+                    else if (UserProfileUtil.IsValidUserProfileMap(userProfileMap))
+                    {
+                        UserProfile = UserProfileUtil.ConvertMapToUserProfile(userProfileMap);
+                    }
+                    else
+                    {
+                        Logger.Log(LogLevel.WARN,
+                            reasons.AddInfo("The UserProfileService returned an invalid map."));
+                    }
+                }
+                catch (Exception exception)
+                {
+                    Logger.Log(LogLevel.ERROR, reasons.AddInfo(exception.Message));
+                    ErrorHandler.HandleError(
+                        new Exceptions.OptimizelyRuntimeException(exception.Message));
+                }
+                
+                if (UserProfile == null)
+                {
+                    UserProfile = new UserProfile(UserId, new Dictionary<string, Decision>());
+                }
             }
 
             public void UpdateUserProfile(Experiment experiment, Variation variation)
@@ -824,6 +800,27 @@ namespace OptimizelySDK.Bucketing
                 Logger.Log(LogLevel.INFO,
                     $"Updated variation \"{variationId}\" of experiment \"{experimentId}\" for user \"{UserProfile.UserId}\".");
             }
+            
+            public void SaveUserProfile() 
+            {
+                if (!ProfileUpdated)
+                {
+                    return;
+                }
+
+                try
+                {
+                    UserProfileService.Save(UserProfile.ToMap());
+                    Logger.Log(LogLevel.INFO,
+                        $"Saved user profile of user \"{UserProfile.UserId}\".");
+                }
+                catch (Exception exception)
+                {
+                    Logger.Log(LogLevel.WARN,
+                        $"Failed to save user profile of user \"{UserProfile.UserId}\".");
+                    ErrorHandler.HandleError(new Exceptions.OptimizelyRuntimeException(exception.Message));
+                }
+            }
         }
 
         public virtual List<Result<FeatureDecision>> GetVariationsForFeatureList(
@@ -836,13 +833,13 @@ namespace OptimizelySDK.Bucketing
         {
             var upsReasons = new DecisionReasons();
 
-            var ignoreUPS = options.Contains(OptimizelyDecideOption.IGNORE_USER_PROFILE_SERVICE);
+            var ignoreUps = options.Contains(OptimizelyDecideOption.IGNORE_USER_PROFILE_SERVICE);
             UserProfileTracker userProfileTracker = null;
 
-            if (UserProfileService != null && !ignoreUPS)
+            if (UserProfileService != null && !ignoreUps)
             {
-                var userProfile = GetUserProfile(user.GetUserId(), upsReasons);
-                userProfileTracker = new UserProfileTracker(userProfile, false);
+                userProfileTracker = new UserProfileTracker(user.GetUserId());
+                userProfileTracker.LoadUserProfile(upsReasons);
             }
 
             var userId = user.GetUserId();
@@ -888,9 +885,9 @@ namespace OptimizelySDK.Bucketing
                 }
             }
 
-            if (UserProfileService != null && !ignoreUPS && userProfileTracker?.ProfileUpdated == true)
+            if (UserProfileService != null && !ignoreUps && userProfileTracker?.ProfileUpdated == true)
             {
-                SaveUserProfile(userProfileTracker.UserProfile);
+                userProfileTracker.SaveUserProfile();
             }
 
             return decisions;
