@@ -41,9 +41,9 @@ namespace OptimizelySDK.Bucketing
         public const string LOGGING_KEY_TYPE_RULE = "rule";
 
         private Bucketer Bucketer;
-        private static IErrorHandler ErrorHandler;
+        private readonly IErrorHandler ErrorHandler;
         private static UserProfileService UserProfileService;
-        private static ILogger Logger;
+        private readonly ILogger Logger;
 
         /// <summary>
         /// Associative array of user IDs to an associative array
@@ -118,7 +118,8 @@ namespace OptimizelySDK.Bucketing
 
             if (UserProfileService != null && !ignoreUps)
             {
-                userProfileTracker = new UserProfileTracker(user.GetUserId());
+                userProfileTracker = new UserProfileTracker(UserProfileService, user.GetUserId(),
+                    Logger, ErrorHandler);
                 userProfileTracker.LoadUserProfile(reasons);
             }
 
@@ -690,7 +691,8 @@ namespace OptimizelySDK.Bucketing
                 }
                 else
                 {
-                    var decisionResponse = GetVariation(experiment, user, config, options, userProfileTracker);
+                    var decisionResponse = GetVariation(experiment, user, config, options,
+                        userProfileTracker);
 
                     reasons += decisionResponse?.DecisionReasons;
                     decisionVariation = decisionResponse.ResultObject;
@@ -730,97 +732,6 @@ namespace OptimizelySDK.Bucketing
                 new OptimizelyDecideOption[] { });
         }
 
-        public class UserProfileTracker
-        {
-            public UserProfile UserProfile { get; private set; }
-            public bool ProfileUpdated { get; private set; }
-            private string UserId { get; }
-
-            public UserProfileTracker(string userId)
-            {
-                UserId = userId;
-                ProfileUpdated = false;
-                UserProfile = null;
-            }
-            
-            public void LoadUserProfile(DecisionReasons reasons)
-            {
-                try
-                {
-                    var userProfileMap = UserProfileService.Lookup(UserId);
-                    if (userProfileMap == null)
-                    {
-                        Logger.Log(LogLevel.INFO,
-                            reasons.AddInfo(
-                                "We were unable to get a user profile map from the UserProfileService."));
-                    }
-                    else if (UserProfileUtil.IsValidUserProfileMap(userProfileMap))
-                    {
-                        UserProfile = UserProfileUtil.ConvertMapToUserProfile(userProfileMap);
-                    }
-                    else
-                    {
-                        Logger.Log(LogLevel.WARN,
-                            reasons.AddInfo("The UserProfileService returned an invalid map."));
-                    }
-                }
-                catch (Exception exception)
-                {
-                    Logger.Log(LogLevel.ERROR, reasons.AddInfo(exception.Message));
-                    ErrorHandler.HandleError(
-                        new Exceptions.OptimizelyRuntimeException(exception.Message));
-                }
-                
-                if (UserProfile == null)
-                {
-                    UserProfile = new UserProfile(UserId, new Dictionary<string, Decision>());
-                }
-            }
-
-            public void UpdateUserProfile(Experiment experiment, Variation variation)
-            {
-                var experimentId = experiment.Id;
-                var variationId = variation.Id;
-                Decision decision;
-                if (UserProfile.ExperimentBucketMap.ContainsKey(experimentId))
-                {
-                    decision = UserProfile.ExperimentBucketMap[experimentId];
-                    decision.VariationId = variationId;
-                }
-                else
-                {
-                    decision = new Decision(variationId);
-                }
-
-                UserProfile.ExperimentBucketMap[experimentId] = decision;
-                ProfileUpdated = true;
-
-                Logger.Log(LogLevel.INFO,
-                    $"Saved variation \"{variationId}\" of experiment \"{experimentId}\" for user \"{UserProfile.UserId}\".");
-            }
-            
-            public void SaveUserProfile() 
-            {
-                if (!ProfileUpdated)
-                {
-                    return;
-                }
-
-                try
-                {
-                    UserProfileService.Save(UserProfile.ToMap());
-                    Logger.Log(LogLevel.INFO,
-                        $"Saved user profile of user \"{UserProfile.UserId}\".");
-                }
-                catch (Exception exception)
-                {
-                    Logger.Log(LogLevel.WARN,
-                        $"Failed to save user profile of user \"{UserProfile.UserId}\".");
-                    ErrorHandler.HandleError(new Exceptions.OptimizelyRuntimeException(exception.Message));
-                }
-            }
-        }
-
         public virtual List<Result<FeatureDecision>> GetVariationsForFeatureList(
             List<FeatureFlag> featureFlags,
             OptimizelyUserContext user,
@@ -836,7 +747,8 @@ namespace OptimizelySDK.Bucketing
 
             if (UserProfileService != null && !ignoreUps)
             {
-                userProfileTracker = new UserProfileTracker(user.GetUserId());
+                userProfileTracker = new UserProfileTracker(UserProfileService, user.GetUserId(),
+                    Logger, ErrorHandler);
                 userProfileTracker.LoadUserProfile(upsReasons);
             }
 
@@ -883,7 +795,8 @@ namespace OptimizelySDK.Bucketing
                 }
             }
 
-            if (UserProfileService != null && !ignoreUps && userProfileTracker?.ProfileUpdated == true)
+            if (UserProfileService != null && !ignoreUps &&
+                userProfileTracker?.ProfileUpdated == true)
             {
                 userProfileTracker.SaveUserProfile();
             }
@@ -909,10 +822,11 @@ namespace OptimizelySDK.Bucketing
         )
         {
             return GetVariationsForFeatureList(new List<FeatureFlag> { featureFlag },
-                user,
-                config,
-                filteredAttributes,
-                options).First();
+                    user,
+                    config,
+                    filteredAttributes,
+                    options).
+                First();
         }
 
         /// <summary>
