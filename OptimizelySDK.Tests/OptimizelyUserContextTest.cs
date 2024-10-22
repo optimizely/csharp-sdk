@@ -426,7 +426,7 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
-        public void SeparateDecideShouldHaveSameNumberOfUpsSaveOnlyOneLookup()
+        public void SeparateDecideShouldHaveSameNumberOfUpsSaveAndLookup()
         {
             var experimentFlagKey = "double_single_variable_feature";
             var rolloutFlagKey = "boolean_single_variable_feature";
@@ -457,7 +457,7 @@ namespace OptimizelySDK.Tests
             LoggerMock.Verify(
                 l => l.Log(LogLevel.ERROR, "The UserProfileService returned an invalid map."),
                 Times.Never);
-            userProfileServiceMock.Verify(l => l.Lookup(UserID), Times.Once);
+            userProfileServiceMock.Verify(l => l.Lookup(UserID), Times.Exactly(2));
             userProfileServiceMock.Verify(l => l.Save(It.IsAny<Dictionary<string, object>>()),
                 Times.Exactly(2));
             Assert.AreEqual(saveArgsCollector[0], expectedUserProfileExperiment.ToMap());
