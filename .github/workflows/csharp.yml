@@ -19,7 +19,7 @@ jobs:
           # Full git history is needed to get a proper list of changed files
           fetch-depth: 0
       - name: Run Super-Linter
-        uses: github/super-linter@v7.1.0
+        uses: github/super-linter@v7
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VALIDATE_ALL_CODEBASE: false
