@@ -161,7 +161,4 @@
         <PackageReference Include="NJsonSchema" Version="10.8.0" />
         <PackageReference Include="murmurhash-signed" Version="1.0.2" />
     </ItemGroup>
-    <ItemGroup>
-      <ProjectReference Include="..\OptimizelySDK\OptimizelySDK.csproj" />
-    </ItemGroup>
 </Project>
