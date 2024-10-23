@@ -66,7 +66,7 @@ namespace OptimizelySDK.Tests
                 ErrorHandlerMock.Object, null, LoggerMock.Object);
             DecisionServiceMock = new Mock<DecisionService>(BucketerMock.Object,
                     ErrorHandlerMock.Object, null, LoggerMock.Object)
-                { CallBase = true };
+            { CallBase = true };
             DecisionReasons = new DecisionReasons();
 
             VariationWithKeyControl =

@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright 2017-2023, Optimizely
+ * Copyright 2017-2024, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use file except in compliance with the License.
@@ -573,8 +573,7 @@ namespace OptimizelySDK
                 else
                 {
                     Logger.Log(LogLevel.INFO,
-                        $@"The user ""{userId}"" is not being experimented on feature ""{featureKey
-                        }"".");
+                        $@"The user ""{userId}"" is not being experimented on feature ""{featureKey}"".");
                 }
             }
 
@@ -624,8 +623,7 @@ namespace OptimizelySDK
             if (config == null)
             {
                 Logger.Log(LogLevel.ERROR,
-                    $@"Datafile has invalid format. Failing '{
-                        FeatureVariable.GetFeatureVariableTypeName(variableType)}'.");
+                    $@"Datafile has invalid format. Failing '{FeatureVariable.GetFeatureVariableTypeName(variableType)}'.");
                 return default;
             }
 
@@ -649,15 +647,13 @@ namespace OptimizelySDK
             if (featureVariable == null)
             {
                 Logger.Log(LogLevel.ERROR,
-                    $@"No feature variable was found for key ""{variableKey}"" in feature flag ""{
-                        featureKey}"".");
+                    $@"No feature variable was found for key ""{variableKey}"" in feature flag ""{featureKey}"".");
                 return default;
             }
             else if (featureVariable.Type != variableType)
             {
                 Logger.Log(LogLevel.ERROR,
-                    $@"Variable is of type ""{featureVariable.Type
-                    }"", but you requested it as type ""{variableType}"".");
+                    $@"Variable is of type ""{featureVariable.Type}"", but you requested it as type ""{variableType}"".");
                 return default;
             }
 
@@ -681,28 +677,24 @@ namespace OptimizelySDK
                     {
                         variableValue = featureVariableUsageInstance.Value;
                         Logger.Log(LogLevel.INFO,
-                            $@"Got variable value ""{variableValue}"" for variable ""{variableKey
-                            }"" of feature flag ""{featureKey}"".");
+                            $@"Got variable value ""{variableValue}"" for variable ""{variableKey}"" of feature flag ""{featureKey}"".");
                     }
                     else
                     {
                         Logger.Log(LogLevel.INFO,
-                            $@"Feature ""{featureKey}"" is not enabled for user {userId
-                            }. Returning the default variable value ""{variableValue}"".");
+                            $@"Feature ""{featureKey}"" is not enabled for user {userId}. Returning the default variable value ""{variableValue}"".");
                     }
                 }
                 else
                 {
                     Logger.Log(LogLevel.INFO,
-                        $@"Variable ""{variableKey}"" is not used in variation ""{variation.Key
-                        }"", returning default value ""{variableValue}"".");
+                        $@"Variable ""{variableKey}"" is not used in variation ""{variation.Key}"", returning default value ""{variableValue}"".");
                 }
             }
             else
             {
                 Logger.Log(LogLevel.INFO,
-                    $@"User ""{userId}"" is not in any variation for feature flag ""{featureKey
-                    }"", returning default value ""{variableValue}"".");
+                    $@"User ""{userId}"" is not in any variation for feature flag ""{featureKey}"", returning default value ""{variableValue}"".");
             }
 
             var sourceInfo = new Dictionary<string, string>();
@@ -951,12 +943,12 @@ namespace OptimizelySDK
 
                 var decisionReasons = new DecisionReasons();
                 decisionReasonsMap.Add(key, decisionReasons);
-                
+
                 var optimizelyDecisionContext = new OptimizelyDecisionContext(key);
                 var forcedDecisionVariation =
                     DecisionService.ValidatedForcedDecision(optimizelyDecisionContext, projectConfig, user);
                 decisionReasons += forcedDecisionVariation.DecisionReasons;
-                
+
                 if (forcedDecisionVariation.ResultObject != null)
                 {
                     flagDecisions.Add(key, new FeatureDecision(null,
@@ -1040,7 +1032,7 @@ namespace OptimizelySDK
                 decisionSource = flagDecision.Source;
             }
 
-            var includeReasons= allOptions.Contains(OptimizelyDecideOption.INCLUDE_REASONS);
+            var includeReasons = allOptions.Contains(OptimizelyDecideOption.INCLUDE_REASONS);
             var reasonsToReport = decisionReasons.ToReport(includeReasons).ToArray();
             var variationKey = flagDecision.Variation?.Key;
             // TODO: add ruleKey values when available later. use a copy of experimentKey until then.
@@ -1071,8 +1063,8 @@ namespace OptimizelySDK
                 { "reasons", reasonsToReport },
                 { "decisionEventDispatched", decisionEventDispatched },
             };
-            
-            NotificationCenter.SendNotifications(NotificationCenter.NotificationType.Decision, 
+
+            NotificationCenter.SendNotifications(NotificationCenter.NotificationType.Decision,
                 DecisionNotificationTypes.FLAG, userId, user.GetAttributes(), decisionInfo);
 
             return new OptimizelyDecision(
@@ -1114,7 +1106,7 @@ namespace OptimizelySDK
 
                 valuesMap[variable.Key] = convertedValue;
             }
-            
+
             return Result<Dictionary<string, object>>.NewResult(valuesMap, reasons);
         }
 

@@ -264,8 +264,7 @@ namespace OptimizelySDK.Bucketing
             if (experimentToVariationMap.ContainsKey(experimentId) == false)
             {
                 Logger.Log(LogLevel.DEBUG,
-                    $@"No experiment ""{experimentKey}"" mapped to user ""{userId
-                    }"" in the forced variation map.");
+                    $@"No experiment ""{experimentKey}"" mapped to user ""{userId}"" in the forced variation map.");
                 return Result<Variation>.NullResult(reasons);
             }
 
@@ -274,8 +273,7 @@ namespace OptimizelySDK.Bucketing
             if (string.IsNullOrEmpty(variationId))
             {
                 Logger.Log(LogLevel.DEBUG,
-                    $@"No variation mapped to experiment ""{experimentKey
-                    }"" in the forced variation map.");
+                    $@"No variation mapped to experiment ""{experimentKey}"" in the forced variation map.");
                 return Result<Variation>.NullResult(reasons);
             }
 
@@ -288,8 +286,7 @@ namespace OptimizelySDK.Bucketing
             }
 
             Logger.Log(LogLevel.DEBUG,
-                reasons.AddInfo($@"Variation ""{variationKey}"" is mapped to experiment ""{
-                    experimentKey}"" and user ""{userId}"" in the forced variation map"));
+                reasons.AddInfo($@"Variation ""{variationKey}"" is mapped to experiment ""{experimentKey}"" and user ""{userId}"" in the forced variation map"));
 
             var variation = config.GetVariationFromKey(experimentKey, variationKey);
 
@@ -333,8 +330,7 @@ namespace OptimizelySDK.Bucketing
                 }
 
                 Logger.Log(LogLevel.DEBUG,
-                    $@"Variation mapped to experiment ""{experimentKey
-                    }"" has been removed for user ""{userId}"".");
+                    $@"Variation mapped to experiment ""{experimentKey}"" has been removed for user ""{userId}"".");
                 return true;
             }
 
@@ -356,8 +352,7 @@ namespace OptimizelySDK.Bucketing
             ForcedVariationMap[userId][experimentId] = variationId;
 
             Logger.Log(LogLevel.DEBUG,
-                $@"Set variation ""{variationId}"" for experiment ""{experimentId}"" and user ""{
-                    userId}"" in the forced variation map.");
+                $@"Set variation ""{variationId}"" for experiment ""{experimentId}"" and user ""{userId}"" in the forced variation map.");
             return true;
         }
 
