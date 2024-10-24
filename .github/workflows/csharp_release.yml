@@ -9,26 +9,23 @@ jobs:
     name: Set Variables
     runs-on: ubuntu-latest
     env:
-      # ⚠️ IMPORTANT: tag should always start with integer & will be used verbatim to string end
       TAG: ${{ github.event.release.tag_name }}
     steps:
-      - name: Set semantic version variable
+      - name: Extract semantic version from tag
         id: set_version
         run: |
-          SEMANTIC_VERSION=$(echo "$TAG" | grep -Po "(?<=^|[^0-9])([0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+)?(-[a-zA-Z]+[0-9]*)?)")
+          # Remove the "v" prefix if it exists and extract the semantic version number
+          SEMANTIC_VERSION=$(echo "${TAG}" | grep -Po "(?<=^|[^0-9])([0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+)?(-[a-zA-Z]+[0-9]*)?)")
+          SEMANTIC_VERSION=${SEMANTIC_VERSION#"v"}
           if [ -z "${SEMANTIC_VERSION}" ]; then
-            echo "Tag did not start with a semantic version number (e.g., #.#.#; #.#.#.#; #.#.#.#-beta)"
+            echo "Error: Tag '${TAG}' does not start with a valid semantic version number (e.g., #.#.#; #.#.#.#; #.#.#.#-beta)"
             exit 1
           fi
+          echo "Extracted semantic version: ${SEMANTIC_VERSION}"
           echo "semantic_version=${SEMANTIC_VERSION}" >> $GITHUB_OUTPUT
-      - name: Output tag & semantic version
-        id: outputs
-        run: |
-          echo "$TAG"
-          echo ${{ steps.set_version.outputs.semantic_version }}
     outputs:
       tag: $TAG
-      semanticVersion: ${{ steps.set_version.outputs.semantic_version }}
+      semanticVersion: ${{ steps.set_version.outputs.semantic_version }}  
   
   buildFrameworkVersions:
     name: Build Framework versions
@@ -48,9 +45,9 @@ jobs:
       - name: Build and strongly name assemblies
         run: msbuild /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=$(pwd)/keypair.snk /p:Configuration=Release ./OptimizelySDK.NETFramework.sln
       - name: Upload Framework artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
-          name: nuget-files
+          name: unsigned-dlls
           if-no-files-found: error
           path: ./**/bin/Release/**/Optimizely*.dll
 
@@ -70,9 +67,9 @@ jobs:
       - name: Build and strongly name assemblies
         run: dotnet build OptimizelySDK.NetStandard16/OptimizelySDK.NetStandard16.csproj /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=$(pwd)/keypair.snk -c Release
       - name: Upload Standard 1.6 artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
-          name: nuget-files
+          name: unsigned-dlls
           if-no-files-found: error
           path: ./**/bin/Release/**/Optimizely*.dll
 
@@ -92,21 +89,69 @@ jobs:
       - name: Build and strongly name Standard 2.0 project
         run: dotnet build OptimizelySDK.NetStandard20/OptimizelySDK.NetStandard20.csproj /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=$(pwd)/keypair.snk -c Release
       - name: Build and strongly name assemblies
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
-          name: nuget-files
+          name: unsigned-dlls
           if-no-files-found: error
           path: ./**/bin/Release/**/Optimizely*.dll
 
-  pack:
-    name: Sign & pack NuGet package
+  sign:
+    name: Send DLLs for signing
     needs: [ variables, buildFrameworkVersions, buildStandard16, buildStandard20 ]
+    runs-on: ubuntu-latest
+    env:      
+      # TODO: Replace actual values
+      SIGNING_SERVER_PRIVATE_KEY: ${{ secrets.SIGNING_SERVER_PRIVATE_KEY }}
+      SIGNING_SERVER_HOST: ${{ secrets.SIGNING_SERVER_HOST }}
+      SIGNING_SERVER_UPLOAD_PATH: /path/to/UPLOAD/directory
+      SIGNING_SERVER_DOWNLOAD_PATH: /path/to/DOWNLOAD/directory
+    steps:
+      # TODO: Remove this when we're ready to automate 
+      - name: Temporarily halt progress
+        run: exit 1
+      - name: Download the unsigned files
+        uses: actions/download-artifact@v4
+        with:
+          name: unsigned-dlls
+          path: ./unsigned-dlls
+      - name: Setup SSH
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: $SIGNING_SERVER_PRIVATE_KEY
+      - name: Send files to signing server
+        run: scp -r ./unsigned-dlls $SIGNING_SERVER_HOST:$SIGNING_SERVER_UPLOAD_PATH
+      - name: Wait for artifact to be published
+        run: |
+          for i in {1..60}; do
+              # Replace with actual path
+              if ssh $SIGNING_SERVER_HOST "ls $SIGNING_SERVER_DOWNLOAD_PATH"; then
+              exit 0
+              fi
+              sleep 10
+          done
+          exit 1
+      - name: Download signed files
+        run: |
+          mkdir ./signed-dlls
+          scp -r $SIGNING_SERVER_HOST:$SIGNING_SERVER_DOWNLOAD_PATH ./signed-dlls
+      - name: Delete signed files from server
+        run: ssh $SIGNING_SERVER_HOST "rm -rf $SIGNING_SERVER_DOWNLOAD_PATH/*"
+      - name: Upload signed files
+        uses: actions/upload-artifact@v4
+        with:
+          name: signed-dlls
+          if-no-files-found: error
+          path: ./signed-dlls
+
+  pack:
+    name: Pack NuGet package
+    needs: [ variables, sign ]
     runs-on: ubuntu-latest
     env:
       VERSION: ${{ needs.variables.outputs.semanticVersion }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ needs.variables.outputs.tag }}
       - name: Install mono
@@ -114,55 +159,25 @@ jobs:
           sudo apt update
           sudo apt install -y mono-devel
       - name: Download NuGet files
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
-          name: nuget-files
-          path: ./nuget-files
+          name: signed-dlls
+          path: ./signed-dlls
       - name: Organize files
         run: |
-          pushd ./nuget-files
+          pushd ./signed-files
           # Move all dlls to the root directory
-          find . -type f -name "*.dll" -exec mv {} . \;
+          find . -type f -name "*.dll" -exec mv {} .
           popd
           # Create directories
           mkdir -p nuget/lib/net35/ nuget/lib/net40/ nuget/lib/net45/ nuget/lib/netstandard1.6/ nuget/lib/netstandard2.0/
           pushd ./nuget
           # Move files to directories
-          mv ../nuget-files/OptimizelySDK.Net35.dll lib/net35/
-          mv ../nuget-files/OptimizelySDK.Net40.dll lib/net40/
-          mv ../nuget-files/OptimizelySDK.dll lib/net45/
-          mv ../nuget-files/OptimizelySDK.NetStandard16.dll lib/netstandard1.6/
-          mv ../nuget-files/OptimizelySDK.NetStandard20.dll lib/netstandard2.0/
-          popd
-      - name: Setup signing prerequisites        
-        env:
-          CERTIFICATE_P12: ${{ secrets.CERTIFICATE_P12 }}
-          CERTIFICATE_PASSWORD: ${{ secrets.CERTIFICATE_PASSWORD }}
-        run: |
-          pushd ./nuget
-          echo $CERTIFICATE_P12 | base64 --decode > authenticode.pfx
-          openssl pkcs12 -in authenticode.pfx -nocerts -nodes -legacy -out key.pem -password env:CERTIFICATE_PASSWORD
-          openssl rsa -in key.pem -outform PVK -pvk-none -out authenticode.pvk
-          openssl pkcs12 -in authenticode.pfx -nokeys -nodes -legacy -out cert.pem -password env:CERTIFICATE_PASSWORD
-          openssl crl2pkcs7 -nocrl -certfile cert.pem -outform DER -out authenticode.spc
-          popd
-      - name: Sign the DLLs
-        run: |
-          pushd ./nuget
-          find . -type f -name "*.dll" -print0 | while IFS= read -r -d '' file; do
-            echo "Signing ${file}"
-            signcode \
-              -spc ./authenticode.spc \
-              -v ./authenticode.pvk \
-              -a sha1 -$ commercial \
-              -n "Optimizely, Inc" \
-              -i "https://www.optimizely.com/" \
-              -t "http://timestamp.digicert.com" \
-              -tr 10 \
-              ${file}
-            rm ${file}.bak
-          done
-          rm *.spc *.pem *.pvk *.pfx
+          mv ../signed-dlls/OptimizelySDK.Net35.dll lib/net35/
+          mv ../signed-dlls/OptimizelySDK.Net40.dll lib/net40/
+          mv ../signed-dlls/OptimizelySDK.dll lib/net45/
+          mv ../signed-dlls/OptimizelySDK.NetStandard16.dll lib/netstandard1.6/
+          mv ../signed-dlls/OptimizelySDK.NetStandard20.dll lib/netstandard2.0/
           popd
       - name: Create nuspec
         # Uses env.VERSION in OptimizelySDK.nuspec.template
@@ -175,27 +190,29 @@ jobs:
           nuget pack OptimizelySDK.nuspec
           popd
       - name: Upload nupkg artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: nuget-package
           if-no-files-found: error
           path: ./nuget/Optimizely.SDK.${{ env.VERSION }}.nupkg
 
   publish:
-    name: Publish package to NuGet
+    name: Publish package to NuGet after reviewing the artifact
     needs: [ variables, pack ]
     runs-on: ubuntu-latest
+    # Review the `nuget-package` artifact ensuring the dlls are 
+    # organized and signed before approving.
+    environment: 'i-reviewed-nuget-package-artifact' 
     env:
       VERSION: ${{ needs.variables.outputs.semanticVersion }}
     steps:
       - name: Download NuGet files
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: nuget-package
           path: ./nuget
       - name: Setup .NET
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v4
       - name: Publish NuGet package
-        # Unset secrets.NUGET_API_KEY to simulate dry run
         run: |
           dotnet nuget push ./nuget/Optimizely.SDK.${{ env.VERSION }}.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }}
