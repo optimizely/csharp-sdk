@@ -25,7 +25,7 @@ jobs:
           echo "semantic_version=${SEMANTIC_VERSION}" >> $GITHUB_OUTPUT
     outputs:
       tag: $TAG
-      semanticVersion: ${{ steps.set_version.outputs.semantic_version }}  
+      semanticVersion: ${{ steps.set_version.outputs.semantic_version }}
   
   buildFrameworkVersions:
     name: Build Framework versions
@@ -99,7 +99,7 @@ jobs:
     name: Send DLLs for signing
     needs: [ variables, buildFrameworkVersions, buildStandard16, buildStandard20 ]
     runs-on: ubuntu-latest
-    env:      
+    env:
       # TODO: Replace actual values
       SIGNING_SERVER_PRIVATE_KEY: ${{ secrets.SIGNING_SERVER_PRIVATE_KEY }}
       SIGNING_SERVER_HOST: ${{ secrets.SIGNING_SERVER_HOST }}
@@ -165,7 +165,7 @@ jobs:
           path: ./signed-dlls
       - name: Organize files
         run: |
-          pushd ./signed-files
+          pushd ./signed-dlls
           # Move all dlls to the root directory
           find . -type f -name "*.dll" -exec mv {} .
           popd
@@ -202,7 +202,7 @@ jobs:
     runs-on: ubuntu-latest
     # Review the `nuget-package` artifact ensuring the dlls are 
     # organized and signed before approving.
-    environment: 'i-reviewed-nuget-package-artifact' 
+    environment: 'i-reviewed-nuget-package-artifact'
     env:
       VERSION: ${{ needs.variables.outputs.semanticVersion }}
     steps:
