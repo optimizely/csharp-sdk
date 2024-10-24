@@ -209,6 +209,9 @@
     <Compile Include="..\OptimizelySDK\Bucketing\UserProfile.cs">
       <Link>Bucketing\UserProfile.cs</Link>
     </Compile>
+    <Compile Include="..\OptimizelySDK\Bucketing\UserProfileTracker.cs">
+      <Link>Bucketing\UserProfileTracker.cs</Link>
+    </Compile>
     <Compile Include="..\OptimizelySDK\Utils\ExperimentUtils.cs">
       <Link>Bucketing\ExperimentUtils</Link>
     </Compile>

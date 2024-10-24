@@ -5,19 +5,21 @@ on:
     branches: [ master ]
   pull_request:
     branches: [ master ]
+    types: [ opened, synchronize, reopened, ready_for_review ]
 
 jobs:
   lintCodebase:
+    name: Lint Codebase if Not Draft
+    if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
-    name: Lint Codebase
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           # Full git history is needed to get a proper list of changed files
           fetch-depth: 0
       - name: Run Super-Linter
-        uses: github/super-linter@v4
+        uses: github/super-linter@v7
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VALIDATE_ALL_CODEBASE: false
@@ -37,7 +39,7 @@ jobs:
       CURRENT_BRANCH: ${{ github.head_ref || github.ref_name }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Add msbuild to PATH
         uses: microsoft/setup-msbuild@v1
       - name: Setup NuGet
@@ -65,7 +67,7 @@ jobs:
       CURRENT_BRANCH: ${{ github.head_ref || github.ref_name }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Setup .NET
         uses: actions/setup-dotnet@v2
         with:
@@ -88,7 +90,7 @@ jobs:
       CURRENT_BRANCH: ${{ github.head_ref || github.ref_name }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Setup .NET
         uses: actions/setup-dotnet@v2
         with:

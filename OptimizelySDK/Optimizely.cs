@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright 2017-2023, Optimizely
+ * Copyright 2017-2024, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use file except in compliance with the License.
@@ -573,8 +573,7 @@ namespace OptimizelySDK
                 else
                 {
                     Logger.Log(LogLevel.INFO,
-                        $@"The user ""{userId}"" is not being experimented on feature ""{featureKey
-                        }"".");
+                        $@"The user ""{userId}"" is not being experimented on feature ""{featureKey}"".");
                 }
             }
 
@@ -624,8 +623,7 @@ namespace OptimizelySDK
             if (config == null)
             {
                 Logger.Log(LogLevel.ERROR,
-                    $@"Datafile has invalid format. Failing '{
-                        FeatureVariable.GetFeatureVariableTypeName(variableType)}'.");
+                    $@"Datafile has invalid format. Failing '{FeatureVariable.GetFeatureVariableTypeName(variableType)}'.");
                 return default;
             }
 
@@ -649,15 +647,13 @@ namespace OptimizelySDK
             if (featureVariable == null)
             {
                 Logger.Log(LogLevel.ERROR,
-                    $@"No feature variable was found for key ""{variableKey}"" in feature flag ""{
-                        featureKey}"".");
+                    $@"No feature variable was found for key ""{variableKey}"" in feature flag ""{featureKey}"".");
                 return default;
             }
             else if (featureVariable.Type != variableType)
             {
                 Logger.Log(LogLevel.ERROR,
-                    $@"Variable is of type ""{featureVariable.Type
-                    }"", but you requested it as type ""{variableType}"".");
+                    $@"Variable is of type ""{featureVariable.Type}"", but you requested it as type ""{variableType}"".");
                 return default;
             }
 
@@ -681,28 +677,24 @@ namespace OptimizelySDK
                     {
                         variableValue = featureVariableUsageInstance.Value;
                         Logger.Log(LogLevel.INFO,
-                            $@"Got variable value ""{variableValue}"" for variable ""{variableKey
-                            }"" of feature flag ""{featureKey}"".");
+                            $@"Got variable value ""{variableValue}"" for variable ""{variableKey}"" of feature flag ""{featureKey}"".");
                     }
                     else
                     {
                         Logger.Log(LogLevel.INFO,
-                            $@"Feature ""{featureKey}"" is not enabled for user {userId
-                            }. Returning the default variable value ""{variableValue}"".");
+                            $@"Feature ""{featureKey}"" is not enabled for user {userId}. Returning the default variable value ""{variableValue}"".");
                     }
                 }
                 else
                 {
                     Logger.Log(LogLevel.INFO,
-                        $@"Variable ""{variableKey}"" is not used in variation ""{variation.Key
-                        }"", returning default value ""{variableValue}"".");
+                        $@"Variable ""{variableKey}"" is not used in variation ""{variation.Key}"", returning default value ""{variableValue}"".");
                 }
             }
             else
             {
                 Logger.Log(LogLevel.INFO,
-                    $@"User ""{userId}"" is not in any variation for feature flag ""{featureKey
-                    }"", returning default value ""{variableValue}"".");
+                    $@"User ""{userId}"" is not in any variation for feature flag ""{featureKey}"", returning default value ""{variableValue}"".");
             }
 
             var sourceInfo = new Dictionary<string, string>();
@@ -861,6 +853,7 @@ namespace OptimizelySDK
         /// <li>If the SDK finds an error, it’ll return a decision with <b>null</b> for <b>variationKey</b>. The decision will include an error message in <b>reasons</b>.
         /// </ul>
         /// </summary>
+        /// <param name="user">User context to be used to make decision.</param>
         /// <param name="key">A flag key for which a decision will be made.</param>
         /// <param name="options">A list of options for decision-making.</param>
         /// <returns>A decision result.</returns>
@@ -877,141 +870,11 @@ namespace OptimizelySDK
                     ErrorHandler, Logger);
             }
 
-            if (key == null)
-            {
-                return OptimizelyDecision.NewErrorDecision(key,
-                    user,
-                    DecisionMessage.Reason(DecisionMessage.FLAG_KEY_INVALID, key),
-                    ErrorHandler, Logger);
-            }
+            var allOptions = GetAllOptions(options).
+                Where(opt => opt != OptimizelyDecideOption.ENABLED_FLAGS_ONLY).
+                ToArray();
 
-            var flag = config.GetFeatureFlagFromKey(key);
-            if (flag.Key == null)
-            {
-                return OptimizelyDecision.NewErrorDecision(key,
-                    user,
-                    DecisionMessage.Reason(DecisionMessage.FLAG_KEY_INVALID, key),
-                    ErrorHandler, Logger);
-            }
-
-            var userId = user?.GetUserId();
-            var userAttributes = user?.GetAttributes();
-            var decisionEventDispatched = false;
-            var allOptions = GetAllOptions(options);
-            var decisionReasons = new DecisionReasons();
-            FeatureDecision decision = null;
-
-            var decisionContext = new OptimizelyDecisionContext(flag.Key);
-            var forcedDecisionVariation =
-                DecisionService.ValidatedForcedDecision(decisionContext, config, user);
-            decisionReasons += forcedDecisionVariation.DecisionReasons;
-
-            if (forcedDecisionVariation.ResultObject != null)
-            {
-                decision = new FeatureDecision(null, forcedDecisionVariation.ResultObject,
-                    FeatureDecision.DECISION_SOURCE_FEATURE_TEST);
-            }
-            else
-            {
-                var flagDecisionResult = DecisionService.GetVariationForFeature(
-                    flag,
-                    user,
-                    config,
-                    userAttributes,
-                    allOptions
-                );
-                decisionReasons += flagDecisionResult.DecisionReasons;
-                decision = flagDecisionResult.ResultObject;
-            }
-
-            var featureEnabled = false;
-
-            if (decision?.Variation != null)
-            {
-                featureEnabled = decision.Variation.FeatureEnabled.GetValueOrDefault();
-            }
-
-            if (featureEnabled)
-            {
-                Logger.Log(LogLevel.INFO,
-                    "Feature \"" + key + "\" is enabled for user \"" + userId + "\"");
-            }
-            else
-            {
-                Logger.Log(LogLevel.INFO,
-                    "Feature \"" + key + "\" is not enabled for user \"" + userId + "\"");
-            }
-
-            var variableMap = new Dictionary<string, object>();
-            if (flag?.Variables != null &&
-                !allOptions.Contains(OptimizelyDecideOption.EXCLUDE_VARIABLES))
-            {
-                foreach (var featureVariable in flag?.Variables)
-                {
-                    var variableValue = featureVariable.DefaultValue;
-                    if (featureEnabled)
-                    {
-                        var featureVariableUsageInstance =
-                            decision?.Variation.GetFeatureVariableUsageFromId(featureVariable.Id);
-                        if (featureVariableUsageInstance != null)
-                        {
-                            variableValue = featureVariableUsageInstance.Value;
-                        }
-                    }
-
-                    var typeCastedValue =
-                        GetTypeCastedVariableValue(variableValue, featureVariable.Type);
-
-                    if (typeCastedValue is OptimizelyJSON)
-                    {
-                        typeCastedValue = ((OptimizelyJSON)typeCastedValue).ToDictionary();
-                    }
-
-                    variableMap.Add(featureVariable.Key, typeCastedValue);
-                }
-            }
-
-            var optimizelyJSON = new OptimizelyJSON(variableMap, ErrorHandler, Logger);
-
-            var decisionSource = decision?.Source ?? FeatureDecision.DECISION_SOURCE_ROLLOUT;
-            if (!allOptions.Contains(OptimizelyDecideOption.DISABLE_DECISION_EVENT))
-            {
-                decisionEventDispatched = SendImpressionEvent(decision?.Experiment,
-                    decision?.Variation, userId, userAttributes, config, key, decisionSource,
-                    featureEnabled);
-            }
-
-            var reasonsToReport = decisionReasons
-                .ToReport(allOptions.Contains(OptimizelyDecideOption.INCLUDE_REASONS))
-                .ToArray();
-            var variationKey = decision?.Variation?.Key;
-
-            // TODO: add ruleKey values when available later. use a copy of experimentKey until then.
-            var ruleKey = decision?.Experiment?.Key;
-
-            var decisionInfo = new Dictionary<string, object>
-            {
-                { "flagKey", key },
-                { "enabled", featureEnabled },
-                { "variables", variableMap },
-                { "variationKey", variationKey },
-                { "ruleKey", ruleKey },
-                { "reasons", reasonsToReport },
-                { "decisionEventDispatched", decisionEventDispatched },
-            };
-
-            NotificationCenter.SendNotifications(NotificationCenter.NotificationType.Decision,
-                DecisionNotificationTypes.FLAG, userId,
-                userAttributes ?? new UserAttributes(), decisionInfo);
-
-            return new OptimizelyDecision(
-                variationKey,
-                featureEnabled,
-                optimizelyJSON,
-                ruleKey,
-                key,
-                user,
-                reasonsToReport);
+            return DecideForKeys(user, new[] { key }, allOptions, true)[key];
         }
 
         internal Dictionary<string, OptimizelyDecision> DecideAll(OptimizelyUserContext user,
@@ -1024,19 +887,20 @@ namespace OptimizelySDK
             if (projectConfig == null)
             {
                 Logger.Log(LogLevel.ERROR,
-                    "Optimizely instance is not valid, failing isFeatureEnabled call.");
+                    "Optimizely instance is not valid, failing DecideAll call.");
                 return decisionMap;
             }
 
             var allFlags = projectConfig.FeatureFlags;
-            var allFlagKeys = allFlags.Select(v => v.Key).ToArray<string>();
+            var allFlagKeys = allFlags.Select(v => v.Key).ToArray();
 
             return DecideForKeys(user, allFlagKeys, options);
         }
 
         internal Dictionary<string, OptimizelyDecision> DecideForKeys(OptimizelyUserContext user,
             string[] keys,
-            OptimizelyDecideOption[] options
+            OptimizelyDecideOption[] options,
+            bool ignoreDefaultOptions = false
         )
         {
             var decisionDictionary = new Dictionary<string, OptimizelyDecision>();
@@ -1045,7 +909,7 @@ namespace OptimizelySDK
             if (projectConfig == null)
             {
                 Logger.Log(LogLevel.ERROR,
-                    "Optimizely instance is not valid, failing isFeatureEnabled call.");
+                    "Optimizely instance is not valid, failing DecideForKeys call.");
                 return decisionDictionary;
             }
 
@@ -1054,19 +918,196 @@ namespace OptimizelySDK
                 return decisionDictionary;
             }
 
-            var allOptions = GetAllOptions(options);
+            var allOptions = ignoreDefaultOptions ? options : GetAllOptions(options);
+
+            var flagDecisions = new Dictionary<string, FeatureDecision>();
+            var decisionReasonsMap = new Dictionary<string, DecisionReasons>();
+
+            var flagsWithoutForcedDecisions = new List<FeatureFlag>();
+
+            var validKeys = new List<string>();
 
             foreach (var key in keys)
             {
-                var decision = Decide(user, key, options);
-                if (!allOptions.Contains(OptimizelyDecideOption.ENABLED_FLAGS_ONLY) ||
-                    decision.Enabled)
+                var flag = projectConfig.GetFeatureFlagFromKey(key);
+                if (flag.Key == null)
                 {
-                    decisionDictionary.Add(key, decision);
+                    decisionDictionary.Add(key,
+                        OptimizelyDecision.NewErrorDecision(key, user,
+                            DecisionMessage.Reason(DecisionMessage.FLAG_KEY_INVALID, key),
+                            ErrorHandler, Logger));
+                    continue;
+                }
+
+                validKeys.Add(key);
+
+                var decisionReasons = new DecisionReasons();
+                decisionReasonsMap.Add(key, decisionReasons);
+
+                var optimizelyDecisionContext = new OptimizelyDecisionContext(key);
+                var forcedDecisionVariation =
+                    DecisionService.ValidatedForcedDecision(optimizelyDecisionContext, projectConfig, user);
+                decisionReasons += forcedDecisionVariation.DecisionReasons;
+
+                if (forcedDecisionVariation.ResultObject != null)
+                {
+                    flagDecisions.Add(key, new FeatureDecision(null,
+                        forcedDecisionVariation.ResultObject,
+                        FeatureDecision.DECISION_SOURCE_FEATURE_TEST));
+                }
+                else
+                {
+                    flagsWithoutForcedDecisions.Add(flag);
+                }
+            }
+
+            var decisionsList = DecisionService.GetVariationsForFeatureList(
+                flagsWithoutForcedDecisions, user, projectConfig, user.GetAttributes(),
+                allOptions);
+
+            for (var i = 0; i < decisionsList.Count; i += 1)
+            {
+                var decision = decisionsList[i];
+                var flagKey = flagsWithoutForcedDecisions[i].Key;
+                flagDecisions.Add(flagKey, decision.ResultObject);
+                decisionReasonsMap[flagKey] += decision.DecisionReasons;
+            }
+
+            foreach (var key in validKeys)
+            {
+                var flagDecision = flagDecisions[key];
+                var decisionReasons = decisionReasonsMap[key];
+
+                var optimizelyDecision = CreateOptimizelyDecision(user, key, flagDecision,
+                    decisionReasons, allOptions.ToList(), projectConfig);
+                if (!allOptions.Contains(OptimizelyDecideOption.ENABLED_FLAGS_ONLY) ||
+                    optimizelyDecision.Enabled)
+                {
+                    decisionDictionary.Add(key, optimizelyDecision);
                 }
             }
 
             return decisionDictionary;
+        }
+
+        private OptimizelyDecision CreateOptimizelyDecision(
+            OptimizelyUserContext user,
+            string flagKey,
+            FeatureDecision flagDecision,
+            DecisionReasons decisionReasons,
+            List<OptimizelyDecideOption> allOptions,
+            ProjectConfig projectConfig
+        )
+        {
+            var userId = user.GetUserId();
+
+            var flagEnabled = false;
+            if (flagDecision.Variation != null)
+            {
+                if (flagDecision.Variation.IsFeatureEnabled)
+                {
+                    flagEnabled = true;
+                }
+            }
+
+            Logger.Log(LogLevel.INFO,
+                $"Feature \"{flagKey}\" is enabled for user \"{userId}\"? {flagEnabled}");
+
+            var variableMap = new Dictionary<string, object>();
+            if (!allOptions.Contains(OptimizelyDecideOption.EXCLUDE_VARIABLES))
+            {
+                var decisionVariables = GetDecisionVariableMap(
+                    projectConfig.GetFeatureFlagFromKey(flagKey),
+                    flagDecision.Variation,
+                    flagEnabled);
+                variableMap = decisionVariables.ResultObject;
+                decisionReasons += decisionVariables.DecisionReasons;
+            }
+
+            var optimizelyJson = new OptimizelyJSON(variableMap, ErrorHandler, Logger);
+
+            var decisionSource = FeatureDecision.DECISION_SOURCE_ROLLOUT;
+            if (flagDecision.Source != null)
+            {
+                decisionSource = flagDecision.Source;
+            }
+
+            var includeReasons = allOptions.Contains(OptimizelyDecideOption.INCLUDE_REASONS);
+            var reasonsToReport = decisionReasons.ToReport(includeReasons).ToArray();
+            var variationKey = flagDecision.Variation?.Key;
+            // TODO: add ruleKey values when available later. use a copy of experimentKey until then.
+            //       add to event metadata as well (currently set to experimentKey)
+            var ruleKey = flagDecision.Experiment?.Key;
+
+            var decisionEventDispatched = false;
+            if (!allOptions.Contains(OptimizelyDecideOption.DISABLE_DECISION_EVENT))
+            {
+                decisionEventDispatched = SendImpressionEvent(
+                    flagDecision.Experiment,
+                    flagDecision.Variation,
+                    userId,
+                    user.GetAttributes(),
+                    projectConfig,
+                    flagKey,
+                    decisionSource,
+                    flagEnabled);
+            }
+
+            var decisionInfo = new Dictionary<string, object>
+            {
+                { "flagKey", flagKey },
+                { "enabled", flagEnabled },
+                { "variables", variableMap },
+                { "variationKey", variationKey },
+                { "ruleKey", ruleKey },
+                { "reasons", reasonsToReport },
+                { "decisionEventDispatched", decisionEventDispatched },
+            };
+
+            NotificationCenter.SendNotifications(NotificationCenter.NotificationType.Decision,
+                DecisionNotificationTypes.FLAG, userId, user.GetAttributes(), decisionInfo);
+
+            return new OptimizelyDecision(
+                variationKey,
+                flagEnabled,
+                optimizelyJson,
+                ruleKey,
+                flagKey,
+                user,
+                reasonsToReport);
+        }
+
+        private Result<Dictionary<string, object>> GetDecisionVariableMap(FeatureFlag flag, Variation variation, bool featureEnabled)
+        {
+            var reasons = new DecisionReasons();
+            var valuesMap = new Dictionary<string, object>();
+
+            foreach (var variable in flag.Variables)
+            {
+                var value = variable.DefaultValue;
+                if (featureEnabled)
+                {
+                    var instance = variation.GetFeatureVariableUsageFromId(variable.Id);
+                    if (instance != null)
+                    {
+                        value = instance.Value;
+                    }
+                }
+
+                var convertedValue = GetTypeCastedVariableValue(value, variable.Type);
+                if (convertedValue == null)
+                {
+                    reasons.AddError(DecisionMessage.Reason(DecisionMessage.VARIABLE_VALUE_INVALID, variable.Key));
+                }
+                else if (convertedValue is OptimizelyJSON optimizelyJson)
+                {
+                    convertedValue = optimizelyJson.ToDictionary();
+                }
+
+                valuesMap[variable.Key] = convertedValue;
+            }
+
+            return Result<Dictionary<string, object>>.NewResult(valuesMap, reasons);
         }
 
         private OptimizelyDecideOption[] GetAllOptions(OptimizelyDecideOption[] options)
