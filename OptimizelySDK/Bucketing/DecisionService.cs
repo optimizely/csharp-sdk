@@ -41,9 +41,9 @@ namespace OptimizelySDK.Bucketing
         public const string LOGGING_KEY_TYPE_RULE = "rule";
 
         private Bucketer Bucketer;
-        private readonly IErrorHandler ErrorHandler;
-        private static UserProfileService UserProfileService;
-        private readonly ILogger Logger;
+        private IErrorHandler ErrorHandler;
+        private UserProfileService UserProfileService;
+        private ILogger Logger;
 
         /// <summary>
         /// Associative array of user IDs to an associative array

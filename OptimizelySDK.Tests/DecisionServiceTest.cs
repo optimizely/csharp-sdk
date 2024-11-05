@@ -160,8 +160,12 @@ namespace OptimizelySDK.Tests
             var variationResult = decisionService.GetVariation(experiment,
                 OptimizelyUserContextMock.Object, ProjectConfig, options);
             Assert.AreEqual(variationResult.DecisionReasons.ToReport(true)[0],
-                "Audiences for experiment \"etag3\" collectively evaluated to FALSE");
+                "We were unable to get a user profile map from the UserProfileService.");
             Assert.AreEqual(variationResult.DecisionReasons.ToReport(true)[1],
+                "No previously activated variation of experiment \"etag3\" for user \"genericUserId\" found in user profile.");
+            Assert.AreEqual(variationResult.DecisionReasons.ToReport(true)[2],
+                "Audiences for experiment \"etag3\" collectively evaluated to FALSE");
+            Assert.AreEqual(variationResult.DecisionReasons.ToReport(true)[3],
                 "User \"genericUserId\" does not meet conditions to be in experiment \"etag3\".");
         }
 
