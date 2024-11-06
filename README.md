@@ -104,7 +104,7 @@ User can provide variables using following procedure:
 ```
 <configSections>
     <section name="optlySDKConfigSection"
-             type="OptimizelySDK.OptimizelySDKConfigSection, OptimizelySDK, Version=4.0.0.0, Culture=neutral, PublicKeyToken=null" />
+             type="OptimizelySDK.OptimizelySDKConfigSection, OptimizelySDK, Version=4.1.0.0, Culture=neutral, PublicKeyToken=null" />
   </configSections>
 ```
 2. Now add **optlySDKConfigSection** below **<configSections>**. In this section you can add and set following **HttpProjectConfigManager** and **BatchEventProcessor** variables: 

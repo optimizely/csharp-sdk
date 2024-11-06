@@ -1,5 +1,15 @@
 # Optimizely C# SDK Changelog
 
+## 4.1.0
+November 7th, 2024
+
+### Enhancement
+
+- Added support for batch processing in `DecideAll` and `DecideForKeys`, enabling more efficient handling of multiple decisions in the User Profile Service. ([#375](https://github.com/optimizely/csharp-sdk/pull/375))
+
+### Bug Fixes
+- GitHub Actions YAML files vulnerable to script injections ([#372](https://github.com/optimizely/csharp-sdk/pull/372))
+
 ## 4.0.0
 January 16th, 2024
 
