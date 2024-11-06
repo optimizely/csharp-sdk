@@ -72,6 +72,7 @@
 			<Compile Include="..\OptimizelySDK\Bucketing\Decision.cs" />
 			<Compile Include="..\OptimizelySDK\Bucketing\DecisionService.cs" />
 			<Compile Include="..\OptimizelySDK\Bucketing\UserProfile.cs" />
+      <Compile Include="..\OptimizelySDK\Bucketing\UserProfileTracker.cs" />
 			<Compile Include="..\OptimizelySDK\Bucketing\UserProfileService.cs" />
 			<Compile Include="..\OptimizelySDK\Bucketing\UserProfileUtil.cs" />
 			<Compile Include="..\OptimizelySDK\ProjectConfig.cs" />

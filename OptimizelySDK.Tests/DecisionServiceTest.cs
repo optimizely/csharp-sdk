@@ -1,6 +1,6 @@
 ﻿/**
  *
- *    Copyright 2017-2021, Optimizely and contributors
+ *    Copyright 2017-2021, 2024 Optimizely and contributors
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -65,7 +65,7 @@ namespace OptimizelySDK.Tests
             DecisionService = new DecisionService(new Bucketer(LoggerMock.Object),
                 ErrorHandlerMock.Object, null, LoggerMock.Object);
             DecisionServiceMock = new Mock<DecisionService>(BucketerMock.Object,
-                ErrorHandlerMock.Object, null, LoggerMock.Object)
+                    ErrorHandlerMock.Object, null, LoggerMock.Object)
             { CallBase = true };
             DecisionReasons = new DecisionReasons();
 
@@ -150,6 +150,11 @@ namespace OptimizelySDK.Tests
             var decisionService = new DecisionService(BucketerMock.Object, ErrorHandlerMock.Object,
                 UserProfileServiceMock.Object, LoggerMock.Object);
             var options = new OptimizelyDecideOption[] { OptimizelyDecideOption.INCLUDE_REASONS };
+            var optlyObject = new Optimizely(TestData.Datafile, new ValidEventDispatcher(),
+                LoggerMock.Object);
+            OptimizelyUserContextMock = new Mock<OptimizelyUserContext>(optlyObject,
+                WhitelistedUserId, new UserAttributes(), ErrorHandlerMock.Object,
+                LoggerMock.Object);
             OptimizelyUserContextMock.Setup(ouc => ouc.GetUserId()).Returns(GenericUserId);
 
             var variationResult = decisionService.GetVariation(experiment,
@@ -157,8 +162,10 @@ namespace OptimizelySDK.Tests
             Assert.AreEqual(variationResult.DecisionReasons.ToReport(true)[0],
                 "We were unable to get a user profile map from the UserProfileService.");
             Assert.AreEqual(variationResult.DecisionReasons.ToReport(true)[1],
-                "Audiences for experiment \"etag3\" collectively evaluated to FALSE");
+                "No previously activated variation of experiment \"etag3\" for user \"genericUserId\" found in user profile.");
             Assert.AreEqual(variationResult.DecisionReasons.ToReport(true)[2],
+                "Audiences for experiment \"etag3\" collectively evaluated to FALSE");
+            Assert.AreEqual(variationResult.DecisionReasons.ToReport(true)[3],
                 "User \"genericUserId\" does not meet conditions to be in experiment \"etag3\".");
         }
 
@@ -291,6 +298,9 @@ namespace OptimizelySDK.Tests
         {
             var experiment = ProjectConfig.Experiments[6];
             var variation = experiment.Variations[0];
+            var variationResult = Result<Variation>.NewResult(
+                experiment.Variations[0],
+                DecisionReasons);
             var decision = new Decision(variation.Id);
 
             var userProfile = new UserProfile(UserProfileId, new Dictionary<string, Decision>
@@ -300,8 +310,10 @@ namespace OptimizelySDK.Tests
 
             UserProfileServiceMock.Setup(_ => _.Lookup(UserProfileId)).Returns(userProfile.ToMap());
 
-            var decisionService = new DecisionService(BucketerMock.Object, ErrorHandlerMock.Object,
-                UserProfileServiceMock.Object, LoggerMock.Object);
+            BucketerMock.
+                Setup(bm => bm.Bucket(ProjectConfig, experiment, It.IsAny<string>(),
+                    It.IsAny<string>())).
+                Returns(variationResult);
 
             var optlyObject = new Optimizely(TestData.Datafile, new ValidEventDispatcher(),
                 LoggerMock.Object);
@@ -310,6 +322,8 @@ namespace OptimizelySDK.Tests
                 LoggerMock.Object);
             OptimizelyUserContextMock.Setup(ouc => ouc.GetUserId()).Returns(UserProfileId);
 
+            var decisionService = new DecisionService(BucketerMock.Object, ErrorHandlerMock.Object,
+                UserProfileServiceMock.Object, LoggerMock.Object);
             var actualVariation = decisionService.GetVariation(experiment,
                 OptimizelyUserContextMock.Object, ProjectConfig);
 
@@ -736,7 +750,8 @@ namespace OptimizelySDK.Tests
             DecisionServiceMock.Setup(ds => ds.GetVariation(
                     ProjectConfig.GetExperimentFromKey("test_experiment_multivariate"),
                     OptimizelyUserContextMock.Object, ProjectConfig,
-                    It.IsAny<OptimizelyDecideOption[]>())).
+                    It.IsAny<OptimizelyDecideOption[]>(), It.IsAny<UserProfileTracker>(),
+                    It.IsAny<DecisionReasons>())).
                 Returns(variation);
 
             var featureFlag = ProjectConfig.GetFeatureFlagFromKey("multi_variate_feature");
@@ -789,13 +804,18 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestGetVariationForFeatureExperimentGivenMutexGroupAndUserNotBucketed()
         {
-            var mutexExperiment = ProjectConfig.GetExperimentFromKey("group_experiment_1");
+            var optlyObject = new Optimizely(TestData.Datafile, new ValidEventDispatcher(),
+                LoggerMock.Object);
+            OptimizelyUserContextMock = new Mock<OptimizelyUserContext>(optlyObject,
+                WhitelistedUserId, new UserAttributes(), ErrorHandlerMock.Object,
+                LoggerMock.Object);
             OptimizelyUserContextMock.Setup(ouc => ouc.GetUserId()).Returns("user1");
 
             DecisionServiceMock.
                 Setup(ds => ds.GetVariation(It.IsAny<Experiment>(),
                     It.IsAny<OptimizelyUserContext>(), ProjectConfig,
-                    It.IsAny<OptimizelyDecideOption[]>())).
+                    It.IsAny<OptimizelyDecideOption[]>(), It.IsAny<UserProfileTracker>(),
+                    It.IsAny<DecisionReasons>())).
                 Returns(Result<Variation>.NullResult(null));
 
             var featureFlag = ProjectConfig.GetFeatureFlagFromKey("boolean_feature");
@@ -856,7 +876,7 @@ namespace OptimizelySDK.Tests
                     ds.GetVariationForFeatureExperiment(It.IsAny<FeatureFlag>(),
                         It.IsAny<OptimizelyUserContext>(), It.IsAny<UserAttributes>(),
                         ProjectConfig,
-                        new OptimizelyDecideOption[] { })).
+                        new OptimizelyDecideOption[] { }, null)).
                 Returns<Variation>(null);
             var optlyObject = new Optimizely(TestData.Datafile, new ValidEventDispatcher(),
                 LoggerMock.Object);
@@ -1201,7 +1221,7 @@ namespace OptimizelySDK.Tests
             DecisionServiceMock.Setup(ds => ds.GetVariationForFeatureExperiment(
                     It.IsAny<FeatureFlag>(), It.IsAny<OptimizelyUserContext>(),
                     It.IsAny<UserAttributes>(), ProjectConfig,
-                    It.IsAny<OptimizelyDecideOption[]>())).
+                    It.IsAny<OptimizelyDecideOption[]>(), null)).
                 Returns(expectedDecision);
             OptimizelyUserContextMock.Setup(ouc => ouc.GetUserId()).Returns("user1");
 
@@ -1228,7 +1248,7 @@ namespace OptimizelySDK.Tests
             DecisionServiceMock.Setup(ds => ds.GetVariationForFeatureExperiment(
                     It.IsAny<FeatureFlag>(), It.IsAny<OptimizelyUserContext>(),
                     It.IsAny<UserAttributes>(), ProjectConfig,
-                    It.IsAny<OptimizelyDecideOption[]>())).
+                    It.IsAny<OptimizelyDecideOption[]>(), null)).
                 Returns(Result<FeatureDecision>.NullResult(null));
             DecisionServiceMock.Setup(ds => ds.GetVariationForFeatureRollout(
                     It.IsAny<FeatureFlag>(), It.IsAny<OptimizelyUserContext>(),
@@ -1262,7 +1282,7 @@ namespace OptimizelySDK.Tests
                     ds.GetVariationForFeatureExperiment(It.IsAny<FeatureFlag>(),
                         It.IsAny<OptimizelyUserContext>(), It.IsAny<UserAttributes>(),
                         ProjectConfig,
-                        new OptimizelyDecideOption[] { })).
+                        new OptimizelyDecideOption[] { }, null)).
                 Returns(Result<FeatureDecision>.NullResult(null));
             DecisionServiceMock.
                 Setup(ds => ds.GetVariationForFeatureRollout(It.IsAny<FeatureFlag>(),
@@ -1308,6 +1328,11 @@ namespace OptimizelySDK.Tests
             OptimizelyUserContextMock = new Mock<OptimizelyUserContext>(optlyObject,
                 WhitelistedUserId, userAttributes, ErrorHandlerMock.Object, LoggerMock.Object);
             OptimizelyUserContextMock.Setup(ouc => ouc.GetUserId()).Returns(UserProfileId);
+
+            BucketerMock.
+                Setup(bm => bm.Bucket(ProjectConfig, experiment, It.IsAny<string>(),
+                    It.IsAny<string>())).
+                Returns(variation);
 
             DecisionServiceMock.Setup(ds => ds.GetVariation(experiment,
                     OptimizelyUserContextMock.Object, ProjectConfig,

@@ -1,5 +1,5 @@
 ﻿/*
-* Copyright 2017-2022, Optimizely
+* Copyright 2017-2022, 2024 Optimizely
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using OptimizelySDK.Entity;
 using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Logger;
@@ -84,9 +85,9 @@ namespace OptimizelySDK.Bucketing
         /// <summary>
         /// Get a Variation of an Experiment for a user to be allocated into.
         /// </summary>
-        /// <param name = "experiment" > The Experiment the user will be bucketed into.</param>
-        /// <param name = "user" > Optimizely user context.
-        /// <param name = "config" > Project config.</param>
+        /// <param name="experiment">The Experiment the user will be bucketed into.</param>
+        /// <param name="user">Optimizely user context.</param>
+        /// <param name="config">Project config.</param>
         /// <returns>The Variation the user is allocated into.</returns>
         public virtual Result<Variation> GetVariation(Experiment experiment,
             OptimizelyUserContext user,
@@ -99,11 +100,11 @@ namespace OptimizelySDK.Bucketing
         /// <summary>
         /// Get a Variation of an Experiment for a user to be allocated into.
         /// </summary>
-        /// <param name = "experiment" > The Experiment the user will be bucketed into.</param>
-        /// <param name = "user" > optimizely user context.
-        /// <param name = "config" > Project Config.</param>
-        /// <param name = "options" >An array of decision options.</param>
-        /// <returns>The Variation the user is allocated into.</returns>
+        /// <param name="experiment">The Experiment the user will be bucketed into.</param>
+        /// <param name="user">Optimizely user context.</param>
+        /// <param name="config">Project Config.</param>
+        /// <param name="options">An array of decision options.</param>
+        /// <returns></returns>
         public virtual Result<Variation> GetVariation(Experiment experiment,
             OptimizelyUserContext user,
             ProjectConfig config,
@@ -111,97 +112,107 @@ namespace OptimizelySDK.Bucketing
         )
         {
             var reasons = new DecisionReasons();
-            var userId = user.GetUserId();
+
+            var ignoreUps = options.Contains(OptimizelyDecideOption.IGNORE_USER_PROFILE_SERVICE);
+            UserProfileTracker userProfileTracker = null;
+
+            if (UserProfileService != null && !ignoreUps)
+            {
+                userProfileTracker = new UserProfileTracker(UserProfileService, user.GetUserId(),
+                    Logger, ErrorHandler);
+                userProfileTracker.LoadUserProfile(reasons);
+            }
+
+            var response = GetVariation(experiment, user, config, options, userProfileTracker,
+                reasons);
+
+            if (UserProfileService != null && !ignoreUps &&
+                userProfileTracker?.ProfileUpdated == true)
+            {
+                userProfileTracker.SaveUserProfile();
+            }
+
+            return response;
+        }
+
+        /// <summary>
+        /// Get a Variation of an Experiment for a user to be allocated into.
+        /// </summary>
+        /// <param name="experiment">The Experiment the user will be bucketed into.</param>
+        /// <param name="user">Optimizely user context.</param>
+        /// <param name="config">Project Config.</param>
+        /// <param name="options">An array of decision options.</param>
+        /// <param name="userProfileTracker">A UserProfileTracker object.</param>
+        /// <param name="reasons">Set of reasons for the decision.</param>
+        /// <returns>The Variation the user is allocated into.</returns>
+        public virtual Result<Variation> GetVariation(Experiment experiment,
+            OptimizelyUserContext user,
+            ProjectConfig config,
+            OptimizelyDecideOption[] options,
+            UserProfileTracker userProfileTracker,
+            DecisionReasons reasons = null
+        )
+        {
+            if (reasons == null)
+            {
+                reasons = new DecisionReasons();
+            }
+
             if (!ExperimentUtils.IsExperimentActive(experiment, Logger))
             {
+                var message = reasons.AddInfo($"Experiment {experiment.Key} is not running.");
+                Logger.Log(LogLevel.INFO, message);
                 return Result<Variation>.NullResult(reasons);
             }
 
-            // check if a forced variation is set
-            var decisionVariationResult = GetForcedVariation(experiment.Key, userId, config);
-            reasons += decisionVariationResult.DecisionReasons;
-            var variation = decisionVariationResult.ResultObject;
+            var userId = user.GetUserId();
+
+            var decisionVariation = GetForcedVariation(experiment.Key, userId, config);
+            reasons += decisionVariation.DecisionReasons;
+            var variation = decisionVariation.ResultObject;
 
             if (variation == null)
             {
-                decisionVariationResult = GetWhitelistedVariation(experiment, user.GetUserId());
-                reasons += decisionVariationResult.DecisionReasons;
-
-                variation = decisionVariationResult.ResultObject;
+                decisionVariation = GetWhitelistedVariation(experiment, user.GetUserId());
+                reasons += decisionVariation.DecisionReasons;
+                variation = decisionVariation.ResultObject;
             }
 
             if (variation != null)
             {
-                decisionVariationResult.SetReasons(reasons);
-                return decisionVariationResult;
+                decisionVariation.SetReasons(reasons);
+                return decisionVariation;
             }
 
-            // fetch the user profile map from the user profile service
-            var ignoreUPS = Array.Exists(options,
-                option => option == OptimizelyDecideOption.IGNORE_USER_PROFILE_SERVICE);
-
-            UserProfile userProfile = null;
-            if (!ignoreUPS && UserProfileService != null)
+            if (userProfileTracker != null)
             {
-                try
+                decisionVariation =
+                    GetStoredVariation(experiment, userProfileTracker.UserProfile, config);
+                reasons += decisionVariation.DecisionReasons;
+                variation = decisionVariation.ResultObject;
+                if (variation != null)
                 {
-                    var userProfileMap = UserProfileService.Lookup(user.GetUserId());
-                    if (userProfileMap != null &&
-                        UserProfileUtil.IsValidUserProfileMap(userProfileMap))
-                    {
-                        userProfile = UserProfileUtil.ConvertMapToUserProfile(userProfileMap);
-                        decisionVariationResult =
-                            GetStoredVariation(experiment, userProfile, config);
-                        reasons += decisionVariationResult.DecisionReasons;
-                        if (decisionVariationResult.ResultObject != null)
-                        {
-                            return decisionVariationResult.SetReasons(reasons);
-                        }
-                    }
-                    else if (userProfileMap == null)
-                    {
-                        Logger.Log(LogLevel.INFO,
-                            reasons.AddInfo(
-                                "We were unable to get a user profile map from the UserProfileService."));
-                    }
-                    else
-                    {
-                        Logger.Log(LogLevel.ERROR,
-                            reasons.AddInfo("The UserProfileService returned an invalid map."));
-                    }
-                }
-                catch (Exception exception)
-                {
-                    Logger.Log(LogLevel.ERROR, reasons.AddInfo(exception.Message));
-                    ErrorHandler.HandleError(
-                        new Exceptions.OptimizelyRuntimeException(exception.Message));
+                    return decisionVariation;
                 }
             }
 
-            var filteredAttributes = user.GetAttributes();
-            var doesUserMeetAudienceConditionsResult =
-                ExperimentUtils.DoesUserMeetAudienceConditions(config, experiment, user,
-                    LOGGING_KEY_TYPE_EXPERIMENT, experiment.Key, Logger);
-            reasons += doesUserMeetAudienceConditionsResult.DecisionReasons;
-            if (doesUserMeetAudienceConditionsResult.ResultObject)
+            var decisionMeetAudience = ExperimentUtils.DoesUserMeetAudienceConditions(config,
+                experiment, user,
+                LOGGING_KEY_TYPE_EXPERIMENT, experiment.Key, Logger);
+            reasons += decisionMeetAudience.DecisionReasons;
+            if (decisionMeetAudience.ResultObject)
             {
-                // Get Bucketing ID from user attributes.
-                var bucketingIdResult = GetBucketingId(userId, filteredAttributes);
-                reasons += bucketingIdResult.DecisionReasons;
+                var bucketingId = GetBucketingId(userId, user.GetAttributes()).ResultObject;
 
-                decisionVariationResult = Bucketer.Bucket(config, experiment,
-                    bucketingIdResult.ResultObject, userId);
-                reasons += decisionVariationResult.DecisionReasons;
+                decisionVariation = Bucketer.Bucket(config, experiment, bucketingId, userId);
+                reasons += decisionVariation.DecisionReasons;
+                variation = decisionVariation.ResultObject;
 
-                if (decisionVariationResult.ResultObject?.Key != null)
+                if (variation != null)
                 {
-                    if (UserProfileService != null && !ignoreUPS)
+                    if (userProfileTracker != null)
                     {
-                        var bucketerUserProfile = userProfile ??
-                                                  new UserProfile(userId,
-                                                      new Dictionary<string, Decision>());
-                        SaveVariation(experiment, decisionVariationResult.ResultObject,
-                            bucketerUserProfile);
+                        userProfileTracker.UpdateUserProfile(experiment, variation);
                     }
                     else
                     {
@@ -210,7 +221,7 @@ namespace OptimizelySDK.Bucketing
                     }
                 }
 
-                return decisionVariationResult.SetReasons(reasons);
+                return decisionVariation.SetReasons(reasons);
             }
 
             Logger.Log(LogLevel.INFO,
@@ -253,8 +264,7 @@ namespace OptimizelySDK.Bucketing
             if (experimentToVariationMap.ContainsKey(experimentId) == false)
             {
                 Logger.Log(LogLevel.DEBUG,
-                    $@"No experiment ""{experimentKey}"" mapped to user ""{userId
-                    }"" in the forced variation map.");
+                    $@"No experiment ""{experimentKey}"" mapped to user ""{userId}"" in the forced variation map.");
                 return Result<Variation>.NullResult(reasons);
             }
 
@@ -263,8 +273,7 @@ namespace OptimizelySDK.Bucketing
             if (string.IsNullOrEmpty(variationId))
             {
                 Logger.Log(LogLevel.DEBUG,
-                    $@"No variation mapped to experiment ""{experimentKey
-                    }"" in the forced variation map.");
+                    $@"No variation mapped to experiment ""{experimentKey}"" in the forced variation map.");
                 return Result<Variation>.NullResult(reasons);
             }
 
@@ -277,8 +286,7 @@ namespace OptimizelySDK.Bucketing
             }
 
             Logger.Log(LogLevel.DEBUG,
-                reasons.AddInfo($@"Variation ""{variationKey}"" is mapped to experiment ""{
-                    experimentKey}"" and user ""{userId}"" in the forced variation map"));
+                reasons.AddInfo($@"Variation ""{variationKey}"" is mapped to experiment ""{experimentKey}"" and user ""{userId}"" in the forced variation map"));
 
             var variation = config.GetVariationFromKey(experimentKey, variationKey);
 
@@ -322,8 +330,7 @@ namespace OptimizelySDK.Bucketing
                 }
 
                 Logger.Log(LogLevel.DEBUG,
-                    $@"Variation mapped to experiment ""{experimentKey
-                    }"" has been removed for user ""{userId}"".");
+                    $@"Variation mapped to experiment ""{experimentKey}"" has been removed for user ""{userId}"".");
                 return true;
             }
 
@@ -345,8 +352,7 @@ namespace OptimizelySDK.Bucketing
             ForcedVariationMap[userId][experimentId] = variationId;
 
             Logger.Log(LogLevel.DEBUG,
-                $@"Set variation ""{variationId}"" for experiment ""{experimentId}"" and user ""{
-                    userId}"" in the forced variation map.");
+                $@"Set variation ""{variationId}"" for experiment ""{experimentId}"" and user ""{userId}"" in the forced variation map.");
             return true;
         }
 
@@ -638,7 +644,8 @@ namespace OptimizelySDK.Bucketing
             OptimizelyUserContext user,
             UserAttributes filteredAttributes,
             ProjectConfig config,
-            OptimizelyDecideOption[] options
+            OptimizelyDecideOption[] options,
+            UserProfileTracker userProfileTracker = null
         )
         {
             var reasons = new DecisionReasons();
@@ -679,7 +686,8 @@ namespace OptimizelySDK.Bucketing
                 }
                 else
                 {
-                    var decisionResponse = GetVariation(experiment, user, config, options);
+                    var decisionResponse = GetVariation(experiment, user, config, options,
+                        userProfileTracker);
 
                     reasons += decisionResponse?.DecisionReasons;
                     decisionVariation = decisionResponse.ResultObject;
@@ -706,9 +714,9 @@ namespace OptimizelySDK.Bucketing
         /// <summary>
         /// Get the variation the user is bucketed into for the FeatureFlag
         /// </summary>
-        /// <param name = "featureFlag" >The feature flag the user wants to access.</param>
-        /// <param name = "userId" >User Identifier</param>
-        /// <param name = "filteredAttributes" >The user's attributes. This should be filtered to just attributes in the Datafile.</param>
+        /// <param name="featureFlag">The feature flag the user wants to access.</param>
+        /// <param name="user">The user context.</param>
+        /// <param name="config">The project config.</param>
         /// <returns>null if the user is not bucketed into any variation or the FeatureDecision entity if the user is
         /// successfully bucketed.</returns>
         public virtual Result<FeatureDecision> GetVariationForFeature(FeatureFlag featureFlag,
@@ -719,14 +727,86 @@ namespace OptimizelySDK.Bucketing
                 new OptimizelyDecideOption[] { });
         }
 
+        public virtual List<Result<FeatureDecision>> GetVariationsForFeatureList(
+            List<FeatureFlag> featureFlags,
+            OptimizelyUserContext user,
+            ProjectConfig projectConfig,
+            UserAttributes filteredAttributes,
+            OptimizelyDecideOption[] options
+        )
+        {
+            var upsReasons = new DecisionReasons();
+
+            var ignoreUps = options.Contains(OptimizelyDecideOption.IGNORE_USER_PROFILE_SERVICE);
+            UserProfileTracker userProfileTracker = null;
+
+            if (UserProfileService != null && !ignoreUps)
+            {
+                userProfileTracker = new UserProfileTracker(UserProfileService, user.GetUserId(),
+                    Logger, ErrorHandler);
+                userProfileTracker.LoadUserProfile(upsReasons);
+            }
+
+            var userId = user.GetUserId();
+            var decisions = new List<Result<FeatureDecision>>();
+
+            foreach (var featureFlag in featureFlags)
+            {
+                var reasons = new DecisionReasons();
+                reasons += upsReasons;
+
+                // Check if the feature flag has an experiment and the user is bucketed into that experiment.
+                var decisionResult = GetVariationForFeatureExperiment(featureFlag, user,
+                    filteredAttributes, projectConfig, options, userProfileTracker);
+                reasons += decisionResult.DecisionReasons;
+
+                if (decisionResult.ResultObject != null)
+                {
+                    decisions.Add(
+                        Result<FeatureDecision>.NewResult(decisionResult.ResultObject, reasons));
+                    continue;
+                }
+
+                // Check if the feature flag has rollout and the the user is bucketed into one of its rules.
+                decisionResult = GetVariationForFeatureRollout(featureFlag, user, projectConfig);
+                reasons += decisionResult.DecisionReasons;
+
+                if (decisionResult.ResultObject == null)
+                {
+                    Logger.Log(LogLevel.INFO,
+                        reasons.AddInfo(
+                            $"The user \"{userId}\" is not bucketed into a rollout for feature flag \"{featureFlag.Key}\"."));
+                    decisions.Add(Result<FeatureDecision>.NewResult(
+                        new FeatureDecision(null, null, FeatureDecision.DECISION_SOURCE_ROLLOUT),
+                        reasons));
+                }
+                else
+                {
+                    Logger.Log(LogLevel.INFO,
+                        reasons.AddInfo(
+                            $"The user \"{userId}\" is bucketed into a rollout for feature flag \"{featureFlag.Key}\"."));
+                    decisions.Add(
+                        Result<FeatureDecision>.NewResult(decisionResult.ResultObject, reasons));
+                }
+            }
+
+            if (UserProfileService != null && !ignoreUps &&
+                userProfileTracker?.ProfileUpdated == true)
+            {
+                userProfileTracker.SaveUserProfile();
+            }
+
+            return decisions;
+        }
+
         /// <summary>
         /// Get the variation the user is bucketed into for the FeatureFlag
         /// </summary>
-        /// <param name = "featureFlag" >The feature flag the user wants to access.</param>
-        /// <param name = "userId" >User Identifier</param>
-        /// <param name = "filteredAttributes" >The user's attributes. This should be filtered to just attributes in the Datafile.</param>
-        /// <param name = "filteredAttributes" >The user's attributes. This should be filtered to just attributes in the Datafile.</param>
-        /// <param name = "options" >An array of decision options.</param>
+        /// <param name="featureFlag">The feature flag the user wants to access.</param>
+        /// <param name="user">The user context.</param>
+        /// <param name="config">The project config.</param>
+        /// <param name="filteredAttributes">The user's attributes. This should be filtered to just attributes in the Datafile.</param>
+        /// <param name="options">An array of decision options.</param>
         /// <returns>null if the user is not bucketed into any variation or the FeatureDecision entity if the user is
         /// successfully bucketed.</returns>
         public virtual Result<FeatureDecision> GetVariationForFeature(FeatureFlag featureFlag,
@@ -736,36 +816,12 @@ namespace OptimizelySDK.Bucketing
             OptimizelyDecideOption[] options
         )
         {
-            var reasons = new DecisionReasons();
-            var userId = user.GetUserId();
-            // Check if the feature flag has an experiment and the user is bucketed into that experiment.
-            var decisionResult = GetVariationForFeatureExperiment(featureFlag, user,
-                filteredAttributes, config, options);
-            reasons += decisionResult.DecisionReasons;
-
-            if (decisionResult.ResultObject != null)
-            {
-                return Result<FeatureDecision>.NewResult(decisionResult.ResultObject, reasons);
-            }
-
-            // Check if the feature flag has rollout and the the user is bucketed into one of its rules.
-            decisionResult = GetVariationForFeatureRollout(featureFlag, user, config);
-            reasons += decisionResult.DecisionReasons;
-
-            if (decisionResult.ResultObject != null)
-            {
-                Logger.Log(LogLevel.INFO,
-                    reasons.AddInfo(
-                        $"The user \"{userId}\" is bucketed into a rollout for feature flag \"{featureFlag.Key}\"."));
-                return Result<FeatureDecision>.NewResult(decisionResult.ResultObject, reasons);
-            }
-
-            Logger.Log(LogLevel.INFO,
-                reasons.AddInfo(
-                    $"The user \"{userId}\" is not bucketed into a rollout for feature flag \"{featureFlag.Key}\"."));
-            return Result<FeatureDecision>.NewResult(
-                new FeatureDecision(null, null, FeatureDecision.DECISION_SOURCE_ROLLOUT), reasons);
-            ;
+            return GetVariationsForFeatureList(new List<FeatureFlag> { featureFlag },
+                    user,
+                    config,
+                    filteredAttributes,
+                    options).
+                First();
         }
 
         /// <summary>
