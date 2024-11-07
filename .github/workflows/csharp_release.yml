@@ -33,13 +33,13 @@ jobs:
     runs-on: windows-2019 # required version for Framework 4.0
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ needs.variables.outputs.tag }}
       - name: Add msbuild to PATH
-        uses: microsoft/setup-msbuild@v1
+        uses: microsoft/setup-msbuild@v2
       - name: Setup NuGet
-        uses: NuGet/setup-nuget@v1
+        uses: nuget/setup-nuget@v2
       - name: Restore NuGet packages
         run: nuget restore ./OptimizelySDK.NETFramework.sln
       - name: Build and strongly name assemblies
@@ -57,11 +57,11 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ needs.variables.outputs.tag }}
       - name: Setup .NET
-        uses: actions/setup-dotnet@v2
+        uses: actions/setup-dotnet@v4
       - name: Restore dependencies
         run: dotnet restore OptimizelySDK.NetStandard16/OptimizelySDK.NetStandard16.csproj
       - name: Build and strongly name assemblies
@@ -79,11 +79,11 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ needs.variables.outputs.tag }}
       - name: Setup .NET
-        uses: actions/setup-dotnet@v2
+        uses: actions/setup-dotnet@v4
       - name: Restore dependencies
         run: dotnet restore OptimizelySDK.NetStandard20/OptimizelySDK.NetStandard20.csproj
       - name: Build and strongly name Standard 2.0 project
