@@ -132,7 +132,7 @@ jobs:
 
   sign:
     name: Send DLLs for signing
-    needs: [ variables, buildFrameworkVersions, buildStandard16, buildStandard20 ]
+    needs: [ combineArtifacts ]
     runs-on: ubuntu-latest
     env:
       # TODO: Replace actual values
@@ -180,7 +180,7 @@ jobs:
 
   pack:
     name: Pack NuGet package
-    needs: [ variables, sign ]
+    needs: [ sign ]
     runs-on: ubuntu-latest
     env:
       VERSION: ${{ needs.variables.outputs.semanticVersion }}
@@ -233,7 +233,7 @@ jobs:
 
   publish:
     name: Publish package to NuGet after reviewing the artifact
-    needs: [ variables, pack ]
+    needs: [ pack ]
     runs-on: ubuntu-latest
     # Review the `nuget-package` artifact ensuring the dlls are 
     # organized and signed before approving.
