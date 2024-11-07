@@ -110,14 +110,17 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: unsigned-dlls-framework
+          path: ./unsigned-dlls-framework
       - name: Download Standard 1.6 artifacts
         uses: actions/download-artifact@v4
         with:
           name: unsigned-dlls-standard16
+          path: ./unsigned-dlls-standard16
       - name: Download Standard 2.0 artifacts
         uses: actions/download-artifact@v4
         with:
           name: unsigned-dlls-standard20
+          path: ./unsigned-dlls-standard20
       - name: Combine artifacts
         run: |
           mkdir -p ./unsigned-dlls
@@ -129,6 +132,7 @@ jobs:
         with:
           name: unsigned-dlls
           if-no-files-found: error
+          path: ./unsigned-dlls
 
   sign:
     name: Send DLLs for signing
