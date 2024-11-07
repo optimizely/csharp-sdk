@@ -34,7 +34,7 @@ jobs:
       semanticVersion: ${{ steps.set_version.outputs.semantic_version }}
   
   buildFrameworkVersions:
-    name: Build Framework versions
+    name: Build .NET Framework versions
     needs: [ variables ]
     runs-on: windows-2019 # required version for Framework 4.0
     steps:
@@ -53,12 +53,12 @@ jobs:
       - name: Upload Framework artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: unsigned-dlls
+          name: unsigned-dlls-framework
           if-no-files-found: error
           path: ./**/bin/Release/**/Optimizely*.dll
 
   buildStandard16:
-    name: Build Standard 1.6 version
+    name: Build .NET 1.6 version
     needs: [ variables ]
     runs-on: windows-latest
     steps:
@@ -75,12 +75,12 @@ jobs:
       - name: Upload Standard 1.6 artifact
         uses: actions/upload-artifact@v4
         with:
-          name: unsigned-dlls
+          name: unsigned-dlls-standard16
           if-no-files-found: error
           path: ./**/bin/Release/**/Optimizely*.dll
 
   buildStandard20:
-    name: Build Standard 2.0 version
+    name: Build .NET 2.0 version
     needs: [ variables ]
     runs-on: windows-latest
     steps:
@@ -97,9 +97,38 @@ jobs:
       - name: Build and strongly name assemblies
         uses: actions/upload-artifact@v4
         with:
-          name: unsigned-dlls
+          name: unsigned-dlls-standard20
           if-no-files-found: error
           path: ./**/bin/Release/**/Optimizely*.dll
+          
+  combineArtifacts:
+    name: Combine artifacts
+    needs: [ variables, buildFrameworkVersions, buildStandard16, buildStandard20 ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Framework artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: unsigned-dlls-framework
+      - name: Download Standard 1.6 artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: unsigned-dlls-standard16
+      - name: Download Standard 2.0 artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: unsigned-dlls-standard20
+      - name: Combine artifacts
+        run: |
+          mkdir -p ./unsigned-dlls
+          mv ./unsigned-dlls-framework/**/Optimizely*.dll ./unsigned-dlls/
+          mv ./unsigned-dlls-standard16/**/Optimizely*.dll ./unsigned-dlls/
+          mv ./unsigned-dlls-standard20/**/Optimizely*.dll ./unsigned-dlls/
+      - name: Upload combined artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: unsigned-dlls
+          if-no-files-found: error
 
   sign:
     name: Send DLLs for signing
