@@ -30,7 +30,7 @@ jobs:
           echo "Extracted semantic version: ${SEMANTIC_VERSION}"
           echo "semantic_version=${SEMANTIC_VERSION}" >> $GITHUB_OUTPUT
     outputs:
-      tag: $TAG
+      tag: ${{ env.TAG }}
       semanticVersion: ${{ steps.set_version.outputs.semantic_version }}
   
   buildFrameworkVersions:
