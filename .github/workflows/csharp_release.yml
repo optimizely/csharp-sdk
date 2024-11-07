@@ -55,7 +55,8 @@ jobs:
         with:
           name: unsigned-dlls-framework
           if-no-files-found: error
-          path: ./**/bin/Release/**/Optimizely*.dll
+          path: |
+            $(find . -path './**/bin/Release/**/Optimizely*.dll' ! -path './**/OptimizelySDK.Tests/**')
 
   buildStandard16:
     name: Build .NET 1.6 version
@@ -121,6 +122,8 @@ jobs:
         with:
           name: unsigned-dlls-standard20
           path: ./unsigned-dlls-standard20
+      - name: List all downloaded artifacts
+        run: ls -R ./
       - name: Combine artifacts
         run: |
           mkdir -p ./unsigned-dlls
