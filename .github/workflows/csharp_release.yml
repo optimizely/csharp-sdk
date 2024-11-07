@@ -3,14 +3,19 @@
 on:
   release:
     types: [ published ] # Trigger on published pre-releases and releases
-  workflow_dispatch: 
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag name'
+        required: true
+        default: 'v4.1.0'
 
 jobs:
   variables:
     name: Set Variables
     runs-on: ubuntu-latest
     env:
-      TAG: ${{ github.event.release.tag_name }}
+      TAG: ${{ github.event.release.tag_name || github.event.inputs.tag }}
     steps:
       - name: Extract semantic version from tag
         id: set_version
