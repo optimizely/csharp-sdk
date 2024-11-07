@@ -127,8 +127,8 @@ jobs:
         run: |
           mkdir -p ./unsigned-dlls
           find ./unsigned-dlls-framework -type f -name 'Optimizely*.dll' ! -path '*/OptimizelySDK.Tests/*' -exec mv {} ./unsigned-dlls/ \;
-          mv ./unsigned-dlls-standard16/**/Optimizely*.dll ./unsigned-dlls/ \;
-          mv ./unsigned-dlls-standard20/**/Optimizely*.dll ./unsigned-dlls/ \;
+          find ./unsigned-dlls-standard16 -type f -name 'Optimizely*.dll' -exec mv {} ./unsigned-dlls/ \;
+          find ./unsigned-dlls-standard20 -type f -name 'Optimizely*.dll' -exec mv {} ./unsigned-dlls/ \;
       - name: Upload combined artifacts
         uses: actions/upload-artifact@v4
         with:
