@@ -3,6 +3,7 @@
 on:
   release:
     types: [ published ] # Trigger on published pre-releases and releases
+  workflow_dispatch: 
 
 jobs:
   variables:
