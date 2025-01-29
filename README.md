@@ -1,6 +1,6 @@
 # Optimizely C# SDK
 ![Semantic](https://img.shields.io/badge/sem-ver-lightgrey.svg?style=plastic)
-[![Build Status](https://travis-ci.org/optimizely/csharp-sdk.svg?branch=master)](https://travis-ci.org/optimizely/csharp-sdk)
+![CI](https://github.com/optimizely/csharp-sdk/actions/workflows/csharp.yml/badge.svg?branch=master)
 [![NuGet](https://img.shields.io/nuget/v/Optimizely.SDK.svg?style=plastic)](https://www.nuget.org/packages/Optimizely.SDK/)
 [![Apache 2.0](https://img.shields.io/github/license/nebula-plugins/gradle-extra-configurations-plugin.svg)](http://www.apache.org/licenses/LICENSE-2.0)
 
