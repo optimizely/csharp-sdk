@@ -1000,7 +1000,10 @@ namespace OptimizelySDK
         )
         {
             var userId = user.GetUserId();
-
+            
+            string experimentId = null;
+            string variationId = null;
+            
             var flagEnabled = false;
             if (flagDecision.Variation != null)
             {
@@ -1008,6 +1011,12 @@ namespace OptimizelySDK
                 {
                     flagEnabled = true;
                 }
+                variationId = flagDecision.Variation.Id;
+            }
+            
+            if (flagDecision.Experiment != null)
+            {
+                experimentId = flagDecision.Experiment.Id;
             }
 
             Logger.Log(LogLevel.INFO,
@@ -1062,6 +1071,8 @@ namespace OptimizelySDK
                 { "ruleKey", ruleKey },
                 { "reasons", reasonsToReport },
                 { "decisionEventDispatched", decisionEventDispatched },
+                { "experimentId", experimentId },
+                { "variationId", variationId },
             };
 
             NotificationCenter.SendNotifications(NotificationCenter.NotificationType.Decision,

@@ -339,6 +339,12 @@ namespace OptimizelySDK.Tests
                         {
                             "decisionEventDispatched", true
                         },
+                        {
+                            "experimentId", "7718750065"
+                        },
+                        {
+                            "variationId", "7713030086"
+                        }
                     }))), Times.Once);
             EventDispatcherMock.Verify(dispatcher => dispatcher.DispatchEvent(It.IsAny<LogEvent>()),
                 Times.Once);
@@ -405,6 +411,12 @@ namespace OptimizelySDK.Tests
                         {
                             "decisionEventDispatched", true
                         },
+                        {
+                            "experimentId", "7718750065"
+                        },
+                        {
+                            "variationId", "7713030086"
+                        }
                     }))), Times.Once);
             EventDispatcherMock.Verify(dispatcher => dispatcher.DispatchEvent(It.IsAny<LogEvent>()),
                 Times.Once);
@@ -476,6 +488,12 @@ namespace OptimizelySDK.Tests
                         {
                             "decisionEventDispatched", false
                         },
+                        {
+                            "experimentId", experiment.Id
+                        },
+                        {
+                            "variationId", variation.Id
+                        }
                     }))), Times.Once);
             EventDispatcherMock.Verify(dispatcher => dispatcher.DispatchEvent(It.IsAny<LogEvent>()),
                 Times.Never);
@@ -547,6 +565,12 @@ namespace OptimizelySDK.Tests
                         {
                             "decisionEventDispatched", true
                         },
+                        {
+                            "experimentId", experiment.Id
+                        },
+                        {
+                            "variationId", variation.Id
+                        }
                     }))), Times.Once);
             EventDispatcherMock.Verify(dispatcher => dispatcher.DispatchEvent(It.IsAny<LogEvent>()),
                 Times.Once);
