@@ -252,6 +252,3 @@ Optimizely SDK uses third party software:
 - Ruby - https://github.com/optimizely/ruby-sdk
 
 - Swift - https://github.com/optimizely/swift-sdk
-
-## Test
-Test pipeline
