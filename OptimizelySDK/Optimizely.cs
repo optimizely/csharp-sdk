@@ -1000,10 +1000,8 @@ namespace OptimizelySDK
         )
         {
             var userId = user.GetUserId();
-            
             string experimentId = null;
             string variationId = null;
-            
             var flagEnabled = false;
             if (flagDecision.Variation != null)
             {
@@ -1013,12 +1011,10 @@ namespace OptimizelySDK
                 }
                 variationId = flagDecision.Variation.Id;
             }
-            
             if (flagDecision.Experiment != null)
             {
                 experimentId = flagDecision.Experiment.Id;
             }
-
             Logger.Log(LogLevel.INFO,
                 $"Feature \"{flagKey}\" is enabled for user \"{userId}\"? {flagEnabled}");
 
