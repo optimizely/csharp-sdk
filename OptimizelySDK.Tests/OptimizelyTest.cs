@@ -339,6 +339,12 @@ namespace OptimizelySDK.Tests
                         {
                             "decisionEventDispatched", true
                         },
+                        {
+                            "experimentId", "7718750065"
+                        },
+                        {
+                            "variationId", "7713030086"
+                        }
                     }))), Times.Once);
             EventDispatcherMock.Verify(dispatcher => dispatcher.DispatchEvent(It.IsAny<LogEvent>()),
                 Times.Once);
@@ -405,6 +411,12 @@ namespace OptimizelySDK.Tests
                         {
                             "decisionEventDispatched", true
                         },
+                        {
+                            "experimentId", "7718750065"
+                        },
+                        {
+                            "variationId", "7713030086"
+                        }
                     }))), Times.Once);
             EventDispatcherMock.Verify(dispatcher => dispatcher.DispatchEvent(It.IsAny<LogEvent>()),
                 Times.Once);
@@ -476,6 +488,12 @@ namespace OptimizelySDK.Tests
                         {
                             "decisionEventDispatched", false
                         },
+                        {
+                            "experimentId", experiment.Id
+                        },
+                        {
+                            "variationId", variation.Id
+                        }
                     }))), Times.Once);
             EventDispatcherMock.Verify(dispatcher => dispatcher.DispatchEvent(It.IsAny<LogEvent>()),
                 Times.Never);
@@ -547,6 +565,12 @@ namespace OptimizelySDK.Tests
                         {
                             "decisionEventDispatched", true
                         },
+                        {
+                            "experimentId", experiment.Id
+                        },
+                        {
+                            "variationId", variation.Id
+                        }
                     }))), Times.Once);
             EventDispatcherMock.Verify(dispatcher => dispatcher.DispatchEvent(It.IsAny<LogEvent>()),
                 Times.Once);
@@ -2361,8 +2385,7 @@ namespace OptimizelySDK.Tests
             Assert.AreEqual(expectedValue, variableValue);
 
             LoggerMock.Verify(l => l.Log(LogLevel.INFO,
-                $@"Got variable value ""{variableValue}"" for variable ""{variableKey
-                }"" of feature flag ""{featureKey}""."));
+                $@"Got variable value ""{variableValue}"" for variable ""{variableKey}"" of feature flag ""{featureKey}""."));
         }
 
         [Test]
@@ -2406,8 +2429,7 @@ namespace OptimizelySDK.Tests
             Assert.AreEqual(expectedValue, variableValue);
 
             LoggerMock.Verify(l => l.Log(LogLevel.INFO,
-                $@"Got variable value ""{variableValue}"" for variable ""{variableKey
-                }"" of feature flag ""{featureKey}""."));
+                $@"Got variable value ""{variableValue}"" for variable ""{variableKey}"" of feature flag ""{featureKey}""."));
         }
 
         [Test]
@@ -2439,8 +2461,7 @@ namespace OptimizelySDK.Tests
             Assert.AreEqual(expectedValue, variableValue);
 
             LoggerMock.Verify(l => l.Log(LogLevel.INFO,
-                $@"Feature ""{featureKey}"" is not enabled for user {TestUserId
-                }. Returning the default variable value ""{variableValue}""."));
+                $@"Feature ""{featureKey}"" is not enabled for user {TestUserId}. Returning the default variable value ""{variableValue}""."));
         }
 
         [Test]
@@ -2484,8 +2505,7 @@ namespace OptimizelySDK.Tests
             Assert.AreEqual(expectedValue, variableValue);
 
             LoggerMock.Verify(l => l.Log(LogLevel.INFO,
-                $@"Feature ""{featureKey}"" is not enabled for user {TestUserId
-                }. Returning the default variable value ""{variableValue}""."));
+                $@"Feature ""{featureKey}"" is not enabled for user {TestUserId}. Returning the default variable value ""{variableValue}""."));
         }
 
         [Test]
@@ -2515,8 +2535,7 @@ namespace OptimizelySDK.Tests
             Assert.AreEqual(expectedValue, variableValue);
 
             LoggerMock.Verify(l => l.Log(LogLevel.INFO,
-                $@"Got variable value ""true"" for variable ""{variableKey}"" of feature flag ""{
-                    featureKey}""."));
+                $@"Got variable value ""true"" for variable ""{variableKey}"" of feature flag ""{featureKey}""."));
         }
 
         [Test]
@@ -2562,8 +2581,7 @@ namespace OptimizelySDK.Tests
             Assert.AreEqual(expectedStringValue, variableValue.GetValue<string>("string_var"));
 
             LoggerMock.Verify(l => l.Log(LogLevel.INFO,
-                $@"Got variable value ""{variableValue}"" for variable ""{variableKey
-                }"" of feature flag ""{featureKey}""."));
+                $@"Got variable value ""{variableValue}"" for variable ""{variableKey}"" of feature flag ""{featureKey}""."));
         }
 
         [Test]
@@ -2609,8 +2627,7 @@ namespace OptimizelySDK.Tests
             Assert.AreEqual(expectedStringValue, variableValue.GetValue<string>("string_var"));
 
             LoggerMock.Verify(l => l.Log(LogLevel.INFO,
-                $@"Got variable value ""{variableValue}"" for variable ""{variableKey
-                }"" of feature flag ""{featureKey}""."));
+                $@"Got variable value ""{variableValue}"" for variable ""{variableKey}"" of feature flag ""{featureKey}""."));
         }
 
         [Test]
@@ -2654,8 +2671,7 @@ namespace OptimizelySDK.Tests
             Assert.AreEqual(expectedValue, variableValue);
 
             LoggerMock.Verify(l => l.Log(LogLevel.INFO,
-                $@"Got variable value ""{variableValue}"" for variable ""{variableKey
-                }"" of feature flag ""{featureKey}""."));
+                $@"Got variable value ""{variableValue}"" for variable ""{variableKey}"" of feature flag ""{featureKey}""."));
         }
 
         [Test]
@@ -2684,8 +2700,7 @@ namespace OptimizelySDK.Tests
                 variableKey, TestUserId, null);
             Assert.AreEqual(expectedValue, variableValue);
             LoggerMock.Verify(l => l.Log(LogLevel.INFO,
-                $@"Feature ""{featureKey}"" is not enabled for user {TestUserId
-                }. Returning the default variable value ""true""."));
+                $@"Feature ""{featureKey}"" is not enabled for user {TestUserId}. Returning the default variable value ""true""."));
         }
 
         [Test]
@@ -2728,8 +2743,7 @@ namespace OptimizelySDK.Tests
             Assert.AreEqual(expectedValue, variableValue);
 
             LoggerMock.Verify(l => l.Log(LogLevel.INFO,
-                $@"Feature ""{featureKey}"" is not enabled for user {TestUserId
-                }. Returning the default variable value ""{variableValue}""."));
+                $@"Feature ""{featureKey}"" is not enabled for user {TestUserId}. Returning the default variable value ""{variableValue}""."));
         }
 
         [Test]
@@ -2758,8 +2772,7 @@ namespace OptimizelySDK.Tests
             Assert.AreEqual(expectedValue, variableValue);
 
             LoggerMock.Verify(l => l.Log(LogLevel.INFO,
-                $@"User ""{TestUserId}"" is not in any variation for feature flag ""{featureKey
-                }"", returning default value ""{variableValue}""."));
+                $@"User ""{TestUserId}"" is not in any variation for feature flag ""{featureKey}"", returning default value ""{variableValue}""."));
         }
 
         #endregion Feature Toggle Tests
@@ -2822,8 +2835,7 @@ namespace OptimizelySDK.Tests
             LoggerMock.Verify(l =>
                 l.Log(LogLevel.ERROR, $@"Feature key ""{featureKey}"" is not in datafile."));
             LoggerMock.Verify(l => l.Log(LogLevel.ERROR,
-                $@"No feature variable was found for key ""{variableKey
-                }"" in feature flag ""double_single_variable_feature""."));
+                $@"No feature variable was found for key ""{variableKey}"" in feature flag ""double_single_variable_feature""."));
         }
 
         // Should return null and log error message when variable type is invalid.
@@ -2851,17 +2863,13 @@ namespace OptimizelySDK.Tests
                 "string_single_variable_feature", "json_var", TestUserId, null, variableTypeInt));
 
             LoggerMock.Verify(l => l.Log(LogLevel.ERROR,
-                $@"Variable is of type ""double"", but you requested it as type ""{variableTypeBool
-                }""."));
+                $@"Variable is of type ""double"", but you requested it as type ""{variableTypeBool}""."));
             LoggerMock.Verify(l => l.Log(LogLevel.ERROR,
-                $@"Variable is of type ""boolean"", but you requested it as type ""{
-                    variableTypeDouble}""."));
+                $@"Variable is of type ""boolean"", but you requested it as type ""{variableTypeDouble}""."));
             LoggerMock.Verify(l => l.Log(LogLevel.ERROR,
-                $@"Variable is of type ""integer"", but you requested it as type ""{
-                    variableTypeString}""."));
+                $@"Variable is of type ""integer"", but you requested it as type ""{variableTypeString}""."));
             LoggerMock.Verify(l => l.Log(LogLevel.ERROR,
-                $@"Variable is of type ""string"", but you requested it as type ""{variableTypeInt
-                }""."));
+                $@"Variable is of type ""string"", but you requested it as type ""{variableTypeInt}""."));
         }
 
         [Test]
@@ -2913,8 +2921,7 @@ namespace OptimizelySDK.Tests
             Assert.AreEqual(expectedValue, variableValue);
 
             LoggerMock.Verify(l => l.Log(LogLevel.INFO,
-                $@"Feature ""{featureKey}"" is not enabled for user {TestUserId
-                }. Returning the default variable value ""{variableValue}""."));
+                $@"Feature ""{featureKey}"" is not enabled for user {TestUserId}. Returning the default variable value ""{variableValue}""."));
         }
 
         // Should return default value and log message when feature is enabled for the user
@@ -2954,9 +2961,7 @@ namespace OptimizelySDK.Tests
             Assert.AreEqual(expectedValue, variableValue);
 
             LoggerMock.Verify(l => l.Log(LogLevel.INFO,
-                $@"Variable ""{variableKey
-                }"" is not used in variation ""control"", returning default value ""{expectedValue
-                }""."));
+                $@"Variable ""{variableKey}"" is not used in variation ""control"", returning default value ""{expectedValue}""."));
         }
 
         // Should return variable value from variation and log message when feature is enabled for the user
@@ -2994,8 +2999,7 @@ namespace OptimizelySDK.Tests
             Assert.AreEqual(expectedValue, variableValue);
 
             LoggerMock.Verify(l => l.Log(LogLevel.INFO,
-                $@"Got variable value ""{variableValue}"" for variable ""{variableKey
-                }"" of feature flag ""{featureKey}""."));
+                $@"Got variable value ""{variableValue}"" for variable ""{variableKey}"" of feature flag ""{featureKey}""."));
         }
 
         // Verify that GetFeatureVariableValueForType returns correct variable value for rollout rule.
@@ -3149,8 +3153,7 @@ namespace OptimizelySDK.Tests
 
             // SendImpressionEvent() does not get called.
             LoggerMock.Verify(l => l.Log(LogLevel.INFO,
-                $@"The user ""{TestUserId}"" is not being experimented on feature ""{featureKey
-                }""."), Times.Once);
+                $@"The user ""{TestUserId}"" is not being experimented on feature ""{featureKey}""."), Times.Once);
 
             LoggerMock.Verify(l => l.Log(LogLevel.INFO,
                 $@"Feature flag ""{featureKey}"" is enabled for user ""{TestUserId}""."));
@@ -3183,8 +3186,7 @@ namespace OptimizelySDK.Tests
 
             // SendImpressionEvent() gets called.
             LoggerMock.Verify(l => l.Log(LogLevel.INFO,
-                $@"The user ""{TestUserId}"" is not being experimented on feature ""{featureKey
-                }""."), Times.Never);
+                $@"The user ""{TestUserId}"" is not being experimented on feature ""{featureKey}""."), Times.Never);
 
             LoggerMock.Verify(l => l.Log(LogLevel.INFO,
                 $@"Feature flag ""{featureKey}"" is enabled for user ""{TestUserId}""."));
@@ -3218,8 +3220,7 @@ namespace OptimizelySDK.Tests
 
             // SendImpressionEvent() gets called.
             LoggerMock.Verify(l => l.Log(LogLevel.INFO,
-                $@"The user ""{TestUserId}"" is not being experimented on feature ""{featureKey
-                }""."), Times.Never);
+                $@"The user ""{TestUserId}"" is not being experimented on feature ""{featureKey}""."), Times.Never);
 
             LoggerMock.Verify(l => l.Log(LogLevel.INFO,
                 $@"Feature flag ""{featureKey}"" is not enabled for user ""{TestUserId}""."));

@@ -75,7 +75,7 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore OptimizelySDK.NetStandard16/OptimizelySDK.NetStandard16.csproj
       - name: Build & strongly name assemblies
-        run: dotnet build OptimizelySDK.NetStandard16/OptimizelySDK.NetStandard16.csproj /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=D:\a\csharp-sdk\csharp-sdk\keypair.snk -c Release
+        run: dotnet build OptimizelySDK.NetStandard16/OptimizelySDK.NetStandard16.csproj /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=$(pwd)/keypair.snk -c Release
 
   netStandard20:
     name: Build Standard 2.0
@@ -98,7 +98,7 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore OptimizelySDK.NetStandard20/OptimizelySDK.NetStandard20.csproj
       - name: Build & strongly name assemblies
-        run: dotnet build OptimizelySDK.NetStandard20/OptimizelySDK.NetStandard20.csproj /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=D:\a\csharp-sdk\csharp-sdk\keypair.snk -c Release
+        run: dotnet build OptimizelySDK.NetStandard20/OptimizelySDK.NetStandard20.csproj /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=$(pwd)/keypair.snk -c Release
   
   integration_tests:
     name: Run Integration Tests

@@ -1081,6 +1081,12 @@ namespace OptimizelySDK.Tests
                 {
                     "decisionEventDispatched", true
                 },
+                {
+                    "experimentId", "122235"
+                },
+                {
+                    "variationId", "122236"
+                },
             };
 
             var userAttributes = new UserAttributes
