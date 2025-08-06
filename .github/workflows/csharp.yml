@@ -29,7 +29,7 @@ jobs:
   netFrameworksAndUnitTest:
     name: Build Framework & Run Unit Tests
     needs: [ lintCodebase ]
-    runs-on: windows-2019 # required version for Framework 4.0
+    runs-on: windows-2022 # required version for Framework 4.0
     env:
       REPO_SLUG: ${{ github.repository }}
       BUILD_NUMBER: ${{ github.run_id }}
