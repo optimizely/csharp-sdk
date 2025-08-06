@@ -44,6 +44,10 @@ jobs:
         uses: microsoft/setup-msbuild@v1
       - name: Setup NuGet
         uses: NuGet/setup-nuget@v1
+      - name: Install .NET Framework Developer Packs
+        run: |
+          choco install netfx-4.5-devpack -y
+          choco install netfx-4.0-devpack -y
       - name: Restore NuGet packages
         run: nuget restore ./OptimizelySDK.NETFramework.sln
       - name: Build & strongly name assemblies
