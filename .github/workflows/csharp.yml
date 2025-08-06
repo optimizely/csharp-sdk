@@ -47,6 +47,7 @@ jobs:
       - name: Install .NET Framework Developer Packs
         run: |
           choco install netfx-4.5.2-devpack -y
+          choco install windows-sdk-7.1 -y
           choco install netfx-4.0.3-devpack -y
       - name: Restore NuGet packages
         run: nuget restore ./OptimizelySDK.NETFramework.sln
