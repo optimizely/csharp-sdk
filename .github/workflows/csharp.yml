@@ -46,8 +46,19 @@ jobs:
         uses: NuGet/setup-nuget@v1
       - name: Install .NET Framework Developer Packs
         run: |
+          # Install .NET 4.5.2 developer pack (this should work)
           choco install netfx-4.5.2-devpack -y
-          choco install netfx-4.0.3-devpack -y
+          
+          # Try .NET 4.0.3 but don't fail the build if it doesn't work
+          echo "Attempting to install .NET 4.0.3 developer pack..."
+          choco install netfx-4.0.3-devpack -y || echo "4.0.3 installation failed, continuing anyway..."
+          
+          # Show what we have available
+          echo "Checking installed targeting packs..."
+          if (Test-Path "C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework") {
+            dir "C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework"
+          }
+        continue-on-error: true
       - name: Restore NuGet packages
         run: nuget restore ./OptimizelySDK.NETFramework.sln
       - name: Build & strongly name assemblies
