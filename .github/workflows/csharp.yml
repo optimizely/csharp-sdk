@@ -46,8 +46,13 @@ jobs:
         uses: NuGet/setup-nuget@v1
       - name: Install .NET Framework Developer Packs
         run: |
-          # Install .NET 4.5.2 developer pack (this should work)
-          choco install netfx-4.5.2-devpack -y
+          # Install .NET 4.5.1 developer pack (closest available to 4.5)
+          echo "Installing .NET 4.5.1 developer pack (closest to 4.5)..."
+          choco install netfx-4.5.1-devpack -y || echo "4.5.1 installation failed"
+          
+          # Also try 4.5.2 as additional fallback
+          echo "Installing .NET 4.5.2 developer pack as additional option..."
+          choco install netfx-4.5.2-devpack -y || echo "4.5.2 installation failed"
           
           # Try .NET 4.0.3 but don't fail the build if it doesn't work
           echo "Attempting to install .NET 4.0.3 developer pack..."
@@ -58,11 +63,33 @@ jobs:
           if (Test-Path "C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework") {
             dir "C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework"
           }
+          
+          # Debug: Check what's actually inside v4.5 folder
+          echo "Checking v4.5 folder contents..."
+          if (Test-Path "C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.5") {
+            dir "C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.5"
+          } else {
+            echo "v4.5 folder does not exist!"
+          }
+          
+          # Debug: Check MSBuild targeting pack environment
+          echo "MSBuild targeting pack environment..."
+          echo "TargetFrameworkRootPath: $env:TargetFrameworkRootPath"
+          echo "MSBuildExtensionsPath32: $env:MSBuildExtensionsPath32"
         continue-on-error: true
       - name: Restore NuGet packages
         run: nuget restore ./OptimizelySDK.NETFramework.sln
       - name: Build & strongly name assemblies
-        run: msbuild /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=$(pwd)/keypair.snk /p:Configuration=Release ./OptimizelySDK.NETFramework.sln
+        run: |
+          echo "=== MSBuild Diagnostics ==="
+          echo "Attempting build with verbose logging to diagnose targeting pack resolution..."
+          msbuild /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=$(pwd)/keypair.snk /p:Configuration=Release /verbosity:diagnostic /flp:logfile=msbuild.log ./OptimizelySDK.NETFramework.sln
+          
+          echo "=== Build completed, checking for targeting pack errors in log ==="
+          if (Test-Path "msbuild.log") {
+            echo "Searching for targeting pack related messages..."
+            Select-String -Path "msbuild.log" -Pattern "(TargetFramework|Reference.*Assemblies|MSB3644|v4\.5)" | Select-Object -First 20
+          }
       - name: Install & Run NUnit tests
         run: |
           nuget install NUnit.Console -Version 3.18.1 -DirectDownload -OutputDirectory .
