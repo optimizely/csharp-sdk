@@ -5,6 +5,8 @@ on:
     branches: [ master ]
   pull_request:
     branches: [ master ]
+    types: [ opened, synchronize, reopened, ready_for_review ]
+
 jobs:
   lintCodebase:
     name: Lint Codebase if Not Draft
