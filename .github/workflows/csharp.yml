@@ -44,52 +44,61 @@ jobs:
         uses: microsoft/setup-msbuild@v1
       - name: Setup NuGet
         uses: NuGet/setup-nuget@v1
-      - name: Install .NET Framework Developer Packs
+      - name: Download and Install .NET Framework Reference Assemblies
         run: |
-          # Install .NET 4.5.1 developer pack (closest available to 4.5)
-          echo "Installing .NET 4.5.1 developer pack (closest to 4.5)..."
-          choco install netfx-4.5.1-devpack -y || echo "4.5.1 installation failed"
+          # Create temp directory
+          New-Item -ItemType Directory -Path "temp_ref_assemblies" -Force
           
-          # Also try 4.5.2 as additional fallback
-          echo "Installing .NET 4.5.2 developer pack as additional option..."
-          choco install netfx-4.5.2-devpack -y || echo "4.5.2 installation failed"
+          # Download .NET 4.0 Reference Assemblies
+          echo "Downloading .NET 4.0 Reference Assemblies..."
+          Invoke-WebRequest -Uri "https://www.nuget.org/api/v2/package/Microsoft.NETFramework.ReferenceAssemblies.net40/1.0.3" -OutFile "temp_ref_assemblies/net40_ref.zip"
           
-          # Try .NET 4.0.3 but don't fail the build if it doesn't work
-          echo "Attempting to install .NET 4.0.3 developer pack..."
-          choco install netfx-4.0.3-devpack -y || echo "4.0.3 installation failed, continuing anyway..."
+          # Download .NET 4.5 Reference Assemblies  
+          echo "Downloading .NET 4.5 Reference Assemblies..."
+          Invoke-WebRequest -Uri "https://www.nuget.org/api/v2/package/Microsoft.NETFramework.ReferenceAssemblies.net45/1.0.3" -OutFile "temp_ref_assemblies/net45_ref.zip"
           
-          # Show what we have available
-          echo "Checking installed targeting packs..."
-          if (Test-Path "C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework") {
-            dir "C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework"
+          # Extract and install .NET 4.0
+          echo "Installing .NET 4.0 Reference Assemblies..."
+          Expand-Archive -Path "temp_ref_assemblies/net40_ref.zip" -DestinationPath "temp_ref_assemblies/net40" -Force
+          if (Test-Path "temp_ref_assemblies/net40/build/.NETFramework/v4.0") {
+              Copy-Item -Path "temp_ref_assemblies/net40/build/.NETFramework/v4.0" -Destination "C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\" -Recurse -Force
+              echo "✓ .NET 4.0 Reference Assemblies installed"
           }
           
-          # Debug: Check what's actually inside v4.5 folder
-          echo "Checking v4.5 folder contents..."
-          if (Test-Path "C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.5") {
-            dir "C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.5"
+          # Extract and install .NET 4.5
+          echo "Installing .NET 4.5 Reference Assemblies..."
+          Expand-Archive -Path "temp_ref_assemblies/net45_ref.zip" -DestinationPath "temp_ref_assemblies/net45" -Force
+          if (Test-Path "temp_ref_assemblies/net45/build/.NETFramework/v4.5") {
+              Copy-Item -Path "temp_ref_assemblies/net45/build/.NETFramework/v4.5" -Destination "C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\" -Recurse -Force
+              echo "✓ .NET 4.5 Reference Assemblies installed"
+          }
+          
+          # Verify installations
+          echo "Verifying installations..."
+          if (Test-Path "C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\mscorlib.dll") {
+              echo "✓ .NET 4.0 mscorlib.dll found"
           } else {
-            echo "v4.5 folder does not exist!"
+              echo "✗ .NET 4.0 mscorlib.dll missing"
+          }
+          if (Test-Path "C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.5\mscorlib.dll") {
+              echo "✓ .NET 4.5 mscorlib.dll found"
+          } else {
+              echo "✗ .NET 4.5 mscorlib.dll missing"
           }
           
-          # Debug: Check MSBuild targeting pack environment
-          echo "MSBuild targeting pack environment..."
-          echo "TargetFrameworkRootPath: $env:TargetFrameworkRootPath"
-          echo "MSBuildExtensionsPath32: $env:MSBuildExtensionsPath32"
+          # Show what we have available now
+          echo "Final targeting pack listing..."
+          if (Test-Path "C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework") {
+              dir "C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework"
+          }
+          
+          # Cleanup
+          Remove-Item -Path "temp_ref_assemblies" -Recurse -Force
         continue-on-error: true
       - name: Restore NuGet packages
         run: nuget restore ./OptimizelySDK.NETFramework.sln
       - name: Build & strongly name assemblies
-        run: |
-          echo "=== MSBuild Diagnostics ==="
-          echo "Attempting build with verbose logging to diagnose targeting pack resolution..."
-          msbuild /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=$(pwd)/keypair.snk /p:Configuration=Release /verbosity:diagnostic /flp:logfile=msbuild.log ./OptimizelySDK.NETFramework.sln
-          
-          echo "=== Build completed, checking for targeting pack errors in log ==="
-          if (Test-Path "msbuild.log") {
-            echo "Searching for targeting pack related messages..."
-            Select-String -Path "msbuild.log" -Pattern "(TargetFramework|Reference.*Assemblies|MSB3644|v4\.5)" | Select-Object -First 20
-          }
+        run: msbuild /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=$(pwd)/keypair.snk /p:Configuration=Release ./OptimizelySDK.NETFramework.sln
       - name: Install & Run NUnit tests
         run: |
           nuget install NUnit.Console -Version 3.18.1 -DirectDownload -OutputDirectory .
