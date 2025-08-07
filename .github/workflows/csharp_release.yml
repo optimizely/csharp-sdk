@@ -41,6 +41,37 @@ jobs:
         uses: microsoft/setup-msbuild@v2
       - name: Setup NuGet
         uses: nuget/setup-nuget@v2
+      - name: Download and Install .NET Framework Reference Assemblies
+        run: |
+          # Create temp directory
+          New-Item -ItemType Directory -Path "temp_ref_assemblies" -Force
+          
+          # Download .NET 4.0 Reference Assemblies
+          echo "Downloading .NET 4.0 Reference Assemblies..."
+          Invoke-WebRequest -Uri "https://www.nuget.org/api/v2/package/Microsoft.NETFramework.ReferenceAssemblies.net40/1.0.3" -OutFile "temp_ref_assemblies/net40_ref.zip"
+          
+          # Download .NET 4.5 Reference Assemblies  
+          echo "Downloading .NET 4.5 Reference Assemblies..."
+          Invoke-WebRequest -Uri "https://www.nuget.org/api/v2/package/Microsoft.NETFramework.ReferenceAssemblies.net45/1.0.3" -OutFile "temp_ref_assemblies/net45_ref.zip"
+          
+          # Extract and install .NET 4.0
+          echo "Installing .NET 4.0 Reference Assemblies..."
+          Expand-Archive -Path "temp_ref_assemblies/net40_ref.zip" -DestinationPath "temp_ref_assemblies/net40" -Force
+          if (Test-Path "temp_ref_assemblies/net40/build/.NETFramework/v4.0") {
+              Copy-Item -Path "temp_ref_assemblies/net40/build/.NETFramework/v4.0" -Destination "C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\" -Recurse -Force
+              echo "✓ .NET 4.0 Reference Assemblies installed"
+          }
+          
+          # Extract and install .NET 4.5
+          echo "Installing .NET 4.5 Reference Assemblies..."
+          Expand-Archive -Path "temp_ref_assemblies/net45_ref.zip" -DestinationPath "temp_ref_assemblies/net45" -Force
+          if (Test-Path "temp_ref_assemblies/net45/build/.NETFramework/v4.5") {
+              Copy-Item -Path "temp_ref_assemblies/net45/build/.NETFramework/v4.5" -Destination "C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\" -Recurse -Force
+              echo "✓ .NET 4.5 Reference Assemblies installed"
+          }
+          
+          # Cleanup
+          Remove-Item -Path "temp_ref_assemblies" -Recurse -Force
       - name: Restore NuGet packages
         run: nuget restore ./OptimizelySDK.NETFramework.sln
       - name: Build and strongly name assemblies

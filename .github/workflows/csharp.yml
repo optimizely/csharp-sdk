@@ -73,25 +73,6 @@ jobs:
               echo "✓ .NET 4.5 Reference Assemblies installed"
           }
           
-          # Verify installations
-          echo "Verifying installations..."
-          if (Test-Path "C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\mscorlib.dll") {
-              echo "✓ .NET 4.0 mscorlib.dll found"
-          } else {
-              echo "✗ .NET 4.0 mscorlib.dll missing"
-          }
-          if (Test-Path "C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.5\mscorlib.dll") {
-              echo "✓ .NET 4.5 mscorlib.dll found"
-          } else {
-              echo "✗ .NET 4.5 mscorlib.dll missing"
-          }
-          
-          # Show what we have available now
-          echo "Final targeting pack listing..."
-          if (Test-Path "C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework") {
-              dir "C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework"
-          }
-          
           # Cleanup
           Remove-Item -Path "temp_ref_assemblies" -Recurse -Force
         continue-on-error: true
