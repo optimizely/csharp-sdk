@@ -31,7 +31,7 @@ jobs:
   buildFrameworkVersions:
     name: Build Framework versions
     needs: [ variables ]
-    runs-on: windows-2022 # required version for Framework 4.0
+    runs-on: windows-2022
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
