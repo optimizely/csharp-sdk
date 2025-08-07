@@ -75,7 +75,6 @@ jobs:
           
           # Cleanup
           Remove-Item -Path "temp_ref_assemblies" -Recurse -Force
-        continue-on-error: true
       - name: Restore NuGet packages
         run: nuget restore ./OptimizelySDK.NETFramework.sln
       - name: Build & strongly name assemblies
