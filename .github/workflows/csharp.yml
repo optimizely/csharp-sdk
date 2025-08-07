@@ -46,9 +46,19 @@ jobs:
         uses: NuGet/setup-nuget@v1
       - name: Install .NET Framework Developer Packs
         run: |
+          # Install .NET 4.5.2 developer pack (this works reliably)
           choco install netfx-4.5.2-devpack -y
-          choco install windows-sdk-7.1 -y
-          choco install netfx-4.0.3-devpack -y
+          
+          # Check what targeting packs are already available
+          echo "Checking available targeting packs..."
+          dir "C:\Program Files (x86)\Microsoft SDKs\Windows\v8.0A\bin\NETFX 4.0 Tools" || echo "No .NET 4.0 tools found"
+          dir "C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework" || echo "No reference assemblies found"
+          
+          # Try to install .NET 4.0 targeting pack from a different source
+          echo "Attempting to download .NET 4.0 targeting pack..."
+          Invoke-WebRequest -Uri "https://download.microsoft.com/download/1/B/E/1BE39E79-7E39-46A3-96FF-047F95396215/dotNetFx40_Full_setup.exe" -OutFile "dotnet40.exe"
+          .\dotnet40.exe /quiet /norestart || echo "Installation failed or already installed"
+        continue-on-error: true
       - name: Restore NuGet packages
         run: nuget restore ./OptimizelySDK.NETFramework.sln
       - name: Build & strongly name assemblies
