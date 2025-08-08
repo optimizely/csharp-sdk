@@ -29,7 +29,7 @@ jobs:
   netFrameworksAndUnitTest:
     name: Build Framework & Run Unit Tests
     needs: [ lintCodebase ]
-    runs-on: windows-2019 # required version for Framework 4.0
+    runs-on: windows-2022
     env:
       REPO_SLUG: ${{ github.repository }}
       BUILD_NUMBER: ${{ github.run_id }}
@@ -44,15 +44,51 @@ jobs:
         uses: microsoft/setup-msbuild@v1
       - name: Setup NuGet
         uses: NuGet/setup-nuget@v1
+      - name: Download and Extract .NET Framework Reference Assemblies
+        run: |
+          # Create temp directory
+          New-Item -ItemType Directory -Path "temp_ref_assemblies" -Force
+          
+          # Download .NET 4.0 Reference Assemblies
+          echo "Downloading .NET 4.0 Reference Assemblies..."
+          Invoke-WebRequest -Uri "https://www.nuget.org/api/v2/package/Microsoft.NETFramework.ReferenceAssemblies.net40/1.0.3" -OutFile "temp_ref_assemblies/net40_ref.zip"
+          
+          # Download .NET 4.5 Reference Assemblies  
+          echo "Downloading .NET 4.5 Reference Assemblies..."
+          Invoke-WebRequest -Uri "https://www.nuget.org/api/v2/package/Microsoft.NETFramework.ReferenceAssemblies.net45/1.0.3" -OutFile "temp_ref_assemblies/net45_ref.zip"
+          
+          # Extract .NET 4.0 Reference Assemblies
+          echo "Extracting .NET 4.0 Reference Assemblies..."
+          Expand-Archive -Path "temp_ref_assemblies/net40_ref.zip" -DestinationPath "temp_ref_assemblies/net40" -Force
+          if (Test-Path "temp_ref_assemblies/net40/build/.NETFramework/v4.0") {
+              echo "✓ .NET 4.0 Reference Assemblies extracted to workspace"
+          }
+          
+          # Extract .NET 4.5 Reference Assemblies
+          echo "Extracting .NET 4.5 Reference Assemblies..."
+          Expand-Archive -Path "temp_ref_assemblies/net45_ref.zip" -DestinationPath "temp_ref_assemblies/net45" -Force
+          if (Test-Path "temp_ref_assemblies/net45/build/.NETFramework/v4.5") {
+              echo "✓ .NET 4.5 Reference Assemblies extracted to workspace"
+          }
       - name: Restore NuGet packages
         run: nuget restore ./OptimizelySDK.NETFramework.sln
       - name: Build & strongly name assemblies
-        run: msbuild /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=$(pwd)/keypair.snk /p:Configuration=Release ./OptimizelySDK.NETFramework.sln
+        run: |
+          # Build with workspace-relative reference assembly paths
+          $Net40RefPath = "$(pwd)\temp_ref_assemblies\net40\build\.NETFramework\v4.0"
+          $Net45RefPath = "$(pwd)\temp_ref_assemblies\net45\build\.NETFramework\v4.5"
+          
+          echo "Using .NET 4.0 Reference Assemblies from: $Net40RefPath"
+          echo "Using .NET 4.5 Reference Assemblies from: $Net45RefPath"
+          
+          msbuild /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=$(pwd)/keypair.snk /p:Configuration=Release /p:FrameworkPathOverride="$Net45RefPath" ./OptimizelySDK.NETFramework.sln
       - name: Install & Run NUnit tests
         run: |
           nuget install NUnit.Console -Version 3.18.1 -DirectDownload -OutputDirectory .
           # https://docs.nunit.org/articles/nunit/running-tests/Console-Command-Line.html
           ./NUnit.ConsoleRunner.3.18.1\tools\nunit3-console.exe /timeout 10000 /process Separate ./OptimizelySDK.Tests/bin/Release/OptimizelySDK.Tests.dll
+      - name: Cleanup reference assemblies
+        run: Remove-Item -Path "temp_ref_assemblies" -Recurse -Force
   
   netStandard16:
     name: Build Standard 1.6
