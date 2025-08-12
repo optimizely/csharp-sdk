@@ -242,7 +242,7 @@ namespace OptimizelySDK.Event.Builder
                 GetImpressionOrConversionParamsWithCommonParams(commonParams,
                     new object[] { impressionOnlyParams });
 
-            var region = !string.IsNullOrEmpty(config.Region) ? config.Region: "US";
+            var region = !string.IsNullOrEmpty(config.Region) ? config.Region : "US";
 
             return new LogEvent(EventFactory.EventEndpoints[region], impressionParams, HTTP_VERB, HTTP_HEADERS);
         }
@@ -270,7 +270,7 @@ namespace OptimizelySDK.Event.Builder
             var conversionParams =
                 GetImpressionOrConversionParamsWithCommonParams(commonParams, conversionOnlyParams);
 
-            var region = !string.IsNullOrEmpty(config.Region) ? config.Region: "US";
+            var region = !string.IsNullOrEmpty(config.Region) ? config.Region : "US";
 
             return new LogEvent(EventFactory.EventEndpoints[region], conversionParams, HTTP_VERB, HTTP_HEADERS);
         }
