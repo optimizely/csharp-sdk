@@ -832,5 +832,11 @@ namespace OptimizelySDK.Config
         {
             return _datafile;
         }
+
+        /// <summary>
+        /// Returns the datafile corresponding to ProjectConfig
+        /// </summary>
+        /// <returns>the datafile string corresponding to ProjectConfig</returns>
+        public string Region { get; set; }
     }
 }

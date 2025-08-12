@@ -18,7 +18,7 @@ namespace OptimizelySDK.Tests.EventTests
         public void DispatchEvent(LogEvent logEvent)
         {
             Assert.AreEqual(logEvent.HttpVerb, "POST");
-            Assert.AreEqual(logEvent.Url, EventFactory.EVENT_ENDPOINT);
+            Assert.AreEqual(logEvent.Url, EventFactory.EventEndpoints["US"]);
             IsUpdated = true;
         }
     }

@@ -34,9 +34,15 @@ namespace OptimizelySDK.Event
     {
         private const string CUSTOM_ATTRIBUTE_FEATURE_TYPE = "custom";
 
-        public const string
-            EVENT_ENDPOINT =
-                "https://logx.optimizely.com/v1/events"; // Should be part of the datafile
+        // Supported regions for event endpoints
+        public static readonly string[] SupportedRegions = { "US", "EU" };
+
+        // Dictionary of event endpoints for different regions
+        public static readonly Dictionary<string, string> EventEndpoints = new Dictionary<string, string>
+        {
+            {"US", "https://logx.optimizely.com/v1/events"},
+            {"EU", "https://eu.logx.optimizely.com/v1/events"}
+        };
 
         private const string ACTIVATE_EVENT_KEY = "campaign_activated";
 
@@ -63,6 +69,10 @@ namespace OptimizelySDK.Event
 
             var visitors = new List<Visitor>(userEvents.Count());
 
+            
+            // Default to US region
+            string region = "US";
+
             foreach (var userEvent in userEvents)
             {
                 if (userEvent is ImpressionEvent)
@@ -80,6 +90,9 @@ namespace OptimizelySDK.Event
                 }
 
                 var userContext = userEvent.Context;
+                
+                // Get region from the event's context, default to US if not specified
+                region = !string.IsNullOrEmpty(userContext.Region) ? userContext.Region : "US";
 
                 builder.WithClientName(userContext.ClientName).
                     WithClientVersion(userContext.ClientVersion).
@@ -102,7 +115,16 @@ namespace OptimizelySDK.Event
             var eventBatchDictionary =
                 JObject.FromObject(eventBatch).ToObject<Dictionary<string, object>>();
 
-            return new LogEvent(EVENT_ENDPOINT, eventBatchDictionary, "POST",
+            // Use the region to determine the endpoint URL, falling back to US if the region is not found or not supported
+            string endpointUrl = EventEndpoints["US"]; // Default to US endpoint
+            
+            // Only try to use the region-specific endpoint if it's a supported region
+            if (SupportedRegions.Contains(region) && EventEndpoints.ContainsKey(region))
+            {
+                endpointUrl = EventEndpoints[region];
+            }
+
+            return new LogEvent(endpointUrl, eventBatchDictionary, "POST",
                 new Dictionary<string, string>
                 {
                     { "Content-Type", "application/json" },

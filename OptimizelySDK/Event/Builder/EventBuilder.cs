@@ -27,9 +27,6 @@ namespace OptimizelySDK.Event.Builder
     [Obsolete("This class is deprecated. Use 'OptimizelySDK.Event.EventFactory'.")]
     public class EventBuilder
     {
-        private const string IMPRESSION_ENDPOINT = "https://logx.optimizely.com/v1/events";
-
-        private const string CONVERSION_ENDPOINT = "https://logx.optimizely.com/v1/events";
 
         private const string HTTP_VERB = "POST";
 
@@ -245,7 +242,9 @@ namespace OptimizelySDK.Event.Builder
                 GetImpressionOrConversionParamsWithCommonParams(commonParams,
                     new object[] { impressionOnlyParams });
 
-            return new LogEvent(IMPRESSION_ENDPOINT, impressionParams, HTTP_VERB, HTTP_HEADERS);
+            var region = !string.IsNullOrEmpty(config.Region) ? config.Region: "US";
+
+            return new LogEvent(EventFactory.EventEndpoints[region], impressionParams, HTTP_VERB, HTTP_HEADERS);
         }
 
 
@@ -270,8 +269,10 @@ namespace OptimizelySDK.Event.Builder
 
             var conversionParams =
                 GetImpressionOrConversionParamsWithCommonParams(commonParams, conversionOnlyParams);
+            
+            var region = !string.IsNullOrEmpty(config.Region) ? config.Region: "US";
 
-            return new LogEvent(CONVERSION_ENDPOINT, conversionParams, HTTP_VERB, HTTP_HEADERS);
+            return new LogEvent(EventFactory.EventEndpoints[region], conversionParams, HTTP_VERB, HTTP_HEADERS);
         }
     }
 }

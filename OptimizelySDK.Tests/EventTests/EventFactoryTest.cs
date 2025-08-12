@@ -67,6 +67,208 @@ namespace OptimizelySDK.Tests.EventTests
         }
 
         [Test]
+        public void TestCreateImpressionEventNoAttributesEU()
+        {
+            var guid = Guid.NewGuid();
+            var timeStamp = TestData.SecondsSince1970();
+
+            var payloadParams = new Dictionary<string, object>
+            {
+                {
+                    "visitors", new object[]
+                    {
+                        new Dictionary<string, object>()
+                        {
+                            {
+                                "snapshots", new object[]
+                                {
+                                    new Dictionary<string, object>
+                                    {
+                                        {
+                                            "decisions", new object[]
+                                            {
+                                                new Dictionary<string, object>
+                                                {
+                                                    { "campaign_id", "7719770039" },
+                                                    { "experiment_id", "7716830082" },
+                                                    { "variation_id", "7722370027" },
+                                                    {
+                                                        "metadata",
+                                                        new Dictionary<string, object>
+                                                        {
+                                                            { "rule_type", "experiment" },
+                                                            { "rule_key", "test_experiment" },
+                                                            { "flag_key", "test_experiment" },
+                                                            { "variation_key", "control" },
+                                                            { "enabled", false },
+                                                        }
+                                                    },
+                                                },
+                                            }
+                                        },
+                                        {
+                                            "events", new object[]
+                                            {
+                                                new Dictionary<string, object>
+                                                {
+                                                    { "entity_id", "7719770039" },
+                                                    { "timestamp", timeStamp },
+                                                    { "uuid", guid },
+                                                    { "key", "campaign_activated" },
+                                                },
+                                            }
+                                        },
+                                    },
+                                }
+                            },
+                            {
+                                "attributes", new object[]
+                                {
+                                    new Dictionary<string, object>
+                                    {
+                                        { "entity_id", ControlAttributes.BOT_FILTERING_ATTRIBUTE },
+                                        { "key", ControlAttributes.BOT_FILTERING_ATTRIBUTE },
+                                        { "type", "custom" },
+                                        { "value", true },
+                                    },
+                                }
+                            },
+                            { "visitor_id", TestUserId },
+                        },
+                    }
+                },
+                { "project_id", "7720880029" },
+                { "account_id", "1592310167" },
+                { "enrich_decisions", true },
+                { "client_name", "csharp-sdk" },
+                { "client_version", Optimizely.SDK_VERSION },
+                { "revision", "15" },
+                { "anonymize_ip", false },
+            };
+
+            var expectedLogEvent = new LogEvent(EventFactory.EventEndpoints["EU"],
+                payloadParams,
+                "POST",
+                new Dictionary<string, string>
+                {
+                    { "Content-Type", "application/json" },
+                });
+            
+            Config.Region = "EU";
+            var impressionEvent = UserEventFactory.CreateImpressionEvent(
+                Config, Config.GetExperimentFromKey("test_experiment"), "7722370027", TestUserId,
+                null, "test_experiment", "experiment");
+
+            var logEvent = EventFactory.CreateLogEvent(impressionEvent, Logger);
+
+            TestData.ChangeGUIDAndTimeStamp(expectedLogEvent.Params, impressionEvent.Timestamp,
+                Guid.Parse(impressionEvent.UUID));
+
+            Assert.IsTrue(TestData.CompareObjects(expectedLogEvent, logEvent));
+        }
+        
+        [Test]
+        public void TestCreateImpressionEventNoAttributesInvalid()
+        {
+            var guid = Guid.NewGuid();
+            var timeStamp = TestData.SecondsSince1970();
+
+            var payloadParams = new Dictionary<string, object>
+            {
+                {
+                    "visitors", new object[]
+                    {
+                        new Dictionary<string, object>()
+                        {
+                            {
+                                "snapshots", new object[]
+                                {
+                                    new Dictionary<string, object>
+                                    {
+                                        {
+                                            "decisions", new object[]
+                                            {
+                                                new Dictionary<string, object>
+                                                {
+                                                    { "campaign_id", "7719770039" },
+                                                    { "experiment_id", "7716830082" },
+                                                    { "variation_id", "7722370027" },
+                                                    {
+                                                        "metadata",
+                                                        new Dictionary<string, object>
+                                                        {
+                                                            { "rule_type", "experiment" },
+                                                            { "rule_key", "test_experiment" },
+                                                            { "flag_key", "test_experiment" },
+                                                            { "variation_key", "control" },
+                                                            { "enabled", false },
+                                                        }
+                                                    },
+                                                },
+                                            }
+                                        },
+                                        {
+                                            "events", new object[]
+                                            {
+                                                new Dictionary<string, object>
+                                                {
+                                                    { "entity_id", "7719770039" },
+                                                    { "timestamp", timeStamp },
+                                                    { "uuid", guid },
+                                                    { "key", "campaign_activated" },
+                                                },
+                                            }
+                                        },
+                                    },
+                                }
+                            },
+                            {
+                                "attributes", new object[]
+                                {
+                                    new Dictionary<string, object>
+                                    {
+                                        { "entity_id", ControlAttributes.BOT_FILTERING_ATTRIBUTE },
+                                        { "key", ControlAttributes.BOT_FILTERING_ATTRIBUTE },
+                                        { "type", "custom" },
+                                        { "value", true },
+                                    },
+                                }
+                            },
+                            { "visitor_id", TestUserId },
+                        },
+                    }
+                },
+                { "project_id", "7720880029" },
+                { "account_id", "1592310167" },
+                { "enrich_decisions", true },
+                { "client_name", "csharp-sdk" },
+                { "client_version", Optimizely.SDK_VERSION },
+                { "revision", "15" },
+                { "anonymize_ip", false },
+            };
+
+            var expectedLogEvent = new LogEvent(EventFactory.EventEndpoints["US"],
+                payloadParams,
+                "POST",
+                new Dictionary<string, string>
+                {
+                    { "Content-Type", "application/json" },
+                });
+            
+            Config.Region = "ZZ";
+            var impressionEvent = UserEventFactory.CreateImpressionEvent(
+                Config, Config.GetExperimentFromKey("test_experiment"), "7722370027", TestUserId,
+                null, "test_experiment", "experiment");
+
+            var logEvent = EventFactory.CreateLogEvent(impressionEvent, Logger);
+
+            TestData.ChangeGUIDAndTimeStamp(expectedLogEvent.Params, impressionEvent.Timestamp,
+                Guid.Parse(impressionEvent.UUID));
+            
+            Assert.IsTrue(TestData.CompareObjects(expectedLogEvent, logEvent));
+        }
+        
+        [Test]
         public void TestCreateImpressionEventNoAttributes()
         {
             var guid = Guid.NewGuid();
@@ -146,7 +348,7 @@ namespace OptimizelySDK.Tests.EventTests
                 { "anonymize_ip", false },
             };
 
-            var expectedLogEvent = new LogEvent("https://logx.optimizely.com/v1/events",
+            var expectedLogEvent = new LogEvent(EventFactory.EventEndpoints["US"],
                 payloadParams,
                 "POST",
                 new Dictionary<string, string>
@@ -251,7 +453,7 @@ namespace OptimizelySDK.Tests.EventTests
                 { "anonymize_ip", false },
             };
 
-            var expectedLogEvent = new LogEvent("https://logx.optimizely.com/v1/events",
+            var expectedLogEvent = new LogEvent(EventFactory.EventEndpoints["US"],
                 payloadParams,
                 "POST",
                 new Dictionary<string, string>
@@ -383,7 +585,7 @@ namespace OptimizelySDK.Tests.EventTests
                 { "anonymize_ip", false },
             };
 
-            var expectedLogEvent = new LogEvent("https://logx.optimizely.com/v1/events",
+            var expectedLogEvent = new LogEvent(EventFactory.EventEndpoints["US"],
                 payloadParams,
                 "POST",
                 new Dictionary<string, string>
@@ -509,7 +711,7 @@ namespace OptimizelySDK.Tests.EventTests
                 { "anonymize_ip", false },
             };
 
-            var expectedLogEvent = new LogEvent("https://logx.optimizely.com/v1/events",
+            var expectedLogEvent = new LogEvent(EventFactory.EventEndpoints["US"],
                 payloadParams,
                 "POST",
                 new Dictionary<string, string>
@@ -642,7 +844,7 @@ namespace OptimizelySDK.Tests.EventTests
                 { "anonymize_ip", false },
             };
 
-            var expectedLogEvent = new LogEvent("https://logx.optimizely.com/v1/events",
+            var expectedLogEvent = new LogEvent(EventFactory.EventEndpoints["US"],
                 payloadParams,
                 "POST",
                 new Dictionary<string, string>
@@ -735,7 +937,7 @@ namespace OptimizelySDK.Tests.EventTests
             };
 
             var expectedEvent = new LogEvent(
-                "https://logx.optimizely.com/v1/events",
+                EventFactory.EventEndpoints["US"],
                 payloadParams,
                 "POST",
                 new Dictionary<string, string>
@@ -747,6 +949,170 @@ namespace OptimizelySDK.Tests.EventTests
                 { "7716830082", new Variation { Id = "7722370027", Key = "control" } },
             };
 
+            var conversionEvent =
+                UserEventFactory.CreateConversionEvent(Config, "purchase", TestUserId, null, null);
+            var logEvent = EventFactory.CreateLogEvent(conversionEvent, Logger);
+
+            TestData.ChangeGUIDAndTimeStamp(expectedEvent.Params, conversionEvent.Timestamp,
+                Guid.Parse(conversionEvent.UUID));
+
+            Assert.IsTrue(TestData.CompareObjects(expectedEvent, logEvent));
+        }
+        
+        [Test]
+        public void TestCreateConversionEventNoAttributesNoValueEU()
+        {
+            var guid = Guid.NewGuid();
+            var timeStamp = TestData.SecondsSince1970();
+
+            var payloadParams = new Dictionary<string, object>
+            {
+                {
+                    "visitors", new object[]
+                    {
+                        new Dictionary<string, object>
+                        {
+                            {
+                                "snapshots", new object[]
+                                {
+                                    new Dictionary<string, object>
+                                    {
+                                        {
+                                            "events", new object[]
+                                            {
+                                                new Dictionary<string, object>
+                                                {
+                                                    { "entity_id", "7718020063" },
+                                                    { "timestamp", timeStamp },
+                                                    { "uuid", guid },
+                                                    { "key", "purchase" },
+                                                },
+                                            }
+                                        },
+                                    },
+                                }
+                            },
+                            { "visitor_id", TestUserId },
+                            {
+                                "attributes", new object[]
+                                {
+                                    new Dictionary<string, object>
+                                    {
+                                        { "entity_id", ControlAttributes.BOT_FILTERING_ATTRIBUTE },
+                                        { "key", ControlAttributes.BOT_FILTERING_ATTRIBUTE },
+                                        { "type", "custom" },
+                                        { "value", true },
+                                    },
+                                }
+                            },
+                        },
+                    }
+                },
+                { "project_id", "7720880029" },
+                { "enrich_decisions", true },
+                { "account_id", "1592310167" },
+                { "client_name", "csharp-sdk" },
+                { "client_version", Optimizely.SDK_VERSION },
+                { "revision", "15" },
+                { "anonymize_ip", false },
+            };
+
+            var expectedEvent = new LogEvent(
+                EventFactory.EventEndpoints["EU"],
+                payloadParams,
+                "POST",
+                new Dictionary<string, string>
+                {
+                    { "Content-Type", "application/json" },
+                });
+            var experimentToVariationMap = new Dictionary<string, Variation>
+            {
+                { "7716830082", new Variation { Id = "7722370027", Key = "control" } },
+            };
+
+            Config.Region = "EU";
+            var conversionEvent =
+                UserEventFactory.CreateConversionEvent(Config, "purchase", TestUserId, null, null);
+            var logEvent = EventFactory.CreateLogEvent(conversionEvent, Logger);
+
+            TestData.ChangeGUIDAndTimeStamp(expectedEvent.Params, conversionEvent.Timestamp,
+                Guid.Parse(conversionEvent.UUID));
+
+            Assert.IsTrue(TestData.CompareObjects(expectedEvent, logEvent));
+        }
+        
+        [Test]
+        public void TestCreateConversionEventNoAttributesNoValueInvalid()
+        {
+            var guid = Guid.NewGuid();
+            var timeStamp = TestData.SecondsSince1970();
+
+            var payloadParams = new Dictionary<string, object>
+            {
+                {
+                    "visitors", new object[]
+                    {
+                        new Dictionary<string, object>
+                        {
+                            {
+                                "snapshots", new object[]
+                                {
+                                    new Dictionary<string, object>
+                                    {
+                                        {
+                                            "events", new object[]
+                                            {
+                                                new Dictionary<string, object>
+                                                {
+                                                    { "entity_id", "7718020063" },
+                                                    { "timestamp", timeStamp },
+                                                    { "uuid", guid },
+                                                    { "key", "purchase" },
+                                                },
+                                            }
+                                        },
+                                    },
+                                }
+                            },
+                            { "visitor_id", TestUserId },
+                            {
+                                "attributes", new object[]
+                                {
+                                    new Dictionary<string, object>
+                                    {
+                                        { "entity_id", ControlAttributes.BOT_FILTERING_ATTRIBUTE },
+                                        { "key", ControlAttributes.BOT_FILTERING_ATTRIBUTE },
+                                        { "type", "custom" },
+                                        { "value", true },
+                                    },
+                                }
+                            },
+                        },
+                    }
+                },
+                { "project_id", "7720880029" },
+                { "enrich_decisions", true },
+                { "account_id", "1592310167" },
+                { "client_name", "csharp-sdk" },
+                { "client_version", Optimizely.SDK_VERSION },
+                { "revision", "15" },
+                { "anonymize_ip", false },
+            };
+
+            var expectedEvent = new LogEvent(
+                EventFactory.EventEndpoints["US"],
+                payloadParams,
+                "POST",
+                new Dictionary<string, string>
+                {
+                    { "Content-Type", "application/json" },
+                });
+            var experimentToVariationMap = new Dictionary<string, Variation>
+            {
+                { "7716830082", new Variation { Id = "7722370027", Key = "control" } },
+            };
+
+            Config.Region = "ZZ";
             var conversionEvent =
                 UserEventFactory.CreateConversionEvent(Config, "purchase", TestUserId, null, null);
             var logEvent = EventFactory.CreateLogEvent(conversionEvent, Logger);
@@ -823,7 +1189,7 @@ namespace OptimizelySDK.Tests.EventTests
             };
 
             var expectedEvent = new LogEvent(
-                "https://logx.optimizely.com/v1/events",
+                EventFactory.EventEndpoints["US"],
                 payloadParams,
                 "POST",
                 new Dictionary<string, string>
@@ -918,7 +1284,7 @@ namespace OptimizelySDK.Tests.EventTests
             };
 
             var expectedEvent = new LogEvent(
-                "https://logx.optimizely.com/v1/events",
+                EventFactory.EventEndpoints["US"],
                 payloadParams,
                 "POST",
                 new Dictionary<string, string>
@@ -1020,7 +1386,7 @@ namespace OptimizelySDK.Tests.EventTests
             };
 
             var expectedEvent = new LogEvent(
-                "https://logx.optimizely.com/v1/events",
+                EventFactory.EventEndpoints["US"],
                 payloadParams,
                 "POST",
                 new Dictionary<string, string>
@@ -1122,7 +1488,7 @@ namespace OptimizelySDK.Tests.EventTests
             };
 
             var expectedEvent = new LogEvent(
-                "https://logx.optimizely.com/v1/events",
+                EventFactory.EventEndpoints["US"],
                 payloadParams,
                 "POST",
                 new Dictionary<string, string>
@@ -1218,7 +1584,7 @@ namespace OptimizelySDK.Tests.EventTests
             };
 
             var expectedEvent = new LogEvent(
-                "https://logx.optimizely.com/v1/events",
+                EventFactory.EventEndpoints["US"],
                 payloadParams,
                 "POST",
                 new Dictionary<string, string>
@@ -1316,7 +1682,7 @@ namespace OptimizelySDK.Tests.EventTests
             };
 
             var expectedEvent = new LogEvent(
-                "https://logx.optimizely.com/v1/events",
+                EventFactory.EventEndpoints["US"],
                 payloadParams,
                 "POST",
                 new Dictionary<string, string>
@@ -1412,7 +1778,7 @@ namespace OptimizelySDK.Tests.EventTests
             };
 
             var expectedEvent = new LogEvent(
-                "https://logx.optimizely.com/v1/events",
+                EventFactory.EventEndpoints["US"],
                 payloadParams,
                 "POST",
                 new Dictionary<string, string>
@@ -1507,7 +1873,7 @@ namespace OptimizelySDK.Tests.EventTests
             };
 
             var expectedEvent = new LogEvent(
-                "https://logx.optimizely.com/v1/events",
+                EventFactory.EventEndpoints["US"],
                 payloadParams,
                 "POST",
                 new Dictionary<string, string>
@@ -1609,7 +1975,7 @@ namespace OptimizelySDK.Tests.EventTests
             };
 
             var expectedEvent = new LogEvent(
-                "https://logx.optimizely.com/v1/events",
+                EventFactory.EventEndpoints["US"],
                 payloadParams,
                 "POST",
                 new Dictionary<string, string>
@@ -1727,7 +2093,7 @@ namespace OptimizelySDK.Tests.EventTests
                 { "anonymize_ip", false },
             };
 
-            var expectedLogEvent = new LogEvent("https://logx.optimizely.com/v1/events",
+            var expectedLogEvent = new LogEvent(EventFactory.EventEndpoints["US"],
                 payloadParams,
                 "POST",
                 new Dictionary<string, string>
@@ -1838,7 +2204,7 @@ namespace OptimizelySDK.Tests.EventTests
                 { "anonymize_ip", false },
             };
 
-            var expectedLogEvent = new LogEvent("https://logx.optimizely.com/v1/events",
+            var expectedLogEvent = new LogEvent(EventFactory.EventEndpoints["US"],
                 payloadParams,
                 "POST",
                 new Dictionary<string, string>
@@ -1945,7 +2311,7 @@ namespace OptimizelySDK.Tests.EventTests
                 { "anonymize_ip", false },
             };
 
-            var expectedLogEvent = new LogEvent("https://logx.optimizely.com/v1/events",
+            var expectedLogEvent = new LogEvent(EventFactory.EventEndpoints["US"],
                 payloadParams,
                 "POST",
                 new Dictionary<string, string>
@@ -2039,7 +2405,7 @@ namespace OptimizelySDK.Tests.EventTests
             };
 
             var expectedEvent = new LogEvent(
-                "https://logx.optimizely.com/v1/events",
+                EventFactory.EventEndpoints["US"],
                 payloadParams,
                 "POST",
                 new Dictionary<string, string>
@@ -2128,7 +2494,7 @@ namespace OptimizelySDK.Tests.EventTests
             };
 
             var expectedEvent = new LogEvent(
-                "https://logx.optimizely.com/v1/events",
+                EventFactory.EventEndpoints["US"],
                 payloadParams,
                 "POST",
                 new Dictionary<string, string>
@@ -2250,7 +2616,7 @@ namespace OptimizelySDK.Tests.EventTests
 
 
             var expectedLogEvent = new LogEvent(
-                "https://logx.optimizely.com/v1/events",
+                EventFactory.EventEndpoints["US"],
                 payloadParams,
                 "POST",
                 new Dictionary<string, string>
@@ -2358,7 +2724,7 @@ namespace OptimizelySDK.Tests.EventTests
             };
 
             var expectedEvent = new LogEvent(
-                "https://logx.optimizely.com/v1/events",
+                EventFactory.EventEndpoints["US"],
                 payloadParams,
                 "POST",
                 new Dictionary<string, string>

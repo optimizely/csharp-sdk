@@ -40,6 +40,9 @@ namespace OptimizelySDK.Event.Entity
 
         [JsonProperty("anonymize_ip")]
         public bool AnonymizeIP { get; protected set; }
+        
+        [JsonProperty("region")]
+        public string Region { get; protected set; }
 
         /// <summary>
         /// EventContext builder
@@ -50,6 +53,7 @@ namespace OptimizelySDK.Event.Entity
             private string ProjectId;
             private string Revision;
             private bool AnonymizeIP;
+            private string Region;
 
             public Builder WithAccountId(string accountId)
             {
@@ -74,6 +78,12 @@ namespace OptimizelySDK.Event.Entity
                 AnonymizeIP = anonymizeIP;
                 return this;
             }
+            
+            public Builder WithRegion(string region)
+            {
+                Region = region;
+                return this;
+            }
 
             /// <summary>
             /// Build EventContext instance
@@ -89,6 +99,7 @@ namespace OptimizelySDK.Event.Entity
                 eventContext.ClientName = Optimizely.SDK_TYPE;
                 eventContext.ClientVersion = Optimizely.SDK_VERSION;
                 eventContext.AnonymizeIP = AnonymizeIP;
+                eventContext.Region = Region;
 
                 return eventContext;
             }
