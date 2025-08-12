@@ -223,6 +223,9 @@
     <Compile Include="..\OptimizelySDK\Utils\ExperimentUtils.cs">
       <Link>Bucketing\ExperimentUtils</Link>
     </Compile>
+    <Compile Include="..\OptimizelySDK\Utils\HoldoutConfig.cs">
+      <Link>Utils\HoldoutConfig.cs</Link>
+    </Compile>
     <Compile Include="..\OptimizelySDK\Bucketing\UserProfileUtil.cs">
       <Link>Bucketing\UserProfileUtil</Link>
     </Compile>

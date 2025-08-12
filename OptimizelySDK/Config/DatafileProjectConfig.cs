@@ -217,6 +217,13 @@ namespace OptimizelySDK.Config
         public Dictionary<string, Rollout> RolloutIdMap => _RolloutIdMap;
 
         /// <summary>
+        /// Associative array of Holdout ID to Holdout(s) in the datafile
+        /// </summary>
+        private Dictionary<string, Holdout> _HoldoutIdMap;
+
+        public Dictionary<string, Holdout> HoldoutIdMap => _HoldoutIdMap;
+
+        /// <summary>
         /// Associative array of experiment IDs that exist in any feature
         /// for checking that experiment is a feature experiment.
         /// </summary>
@@ -231,6 +238,11 @@ namespace OptimizelySDK.Config
 
         public Dictionary<string, Dictionary<string, Variation>> FlagVariationMap =>
             _FlagVariationMap;
+
+        /// <summary>
+        /// Holdout configuration manager for flag-to-holdout relationships.
+        /// </summary>
+        private HoldoutConfig _holdoutConfig;
 
         //========================= Interfaces ===========================
 
@@ -287,6 +299,11 @@ namespace OptimizelySDK.Config
         public Rollout[] Rollouts { get; set; }
 
         /// <summary>
+        /// Associative list of Holdouts.
+        /// </summary>
+        public Holdout[] Holdouts { get; set; }
+
+        /// <summary>
         /// Associative list of Integrations.
         /// </summary>
         public Integration[] Integrations { get; set; }
@@ -309,6 +326,7 @@ namespace OptimizelySDK.Config
             TypedAudiences = TypedAudiences ?? new Audience[0];
             FeatureFlags = FeatureFlags ?? new FeatureFlag[0];
             Rollouts = Rollouts ?? new Rollout[0];
+            Holdouts = Holdouts ?? new Holdout[0];
             Integrations = Integrations ?? new Integration[0];
             _ExperimentKeyMap = new Dictionary<string, Experiment>();
 
@@ -327,6 +345,8 @@ namespace OptimizelySDK.Config
                 f => f.Key, true);
             _RolloutIdMap = ConfigParser<Rollout>.GenerateMap(Rollouts,
                 r => r.Id.ToString(), true);
+            _HoldoutIdMap = ConfigParser<Holdout>.GenerateMap(Holdouts,
+                h => h.Id, true);
 
             // Overwrite similar items in audience id map with typed audience id map.
             var typedAudienceIdMap = ConfigParser<Audience>.GenerateMap(TypedAudiences,
@@ -450,6 +470,9 @@ namespace OptimizelySDK.Config
             }
 
             _FlagVariationMap = flagToVariationsMap;
+
+            // Initialize HoldoutConfig for managing flag-to-holdout relationships
+            _holdoutConfig = new HoldoutConfig(Holdouts ?? new Holdout[0]);
         }
 
         /// <summary>
@@ -774,6 +797,34 @@ namespace OptimizelySDK.Config
         }
 
         /// <summary>
+        /// Get the holdout from the ID
+        /// </summary>
+        /// <param name="holdoutId">ID for holdout</param>
+        /// <returns>Holdout Entity corresponding to the holdout ID or a dummy entity if ID is invalid</returns>
+        public Holdout GetHoldout(string holdoutId)
+        {
+#if NET35 || NET40
+            if (string.IsNullOrEmpty(holdoutId) || string.IsNullOrEmpty(holdoutId.Trim()))
+#else
+            if (string.IsNullOrWhiteSpace(holdoutId))
+#endif
+            {
+                return new Holdout();
+            }
+
+            if (_HoldoutIdMap.ContainsKey(holdoutId))
+            {
+                return _HoldoutIdMap[holdoutId];
+            }
+
+            var message = $@"Holdout ID ""{holdoutId}"" is not in datafile.";
+            Logger.Log(LogLevel.ERROR, message);
+            ErrorHandler.HandleError(
+                new InvalidExperimentException("Provided holdout is not in datafile."));
+            return new Holdout();
+        }
+
+        /// <summary>
         /// Get attribute ID for the provided attribute key
         /// </summary>
         /// <param name="attributeKey">Key of the Attribute</param>
@@ -831,6 +882,17 @@ namespace OptimizelySDK.Config
         public string ToDatafile()
         {
             return _datafile;
+        }
+
+        /// <summary>
+        /// Get holdout instances associated with the given feature flag key.
+        /// </summary>
+        /// <param name="flagKey">Feature flag key</param>
+        /// <returns>Array of holdouts associated with the flag, empty array if none</returns>
+        public Holdout[] GetHoldoutsForFlag(string flagKey)
+        {
+            var holdouts = _holdoutConfig?.GetHoldoutsForFlag(flagKey);
+            return holdouts?.ToArray() ?? new Holdout[0];
         }
     }
 }
