@@ -817,7 +817,9 @@ namespace OptimizelySDK.Config
         }
 
         /// <summary>
-        ///Returns the datafile corresponding to ProjectConfig
+        /// Gets or sets the region associated with the project configuration.
+        /// This typically indicates the data residency or deployment region (e.g., "us", "eu").
+        /// Valid values depend on the Optimizely environment and configuration.
         /// </summary>
         /// <returns>the datafile string corresponding to ProjectConfig</returns>
         public string ToDatafile()
