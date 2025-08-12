@@ -697,8 +697,7 @@ namespace OptimizelySDK.Config
                 return _VariationIdMapByExperimentId[experimentId][variationId];
             }
 
-            var message = $@"No variation ID ""{variationId
-            }"" defined in datafile for experiment ""{experimentId}"".";
+            var message = $@"No variation ID ""{variationId}"" defined in datafile for experiment ""{experimentId}"".";
             Logger.Log(LogLevel.ERROR, message);
             ErrorHandler.HandleError(new InvalidVariationException("Provided variation is not in datafile."));
             return new Variation();
