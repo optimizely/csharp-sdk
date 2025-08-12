@@ -69,7 +69,6 @@ namespace OptimizelySDK.Event
 
             var visitors = new List<Visitor>(userEvents.Count());
 
-            
             // Default to US region
             string region = "US";
 
@@ -90,7 +89,7 @@ namespace OptimizelySDK.Event
                 }
 
                 var userContext = userEvent.Context;
-                
+
                 // Get region from the event's context, default to US if not specified
                 region = !string.IsNullOrEmpty(userContext.Region) ? userContext.Region : "US";
 
@@ -117,7 +116,7 @@ namespace OptimizelySDK.Event
 
             // Use the region to determine the endpoint URL, falling back to US if the region is not found or not supported
             string endpointUrl = EventEndpoints["US"]; // Default to US endpoint
-            
+
             // Only try to use the region-specific endpoint if it's a supported region
             if (SupportedRegions.Contains(region) && EventEndpoints.ContainsKey(region))
             {

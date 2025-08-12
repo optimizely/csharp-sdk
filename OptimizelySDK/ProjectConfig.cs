@@ -312,7 +312,7 @@ namespace OptimizelySDK
         /// Returns the datafile corresponding to ProjectConfig
         /// </summary>
         string ToDatafile();
-        
+
         /// <summary>
         /// Returns the datafile region to ProjectConfig
         /// </summary>

@@ -153,7 +153,7 @@ namespace OptimizelySDK.Tests.EventTests
                 {
                     { "Content-Type", "application/json" },
                 });
-            
+
             Config.Region = "EU";
             var impressionEvent = UserEventFactory.CreateImpressionEvent(
                 Config, Config.GetExperimentFromKey("test_experiment"), "7722370027", TestUserId,
@@ -166,7 +166,7 @@ namespace OptimizelySDK.Tests.EventTests
 
             Assert.IsTrue(TestData.CompareObjects(expectedLogEvent, logEvent));
         }
-        
+
         [Test]
         public void TestCreateImpressionEventNoAttributesInvalid()
         {
@@ -254,7 +254,7 @@ namespace OptimizelySDK.Tests.EventTests
                 {
                     { "Content-Type", "application/json" },
                 });
-            
+
             Config.Region = "ZZ";
             var impressionEvent = UserEventFactory.CreateImpressionEvent(
                 Config, Config.GetExperimentFromKey("test_experiment"), "7722370027", TestUserId,
@@ -264,10 +264,10 @@ namespace OptimizelySDK.Tests.EventTests
 
             TestData.ChangeGUIDAndTimeStamp(expectedLogEvent.Params, impressionEvent.Timestamp,
                 Guid.Parse(impressionEvent.UUID));
-            
+
             Assert.IsTrue(TestData.CompareObjects(expectedLogEvent, logEvent));
         }
-        
+
         [Test]
         public void TestCreateImpressionEventNoAttributes()
         {
@@ -958,7 +958,7 @@ namespace OptimizelySDK.Tests.EventTests
 
             Assert.IsTrue(TestData.CompareObjects(expectedEvent, logEvent));
         }
-        
+
         [Test]
         public void TestCreateConversionEventNoAttributesNoValueEU()
         {
@@ -1040,7 +1040,7 @@ namespace OptimizelySDK.Tests.EventTests
 
             Assert.IsTrue(TestData.CompareObjects(expectedEvent, logEvent));
         }
-        
+
         [Test]
         public void TestCreateConversionEventNoAttributesNoValueInvalid()
         {

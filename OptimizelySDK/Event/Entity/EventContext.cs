@@ -40,7 +40,7 @@ namespace OptimizelySDK.Event.Entity
 
         [JsonProperty("anonymize_ip")]
         public bool AnonymizeIP { get; protected set; }
-        
+
         [JsonProperty("region")]
         public string Region { get; protected set; }
 
@@ -78,7 +78,7 @@ namespace OptimizelySDK.Event.Entity
                 AnonymizeIP = anonymizeIP;
                 return this;
             }
-            
+
             public Builder WithRegion(string region)
             {
                 Region = region;
