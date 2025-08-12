@@ -22,7 +22,7 @@ using OptimizelySDK.Utils;
 
 namespace OptimizelySDK.Entity
 {
-    public class Experiment : IdKeyEntity
+    public class Experiment : IdKeyEntity, IExperimentCore
     {
         private const string STATUS_RUNNING = "Running";
 
@@ -281,5 +281,10 @@ namespace OptimizelySDK.Entity
         {
             return ForcedVariations != null && ForcedVariations.ContainsKey(userId);
         }
+
+        /// <summary>
+        /// Determine if experiment is currently activated/running (IExperimentCore implementation)
+        /// </summary>
+        public bool IsActivated => IsExperimentRunning;
     }
 }
