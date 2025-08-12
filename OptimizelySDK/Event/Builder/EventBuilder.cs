@@ -242,6 +242,8 @@ namespace OptimizelySDK.Event.Builder
                 GetImpressionOrConversionParamsWithCommonParams(commonParams,
                     new object[] { impressionOnlyParams });
 
+            var region = !string.IsNullOrEmpty(config.Region) ? config.Region : "US";
+
             var endpoint = EventFactory.EventEndpoints.ContainsKey(region)
                 ? EventFactory.EventEndpoints[region]
                 : EventFactory.EventEndpoints["US"];
@@ -271,6 +273,8 @@ namespace OptimizelySDK.Event.Builder
 
             var conversionParams =
                 GetImpressionOrConversionParamsWithCommonParams(commonParams, conversionOnlyParams);
+
+            var region = !string.IsNullOrEmpty(config.Region) ? config.Region : "US";
 
             var endpoint = EventFactory.EventEndpoints.ContainsKey(region)
                 ? EventFactory.EventEndpoints[region]
