@@ -25,7 +25,7 @@ namespace OptimizelySDK.Utils
     /// </summary>
     public class HoldoutConfig
     {
-        private readonly List<Holdout> _allHoldouts;
+        private List<Holdout> _allHoldouts;
         private readonly List<Holdout> _globalHoldouts;
         private readonly Dictionary<string, Holdout> _holdoutIdMap;
         private readonly Dictionary<string, List<Holdout>> _includedHoldouts;
@@ -49,6 +49,11 @@ namespace OptimizelySDK.Utils
         }
 
         /// <summary>
+        /// Gets a read-only dictionary mapping holdout IDs to holdout instances.
+        /// </summary>
+        public IDictionary<string, Holdout> HoldoutIdMap => _holdoutIdMap;
+
+        /// <summary>
         /// Updates internal mappings of holdouts including the id map, global list, and per-flag inclusion/exclusion maps.
         /// </summary>
         private void UpdateHoldoutMapping()
@@ -68,14 +73,9 @@ namespace OptimizelySDK.Utils
                 var hasIncludedFlags = holdout.IncludedFlags != null && holdout.IncludedFlags.Length > 0;
                 var hasExcludedFlags = holdout.ExcludedFlags != null && holdout.ExcludedFlags.Length > 0;
 
-                if (!hasIncludedFlags && !hasExcludedFlags)
+                if (hasIncludedFlags)
                 {
-                    // Global holdout (no included or excluded flags)
-                    _globalHoldouts.Add(holdout);
-                }
-                else if (hasIncludedFlags)
-                {
-                    // Holdout with specific included flags
+                    // Local/targeted holdout - only applies to specific included flags
                     foreach (var flagId in holdout.IncludedFlags)
                     {
                         if (!_includedHoldouts.ContainsKey(flagId))
@@ -84,17 +84,21 @@ namespace OptimizelySDK.Utils
                         _includedHoldouts[flagId].Add(holdout);
                     }
                 }
-                else if (hasExcludedFlags)
+                else
                 {
-                    // Global holdout with excluded flags
+                    // Global holdout (applies to all flags)
                     _globalHoldouts.Add(holdout);
                     
-                    foreach (var flagId in holdout.ExcludedFlags)
+                    // If it has excluded flags, track which flags to exclude it from
+                    if (hasExcludedFlags)
                     {
-                        if (!_excludedHoldouts.ContainsKey(flagId))
-                            _excludedHoldouts[flagId] = new List<Holdout>();
-                        
-                        _excludedHoldouts[flagId].Add(holdout);
+                        foreach (var flagId in holdout.ExcludedFlags)
+                        {
+                            if (!_excludedHoldouts.ContainsKey(flagId))
+                                _excludedHoldouts[flagId] = new List<Holdout>();
+                            
+                            _excludedHoldouts[flagId].Add(holdout);
+                        }
                     }
                 }
             }
@@ -108,7 +112,7 @@ namespace OptimizelySDK.Utils
         /// <returns>A list of Holdout objects relevant to the given flag</returns>
         public List<Holdout> GetHoldoutsForFlag(string flagId)
         {
-            if (_allHoldouts.Count == 0)
+            if (string.IsNullOrEmpty(flagId) || _allHoldouts.Count == 0)
                 return new List<Holdout>();
 
             // Check cache first
@@ -159,5 +163,16 @@ namespace OptimizelySDK.Utils
         /// Gets the number of global holdouts.
         /// </summary>
         public int GlobalHoldoutCount => _globalHoldouts.Count;
+
+        /// <summary>
+        /// Updates the holdout configuration with a new set of holdouts.
+        /// This method is useful for testing or when the holdout configuration needs to be updated at runtime.
+        /// </summary>
+        /// <param name="newHoldouts">The new array of holdouts to use</param>
+        public void UpdateHoldoutMapping(Holdout[] newHoldouts)
+        {
+            _allHoldouts = newHoldouts?.ToList() ?? new List<Holdout>();
+            UpdateHoldoutMapping();
+        }
     }
 }

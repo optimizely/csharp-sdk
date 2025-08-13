@@ -29,6 +29,15 @@ namespace OptimizelySDK.Entity
     public class Holdout : IdKeyEntity, IExperimentCore
     {
         /// <summary>
+        /// Constructor that initializes properties to avoid null values
+        /// </summary>
+        public Holdout()
+        {
+            Id = "";
+            Key = "";
+        }
+
+        /// <summary>
         /// Holdout status enumeration
         /// </summary>
         public enum HoldoutStatus
@@ -74,12 +83,12 @@ namespace OptimizelySDK.Entity
         /// <summary>
         /// Flags included in this holdout
         /// </summary>
-        public string[] IncludedFlags { get; set; }
+        public string[] IncludedFlags { get; set; } = new string[0];
 
         /// <summary>
         /// Flags excluded from this holdout
         /// </summary>
-        public string[] ExcludedFlags { get; set; }
+        public string[] ExcludedFlags { get; set; } = new string[0];
 
         #region Audience Processing Properties
 
