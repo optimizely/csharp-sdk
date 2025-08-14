@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2017-2019, Optimizely
+ * Copyright 2025, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 
 using System.Collections.Generic;
+using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using OptimizelySDK.AudienceConditions;
@@ -22,56 +23,70 @@ using OptimizelySDK.Utils;
 
 namespace OptimizelySDK.Entity
 {
-    public class Experiment : IdKeyEntity, IExperimentCore
+    /// <summary>
+    /// Represents a holdout in an Optimizely project
+    /// </summary>
+    public class Holdout : IdKeyEntity, IExperimentCore
     {
+        /// <summary>
+        /// Holdout status enumeration
+        /// </summary>
+        public enum HoldoutStatus
+        {
+            Draft,
+            Running,
+            Concluded,
+            Archived
+        }
+
         private const string STATUS_RUNNING = "Running";
 
-        private const string MUTEX_GROUP_POLICY = "random";
-
         /// <summary>
-        /// Experiment Status
+        /// Holdout Status
         /// </summary>
         public string Status { get; set; }
 
         /// <summary>
-        /// Layer ID for the experiment
+        /// Layer ID for the holdout
         /// </summary>
         public string LayerId { get; set; }
 
         /// <summary>
-        /// Group ID for the experiment
-        /// </summary>
-        public string GroupId { get; set; }
-
-        /// <summary>
-        /// Variations for the experiment
+        /// Variations for the holdout
         /// </summary>
         public Variation[] Variations { get; set; }
 
         /// <summary>
-        /// ForcedVariations for the experiment
+        /// Traffic allocation of variations in the holdout
         /// </summary>
-        public Dictionary<string, string> ForcedVariations { get; set; }
+        public TrafficAllocation[] TrafficAllocation { get; set; }
 
         /// <summary>
-        /// ForcedVariations for the experiment
-        /// </summary>
-        public Dictionary<string, string> UserIdToKeyVariations => ForcedVariations;
-
-        /// <summary>
-        /// Policy of the experiment group
-        /// </summary>
-        public string GroupPolicy { get; set; }
-
-        /// <summary>
-        /// ID(s) of audience(s) the experiment is targeted to
+        /// ID(s) of audience(s) the holdout is targeted to
         /// </summary>
         public string[] AudienceIds { get; set; }
+
+        /// <summary>
+        /// Audience Conditions
+        /// </summary>
+        public object AudienceConditions { get; set; }
+
+        /// <summary>
+        /// Flags included in this holdout
+        /// </summary>
+        public string[] IncludedFlags { get; set; } = new string[0];
+
+        /// <summary>
+        /// Flags excluded from this holdout
+        /// </summary>
+        public string[] ExcludedFlags { get; set; } = new string[0];
+
+        #region Audience Processing Properties
 
         private ICondition _audienceIdsList = null;
 
         /// <summary>
-        /// De-serialized audience conditions
+        /// De-serialized audience conditions from audience IDs
         /// </summary>
         public ICondition AudienceIdsList
         {
@@ -87,8 +102,7 @@ namespace OptimizelySDK.Entity
                     var conditions = new List<ICondition>();
                     foreach (var audienceId in AudienceIds)
                     {
-                        conditions.Add(
-                            new AudienceIdCondition() { AudienceId = (string)audienceId });
+                        conditions.Add(new AudienceIdCondition() { AudienceId = audienceId });
                     }
 
                     _audienceIdsList = new OrCondition() { Conditions = conditions.ToArray() };
@@ -101,7 +115,7 @@ namespace OptimizelySDK.Entity
         private string _audienceIdsString = null;
 
         /// <summary>
-        /// Stringified audience conditions
+        /// Stringified audience IDs
         /// </summary>
         public string AudienceIdsString
         {
@@ -120,16 +134,6 @@ namespace OptimizelySDK.Entity
                 return _audienceIdsString;
             }
         }
-
-        /// <summary>
-        /// Traffic allocation of variations in the experiment
-        /// </summary>
-        public TrafficAllocation[] TrafficAllocation { get; set; }
-
-        /// <summary>
-        /// Audience Conditions
-        /// </summary>
-        public object AudienceConditions { get; set; }
 
         private ICondition _audienceConditionsList = null;
 
@@ -194,10 +198,17 @@ namespace OptimizelySDK.Entity
             }
         }
 
+        #endregion
+
+        #region Variation Mapping Properties
+
         private bool isGenerateKeyMapCalled = false;
 
         private Dictionary<string, Variation> _VariationKeyToVariationMap;
 
+        /// <summary>
+        /// Variation key to variation mapping
+        /// </summary>
         public Dictionary<string, Variation> VariationKeyToVariationMap
         {
             get
@@ -213,6 +224,9 @@ namespace OptimizelySDK.Entity
 
         private Dictionary<string, Variation> _VariationIdToVariationMap;
 
+        /// <summary>
+        /// Variation ID to variation mapping
+        /// </summary>
         public Dictionary<string, Variation> VariationIdToVariationMap
         {
             get
@@ -226,6 +240,9 @@ namespace OptimizelySDK.Entity
             }
         }
 
+        /// <summary>
+        /// Generate variation key maps for performance optimization
+        /// </summary>
         public void GenerateVariationKeyMap()
         {
             if (Variations == null)
@@ -240,51 +257,28 @@ namespace OptimizelySDK.Entity
             isGenerateKeyMapCalled = true;
         }
 
-        // Code from PHP, need to build traffic and variations from config
-#if false
-        /**
-         * @param $variations array Variations in experiment.
-         */
-        public function setVariations($variations)
-        {
-        $this->_variations = ConfigParser::generateMap($variations, null, Variation::class);
-        }
-
-        /**
-         * @param $trafficAllocation array Traffic allocation of variations in experiment.
-         */
-        public function setTrafficAllocation($trafficAllocation)
-        {
-        $this->_trafficAllocation =
- ConfigParser::generateMap($trafficAllocation, null, TrafficAllocation::class);
-        }
-#endif
+        #endregion
 
         /// <summary>
-        /// Determine if experiment is in a mutually exclusive group
+        /// Determine if holdout is currently activated/running
         /// </summary>
-        public bool IsInMutexGroup =>
-            !string.IsNullOrEmpty(GroupPolicy) && GroupPolicy == MUTEX_GROUP_POLICY;
-
-        /// <summary>
-        /// Determine if experiment is running or not
-        /// </summary>
-        public bool IsExperimentRunning =>
+        public bool IsActivated =>
             !string.IsNullOrEmpty(Status) && Status == STATUS_RUNNING;
 
         /// <summary>
-        /// Determin if user is forced variation of experiment
+        /// Serializes audiences with provided audience map for display purposes
         /// </summary>
-        /// <param name="userId">User ID of the user</param>
-        /// <returns>True iff user is in forced variation of experiment</returns>
-        public bool IsUserInForcedVariation(string userId)
+        /// <param name="audiencesMap">Map of audience ID to audience name</param>
+        /// <returns>Serialized audience string with names</returns>
+        public string SerializeAudiences(Dictionary<string, string> audiencesMap)
         {
-            return ForcedVariations != null && ForcedVariations.ContainsKey(userId);
-        }
+            if (AudienceConditions == null)
+            {
+                return string.Empty;
+            }
 
-        /// <summary>
-        /// Determine if experiment is currently activated/running (IExperimentCore implementation)
-        /// </summary>
-        public bool IsActivated => IsExperimentRunning;
+            var serialized = AudienceConditionsString;
+            return this.ReplaceAudienceIdsWithNames(serialized, audiencesMap);
+        }
     }
 }

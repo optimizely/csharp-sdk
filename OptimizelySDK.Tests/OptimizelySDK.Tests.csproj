@@ -119,6 +119,7 @@
     <Compile Include="ValidEventDispatcher.cs"/>
     <Compile Include="ConfigTest\TestPollingProjectConfigManager.cs"/>
     <Compile Include="EntityTests\FeatureVariableTest.cs"/>
+    <Compile Include="EntityTests\HoldoutTests.cs"/>
     <Compile Include="EventTests\EventEntitiesTest.cs"/>
     <Compile Include="EventTests\UserEventFactoryTest.cs"/>
     <Compile Include="EventTests\EventFactoryTest.cs"/>
@@ -126,12 +127,16 @@
     <Compile Include="OptimizelyFactoryTest.cs"/>
     <Compile Include="Utils\TestData.cs"/>
     <Compile Include="Utils\Reflection.cs"/>
+    <Compile Include="UtilsTests\HoldoutConfigTests.cs"/>
     <Compile Include="ConfigTest\ProjectConfigProps.cs"/>
     <Compile Include="Utils\TestHttpProjectConfigManagerUtil.cs"/>
   </ItemGroup>
   <ItemGroup>
     <Content Include="App.config"/>
     <EmbeddedResource Include="OdpSegmentsDatafile.json"/>
+    <Content Include="TestData\HoldoutTestData.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="IntegrationEmptyDatafile.json"/>

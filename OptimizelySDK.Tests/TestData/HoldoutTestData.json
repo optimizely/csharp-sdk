@@ -1,0 +1,192 @@
+{
+  "globalHoldout": {
+    "id": "holdout_global_1",
+    "key": "global_holdout",
+    "status": "Running",
+    "layerId": "layer_1",
+    "variations": [
+      {
+        "id": "var_1",
+        "key": "control",
+        "featureEnabled": false,
+        "variables": []
+      }
+    ],
+    "trafficAllocation": [
+      {
+        "entityId": "var_1",
+        "endOfRange": 10000
+      }
+    ],
+    "audienceIds": [],
+    "audienceConditions": [],
+    "includedFlags": [],
+    "excludedFlags": []
+  },
+  "includedFlagsHoldout": {
+    "id": "holdout_included_1",
+    "key": "included_holdout",
+    "status": "Running",
+    "layerId": "layer_2",
+    "variations": [
+      {
+        "id": "var_2",
+        "key": "treatment",
+        "featureEnabled": true,
+        "variables": []
+      }
+    ],
+    "trafficAllocation": [
+      {
+        "entityId": "var_2",
+        "endOfRange": 10000
+      }
+    ],
+    "audienceIds": [],
+    "audienceConditions": [],
+    "includedFlags": ["flag_1", "flag_2"],
+    "excludedFlags": []
+  },
+  "excludedFlagsHoldout": {
+    "id": "holdout_excluded_1",
+    "key": "excluded_holdout",
+    "status": "Running",
+    "layerId": "layer_3",
+    "variations": [
+      {
+        "id": "var_3",
+        "key": "excluded_var",
+        "featureEnabled": false,
+        "variables": []
+      }
+    ],
+    "trafficAllocation": [
+      {
+        "entityId": "var_3",
+        "endOfRange": 10000
+      }
+    ],
+    "audienceIds": [],
+    "audienceConditions": [],
+    "includedFlags": [],
+    "excludedFlags": ["flag_3", "flag_4"]
+  },
+  "datafileWithHoldouts": {
+    "version": "4",
+    "rollouts": [],
+    "projectId": "test_project",
+    "experiments": [],
+    "groups": [],
+    "attributes": [],
+    "audiences": [],
+    "layers": [],
+    "events": [],
+    "revision": "1",
+    "accountId": "12345",
+    "anonymizeIP": false,
+    "featureFlags": [
+      {
+        "id": "flag_1",
+        "key": "test_flag_1",
+        "experimentIds": [],
+        "rolloutId": "",
+        "variables": []
+      },
+      {
+        "id": "flag_2",
+        "key": "test_flag_2",
+        "experimentIds": [],
+        "rolloutId": "",
+        "variables": []
+      },
+      {
+        "id": "flag_3",
+        "key": "test_flag_3",
+        "experimentIds": [],
+        "rolloutId": "",
+        "variables": []
+      },
+      {
+        "id": "flag_4",
+        "key": "test_flag_4",
+        "experimentIds": [],
+        "rolloutId": "",
+        "variables": []
+      }
+    ],
+    "holdouts": [
+      {
+        "id": "holdout_global_1",
+        "key": "global_holdout",
+        "status": "Running",
+        "layerId": "layer_1",
+        "variations": [
+          {
+            "id": "var_1",
+            "key": "control",
+            "featureEnabled": false,
+            "variables": []
+          }
+        ],
+        "trafficAllocation": [
+          {
+            "entityId": "var_1",
+            "endOfRange": 10000
+          }
+        ],
+        "audienceIds": [],
+        "audienceConditions": [],
+        "includedFlags": [],
+        "excludedFlags": []
+      },
+      {
+        "id": "holdout_included_1",
+        "key": "included_holdout",
+        "status": "Running",
+        "layerId": "layer_2",
+        "variations": [
+          {
+            "id": "var_2",
+            "key": "treatment",
+            "featureEnabled": true,
+            "variables": []
+          }
+        ],
+        "trafficAllocation": [
+          {
+            "entityId": "var_2",
+            "endOfRange": 10000
+          }
+        ],
+        "audienceIds": [],
+        "audienceConditions": [],
+        "includedFlags": ["flag_1", "flag_2"],
+        "excludedFlags": []
+      },
+      {
+        "id": "holdout_excluded_1",
+        "key": "excluded_holdout",
+        "status": "Running",
+        "layerId": "layer_3",
+        "variations": [
+          {
+            "id": "var_3",
+            "key": "excluded_var",
+            "featureEnabled": false,
+            "variables": []
+          }
+        ],
+        "trafficAllocation": [
+          {
+            "entityId": "var_3",
+            "endOfRange": 10000
+          }
+        ],
+        "audienceIds": [],
+        "audienceConditions": [],
+        "includedFlags": [],
+        "excludedFlags": ["flag_3", "flag_4"]
+      }
+    ]
+  }
+}
