@@ -322,7 +322,7 @@ namespace OptimizelySDK
         /// Get the holdout from the ID
         /// </summary>
         /// <param name="holdoutId">ID for holdout</param>
-        /// <returns>Holdout Entity corresponding to the holdout ID or a dummy entity if ID is invalid</returns>
+        /// <returns>Holdout Entity corresponding to the holdout ID or null if ID is invalid</returns>
         Holdout GetHoldout(string holdoutId);
 
         /// <summary>

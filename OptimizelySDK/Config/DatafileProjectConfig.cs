@@ -795,7 +795,7 @@ namespace OptimizelySDK.Config
         /// Get the holdout from the ID
         /// </summary>
         /// <param name="holdoutId">ID for holdout</param>
-        /// <returns>Holdout Entity corresponding to the holdout ID or a dummy entity if ID is invalid</returns>
+        /// <returns>Holdout Entity corresponding to the holdout ID or null if ID is invalid</returns>
         public Holdout GetHoldout(string holdoutId)
         {
 #if NET35 || NET40
@@ -804,7 +804,7 @@ namespace OptimizelySDK.Config
             if (string.IsNullOrWhiteSpace(holdoutId))
 #endif
             {
-                return new Holdout();
+                return null;
             }
 
             if (_HoldoutIdMap.ContainsKey(holdoutId))
@@ -816,7 +816,7 @@ namespace OptimizelySDK.Config
             Logger.Log(LogLevel.ERROR, message);
             ErrorHandler.HandleError(
                 new InvalidExperimentException("Provided holdout is not in datafile."));
-            return new Holdout();
+            return null;
         }
 
         /// <summary>

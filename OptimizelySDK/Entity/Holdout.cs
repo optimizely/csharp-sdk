@@ -29,15 +29,6 @@ namespace OptimizelySDK.Entity
     public class Holdout : IdKeyEntity, IExperimentCore
     {
         /// <summary>
-        /// Constructor that initializes properties to avoid null values
-        /// </summary>
-        public Holdout()
-        {
-            Id = "";
-            Key = "";
-        }
-
-        /// <summary>
         /// Holdout status enumeration
         /// </summary>
         public enum HoldoutStatus

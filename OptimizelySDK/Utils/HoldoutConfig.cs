@@ -120,16 +120,24 @@ namespace OptimizelySDK.Utils
                 return _flagHoldoutCache[flagId];
 
             var activeHoldouts = new List<Holdout>();
-
             // Start with global holdouts, excluding any that are specifically excluded for this flag
             var excludedForFlag = _excludedHoldouts.ContainsKey(flagId) ? _excludedHoldouts[flagId] : new List<Holdout>();
 
-            foreach (var globalHoldout in _globalHoldouts)
+            if (excludedForFlag.Count > 0)
             {
-                if (!excludedForFlag.Contains(globalHoldout))
+                // Only iterate if we have exclusions to check
+                foreach (var globalHoldout in _globalHoldouts)
                 {
-                    activeHoldouts.Add(globalHoldout);
+                    if (!excludedForFlag.Contains(globalHoldout))
+                    {
+                        activeHoldouts.Add(globalHoldout);
+                    }
                 }
+            }
+            else
+            {
+                // No exclusions, add all global holdouts directly
+                activeHoldouts.AddRange(_globalHoldouts);
             }
 
             // Add included holdouts for this flag

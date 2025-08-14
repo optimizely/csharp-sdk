@@ -1425,8 +1425,7 @@ namespace OptimizelySDK.Tests
             Assert.AreEqual("global_holdout", globalHoldout.Key);
 
             var invalidHoldout = datafileProjectConfig.GetHoldout("invalid_id");
-            Assert.IsNotNull(invalidHoldout);
-            Assert.AreEqual("", invalidHoldout.Id); // Dummy holdout has empty ID
+            Assert.IsNull(invalidHoldout);
         }
 
         [Test]
@@ -1461,8 +1460,7 @@ namespace OptimizelySDK.Tests
             Assert.AreEqual(0, holdouts.Length);
 
             var holdout = datafileProjectConfig.GetHoldout("any_id");
-            Assert.IsNotNull(holdout);
-            Assert.AreEqual("", holdout.Id); // Dummy holdout has empty ID
+            Assert.IsNull(holdout);
         }
 
         #endregion
