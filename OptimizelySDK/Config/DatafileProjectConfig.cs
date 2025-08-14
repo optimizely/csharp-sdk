@@ -515,8 +515,7 @@ namespace OptimizelySDK.Config
                     !(((int)supportedVersion).ToString() == config.Version)))
             {
                 throw new ConfigParseException(
-                    $@"This version of the C# SDK does not support the given datafile version: {
-                        config.Version}");
+                    $@"This version of the C# SDK does not support the given datafile version: {config.Version}");
             }
 
             return config;
@@ -655,8 +654,7 @@ namespace OptimizelySDK.Config
                 return _VariationKeyMap[experimentKey][variationKey];
             }
 
-            var message = $@"No variation key ""{variationKey
-            }"" defined in datafile for experiment ""{experimentKey}"".";
+            var message = $@"No variation key ""{variationKey}"" defined in datafile for experiment ""{experimentKey}"".";
             Logger.Log(LogLevel.ERROR, message);
             ErrorHandler.HandleError(
                 new InvalidVariationException("Provided variation is not in datafile."));
@@ -678,8 +676,7 @@ namespace OptimizelySDK.Config
                 return _VariationKeyMapByExperimentId[experimentId][variationKey];
             }
 
-            var message = $@"No variation key ""{variationKey
-            }"" defined in datafile for experiment ""{experimentId}"".";
+            var message = $@"No variation key ""{variationKey}"" defined in datafile for experiment ""{experimentId}"".";
             Logger.Log(LogLevel.ERROR, message);
             ErrorHandler.HandleError(
                 new InvalidVariationException("Provided variation is not in datafile."));
@@ -701,8 +698,7 @@ namespace OptimizelySDK.Config
                 return _VariationIdMap[experimentKey][variationId];
             }
 
-            var message = $@"No variation ID ""{variationId
-            }"" defined in datafile for experiment ""{experimentKey}"".";
+            var message = $@"No variation ID ""{variationId}"" defined in datafile for experiment ""{experimentKey}"".";
             Logger.Log(LogLevel.ERROR, message);
             ErrorHandler.HandleError(
                 new InvalidVariationException("Provided variation is not in datafile."));
@@ -724,8 +720,7 @@ namespace OptimizelySDK.Config
                 return _VariationIdMapByExperimentId[experimentId][variationId];
             }
 
-            var message = $@"No variation ID ""{variationId
-            }"" defined in datafile for experiment ""{experimentId}"".";
+            var message = $@"No variation ID ""{variationId}"" defined in datafile for experiment ""{experimentId}"".";
             Logger.Log(LogLevel.ERROR, message);
             ErrorHandler.HandleError(
                 new InvalidVariationException("Provided variation is not in datafile."));
@@ -839,9 +834,7 @@ namespace OptimizelySDK.Config
                 if (hasReservedPrefix)
                 {
                     Logger.Log(LogLevel.WARN,
-                        $@"Attribute {attributeKey} unexpectedly has reserved prefix {
-                            RESERVED_ATTRIBUTE_PREFIX
-                        }; using attribute ID instead of reserved attribute name.");
+                        $@"Attribute {attributeKey} unexpectedly has reserved prefix {RESERVED_ATTRIBUTE_PREFIX}; using attribute ID instead of reserved attribute name.");
                 }
 
                 return attribute.Id;

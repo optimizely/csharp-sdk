@@ -1,4 +1,4 @@
-/* 
+﻿/* 
  * Copyright 2025, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -62,7 +62,7 @@ namespace OptimizelySDK.Entity
         /// <param name="conditionString">String containing audience conditions</param>
         /// <param name="audiencesMap">Map of audience ID to audience name</param>
         /// <returns>String with audience IDs replaced by names</returns>
-        public static string ReplaceAudienceIdsWithNames(this IExperimentCore experimentCore, 
+        public static string ReplaceAudienceIdsWithNames(this IExperimentCore experimentCore,
             string conditionString, System.Collections.Generic.Dictionary<string, string> audiencesMap)
         {
             if (string.IsNullOrEmpty(conditionString) || audiencesMap == null)

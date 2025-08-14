@@ -1176,9 +1176,7 @@ namespace OptimizelySDK.Tests
             Assert.AreEqual(reservedAttrConfig.GetAttributeId(reservedPrefixAttrKey),
                 reservedAttrConfig.GetAttribute(reservedPrefixAttrKey).Id);
             LoggerMock.Verify(l => l.Log(LogLevel.WARN,
-                $@"Attribute {reservedPrefixAttrKey} unexpectedly has reserved prefix {
-                    DatafileProjectConfig.RESERVED_ATTRIBUTE_PREFIX
-                }; using attribute ID instead of reserved attribute name."));
+                $@"Attribute {reservedPrefixAttrKey} unexpectedly has reserved prefix {DatafileProjectConfig.RESERVED_ATTRIBUTE_PREFIX}; using attribute ID instead of reserved attribute name."));
         }
 
         [Test]
@@ -1359,14 +1357,14 @@ namespace OptimizelySDK.Tests
         public void TestHoldoutDeserialization_FromDatafile()
         {
             // Test that holdouts can be deserialized from a datafile with holdouts
-            var testDataPath = Path.Combine(TestContext.CurrentContext.TestDirectory, 
+            var testDataPath = Path.Combine(TestContext.CurrentContext.TestDirectory,
                 "TestData", "HoldoutTestData.json");
             var jsonContent = File.ReadAllText(testDataPath);
             var testData = JObject.Parse(jsonContent);
-            
+
             var datafileJson = testData["datafileWithHoldouts"].ToString();
-            
-            var datafileProjectConfig = DatafileProjectConfig.Create(datafileJson, 
+
+            var datafileProjectConfig = DatafileProjectConfig.Create(datafileJson,
                 new NoOpLogger(), new NoOpErrorHandler()) as DatafileProjectConfig;
 
             Assert.IsNotNull(datafileProjectConfig.Holdouts);
@@ -1383,14 +1381,14 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestGetHoldoutsForFlag_Integration()
         {
-            var testDataPath = Path.Combine(TestContext.CurrentContext.TestDirectory, 
+            var testDataPath = Path.Combine(TestContext.CurrentContext.TestDirectory,
                 "TestData", "HoldoutTestData.json");
             var jsonContent = File.ReadAllText(testDataPath);
             var testData = JObject.Parse(jsonContent);
-            
+
             var datafileJson = testData["datafileWithHoldouts"].ToString();
-            
-            var datafileProjectConfig = DatafileProjectConfig.Create(datafileJson, 
+
+            var datafileProjectConfig = DatafileProjectConfig.Create(datafileJson,
                 new NoOpLogger(), new NoOpErrorHandler()) as DatafileProjectConfig;
 
             // Test GetHoldoutsForFlag method
@@ -1410,14 +1408,14 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestGetHoldout_Integration()
         {
-            var testDataPath = Path.Combine(TestContext.CurrentContext.TestDirectory, 
+            var testDataPath = Path.Combine(TestContext.CurrentContext.TestDirectory,
                 "TestData", "HoldoutTestData.json");
             var jsonContent = File.ReadAllText(testDataPath);
             var testData = JObject.Parse(jsonContent);
-            
+
             var datafileJson = testData["datafileWithHoldouts"].ToString();
-            
-            var datafileProjectConfig = DatafileProjectConfig.Create(datafileJson, 
+
+            var datafileProjectConfig = DatafileProjectConfig.Create(datafileJson,
                 new NoOpLogger(), new NoOpErrorHandler()) as DatafileProjectConfig;
 
             // Test GetHoldout method
@@ -1449,7 +1447,7 @@ namespace OptimizelySDK.Tests
                 ""featureFlags"": []
             }";
 
-            var datafileProjectConfig = DatafileProjectConfig.Create(datafileWithoutHoldouts, 
+            var datafileProjectConfig = DatafileProjectConfig.Create(datafileWithoutHoldouts,
                 new NoOpLogger(), new NoOpErrorHandler()) as DatafileProjectConfig;
 
             Assert.IsNotNull(datafileProjectConfig.Holdouts);

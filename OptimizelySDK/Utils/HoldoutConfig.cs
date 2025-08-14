@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright 2025, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -80,7 +80,7 @@ namespace OptimizelySDK.Utils
                     {
                         if (!_includedHoldouts.ContainsKey(flagId))
                             _includedHoldouts[flagId] = new List<Holdout>();
-                        
+
                         _includedHoldouts[flagId].Add(holdout);
                     }
                 }
@@ -88,7 +88,7 @@ namespace OptimizelySDK.Utils
                 {
                     // Global holdout (applies to all flags)
                     _globalHoldouts.Add(holdout);
-                    
+
                     // If it has excluded flags, track which flags to exclude it from
                     if (hasExcludedFlags)
                     {
@@ -96,7 +96,7 @@ namespace OptimizelySDK.Utils
                         {
                             if (!_excludedHoldouts.ContainsKey(flagId))
                                 _excludedHoldouts[flagId] = new List<Holdout>();
-                            
+
                             _excludedHoldouts[flagId].Add(holdout);
                         }
                     }
@@ -123,7 +123,7 @@ namespace OptimizelySDK.Utils
 
             // Start with global holdouts, excluding any that are specifically excluded for this flag
             var excludedForFlag = _excludedHoldouts.ContainsKey(flagId) ? _excludedHoldouts[flagId] : new List<Holdout>();
-            
+
             foreach (var globalHoldout in _globalHoldouts)
             {
                 if (!excludedForFlag.Contains(globalHoldout))
