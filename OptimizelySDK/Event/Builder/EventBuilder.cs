@@ -244,7 +244,7 @@ namespace OptimizelySDK.Event.Builder
 
             var region = !string.IsNullOrEmpty(config.Region) && EventFactory.EventEndpoints.ContainsKey(config.Region) ? config.Region : "US";
 
-            var endpoint = EventFactory.EventEndpoints[region]
+            var endpoint = EventFactory.EventEndpoints[region];
 
             return new LogEvent(endpoint, impressionParams, HTTP_VERB, HTTP_HEADERS);
         }
@@ -274,7 +274,7 @@ namespace OptimizelySDK.Event.Builder
 
             var region = !string.IsNullOrEmpty(config.Region) && EventFactory.EventEndpoints.ContainsKey(config.Region) ? config.Region : "US";
 
-            var endpoint = EventFactory.EventEndpoints[region]
+            var endpoint = EventFactory.EventEndpoints[region];
 
             return new LogEvent(endpoint, conversionParams, HTTP_VERB, HTTP_HEADERS);
         }
