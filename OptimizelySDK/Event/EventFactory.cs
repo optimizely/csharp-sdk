@@ -35,7 +35,7 @@ namespace OptimizelySDK.Event
         private const string CUSTOM_ATTRIBUTE_FEATURE_TYPE = "custom";
 
         // Supported regions for event endpoints
-        public static readonly string[] SupportedRegions = { "US", "EU" };
+        public static string[] SupportedRegions => EventEndpoints.Keys.ToArray();
 
         // Dictionary of event endpoints for different regions
         public static readonly Dictionary<string, string> EventEndpoints = new Dictionary<string, string>
@@ -91,7 +91,10 @@ namespace OptimizelySDK.Event
                 var userContext = userEvent.Context;
 
                 // Get region from the event's context, default to US if not specified
-                region = !string.IsNullOrEmpty(userContext.Region) ? userContext.Region : "US";
+                if (!string.IsNullOrEmpty(userContext.Region))
+                {
+                    region = userContext.Region;
+                }
 
                 builder.WithClientName(userContext.ClientName).
                     WithClientVersion(userContext.ClientVersion).
