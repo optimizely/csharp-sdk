@@ -3490,7 +3490,7 @@ namespace OptimizelySDK.Tests
             var variation =
                 Result<Variation>.NewResult(Config.GetVariationFromKey(experimentKey, variationKey),
                     DecisionReasons);
-            var logEvent = new LogEvent("https://logx.optimizely.com/v1/events",
+            var logEvent = new LogEvent(EventFactory.EventEndpoints["US"],
                 OptimizelyHelper.SingleParameter,
                 "POST", new Dictionary<string, string>());
 
