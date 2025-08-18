@@ -84,9 +84,8 @@
     <Compile Include="Entity\Event.cs"/>
     <Compile Include="Entity\EventTags.cs"/>
     <Compile Include="Entity\Experiment.cs"/>
-    <Compile Include="Entity\ExperimentCoreExtensions.cs"/>
+    <Compile Include="Entity\ExperimentCore.cs"/>
     <Compile Include="Entity\Holdout.cs"/>
-    <Compile Include="Entity\IExperimentCore.cs"/>
     <Compile Include="Entity\FeatureDecision.cs"/>
     <Compile Include="Entity\FeatureFlag.cs"/>
     <Compile Include="Entity\FeatureVariable.cs"/>

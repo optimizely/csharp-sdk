@@ -49,7 +49,6 @@ namespace OptimizelySDK.Tests
             Assert.AreEqual("holdout_global_1", globalHoldout.Id);
             Assert.AreEqual("global_holdout", globalHoldout.Key);
             Assert.AreEqual("Running", globalHoldout.Status);
-            Assert.AreEqual("layer_1", globalHoldout.LayerId);
             Assert.IsNotNull(globalHoldout.Variations);
             Assert.AreEqual(1, globalHoldout.Variations.Length);
             Assert.IsNotNull(globalHoldout.TrafficAllocation);
@@ -174,7 +173,6 @@ namespace OptimizelySDK.Tests
                 ""id"": ""test_holdout"",
                 ""key"": ""test_key"",
                 ""status"": ""Running"",
-                ""layerId"": ""test_layer"",
                 ""variations"": [],
                 ""trafficAllocation"": [],
                 ""audienceIds"": [],

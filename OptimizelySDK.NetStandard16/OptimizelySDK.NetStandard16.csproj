@@ -26,9 +26,8 @@
 			<Compile Include="..\OptimizelySDK\Entity\Event.cs" />
 			<Compile Include="..\OptimizelySDK\Entity\EventTags.cs" />
 			<Compile Include="..\OptimizelySDK\Entity\Experiment.cs" />
-			<Compile Include="..\OptimizelySDK\Entity\ExperimentCoreExtensions.cs" />
 			<Compile Include="..\OptimizelySDK\Entity\Holdout.cs" />
-			<Compile Include="..\OptimizelySDK\Entity\IExperimentCore.cs" />
+			<Compile Include="..\OptimizelySDK\Entity\ExperimentCore.cs" />
 			<Compile Include="..\OptimizelySDK\Entity\FeatureDecision.cs" />
 			<Compile Include="..\OptimizelySDK\Entity\ForcedVariation.cs" />
 			<Compile Include="..\OptimizelySDK\Entity\Group.cs" />

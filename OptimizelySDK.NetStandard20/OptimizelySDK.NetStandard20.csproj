@@ -178,16 +178,12 @@
     <Compile Include="..\OptimizelySDK\Entity\Experiment.cs">
       <Link>Entity\Experiment.cs</Link>
     </Compile>
-    <Compile Include="..\OptimizelySDK\Entity\ExperimentCoreExtensions.cs">
-      <Link>Entity\ExperimentCoreExtensions.cs</Link>
-    </Compile>
     <Compile Include="..\OptimizelySDK\Entity\Holdout.cs">
       <Link>Entity\Holdout.cs</Link>
     </Compile>
-    <Compile Include="..\OptimizelySDK\Entity\IExperimentCore.cs">
-      <Link>Entity\IExperimentCore.cs</Link>
-    </Compile>
-    <Compile Include="..\OptimizelySDK\Entity\FeatureDecision.cs">
+    <Compile Include="..\OptimizelySDK\Entity\ExperimentCore.cs">
+      <Link>Entity\ExperimentCore.cs</Link>
+    </Compile>   <Compile Include="..\OptimizelySDK\Entity\FeatureDecision.cs">
       <Link>Entity\FeatureDecision.cs</Link>
     </Compile>
     <Compile Include="..\OptimizelySDK\Entity\FeatureFlag.cs">

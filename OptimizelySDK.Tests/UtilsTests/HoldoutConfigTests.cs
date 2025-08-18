@@ -332,7 +332,6 @@ namespace OptimizelySDK.Tests
                 Id = id,
                 Key = key,
                 Status = "Running",
-                LayerId = "test_layer",
                 Variations = new Variation[0],
                 TrafficAllocation = new TrafficAllocation[0],
                 AudienceIds = new string[0],
