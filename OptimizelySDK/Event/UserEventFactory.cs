@@ -80,6 +80,7 @@ namespace OptimizelySDK.Event
                 WithAccountId(projectConfig.AccountId).
                 WithAnonymizeIP(projectConfig.AnonymizeIP).
                 WithRevision(projectConfig.Revision).
+                WithRegion(projectConfig.Region).
                 Build();
 
             var variationKey = "";
@@ -123,6 +124,7 @@ namespace OptimizelySDK.Event
                 WithAccountId(projectConfig.AccountId).
                 WithAnonymizeIP(projectConfig.AnonymizeIP).
                 WithRevision(projectConfig.Revision).
+                WithRegion(projectConfig.Region).
                 Build();
 
             return new ConversionEvent.Builder().

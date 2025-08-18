@@ -104,7 +104,7 @@ namespace OptimizelySDK.Config
         public string Datafile { get; set; }
 
         /// <summary>
-        /// Configured host name for the Optimizely Data Platform. 
+        /// Configured host name for the Optimizely Data Platform.
         /// </summary>
         public string HostForOdp { get; private set; }
 
@@ -721,8 +721,7 @@ namespace OptimizelySDK.Config
 
             var message = $@"No variation ID ""{variationId}"" defined in datafile for experiment ""{experimentId}"".";
             Logger.Log(LogLevel.ERROR, message);
-            ErrorHandler.HandleError(
-                new InvalidVariationException("Provided variation is not in datafile."));
+            ErrorHandler.HandleError(new InvalidVariationException("Provided variation is not in datafile."));
             return new Variation();
         }
 
@@ -868,7 +867,9 @@ namespace OptimizelySDK.Config
         }
 
         /// <summary>
-        ///Returns the datafile corresponding to ProjectConfig
+        /// Gets or sets the region associated with the project configuration.
+        /// This typically indicates the data residency or deployment region (e.g., "us", "eu").
+        /// Valid values depend on the Optimizely environment and configuration.
         /// </summary>
         /// <returns>the datafile string corresponding to ProjectConfig</returns>
         public string ToDatafile()
@@ -886,5 +887,9 @@ namespace OptimizelySDK.Config
             var holdouts = _holdoutConfig?.GetHoldoutsForFlag(flagKey);
             return holdouts?.ToArray() ?? new Holdout[0];
         }
+        /// Returns the datafile corresponding to ProjectConfig
+        /// </summary>
+        /// <returns>the datafile string corresponding to ProjectConfig</returns>
+        public string Region { get; set; }
     }
 }

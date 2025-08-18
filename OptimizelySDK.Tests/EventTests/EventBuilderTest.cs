@@ -115,7 +115,7 @@ namespace OptimizelySDK.Tests.EventTests
                 { "anonymize_ip", false },
             };
 
-            var expectedLogEvent = new LogEvent("https://logx.optimizely.com/v1/events",
+            var expectedLogEvent = new LogEvent(EventFactory.EventEndpoints["US"],
                 payloadParams,
                 "POST",
                 new Dictionary<string, string>
@@ -207,7 +207,7 @@ namespace OptimizelySDK.Tests.EventTests
                 { "anonymize_ip", false },
             };
 
-            var expectedLogEvent = new LogEvent("https://logx.optimizely.com/v1/events",
+            var expectedLogEvent = new LogEvent(EventFactory.EventEndpoints["US"],
                 payloadParams,
                 "POST",
                 new Dictionary<string, string>
@@ -327,7 +327,7 @@ namespace OptimizelySDK.Tests.EventTests
                 { "anonymize_ip", false },
             };
 
-            var expectedLogEvent = new LogEvent("https://logx.optimizely.com/v1/events",
+            var expectedLogEvent = new LogEvent(EventFactory.EventEndpoints["US"],
                 payloadParams,
                 "POST",
                 new Dictionary<string, string>
@@ -441,7 +441,7 @@ namespace OptimizelySDK.Tests.EventTests
                 { "anonymize_ip", false },
             };
 
-            var expectedLogEvent = new LogEvent("https://logx.optimizely.com/v1/events",
+            var expectedLogEvent = new LogEvent(EventFactory.EventEndpoints["US"],
                 payloadParams,
                 "POST",
                 new Dictionary<string, string>
@@ -531,7 +531,7 @@ namespace OptimizelySDK.Tests.EventTests
             };
 
             var expectedEvent = new LogEvent(
-                "https://logx.optimizely.com/v1/events",
+                EventFactory.EventEndpoints["US"],
                 payloadParams,
                 "POST",
                 new Dictionary<string, string>
@@ -617,7 +617,7 @@ namespace OptimizelySDK.Tests.EventTests
             };
 
             var expectedEvent = new LogEvent(
-                "https://logx.optimizely.com/v1/events",
+                EventFactory.EventEndpoints["US"],
                 payloadParams,
                 "POST",
                 new Dictionary<string, string>
@@ -709,7 +709,7 @@ namespace OptimizelySDK.Tests.EventTests
             };
 
             var expectedEvent = new LogEvent(
-                "https://logx.optimizely.com/v1/events",
+                EventFactory.EventEndpoints["US"],
                 payloadParams,
                 "POST",
                 new Dictionary<string, string>
@@ -809,7 +809,7 @@ namespace OptimizelySDK.Tests.EventTests
             };
 
             var expectedEvent = new LogEvent(
-                "https://logx.optimizely.com/v1/events",
+                EventFactory.EventEndpoints["US"],
                 payloadParams,
                 "POST",
                 new Dictionary<string, string>
@@ -909,7 +909,7 @@ namespace OptimizelySDK.Tests.EventTests
             };
 
             var expectedEvent = new LogEvent(
-                "https://logx.optimizely.com/v1/events",
+                EventFactory.EventEndpoints["US"],
                 payloadParams,
                 "POST",
                 new Dictionary<string, string>
@@ -1003,7 +1003,7 @@ namespace OptimizelySDK.Tests.EventTests
             };
 
             var expectedEvent = new LogEvent(
-                "https://logx.optimizely.com/v1/events",
+                EventFactory.EventEndpoints["US"],
                 payloadParams,
                 "POST",
                 new Dictionary<string, string>
@@ -1096,7 +1096,7 @@ namespace OptimizelySDK.Tests.EventTests
             };
 
             var expectedEvent = new LogEvent(
-                "https://logx.optimizely.com/v1/events",
+                EventFactory.EventEndpoints["US"],
                 payloadParams,
                 "POST",
                 new Dictionary<string, string>
@@ -1189,7 +1189,7 @@ namespace OptimizelySDK.Tests.EventTests
             };
 
             var expectedEvent = new LogEvent(
-                "https://logx.optimizely.com/v1/events",
+                EventFactory.EventEndpoints["US"],
                 payloadParams,
                 "POST",
                 new Dictionary<string, string>
@@ -1282,7 +1282,7 @@ namespace OptimizelySDK.Tests.EventTests
             };
 
             var expectedEvent = new LogEvent(
-                "https://logx.optimizely.com/v1/events",
+                EventFactory.EventEndpoints["US"],
                 payloadParams,
                 "POST",
                 new Dictionary<string, string>
@@ -1381,7 +1381,7 @@ namespace OptimizelySDK.Tests.EventTests
             };
 
             var expectedEvent = new LogEvent(
-                "https://logx.optimizely.com/v1/events",
+                EventFactory.EventEndpoints["US"],
                 payloadParams,
                 "POST",
                 new Dictionary<string, string>
@@ -1487,7 +1487,7 @@ namespace OptimizelySDK.Tests.EventTests
                 { "anonymize_ip", false },
             };
 
-            var expectedLogEvent = new LogEvent("https://logx.optimizely.com/v1/events",
+            var expectedLogEvent = new LogEvent(EventFactory.EventEndpoints["US"],
                 payloadParams,
                 "POST",
                 new Dictionary<string, string>
@@ -1587,7 +1587,7 @@ namespace OptimizelySDK.Tests.EventTests
                 { "anonymize_ip", false },
             };
 
-            var expectedLogEvent = new LogEvent("https://logx.optimizely.com/v1/events",
+            var expectedLogEvent = new LogEvent(EventFactory.EventEndpoints["US"],
                 payloadParams,
                 "POST",
                 new Dictionary<string, string>
@@ -1680,7 +1680,7 @@ namespace OptimizelySDK.Tests.EventTests
                 { "anonymize_ip", false },
             };
 
-            var expectedLogEvent = new LogEvent("https://logx.optimizely.com/v1/events",
+            var expectedLogEvent = new LogEvent(EventFactory.EventEndpoints["US"],
                 payloadParams,
                 "POST",
                 new Dictionary<string, string>
@@ -1770,7 +1770,7 @@ namespace OptimizelySDK.Tests.EventTests
             };
 
             var expectedEvent = new LogEvent(
-                "https://logx.optimizely.com/v1/events",
+                EventFactory.EventEndpoints["US"],
                 payloadParams,
                 "POST",
                 new Dictionary<string, string>
@@ -1856,7 +1856,7 @@ namespace OptimizelySDK.Tests.EventTests
             };
 
             var expectedEvent = new LogEvent(
-                "https://logx.optimizely.com/v1/events",
+                EventFactory.EventEndpoints["US"],
                 payloadParams,
                 "POST",
                 new Dictionary<string, string>
@@ -1989,7 +1989,7 @@ namespace OptimizelySDK.Tests.EventTests
 
 
             var expectedLogEvent = new LogEvent(
-                "https://logx.optimizely.com/v1/events",
+                EventFactory.EventEndpoints["US"],
                 payloadParams,
                 "POST",
                 new Dictionary<string, string>
@@ -2082,7 +2082,7 @@ namespace OptimizelySDK.Tests.EventTests
             };
 
             var expectedEvent = new LogEvent(
-                "https://logx.optimizely.com/v1/events",
+                EventFactory.EventEndpoints["US"],
                 payloadParams,
                 "POST",
                 new Dictionary<string, string>
