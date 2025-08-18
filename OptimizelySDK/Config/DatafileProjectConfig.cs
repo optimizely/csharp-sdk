@@ -18,6 +18,7 @@
 #define USE_ODP
 #endif
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
@@ -219,9 +220,7 @@ namespace OptimizelySDK.Config
         /// <summary>
         /// Associative array of Holdout ID to Holdout(s) in the datafile
         /// </summary>
-        private Dictionary<string, Holdout> _HoldoutIdMap;
-
-        public Dictionary<string, Holdout> HoldoutIdMap => _HoldoutIdMap;
+        public Dictionary<string, Holdout> HoldoutIdMap { get; private set; }
 
         /// <summary>
         /// Associative array of experiment IDs that exist in any feature
@@ -345,7 +344,7 @@ namespace OptimizelySDK.Config
                 f => f.Key, true);
             _RolloutIdMap = ConfigParser<Rollout>.GenerateMap(Rollouts,
                 r => r.Id.ToString(), true);
-            _HoldoutIdMap = ConfigParser<Holdout>.GenerateMap(Holdouts,
+            HoldoutIdMap = ConfigParser<Holdout>.GenerateMap(Holdouts,
                 h => h.Id, true);
 
             // Overwrite similar items in audience id map with typed audience id map.
@@ -807,15 +806,15 @@ namespace OptimizelySDK.Config
                 return null;
             }
 
-            if (_HoldoutIdMap.ContainsKey(holdoutId))
+            if (HoldoutIdMap.ContainsKey(holdoutId))
             {
-                return _HoldoutIdMap[holdoutId];
+                return HoldoutIdMap[holdoutId];
             }
 
             var message = $@"Holdout ID ""{holdoutId}"" is not in datafile.";
             Logger.Log(LogLevel.ERROR, message);
             ErrorHandler.HandleError(
-                new InvalidExperimentException("Provided holdout is not in datafile."));
+                new InvalidHoldoutException("Provided holdout is not in datafile."));
             return null;
         }
 

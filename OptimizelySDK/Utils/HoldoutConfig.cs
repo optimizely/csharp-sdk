@@ -159,7 +159,14 @@ namespace OptimizelySDK.Utils
         /// <returns>The Holdout object if found, null otherwise</returns>
         public Holdout GetHoldout(string holdoutId)
         {
-            return _holdoutIdMap.ContainsKey(holdoutId) ? _holdoutIdMap[holdoutId] : null;
+            if (string.IsNullOrEmpty(holdoutId))
+            {
+                return null;
+            }
+
+            _holdoutIdMap.TryGetValue(holdoutId, out var holdout);
+
+            return holdout;
         }
 
         /// <summary>

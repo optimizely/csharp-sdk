@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
@@ -179,6 +180,7 @@ namespace OptimizelySDK.Entity
             {
                 if (AudienceConditions == null)
                 {
+                    _audienceConditionsString = null;
                     return null;
                 }
 
@@ -265,20 +267,5 @@ namespace OptimizelySDK.Entity
         public bool IsActivated =>
             !string.IsNullOrEmpty(Status) && Status == STATUS_RUNNING;
 
-        /// <summary>
-        /// Serializes audiences with provided audience map for display purposes
-        /// </summary>
-        /// <param name="audiencesMap">Map of audience ID to audience name</param>
-        /// <returns>Serialized audience string with names</returns>
-        public string SerializeAudiences(Dictionary<string, string> audiencesMap)
-        {
-            if (AudienceConditions == null)
-            {
-                return string.Empty;
-            }
-
-            var serialized = AudienceConditionsString;
-            return this.ReplaceAudienceIdsWithNames(serialized, audiencesMap);
-        }
     }
 }
