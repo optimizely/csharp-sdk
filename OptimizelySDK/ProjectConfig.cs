@@ -129,11 +129,6 @@ namespace OptimizelySDK
         Dictionary<string, Rollout> RolloutIdMap { get; }
 
         /// <summary>
-        /// Associative array of Holdout ID to Holdout(s) in the datafile
-        /// </summary>
-        Dictionary<string, Holdout> HoldoutIdMap { get; }
-
-        /// <summary>
         /// Associative dictionary of Flag to Variation key and Variation in the datafile
         /// </summary>
         Dictionary<string, Dictionary<string, Variation>> FlagVariationMap { get; }

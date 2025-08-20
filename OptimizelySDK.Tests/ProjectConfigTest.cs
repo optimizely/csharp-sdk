@@ -1369,13 +1369,6 @@ namespace OptimizelySDK.Tests
 
             Assert.IsNotNull(datafileProjectConfig.Holdouts);
             Assert.AreEqual(3, datafileProjectConfig.Holdouts.Length);
-            Assert.IsNotNull(datafileProjectConfig.HoldoutIdMap);
-            Assert.AreEqual(3, datafileProjectConfig.HoldoutIdMap.Count);
-
-            // Verify specific holdouts are present
-            Assert.IsTrue(datafileProjectConfig.HoldoutIdMap.ContainsKey("holdout_global_1"));
-            Assert.IsTrue(datafileProjectConfig.HoldoutIdMap.ContainsKey("holdout_included_1"));
-            Assert.IsTrue(datafileProjectConfig.HoldoutIdMap.ContainsKey("holdout_excluded_1"));
         }
 
         [Test]
@@ -1451,8 +1444,6 @@ namespace OptimizelySDK.Tests
 
             Assert.IsNotNull(datafileProjectConfig.Holdouts);
             Assert.AreEqual(0, datafileProjectConfig.Holdouts.Length);
-            Assert.IsNotNull(datafileProjectConfig.HoldoutIdMap);
-            Assert.AreEqual(0, datafileProjectConfig.HoldoutIdMap.Count);
 
             // Methods should still work with empty holdouts
             var holdouts = datafileProjectConfig.GetHoldoutsForFlag("any_flag");

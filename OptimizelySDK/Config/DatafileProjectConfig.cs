@@ -217,11 +217,6 @@ namespace OptimizelySDK.Config
         public Dictionary<string, Rollout> RolloutIdMap => _RolloutIdMap;
 
         /// <summary>
-        /// Associative array of Holdout ID to Holdout(s) in the datafile
-        /// </summary>
-        public Dictionary<string, Holdout> HoldoutIdMap { get; private set; }
-
-        /// <summary>
         /// Associative array of experiment IDs that exist in any feature
         /// for checking that experiment is a feature experiment.
         /// </summary>
@@ -343,8 +338,6 @@ namespace OptimizelySDK.Config
                 f => f.Key, true);
             _RolloutIdMap = ConfigParser<Rollout>.GenerateMap(Rollouts,
                 r => r.Id.ToString(), true);
-            HoldoutIdMap = ConfigParser<Holdout>.GenerateMap(Holdouts,
-                h => h.Id, true);
 
             // Overwrite similar items in audience id map with typed audience id map.
             var typedAudienceIdMap = ConfigParser<Audience>.GenerateMap(TypedAudiences,
@@ -795,25 +788,7 @@ namespace OptimizelySDK.Config
         /// <returns>Holdout Entity corresponding to the holdout ID or null if ID is invalid</returns>
         public Holdout GetHoldout(string holdoutId)
         {
-#if NET35 || NET40
-            if (string.IsNullOrEmpty(holdoutId) || string.IsNullOrEmpty(holdoutId.Trim()))
-#else
-            if (string.IsNullOrWhiteSpace(holdoutId))
-#endif
-            {
-                return null;
-            }
-
-            if (HoldoutIdMap.ContainsKey(holdoutId))
-            {
-                return HoldoutIdMap[holdoutId];
-            }
-
-            var message = $@"Holdout ID ""{holdoutId}"" is not in datafile.";
-            Logger.Log(LogLevel.ERROR, message);
-            ErrorHandler.HandleError(
-                new InvalidHoldoutException("Provided holdout is not in datafile."));
-            return null;
+            return _holdoutConfig.GetHoldout(holdoutId);
         }
 
         /// <summary>
