@@ -102,4 +102,10 @@ namespace OptimizelySDK.Exceptions
         public ParseException(string message)
             : base(message) { }
     }
+    public class InvalidHoldoutException : OptimizelyException
+    {
+        public InvalidHoldoutException(string message)
+            : base(message) { }
+    }
 }
+

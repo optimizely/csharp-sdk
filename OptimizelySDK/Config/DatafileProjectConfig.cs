@@ -232,6 +232,11 @@ namespace OptimizelySDK.Config
         public Dictionary<string, Dictionary<string, Variation>> FlagVariationMap =>
             _FlagVariationMap;
 
+        /// <summary>
+        /// Holdout configuration manager for flag-to-holdout relationships.
+        /// </summary>
+        private HoldoutConfig _holdoutConfig;
+
         //========================= Interfaces ===========================
 
         /// <summary>
@@ -287,6 +292,11 @@ namespace OptimizelySDK.Config
         public Rollout[] Rollouts { get; set; }
 
         /// <summary>
+        /// Associative list of Holdouts.
+        /// </summary>
+        public Holdout[] Holdouts { get; set; }
+
+        /// <summary>
         /// Associative list of Integrations.
         /// </summary>
         public Integration[] Integrations { get; set; }
@@ -309,6 +319,7 @@ namespace OptimizelySDK.Config
             TypedAudiences = TypedAudiences ?? new Audience[0];
             FeatureFlags = FeatureFlags ?? new FeatureFlag[0];
             Rollouts = Rollouts ?? new Rollout[0];
+            Holdouts = Holdouts ?? new Holdout[0];
             Integrations = Integrations ?? new Integration[0];
             _ExperimentKeyMap = new Dictionary<string, Experiment>();
 
@@ -450,6 +461,9 @@ namespace OptimizelySDK.Config
             }
 
             _FlagVariationMap = flagToVariationsMap;
+
+            // Initialize HoldoutConfig for managing flag-to-holdout relationships
+            _holdoutConfig = new HoldoutConfig(Holdouts ?? new Holdout[0]);
         }
 
         /// <summary>
@@ -768,6 +782,16 @@ namespace OptimizelySDK.Config
         }
 
         /// <summary>
+        /// Get the holdout from the ID
+        /// </summary>
+        /// <param name="holdoutId">ID for holdout</param>
+        /// <returns>Holdout Entity corresponding to the holdout ID or null if ID is invalid</returns>
+        public Holdout GetHoldout(string holdoutId)
+        {
+            return _holdoutConfig.GetHoldout(holdoutId);
+        }
+
+        /// <summary>
         /// Get attribute ID for the provided attribute key
         /// </summary>
         /// <param name="attributeKey">Key of the Attribute</param>
@@ -828,6 +852,15 @@ namespace OptimizelySDK.Config
         }
 
         /// <summary>
+        /// Get holdout instances associated with the given feature flag key.
+        /// </summary>
+        /// <param name="flagKey">Feature flag key</param>
+        /// <returns>Array of holdouts associated with the flag, empty array if none</returns>
+        public Holdout[] GetHoldoutsForFlag(string flagKey)
+        {
+            var holdouts = _holdoutConfig?.GetHoldoutsForFlag(flagKey);
+            return holdouts?.ToArray() ?? new Holdout[0];
+        }
         /// Returns the datafile corresponding to ProjectConfig
         /// </summary>
         /// <returns>the datafile string corresponding to ProjectConfig</returns>

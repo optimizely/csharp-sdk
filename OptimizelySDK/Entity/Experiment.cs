@@ -15,28 +15,12 @@
  */
 
 using System.Collections.Generic;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using OptimizelySDK.AudienceConditions;
-using OptimizelySDK.Utils;
 
 namespace OptimizelySDK.Entity
 {
-    public class Experiment : IdKeyEntity
+    public class Experiment : ExperimentCore
     {
-        private const string STATUS_RUNNING = "Running";
-
         private const string MUTEX_GROUP_POLICY = "random";
-
-        /// <summary>
-        /// Experiment Status
-        /// </summary>
-        public string Status { get; set; }
-
-        /// <summary>
-        /// Layer ID for the experiment
-        /// </summary>
-        public string LayerId { get; set; }
 
         /// <summary>
         /// Group ID for the experiment
@@ -44,9 +28,9 @@ namespace OptimizelySDK.Entity
         public string GroupId { get; set; }
 
         /// <summary>
-        /// Variations for the experiment
+        /// Layer ID for the experiment
         /// </summary>
-        public Variation[] Variations { get; set; }
+        public string LayerId { get; set; }
 
         /// <summary>
         /// ForcedVariations for the experiment
@@ -62,203 +46,6 @@ namespace OptimizelySDK.Entity
         /// Policy of the experiment group
         /// </summary>
         public string GroupPolicy { get; set; }
-
-        /// <summary>
-        /// ID(s) of audience(s) the experiment is targeted to
-        /// </summary>
-        public string[] AudienceIds { get; set; }
-
-        private ICondition _audienceIdsList = null;
-
-        /// <summary>
-        /// De-serialized audience conditions
-        /// </summary>
-        public ICondition AudienceIdsList
-        {
-            get
-            {
-                if (AudienceIds == null || AudienceIds.Length == 0)
-                {
-                    return null;
-                }
-
-                if (_audienceIdsList == null)
-                {
-                    var conditions = new List<ICondition>();
-                    foreach (var audienceId in AudienceIds)
-                    {
-                        conditions.Add(
-                            new AudienceIdCondition() { AudienceId = (string)audienceId });
-                    }
-
-                    _audienceIdsList = new OrCondition() { Conditions = conditions.ToArray() };
-                }
-
-                return _audienceIdsList;
-            }
-        }
-
-        private string _audienceIdsString = null;
-
-        /// <summary>
-        /// Stringified audience conditions
-        /// </summary>
-        public string AudienceIdsString
-        {
-            get
-            {
-                if (AudienceIds == null)
-                {
-                    return null;
-                }
-
-                if (_audienceIdsString == null)
-                {
-                    _audienceIdsString = JsonConvert.SerializeObject(AudienceIds, Formatting.None);
-                }
-
-                return _audienceIdsString;
-            }
-        }
-
-        /// <summary>
-        /// Traffic allocation of variations in the experiment
-        /// </summary>
-        public TrafficAllocation[] TrafficAllocation { get; set; }
-
-        /// <summary>
-        /// Audience Conditions
-        /// </summary>
-        public object AudienceConditions { get; set; }
-
-        private ICondition _audienceConditionsList = null;
-
-        /// <summary>
-        /// De-serialized audience conditions
-        /// </summary>
-        public ICondition AudienceConditionsList
-        {
-            get
-            {
-                if (AudienceConditions == null)
-                {
-                    return null;
-                }
-
-                if (_audienceConditionsList == null)
-                {
-                    if (AudienceConditions is string)
-                    {
-                        _audienceConditionsList =
-                            ConditionParser.ParseAudienceConditions(
-                                JToken.Parse((string)AudienceConditions));
-                    }
-                    else
-                    {
-                        _audienceConditionsList =
-                            ConditionParser.ParseAudienceConditions((JToken)AudienceConditions);
-                    }
-                }
-
-                return _audienceConditionsList;
-            }
-        }
-
-        private string _audienceConditionsString = null;
-
-        /// <summary>
-        /// Stringified audience conditions
-        /// </summary>
-        public string AudienceConditionsString
-        {
-            get
-            {
-                if (AudienceConditions == null)
-                {
-                    return null;
-                }
-
-                if (_audienceConditionsString == null)
-                {
-                    if (AudienceConditions is JToken token)
-                    {
-                        _audienceConditionsString = token.ToString(Formatting.None);
-                    }
-                    else
-                    {
-                        _audienceConditionsString = AudienceConditions.ToString();
-                    }
-                }
-
-                return _audienceConditionsString;
-            }
-        }
-
-        private bool isGenerateKeyMapCalled = false;
-
-        private Dictionary<string, Variation> _VariationKeyToVariationMap;
-
-        public Dictionary<string, Variation> VariationKeyToVariationMap
-        {
-            get
-            {
-                if (!isGenerateKeyMapCalled)
-                {
-                    GenerateVariationKeyMap();
-                }
-
-                return _VariationKeyToVariationMap;
-            }
-        }
-
-        private Dictionary<string, Variation> _VariationIdToVariationMap;
-
-        public Dictionary<string, Variation> VariationIdToVariationMap
-        {
-            get
-            {
-                if (!isGenerateKeyMapCalled)
-                {
-                    GenerateVariationKeyMap();
-                }
-
-                return _VariationIdToVariationMap;
-            }
-        }
-
-        public void GenerateVariationKeyMap()
-        {
-            if (Variations == null)
-            {
-                return;
-            }
-
-            _VariationIdToVariationMap =
-                ConfigParser<Variation>.GenerateMap(Variations, a => a.Id, true);
-            _VariationKeyToVariationMap =
-                ConfigParser<Variation>.GenerateMap(Variations, a => a.Key, true);
-            isGenerateKeyMapCalled = true;
-        }
-
-        // Code from PHP, need to build traffic and variations from config
-#if false
-        /**
-         * @param $variations array Variations in experiment.
-         */
-        public function setVariations($variations)
-        {
-        $this->_variations = ConfigParser::generateMap($variations, null, Variation::class);
-        }
-
-        /**
-         * @param $trafficAllocation array Traffic allocation of variations in experiment.
-         */
-        public function setTrafficAllocation($trafficAllocation)
-        {
-        $this->_trafficAllocation =
- ConfigParser::generateMap($trafficAllocation, null, TrafficAllocation::class);
-        }
-#endif
 
         /// <summary>
         /// Determine if experiment is in a mutually exclusive group
@@ -281,5 +68,10 @@ namespace OptimizelySDK.Entity
         {
             return ForcedVariations != null && ForcedVariations.ContainsKey(userId);
         }
+
+        /// <summary>
+        /// Determine if experiment is currently activated/running (implementation of abstract property)
+        /// </summary>
+        public override bool IsActivated => IsExperimentRunning;
     }
 }

@@ -178,7 +178,12 @@
     <Compile Include="..\OptimizelySDK\Entity\Experiment.cs">
       <Link>Entity\Experiment.cs</Link>
     </Compile>
-    <Compile Include="..\OptimizelySDK\Entity\FeatureDecision.cs">
+    <Compile Include="..\OptimizelySDK\Entity\Holdout.cs">
+      <Link>Entity\Holdout.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Entity\ExperimentCore.cs">
+      <Link>Entity\ExperimentCore.cs</Link>
+    </Compile>   <Compile Include="..\OptimizelySDK\Entity\FeatureDecision.cs">
       <Link>Entity\FeatureDecision.cs</Link>
     </Compile>
     <Compile Include="..\OptimizelySDK\Entity\FeatureFlag.cs">
@@ -330,6 +335,9 @@
     </Compile>
     <Compile Include="..\OptimizelySDK\Utils\ExperimentUtils.cs">
       <Link>Utils\ExperimentUtils.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Utils\HoldoutConfig.cs">
+      <Link>Utils\HoldoutConfig.cs</Link>
     </Compile>
     <Compile Include="..\OptimizelySDK\Utils\Schema.cs">
       <Link>Utils\Schema.cs</Link>

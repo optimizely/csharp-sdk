@@ -84,6 +84,8 @@
     <Compile Include="Entity\Event.cs"/>
     <Compile Include="Entity\EventTags.cs"/>
     <Compile Include="Entity\Experiment.cs"/>
+    <Compile Include="Entity\ExperimentCore.cs"/>
+    <Compile Include="Entity\Holdout.cs"/>
     <Compile Include="Entity\FeatureDecision.cs"/>
     <Compile Include="Entity\FeatureFlag.cs"/>
     <Compile Include="Entity\FeatureVariable.cs"/>
@@ -171,6 +173,7 @@
     <Compile Include="Utils\EventTagUtils.cs"/>
     <Compile Include="Bucketing\UserProfileUtil.cs"/>
     <Compile Include="Utils\ExperimentUtils.cs"/>
+    <Compile Include="Utils\HoldoutConfig.cs"/>
     <Compile Include="Utils\ControlAttributes.cs"/>
     <Compile Include="Utils\ExceptionExtensions.cs"/>
     <Compile Include="Utils\DateTimeUtils.cs"/>

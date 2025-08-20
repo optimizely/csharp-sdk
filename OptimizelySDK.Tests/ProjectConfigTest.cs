@@ -16,6 +16,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Moq;
 using Newtonsoft.Json;
@@ -1175,9 +1176,7 @@ namespace OptimizelySDK.Tests
             Assert.AreEqual(reservedAttrConfig.GetAttributeId(reservedPrefixAttrKey),
                 reservedAttrConfig.GetAttribute(reservedPrefixAttrKey).Id);
             LoggerMock.Verify(l => l.Log(LogLevel.WARN,
-                $@"Attribute {reservedPrefixAttrKey} unexpectedly has reserved prefix {
-                    DatafileProjectConfig.RESERVED_ATTRIBUTE_PREFIX
-                }; using attribute ID instead of reserved attribute name."));
+                $@"Attribute {reservedPrefixAttrKey} unexpectedly has reserved prefix {DatafileProjectConfig.RESERVED_ATTRIBUTE_PREFIX}; using attribute ID instead of reserved attribute name."));
         }
 
         [Test]
@@ -1351,5 +1350,110 @@ namespace OptimizelySDK.Tests
             Assert.IsNull(datafileProjectConfig.HostForOdp);
             Assert.IsNull(datafileProjectConfig.PublicKeyForOdp);
         }
+
+        #region Holdout Integration Tests
+
+        [Test]
+        public void TestHoldoutDeserialization_FromDatafile()
+        {
+            // Test that holdouts can be deserialized from a datafile with holdouts
+            var testDataPath = Path.Combine(TestContext.CurrentContext.TestDirectory,
+                "TestData", "HoldoutTestData.json");
+            var jsonContent = File.ReadAllText(testDataPath);
+            var testData = JObject.Parse(jsonContent);
+
+            var datafileJson = testData["datafileWithHoldouts"].ToString();
+
+            var datafileProjectConfig = DatafileProjectConfig.Create(datafileJson,
+                new NoOpLogger(), new NoOpErrorHandler()) as DatafileProjectConfig;
+
+            Assert.IsNotNull(datafileProjectConfig.Holdouts);
+            Assert.AreEqual(3, datafileProjectConfig.Holdouts.Length);
+        }
+
+        [Test]
+        public void TestGetHoldoutsForFlag_Integration()
+        {
+            var testDataPath = Path.Combine(TestContext.CurrentContext.TestDirectory,
+                "TestData", "HoldoutTestData.json");
+            var jsonContent = File.ReadAllText(testDataPath);
+            var testData = JObject.Parse(jsonContent);
+
+            var datafileJson = testData["datafileWithHoldouts"].ToString();
+
+            var datafileProjectConfig = DatafileProjectConfig.Create(datafileJson,
+                new NoOpLogger(), new NoOpErrorHandler()) as DatafileProjectConfig;
+
+            // Test GetHoldoutsForFlag method
+            var holdoutsForFlag1 = datafileProjectConfig.GetHoldoutsForFlag("flag_1");
+            Assert.IsNotNull(holdoutsForFlag1);
+            Assert.AreEqual(3, holdoutsForFlag1.Length); // Global + excluded holdout (applies to all except flag_3/flag_4) + included holdout
+
+            var holdoutsForFlag3 = datafileProjectConfig.GetHoldoutsForFlag("flag_3");
+            Assert.IsNotNull(holdoutsForFlag3);
+            Assert.AreEqual(1, holdoutsForFlag3.Length); // Only true global (excluded holdout excludes flag_3)
+
+            var holdoutsForUnknownFlag = datafileProjectConfig.GetHoldoutsForFlag("unknown_flag");
+            Assert.IsNotNull(holdoutsForUnknownFlag);
+            Assert.AreEqual(2, holdoutsForUnknownFlag.Length); // Global + excluded holdout (unknown_flag not in excluded list)
+        }
+
+        [Test]
+        public void TestGetHoldout_Integration()
+        {
+            var testDataPath = Path.Combine(TestContext.CurrentContext.TestDirectory,
+                "TestData", "HoldoutTestData.json");
+            var jsonContent = File.ReadAllText(testDataPath);
+            var testData = JObject.Parse(jsonContent);
+
+            var datafileJson = testData["datafileWithHoldouts"].ToString();
+
+            var datafileProjectConfig = DatafileProjectConfig.Create(datafileJson,
+                new NoOpLogger(), new NoOpErrorHandler()) as DatafileProjectConfig;
+
+            // Test GetHoldout method
+            var globalHoldout = datafileProjectConfig.GetHoldout("holdout_global_1");
+            Assert.IsNotNull(globalHoldout);
+            Assert.AreEqual("holdout_global_1", globalHoldout.Id);
+            Assert.AreEqual("global_holdout", globalHoldout.Key);
+
+            var invalidHoldout = datafileProjectConfig.GetHoldout("invalid_id");
+            Assert.IsNull(invalidHoldout);
+        }
+
+        [Test]
+        public void TestMissingHoldoutsField_BackwardCompatibility()
+        {
+            // Test that a datafile without holdouts field still works
+            var datafileWithoutHoldouts = @"{
+                ""version"": ""4"",
+                ""rollouts"": [],
+                ""projectId"": ""test_project"",
+                ""experiments"": [],
+                ""groups"": [],
+                ""attributes"": [],
+                ""audiences"": [],
+                ""layers"": [],
+                ""events"": [],
+                ""revision"": ""1"",
+                ""featureFlags"": []
+            }";
+
+            var datafileProjectConfig = DatafileProjectConfig.Create(datafileWithoutHoldouts,
+                new NoOpLogger(), new NoOpErrorHandler()) as DatafileProjectConfig;
+
+            Assert.IsNotNull(datafileProjectConfig.Holdouts);
+            Assert.AreEqual(0, datafileProjectConfig.Holdouts.Length);
+
+            // Methods should still work with empty holdouts
+            var holdouts = datafileProjectConfig.GetHoldoutsForFlag("any_flag");
+            Assert.IsNotNull(holdouts);
+            Assert.AreEqual(0, holdouts.Length);
+
+            var holdout = datafileProjectConfig.GetHoldout("any_id");
+            Assert.IsNull(holdout);
+        }
+
+        #endregion
     }
 }

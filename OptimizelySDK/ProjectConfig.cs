@@ -176,6 +176,11 @@ namespace OptimizelySDK
         Rollout[] Rollouts { get; set; }
 
         /// <summary>
+        /// Associative list of Holdouts.
+        /// </summary>
+        Holdout[] Holdouts { get; set; }
+
+        /// <summary>
         /// Associative list of Integrations.
         /// </summary>
         Integration[] Integrations { get; }
@@ -307,6 +312,20 @@ namespace OptimizelySDK
         /// <param name="experimentId">Experiment Id</param>
         /// <returns>List| Feature flag ids list, null otherwise</returns>
         List<string> GetExperimentFeatureList(string experimentId);
+
+        /// <summary>
+        /// Get the holdout from the ID
+        /// </summary>
+        /// <param name="holdoutId">ID for holdout</param>
+        /// <returns>Holdout Entity corresponding to the holdout ID or null if ID is invalid</returns>
+        Holdout GetHoldout(string holdoutId);
+
+        /// <summary>
+        /// Get holdout instances associated with the given feature flag key.
+        /// </summary>
+        /// <param name="flagKey">Feature flag key</param>
+        /// <returns>Array of holdouts associated with the flag, empty array if none</returns>
+        Holdout[] GetHoldoutsForFlag(string flagKey);
 
         /// <summary>
         /// Returns the datafile corresponding to ProjectConfig

@@ -26,6 +26,8 @@
 			<Compile Include="..\OptimizelySDK\Entity\Event.cs" />
 			<Compile Include="..\OptimizelySDK\Entity\EventTags.cs" />
 			<Compile Include="..\OptimizelySDK\Entity\Experiment.cs" />
+			<Compile Include="..\OptimizelySDK\Entity\Holdout.cs" />
+			<Compile Include="..\OptimizelySDK\Entity\ExperimentCore.cs" />
 			<Compile Include="..\OptimizelySDK\Entity\FeatureDecision.cs" />
 			<Compile Include="..\OptimizelySDK\Entity\ForcedVariation.cs" />
 			<Compile Include="..\OptimizelySDK\Entity\Group.cs" />
@@ -64,6 +66,7 @@
 			<Compile Include="..\OptimizelySDK\Utils\ControlAttributes.cs" />
 			<Compile Include="..\OptimizelySDK\Utils\ExceptionExtensions.cs" />
 			<Compile Include="..\OptimizelySDK\Utils\ExperimentUtils.cs" />
+			<Compile Include="..\OptimizelySDK\Utils\HoldoutConfig.cs" />
 			<Compile Include="..\OptimizelySDK\Utils\ConditionParser.cs" />
 			<Compile Include="..\OptimizelySDK\Utils\AttributeMatchTypes.cs" />
 			<Compile Include="..\OptimizelySDK\Utils\DecisionInfoTypes.cs" />
