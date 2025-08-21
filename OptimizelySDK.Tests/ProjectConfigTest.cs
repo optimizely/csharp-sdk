@@ -1368,7 +1368,7 @@ namespace OptimizelySDK.Tests
                 new NoOpLogger(), new NoOpErrorHandler()) as DatafileProjectConfig;
 
             Assert.IsNotNull(datafileProjectConfig.Holdouts);
-            Assert.AreEqual(3, datafileProjectConfig.Holdouts.Length);
+            Assert.AreEqual(4, datafileProjectConfig.Holdouts.Length);
         }
 
         [Test]
@@ -1387,15 +1387,15 @@ namespace OptimizelySDK.Tests
             // Test GetHoldoutsForFlag method
             var holdoutsForFlag1 = datafileProjectConfig.GetHoldoutsForFlag("flag_1");
             Assert.IsNotNull(holdoutsForFlag1);
-            Assert.AreEqual(3, holdoutsForFlag1.Length); // Global + excluded holdout (applies to all except flag_3/flag_4) + included holdout
+            Assert.AreEqual(4, holdoutsForFlag1.Length); // Global + excluded holdout (applies to all except flag_3/flag_4) + included holdout + empty holdout
 
             var holdoutsForFlag3 = datafileProjectConfig.GetHoldoutsForFlag("flag_3");
             Assert.IsNotNull(holdoutsForFlag3);
-            Assert.AreEqual(1, holdoutsForFlag3.Length); // Only true global (excluded holdout excludes flag_3)
+            Assert.AreEqual(2, holdoutsForFlag3.Length); // Global + empty holdout (excluded holdout excludes flag_3, included holdout doesn't include flag_3)
 
             var holdoutsForUnknownFlag = datafileProjectConfig.GetHoldoutsForFlag("unknown_flag");
             Assert.IsNotNull(holdoutsForUnknownFlag);
-            Assert.AreEqual(2, holdoutsForUnknownFlag.Length); // Global + excluded holdout (unknown_flag not in excluded list)
+            Assert.AreEqual(3, holdoutsForUnknownFlag.Length); // Global + excluded holdout (unknown_flag not in excluded list) + empty holdout
         }
 
         [Test]

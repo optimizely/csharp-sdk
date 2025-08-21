@@ -413,6 +413,29 @@ namespace OptimizelySDK.Config
                 }
             }
 
+            // Adding Holdout variations in variation id and key maps.
+            if (Holdouts != null)
+            {
+                foreach (var holdout in Holdouts)
+                {
+                    _VariationKeyMap[holdout.Key] = new Dictionary<string, Variation>();
+                    _VariationIdMap[holdout.Key] = new Dictionary<string, Variation>();
+                    _VariationIdMapByExperimentId[holdout.Id] = new Dictionary<string, Variation>();
+                    _VariationKeyMapByExperimentId[holdout.Id] = new Dictionary<string, Variation>();
+
+                    if (holdout.Variations != null)
+                    {
+                        foreach (var variation in holdout.Variations)
+                        {
+                            _VariationKeyMap[holdout.Key][variation.Key] = variation;
+                            _VariationIdMap[holdout.Key][variation.Id] = variation;
+                            _VariationKeyMapByExperimentId[holdout.Id][variation.Key] = variation;
+                            _VariationIdMapByExperimentId[holdout.Id][variation.Id] = variation;
+                        }
+                    }
+                }
+            }
+
             var integration = Integrations.FirstOrDefault(i => i.Key.ToLower() == "odp");
             HostForOdp = integration?.Host;
             PublicKeyForOdp = integration?.PublicKey;
