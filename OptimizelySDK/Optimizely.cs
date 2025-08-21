@@ -1154,7 +1154,7 @@ namespace OptimizelySDK
         /// <param name="userAttributes">The user's attributes</param>
         /// <param name="flagKey">It can either be experiment key in case if ruleType is experiment or it's feature key in case ruleType is feature-test or rollout</param>
         /// <param name="ruleType">It can either be experiment in case impression event is sent from activate or it's feature-test or rollout</param>
-        private bool SendImpressionEvent(Experiment experiment, Variation variation, string userId,
+        private bool SendImpressionEvent(ExperimentCore experiment, Variation variation, string userId,
             UserAttributes userAttributes, ProjectConfig config,
             string flagKey, string ruleType, bool enabled
         )

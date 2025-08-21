@@ -28,11 +28,6 @@ namespace OptimizelySDK.Entity
         public string GroupId { get; set; }
 
         /// <summary>
-        /// Layer ID for the experiment
-        /// </summary>
-        public string LayerId { get; set; }
-
-        /// <summary>
         /// ForcedVariations for the experiment
         /// </summary>
         public Dictionary<string, string> ForcedVariations { get; set; }
@@ -54,12 +49,6 @@ namespace OptimizelySDK.Entity
             !string.IsNullOrEmpty(GroupPolicy) && GroupPolicy == MUTEX_GROUP_POLICY;
 
         /// <summary>
-        /// Determine if experiment is running or not
-        /// </summary>
-        public bool IsExperimentRunning =>
-            !string.IsNullOrEmpty(Status) && Status == STATUS_RUNNING;
-
-        /// <summary>
         /// Determin if user is forced variation of experiment
         /// </summary>
         /// <param name="userId">User ID of the user</param>
@@ -68,10 +57,5 @@ namespace OptimizelySDK.Entity
         {
             return ForcedVariations != null && ForcedVariations.ContainsKey(userId);
         }
-
-        /// <summary>
-        /// Determine if experiment is currently activated/running (implementation of abstract property)
-        /// </summary>
-        public override bool IsActivated => IsExperimentRunning;
     }
 }

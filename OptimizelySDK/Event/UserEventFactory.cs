@@ -61,7 +61,7 @@ namespace OptimizelySDK.Event
         /// <param name="ruleType">experiment or featureDecision source </param>
         /// <returns>ImpressionEvent instance</returns>
         public static ImpressionEvent CreateImpressionEvent(ProjectConfig projectConfig,
-            Experiment activatedExperiment,
+            ExperimentCore activatedExperiment,
             Variation variation,
             string userId,
             UserAttributes userAttributes,

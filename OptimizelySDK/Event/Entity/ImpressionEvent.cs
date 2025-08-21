@@ -28,7 +28,7 @@ namespace OptimizelySDK.Event.Entity
         public string UserId { get; private set; }
         public VisitorAttribute[] VisitorAttributes { get; private set; }
 
-        public Experiment Experiment { get; set; }
+        public ExperimentCore Experiment { get; set; }
         public DecisionMetadata Metadata { get; set; }
         public Variation Variation { get; set; }
         public bool? BotFiltering { get; set; }
@@ -42,7 +42,7 @@ namespace OptimizelySDK.Event.Entity
             private EventContext EventContext;
 
             public VisitorAttribute[] VisitorAttributes;
-            private Experiment Experiment;
+            private ExperimentCore Experiment;
             private Variation Variation;
             private DecisionMetadata Metadata;
             private bool? BotFiltering;
@@ -61,7 +61,7 @@ namespace OptimizelySDK.Event.Entity
                 return this;
             }
 
-            public Builder WithExperiment(Experiment experiment)
+            public Builder WithExperiment(ExperimentCore experiment)
             {
                 Experiment = experiment;
 
