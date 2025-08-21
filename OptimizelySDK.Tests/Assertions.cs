@@ -500,6 +500,33 @@ namespace OptimizelySDK.Tests
             AreEquivalent(expected.Variations, actual.Variations);
         }
 
+        public static void AreEqual(ExperimentCore expected, ExperimentCore actual)
+        {
+            if (expected == null && actual == null)
+            {
+                return;
+            }
+            
+            Assert.IsNotNull(expected, "Expected ExperimentCore should not be null");
+            Assert.IsNotNull(actual, "Actual ExperimentCore should not be null");
+            
+            Assert.AreEqual(expected.AudienceConditions, actual.AudienceConditions);
+            Assert.AreEqual(expected.AudienceConditionsList, actual.AudienceConditionsList);
+            Assert.AreEqual(expected.AudienceConditionsString, actual.AudienceConditionsString);
+            AreEquivalent(expected.AudienceIds, actual.AudienceIds);
+            Assert.AreEqual(expected.AudienceIdsList, actual.AudienceIdsList);
+            Assert.AreEqual(expected.AudienceIdsString, actual.AudienceIdsString);
+            Assert.AreEqual(expected.Id, actual.Id);
+            Assert.AreEqual(expected.IsExperimentRunning, actual.IsExperimentRunning);
+            Assert.AreEqual(expected.Key, actual.Key);
+            Assert.AreEqual(expected.LayerId, actual.LayerId);
+            Assert.AreEqual(expected.Status, actual.Status);
+            AreEquivalent(expected.TrafficAllocation, actual.TrafficAllocation);
+            AreEquivalent(expected.VariationIdToVariationMap, actual.VariationIdToVariationMap);
+            AreEquivalent(expected.VariationKeyToVariationMap, actual.VariationKeyToVariationMap);
+            AreEquivalent(expected.Variations, actual.Variations);
+        }
+
         #endregion Experiment
 
         #region FeatureDecision
@@ -507,6 +534,8 @@ namespace OptimizelySDK.Tests
         public static void AreEqual(FeatureDecision expected, FeatureDecision actual)
         {
             AreEqual(expected.Experiment, actual.Experiment);
+            AreEqual(expected.Variation, actual.Variation);
+            Assert.AreEqual(expected.Source, actual.Source);
         }
 
         #endregion FeatureDecision
