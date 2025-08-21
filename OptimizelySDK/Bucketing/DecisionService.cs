@@ -883,7 +883,7 @@ namespace OptimizelySDK.Bucketing
 
             if (!holdout.IsActivated)
             {
-                reasons.AddInfo("Holdout ({0}) is not running.", holdout.Key);
+                reasons.AddInfo($"Holdout \"{holdout.Key}\" is not running.");
                 return Result<FeatureDecision>.NewResult(
                     new FeatureDecision(null, null, FeatureDecision.DECISION_SOURCE_HOLDOUT),
                     reasons
@@ -902,11 +902,7 @@ namespace OptimizelySDK.Bucketing
 
             if (!audienceResult.ResultObject)
             {
-                reasons.AddInfo(
-                    "User ({0}) does not meet conditions for holdout ({1}).",
-                    userId,
-                    holdout.Key
-                );
+                reasons.AddInfo($"User \"{userId}\" does not meet conditions for holdout ({holdout.Key}).");
                 return Result<FeatureDecision>.NewResult(
                     new FeatureDecision(null, null, FeatureDecision.DECISION_SOURCE_HOLDOUT),
                     reasons
@@ -920,22 +916,14 @@ namespace OptimizelySDK.Bucketing
 
             if (bucketedVariation.ResultObject != null)
             {
-                reasons.AddInfo(
-                    "User ({0}) is bucketed into holdout variation ({1}).",
-                    userId,
-                    bucketedVariation.ResultObject.Key
-                );
+                reasons.AddInfo($"User \"{userId}\" is bucketed into holdout variation \"{bucketedVariation.ResultObject.Key}\".");
                 return Result<FeatureDecision>.NewResult(
                     new FeatureDecision(holdout, bucketedVariation.ResultObject, FeatureDecision.DECISION_SOURCE_HOLDOUT),
                     reasons
                 );
             }
 
-            reasons.AddInfo(
-                "User ({0}) is not bucketed into holdout variation ({1}).",
-                userId,
-                holdout.Key
-            );
+            reasons.AddInfo($"User \"{userId}\" is not bucketed into holdout variation \"{holdout.Key}\".");
 
             return Result<FeatureDecision>.NewResult(
                 new FeatureDecision(null, null, FeatureDecision.DECISION_SOURCE_HOLDOUT),
