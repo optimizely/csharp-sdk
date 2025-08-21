@@ -20,12 +20,12 @@ namespace OptimizelySDK.Entity
     {
         public const string DECISION_SOURCE_FEATURE_TEST = "feature-test";
         public const string DECISION_SOURCE_ROLLOUT = "rollout";
-
-        public Experiment Experiment { get; }
+        public const string DECISION_SOURCE_HOLDOUT = "holdout";
+        public ExperimentCore Experiment { get; }
         public Variation Variation { get; }
         public string Source { get; }
 
-        public FeatureDecision(Experiment experiment, Variation variation, string source)
+        public FeatureDecision(ExperimentCore experiment, Variation variation, string source)
         {
             Experiment = experiment;
             Variation = variation;

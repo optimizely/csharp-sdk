@@ -46,7 +46,7 @@ namespace OptimizelySDK.Utils
         /// <param name="logger">Custom logger implementation to record log outputs</param>
         /// <returns>true if the user meets audience conditions to be in experiment, false otherwise.</returns>
         public static Result<bool> DoesUserMeetAudienceConditions(ProjectConfig config,
-            Experiment experiment,
+            ExperimentCore experiment,
             OptimizelyUserContext user,
             string loggingKeyType,
             string loggingKey,

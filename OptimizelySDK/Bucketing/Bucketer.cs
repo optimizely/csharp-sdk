@@ -112,7 +112,7 @@ namespace OptimizelySDK.Bucketing
         /// <param name="bucketingId">A customer-assigned value used to create the key for the murmur hash.</param>
         /// <param name="userId">User identifier</param>
         /// <returns>Variation which will be shown to the user</returns>
-        public virtual Result<Variation> Bucket(ProjectConfig config, Experiment experiment,
+        public virtual Result<Variation> Bucket(ProjectConfig config, ExperimentCore experiment,
             string bucketingId, string userId
         )
         {
@@ -127,9 +127,9 @@ namespace OptimizelySDK.Bucketing
             }
 
             // Determine if experiment is in a mutually exclusive group.
-            if (experiment.IsInMutexGroup)
+            if (experiment is Experiment exp && exp.IsInMutexGroup)
             {
-                var group = config.GetGroup(experiment.GroupId);
+                var group = config.GetGroup(exp.GroupId);
                 if (string.IsNullOrEmpty(group.Id))
                 {
                     return Result<Variation>.NewResult(new Variation(), reasons);
@@ -147,13 +147,13 @@ namespace OptimizelySDK.Bucketing
                 if (userExperimentId != experiment.Id)
                 {
                     message =
-                        $"User [{userId}] is not in experiment [{experiment.Key}] of group [{experiment.GroupId}].";
+                        $"User [{userId}] is not in experiment [{exp.Key}] of group [{exp.GroupId}].";
                     Logger.Log(LogLevel.INFO, reasons.AddInfo(message));
                     return Result<Variation>.NewResult(new Variation(), reasons);
                 }
 
                 message =
-                    $"User [{userId}] is in experiment [{experiment.Key}] of group [{experiment.GroupId}].";
+                    $"User [{userId}] is in experiment [{exp.Key}] of group [{exp.GroupId}].";
                 Logger.Log(LogLevel.INFO, reasons.AddInfo(message));
             }
 

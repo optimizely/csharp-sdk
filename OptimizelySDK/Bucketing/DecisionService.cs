@@ -22,6 +22,7 @@ using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Logger;
 using OptimizelySDK.OptimizelyDecisions;
 using OptimizelySDK.Utils;
+using static OptimizelySDK.Entity.Holdout;
 
 namespace OptimizelySDK.Bucketing
 {
@@ -754,7 +755,22 @@ namespace OptimizelySDK.Bucketing
             {
                 var reasons = new DecisionReasons();
                 reasons += upsReasons;
+                var holdouts = projectConfig.GetHoldoutsForFlag(featureFlag.Key);
+                foreach (var holdout in holdouts)
+                {
+                    var holdoutDecision = GetVariationForHoldout(holdout, user, projectConfig);
+                    reasons += holdoutDecision.DecisionReasons;
 
+                    if (holdoutDecision.ResultObject != null)
+                    {
+                        Logger.Log(LogLevel.INFO,
+                            reasons.AddInfo(
+                                $"The user \"{userId}\" is bucketed into holdout \"{holdout.Key}\" for feature flag \"{featureFlag.Key}\"."));
+                        decisions.Add(Result<FeatureDecision>.NewResult(holdoutDecision.ResultObject,
+                            reasons));
+                        continue;
+                    }
+                }
                 // Check if the feature flag has an experiment and the user is bucketed into that experiment.
                 var decisionResult = GetVariationForFeatureExperiment(featureFlag, user,
                     filteredAttributes, projectConfig, options, userProfileTracker);
@@ -856,6 +872,76 @@ namespace OptimizelySDK.Bucketing
             return Result<string>.NewResult(bucketingId, reasons);
         }
 
+        private Result<FeatureDecision> GetVariationForHoldout(
+            Holdout holdout,
+            OptimizelyUserContext user,
+            ProjectConfig config
+        )
+        {
+            var userId = user.GetUserId();
+            var reasons = new DecisionReasons();
+
+            if (!holdout.IsActivated)
+            {
+                reasons.AddInfo("Holdout ({0}) is not running.", holdout.Key);
+                return Result<FeatureDecision>.NewResult(
+                    new FeatureDecision(null, null, FeatureDecision.DECISION_SOURCE_HOLDOUT),
+                    reasons
+                );
+            }
+
+            var audienceResult = ExperimentUtils.DoesUserMeetAudienceConditions(
+                config,
+                holdout,
+                user,
+                LOGGING_KEY_TYPE_EXPERIMENT,
+                holdout.Key,
+                Logger
+            );
+            reasons += audienceResult.DecisionReasons;
+
+            if (!audienceResult.ResultObject)
+            {
+                reasons.AddInfo(
+                    "User ({0}) does not meet conditions for holdout ({1}).",
+                    userId,
+                    holdout.Key
+                );
+                return Result<FeatureDecision>.NewResult(
+                    new FeatureDecision(null, null, FeatureDecision.DECISION_SOURCE_HOLDOUT),
+                    reasons
+                );
+            }
+
+            var attributes = user.GetAttributes();
+            var bucketingIdResult = GetBucketingId(userId, attributes);
+            var bucketedVariation = Bucketer.Bucket(config, holdout, bucketingIdResult.ResultObject, userId);
+            reasons += bucketedVariation.DecisionReasons;
+
+            if (bucketedVariation.ResultObject != null)
+            {
+                reasons.AddInfo(
+                    "User ({0}) is bucketed into holdout variation ({1}).",
+                    userId,
+                    bucketedVariation.ResultObject.Key
+                );
+                return Result<FeatureDecision>.NewResult(
+                    new FeatureDecision(holdout, bucketedVariation.ResultObject, FeatureDecision.DECISION_SOURCE_HOLDOUT),
+                    reasons
+                );
+            }
+
+            reasons.AddInfo(
+                "User ({0}) is not bucketed into holdout variation ({1}).",
+                userId,
+                holdout.Key
+            );
+
+            return Result<FeatureDecision>.NewResult(
+                new FeatureDecision(null, null, FeatureDecision.DECISION_SOURCE_HOLDOUT),
+                reasons
+            );
+        }
         /// <summary>
         /// Finds a validated forced decision.
         /// </summary>
