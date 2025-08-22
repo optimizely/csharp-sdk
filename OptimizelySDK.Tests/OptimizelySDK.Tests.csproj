@@ -108,6 +108,7 @@
     <Compile Include="TestBucketer.cs"/>
     <Compile Include="BucketerHoldoutTest.cs"/>
     <Compile Include="DecisionServiceHoldoutTest.cs"/>
+    <Compile Include="OptimizelyUserContextHoldoutTest.cs"/>
     <Compile Include="BucketerTest.cs"/>
     <Compile Include="ProjectConfigTest.cs"/>
     <Compile Include="TestSetup.cs"/>
