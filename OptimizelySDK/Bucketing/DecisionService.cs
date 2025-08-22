@@ -883,7 +883,9 @@ namespace OptimizelySDK.Bucketing
 
             if (!holdout.IsActivated)
             {
-                reasons.AddInfo($"Holdout \"{holdout.Key}\" is not running.");
+                var infoMessage = $"Holdout \"{holdout.Key}\" is not running.";
+                Logger.Log(LogLevel.INFO, infoMessage);
+                reasons.AddInfo(infoMessage);
                 return Result<FeatureDecision>.NewResult(
                     new FeatureDecision(null, null, FeatureDecision.DECISION_SOURCE_HOLDOUT),
                     reasons
