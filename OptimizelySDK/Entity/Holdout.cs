@@ -47,10 +47,13 @@ namespace OptimizelySDK.Entity
         /// <summary>
         /// Layer ID is always empty for holdouts as they don't belong to any layer
         /// </summary>
-        public override string LayerId 
-        { 
-            get => string.Empty; 
-            set { /* Holdouts don't have layer IDs, ignore any assignment */ } 
+        public override string LayerId
+        {
+            get => string.Empty;
+            set
+            {
+                /* Holdouts don't have layer IDs, ignore any assignment */
+            }
         }
     }
 }

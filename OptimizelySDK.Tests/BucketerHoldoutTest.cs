@@ -42,19 +42,19 @@ namespace OptimizelySDK.Tests
         public void Initialize()
         {
             LoggerMock = new Mock<ILogger>();
-            
+
             // Load holdout test data
             var testDataPath = Path.Combine(TestContext.CurrentContext.TestDirectory,
                 "TestData", "HoldoutTestData.json");
             var jsonContent = File.ReadAllText(testDataPath);
             TestData = JObject.Parse(jsonContent);
-            
+
             // Use datafile with holdouts for proper config setup
             var datafileWithHoldouts = TestData["datafileWithHoldouts"].ToString();
             Config = DatafileProjectConfig.Create(datafileWithHoldouts, LoggerMock.Object,
                 new ErrorHandler.NoOpErrorHandler());
             TestBucketer = new TestBucketer(LoggerMock.Object);
-            
+
             // Verify that the config contains holdouts
             Assert.IsNotNull(Config.Holdouts, "Config should have holdouts");
             Assert.IsTrue(Config.Holdouts.Length > 0, "Config should contain holdouts");
@@ -76,10 +76,10 @@ namespace OptimizelySDK.Tests
             Assert.IsNotNull(result.ResultObject);
             Assert.AreEqual("var_1", result.ResultObject.Id);
             Assert.AreEqual("control", result.ResultObject.Key);
-            
+
             // Verify logging
-            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, 
-                It.Is<string>(s => s.Contains($"Assigned bucket [2500] to user [{TestUserId}]"))), 
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG,
+                    It.Is<string>(s => s.Contains($"Assigned bucket [2500] to user [{TestUserId}]"))),
                 Times.Once);
         }
 
@@ -89,7 +89,7 @@ namespace OptimizelySDK.Tests
             // Test user not bucketed when outside traffic allocation range
             var holdoutJson = TestData["globalHoldout"].ToString();
             var holdout = JsonConvert.DeserializeObject<Holdout>(holdoutJson);
-            
+
             // Modify traffic allocation to be smaller (0-1000 range = 10%)
             holdout.TrafficAllocation[0].EndOfRange = 1000;
 
@@ -100,10 +100,10 @@ namespace OptimizelySDK.Tests
 
             Assert.IsNull(result.ResultObject.Id);
             Assert.IsNull(result.ResultObject.Key);
-            
+
             // Verify user was assigned bucket value but no variation was found
-            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, 
-                It.Is<string>(s => s.Contains($"Assigned bucket [1500] to user [{TestUserId}]"))), 
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG,
+                    It.Is<string>(s => s.Contains($"Assigned bucket [1500] to user [{TestUserId}]"))),
                 Times.Once);
         }
 
@@ -113,7 +113,7 @@ namespace OptimizelySDK.Tests
             // Test holdout with empty traffic allocation
             var holdoutJson = TestData["globalHoldout"].ToString();
             var holdout = JsonConvert.DeserializeObject<Holdout>(holdoutJson);
-            
+
             // Clear traffic allocation
             holdout.TrafficAllocation = new TrafficAllocation[0];
 
@@ -123,10 +123,10 @@ namespace OptimizelySDK.Tests
 
             Assert.IsNull(result.ResultObject.Id);
             Assert.IsNull(result.ResultObject.Key);
-            
+
             // Verify bucket was assigned but no variation found
-            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, 
-                It.Is<string>(s => s.Contains($"Assigned bucket [5000] to user [{TestUserId}]"))), 
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG,
+                    It.Is<string>(s => s.Contains($"Assigned bucket [5000] to user [{TestUserId}]"))),
                 Times.Once);
         }
 
@@ -136,7 +136,7 @@ namespace OptimizelySDK.Tests
             // Test holdout with invalid variation ID in traffic allocation
             var holdoutJson = TestData["globalHoldout"].ToString();
             var holdout = JsonConvert.DeserializeObject<Holdout>(holdoutJson);
-            
+
             // Set traffic allocation to point to non-existent variation
             holdout.TrafficAllocation[0].EntityId = "invalid_variation_id";
 
@@ -146,10 +146,10 @@ namespace OptimizelySDK.Tests
 
             Assert.IsNull(result.ResultObject.Id);
             Assert.IsNull(result.ResultObject.Key);
-            
+
             // Verify bucket was assigned
-            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, 
-                It.Is<string>(s => s.Contains($"Assigned bucket [5000] to user [{TestUserId}]"))), 
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG,
+                    It.Is<string>(s => s.Contains($"Assigned bucket [5000] to user [{TestUserId}]"))),
                 Times.Once);
         }
 
@@ -167,10 +167,10 @@ namespace OptimizelySDK.Tests
 
             Assert.IsNull(result.ResultObject.Id);
             Assert.IsNull(result.ResultObject.Key);
-            
+
             // Verify bucket was assigned
-            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG, 
-                It.Is<string>(s => s.Contains($"Assigned bucket [5000] to user [{TestUserId}]"))), 
+            LoggerMock.Verify(l => l.Log(LogLevel.DEBUG,
+                    It.Is<string>(s => s.Contains($"Assigned bucket [5000] to user [{TestUserId}]"))),
                 Times.Once);
         }
 
@@ -180,7 +180,7 @@ namespace OptimizelySDK.Tests
             // Test holdout with empty key
             var holdoutJson = TestData["globalHoldout"].ToString();
             var holdout = JsonConvert.DeserializeObject<Holdout>(holdoutJson);
-            
+
             // Clear holdout key
             holdout.Key = "";
 
@@ -200,7 +200,7 @@ namespace OptimizelySDK.Tests
             // Test holdout with null key
             var holdoutJson = TestData["globalHoldout"].ToString();
             var holdout = JsonConvert.DeserializeObject<Holdout>(holdoutJson);
-            
+
             // Set holdout key to null
             holdout.Key = null;
 
@@ -220,7 +220,7 @@ namespace OptimizelySDK.Tests
             // Test holdout with multiple variations and user buckets into first one
             var holdoutJson = TestData["globalHoldout"].ToString();
             var holdout = JsonConvert.DeserializeObject<Holdout>(holdoutJson);
-            
+
             // Add a second variation
             var variation2 = new Variation
             {
@@ -229,7 +229,7 @@ namespace OptimizelySDK.Tests
                 FeatureEnabled = true
             };
             holdout.Variations = new[] { holdout.Variations[0], variation2 };
-            
+
             // Set traffic allocation for first variation (0-5000) and second (5000-10000)
             holdout.TrafficAllocation = new[]
             {
@@ -253,7 +253,7 @@ namespace OptimizelySDK.Tests
             // Use the global holdout from config which now has multiple variations
             var holdout = Config.GetHoldout("holdout_global_1");
             Assert.IsNotNull(holdout, "Holdout should exist in config");
-            
+
             // Verify holdout has multiple variations 
             Assert.IsTrue(holdout.Variations.Length >= 2, "Holdout should have multiple variations");
             Assert.AreEqual("var_1", holdout.Variations[0].Id);
@@ -274,7 +274,7 @@ namespace OptimizelySDK.Tests
             // Test edge cases at traffic allocation boundaries
             var holdoutJson = TestData["globalHoldout"].ToString();
             var holdout = JsonConvert.DeserializeObject<Holdout>(holdoutJson);
-            
+
             // Set traffic allocation to 5000 (50%)
             holdout.TrafficAllocation[0].EndOfRange = 5000;
 
@@ -308,7 +308,7 @@ namespace OptimizelySDK.Tests
             // Results should be identical
             Assert.IsNotNull(result1);
             Assert.IsNotNull(result2);
-            
+
             if (result1.ResultObject?.Id != null)
             {
                 Assert.AreEqual(result1.ResultObject.Id, result2.ResultObject.Id);
