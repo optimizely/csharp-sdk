@@ -506,10 +506,10 @@ namespace OptimizelySDK.Tests
             {
                 return;
             }
-            
+
             Assert.IsNotNull(expected, "Expected ExperimentCore should not be null");
             Assert.IsNotNull(actual, "Actual ExperimentCore should not be null");
-            
+
             Assert.AreEqual(expected.AudienceConditions, actual.AudienceConditions);
             Assert.AreEqual(expected.AudienceConditionsList, actual.AudienceConditionsList);
             Assert.AreEqual(expected.AudienceConditionsString, actual.AudienceConditionsString);
