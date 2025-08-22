@@ -64,15 +64,13 @@ namespace OptimizelySDK.Utils
             {
                 expConditions = experiment.AudienceConditionsList;
                 logger.Log(LogLevel.DEBUG,
-                    $@"Evaluating audiences for {loggingKeyType} ""{loggingKey}"": {
-                        experiment.AudienceConditionsString}.");
+                    $@"Evaluating audiences for {loggingKeyType} ""{loggingKey}"": {experiment.AudienceConditionsString}.");
             }
             else
             {
                 expConditions = experiment.AudienceIdsList;
                 logger.Log(LogLevel.DEBUG,
-                    $@"Evaluating audiences for {loggingKeyType} ""{loggingKey}"": {
-                        experiment.AudienceIdsString}.");
+                    $@"Evaluating audiences for {loggingKeyType} ""{loggingKey}"": {experiment.AudienceIdsString}.");
             }
 
             // If there are no audiences, return true because that means ALL users are included in the experiment.
@@ -84,8 +82,7 @@ namespace OptimizelySDK.Utils
             var result = expConditions.Evaluate(config, user, logger).GetValueOrDefault();
             var resultText = result.ToString().ToUpper();
             logger.Log(LogLevel.INFO,
-                reasons.AddInfo($@"Audiences for {loggingKeyType} ""{loggingKey
-                }"" collectively evaluated to {resultText}"));
+                reasons.AddInfo($@"Audiences for {loggingKeyType} ""{loggingKey}"" collectively evaluated to {resultText}"));
             return Result<bool>.NewResult(result, reasons);
         }
     }
