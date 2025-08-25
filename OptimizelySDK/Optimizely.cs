@@ -1159,7 +1159,7 @@ namespace OptimizelySDK
             string flagKey, string ruleType, bool enabled
         )
         {
-            if (experiment != null && !experiment.IsExperimentRunning)
+            if (experiment != null && !experiment.isRunning)
             {
                 Logger.Log(LogLevel.ERROR,
                     @"Experiment has ""Launched"" status so not dispatching event during activation.");

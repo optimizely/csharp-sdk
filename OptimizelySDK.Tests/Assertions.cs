@@ -488,7 +488,7 @@ namespace OptimizelySDK.Tests
             Assert.AreEqual(expected.GroupId, actual.GroupId);
             Assert.AreEqual(expected.GroupPolicy, actual.GroupPolicy);
             Assert.AreEqual(expected.Id, actual.Id);
-            Assert.AreEqual(expected.IsExperimentRunning, actual.IsExperimentRunning);
+            Assert.AreEqual(expected.isRunning, actual.isRunning);
             Assert.AreEqual(expected.IsInMutexGroup, actual.IsInMutexGroup);
             Assert.AreEqual(expected.Key, actual.Key);
             Assert.AreEqual(expected.LayerId, actual.LayerId);
@@ -517,7 +517,7 @@ namespace OptimizelySDK.Tests
             Assert.AreEqual(expected.AudienceIdsList, actual.AudienceIdsList);
             Assert.AreEqual(expected.AudienceIdsString, actual.AudienceIdsString);
             Assert.AreEqual(expected.Id, actual.Id);
-            Assert.AreEqual(expected.IsExperimentRunning, actual.IsExperimentRunning);
+            Assert.AreEqual(expected.isRunning, actual.isRunning);
             Assert.AreEqual(expected.Key, actual.Key);
             Assert.AreEqual(expected.LayerId, actual.LayerId);
             Assert.AreEqual(expected.Status, actual.Status);

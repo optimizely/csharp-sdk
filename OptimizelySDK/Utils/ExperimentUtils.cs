@@ -25,7 +25,7 @@ namespace OptimizelySDK.Utils
     {
         public static bool IsExperimentActive(Experiment experiment, ILogger logger)
         {
-            if (!experiment.IsExperimentRunning)
+            if (!experiment.isRunning)
             {
                 logger.Log(LogLevel.INFO, $"Experiment \"{experiment.Key}\" is not running.");
 

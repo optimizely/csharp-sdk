@@ -115,9 +115,6 @@ namespace OptimizelySDK.Tests
 
             Assert.IsNotNull(holdout1);
             Assert.IsNotNull(holdout2);
-            // Note: This test depends on how Holdout implements equality
-            // If Holdout doesn't override Equals, this will test reference equality
-            // You may need to implement custom equality logic for Holdout
         }
 
         [Test]
@@ -128,10 +125,6 @@ namespace OptimizelySDK.Tests
 
             Assert.IsNotNull(globalHoldout);
             Assert.AreEqual("Running", globalHoldout.Status);
-
-            // Test that the holdout is considered activated when status is "Running"
-            // This assumes there's an IsActivated property or similar logic
-            // Adjust based on actual Holdout implementation
         }
 
         [Test]
@@ -184,9 +177,6 @@ namespace OptimizelySDK.Tests
             Assert.IsNotNull(holdout);
             Assert.AreEqual("test_holdout", holdout.Id);
             Assert.AreEqual("test_key", holdout.Key);
-
-            // Verify that missing includedFlags and excludedFlags are handled properly
-            // This depends on how the Holdout entity handles missing properties
             Assert.IsNotNull(holdout.IncludedFlags);
             Assert.IsNotNull(holdout.ExcludedFlags);
         }

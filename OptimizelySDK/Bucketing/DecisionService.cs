@@ -910,7 +910,7 @@ namespace OptimizelySDK.Bucketing
             var userId = user.GetUserId();
             var reasons = new DecisionReasons();
 
-            if (!holdout.IsActivated)
+            if (!holdout.isRunning)
             {
                 var infoMessage = $"Holdout \"{holdout.Key}\" is not running.";
                 Logger.Log(LogLevel.INFO, infoMessage);

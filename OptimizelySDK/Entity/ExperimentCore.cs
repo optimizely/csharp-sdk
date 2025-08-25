@@ -276,9 +276,6 @@ namespace OptimizelySDK.Entity
         /// <summary>
         /// Determine if experiment is currently activated/running 
         /// </summary>
-        public bool IsExperimentRunning =>
-            !string.IsNullOrEmpty(Status) && Status == STATUS_RUNNING;
-
-        public bool IsActivated => IsExperimentRunning;
+        public bool isRunning => !string.IsNullOrEmpty(Status) && Status == STATUS_RUNNING;
     }
 }
