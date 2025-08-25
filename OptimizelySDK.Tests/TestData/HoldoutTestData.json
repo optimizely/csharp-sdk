@@ -126,11 +126,21 @@
             "key": "control",
             "featureEnabled": false,
             "variables": []
+          },
+          {
+            "id": "var_2",
+            "key": "treatment",
+            "featureEnabled": true,
+            "variables": []
           }
         ],
         "trafficAllocation": [
           {
             "entityId": "var_1",
+            "endOfRange": 5000
+          },
+          {
+            "entityId": "var_2",
             "endOfRange": 10000
           }
         ],
@@ -186,6 +196,18 @@
         "audienceConditions": [],
         "includedFlags": [],
         "excludedFlags": ["flag_3", "flag_4"]
+      },
+      {
+        "id": "holdout_empty_1",
+        "key": "empty_holdout",
+        "status": "Running",
+        "layerId": "layer_4",
+        "variations": [],
+        "trafficAllocation": [],
+        "audienceIds": [],
+        "audienceConditions": [],
+        "includedFlags": [],
+        "excludedFlags": []
       }
     ]
   }

@@ -36,6 +36,11 @@ namespace OptimizelySDK.Entity
         public string Status { get; set; }
 
         /// <summary>
+        /// Layer ID for the experiment
+        /// </summary>
+        public virtual string LayerId { get; set; }
+
+        /// <summary>
         /// Variations for the experiment/holdout
         /// </summary>
         public Variation[] Variations { get; set; }
@@ -269,8 +274,8 @@ namespace OptimizelySDK.Entity
         #endregion
 
         /// <summary>
-        /// Determine if experiment/holdout is currently activated/running
+        /// Determine if experiment is currently activated/running 
         /// </summary>
-        public abstract bool IsActivated { get; }
+        public bool isRunning => !string.IsNullOrEmpty(Status) && Status == STATUS_RUNNING;
     }
 }

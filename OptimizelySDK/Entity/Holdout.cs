@@ -45,10 +45,15 @@ namespace OptimizelySDK.Entity
         public string[] ExcludedFlags { get; set; } = new string[0];
 
         /// <summary>
-        /// Determine if holdout is currently activated/running
+        /// Layer ID is always empty for holdouts as they don't belong to any layer
         /// </summary>
-        public override bool IsActivated =>
-            !string.IsNullOrEmpty(Status) && Status == STATUS_RUNNING;
-
+        public override string LayerId
+        {
+            get => string.Empty;
+            set
+            {
+                /* Holdouts don't have layer IDs, ignore any assignment */
+            }
+        }
     }
 }

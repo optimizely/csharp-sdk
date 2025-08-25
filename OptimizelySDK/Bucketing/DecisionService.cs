@@ -22,6 +22,7 @@ using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Logger;
 using OptimizelySDK.OptimizelyDecisions;
 using OptimizelySDK.Utils;
+using static OptimizelySDK.Entity.Holdout;
 
 namespace OptimizelySDK.Bucketing
 {
@@ -727,6 +728,84 @@ namespace OptimizelySDK.Bucketing
                 new OptimizelyDecideOption[] { });
         }
 
+        /// <summary>
+        /// Get the decision for a single feature flag, following Swift SDK pattern.
+        /// This method processes holdouts, experiments, and rollouts in sequence.
+        /// </summary>
+        /// <param name="featureFlag">The feature flag to get a decision for.</param>
+        /// <param name="user">The user context.</param>
+        /// <param name="projectConfig">The project config.</param>
+        /// <param name="filteredAttributes">The user's filtered attributes.</param>
+        /// <param name="options">Decision options.</param>
+        /// <param name="userProfileTracker">User profile tracker for sticky bucketing.</param>
+        /// <param name="decideReasons">Decision reasons to merge.</param>
+        /// <returns>A decision result for the feature flag.</returns>
+        public virtual Result<FeatureDecision> GetDecisionForFlag(
+            FeatureFlag featureFlag,
+            OptimizelyUserContext user,
+            ProjectConfig projectConfig,
+            UserAttributes filteredAttributes,
+            OptimizelyDecideOption[] options,
+            UserProfileTracker userProfileTracker = null,
+            DecisionReasons decideReasons = null
+        )
+        {
+            var reasons = new DecisionReasons();
+            if (decideReasons != null)
+            {
+                reasons += decideReasons;
+            }
+
+            var userId = user.GetUserId();
+
+            // Check holdouts first (highest priority)
+            var holdouts = projectConfig.GetHoldoutsForFlag(featureFlag.Key);
+            foreach (var holdout in holdouts)
+            {
+                var holdoutDecision = GetVariationForHoldout(holdout, user, projectConfig);
+                reasons += holdoutDecision.DecisionReasons;
+
+                if (holdoutDecision.ResultObject != null)
+                {
+                    Logger.Log(LogLevel.INFO,
+                        reasons.AddInfo(
+                            $"The user \"{userId}\" is bucketed into holdout \"{holdout.Key}\" for feature flag \"{featureFlag.Key}\"."));
+                    return Result<FeatureDecision>.NewResult(holdoutDecision.ResultObject, reasons);
+                }
+            }
+
+            // Check if the feature flag has an experiment and the user is bucketed into that experiment.
+            var experimentDecision = GetVariationForFeatureExperiment(featureFlag, user,
+                filteredAttributes, projectConfig, options, userProfileTracker);
+            reasons += experimentDecision.DecisionReasons;
+
+            if (experimentDecision.ResultObject != null)
+            {
+                return Result<FeatureDecision>.NewResult(experimentDecision.ResultObject, reasons);
+            }
+
+            // Check if the feature flag has rollout and the user is bucketed into one of its rules.
+            var rolloutDecision = GetVariationForFeatureRollout(featureFlag, user, projectConfig);
+            reasons += rolloutDecision.DecisionReasons;
+
+            if (rolloutDecision.ResultObject != null)
+            {
+                Logger.Log(LogLevel.INFO,
+                    reasons.AddInfo(
+                        $"The user \"{userId}\" is bucketed into a rollout for feature flag \"{featureFlag.Key}\"."));
+                return Result<FeatureDecision>.NewResult(rolloutDecision.ResultObject, reasons);
+            }
+            else
+            {
+                Logger.Log(LogLevel.INFO,
+                    reasons.AddInfo(
+                        $"The user \"{userId}\" is not bucketed into a rollout for feature flag \"{featureFlag.Key}\"."));
+                return Result<FeatureDecision>.NewResult(
+                    new FeatureDecision(null, null, FeatureDecision.DECISION_SOURCE_ROLLOUT),
+                    reasons);
+            }
+        }
+
         public virtual List<Result<FeatureDecision>> GetVariationsForFeatureList(
             List<FeatureFlag> featureFlags,
             OptimizelyUserContext user,
@@ -747,47 +826,13 @@ namespace OptimizelySDK.Bucketing
                 userProfileTracker.LoadUserProfile(upsReasons);
             }
 
-            var userId = user.GetUserId();
             var decisions = new List<Result<FeatureDecision>>();
 
             foreach (var featureFlag in featureFlags)
             {
-                var reasons = new DecisionReasons();
-                reasons += upsReasons;
-
-                // Check if the feature flag has an experiment and the user is bucketed into that experiment.
-                var decisionResult = GetVariationForFeatureExperiment(featureFlag, user,
-                    filteredAttributes, projectConfig, options, userProfileTracker);
-                reasons += decisionResult.DecisionReasons;
-
-                if (decisionResult.ResultObject != null)
-                {
-                    decisions.Add(
-                        Result<FeatureDecision>.NewResult(decisionResult.ResultObject, reasons));
-                    continue;
-                }
-
-                // Check if the feature flag has rollout and the the user is bucketed into one of its rules.
-                decisionResult = GetVariationForFeatureRollout(featureFlag, user, projectConfig);
-                reasons += decisionResult.DecisionReasons;
-
-                if (decisionResult.ResultObject == null)
-                {
-                    Logger.Log(LogLevel.INFO,
-                        reasons.AddInfo(
-                            $"The user \"{userId}\" is not bucketed into a rollout for feature flag \"{featureFlag.Key}\"."));
-                    decisions.Add(Result<FeatureDecision>.NewResult(
-                        new FeatureDecision(null, null, FeatureDecision.DECISION_SOURCE_ROLLOUT),
-                        reasons));
-                }
-                else
-                {
-                    Logger.Log(LogLevel.INFO,
-                        reasons.AddInfo(
-                            $"The user \"{userId}\" is bucketed into a rollout for feature flag \"{featureFlag.Key}\"."));
-                    decisions.Add(
-                        Result<FeatureDecision>.NewResult(decisionResult.ResultObject, reasons));
-                }
+                var decision = GetDecisionForFlag(featureFlag, user, projectConfig, filteredAttributes,
+                    options, userProfileTracker, upsReasons);
+                decisions.Add(decision);
             }
 
             if (UserProfileService != null && !ignoreUps &&
@@ -856,6 +901,66 @@ namespace OptimizelySDK.Bucketing
             return Result<string>.NewResult(bucketingId, reasons);
         }
 
+        private Result<FeatureDecision> GetVariationForHoldout(
+            Holdout holdout,
+            OptimizelyUserContext user,
+            ProjectConfig config
+        )
+        {
+            var userId = user.GetUserId();
+            var reasons = new DecisionReasons();
+
+            if (!holdout.isRunning)
+            {
+                var infoMessage = $"Holdout \"{holdout.Key}\" is not running.";
+                Logger.Log(LogLevel.INFO, infoMessage);
+                reasons.AddInfo(infoMessage);
+                return Result<FeatureDecision>.NewResult(
+                    new FeatureDecision(null, null, FeatureDecision.DECISION_SOURCE_HOLDOUT),
+                    reasons
+                );
+            }
+
+            var audienceResult = ExperimentUtils.DoesUserMeetAudienceConditions(
+                config,
+                holdout,
+                user,
+                LOGGING_KEY_TYPE_EXPERIMENT,
+                holdout.Key,
+                Logger
+            );
+            reasons += audienceResult.DecisionReasons;
+
+            if (!audienceResult.ResultObject)
+            {
+                reasons.AddInfo($"User \"{userId}\" does not meet conditions for holdout ({holdout.Key}).");
+                return Result<FeatureDecision>.NewResult(
+                    new FeatureDecision(null, null, FeatureDecision.DECISION_SOURCE_HOLDOUT),
+                    reasons
+                );
+            }
+
+            var attributes = user.GetAttributes();
+            var bucketingIdResult = GetBucketingId(userId, attributes);
+            var bucketedVariation = Bucketer.Bucket(config, holdout, bucketingIdResult.ResultObject, userId);
+            reasons += bucketedVariation.DecisionReasons;
+
+            if (bucketedVariation.ResultObject != null)
+            {
+                reasons.AddInfo($"User \"{userId}\" is bucketed into holdout variation \"{bucketedVariation.ResultObject.Key}\".");
+                return Result<FeatureDecision>.NewResult(
+                    new FeatureDecision(holdout, bucketedVariation.ResultObject, FeatureDecision.DECISION_SOURCE_HOLDOUT),
+                    reasons
+                );
+            }
+
+            reasons.AddInfo($"User \"{userId}\" is not bucketed into holdout variation \"{holdout.Key}\".");
+
+            return Result<FeatureDecision>.NewResult(
+                new FeatureDecision(null, null, FeatureDecision.DECISION_SOURCE_HOLDOUT),
+                reasons
+            );
+        }
         /// <summary>
         /// Finds a validated forced decision.
         /// </summary>
