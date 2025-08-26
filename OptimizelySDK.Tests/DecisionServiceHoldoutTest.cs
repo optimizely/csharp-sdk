@@ -250,7 +250,7 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestImpressionEventForHoldout()
         {
-            var featureFlag = Config.FeatureKeyMap["test_flag_1"]; 
+            var featureFlag = Config.FeatureKeyMap["test_flag_1"];
             var userAttributes = new UserAttributes();
 
             var eventDispatcher = new Event.Dispatcher.DefaultEventDispatcher(LoggerMock.Object);
@@ -271,24 +271,24 @@ namespace OptimizelySDK.Tests
 
             Assert.IsNotNull(decision, "Decision should not be null");
             Assert.IsNotNull(decision.RuleKey, "RuleKey should not be null");
-            
+
             var actualHoldout = Config.Holdouts?.FirstOrDefault(h => h.Key == decision.RuleKey);
 
-            Assert.IsNotNull(actualHoldout, 
+            Assert.IsNotNull(actualHoldout,
                 $"RuleKey '{decision.RuleKey}' should correspond to a holdout experiment");
             Assert.AreEqual(featureFlag.Key, decision.FlagKey, "Flag key should match");
-            
+
             var holdoutVariation = actualHoldout.Variations.FirstOrDefault(v => v.Key == decision.VariationKey);
 
-            Assert.IsNotNull(holdoutVariation, 
+            Assert.IsNotNull(holdoutVariation,
                 $"Variation '{decision.VariationKey}' should be from the chosen holdout '{actualHoldout.Key}'");
-            
+
             Assert.AreEqual(holdoutVariation.FeatureEnabled, decision.Enabled,
                 "Enabled flag should match holdout variation's featureEnabled value");
-            
+
             EventProcessorMock.Verify(ep => ep.Process(It.IsAny<ImpressionEvent>()), Times.Once,
                 "Impression event should be processed exactly once for holdout decision");
-                
+
             EventProcessorMock.Verify(ep => ep.Process(It.Is<ImpressionEvent>(ie =>
                 ie.Experiment.Key == actualHoldout.Key &&
                 ie.Experiment.Id == actualHoldout.Id &&
@@ -321,13 +321,13 @@ namespace OptimizelySDK.Tests
 
             Assert.IsNotNull(decision, "Decision should not be null");
             Assert.IsNotNull(decision.RuleKey, "User should be bucketed into a holdout");
-            
+
             var chosenHoldout = Config.Holdouts?.FirstOrDefault(h => h.Key == decision.RuleKey);
 
             Assert.IsNotNull(chosenHoldout, $"Holdout '{decision.RuleKey}' should exist in config");
-            
+
             Assert.AreEqual(featureFlag.Key, decision.FlagKey, "Flag key should match");
-            
+
             EventProcessorMock.Verify(ep => ep.Process(It.IsAny<ImpressionEvent>()), Times.Never,
                 "No impression event should be processed when DISABLE_DECISION_EVENT option is used");
         }
