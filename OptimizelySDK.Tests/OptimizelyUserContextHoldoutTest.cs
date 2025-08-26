@@ -577,7 +577,7 @@ namespace OptimizelySDK.Tests
 
         #endregion
 
-        # region Notification test
+        #region Notification test
 
         [Test]
         public void TestDecide_HoldoutNotificationContent()
