@@ -759,7 +759,7 @@ namespace OptimizelySDK.Bucketing
             var userId = user.GetUserId();
 
             // Check holdouts first (highest priority)
-            var holdouts = projectConfig.GetHoldoutsForFlag(featureFlag.Key);
+            var holdouts = projectConfig.GetHoldoutsForFlag(featureFlag.Id);
             foreach (var holdout in holdouts)
             {
                 var holdoutDecision = GetVariationForHoldout(holdout, user, projectConfig);
@@ -945,7 +945,7 @@ namespace OptimizelySDK.Bucketing
             var bucketedVariation = Bucketer.Bucket(config, holdout, bucketingIdResult.ResultObject, userId);
             reasons += bucketedVariation.DecisionReasons;
 
-            if (bucketedVariation.ResultObject != null)
+            if (bucketedVariation.ResultObject != null && !string.IsNullOrEmpty(bucketedVariation.ResultObject.Key))
             {
                 reasons.AddInfo($"User \"{userId}\" is bucketed into holdout variation \"{bucketedVariation.ResultObject.Key}\".");
                 return Result<FeatureDecision>.NewResult(
