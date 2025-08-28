@@ -956,10 +956,7 @@ namespace OptimizelySDK.Bucketing
 
             reasons.AddInfo($"User \"{userId}\" is not bucketed into holdout variation \"{holdout.Key}\".");
 
-            return Result<FeatureDecision>.NewResult(
-                new FeatureDecision(null, null, FeatureDecision.DECISION_SOURCE_HOLDOUT),
-                reasons
-            );
+            return Result<FeatureDecision>.NewResult(null, reasons);
         }
         /// <summary>
         /// Finds a validated forced decision.
