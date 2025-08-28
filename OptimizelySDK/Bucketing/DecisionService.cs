@@ -915,10 +915,7 @@ namespace OptimizelySDK.Bucketing
                 var infoMessage = $"Holdout \"{holdout.Key}\" is not running.";
                 Logger.Log(LogLevel.INFO, infoMessage);
                 reasons.AddInfo(infoMessage);
-                return Result<FeatureDecision>.NewResult(
-                    new FeatureDecision(null, null, FeatureDecision.DECISION_SOURCE_HOLDOUT),
-                    reasons
-                );
+                return Result<FeatureDecision>.NullResult(reasons);
             }
 
             var audienceResult = ExperimentUtils.DoesUserMeetAudienceConditions(
@@ -934,10 +931,7 @@ namespace OptimizelySDK.Bucketing
             if (!audienceResult.ResultObject)
             {
                 reasons.AddInfo($"User \"{userId}\" does not meet conditions for holdout ({holdout.Key}).");
-                return Result<FeatureDecision>.NewResult(
-                    new FeatureDecision(null, null, FeatureDecision.DECISION_SOURCE_HOLDOUT),
-                    reasons
-                );
+                return Result<FeatureDecision>.NullResult(reasons);
             }
 
             var attributes = user.GetAttributes();
@@ -955,8 +949,7 @@ namespace OptimizelySDK.Bucketing
             }
 
             reasons.AddInfo($"User \"{userId}\" is not bucketed into holdout variation \"{holdout.Key}\".");
-
-            return Result<FeatureDecision>.NewResult(null, reasons);
+            return Result<FeatureDecision>.NullResult(reasons);
         }
         /// <summary>
         /// Finds a validated forced decision.
