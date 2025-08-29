@@ -321,11 +321,11 @@ namespace OptimizelySDK
         Holdout GetHoldout(string holdoutId);
 
         /// <summary>
-        /// Get holdout instances associated with the given feature flag key.
+        /// Get holdout instances associated with the given feature flag Id.
         /// </summary>
-        /// <param name="flagKey">Feature flag key</param>
+        /// <param name="flagKey">Feature flag Id</param>
         /// <returns>Array of holdouts associated with the flag, empty array if none</returns>
-        Holdout[] GetHoldoutsForFlag(string flagKey);
+        Holdout[] GetHoldoutsForFlag(string flagId);
 
         /// <summary>
         /// Returns the datafile corresponding to ProjectConfig

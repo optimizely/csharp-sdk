@@ -25,6 +25,8 @@ using OptimizelySDK.Bucketing;
 using OptimizelySDK.Config;
 using OptimizelySDK.Entity;
 using OptimizelySDK.ErrorHandler;
+using OptimizelySDK.Event;
+using OptimizelySDK.Event.Entity;
 using OptimizelySDK.Logger;
 using OptimizelySDK.OptimizelyDecisions;
 
@@ -34,6 +36,7 @@ namespace OptimizelySDK.Tests
     public class DecisionServiceHoldoutTest
     {
         private Mock<ILogger> LoggerMock;
+        private Mock<EventProcessor> EventProcessorMock;
         private DecisionService DecisionService;
         private DatafileProjectConfig Config;
         private JObject TestData;
@@ -46,6 +49,7 @@ namespace OptimizelySDK.Tests
         public void Initialize()
         {
             LoggerMock = new Mock<ILogger>();
+            EventProcessorMock = new Mock<EventProcessor>();
 
             // Load test data
             var testDataPath = Path.Combine(TestContext.CurrentContext.TestDirectory,
@@ -241,6 +245,91 @@ namespace OptimizelySDK.Tests
             {
                 Assert.IsTrue(decisionWithReasons.DecisionReasons.ToReport().Count > 0, "Should have decision reasons");
             }
+        }
+
+        [Test]
+        public void TestImpressionEventForHoldout()
+        {
+            var featureFlag = Config.FeatureKeyMap["test_flag_1"];
+            var userAttributes = new UserAttributes();
+
+            var eventDispatcher = new Event.Dispatcher.DefaultEventDispatcher(LoggerMock.Object);
+            var optimizelyWithMockedEvents = new Optimizely(
+                TestData["datafileWithHoldouts"].ToString(),
+                eventDispatcher,
+                LoggerMock.Object,
+                new ErrorHandler.NoOpErrorHandler(),
+                null, // userProfileService
+                false, // skipJsonValidation
+                EventProcessorMock.Object
+            );
+
+            EventProcessorMock.Setup(ep => ep.Process(It.IsAny<ImpressionEvent>()));
+
+            var userContext = optimizelyWithMockedEvents.CreateUserContext(TestUserId, userAttributes);
+            var decision = userContext.Decide(featureFlag.Key);
+
+            Assert.IsNotNull(decision, "Decision should not be null");
+            Assert.IsNotNull(decision.RuleKey, "RuleKey should not be null");
+
+            var actualHoldout = Config.Holdouts?.FirstOrDefault(h => h.Key == decision.RuleKey);
+
+            Assert.IsNotNull(actualHoldout,
+                $"RuleKey '{decision.RuleKey}' should correspond to a holdout experiment");
+            Assert.AreEqual(featureFlag.Key, decision.FlagKey, "Flag key should match");
+
+            var holdoutVariation = actualHoldout.Variations.FirstOrDefault(v => v.Key == decision.VariationKey);
+
+            Assert.IsNotNull(holdoutVariation,
+                $"Variation '{decision.VariationKey}' should be from the chosen holdout '{actualHoldout.Key}'");
+
+            Assert.AreEqual(holdoutVariation.FeatureEnabled, decision.Enabled,
+                "Enabled flag should match holdout variation's featureEnabled value");
+
+            EventProcessorMock.Verify(ep => ep.Process(It.IsAny<ImpressionEvent>()), Times.Once,
+                "Impression event should be processed exactly once for holdout decision");
+
+            EventProcessorMock.Verify(ep => ep.Process(It.Is<ImpressionEvent>(ie =>
+                ie.Experiment.Key == actualHoldout.Key &&
+                ie.Experiment.Id == actualHoldout.Id &&
+                ie.Timestamp > 0 &&
+                ie.UserId == TestUserId
+            )), Times.Once, "Impression event should contain correct holdout experiment details");
+        }
+
+        [Test]
+        public void TestImpressionEventForHoldout_DisableDecisionEvent()
+        {
+            var featureFlag = Config.FeatureKeyMap["test_flag_1"];
+            var userAttributes = new UserAttributes();
+
+            var eventDispatcher = new Event.Dispatcher.DefaultEventDispatcher(LoggerMock.Object);
+            var optimizelyWithMockedEvents = new Optimizely(
+                TestData["datafileWithHoldouts"].ToString(),
+                eventDispatcher,
+                LoggerMock.Object,
+                new ErrorHandler.NoOpErrorHandler(),
+                null, // userProfileService
+                false, // skipJsonValidation
+                EventProcessorMock.Object
+            );
+
+            EventProcessorMock.Setup(ep => ep.Process(It.IsAny<ImpressionEvent>()));
+
+            var userContext = optimizelyWithMockedEvents.CreateUserContext(TestUserId, userAttributes);
+            var decision = userContext.Decide(featureFlag.Key, new[] { OptimizelyDecideOption.DISABLE_DECISION_EVENT });
+
+            Assert.IsNotNull(decision, "Decision should not be null");
+            Assert.IsNotNull(decision.RuleKey, "User should be bucketed into a holdout");
+
+            var chosenHoldout = Config.Holdouts?.FirstOrDefault(h => h.Key == decision.RuleKey);
+
+            Assert.IsNotNull(chosenHoldout, $"Holdout '{decision.RuleKey}' should exist in config");
+
+            Assert.AreEqual(featureFlag.Key, decision.FlagKey, "Flag key should match");
+
+            EventProcessorMock.Verify(ep => ep.Process(It.IsAny<ImpressionEvent>()), Times.Never,
+                "No impression event should be processed when DISABLE_DECISION_EVENT option is used");
         }
     }
 }

@@ -28,7 +28,9 @@ using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Event;
 using OptimizelySDK.Event.Dispatcher;
 using OptimizelySDK.Logger;
+using OptimizelySDK.Notifications;
 using OptimizelySDK.OptimizelyDecisions;
+using OptimizelySDK.Utils;
 
 namespace OptimizelySDK.Tests
 {
@@ -572,6 +574,92 @@ namespace OptimizelySDK.Tests
                 "Should contain holdout-related decision reasoning");
         }
 
+
+        #endregion
+
+        #region Notification test
+
+        [Test]
+        public void TestDecide_HoldoutNotificationContent()
+        {
+            var capturedNotifications = new List<Dictionary<string, object>>();
+
+            NotificationCenter.DecisionCallback notificationCallback =
+                (decisionType, userId, userAttributes, decisionInfo) =>
+                {
+                    capturedNotifications.Add(new Dictionary<string, object>(decisionInfo));
+                };
+
+            OptimizelyInstance.NotificationCenter.AddNotification(
+                NotificationCenter.NotificationType.Decision,
+                notificationCallback);
+
+            var userContext = OptimizelyInstance.CreateUserContext(TestUserId,
+                new UserAttributes { { "country", "us" } });
+            var decision = userContext.Decide("test_flag_1");
+
+            Assert.AreEqual(1, capturedNotifications.Count,
+                "Should have captured exactly one decision notification");
+
+            var notification = capturedNotifications.First();
+
+            Assert.IsTrue(notification.ContainsKey("ruleKey"),
+                "Notification should contain ruleKey");
+
+            var ruleKey = notification["ruleKey"]?.ToString();
+
+            Assert.IsNotNull(ruleKey, "RuleKey should not be null");
+
+            var holdoutExperiment = Config.Holdouts?.FirstOrDefault(h => h.Key == ruleKey);
+
+            Assert.IsNotNull(holdoutExperiment,
+                $"RuleKey '{ruleKey}' should correspond to a holdout experiment");
+            Assert.IsTrue(notification.ContainsKey("flagKey"),
+                "Holdout notification should contain flagKey");
+            Assert.IsTrue(notification.ContainsKey("enabled"),
+                "Holdout notification should contain enabled flag");
+            Assert.IsTrue(notification.ContainsKey("variationKey"),
+                "Holdout notification should contain variationKey");
+            Assert.IsTrue(notification.ContainsKey("experimentId"),
+                "Holdout notification should contain experimentId");
+            Assert.IsTrue(notification.ContainsKey("variationId"),
+                "Holdout notification should contain variationId");
+
+            var flagKey = notification["flagKey"]?.ToString();
+
+            Assert.AreEqual("test_flag_1", flagKey, "FlagKey should match the requested flag");
+
+            var experimentId = notification["experimentId"]?.ToString();
+            Assert.AreEqual(holdoutExperiment.Id, experimentId,
+                "ExperimentId in notification should match holdout experiment ID");
+
+            var variationId = notification["variationId"]?.ToString();
+            var holdoutVariation = holdoutExperiment.Variations?.FirstOrDefault(v => v.Id == variationId);
+
+            Assert.IsNotNull(holdoutVariation,
+                $"VariationId '{variationId}' should correspond to a holdout variation");
+
+            var variationKey = notification["variationKey"]?.ToString();
+
+            Assert.AreEqual(holdoutVariation.Key, variationKey,
+                "VariationKey in notification should match holdout variation key");
+
+            var enabled = notification["enabled"];
+
+            Assert.IsNotNull(enabled, "Enabled flag should be present in notification");
+            Assert.AreEqual(holdoutVariation.FeatureEnabled, (bool)enabled,
+                "Enabled flag should match holdout variation's featureEnabled value");
+
+            Assert.IsTrue(Config.FeatureKeyMap.ContainsKey(flagKey),
+                $"FlagKey '{flagKey}' should exist in config");
+
+            Assert.IsTrue(notification.ContainsKey("variables"),
+                "Notification should contain variables");
+            Assert.IsTrue(notification.ContainsKey("reasons"),
+                "Notification should contain reasons");
+            Assert.IsTrue(notification.ContainsKey("decisionEventDispatched"),
+                "Notification should contain decisionEventDispatched");
+        }
         #endregion
     }
 }

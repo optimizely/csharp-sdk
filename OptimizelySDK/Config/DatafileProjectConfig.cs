@@ -875,13 +875,13 @@ namespace OptimizelySDK.Config
         }
 
         /// <summary>
-        /// Get holdout instances associated with the given feature flag key.
+        /// Get holdout instances associated with the given feature flag Id.
         /// </summary>
-        /// <param name="flagKey">Feature flag key</param>
+        /// <param name="flagId">Feature flag Id</param>
         /// <returns>Array of holdouts associated with the flag, empty array if none</returns>
-        public Holdout[] GetHoldoutsForFlag(string flagKey)
+        public Holdout[] GetHoldoutsForFlag(string flagId)
         {
-            var holdouts = _holdoutConfig?.GetHoldoutsForFlag(flagKey);
+            var holdouts = _holdoutConfig?.GetHoldoutsForFlag(flagId);
             return holdouts?.ToArray() ?? new Holdout[0];
         }
         /// Returns the datafile corresponding to ProjectConfig
