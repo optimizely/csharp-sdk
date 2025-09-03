@@ -564,7 +564,8 @@ namespace OptimizelySDK
 
                 // This information is only necessary for feature tests.
                 // For rollouts experiments and variations are an implementation detail only.
-                if (decision?.Source == FeatureDecision.DECISION_SOURCE_FEATURE_TEST)
+                if (decision?.Source == FeatureDecision.DECISION_SOURCE_FEATURE_TEST ||
+                    decision?.Source == FeatureDecision.DECISION_SOURCE_HOLDOUT)
                 {
                     decisionSource = decision.Source;
                     sourceInfo["experimentKey"] = decision.Experiment.Key;
