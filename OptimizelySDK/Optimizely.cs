@@ -937,7 +937,6 @@ namespace OptimizelySDK
             foreach (var key in keys)
             {
                 var flag = projectConfig.GetFeatureFlagFromKey(key);
-
                 if (flag.Key == null)
                 {
                     decisionDictionary.Add(key,
