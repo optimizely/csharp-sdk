@@ -406,6 +406,23 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
+        public void DecideNullFlagKey()
+        {
+            var user = Optimizely.CreateUserContext(UserID);
+            user.SetAttribute("browser_type", "chrome");
+
+            var decisionExpected = OptimizelyDecision.NewErrorDecision(
+                null,
+                user,
+                DecisionMessage.Reason(DecisionMessage.FLAG_KEY_INVALID, "null"),
+                ErrorHandlerMock.Object,
+                LoggerMock.Object);
+            var decision = user.Decide(null);
+
+            Assert.IsTrue(TestData.CompareObjects(decision, decisionExpected));
+        }
+
+        [Test]
         public void DecideWhenConfigIsNull()
         {
             var optimizely = new Optimizely(TestData.UnsupportedVersionDatafile,

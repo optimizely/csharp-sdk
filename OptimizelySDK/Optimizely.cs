@@ -871,6 +871,13 @@ namespace OptimizelySDK
                     ErrorHandler, Logger);
             }
 
+            if (key == null)
+            {
+                return OptimizelyDecision.NewErrorDecision(key, user,
+                    DecisionMessage.Reason(DecisionMessage.FLAG_KEY_INVALID, "null"),
+                    ErrorHandler, Logger);
+            }
+
             var allOptions = GetAllOptions(options).
                 Where(opt => opt != OptimizelyDecideOption.ENABLED_FLAGS_ONLY).
                 ToArray();
