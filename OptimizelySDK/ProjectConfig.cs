@@ -114,6 +114,11 @@ namespace OptimizelySDK
         Dictionary<string, Attribute> AttributeKeyMap { get; }
 
         /// <summary>
+        /// Associative array of attribute ID to Attribute(s) in the datafile
+        /// </summary>
+        Dictionary<string, Attribute> AttributeIdMap { get; }
+
+        /// <summary>
         /// Associative array of audience ID to Audience(s) in the datafile
         /// </summary>
         Dictionary<string, Audience> AudienceIdMap { get; }
@@ -233,6 +238,13 @@ namespace OptimizelySDK
         /// <param name="attributeKey">Key of the Attribute</param>
         /// <returns>Attribute Entity corresponding to the key or a dummy entity if key is invalid</returns>
         Attribute GetAttribute(string attributeKey);
+
+        /// <summary>
+        /// Get the Attribute from the ID
+        /// </summary>
+        /// <param name="attributeId">ID of the Attribute</param>
+        /// <returns>Attribute Entity corresponding to the ID or a dummy entity if ID is invalid</returns>
+        Attribute GetAttributeById(string attributeId);
 
         /// <summary>
         /// Get the Variation from the keys

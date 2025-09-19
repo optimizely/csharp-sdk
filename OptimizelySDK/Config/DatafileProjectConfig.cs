@@ -196,6 +196,13 @@ namespace OptimizelySDK.Config
         public Dictionary<string, Attribute> AttributeKeyMap => _AttributeKeyMap;
 
         /// <summary>
+        /// Associative array of attribute ID to Attribute(s) in the datafile
+        /// </summary>
+        private Dictionary<string, Attribute> _AttributeIdMap;
+
+        public Dictionary<string, Attribute> AttributeIdMap => _AttributeIdMap;
+
+        /// <summary>
         /// Associative array of audience ID to Audience(s) in the datafile
         /// </summary>
         private Dictionary<string, Audience> _AudienceIdMap;
@@ -332,6 +339,8 @@ namespace OptimizelySDK.Config
                     true);
             _AttributeKeyMap = ConfigParser<Attribute>.GenerateMap(Attributes,
                 a => a.Key, true);
+            _AttributeIdMap = ConfigParser<Attribute>.GenerateMap(Attributes,
+                a => a.Id, true);
             _AudienceIdMap = ConfigParser<Audience>.GenerateMap(Audiences,
                 a => a.Id.ToString(), true);
             _FeatureKeyMap = ConfigParser<FeatureFlag>.GenerateMap(FeatureFlags,
@@ -647,6 +656,25 @@ namespace OptimizelySDK.Config
             }
 
             var message = $@"Attribute key ""{attributeKey}"" is not in datafile.";
+            Logger.Log(LogLevel.ERROR, message);
+            ErrorHandler.HandleError(
+                new InvalidAttributeException("Provided attribute is not in datafile."));
+            return new Attribute();
+        }
+
+        /// <summary>
+        /// Get the Attribute from the ID
+        /// </summary>
+        /// <param name="attributeId">ID of the Attribute</param>
+        /// <returns>Attribute Entity corresponding to the ID or a dummy entity if ID is invalid</returns>
+        public Attribute GetAttributeById(string attributeId)
+        {
+            if (_AttributeIdMap.ContainsKey(attributeId))
+            {
+                return _AttributeIdMap[attributeId];
+            }
+
+            var message = $@"Attribute ID ""{attributeId}"" is not in datafile.";
             Logger.Log(LogLevel.ERROR, message);
             ErrorHandler.HandleError(
                 new InvalidAttributeException("Provided attribute is not in datafile."));

@@ -182,6 +182,20 @@
           },
           "forcedVariations": {
             "type": "object"
+          },
+          "cmab": {
+            "type": "object",
+            "properties": {
+              "attributeIds": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "trafficAllocation": {
+                "type": "integer"
+              }
+            }
           }
         },
         "required": [

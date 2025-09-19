@@ -15,6 +15,7 @@
  */
 
 using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace OptimizelySDK.Entity
 {
@@ -47,6 +48,12 @@ namespace OptimizelySDK.Entity
         /// </summary>
         public bool IsInMutexGroup =>
             !string.IsNullOrEmpty(GroupPolicy) && GroupPolicy == MUTEX_GROUP_POLICY;
+
+        /// <summary>
+        /// CMAB (Contextual Multi-Armed Bandit) configuration for the experiment.
+        /// </summary>
+        [JsonProperty("cmab")]
+        public CmabConfig Cmab { get; set; }
 
         /// <summary>
         /// Determin if user is forced variation of experiment

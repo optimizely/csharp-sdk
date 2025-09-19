@@ -1455,5 +1455,40 @@ namespace OptimizelySDK.Tests
         }
 
         #endregion
+
+        [Test]
+        public void TestCmabFieldPopulation()
+        {
+
+            var datafileJson = JObject.Parse(TestData.Datafile);
+            var experiments = (JArray)datafileJson["experiments"];
+
+            if (experiments.Count > 0)
+            {
+                var firstExperiment = (JObject)experiments[0];
+
+                firstExperiment["cmab"] = new JObject
+                {
+                    ["attributeIds"] = new JArray { "7723280020", "7723348204" },
+                    ["trafficAllocation"] = 4000
+                };
+
+                firstExperiment["trafficAllocation"] = new JArray();
+            }
+
+            var modifiedDatafile = datafileJson.ToString();
+            var projectConfig = DatafileProjectConfig.Create(modifiedDatafile, LoggerMock.Object, ErrorHandlerMock.Object);
+            var experimentWithCmab = projectConfig.GetExperimentFromKey("test_experiment");
+
+            Assert.IsNotNull(experimentWithCmab.Cmab);
+            Assert.AreEqual(2, experimentWithCmab.Cmab.AttributeIds.Count);
+            Assert.Contains("7723280020", experimentWithCmab.Cmab.AttributeIds);
+            Assert.Contains("7723348204", experimentWithCmab.Cmab.AttributeIds);
+            Assert.AreEqual(4000, experimentWithCmab.Cmab.TrafficAllocation);
+
+            var experimentWithoutCmab = projectConfig.GetExperimentFromKey("paused_experiment");
+
+            Assert.IsNull(experimentWithoutCmab.Cmab);
+        }
     }
 }
