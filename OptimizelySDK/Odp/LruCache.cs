@@ -166,6 +166,18 @@ namespace OptimizelySDK.Odp
         }
 
         /// <summary>
+        /// Remove the element associated with the provided key from the cache
+        /// </summary>
+        /// <param name="key">Key of element to remove from the cache</param>
+        public void Remove(string key)
+        {
+            lock (_mutex)
+            {
+                _cache.Remove(key);
+            }
+        }
+
+        /// <summary>
         /// Wrapping class around a generic value stored in the cache
         /// </summary>
         public class ItemWrapper

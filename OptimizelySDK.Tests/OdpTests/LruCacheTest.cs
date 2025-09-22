@@ -208,5 +208,113 @@ namespace OptimizelySDK.Tests.OdpTests
 
             Assert.AreEqual(0, cache.CurrentCacheKeysForTesting().Length);
         }
+
+        [Test]
+        public void ShouldHandleRemoveNonExistentKey()
+        {
+            var cache = new LruCache<List<string>>();
+            cache.Save("user1", _segments1And2);
+            cache.Save("user2", _segments3And4);
+
+            // Remove a key that doesn't exist
+            cache.Remove("user3");
+
+            // Existing keys should still be there
+            Assert.AreEqual(_segments1And2, cache.Lookup("user1"));
+            Assert.AreEqual(_segments3And4, cache.Lookup("user2"));
+        }
+
+        [Test]
+        public void ShouldHandleRemoveExistingKey()
+        {
+            var cache = new LruCache<List<string>>();
+
+            cache.Save("user1", _segments1And2);
+            cache.Save("user2", _segments3And4);
+            cache.Save("user3", _segments5And6);
+
+            Assert.AreEqual(_segments1And2, cache.Lookup("user1"));
+            Assert.AreEqual(_segments3And4, cache.Lookup("user2"));
+            Assert.AreEqual(_segments5And6, cache.Lookup("user3"));
+
+            cache.Remove("user2");
+
+            Assert.AreEqual(_segments1And2, cache.Lookup("user1"));
+            Assert.IsNull(cache.Lookup("user2"));
+            Assert.AreEqual(_segments5And6, cache.Lookup("user3"));
+        }
+
+        [Test]
+        public void ShouldHandleRemoveFromZeroSizedCache()
+        {
+            var cache = new LruCache<List<string>>(0);
+
+            cache.Save("user1", _segments1And2);
+            cache.Remove("user1");
+
+            Assert.IsNull(cache.Lookup("user1"));
+            Assert.AreEqual(0, cache.CurrentCacheKeysForTesting().Length);
+        }
+
+        [Test]
+        public void ShouldHandleRemoveAndAddBack()
+        {
+            var cache = new LruCache<List<string>>();
+
+            cache.Save("user1", _segments1And2);
+            cache.Save("user2", _segments3And4);
+            cache.Save("user3", _segments5And6);
+
+            // Remove user2 and add it back with different data
+            cache.Remove("user2");
+            cache.Save("user2", _segments1And2);
+
+            Assert.AreEqual(_segments1And2, cache.Lookup("user1"));
+            Assert.AreEqual(_segments1And2, cache.Lookup("user2"));
+            Assert.AreEqual(_segments5And6, cache.Lookup("user3"));
+
+            Assert.AreEqual(3, cache.CurrentCacheKeysForTesting().Length);
+        }
+
+        [Test]
+        public void ShouldHandleThreadSafetyWithRemove()
+        {
+            var cache = new LruCache<string>(100);
+
+            for (int i = 1; i <= 100; i++)
+            {
+                cache.Save($"key{i}", $"value{i}");
+            }
+
+            var threads = new List<Thread>();
+
+            for (int i = 1; i <= 50; i++)
+            {
+                int localI = i; // Capture variable for closure
+                var thread = new Thread(() => cache.Remove($"key{localI}"));
+                threads.Add(thread);
+                thread.Start();
+            }
+
+            // Wait for all threads to complete
+            foreach (var thread in threads)
+            {
+                thread.Join();
+            }
+
+            for (int i = 1; i <= 100; i++)
+            {
+                if (i <= 50)
+                {
+                    Assert.IsNull(cache.Lookup($"key{i}"), $"key{i} should be removed");
+                }
+                else
+                {
+                    Assert.AreEqual($"value{i}", cache.Lookup($"key{i}"), $"key{i} should still exist");
+                }
+            }
+
+            Assert.AreEqual(50, cache.CurrentCacheKeysForTesting().Length);
+        }
     }
 }
