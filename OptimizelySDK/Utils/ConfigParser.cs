@@ -33,7 +33,13 @@ namespace OptimizelySDK.Utils
             Func<T, string> getKey, bool clone
         )
         {
-            return entities.ToDictionary(e => getKey(e), e => clone ? (T)e.Clone() : e);
+            var dictionary = new Dictionary<string, T>();
+            foreach (var entity in entities)
+            {
+                var key = getKey(entity);
+                dictionary[key] = clone ? (T)entity.Clone() : entity;
+            }
+            return dictionary;
         }
     }
 }

@@ -90,6 +90,9 @@
     <Compile Include="..\OptimizelySDK\Entity\Experiment.cs">
       <Link>Entity\Experiment.cs</Link>
     </Compile>
+    <Compile Include="..\OptimizelySDK\Entity\Cmab.cs">
+      <Link>Entity\Cmab.cs</Link>
+    </Compile>
     <Compile Include="..\OptimizelySDK\Entity\Holdout.cs">
       <Link>Entity\Holdout.cs</Link>
     </Compile>
