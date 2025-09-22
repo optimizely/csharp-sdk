@@ -26,7 +26,7 @@
 			<Compile Include="..\OptimizelySDK\Entity\Event.cs" />
 			<Compile Include="..\OptimizelySDK\Entity\EventTags.cs" />
 			<Compile Include="..\OptimizelySDK\Entity\Experiment.cs" />
-			<Compile Include="..\OptimizelySDK\Entity\CmabConfig.cs" />
+			<Compile Include="..\OptimizelySDK\Entity\Cmab.cs" />
 			<Compile Include="..\OptimizelySDK\Entity\Holdout.cs" />
 			<Compile Include="..\OptimizelySDK\Entity\ExperimentCore.cs" />
 			<Compile Include="..\OptimizelySDK\Entity\FeatureDecision.cs" />

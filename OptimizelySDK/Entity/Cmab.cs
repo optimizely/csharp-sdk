@@ -22,7 +22,7 @@ namespace OptimizelySDK.Entity
     /// <summary>
     /// Class representing CMAB (Contextual Multi-Armed Bandit) configuration for experiments.
     /// </summary>
-    public class CmabConfig
+    public class Cmab
     {
         /// <summary>
         /// List of attribute IDs that are relevant for CMAB decision making.
@@ -39,11 +39,11 @@ namespace OptimizelySDK.Entity
         public int? TrafficAllocation { get; set; }
 
         /// <summary>
-        /// Initializes a new instance of the CmabConfig class with specified values.
+        /// Initializes a new instance of the Cmab class with specified values.
         /// </summary>
         /// <param name="attributeIds">List of attribute IDs for CMAB</param>
         /// <param name="trafficAllocation">Traffic allocation value</param>
-        public CmabConfig(List<string> attributeIds, int? trafficAllocation = null)
+        public Cmab(List<string> attributeIds, int? trafficAllocation = null)
         {
             AttributeIds = attributeIds ?? new List<string>();
             TrafficAllocation = trafficAllocation;
@@ -56,7 +56,7 @@ namespace OptimizelySDK.Entity
         public override string ToString()
         {
             var attributeList = AttributeIds ?? new List<string>();
-            return string.Format("CmabDict{{AttributeIds=[{0}], TrafficAllocation={1}}}",
+            return string.Format("Cmab{{AttributeIds=[{0}], TrafficAllocation={1}}}",
                 string.Join(", ", attributeList.ToArray()), TrafficAllocation);
         }
     }

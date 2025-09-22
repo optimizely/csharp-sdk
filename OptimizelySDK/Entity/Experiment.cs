@@ -53,7 +53,7 @@ namespace OptimizelySDK.Entity
         /// CMAB (Contextual Multi-Armed Bandit) configuration for the experiment.
         /// </summary>
         [JsonProperty("cmab")]
-        public CmabConfig Cmab { get; set; }
+        public Cmab Cmab { get; set; }
 
         /// <summary>
         /// Determin if user is forced variation of experiment

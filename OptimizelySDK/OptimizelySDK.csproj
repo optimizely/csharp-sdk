@@ -84,7 +84,7 @@
     <Compile Include="Entity\Event.cs"/>
     <Compile Include="Entity\EventTags.cs"/>
     <Compile Include="Entity\Experiment.cs"/>
-    <Compile Include="Entity\CmabConfig.cs"/>
+    <Compile Include="Entity\Cmab.cs"/>
     <Compile Include="Entity\ExperimentCore.cs"/>
     <Compile Include="Entity\Holdout.cs"/>
     <Compile Include="Entity\FeatureDecision.cs"/>
