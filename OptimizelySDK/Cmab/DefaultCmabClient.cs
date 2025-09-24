@@ -151,12 +151,16 @@ namespace OptimizelySDK.Cmab
                     _logger.Log(LogLevel.ERROR, CmabConstants.ErrorInvalidResponse);
                     throw new CmabInvalidResponseException(ex.Message);
                 }
+                catch(CmabInvalidResponseException)
+                {
+                    throw;
+                }
                 catch (HttpRequestException ex)
                 {
                     _logger.Log(LogLevel.ERROR, string.Format(CmabConstants.ErrorFetchFailedFmt, ex.Message));
                     throw new CmabFetchException(string.Format(CmabConstants.ErrorFetchFailedFmt, ex.Message));
                 }
-                catch (Exception ex) when (!(ex is CmabInvalidResponseException))
+                catch (Exception ex)
                 {
                     _logger.Log(LogLevel.ERROR, string.Format(CmabConstants.ErrorFetchFailedFmt, ex.Message));
                     throw new CmabFetchException(string.Format(CmabConstants.ErrorFetchFailedFmt, ex.Message));
