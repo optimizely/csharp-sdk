@@ -116,7 +116,6 @@ namespace OptimizelySDK.Cmab
         {
             using (var cts = new CancellationTokenSource(timeout))
             {
-
                 try
                 {
                     var httpRequest = new HttpRequestMessage
@@ -179,8 +178,8 @@ namespace OptimizelySDK.Cmab
                 {
                     if (attempt >= _retryConfig.MaxRetries)
                     {
-                        _logger.Log(LogLevel.ERROR, string.Format(CmabConstants.ErrorFetchFailedFmt, "Exhausted all retries for CMAB request."));
-                        throw new CmabFetchException(string.Format(CmabConstants.ErrorFetchFailedFmt, "Exhausted all retries for CMAB request."));
+                        _logger.Log(LogLevel.ERROR, string.Format(CmabConstants.ErrorFetchFailedFmt, CmabConstants.ExhaustRetryMessage));
+                        throw new CmabFetchException(string.Format(CmabConstants.ErrorFetchFailedFmt, CmabConstants.ExhaustRetryMessage));
                     }
 
                     _logger.Log(LogLevel.INFO, $"Retrying CMAB request (attempt: {attempt + 1}) after {backoff.TotalSeconds} seconds...");

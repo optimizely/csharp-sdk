@@ -27,5 +27,6 @@ namespace OptimizelySDK.Cmab
 
         public const string ErrorFetchFailedFmt = "CMAB decision fetch failed with status: {0}";
         public const string ErrorInvalidResponse = "Invalid CMAB fetch response";
+        public const string ExhaustRetryMessage = "Exhausted all retries for CMAB request";
     }
 }
