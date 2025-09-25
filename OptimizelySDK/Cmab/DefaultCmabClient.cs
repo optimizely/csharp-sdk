@@ -95,7 +95,12 @@ namespace OptimizelySDK.Cmab
 
         private static CmabRequest BuildRequestBody(string ruleId, string userId, IDictionary<string, object> attributes, string cmabUuid)
         {
-            var attrList = (attributes ?? new Dictionary<string, object>()).Select(kv => new CmabAttribute { Id = kv.Key, Value = kv.Value }).ToList();
+            var attrList = new List<CmabAttribute>();
+
+            if (attributes != null)
+            {
+                attrList = attributes.Select(kv => new CmabAttribute { Id = kv.Key, Value = kv.Value }).ToList();
+            }
 
             return new CmabRequest
             {
@@ -151,7 +156,7 @@ namespace OptimizelySDK.Cmab
                     _logger.Log(LogLevel.ERROR, CmabConstants.ErrorInvalidResponse);
                     throw new CmabInvalidResponseException(ex.Message);
                 }
-                catch(CmabInvalidResponseException)
+                catch (CmabInvalidResponseException)
                 {
                     throw;
                 }
