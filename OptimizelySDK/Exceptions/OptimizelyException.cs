@@ -85,6 +85,33 @@ namespace OptimizelySDK.Exceptions
             : base(message) { }
     }
 
+    /// <summary>
+    /// Base exception for CMAB client errors.
+    /// </summary>
+    public class CmabException : OptimizelyException
+    {
+        public CmabException(string message)
+            : base(message) { }
+    }
+
+    /// <summary>
+    /// Exception thrown when CMAB decision fetch fails (network/non-2xx/exhausted retries).
+    /// </summary>
+    public class CmabFetchException : CmabException
+    {
+        public CmabFetchException(string message)
+            : base(message) { }
+    }
+
+    /// <summary>
+    /// Exception thrown when CMAB response is invalid or cannot be parsed.
+    /// </summary>
+    public class CmabInvalidResponseException : CmabException
+    {
+        public CmabInvalidResponseException(string message)
+            : base(message) { }
+    }
+
     public class InvalidRolloutException : OptimizelyException
     {
         public InvalidRolloutException(string message)

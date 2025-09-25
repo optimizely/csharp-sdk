@@ -181,6 +181,21 @@
     <Compile Include="..\OptimizelySDK\Entity\Cmab.cs">
       <Link>Entity\Cmab.cs</Link>
     </Compile>
+    <Compile Include="..\OptimizelySDK\Cmab\ICmabClient.cs">
+      <Link>Cmab\ICmabClient.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Cmab\DefaultCmabClient.cs">
+      <Link>Cmab\DefaultCmabClient.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Cmab\CmabRetryConfig.cs">
+      <Link>Cmab\CmabRetryConfig.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Cmab\CmabModels.cs">
+      <Link>Cmab\CmabModels.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Cmab\CmabConstants.cs">
+      <Link>Cmab\CmabConstants.cs</Link>
+    </Compile>
     <Compile Include="..\OptimizelySDK\Entity\Holdout.cs">
       <Link>Entity\Holdout.cs</Link>
     </Compile>

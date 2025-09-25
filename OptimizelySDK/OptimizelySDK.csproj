@@ -204,6 +204,11 @@
     <Compile Include="AudienceConditions\SemanticVersion.cs"/>
     <Compile Include="Entity\Result.cs"/>
     <Compile Include="Notifications\NotificationCenterRegistry.cs"/>
+    <Compile Include="Cmab\ICmabClient.cs"/>
+    <Compile Include="Cmab\DefaultCmabClient.cs"/>
+    <Compile Include="Cmab\CmabRetryConfig.cs"/>
+    <Compile Include="Cmab\CmabModels.cs"/>
+    <Compile Include="Cmab\CmabConstants.cs"/>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Utils\schema.json"/>
