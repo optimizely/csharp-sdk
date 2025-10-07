@@ -159,13 +159,13 @@ namespace OptimizelySDK.Cmab
             return filtered;
         }
 
-        private string GetCacheKey(string userId, string ruleId)
+        internal static string GetCacheKey(string userId, string ruleId)
         {
             var normalizedUserId = userId ?? string.Empty;
             return $"{normalizedUserId.Length}-{normalizedUserId}-{ruleId}";
         }
 
-        private string HashAttributes(UserAttributes attributes)
+        internal static string HashAttributes(UserAttributes attributes)
         {
             var ordered = attributes.OrderBy(kvp => kvp.Key).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
             var serialized = JsonConvert.SerializeObject(ordered);

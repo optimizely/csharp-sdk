@@ -71,6 +71,7 @@
   <ItemGroup>
     <Compile Include="Assertions.cs"/>
     <Compile Include="CmabTests\DefaultCmabClientTest.cs"/>
+    <Compile Include="CmabTests\DefaultCmabServiceTest.cs"/>
     <Compile Include="AudienceConditionsTests\ConditionEvaluationTest.cs"/>
     <Compile Include="AudienceConditionsTests\ConditionsTest.cs"/>
     <Compile Include="AudienceConditionsTests\SegmentsTests.cs"/>
