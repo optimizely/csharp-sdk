@@ -1,4 +1,4 @@
-/* 
+﻿/* 
 * Copyright 2025, Optimizely
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
@@ -167,8 +167,7 @@ namespace OptimizelySDK.Cmab
 
         private string HashAttributes(UserAttributes attributes)
         {
-            var ordered = attributes.OrderBy(kvp => kvp.Key)
-                .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+            var ordered = attributes.OrderBy(kvp => kvp.Key).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
             var serialized = JsonConvert.SerializeObject(ordered);
 
             using (var md5 = MD5.Create())

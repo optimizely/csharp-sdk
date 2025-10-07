@@ -205,7 +205,7 @@
     <Compile Include="Entity\Result.cs"/>
     <Compile Include="Notifications\NotificationCenterRegistry.cs"/>
     <Compile Include="Cmab\ICmabClient.cs"/>
-  <Compile Include="Cmab\ICmabService.cs"/>
+    <Compile Include="Cmab\ICmabService.cs"/>
     <Compile Include="Cmab\DefaultCmabClient.cs"/>
     <Compile Include="Cmab\DefaultCmabService.cs"/>
     <Compile Include="Cmab\CmabRetryConfig.cs"/>
