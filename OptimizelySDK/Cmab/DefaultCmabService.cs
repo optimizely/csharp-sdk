@@ -34,25 +34,52 @@ namespace OptimizelySDK.Cmab
     /// </summary>
     public class CmabDecision
     {
+        /// <summary>
+        /// Initializes a new instance of the CmabDecision class.
+        /// </summary>
+        /// <param name="variationId">The variation ID assigned by the CMAB service.</param>
+        /// <param name="cmabUuid">The unique identifier for this CMAB decision.</param>
         public CmabDecision(string variationId, string cmabUuid)
         {
             VariationId = variationId;
             CmabUuid = cmabUuid;
         }
 
+        /// <summary>
+        /// Gets the variation ID assigned by the CMAB service.
+        /// </summary>
         public string VariationId { get; }
+
+        /// <summary>
+        /// Gets the unique identifier for this CMAB decision.
+        /// </summary>
         public string CmabUuid { get; }
     }
 
+    /// <summary>
+    /// Represents a cached CMAB decision entry.
+    /// </summary>
     public class CmabCacheEntry
     {
+        /// <summary>
+        /// Gets or sets the hash of the filtered attributes used for this decision.
+        /// </summary>
         public string AttributesHash { get; set; }
+
+        /// <summary>
+        /// Gets or sets the variation ID from the cached decision.
+        /// </summary>
         public string VariationId { get; set; }
+
+        /// <summary>
+        /// Gets or sets the CMAB UUID from the cached decision.
+        /// </summary>
         public string CmabUuid { get; set; }
     }
 
     /// <summary>
     /// Default implementation of the CMAB decision service that handles caching and filtering.
+    /// Provides methods for retrieving CMAB decisions with intelligent caching based on user attributes.
     /// </summary>
     public class DefaultCmabService : ICmabService
     {
@@ -60,6 +87,12 @@ namespace OptimizelySDK.Cmab
         private readonly ICmabClient _cmabClient;
         private readonly ILogger _logger;
 
+        /// <summary>
+        /// Initializes a new instance of the DefaultCmabService class.
+        /// </summary>
+        /// <param name="cmabCache">LRU cache for storing CMAB decisions.</param>
+        /// <param name="cmabClient">Client for fetching decisions from the CMAB prediction service.</param>
+        /// <param name="logger">Optional logger for recording service operations.</param>
         public DefaultCmabService(LruCache<CmabCacheEntry> cmabCache,
             ICmabClient cmabClient,
             ILogger logger = null)
@@ -72,7 +105,7 @@ namespace OptimizelySDK.Cmab
         public CmabDecision GetDecision(ProjectConfig projectConfig,
             OptimizelyUserContext userContext,
             string ruleId,
-            OptimizelyDecideOption[] options)
+            OptimizelyDecideOption[] options = null)
         {
             var optionSet = options ?? new OptimizelyDecideOption[0];
             var filteredAttributes = FilterAttributes(projectConfig, userContext, ruleId);
@@ -119,6 +152,13 @@ namespace OptimizelySDK.Cmab
             return cmabDecision;
         }
 
+        /// <summary>
+        /// Fetches a new decision from the CMAB client and generates a unique UUID for tracking.
+        /// </summary>
+        /// <param name="ruleId">The experiment/rule ID.</param>
+        /// <param name="userId">The user ID.</param>
+        /// <param name="attributes">The filtered user attributes to send to the CMAB service.</param>
+        /// <returns>A new CmabDecision with the assigned variation and generated UUID.</returns>
         private CmabDecision FetchDecision(string ruleId,
             string userId,
             UserAttributes attributes)
@@ -128,6 +168,17 @@ namespace OptimizelySDK.Cmab
             return new CmabDecision(variationId, cmabUuid);
         }
 
+        /// <summary>
+        /// Filters user attributes to include only those configured for the CMAB experiment.
+        /// </summary>
+        /// <param name="projectConfig">The project configuration containing attribute mappings.</param>
+        /// <param name="userContext">The user context with all user attributes.</param>
+        /// <param name="ruleId">The experiment/rule ID to get CMAB attribute configuration for.</param>
+        /// <returns>A UserAttributes object containing only the filtered attributes, or empty if no CMAB config exists.</returns>
+        /// <remarks>
+        /// Only attributes specified in the experiment's CMAB configuration are included.
+        /// This ensures that cache invalidation is based only on relevant attributes.
+        /// </remarks>
         private UserAttributes FilterAttributes(ProjectConfig projectConfig,
             OptimizelyUserContext userContext,
             string ruleId)
@@ -147,9 +198,7 @@ namespace OptimizelySDK.Cmab
 
             foreach (var attributeId in experiment.Cmab.AttributeIds)
             {
-                if (attributeIdMap.TryGetValue(attributeId, out AttributeEntity attribute) &&
-                    attribute != null &&
-                    !string.IsNullOrEmpty(attribute.Key) &&
+                if (attributeIdMap.TryGetValue(attributeId, out var attribute) &&
                     userAttributes.TryGetValue(attribute.Key, out var value))
                 {
                     filtered[attribute.Key] = value;
@@ -159,12 +208,32 @@ namespace OptimizelySDK.Cmab
             return filtered;
         }
 
+        /// <summary>
+        /// Generates a cache key for storing and retrieving CMAB decisions.
+        /// </summary>
+        /// <param name="userId">The user ID.</param>
+        /// <param name="ruleId">The experiment/rule ID.</param>
+        /// <returns>A cache key string in the format: {userId.Length}-{userId}-{ruleId}</returns>
+        /// <remarks>
+        /// The length prefix prevents key collisions between different user IDs that might appear
+        /// similar when concatenated (e.g., "12-abc-exp" vs "1-2abc-exp").
+        /// </remarks>
         internal static string GetCacheKey(string userId, string ruleId)
         {
             var normalizedUserId = userId ?? string.Empty;
             return $"{normalizedUserId.Length}-{normalizedUserId}-{ruleId}";
         }
 
+        /// <summary>
+        /// Computes an MD5 hash of the user attributes for cache validation.
+        /// </summary>
+        /// <param name="attributes">The user attributes to hash.</param>
+        /// <returns>A hexadecimal MD5 hash string of the serialized attributes.</returns>
+        /// <remarks>
+        /// Attributes are sorted by key before hashing to ensure consistent hashes regardless of
+        /// the order in which attributes are provided. This allows cache hits when the same attributes
+        /// are present in different orders.
+        /// </remarks>
         internal static string HashAttributes(UserAttributes attributes)
         {
             var ordered = attributes.OrderBy(kvp => kvp.Key).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
