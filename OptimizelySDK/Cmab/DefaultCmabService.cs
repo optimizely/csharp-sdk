@@ -112,11 +112,13 @@ namespace OptimizelySDK.Cmab
 
             if (optionSet.Contains(OptimizelyDecideOption.IGNORE_CMAB_CACHE))
             {
+                _logger.Log(LogLevel.DEBUG, "Ignoring CMAB cache.");
                 return FetchDecision(ruleId, userContext.GetUserId(), filteredAttributes);
             }
 
             if (optionSet.Contains(OptimizelyDecideOption.RESET_CMAB_CACHE))
             {
+                _logger.Log(LogLevel.DEBUG, "Resetting CMAB cache.");
                 _cmabCache.Reset();
             }
 
@@ -124,6 +126,7 @@ namespace OptimizelySDK.Cmab
 
             if (optionSet.Contains(OptimizelyDecideOption.INVALIDATE_USER_CMAB_CACHE))
             {
+                _logger.Log(LogLevel.DEBUG, "Invalidating user CMAB cache.");
                 _cmabCache.Remove(cacheKey);
             }
 
@@ -136,8 +139,11 @@ namespace OptimizelySDK.Cmab
                 {
                     return new CmabDecision(cachedValue.VariationId, cachedValue.CmabUuid);
                 }
+                else
+                {
+                    _cmabCache.Remove(cacheKey);
+                }
 
-                _cmabCache.Remove(cacheKey);
             }
 
             var cmabDecision = FetchDecision(ruleId, userContext.GetUserId(), filteredAttributes);
