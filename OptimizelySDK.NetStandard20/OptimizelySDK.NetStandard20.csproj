@@ -187,6 +187,12 @@
     <Compile Include="..\OptimizelySDK\Cmab\DefaultCmabClient.cs">
       <Link>Cmab\DefaultCmabClient.cs</Link>
     </Compile>
+    <Compile Include="..\OptimizelySDK\Cmab\ICmabService.cs">
+      <Link>Cmab\ICmabService.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Cmab\DefaultCmabService.cs">
+      <Link>Cmab\DefaultCmabService.cs</Link>
+    </Compile>
     <Compile Include="..\OptimizelySDK\Cmab\CmabRetryConfig.cs">
       <Link>Cmab\CmabRetryConfig.cs</Link>
     </Compile>

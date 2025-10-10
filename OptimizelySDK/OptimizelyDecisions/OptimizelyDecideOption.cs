@@ -23,5 +23,8 @@ namespace OptimizelySDK.OptimizelyDecisions
         IGNORE_USER_PROFILE_SERVICE,
         INCLUDE_REASONS,
         EXCLUDE_VARIABLES,
+        IGNORE_CMAB_CACHE,
+        RESET_CMAB_CACHE,
+        INVALIDATE_USER_CMAB_CACHE,
     }
 }
