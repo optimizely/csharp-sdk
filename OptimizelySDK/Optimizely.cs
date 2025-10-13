@@ -19,6 +19,7 @@
 #endif
 
 using OptimizelySDK.Bucketing;
+using OptimizelySDK.Cmab;
 using OptimizelySDK.Entity;
 using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Event.Builder;
@@ -252,6 +253,7 @@ namespace OptimizelySDK
 #if USE_ODP
             , IOdpManager odpManager = null
 #endif
+            , ICmabService cmabService = null
         )
         {
             Logger = logger ?? new NoOpLogger();
@@ -261,8 +263,29 @@ namespace OptimizelySDK
             EventBuilder = new EventBuilder(Bucketer, Logger);
             UserProfileService = userProfileService;
             NotificationCenter = notificationCenter ?? new NotificationCenter(Logger);
+            
+            // Initialize CMAB Service with default implementation if not provided
+            var effectiveCmabService = cmabService;
+            if (effectiveCmabService == null)
+            {
+                try
+                {
+                    // Create default CMAB cache (30 minutes timeout, 1000 entries)
+                    var cmabCache = new LruCache<CmabCacheEntry>(1000, TimeSpan.FromSeconds(30 * 60));
+                    var cmabClient = new DefaultCmabClient(null, null, Logger);
+                    effectiveCmabService = new DefaultCmabService(cmabCache, cmabClient, Logger);
+                }
+                catch (Exception ex)
+                {
+                    Logger.Log(LogLevel.WARN,
+                        $"Failed to initialize CMAB service: {ex.Message}. CMAB experiments will not be available.");
+                    effectiveCmabService = null;
+                }
+            }
+
             DecisionService =
-                new DecisionService(Bucketer, ErrorHandler, userProfileService, Logger);
+                new DecisionService(Bucketer, ErrorHandler, userProfileService, Logger,
+                    effectiveCmabService);
             EventProcessor = eventProcessor ?? new ForwardingEventProcessor(EventDispatcher,
                 NotificationCenter,
                 Logger);
@@ -1063,7 +1086,8 @@ namespace OptimizelySDK
                     projectConfig,
                     flagKey,
                     decisionSource,
-                    flagEnabled);
+                    flagEnabled,
+                    flagDecision.CmabUuid);
             }
 
             var decisionInfo = new Dictionary<string, object>
@@ -1089,7 +1113,8 @@ namespace OptimizelySDK
                 ruleKey,
                 flagKey,
                 user,
-                reasonsToReport);
+                reasonsToReport,
+                flagDecision.CmabUuid);
         }
 
         private Result<Dictionary<string, object>> GetDecisionVariableMap(FeatureFlag flag, Variation variation, bool featureEnabled)
@@ -1162,9 +1187,10 @@ namespace OptimizelySDK
         /// <param name="userAttributes">The user's attributes</param>
         /// <param name="flagKey">It can either be experiment key in case if ruleType is experiment or it's feature key in case ruleType is feature-test or rollout</param>
         /// <param name="ruleType">It can either be experiment in case impression event is sent from activate or it's feature-test or rollout</param>
+        /// <param name="cmabUuid">Optional CMAB UUID for contextual multi-armed bandit experiments</param>
         private bool SendImpressionEvent(ExperimentCore experiment, Variation variation, string userId,
             UserAttributes userAttributes, ProjectConfig config,
-            string flagKey, string ruleType, bool enabled
+            string flagKey, string ruleType, bool enabled, string cmabUuid = null
         )
         {
             if (experiment != null && !experiment.isRunning)
@@ -1174,7 +1200,7 @@ namespace OptimizelySDK
             }
 
             var userEvent = UserEventFactory.CreateImpressionEvent(config, experiment, variation,
-                userId, userAttributes, flagKey, ruleType, enabled);
+                userId, userAttributes, flagKey, ruleType, enabled, cmabUuid);
             if (userEvent == null)
             {
                 return false;

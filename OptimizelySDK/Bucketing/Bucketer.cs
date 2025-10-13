@@ -105,6 +105,73 @@ namespace OptimizelySDK.Bucketing
         }
 
         /// <summary>
+        /// Bucket user to an entity ID based on traffic allocations.
+        /// This method is used for CMAB experiments where we need to determine if a user
+        /// is in the traffic allocation before fetching the CMAB decision.
+        /// </summary>
+        /// <param name="config">ProjectConfig Configuration for the project</param>
+        /// <param name="experiment">Experiment in which user is to be bucketed</param>
+        /// <param name="bucketingId">A customer-assigned value used to create the key for the murmur hash.</param>
+        /// <param name="userId">User identifier</param>
+        /// <param name="trafficAllocations">Traffic allocations to use for bucketing</param>
+        /// <returns>Entity ID (string) if user is bucketed, null otherwise</returns>
+        public virtual Result<string> BucketToEntityId(ProjectConfig config, Experiment experiment,
+            string bucketingId, string userId, IEnumerable<TrafficAllocation> trafficAllocations
+        )
+        {
+            string message;
+            var reasons = new DecisionReasons();
+
+            if (string.IsNullOrEmpty(experiment?.Key))
+            {
+                return Result<string>.NullResult(reasons);
+            }
+
+            // Determine if experiment is in a mutually exclusive group.
+            if (experiment.IsInMutexGroup)
+            {
+                var group = config.GetGroup(experiment.GroupId);
+                if (string.IsNullOrEmpty(group?.Id))
+                {
+                    return Result<string>.NullResult(reasons);
+                }
+
+                var userExperimentId =
+                    FindBucket(bucketingId, userId, group.Id, group.TrafficAllocation);
+                if (string.IsNullOrEmpty(userExperimentId))
+                {
+                    message = $"User [{userId}] is in no experiment.";
+                    Logger.Log(LogLevel.INFO, reasons.AddInfo(message));
+                    return Result<string>.NullResult(reasons);
+                }
+
+                if (userExperimentId != experiment.Id)
+                {
+                    message =
+                        $"User [{userId}] is not in experiment [{experiment.Key}] of group [{experiment.GroupId}].";
+                    Logger.Log(LogLevel.INFO, reasons.AddInfo(message));
+                    return Result<string>.NullResult(reasons);
+                }
+
+                message =
+                    $"User [{userId}] is in experiment [{experiment.Key}] of group [{experiment.GroupId}].";
+                Logger.Log(LogLevel.INFO, reasons.AddInfo(message));
+            }
+
+            // Bucket user with provided traffic allocations
+            var entityId = FindBucket(bucketingId, userId, experiment.Id, trafficAllocations);
+            
+            if (string.IsNullOrEmpty(entityId))
+            {
+                return Result<string>.NullResult(reasons);
+            }
+
+            message = $"User bucketed into entity [{entityId}]";
+            Logger.Log(LogLevel.DEBUG, reasons.AddInfo(message));
+            return Result<string>.NewResult(entityId, reasons);
+        }
+
+        /// <summary>
         /// Determine variation the user should be put in.
         /// </summary>
         /// <param name="config">ProjectConfig Configuration for the project</param>

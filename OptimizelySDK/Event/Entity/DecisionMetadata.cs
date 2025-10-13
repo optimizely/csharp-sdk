@@ -39,8 +39,11 @@ namespace OptimizelySDK.Event.Entity
         [JsonProperty("enabled")]
         public bool Enabled { get; private set; }
 
+        [JsonProperty("cmab_uuid")]
+        public string CmabUuid { get; private set; }
+
         public DecisionMetadata(string flagKey, string ruleKey, string ruleType,
-            string variationKey = "", bool enabled = false
+            string variationKey = "", bool enabled = false, string cmabUuid = null
         )
         {
             FlagKey = flagKey;
@@ -48,6 +51,7 @@ namespace OptimizelySDK.Event.Entity
             RuleType = ruleType;
             VariationKey = variationKey;
             Enabled = enabled;
+            CmabUuid = cmabUuid;
         }
     }
 }

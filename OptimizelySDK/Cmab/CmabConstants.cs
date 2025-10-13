@@ -28,5 +28,11 @@ namespace OptimizelySDK.Cmab
         public const string ErrorFetchFailedFmt = "CMAB decision fetch failed with status: {0}";
         public const string ErrorInvalidResponse = "Invalid CMAB fetch response";
         public const string ExhaustRetryMessage = "Exhausted all retries for CMAB request";
+        
+        // Decision service messages
+        public const string UserNotInCmabExperiment = "User [{0}] not in CMAB experiment [{1}] due to traffic allocation.";
+        public const string CmabFetchFailed = "Failed to fetch CMAB decision for experiment [{0}].";
+        public const string CmabDecisionFetched = "CMAB decision fetched for user [{0}] in experiment [{1}].";
+        public const string CmabExperimentNotProperlyConfigured = "CMAB experiment [{0}] is not properly configured.";
     }
 }

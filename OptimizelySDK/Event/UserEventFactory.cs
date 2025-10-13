@@ -59,6 +59,7 @@ namespace OptimizelySDK.Event
         /// <param name="userAttributes">The user's attributes</param>
         /// <param name="flagKey">experiment key or feature key</param>
         /// <param name="ruleType">experiment or featureDecision source </param>
+        /// <param name="cmabUuid">Optional CMAB UUID for contextual multi-armed bandit experiments</param>
         /// <returns>ImpressionEvent instance</returns>
         public static ImpressionEvent CreateImpressionEvent(ProjectConfig projectConfig,
             ExperimentCore activatedExperiment,
@@ -67,7 +68,8 @@ namespace OptimizelySDK.Event
             UserAttributes userAttributes,
             string flagKey,
             string ruleType,
-            bool enabled = false
+            bool enabled = false,
+            string cmabUuid = null
         )
         {
             if ((ruleType == FeatureDecision.DECISION_SOURCE_ROLLOUT || variation == null) &&
@@ -91,7 +93,7 @@ namespace OptimizelySDK.Event
                 ruleKey = activatedExperiment?.Key ?? string.Empty;
             }
 
-            var metadata = new DecisionMetadata(flagKey, ruleKey, ruleType, variationKey, enabled);
+            var metadata = new DecisionMetadata(flagKey, ruleKey, ruleType, variationKey, enabled, cmabUuid);
 
             return new ImpressionEvent.Builder().WithEventContext(eventContext).
                 WithBotFilteringEnabled(projectConfig.BotFiltering).
