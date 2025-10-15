@@ -142,6 +142,9 @@
     <Compile Include="..\OptimizelySDK\Bucketing\UserProfileUtil.cs">
       <Link>Bucketing\UserProfileUtil.cs</Link>
     </Compile>
+    <Compile Include="..\OptimizelySDK\Bucketing\VariationDecisionResult.cs">
+      <Link>Bucketing\VariationDecisionResult.cs</Link>
+    </Compile>
     <Compile Include="..\OptimizelySDK\Config\DatafileProjectConfig.cs">
       <Link>Config\DatafileProjectConfig.cs</Link>
     </Compile>

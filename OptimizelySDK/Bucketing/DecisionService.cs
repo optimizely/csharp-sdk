@@ -14,16 +14,25 @@
 * limitations under the License.
 */
 
+#if !(NET35 || NET40 || NETSTANDARD1_6)
+#define USE_CMAB
+#endif
+
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using OptimizelySDK.Cmab;
 using OptimizelySDK.Entity;
 using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Logger;
 using OptimizelySDK.OptimizelyDecisions;
 using OptimizelySDK.Utils;
 using static OptimizelySDK.Entity.Holdout;
+
+#if USE_CMAB
+using OptimizelySDK.Cmab;
+#endif
+
 
 namespace OptimizelySDK.Bucketing
 {
@@ -46,7 +55,9 @@ namespace OptimizelySDK.Bucketing
         private IErrorHandler ErrorHandler;
         private UserProfileService UserProfileService;
         private ILogger Logger;
+#if USE_CMAB
         private ICmabService CmabService;
+#endif
 
         /// <summary>
         /// Associative array of user IDs to an associative array
@@ -70,15 +81,19 @@ namespace OptimizelySDK.Bucketing
         /// <param name = "logger" > Logger for logging messages.</param>
         /// <param name = "cmabService" > CMAB service for fetching CMAB decisions. Optional.</param>
         public DecisionService(Bucketer bucketer, IErrorHandler errorHandler,
-            UserProfileService userProfileService, ILogger logger,
-            ICmabService cmabService = null
+            UserProfileService userProfileService, ILogger logger
+#if USE_CMAB
+            , ICmabService cmabService = null
+#endif
         )
         {
             Bucketer = bucketer;
             ErrorHandler = errorHandler;
             UserProfileService = userProfileService;
             Logger = logger;
+#if USE_CMAB
             CmabService = cmabService;
+#endif
 #if NET35
             ForcedVariationMap = new Dictionary<string, Dictionary<string, string>>();
 #else
@@ -210,6 +225,7 @@ namespace OptimizelySDK.Bucketing
             {
                 var bucketingId = GetBucketingId(userId, user.GetAttributes()).ResultObject;
 
+#if USE_CMAB
                 // Check if this is a CMAB experiment
                 if (experiment.Cmab != null)
                 {
@@ -240,6 +256,7 @@ namespace OptimizelySDK.Bucketing
 
                     return Result<Variation>.NullResult(reasons);
                 }
+#endif
 
                 // Standard (non-CMAB) bucketing
                 decisionVariation = Bucketer.Bucket(config, experiment, bucketingId, userId);
@@ -280,6 +297,7 @@ namespace OptimizelySDK.Bucketing
         /// <param name="bucketingId">Bucketing ID for the user</param>
         /// <param name="options">Decision options</param>
         /// <returns>Result containing VariationDecisionResult with variation, CMAB UUID, and error status</returns>
+#if USE_CMAB
         private Result<VariationDecisionResult> GetDecisionForCmabExperiment(
             Experiment experiment,
             OptimizelyUserContext user,
@@ -375,6 +393,7 @@ namespace OptimizelySDK.Bucketing
                     new VariationDecisionResult(null, null, true), reasons);
             }
         }
+#endif
 
         /// <summary>
         /// Gets the forced variation for the given user and experiment.
@@ -844,10 +863,15 @@ namespace OptimizelySDK.Bucketing
                         reasons.AddInfo(
                             $"The user \"{userId}\" is bucketed into experiment \"{experiment.Key}\" of feature \"{featureFlag.Key}\"."));
 
+#if USE_CMAB
                     // Extract CmabUuid from reasons if this was a CMAB decision
                     var cmabUuid = reasons.CmabUuid;
                     var featureDecision = new FeatureDecision(experiment, decisionVariation,
                         FeatureDecision.DECISION_SOURCE_FEATURE_TEST, cmabUuid);
+#else
+                    var featureDecision = new FeatureDecision(experiment, decisionVariation,
+                        FeatureDecision.DECISION_SOURCE_FEATURE_TEST);
+#endif
                     return Result<FeatureDecision>.NewResult(featureDecision, reasons);
                 }
             }

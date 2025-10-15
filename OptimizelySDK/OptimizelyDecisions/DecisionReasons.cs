@@ -52,12 +52,6 @@ namespace OptimizelySDK.OptimizelyDecisions
 
             a.Errors.AddRange(b.Errors);
             a.Infos.AddRange(b.Infos);
-            
-            // Preserve CmabUuid if present in either reasons object
-            if (a.CmabUuid == null && b.CmabUuid != null)
-            {
-                a.CmabUuid = b.CmabUuid;
-            }
 
             return a;
         }
