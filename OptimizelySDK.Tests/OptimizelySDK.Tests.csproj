@@ -74,6 +74,8 @@
     <Compile Include="CmabTests\DecisionServiceCmabTest.cs"/>
     <Compile Include="CmabTests\DefaultCmabClientTest.cs"/>
     <Compile Include="CmabTests\DefaultCmabServiceTest.cs"/>
+    <Compile Include="CmabTests\ImpressionEventCmabTest.cs"/>
+    <Compile Include="CmabTests\OptimizelyUserContextCmabTest.cs"/>
     <Compile Include="AudienceConditionsTests\ConditionEvaluationTest.cs"/>
     <Compile Include="AudienceConditionsTests\ConditionsTest.cs"/>
     <Compile Include="AudienceConditionsTests\SegmentsTests.cs"/>
