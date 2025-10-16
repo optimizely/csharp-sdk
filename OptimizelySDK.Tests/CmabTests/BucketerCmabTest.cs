@@ -252,7 +252,8 @@ namespace OptimizelySDK.Tests.CmabTests
                 Id = id,
                 Key = key,
                 GroupId = groupId, // IsInMutexGroup is computed from GroupId - no need to set it
-                TrafficAllocation = new TrafficAllocation[0] // Array, not List
+                TrafficAllocation = new TrafficAllocation[0], // Array, not List
+                ForcedVariations = new Dictionary<string, string>() // UserIdToKeyVariations is an alias for this
             };
         }
 

@@ -115,7 +115,7 @@ namespace OptimizelySDK.Tests
 
             DecisionServiceMock = new Mock<DecisionService>(new Bucketer(LoggerMock.Object),
                 ErrorHandlerMock.Object,
-                null, LoggerMock.Object);
+                null, LoggerMock.Object, null);
 
             NotificationCenter = new NotificationCenter(LoggerMock.Object);
             NotificationCallbackMock = new Mock<TestNotificationCallbacks>();

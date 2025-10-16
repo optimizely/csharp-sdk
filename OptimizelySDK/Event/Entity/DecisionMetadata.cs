@@ -39,7 +39,7 @@ namespace OptimizelySDK.Event.Entity
         [JsonProperty("enabled")]
         public bool Enabled { get; private set; }
 
-        [JsonProperty("cmab_uuid")]
+        [JsonProperty("cmab_uuid", NullValueHandling = NullValueHandling.Ignore)]
         public string CmabUuid { get; private set; }
 
         public DecisionMetadata(string flagKey, string ruleKey, string ruleType,

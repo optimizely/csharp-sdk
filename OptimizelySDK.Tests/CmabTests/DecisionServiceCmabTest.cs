@@ -487,6 +487,7 @@ namespace OptimizelySDK.Tests.CmabTests
                 LayerId = "layer_1",
                 Status = "Running",
                 TrafficAllocation = new TrafficAllocation[0],
+                ForcedVariations = new Dictionary<string, string>(), // UserIdToKeyVariations is an alias for this
                 Cmab = new Entity.Cmab(attributeIds ?? new List<string>())
                 {
                     TrafficAllocation = trafficAllocation
