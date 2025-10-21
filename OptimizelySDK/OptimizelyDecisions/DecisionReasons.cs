@@ -52,6 +52,10 @@ namespace OptimizelySDK.OptimizelyDecisions
 
             a.Errors.AddRange(b.Errors);
             a.Infos.AddRange(b.Infos);
+            if (a.CmabUuid == null && !string.IsNullOrEmpty(b.CmabUuid))
+            {
+                a.CmabUuid = b.CmabUuid;
+            }
 
             return a;
         }

@@ -50,17 +50,14 @@ namespace OptimizelySDK.Tests.CmabTests
         }
 
         /// <summary>
-        /// Test 1: TestCreateImpressionEventWithCmabUuid
         /// Verifies that CreateImpressionEvent includes CMAB UUID in metadata
         /// </summary>
         [Test]
         public void TestCreateImpressionEventWithCmabUuid()
         {
-            // Arrange
             var experiment = _config.GetExperimentFromKey(TEST_EXPERIMENT_KEY);
             var variation = _config.GetVariationFromId(experiment.Key, TEST_VARIATION_ID);
 
-            // Act - Create impression event with CMAB UUID
             var impressionEvent = UserEventFactory.CreateImpressionEvent(
                 _config,
                 experiment,
@@ -72,7 +69,6 @@ namespace OptimizelySDK.Tests.CmabTests
                 true,
                 TEST_CMAB_UUID);
 
-            // Assert
             Assert.IsNotNull(impressionEvent);
             Assert.IsNotNull(impressionEvent.Metadata);
             Assert.AreEqual(TEST_CMAB_UUID, impressionEvent.Metadata.CmabUuid);
@@ -82,17 +78,14 @@ namespace OptimizelySDK.Tests.CmabTests
         }
 
         /// <summary>
-        /// Test 2: TestCreateImpressionEventWithoutCmabUuid
         /// Verifies that CreateImpressionEvent without CMAB UUID has null cmab_uuid
         /// </summary>
         [Test]
         public void TestCreateImpressionEventWithoutCmabUuid()
         {
-            // Arrange
             var experiment = _config.GetExperimentFromKey(TEST_EXPERIMENT_KEY);
             var variation = _config.GetVariationFromId(experiment.Key, TEST_VARIATION_ID);
 
-            // Act - Create impression event without CMAB UUID
             var impressionEvent = UserEventFactory.CreateImpressionEvent(
                 _config,
                 experiment,
@@ -102,7 +95,6 @@ namespace OptimizelySDK.Tests.CmabTests
                 TEST_EXPERIMENT_KEY,
                 "experiment");
 
-            // Assert
             Assert.IsNotNull(impressionEvent);
             Assert.IsNotNull(impressionEvent.Metadata);
             Assert.IsNull(impressionEvent.Metadata.CmabUuid);
@@ -111,7 +103,6 @@ namespace OptimizelySDK.Tests.CmabTests
         }
 
         /// <summary>
-        /// Test 3: TestEventFactoryCreateLogEventWithCmabUuid
         /// Verifies that EventFactory includes cmab_uuid in the log event JSON
         /// </summary>
         [Test]
@@ -132,48 +123,47 @@ namespace OptimizelySDK.Tests.CmabTests
                 true,
                 TEST_CMAB_UUID);
 
-            // Act - Create log event from impression event
             var logEvent = EventFactory.CreateLogEvent(new UserEvent[] { impressionEvent }, _loggerMock.Object);
 
-            // Assert
             Assert.IsNotNull(logEvent);
 
-            // Parse the log event params to verify CMAB UUID is included
             var params_dict = logEvent.Params;
+
             Assert.IsNotNull(params_dict);
             Assert.IsTrue(params_dict.ContainsKey("visitors"));
 
             var visitors = (JArray)params_dict["visitors"];
+
             Assert.IsNotNull(visitors);
             Assert.AreEqual(1, visitors.Count);
 
             var visitor = visitors[0] as JObject;
             var snapshots = visitor["snapshots"] as JArray;
+
             Assert.IsNotNull(snapshots);
             Assert.Greater(snapshots.Count, 0);
 
             var snapshot = snapshots[0] as JObject;
             var decisions = snapshot["decisions"] as JArray;
+
             Assert.IsNotNull(decisions);
             Assert.Greater(decisions.Count, 0);
 
             var decision = decisions[0] as JObject;
             var metadata = decision["metadata"] as JObject;
+
             Assert.IsNotNull(metadata);
 
-            // Verify cmab_uuid is present in metadata
             Assert.IsTrue(metadata.ContainsKey("cmab_uuid"));
             Assert.AreEqual(TEST_CMAB_UUID, metadata["cmab_uuid"].ToString());
         }
 
         /// <summary>
-        /// Test 4: TestEventFactoryCreateLogEventWithoutCmabUuid
         /// Verifies that EventFactory does not include cmab_uuid when not provided
         /// </summary>
         [Test]
         public void TestEventFactoryCreateLogEventWithoutCmabUuid()
         {
-            // Arrange
             var experiment = _config.GetExperimentFromKey(TEST_EXPERIMENT_KEY);
             var variation = _config.GetVariationFromId(experiment.Key, TEST_VARIATION_ID);
 
@@ -186,35 +176,38 @@ namespace OptimizelySDK.Tests.CmabTests
                 TEST_EXPERIMENT_KEY,
                 "experiment");
 
-            // Act - Create log event from impression event
             var logEvent = EventFactory.CreateLogEvent(new UserEvent[] { impressionEvent }, _loggerMock.Object);
 
-            // Assert
             Assert.IsNotNull(logEvent);
 
-            // Parse the log event params to verify CMAB UUID is not included or is null
             var params_dict = logEvent.Params;
+
             Assert.IsNotNull(params_dict);
             Assert.IsTrue(params_dict.ContainsKey("visitors"));
 
             var visitors = (JArray)params_dict["visitors"];
+
             Assert.IsNotNull(visitors);
             Assert.AreEqual(1, visitors.Count);
 
             var visitor = visitors[0] as JObject;
             var snapshots = visitor["snapshots"] as JArray;
+
             Assert.IsNotNull(snapshots);
             Assert.Greater(snapshots.Count, 0);
 
             var snapshot = snapshots[0] as JObject;
             var decisions = snapshot["decisions"] as JArray;
+
             Assert.IsNotNull(decisions);
             Assert.Greater(decisions.Count, 0);
 
             var decision = decisions[0] as JObject;
             var metadata = decision["metadata"] as JObject;
+
             Assert.IsNotNull(metadata);
 
+			// Todo: If in test code is not acceptable
             // Verify cmab_uuid is either not present or is null
             if (metadata.ContainsKey("cmab_uuid"))
             {

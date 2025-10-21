@@ -25,6 +25,8 @@ using OptimizelySDK.Entity;
 using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Logger;
 using OptimizelySDK.OptimizelyDecisions;
+using OptimizelySDK.Odp;
+using AttributeEntity = OptimizelySDK.Entity.Attribute;
 
 namespace OptimizelySDK.Tests.CmabTests
 {
@@ -97,6 +99,13 @@ namespace OptimizelySDK.Tests.CmabTests
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.ResultObject, "Variation should be returned");
             Assert.AreEqual(VARIATION_A_KEY, result.ResultObject.Key);
+            Assert.AreEqual(VARIATION_A_ID, result.ResultObject.Id);
+            Assert.AreEqual(TEST_CMAB_UUID, result.DecisionReasons.CmabUuid);
+
+            var reasons = result.DecisionReasons.ToReport(true);
+            var expectedMessage =
+                $"CMAB decision fetched for user [{TEST_USER_ID}] in experiment [{TEST_EXPERIMENT_KEY}].";
+            Assert.Contains(expectedMessage, reasons);
 
             _cmabServiceMock.Verify(c => c.GetDecision(
                 It.IsAny<ProjectConfig>(),
@@ -129,6 +138,12 @@ namespace OptimizelySDK.Tests.CmabTests
 
             Assert.IsNotNull(result);
             Assert.IsNull(result.ResultObject, "No variation should be returned with 0 traffic");
+            Assert.IsNull(result.DecisionReasons.CmabUuid);
+
+            var reasons = result.DecisionReasons.ToReport(true);
+            var expectedMessage =
+                $"User [{TEST_USER_ID}] not in CMAB experiment [{TEST_EXPERIMENT_KEY}] due to traffic allocation.";
+            Assert.Contains(expectedMessage, reasons);
 
             _cmabServiceMock.Verify(c => c.GetDecision(
                 It.IsAny<ProjectConfig>(),
@@ -168,8 +183,68 @@ namespace OptimizelySDK.Tests.CmabTests
 
             Assert.IsNotNull(result);
             Assert.IsNull(result.ResultObject, "Should return null on error");
-            Assert.IsTrue(result.DecisionReasons.ToReport(false).Contains("CMAB"),
-                "Decision reasons should mention CMAB error");
+            Assert.IsNull(result.DecisionReasons.CmabUuid);
+
+            var reasonsList = result.DecisionReasons.ToReport(true);
+            Assert.IsTrue(reasonsList.Exists(reason =>
+                    reason.Contains(
+                        $"Failed to fetch CMAB decision for experiment [{TEST_EXPERIMENT_KEY}].")),
+                $"Decision reasons should include CMAB fetch failure. Actual reasons: {string.Join(", ", reasonsList)}");
+            Assert.IsTrue(reasonsList.Exists(reason => reason.Contains("Error: CMAB service error")),
+                $"Decision reasons should include CMAB service error text. Actual reasons: {string.Join(", ", reasonsList)}");
+
+            _cmabServiceMock.Verify(c => c.GetDecision(
+                It.IsAny<ProjectConfig>(),
+                It.IsAny<OptimizelyUserContext>(),
+                TEST_EXPERIMENT_ID,
+                It.IsAny<OptimizelyDecideOption[]>()
+            ), Times.Once);
+        }
+
+        /// <summary>
+        /// Verifies behavior when CMAB service returns an unknown variation ID
+        /// </summary>
+        [Test]
+        public void TestGetVariationWithCmabExperimentUnknownVariationId()
+        {
+            var experiment = CreateCmabExperiment(TEST_EXPERIMENT_ID, TEST_EXPERIMENT_KEY, 10000);
+            var userContext = _optimizely.CreateUserContext(TEST_USER_ID);
+
+            _bucketerMock.Setup(b => b.BucketToEntityId(
+                It.IsAny<ProjectConfig>(),
+                It.IsAny<Experiment>(),
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.IsAny<IEnumerable<TrafficAllocation>>()
+            )).Returns(Result<string>.NewResult("$", new DecisionReasons()));
+
+            const string unknownVariationId = "unknown_var";
+            _cmabServiceMock.Setup(c => c.GetDecision(
+                It.IsAny<ProjectConfig>(),
+                It.IsAny<OptimizelyUserContext>(),
+                TEST_EXPERIMENT_ID,
+                It.IsAny<OptimizelyDecideOption[]>()
+            )).Returns(new CmabDecision(unknownVariationId, TEST_CMAB_UUID));
+
+            var mockConfig = CreateMockConfig(experiment, null);
+
+            var result = _decisionService.GetVariation(experiment, userContext, mockConfig.Object);
+
+            Assert.IsNotNull(result);
+            Assert.IsNull(result.ResultObject);
+            Assert.IsNull(result.DecisionReasons.CmabUuid);
+
+            var reasons = result.DecisionReasons.ToReport(true);
+            var expectedMessage =
+                $"User [{TEST_USER_ID}] bucketed into invalid variation [{unknownVariationId}] for CMAB experiment [{TEST_EXPERIMENT_KEY}].";
+            Assert.Contains(expectedMessage, reasons);
+
+            _cmabServiceMock.Verify(c => c.GetDecision(
+                It.IsAny<ProjectConfig>(),
+                It.IsAny<OptimizelyUserContext>(),
+                TEST_EXPERIMENT_ID,
+                It.IsAny<OptimizelyDecideOption[]>()
+            ), Times.Once);
         }
 
         /// <summary>
@@ -178,9 +253,9 @@ namespace OptimizelySDK.Tests.CmabTests
         [Test]
         public void TestGetVariationWithCmabExperimentCacheHit()
         {
-            var experiment = CreateCmabExperiment(TEST_EXPERIMENT_ID, TEST_EXPERIMENT_KEY, 10000);
-            var userContext = _optimizely.CreateUserContext(TEST_USER_ID);
-            userContext.SetAttribute(AGE_ATTRIBUTE_KEY, 25);
+            var attributeIds = new List<string> { "age_attr_id" };
+            var experiment = CreateCmabExperiment(TEST_EXPERIMENT_ID, TEST_EXPERIMENT_KEY, 10000,
+                attributeIds);
             var variation = new Variation { Id = VARIATION_A_ID, Key = VARIATION_A_KEY };
 
             _bucketerMock.Setup(b => b.BucketToEntityId(
@@ -191,29 +266,55 @@ namespace OptimizelySDK.Tests.CmabTests
                 It.IsAny<IEnumerable<TrafficAllocation>>()
             )).Returns(Result<string>.NewResult("$", new DecisionReasons()));
 
-            _cmabServiceMock.Setup(c => c.GetDecision(
-                It.IsAny<ProjectConfig>(),
-                It.IsAny<OptimizelyUserContext>(),
-                TEST_EXPERIMENT_ID,
-                It.IsAny<OptimizelyDecideOption[]>()
-            )).Returns(new CmabDecision(VARIATION_A_ID, TEST_CMAB_UUID));
+            var attributeMap = new Dictionary<string, AttributeEntity>
+            {
+                { "age_attr_id", new AttributeEntity { Id = "age_attr_id", Key = AGE_ATTRIBUTE_KEY } }
+            };
+            var mockConfig = CreateMockConfig(experiment, variation, attributeMap);
 
-            var mockConfig = CreateMockConfig(experiment, variation);
+            var cmabClientMock = new Mock<ICmabClient>(MockBehavior.Strict);
+            cmabClientMock.Setup(c => c.FetchDecision(
+                    TEST_EXPERIMENT_ID,
+                    TEST_USER_ID,
+                    It.Is<IDictionary<string, object>>(attrs =>
+                        attrs.Count == 1 && attrs.ContainsKey(AGE_ATTRIBUTE_KEY) &&
+                        (int)attrs[AGE_ATTRIBUTE_KEY] == 25),
+                    It.IsAny<string>(),
+                    It.IsAny<TimeSpan?>()))
+                .Returns(VARIATION_A_ID);
 
-            var result1 = _decisionService.GetVariation(experiment, userContext, mockConfig.Object);
+            var cache = new LruCache<CmabCacheEntry>(maxSize: 10,
+                itemTimeout: TimeSpan.FromMinutes(5),
+                logger: new NoOpLogger());
+            var cmabService = new DefaultCmabService(cache, cmabClientMock.Object, new NoOpLogger());
+            var decisionService = new DecisionService(_bucketerMock.Object, _errorHandlerMock.Object,
+                null, _loggerMock.Object, cmabService);
 
-            var result2 = _decisionService.GetVariation(experiment, userContext, mockConfig.Object);
+            var userContext = _optimizely.CreateUserContext(TEST_USER_ID);
+            userContext.SetAttribute(AGE_ATTRIBUTE_KEY, 25);
+
+            var result1 = decisionService.GetVariation(experiment, userContext, mockConfig.Object);
+            var result2 = decisionService.GetVariation(experiment, userContext, mockConfig.Object);
 
             Assert.IsNotNull(result1.ResultObject);
             Assert.IsNotNull(result2.ResultObject);
             Assert.AreEqual(result1.ResultObject.Key, result2.ResultObject.Key);
+            Assert.IsNotNull(result1.DecisionReasons.CmabUuid);
+            Assert.AreEqual(result1.DecisionReasons.CmabUuid, result2.DecisionReasons.CmabUuid);
 
-            _cmabServiceMock.Verify(c => c.GetDecision(
-                It.IsAny<ProjectConfig>(),
-                It.IsAny<OptimizelyUserContext>(),
-                TEST_EXPERIMENT_ID,
-                It.IsAny<OptimizelyDecideOption[]>()
-            ), Times.AtLeastOnce);
+            cmabClientMock.Verify(c => c.FetchDecision(
+                    TEST_EXPERIMENT_ID,
+                    TEST_USER_ID,
+                    It.Is<IDictionary<string, object>>(attrs =>
+                        attrs.Count == 1 && (int)attrs[AGE_ATTRIBUTE_KEY] == 25),
+                    It.IsAny<string>(),
+                    It.IsAny<TimeSpan?>()),
+                Times.Once);
+
+            var reasons = result2.DecisionReasons.ToReport(true);
+            var expectedMessage =
+                $"CMAB decision fetched for user [{TEST_USER_ID}] in experiment [{TEST_EXPERIMENT_KEY}].";
+            Assert.Contains(expectedMessage, reasons);
         }
 
         /// <summary>
@@ -222,9 +323,15 @@ namespace OptimizelySDK.Tests.CmabTests
         [Test]
         public void TestGetVariationWithCmabExperimentCacheMissAttributesChanged()
         {
-            var experiment = CreateCmabExperiment(TEST_EXPERIMENT_ID, TEST_EXPERIMENT_KEY, 10000);
-            var userContext = _optimizely.CreateUserContext(TEST_USER_ID);
+            var attributeIds = new List<string> { "age_attr_id" };
+            var experiment = CreateCmabExperiment(TEST_EXPERIMENT_ID, TEST_EXPERIMENT_KEY, 10000,
+                attributeIds);
             var variation = new Variation { Id = VARIATION_A_ID, Key = VARIATION_A_KEY };
+            var attributeMap = new Dictionary<string, AttributeEntity>
+            {
+                { "age_attr_id", new AttributeEntity { Id = "age_attr_id", Key = AGE_ATTRIBUTE_KEY } }
+            };
+            var mockConfig = CreateMockConfig(experiment, variation, attributeMap);
 
             _bucketerMock.Setup(b => b.BucketToEntityId(
                 It.IsAny<ProjectConfig>(),
@@ -234,33 +341,52 @@ namespace OptimizelySDK.Tests.CmabTests
                 It.IsAny<IEnumerable<TrafficAllocation>>()
             )).Returns(Result<string>.NewResult("$", new DecisionReasons()));
 
-            _cmabServiceMock.Setup(c => c.GetDecision(
-                It.IsAny<ProjectConfig>(),
-                It.IsAny<OptimizelyUserContext>(),
-                TEST_EXPERIMENT_ID,
-                It.IsAny<OptimizelyDecideOption[]>()
-            )).Returns(new CmabDecision(VARIATION_A_ID, TEST_CMAB_UUID));
+            var cmabClientMock = new Mock<ICmabClient>(MockBehavior.Strict);
+            cmabClientMock.Setup(c => c.FetchDecision(
+                    TEST_EXPERIMENT_ID,
+                    TEST_USER_ID,
+                    It.Is<IDictionary<string, object>>(attrs => attrs.ContainsKey(AGE_ATTRIBUTE_KEY)),
+                    It.IsAny<string>(),
+                    It.IsAny<TimeSpan?>()))
+                .Returns(VARIATION_A_ID);
 
-            var mockConfig = CreateMockConfig(experiment, variation);
+            var cache = new LruCache<CmabCacheEntry>(maxSize: 10,
+                itemTimeout: TimeSpan.FromMinutes(5),
+                logger: new NoOpLogger());
+            var cmabService = new DefaultCmabService(cache, cmabClientMock.Object, new NoOpLogger());
+            var decisionService = new DecisionService(_bucketerMock.Object, _errorHandlerMock.Object,
+                null, _loggerMock.Object, cmabService);
 
-            // First call with age=25
+            var userContext = _optimizely.CreateUserContext(TEST_USER_ID);
+
             userContext.SetAttribute(AGE_ATTRIBUTE_KEY, 25);
-            var result1 = _decisionService.GetVariation(experiment, userContext, mockConfig.Object);
+            var result1 = decisionService.GetVariation(experiment, userContext, mockConfig.Object);
 
-            // Second call with age=30 (different attribute)
             userContext.SetAttribute(AGE_ATTRIBUTE_KEY, 30);
-            var result2 = _decisionService.GetVariation(experiment, userContext, mockConfig.Object);
+            var result2 = decisionService.GetVariation(experiment, userContext, mockConfig.Object);
 
             Assert.IsNotNull(result1.ResultObject);
             Assert.IsNotNull(result2.ResultObject);
+            Assert.IsNotNull(result1.DecisionReasons.CmabUuid);
+            Assert.IsNotNull(result2.DecisionReasons.CmabUuid);
+            Assert.AreNotEqual(result1.DecisionReasons.CmabUuid, result2.DecisionReasons.CmabUuid);
 
-            // CMAB service should be called twice (cache miss on attribute change)
-            _cmabServiceMock.Verify(c => c.GetDecision(
-                It.IsAny<ProjectConfig>(),
-                It.IsAny<OptimizelyUserContext>(),
-                TEST_EXPERIMENT_ID,
-                It.IsAny<OptimizelyDecideOption[]>()
-            ), Times.AtLeast(2));
+            cmabClientMock.Verify(c => c.FetchDecision(
+                    TEST_EXPERIMENT_ID,
+                    TEST_USER_ID,
+                    It.Is<IDictionary<string, object>>(attrs =>
+                        attrs.ContainsKey(AGE_ATTRIBUTE_KEY) && (int)attrs[AGE_ATTRIBUTE_KEY] == 25),
+                    It.IsAny<string>(),
+                    It.IsAny<TimeSpan?>()),
+                Times.Once);
+            cmabClientMock.Verify(c => c.FetchDecision(
+                    TEST_EXPERIMENT_ID,
+                    TEST_USER_ID,
+                    It.Is<IDictionary<string, object>>(attrs =>
+                        attrs.ContainsKey(AGE_ATTRIBUTE_KEY) && (int)attrs[AGE_ATTRIBUTE_KEY] == 30),
+                    It.IsAny<string>(),
+                    It.IsAny<TimeSpan?>()),
+                Times.Once);
         }
 
         /// <summary>
@@ -299,6 +425,7 @@ namespace OptimizelySDK.Tests.CmabTests
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.ResultObject);
             Assert.AreEqual(VARIATION_A_KEY, result.ResultObject.Key);
+            Assert.AreEqual(TEST_CMAB_UUID, result.DecisionReasons.CmabUuid);
         }
 
         /// <summary>
@@ -340,6 +467,7 @@ namespace OptimizelySDK.Tests.CmabTests
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.ResultObject);
             Assert.IsTrue(result.ResultObject.FeatureEnabled == true);
+            Assert.AreEqual(TEST_CMAB_UUID, result.DecisionReasons.CmabUuid);
         }
 
         /// <summary>
@@ -348,17 +476,16 @@ namespace OptimizelySDK.Tests.CmabTests
         [Test]
         public void TestGetDecisionForCmabExperimentAttributeFiltering()
         {
-            // Arrange
-            var attributeIds = new List<string> { "age_attr_id" };
+            var attributeIds = new List<string> { "age_attr_id", "location_attr_id" };
             var experiment = CreateCmabExperiment(TEST_EXPERIMENT_ID, TEST_EXPERIMENT_KEY, 10000,
                 attributeIds);
-
-            var userContext = _optimizely.CreateUserContext(TEST_USER_ID);
-            userContext.SetAttribute("age", 25);
-            userContext.SetAttribute("location", "USA"); // Should be filtered out
-            userContext.SetAttribute("extra", "value"); // Should be filtered out
-
             var variation = new Variation { Id = VARIATION_A_ID, Key = VARIATION_A_KEY };
+            var attributeMap = new Dictionary<string, AttributeEntity>
+            {
+                { "age_attr_id", new AttributeEntity { Id = "age_attr_id", Key = "age" } },
+                { "location_attr_id", new AttributeEntity { Id = "location_attr_id", Key = "location" } }
+            };
+            var mockConfig = CreateMockConfig(experiment, variation, attributeMap);
 
             _bucketerMock.Setup(b => b.BucketToEntityId(
                 It.IsAny<ProjectConfig>(),
@@ -368,73 +495,85 @@ namespace OptimizelySDK.Tests.CmabTests
                 It.IsAny<IEnumerable<TrafficAllocation>>()
             )).Returns(Result<string>.NewResult("$", new DecisionReasons()));
 
-            _cmabServiceMock.Setup(c => c.GetDecision(
-                It.IsAny<ProjectConfig>(),
-                It.IsAny<OptimizelyUserContext>(),
-                TEST_EXPERIMENT_ID,
-                It.IsAny<OptimizelyDecideOption[]>()
-            )).Returns(new CmabDecision(VARIATION_A_ID, TEST_CMAB_UUID));
+            var cmabClientMock = new Mock<ICmabClient>(MockBehavior.Strict);
+            cmabClientMock.Setup(c => c.FetchDecision(
+                    TEST_EXPERIMENT_ID,
+                    TEST_USER_ID,
+                    It.Is<IDictionary<string, object>>(attrs =>
+                        attrs.Count == 2 && (int)attrs["age"] == 25 &&
+                        (string)attrs["location"] == "USA" &&
+                        !attrs.ContainsKey("extra")),
+                    It.IsAny<string>(),
+                    It.IsAny<TimeSpan?>()))
+                .Returns(VARIATION_A_ID);
 
-            var mockConfig = CreateMockConfig(experiment, variation);
+            var cache = new LruCache<CmabCacheEntry>(maxSize: 10,
+                itemTimeout: TimeSpan.FromMinutes(5),
+                logger: new NoOpLogger());
+            var cmabService = new DefaultCmabService(cache, cmabClientMock.Object, new NoOpLogger());
+            var decisionService = new DecisionService(_bucketerMock.Object, _errorHandlerMock.Object,
+                null, _loggerMock.Object, cmabService);
 
-            var result = _decisionService.GetVariation(experiment, userContext, mockConfig.Object);
+            var userContext = _optimizely.CreateUserContext(TEST_USER_ID);
+            userContext.SetAttribute("age", 25);
+            userContext.SetAttribute("location", "USA");
+            userContext.SetAttribute("extra", "value");
+
+            var result = decisionService.GetVariation(experiment, userContext, mockConfig.Object);
 
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.ResultObject);
+            Assert.IsNotNull(result.DecisionReasons.CmabUuid);
 
-            // Verify CMAB service was called (attribute filtering happens inside service)
-            _cmabServiceMock.Verify(c => c.GetDecision(
-                It.IsAny<ProjectConfig>(),
-                It.IsAny<OptimizelyUserContext>(),
-                TEST_EXPERIMENT_ID,
-                It.IsAny<OptimizelyDecideOption[]>()
-            ), Times.Once);
+            cmabClientMock.VerifyAll();
         }
 
-        /// <summary>
-        /// Verifies all attributes are sent when no attributeIds specified
-        /// </summary>
+    /// <summary>
+    /// Verifies CMAB service receives an empty attribute payload when no CMAB attribute IDs are configured
+    /// </summary>
         [Test]
         public void TestGetDecisionForCmabExperimentNoAttributeIds()
         {
             var experiment = CreateCmabExperiment(TEST_EXPERIMENT_ID, TEST_EXPERIMENT_KEY, 10000,
-                null); // No attribute filtering
+                null);
+            var variation = new Variation { Id = VARIATION_A_ID, Key = VARIATION_A_KEY };
+            var mockConfig = CreateMockConfig(experiment, variation, new Dictionary<string, AttributeEntity>());
+
+            _bucketerMock.Setup(b => b.BucketToEntityId(
+                It.IsAny<ProjectConfig>(),
+                It.IsAny<Experiment>(),
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.IsAny<IEnumerable<TrafficAllocation>>()
+            )).Returns(Result<string>.NewResult("$", new DecisionReasons()));
+
+            var cmabClientMock = new Mock<ICmabClient>(MockBehavior.Strict);
+            cmabClientMock.Setup(c => c.FetchDecision(
+                    TEST_EXPERIMENT_ID,
+                    TEST_USER_ID,
+                    It.Is<IDictionary<string, object>>(attrs => attrs.Count == 0),
+                    It.IsAny<string>(),
+                    It.IsAny<TimeSpan?>()))
+                .Returns(VARIATION_A_ID);
+
+            var cache = new LruCache<CmabCacheEntry>(maxSize: 10,
+                itemTimeout: TimeSpan.FromMinutes(5),
+                logger: new NoOpLogger());
+            var cmabService = new DefaultCmabService(cache, cmabClientMock.Object, new NoOpLogger());
+            var decisionService = new DecisionService(_bucketerMock.Object, _errorHandlerMock.Object,
+                null, _loggerMock.Object, cmabService);
 
             var userContext = _optimizely.CreateUserContext(TEST_USER_ID);
             userContext.SetAttribute("age", 25);
             userContext.SetAttribute("location", "USA");
 
-            var variation = new Variation { Id = VARIATION_A_ID, Key = VARIATION_A_KEY };
-
-            _bucketerMock.Setup(b => b.BucketToEntityId(
-                It.IsAny<ProjectConfig>(),
-                It.IsAny<Experiment>(),
-                It.IsAny<string>(),
-                It.IsAny<string>(),
-                It.IsAny<IEnumerable<TrafficAllocation>>()
-            )).Returns(Result<string>.NewResult("$", new DecisionReasons()));
-
-            _cmabServiceMock.Setup(c => c.GetDecision(
-                It.IsAny<ProjectConfig>(),
-                It.IsAny<OptimizelyUserContext>(),
-                TEST_EXPERIMENT_ID,
-                It.IsAny<OptimizelyDecideOption[]>()
-            )).Returns(new CmabDecision(VARIATION_A_ID, TEST_CMAB_UUID));
-
-            var mockConfig = CreateMockConfig(experiment, variation);
-
-            var result = _decisionService.GetVariation(experiment, userContext, mockConfig.Object);
+            var result = decisionService.GetVariation(experiment, userContext, mockConfig.Object);
 
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.ResultObject);
+            Assert.IsNotNull(result.DecisionReasons.CmabUuid);
 
-            // Verify CMAB service was called with all attributes
-            _cmabServiceMock.Verify(c => c.GetDecision(
-                It.IsAny<ProjectConfig>(),
-                It.IsAny<OptimizelyUserContext>(),
-                TEST_EXPERIMENT_ID,
-                It.IsAny<OptimizelyDecideOption[]>()
-            ), Times.Once);
+            cmabClientMock.VerifyAll();
         }
 
         /// <summary>
@@ -498,7 +637,8 @@ namespace OptimizelySDK.Tests.CmabTests
         /// <summary>
         /// Creates a mock ProjectConfig with the experiment and variation
         /// </summary>
-        private Mock<ProjectConfig> CreateMockConfig(Experiment experiment, Variation variation)
+        private Mock<ProjectConfig> CreateMockConfig(Experiment experiment, Variation variation,
+            Dictionary<string, AttributeEntity> attributeMap = null)
         {
             var mockConfig = new Mock<ProjectConfig>();
 
@@ -509,6 +649,7 @@ namespace OptimizelySDK.Tests.CmabTests
 
             mockConfig.Setup(c => c.ExperimentIdMap).Returns(experimentMap);
             mockConfig.Setup(c => c.GetExperimentFromKey(experiment.Key)).Returns(experiment);
+            mockConfig.Setup(c => c.GetExperimentFromId(experiment.Id)).Returns(experiment);
 
             if (variation != null)
             {
@@ -516,7 +657,8 @@ namespace OptimizelySDK.Tests.CmabTests
                     variation.Id)).Returns(variation);
             }
 
-            mockConfig.Setup(c => c.AttributeIdMap).Returns(new Dictionary<string, Entity.Attribute>());
+            mockConfig.Setup(c => c.AttributeIdMap)
+                .Returns(attributeMap ?? new Dictionary<string, AttributeEntity>());
 
             return mockConfig;
         }
