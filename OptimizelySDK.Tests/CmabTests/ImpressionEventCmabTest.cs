@@ -207,12 +207,9 @@ namespace OptimizelySDK.Tests.CmabTests
 
             Assert.IsNotNull(metadata);
 
-			// Todo: If in test code is not acceptable
-            // Verify cmab_uuid is either not present or is null
-            if (metadata.ContainsKey("cmab_uuid"))
-            {
-                Assert.IsTrue(metadata["cmab_uuid"].Type == JTokenType.Null);
-            }
+            Assert.IsFalse(metadata.ContainsKey("cmab_uuid") &&
+                            metadata["cmab_uuid"].Type != JTokenType.Null,
+                "cmab_uuid should be absent or null when no CMAB UUID is provided.");
         }
     }
 }

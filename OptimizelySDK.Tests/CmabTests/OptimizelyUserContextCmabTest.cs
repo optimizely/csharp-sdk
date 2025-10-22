@@ -137,6 +137,40 @@ namespace OptimizelySDK.Tests.CmabTests
         }
 
         /// <summary>
+        /// Verifies IsFeatureEnabled sends impression event including CMAB UUID in metadata
+        /// </summary>
+        [Test]
+        public void TestIsFeatureEnabledDispatchesCmabUuidInImpressionEvent()
+        {
+            LogEvent impressionEvent = null;
+
+            _eventDispatcherMock.Setup(d => d.DispatchEvent(It.IsAny<LogEvent>()))
+                .Callback<LogEvent>(e => impressionEvent = e);
+
+            var attributes = new UserAttributes
+            {
+                { DEVICE_TYPE_ATTRIBUTE_KEY, "mobile" },
+                { BROWSER_TYPE_ATTRIBUTE_KEY, "chrome" },
+            };
+
+            var featureEnabled = _optimizely.IsFeatureEnabled(TEST_FEATURE_KEY, TEST_USER_ID,
+                attributes);
+
+            Assert.IsTrue(featureEnabled, "Feature flag should be enabled for CMAB variation.");
+            _eventDispatcherMock.Verify(d => d.DispatchEvent(It.IsAny<LogEvent>()), Times.Once,
+                "Impression event should be dispatched for IsFeatureEnabled calls.");
+            Assert.IsNotNull(impressionEvent, "Impression event should be captured.");
+
+            var payload = JObject.Parse(impressionEvent.GetParamsAsJson());
+            var cmabUuidToken =
+                payload.SelectToken("visitors[0].snapshots[0].decisions[0].metadata.cmab_uuid");
+
+            Assert.IsNotNull(cmabUuidToken, "Metadata should include CMAB UUID.");
+            Assert.AreEqual(TEST_CMAB_UUID, cmabUuidToken.Value<string>());
+            Assert.AreEqual(1, _cmabService.CallCount);
+        }
+
+        /// <summary>
         /// Verifies no impression event sent when DISABLE_DECISION_EVENT option is used
         /// </summary>
         [Test]

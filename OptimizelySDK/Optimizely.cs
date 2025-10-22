@@ -632,7 +632,11 @@ namespace OptimizelySDK
             };
 
             SendImpressionEvent(decision?.Experiment, variation, userId, userAttributes, config,
-                featureKey, decisionSource, featureEnabled);
+                featureKey, decisionSource, featureEnabled
+#if USE_CMAB
+                , decision?.CmabUuid
+#endif
+            );
 
             NotificationCenter.SendNotifications(NotificationCenter.NotificationType.Decision,
                 DecisionNotificationTypes.FEATURE, userId,
