@@ -549,8 +549,7 @@ namespace OptimizelySDK.Tests.CmabTests
             public bool ReturnNullNext { get; set; }
 
             public Func<ProjectConfig, OptimizelyUserContext, string, OptimizelyDecideOption[],
-                    CmabDecision>
-                Handler { get; set; }
+                CmabDecision> Handler { get; set; }
 
             public void EnqueueDecision(CmabDecision decision)
             {
