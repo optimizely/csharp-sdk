@@ -528,9 +528,10 @@ namespace OptimizelySDK.Tests.CmabTests
             cmabClientMock.VerifyAll();
         }
 
-    /// <summary>
-    /// Verifies CMAB service receives an empty attribute payload when no CMAB attribute IDs are configured
-    /// </summary>
+        /// <summary>
+        ///     Verifies CMAB service receives an empty attribute payload when no CMAB attribute IDs are
+        ///     configured
+        /// </summary>
         [Test]
         public void TestGetDecisionForCmabExperimentNoAttributeIds()
         {

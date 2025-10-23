@@ -40,9 +40,9 @@ namespace OptimizelySDK.Tests.CmabTests
     public class OptimizelyUserContextCmabTest
     {
         private Mock<ILogger> _loggerMock;
-    private Mock<IErrorHandler> _errorHandlerMock;
-    private Mock<IEventDispatcher> _eventDispatcherMock;
-    private TestCmabService _cmabService;
+        private Mock<IErrorHandler> _errorHandlerMock;
+        private Mock<IEventDispatcher> _eventDispatcherMock;
+        private TestCmabService _cmabService;
         private Mock<TestNotificationCallbacks> _notificationCallbackMock;
         private Optimizely _optimizely;
         private ProjectConfig _config;
@@ -548,7 +548,8 @@ namespace OptimizelySDK.Tests.CmabTests
 
             public bool ReturnNullNext { get; set; }
 
-            public Func<ProjectConfig, OptimizelyUserContext, string, OptimizelyDecideOption[], CmabDecision>
+            public Func<ProjectConfig, OptimizelyUserContext, string, OptimizelyDecideOption[],
+                    CmabDecision>
                 Handler { get; set; }
 
             public void EnqueueDecision(CmabDecision decision)

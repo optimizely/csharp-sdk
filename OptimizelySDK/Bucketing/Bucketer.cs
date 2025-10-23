@@ -160,7 +160,7 @@ namespace OptimizelySDK.Bucketing
 
             // Bucket user with provided traffic allocations
             var entityId = FindBucket(bucketingId, userId, experiment.Id, trafficAllocations);
-            
+
             if (string.IsNullOrEmpty(entityId))
             {
                 return Result<string>.NullResult(reasons);

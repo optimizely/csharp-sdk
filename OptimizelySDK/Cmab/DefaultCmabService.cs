@@ -110,16 +110,15 @@ namespace OptimizelySDK.Cmab
         /// <param name="logger">Optional logger for recording service operations.</param>
         public DefaultCmabService(CmabConfig cmabConfig = null,
             ICmabClient cmabClient = null,
-            ILogger logger = null)
+            ILogger logger = null
+        )
         {
             _logger = logger ?? new NoOpLogger();
-            
-            // Create cache based on configuration
+
             var config = cmabConfig ?? new CmabConfig();
-            
+
             if (config.CustomCache != null)
             {
-                // Use custom cache if provided
                 _cmabCache = config.CustomCache as LruCache<CmabCacheEntry>;
                 if (_cmabCache == null)
                 {
@@ -129,17 +128,16 @@ namespace OptimizelySDK.Cmab
             }
             else
             {
-                // Use default or configured cache size and TTL
                 var cacheSize = config.CacheSize ?? CmabConstants.DEFAULT_CACHE_SIZE;
                 var cacheTtl = config.CacheTtl ?? CmabConstants.DEFAULT_CACHE_TTL;
                 _cmabCache = new LruCache<CmabCacheEntry>(cacheSize, cacheTtl, _logger);
             }
-            
+
             // Create client if not provided
             if (cmabClient == null)
             {
-                var cmabRetryConfig = new CmabRetryConfig(maxRetries: 1,
-                    initialBackoff: TimeSpan.FromMilliseconds(100));
+                var cmabRetryConfig = new CmabRetryConfig(1,
+                    TimeSpan.FromMilliseconds(100));
                 _cmabClient = new DefaultCmabClient(null, cmabRetryConfig, _logger);
             }
             else
