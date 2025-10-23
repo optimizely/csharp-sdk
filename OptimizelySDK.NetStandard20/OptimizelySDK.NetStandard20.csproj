@@ -199,6 +199,9 @@
     <Compile Include="..\OptimizelySDK\Cmab\CmabRetryConfig.cs">
       <Link>Cmab\CmabRetryConfig.cs</Link>
     </Compile>
+    <Compile Include="..\OptimizelySDK\Cmab\CmabConfig.cs">
+      <Link>Cmab\CmabConfig.cs</Link>
+    </Compile>
     <Compile Include="..\OptimizelySDK\Cmab\CmabModels.cs">
       <Link>Cmab\CmabModels.cs</Link>
     </Compile>

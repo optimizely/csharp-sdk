@@ -198,6 +198,7 @@ namespace OptimizelySDK
         /// <param name="eventProcessor">EventProcessor</param>
         /// <param name="defaultDecideOptions">Default Decide options</param>
         /// <param name="odpManager">Optional ODP Manager</param>
+        /// <param name="cmabConfig">Optional CMAB Configuration</param>
         public Optimizely(ProjectConfigManager configManager,
             NotificationCenter notificationCenter = null,
             IEventDispatcher eventDispatcher = null,
@@ -209,13 +210,22 @@ namespace OptimizelySDK
 #if USE_ODP
             , IOdpManager odpManager = null
 #endif
+#if USE_CMAB
+            , CmabConfig cmabConfig = null
+#endif
         )
         {
             ProjectConfigManager = configManager;
 
-#if USE_ODP
+#if USE_ODP && USE_CMAB
+            InitializeComponents(eventDispatcher, logger, errorHandler, userProfileService,
+                notificationCenter, eventProcessor, defaultDecideOptions, odpManager, null, cmabConfig);
+#elif USE_ODP
             InitializeComponents(eventDispatcher, logger, errorHandler, userProfileService,
                 notificationCenter, eventProcessor, defaultDecideOptions, odpManager);
+#elif USE_CMAB
+            InitializeComponents(eventDispatcher, logger, errorHandler, userProfileService,
+                notificationCenter, eventProcessor, defaultDecideOptions, null, cmabConfig);
 
             var projectConfig = ProjectConfigManager.CachedProjectConfig;
 
@@ -242,7 +252,11 @@ namespace OptimizelySDK
 
 #else
             InitializeComponents(eventDispatcher, logger, errorHandler, userProfileService,
-                notificationCenter, eventProcessor, defaultDecideOptions);
+                notificationCenter, eventProcessor, defaultDecideOptions
+#if USE_CMAB
+                , null, cmabConfig
+#endif
+                );
 #endif
         }
 
@@ -259,6 +273,7 @@ namespace OptimizelySDK
 #endif
 #if USE_CMAB
             , ICmabService cmabService = null
+            , CmabConfig cmabConfig = null
 #endif
         )
         {
@@ -277,10 +292,8 @@ namespace OptimizelySDK
             {
                 try
                 {
-                    // Create default CMAB cache (30 minutes timeout, 1000 entries)
-                    var cmabCache = new LruCache<CmabCacheEntry>(1000, TimeSpan.FromSeconds(30 * 60));
-                    var cmabClient = new DefaultCmabClient(null, null, Logger);
-                    effectiveCmabService = new DefaultCmabService(cmabCache, cmabClient, Logger);
+                    // Create CMAB service with configuration
+                    effectiveCmabService = new DefaultCmabService(cmabConfig, null, Logger);
                 }
                 catch (Exception ex)
                 {

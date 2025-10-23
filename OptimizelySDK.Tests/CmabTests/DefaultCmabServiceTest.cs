@@ -1,18 +1,18 @@
-﻿/* 
-* Copyright 2025, Optimizely
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+﻿/*
+ * Copyright 2025, Optimizely
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 using System;
 using System.Collections.Generic;
@@ -25,6 +25,7 @@ using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Logger;
 using OptimizelySDK.Odp;
 using OptimizelySDK.OptimizelyDecisions;
+using OptimizelySDK.Tests.Utils;
 using AttributeEntity = OptimizelySDK.Entity.Attribute;
 
 namespace OptimizelySDK.Tests.CmabTests
@@ -32,6 +33,19 @@ namespace OptimizelySDK.Tests.CmabTests
     [TestFixture]
     public class DefaultCmabServiceTest
     {
+        [SetUp]
+        public void SetUp()
+        {
+            _mockCmabClient = new Mock<ICmabClient>(MockBehavior.Strict);
+            _logger = new NoOpLogger();
+            _cmabCache = new LruCache<CmabCacheEntry>(10, TimeSpan.FromMinutes(5), _logger);
+            _cmabService = new DefaultCmabService(_cmabCache, _mockCmabClient.Object, _logger);
+
+            _config = DatafileProjectConfig.Create(TestData.Datafile, _logger,
+                new NoOpErrorHandler());
+            _optimizely = new Optimizely(TestData.Datafile, null, _logger, new NoOpErrorHandler());
+        }
+
         private Mock<ICmabClient> _mockCmabClient;
         private LruCache<CmabCacheEntry> _cmabCache;
         private DefaultCmabService _cmabService;
@@ -44,44 +58,37 @@ namespace OptimizelySDK.Tests.CmabTests
         private const string AGE_ATTRIBUTE_ID = "66";
         private const string LOCATION_ATTRIBUTE_ID = "77";
 
-        [SetUp]
-        public void SetUp()
-        {
-            _mockCmabClient = new Mock<ICmabClient>(MockBehavior.Strict);
-            _logger = new NoOpLogger();
-            _cmabCache = new LruCache<CmabCacheEntry>(maxSize: 10, itemTimeout: TimeSpan.FromMinutes(5), logger: _logger);
-            _cmabService = new DefaultCmabService(_cmabCache, _mockCmabClient.Object, _logger);
-
-            _config = DatafileProjectConfig.Create(TestData.Datafile, _logger, new NoOpErrorHandler());
-            _optimizely = new Optimizely(TestData.Datafile, null, _logger, new NoOpErrorHandler());
-        }
-
         [Test]
         public void ReturnsDecisionFromCacheWhenHashMatches()
         {
             var experiment = CreateExperiment(TEST_RULE_ID, new List<string> { AGE_ATTRIBUTE_ID });
             var attributeMap = new Dictionary<string, AttributeEntity>
             {
-                { AGE_ATTRIBUTE_ID, new AttributeEntity { Id = AGE_ATTRIBUTE_ID, Key = "age" } }
+                { AGE_ATTRIBUTE_ID, new AttributeEntity { Id = AGE_ATTRIBUTE_ID, Key = "age" } },
             };
             var projectConfig = CreateProjectConfig(TEST_RULE_ID, experiment, attributeMap);
-            var userContext = CreateUserContext(TEST_USER_ID, new Dictionary<string, object> { { "age", 25 } });
-            var filteredAttributes = new UserAttributes(new Dictionary<string, object> { { "age", 25 } });
+            var userContext = CreateUserContext(TEST_USER_ID,
+                new Dictionary<string, object> { { "age", 25 } });
+            var filteredAttributes =
+                new UserAttributes(new Dictionary<string, object> { { "age", 25 } });
             var cacheKey = DefaultCmabService.GetCacheKey(TEST_USER_ID, TEST_RULE_ID);
 
             _cmabCache.Save(cacheKey, new CmabCacheEntry
             {
                 AttributesHash = DefaultCmabService.HashAttributes(filteredAttributes),
                 CmabUuid = "uuid-cached",
-                VariationId = "varA"
+                VariationId = "varA",
             });
 
-            var decision = _cmabService.GetDecision(projectConfig, userContext, TEST_RULE_ID, null);
+            var decision = _cmabService.GetDecision(projectConfig, userContext, TEST_RULE_ID);
 
             Assert.IsNotNull(decision);
             Assert.AreEqual("varA", decision.VariationId);
             Assert.AreEqual("uuid-cached", decision.CmabUuid);
-            _mockCmabClient.Verify(c => c.FetchDecision(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IDictionary<string, object>>(), It.IsAny<string>(), It.IsAny<TimeSpan?>()), Times.Never);
+            _mockCmabClient.Verify(
+                c => c.FetchDecision(It.IsAny<string>(), It.IsAny<string>(),
+                    It.IsAny<IDictionary<string, object>>(), It.IsAny<string>(),
+                    It.IsAny<TimeSpan?>()), Times.Never);
         }
 
         [Test]
@@ -90,14 +97,17 @@ namespace OptimizelySDK.Tests.CmabTests
             var experiment = CreateExperiment(TEST_RULE_ID, new List<string> { AGE_ATTRIBUTE_ID });
             var attributeMap = new Dictionary<string, AttributeEntity>
             {
-                { AGE_ATTRIBUTE_ID, new AttributeEntity { Id = AGE_ATTRIBUTE_ID, Key = "age" } }
+                { AGE_ATTRIBUTE_ID, new AttributeEntity { Id = AGE_ATTRIBUTE_ID, Key = "age" } },
             };
             var projectConfig = CreateProjectConfig(TEST_RULE_ID, experiment, attributeMap);
-            var userContext = CreateUserContext(TEST_USER_ID, new Dictionary<string, object> { { "age", 25 } });
+            var userContext = CreateUserContext(TEST_USER_ID,
+                new Dictionary<string, object> { { "age", 25 } });
             var cacheKey = DefaultCmabService.GetCacheKey(TEST_USER_ID, TEST_RULE_ID);
 
             _mockCmabClient.Setup(c => c.FetchDecision(TEST_RULE_ID, TEST_USER_ID,
-                It.Is<IDictionary<string, object>>(attrs => attrs != null && attrs.Count == 1 && attrs.ContainsKey("age") && (int)attrs["age"] == 25),
+                It.Is<IDictionary<string, object>>(attrs =>
+                    attrs != null && attrs.Count == 1 && attrs.ContainsKey("age") &&
+                    (int)attrs["age"] == 25),
                 It.IsAny<string>(),
                 It.IsAny<TimeSpan?>())).Returns("varB");
 
@@ -116,21 +126,23 @@ namespace OptimizelySDK.Tests.CmabTests
             var experiment = CreateExperiment(TEST_RULE_ID, new List<string> { AGE_ATTRIBUTE_ID });
             var attributeMap = new Dictionary<string, AttributeEntity>
             {
-                { AGE_ATTRIBUTE_ID, new AttributeEntity { Id = AGE_ATTRIBUTE_ID, Key = "age" } }
+                { AGE_ATTRIBUTE_ID, new AttributeEntity { Id = AGE_ATTRIBUTE_ID, Key = "age" } },
             };
             var projectConfig = CreateProjectConfig(TEST_RULE_ID, experiment, attributeMap);
-            var userContext = CreateUserContext(TEST_USER_ID, new Dictionary<string, object> { { "age", 25 } });
+            var userContext = CreateUserContext(TEST_USER_ID,
+                new Dictionary<string, object> { { "age", 25 } });
             var cacheKey = DefaultCmabService.GetCacheKey(TEST_USER_ID, TEST_RULE_ID);
 
             _cmabCache.Save(cacheKey, new CmabCacheEntry
             {
                 AttributesHash = "stale",
                 CmabUuid = "uuid-old",
-                VariationId = "varOld"
+                VariationId = "varOld",
             });
 
             _mockCmabClient.Setup(c => c.FetchDecision(TEST_RULE_ID, TEST_USER_ID,
-                It.Is<IDictionary<string, object>>(attrs => attrs.Count == 1 && (int)attrs["age"] == 25),
+                It.Is<IDictionary<string, object>>(attrs =>
+                    attrs.Count == 1 && (int)attrs["age"] == 25),
                 It.IsAny<string>(),
                 It.IsAny<TimeSpan?>())).Returns("varNew");
 
@@ -153,10 +165,11 @@ namespace OptimizelySDK.Tests.CmabTests
             var experiment = CreateExperiment(TEST_RULE_ID, new List<string> { AGE_ATTRIBUTE_ID });
             var attributeMap = new Dictionary<string, AttributeEntity>
             {
-                { AGE_ATTRIBUTE_ID, new AttributeEntity { Id = AGE_ATTRIBUTE_ID, Key = "age" } }
+                { AGE_ATTRIBUTE_ID, new AttributeEntity { Id = AGE_ATTRIBUTE_ID, Key = "age" } },
             };
             var projectConfig = CreateProjectConfig(TEST_RULE_ID, experiment, attributeMap);
-            var userContext = CreateUserContext(TEST_USER_ID, new Dictionary<string, object> { { "age", 25 } });
+            var userContext = CreateUserContext(TEST_USER_ID,
+                new Dictionary<string, object> { { "age", 25 } });
 
             var targetKey = DefaultCmabService.GetCacheKey(TEST_USER_ID, TEST_RULE_ID);
             var otherKey = DefaultCmabService.GetCacheKey(otherUserId, TEST_RULE_ID);
@@ -165,17 +178,18 @@ namespace OptimizelySDK.Tests.CmabTests
             {
                 AttributesHash = "old_hash",
                 CmabUuid = "uuid-old",
-                VariationId = "varOld"
+                VariationId = "varOld",
             });
             _cmabCache.Save(otherKey, new CmabCacheEntry
             {
                 AttributesHash = "other_hash",
                 CmabUuid = "uuid-other",
-                VariationId = "varOther"
+                VariationId = "varOther",
             });
 
             _mockCmabClient.Setup(c => c.FetchDecision(TEST_RULE_ID, TEST_USER_ID,
-                It.Is<IDictionary<string, object>>(attrs => attrs.Count == 1 && (int)attrs["age"] == 25),
+                It.Is<IDictionary<string, object>>(attrs =>
+                    attrs.Count == 1 && (int)attrs["age"] == 25),
                 It.IsAny<string>(),
                 It.IsAny<TimeSpan?>())).Returns("varNew");
 
@@ -201,25 +215,27 @@ namespace OptimizelySDK.Tests.CmabTests
             var experiment = CreateExperiment(TEST_RULE_ID, new List<string> { AGE_ATTRIBUTE_ID });
             var attributeMap = new Dictionary<string, AttributeEntity>
             {
-                { AGE_ATTRIBUTE_ID, new AttributeEntity { Id = AGE_ATTRIBUTE_ID, Key = "age" } }
+                { AGE_ATTRIBUTE_ID, new AttributeEntity { Id = AGE_ATTRIBUTE_ID, Key = "age" } },
             };
             var projectConfig = CreateProjectConfig(TEST_RULE_ID, experiment, attributeMap);
-            var userContext = CreateUserContext(TEST_USER_ID, new Dictionary<string, object> { { "age", 25 } });
+            var userContext = CreateUserContext(TEST_USER_ID,
+                new Dictionary<string, object> { { "age", 25 } });
 
             var cacheKey = DefaultCmabService.GetCacheKey(TEST_USER_ID, TEST_RULE_ID);
             _cmabCache.Save(cacheKey, new CmabCacheEntry
             {
                 AttributesHash = "different_hash",
                 CmabUuid = "uuid-old",
-                VariationId = "varOld"
+                VariationId = "varOld",
             });
 
             _mockCmabClient.Setup(c => c.FetchDecision(TEST_RULE_ID, TEST_USER_ID,
-                It.Is<IDictionary<string, object>>(attrs => attrs.Count == 1 && (int)attrs["age"] == 25),
+                It.Is<IDictionary<string, object>>(attrs =>
+                    attrs.Count == 1 && (int)attrs["age"] == 25),
                 It.IsAny<string>(),
                 It.IsAny<TimeSpan?>())).Returns("varUpdated");
 
-            var decision = _cmabService.GetDecision(projectConfig, userContext, TEST_RULE_ID, null);
+            var decision = _cmabService.GetDecision(projectConfig, userContext, TEST_RULE_ID);
 
             Assert.IsNotNull(decision);
             Assert.AreEqual("varUpdated", decision.VariationId);
@@ -233,18 +249,22 @@ namespace OptimizelySDK.Tests.CmabTests
         [Test]
         public void FiltersAttributesBeforeCallingClient()
         {
-            var experiment = CreateExperiment(TEST_RULE_ID, new List<string> { AGE_ATTRIBUTE_ID, LOCATION_ATTRIBUTE_ID });
+            var experiment = CreateExperiment(TEST_RULE_ID,
+                new List<string> { AGE_ATTRIBUTE_ID, LOCATION_ATTRIBUTE_ID });
             var attributeMap = new Dictionary<string, AttributeEntity>
             {
                 { AGE_ATTRIBUTE_ID, new AttributeEntity { Id = AGE_ATTRIBUTE_ID, Key = "age" } },
-                { LOCATION_ATTRIBUTE_ID, new AttributeEntity { Id = LOCATION_ATTRIBUTE_ID, Key = "location" } }
+                {
+                    LOCATION_ATTRIBUTE_ID,
+                    new AttributeEntity { Id = LOCATION_ATTRIBUTE_ID, Key = "location" }
+                },
             };
             var projectConfig = CreateProjectConfig(TEST_RULE_ID, experiment, attributeMap);
             var userContext = CreateUserContext(TEST_USER_ID, new Dictionary<string, object>
             {
                 { "age", 25 },
                 { "location", "USA" },
-                { "extra", "value" }
+                { "extra", "value" },
             });
 
             _mockCmabClient.Setup(c => c.FetchDecision(TEST_RULE_ID, TEST_USER_ID,
@@ -255,7 +275,7 @@ namespace OptimizelySDK.Tests.CmabTests
                 It.IsAny<string>(),
                 It.IsAny<TimeSpan?>())).Returns("varFiltered");
 
-            var decision = _cmabService.GetDecision(projectConfig, userContext, TEST_RULE_ID, null);
+            var decision = _cmabService.GetDecision(projectConfig, userContext, TEST_RULE_ID);
 
             Assert.IsNotNull(decision);
             Assert.AreEqual("varFiltered", decision.VariationId);
@@ -268,14 +288,15 @@ namespace OptimizelySDK.Tests.CmabTests
             var experiment = CreateExperiment(TEST_RULE_ID, null);
             var attributeMap = new Dictionary<string, AttributeEntity>();
             var projectConfig = CreateProjectConfig(TEST_RULE_ID, experiment, attributeMap);
-            var userContext = CreateUserContext(TEST_USER_ID, new Dictionary<string, object> { { "age", 25 } });
+            var userContext = CreateUserContext(TEST_USER_ID,
+                new Dictionary<string, object> { { "age", 25 } });
 
             _mockCmabClient.Setup(c => c.FetchDecision(TEST_RULE_ID, TEST_USER_ID,
                 It.Is<IDictionary<string, object>>(attrs => attrs.Count == 0),
                 It.IsAny<string>(),
                 It.IsAny<TimeSpan?>())).Returns("varDefault");
 
-            var decision = _cmabService.GetDecision(projectConfig, userContext, TEST_RULE_ID, null);
+            var decision = _cmabService.GetDecision(projectConfig, userContext, TEST_RULE_ID);
 
             Assert.IsNotNull(decision);
             Assert.AreEqual("varDefault", decision.VariationId);
@@ -285,18 +306,22 @@ namespace OptimizelySDK.Tests.CmabTests
         [Test]
         public void AttributeHashIsStableRegardlessOfOrder()
         {
-            var experiment = CreateExperiment(TEST_RULE_ID, new List<string> { AGE_ATTRIBUTE_ID, LOCATION_ATTRIBUTE_ID });
+            var experiment = CreateExperiment(TEST_RULE_ID,
+                new List<string> { AGE_ATTRIBUTE_ID, LOCATION_ATTRIBUTE_ID });
             var attributeMap = new Dictionary<string, AttributeEntity>
             {
                 { AGE_ATTRIBUTE_ID, new AttributeEntity { Id = AGE_ATTRIBUTE_ID, Key = "a" } },
-                { LOCATION_ATTRIBUTE_ID, new AttributeEntity { Id = LOCATION_ATTRIBUTE_ID, Key = "b" } }
+                {
+                    LOCATION_ATTRIBUTE_ID,
+                    new AttributeEntity { Id = LOCATION_ATTRIBUTE_ID, Key = "b" }
+                },
             };
             var projectConfig = CreateProjectConfig(TEST_RULE_ID, experiment, attributeMap);
 
             var firstContext = CreateUserContext(TEST_USER_ID, new Dictionary<string, object>
             {
                 { "b", 2 },
-                { "a", 1 }
+                { "a", 1 },
             });
 
             _mockCmabClient.Setup(c => c.FetchDecision(TEST_RULE_ID, TEST_USER_ID,
@@ -304,22 +329,25 @@ namespace OptimizelySDK.Tests.CmabTests
                 It.IsAny<string>(),
                 It.IsAny<TimeSpan?>())).Returns("varStable");
 
-            var firstDecision = _cmabService.GetDecision(projectConfig, firstContext, TEST_RULE_ID, null);
+            var firstDecision = _cmabService.GetDecision(projectConfig, firstContext, TEST_RULE_ID);
             Assert.IsNotNull(firstDecision);
             Assert.AreEqual("varStable", firstDecision.VariationId);
 
             var secondContext = CreateUserContext(TEST_USER_ID, new Dictionary<string, object>
             {
                 { "a", 1 },
-                { "b", 2 }
+                { "b", 2 },
             });
 
-            var secondDecision = _cmabService.GetDecision(projectConfig, secondContext, TEST_RULE_ID, null);
+            var secondDecision =
+                _cmabService.GetDecision(projectConfig, secondContext, TEST_RULE_ID);
 
             Assert.IsNotNull(secondDecision);
             Assert.AreEqual("varStable", secondDecision.VariationId);
             _mockCmabClient.Verify(c => c.FetchDecision(TEST_RULE_ID, TEST_USER_ID,
-                It.IsAny<IDictionary<string, object>>(), It.IsAny<string>(), It.IsAny<TimeSpan?>()), Times.Once);
+                    It.IsAny<IDictionary<string, object>>(), It.IsAny<string>(),
+                    It.IsAny<TimeSpan?>()),
+                Times.Once);
         }
 
         [Test]
@@ -328,17 +356,18 @@ namespace OptimizelySDK.Tests.CmabTests
             var experiment = CreateExperiment(TEST_RULE_ID, new List<string> { AGE_ATTRIBUTE_ID });
             var attributeMap = new Dictionary<string, AttributeEntity>
             {
-                { AGE_ATTRIBUTE_ID, new AttributeEntity { Id = AGE_ATTRIBUTE_ID, Key = "age" } }
+                { AGE_ATTRIBUTE_ID, new AttributeEntity { Id = AGE_ATTRIBUTE_ID, Key = "age" } },
             };
             var projectConfig = CreateProjectConfig(TEST_RULE_ID, experiment, attributeMap);
-            var userContext = CreateUserContext(TEST_USER_ID, new Dictionary<string, object> { { "age", 25 } });
+            var userContext = CreateUserContext(TEST_USER_ID,
+                new Dictionary<string, object> { { "age", 25 } });
 
             _mockCmabClient.Setup(c => c.FetchDecision(TEST_RULE_ID, TEST_USER_ID,
                 It.IsAny<IDictionary<string, object>>(),
                 It.IsAny<string>(),
                 It.IsAny<TimeSpan?>())).Returns("varKey");
 
-            var decision = _cmabService.GetDecision(projectConfig, userContext, TEST_RULE_ID, null);
+            var decision = _cmabService.GetDecision(projectConfig, userContext, TEST_RULE_ID);
             Assert.IsNotNull(decision);
             Assert.AreEqual("varKey", decision.VariationId);
 
@@ -348,7 +377,124 @@ namespace OptimizelySDK.Tests.CmabTests
             Assert.AreEqual(decision.CmabUuid, cachedEntry.CmabUuid);
         }
 
-        private OptimizelyUserContext CreateUserContext(string userId, IDictionary<string, object> attributes)
+        [Test]
+        public void ConstructorWithoutConfigUsesDefaultCacheSettings()
+        {
+            var service = new DefaultCmabService();
+            var cache = GetInternalCache(service);
+
+            Assert.IsNotNull(cache);
+            Assert.AreEqual(CmabConstants.DEFAULT_CACHE_SIZE, cache.MaxSizeForTesting);
+            Assert.AreEqual(CmabConstants.DEFAULT_CACHE_TTL, cache.TimeoutForTesting);
+        }
+
+        [Test]
+        public void ConstructorAppliesCustomCacheSize()
+        {
+            var config = new CmabConfig(42);
+            var service = new DefaultCmabService(config, logger: _logger);
+            var cache = GetInternalCache(service);
+
+            Assert.IsNotNull(cache);
+            Assert.AreEqual(42, cache.MaxSizeForTesting);
+            Assert.AreEqual(CmabConstants.DEFAULT_CACHE_TTL, cache.TimeoutForTesting);
+        }
+
+        [Test]
+        public void ConstructorAppliesCustomCacheTtl()
+        {
+            var expectedTtl = TimeSpan.FromMinutes(3);
+            var config = new CmabConfig(cacheTtl: expectedTtl);
+            var service = new DefaultCmabService(config, logger: _logger);
+            var cache = GetInternalCache(service);
+
+            Assert.IsNotNull(cache);
+            Assert.AreEqual(CmabConstants.DEFAULT_CACHE_SIZE, cache.MaxSizeForTesting);
+            Assert.AreEqual(expectedTtl, cache.TimeoutForTesting);
+        }
+
+        [Test]
+        public void ConstructorAppliesCustomCacheSizeAndTtl()
+        {
+            var expectedTtl = TimeSpan.FromSeconds(90);
+            var config = new CmabConfig(5, expectedTtl);
+            var service = new DefaultCmabService(config, logger: _logger);
+            var cache = GetInternalCache(service);
+
+            Assert.IsNotNull(cache);
+            Assert.AreEqual(5, cache.MaxSizeForTesting);
+            Assert.AreEqual(expectedTtl, cache.TimeoutForTesting);
+        }
+
+        [Test]
+        public void ConstructorUsesProvidedCustomCacheInstance()
+        {
+            var customCache = new LruCache<CmabCacheEntry>(3, TimeSpan.FromSeconds(5), _logger);
+            var service = new DefaultCmabService(new CmabConfig(customCache), logger: _logger);
+            var cache = GetInternalCache(service);
+
+            Assert.IsNotNull(cache);
+            Assert.AreSame(customCache, cache);
+        }
+
+        [Test]
+        public void ConstructorThrowsWhenCustomCacheIsNotLruCache()
+        {
+            var config = new CmabConfig(new FakeCache());
+
+            var exception =
+                Assert.Throws<ArgumentException>(() =>
+                    new DefaultCmabService(config, logger: _logger));
+            Assert.AreEqual("CustomCache must be of type LruCache<CmabCacheEntry>.",
+                exception.Message);
+        }
+
+        [Test]
+        public void ConstructorCreatesDefaultClientWhenNoneProvided()
+        {
+            var service = new DefaultCmabService();
+            var client = GetInternalClient(service);
+
+            Assert.IsInstanceOf<DefaultCmabClient>(client);
+        }
+
+        [Test]
+        public void ConstructorUsesProvidedClientInstance()
+        {
+            var mockClient = new Mock<ICmabClient>().Object;
+            var service = new DefaultCmabService(cmabClient: mockClient, logger: _logger);
+            var client = GetInternalClient(service);
+
+            Assert.AreSame(mockClient, client);
+        }
+
+        private static LruCache<CmabCacheEntry> GetInternalCache(DefaultCmabService service)
+        {
+            return Reflection.GetFieldValue<LruCache<CmabCacheEntry>, DefaultCmabService>(service,
+                "_cmabCache");
+        }
+
+        private static ICmabClient GetInternalClient(DefaultCmabService service)
+        {
+            return Reflection.GetFieldValue<ICmabClient, DefaultCmabService>(service,
+                "_cmabClient");
+        }
+
+        private sealed class FakeCache : ICache<CmabCacheEntry>
+        {
+            public void Save(string key, CmabCacheEntry value) { }
+
+            public CmabCacheEntry Lookup(string key)
+            {
+                return null;
+            }
+
+            public void Reset() { }
+        }
+
+        private OptimizelyUserContext CreateUserContext(string userId,
+            IDictionary<string, object> attributes
+        )
         {
             var userContext = _optimizely.CreateUserContext(userId);
 
@@ -361,7 +507,8 @@ namespace OptimizelySDK.Tests.CmabTests
         }
 
         private static ProjectConfig CreateProjectConfig(string ruleId, Experiment experiment,
-            Dictionary<string, AttributeEntity> attributeMap)
+            Dictionary<string, AttributeEntity> attributeMap
+        )
         {
             var mockConfig = new Mock<ProjectConfig>();
             var experimentMap = new Dictionary<string, Experiment>();
@@ -371,7 +518,8 @@ namespace OptimizelySDK.Tests.CmabTests
             }
 
             mockConfig.SetupGet(c => c.ExperimentIdMap).Returns(experimentMap);
-            mockConfig.SetupGet(c => c.AttributeIdMap).Returns(attributeMap ?? new Dictionary<string, AttributeEntity>());
+            mockConfig.SetupGet(c => c.AttributeIdMap).
+                Returns(attributeMap ?? new Dictionary<string, AttributeEntity>());
             return mockConfig.Object;
         }
 
@@ -380,9 +528,8 @@ namespace OptimizelySDK.Tests.CmabTests
             return new Experiment
             {
                 Id = ruleId,
-                Cmab = attributeIds == null ? null : new Entity.Cmab(attributeIds)
+                Cmab = attributeIds == null ? null : new Entity.Cmab(attributeIds),
             };
         }
-
     }
 }

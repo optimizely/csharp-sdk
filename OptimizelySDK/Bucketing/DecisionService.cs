@@ -312,7 +312,7 @@ namespace OptimizelySDK.Bucketing
             // Check if CMAB is properly configured
             if (experiment.Cmab == null)
             {
-                var message = string.Format(CmabConstants.CmabExperimentNotProperlyConfigured,
+                var message = string.Format(CmabConstants.CMAB_EXPERIMENT_NOT_PROPERLY_CONFIGURED,
                     experiment.Key);
                 Logger.Log(LogLevel.ERROR, reasons.AddInfo(message));
                 return Result<VariationDecisionResult>.NewResult(
@@ -337,7 +337,7 @@ namespace OptimizelySDK.Bucketing
             var entityId = bucketResult.ResultObject;
             if (string.IsNullOrEmpty(entityId))
             {
-                var message = string.Format(CmabConstants.UserNotInCmabExperiment, userId,
+                var message = string.Format(CmabConstants.USER_NOT_IN_CMAB_EXPERIMENT, userId,
                     experiment.Key);
                 Logger.Log(LogLevel.INFO, reasons.AddInfo(message));
                 return Result<VariationDecisionResult>.NewResult(
@@ -359,7 +359,7 @@ namespace OptimizelySDK.Bucketing
 
                 if (cmabDecision == null || string.IsNullOrEmpty(cmabDecision.VariationId))
                 {
-                    var message = string.Format(CmabConstants.CmabFetchFailed, experiment.Key);
+                    var message = string.Format(CmabConstants.CMAB_FETCH_FAILED, experiment.Key);
                     Logger.Log(LogLevel.ERROR, reasons.AddInfo(message));
                     return Result<VariationDecisionResult>.NewResult(
                         new VariationDecisionResult(null, null, true), reasons);
@@ -378,7 +378,7 @@ namespace OptimizelySDK.Bucketing
                         new VariationDecisionResult(null), reasons);
                 }
 
-                var successMessage = string.Format(CmabConstants.CmabDecisionFetched, userId,
+                var successMessage = string.Format(CmabConstants.CMAB_DECISION_FETCHED, userId,
                     experiment.Key);
                 Logger.Log(LogLevel.INFO, reasons.AddInfo(successMessage));
 
@@ -387,7 +387,7 @@ namespace OptimizelySDK.Bucketing
             }
             catch (Exception ex)
             {
-                var message = string.Format(CmabConstants.CmabFetchFailed, experiment.Key);
+                var message = string.Format(CmabConstants.CMAB_FETCH_FAILED, experiment.Key);
                 Logger.Log(LogLevel.ERROR, reasons.AddInfo($"{message} Error: {ex.Message}"));
                 return Result<VariationDecisionResult>.NewResult(
                     new VariationDecisionResult(null, null, true), reasons);

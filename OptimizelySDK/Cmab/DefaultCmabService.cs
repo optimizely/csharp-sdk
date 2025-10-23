@@ -102,6 +102,52 @@ namespace OptimizelySDK.Cmab
             _logger = logger ?? new NoOpLogger();
         }
 
+        /// <summary>
+        /// Initializes a new instance of the DefaultCmabService class with configuration.
+        /// </summary>
+        /// <param name="cmabConfig">Configuration for CMAB cache. If null, default values are used.</param>
+        /// <param name="cmabClient">Client for fetching decisions from the CMAB prediction service. If null, a default client is created.</param>
+        /// <param name="logger">Optional logger for recording service operations.</param>
+        public DefaultCmabService(CmabConfig cmabConfig = null,
+            ICmabClient cmabClient = null,
+            ILogger logger = null)
+        {
+            _logger = logger ?? new NoOpLogger();
+            
+            // Create cache based on configuration
+            var config = cmabConfig ?? new CmabConfig();
+            
+            if (config.CustomCache != null)
+            {
+                // Use custom cache if provided
+                _cmabCache = config.CustomCache as LruCache<CmabCacheEntry>;
+                if (_cmabCache == null)
+                {
+                    throw new ArgumentException(
+                        "CustomCache must be of type LruCache<CmabCacheEntry>.");
+                }
+            }
+            else
+            {
+                // Use default or configured cache size and TTL
+                var cacheSize = config.CacheSize ?? CmabConstants.DEFAULT_CACHE_SIZE;
+                var cacheTtl = config.CacheTtl ?? CmabConstants.DEFAULT_CACHE_TTL;
+                _cmabCache = new LruCache<CmabCacheEntry>(cacheSize, cacheTtl, _logger);
+            }
+            
+            // Create client if not provided
+            if (cmabClient == null)
+            {
+                var cmabRetryConfig = new CmabRetryConfig(maxRetries: 1,
+                    initialBackoff: TimeSpan.FromMilliseconds(100));
+                _cmabClient = new DefaultCmabClient(null, cmabRetryConfig, _logger);
+            }
+            else
+            {
+                _cmabClient = cmabClient;
+            }
+        }
+
         public CmabDecision GetDecision(ProjectConfig projectConfig,
             OptimizelyUserContext userContext,
             string ruleId,
