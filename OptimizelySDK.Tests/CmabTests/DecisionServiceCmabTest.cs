@@ -79,7 +79,7 @@ namespace OptimizelySDK.Tests.CmabTests
 
             _bucketerMock.Setup(b => b.BucketToEntityId(
                 It.IsAny<ProjectConfig>(),
-                It.IsAny<Experiment>(),
+                It.IsAny<ExperimentCore>(),
                 It.IsAny<string>(),
                 It.IsAny<string>(),
                 It.IsAny<IEnumerable<TrafficAllocation>>()
@@ -126,7 +126,7 @@ namespace OptimizelySDK.Tests.CmabTests
 
             _bucketerMock.Setup(b => b.BucketToEntityId(
                 It.IsAny<ProjectConfig>(),
-                It.IsAny<Experiment>(),
+                It.IsAny<ExperimentCore>(),
                 It.IsAny<string>(),
                 It.IsAny<string>(),
                 It.IsAny<IEnumerable<TrafficAllocation>>()
@@ -164,7 +164,7 @@ namespace OptimizelySDK.Tests.CmabTests
 
             _bucketerMock.Setup(b => b.BucketToEntityId(
                 It.IsAny<ProjectConfig>(),
-                It.IsAny<Experiment>(),
+                It.IsAny<ExperimentCore>(),
                 It.IsAny<string>(),
                 It.IsAny<string>(),
                 It.IsAny<IEnumerable<TrafficAllocation>>()
@@ -212,7 +212,7 @@ namespace OptimizelySDK.Tests.CmabTests
 
             _bucketerMock.Setup(b => b.BucketToEntityId(
                 It.IsAny<ProjectConfig>(),
-                It.IsAny<Experiment>(),
+                It.IsAny<ExperimentCore>(),
                 It.IsAny<string>(),
                 It.IsAny<string>(),
                 It.IsAny<IEnumerable<TrafficAllocation>>()
@@ -260,7 +260,7 @@ namespace OptimizelySDK.Tests.CmabTests
 
             _bucketerMock.Setup(b => b.BucketToEntityId(
                 It.IsAny<ProjectConfig>(),
-                It.IsAny<Experiment>(),
+                It.IsAny<ExperimentCore>(),
                 It.IsAny<string>(),
                 It.IsAny<string>(),
                 It.IsAny<IEnumerable<TrafficAllocation>>()
@@ -335,7 +335,7 @@ namespace OptimizelySDK.Tests.CmabTests
 
             _bucketerMock.Setup(b => b.BucketToEntityId(
                 It.IsAny<ProjectConfig>(),
-                It.IsAny<Experiment>(),
+                It.IsAny<ExperimentCore>(),
                 It.IsAny<string>(),
                 It.IsAny<string>(),
                 It.IsAny<IEnumerable<TrafficAllocation>>()
@@ -401,7 +401,7 @@ namespace OptimizelySDK.Tests.CmabTests
 
             _bucketerMock.Setup(b => b.BucketToEntityId(
                 It.IsAny<ProjectConfig>(),
-                It.IsAny<Experiment>(),
+                It.IsAny<ExperimentCore>(),
                 It.IsAny<string>(),
                 It.IsAny<string>(),
                 It.IsAny<IEnumerable<TrafficAllocation>>()
@@ -446,7 +446,7 @@ namespace OptimizelySDK.Tests.CmabTests
 
             _bucketerMock.Setup(b => b.BucketToEntityId(
                 It.IsAny<ProjectConfig>(),
-                It.IsAny<Experiment>(),
+                It.IsAny<ExperimentCore>(),
                 It.IsAny<string>(),
                 It.IsAny<string>(),
                 It.IsAny<IEnumerable<TrafficAllocation>>()
@@ -489,7 +489,7 @@ namespace OptimizelySDK.Tests.CmabTests
 
             _bucketerMock.Setup(b => b.BucketToEntityId(
                 It.IsAny<ProjectConfig>(),
-                It.IsAny<Experiment>(),
+                It.IsAny<ExperimentCore>(),
                 It.IsAny<string>(),
                 It.IsAny<string>(),
                 It.IsAny<IEnumerable<TrafficAllocation>>()
@@ -542,7 +542,7 @@ namespace OptimizelySDK.Tests.CmabTests
 
             _bucketerMock.Setup(b => b.BucketToEntityId(
                 It.IsAny<ProjectConfig>(),
-                It.IsAny<Experiment>(),
+                It.IsAny<ExperimentCore>(),
                 It.IsAny<string>(),
                 It.IsAny<string>(),
                 It.IsAny<IEnumerable<TrafficAllocation>>()
