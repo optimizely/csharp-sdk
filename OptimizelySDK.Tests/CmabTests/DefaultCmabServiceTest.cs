@@ -381,7 +381,7 @@ namespace OptimizelySDK.Tests.CmabTests
         public void ConstructorWithoutConfigUsesDefaultCacheSettings()
         {
             var service = new DefaultCmabService();
-            var cache = GetInternalCache(service);
+            var cache = GetInternalCache(service) as LruCache<CmabCacheEntry>;
 
             Assert.IsNotNull(cache);
             Assert.AreEqual(CmabConstants.DEFAULT_CACHE_SIZE, cache.MaxSizeForTesting);
@@ -393,7 +393,7 @@ namespace OptimizelySDK.Tests.CmabTests
         {
             var config = new CmabConfig(42);
             var service = new DefaultCmabService(config, logger: _logger);
-            var cache = GetInternalCache(service);
+            var cache = GetInternalCache(service) as LruCache<CmabCacheEntry>;
 
             Assert.IsNotNull(cache);
             Assert.AreEqual(42, cache.MaxSizeForTesting);
@@ -406,7 +406,7 @@ namespace OptimizelySDK.Tests.CmabTests
             var expectedTtl = TimeSpan.FromMinutes(3);
             var config = new CmabConfig(cacheTtl: expectedTtl);
             var service = new DefaultCmabService(config, logger: _logger);
-            var cache = GetInternalCache(service);
+            var cache = GetInternalCache(service) as LruCache<CmabCacheEntry>;
 
             Assert.IsNotNull(cache);
             Assert.AreEqual(CmabConstants.DEFAULT_CACHE_SIZE, cache.MaxSizeForTesting);
@@ -419,7 +419,7 @@ namespace OptimizelySDK.Tests.CmabTests
             var expectedTtl = TimeSpan.FromSeconds(90);
             var config = new CmabConfig(5, expectedTtl);
             var service = new DefaultCmabService(config, logger: _logger);
-            var cache = GetInternalCache(service);
+            var cache = GetInternalCache(service) as LruCache<CmabCacheEntry>;
 
             Assert.IsNotNull(cache);
             Assert.AreEqual(5, cache.MaxSizeForTesting);
@@ -438,15 +438,15 @@ namespace OptimizelySDK.Tests.CmabTests
         }
 
         [Test]
-        public void ConstructorThrowsWhenCustomCacheIsNotLruCache()
+        public void ConstructorAcceptsAnyICacheImplementation()
         {
-            var config = new CmabConfig(new FakeCache());
+            var fakeCache = new FakeCache();
+            var service = new DefaultCmabService(new CmabConfig(fakeCache), logger: _logger);
+            var cache = GetInternalCache(service);
 
-            var exception =
-                Assert.Throws<ArgumentException>(() =>
-                    new DefaultCmabService(config, logger: _logger));
-            Assert.AreEqual("CustomCache must be of type LruCache<CmabCacheEntry>.",
-                exception.Message);
+            Assert.IsNotNull(cache);
+            Assert.AreSame(fakeCache, cache);
+            Assert.IsInstanceOf<ICache<CmabCacheEntry>>(cache);
         }
 
         [Test]
@@ -468,9 +468,9 @@ namespace OptimizelySDK.Tests.CmabTests
             Assert.AreSame(mockClient, client);
         }
 
-        private static LruCache<CmabCacheEntry> GetInternalCache(DefaultCmabService service)
+        private static ICache<CmabCacheEntry> GetInternalCache(DefaultCmabService service)
         {
-            return Reflection.GetFieldValue<LruCache<CmabCacheEntry>, DefaultCmabService>(service,
+            return Reflection.GetFieldValue<ICache<CmabCacheEntry>, DefaultCmabService>(service,
                 "_cmabCache");
         }
 
@@ -490,6 +490,8 @@ namespace OptimizelySDK.Tests.CmabTests
             }
 
             public void Reset() { }
+
+            public void Remove(string key) { }
         }
 
         private OptimizelyUserContext CreateUserContext(string userId,

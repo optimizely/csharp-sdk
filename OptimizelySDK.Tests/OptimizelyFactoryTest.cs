@@ -308,7 +308,7 @@ namespace OptimizelySDK.Tests
             var cmabService = Reflection.GetFieldValue<ICmabService, DecisionService>(decisionService, "CmabService");
             Assert.IsInstanceOf<DefaultCmabService>(cmabService);
 
-            var cache = Reflection.GetFieldValue<LruCache<CmabCacheEntry>, DefaultCmabService>((DefaultCmabService)cmabService, "_cmabCache");
+            var cache = Reflection.GetFieldValue<ICache<CmabCacheEntry>, DefaultCmabService>((DefaultCmabService)cmabService, "_cmabCache") as LruCache<CmabCacheEntry>;
             Assert.IsNotNull(cache);
             Assert.AreEqual(cacheSize, cache.MaxSizeForTesting);
             Assert.AreEqual(cacheTtl, cache.TimeoutForTesting);

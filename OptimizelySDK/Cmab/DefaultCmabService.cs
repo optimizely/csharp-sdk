@@ -83,17 +83,17 @@ namespace OptimizelySDK.Cmab
     /// </summary>
     public class DefaultCmabService : ICmabService
     {
-        private readonly LruCache<CmabCacheEntry> _cmabCache;
+        private readonly ICache<CmabCacheEntry> _cmabCache;
         private readonly ICmabClient _cmabClient;
         private readonly ILogger _logger;
 
         /// <summary>
         /// Initializes a new instance of the DefaultCmabService class.
         /// </summary>
-        /// <param name="cmabCache">LRU cache for storing CMAB decisions.</param>
+        /// <param name="cmabCache">Cache for storing CMAB decisions.</param>
         /// <param name="cmabClient">Client for fetching decisions from the CMAB prediction service.</param>
         /// <param name="logger">Optional logger for recording service operations.</param>
-        public DefaultCmabService(LruCache<CmabCacheEntry> cmabCache,
+        public DefaultCmabService(ICache<CmabCacheEntry> cmabCache,
             ICmabClient cmabClient,
             ILogger logger = null)
         {
@@ -119,12 +119,7 @@ namespace OptimizelySDK.Cmab
 
             if (config.CustomCache != null)
             {
-                _cmabCache = config.CustomCache as LruCache<CmabCacheEntry>;
-                if (_cmabCache == null)
-                {
-                    throw new ArgumentException(
-                        "CustomCache must be of type LruCache<CmabCacheEntry>.");
-                }
+                _cmabCache = config.CustomCache;
             }
             else
             {
