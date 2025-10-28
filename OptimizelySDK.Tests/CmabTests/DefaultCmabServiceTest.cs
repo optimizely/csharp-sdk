@@ -380,57 +380,70 @@ namespace OptimizelySDK.Tests.CmabTests
         [Test]
         public void ConstructorWithoutConfigUsesDefaultCacheSettings()
         {
-            var service = new DefaultCmabService();
-            var cache = GetInternalCache(service) as LruCache<CmabCacheEntry>;
+            var cache = new LruCache<CmabCacheEntry>(CmabConstants.DEFAULT_CACHE_SIZE,
+                CmabConstants.DEFAULT_CACHE_TTL, _logger);
+            var client = new DefaultCmabClient(null,
+                new CmabRetryConfig(1, TimeSpan.FromMilliseconds(100)), _logger);
+            var service = new DefaultCmabService(cache, client, _logger);
+            var internalCache = GetInternalCache(service) as LruCache<CmabCacheEntry>;
 
-            Assert.IsNotNull(cache);
-            Assert.AreEqual(CmabConstants.DEFAULT_CACHE_SIZE, cache.MaxSizeForTesting);
-            Assert.AreEqual(CmabConstants.DEFAULT_CACHE_TTL, cache.TimeoutForTesting);
+            Assert.IsNotNull(internalCache);
+            Assert.AreEqual(CmabConstants.DEFAULT_CACHE_SIZE, internalCache.MaxSizeForTesting);
+            Assert.AreEqual(CmabConstants.DEFAULT_CACHE_TTL, internalCache.TimeoutForTesting);
         }
 
         [Test]
         public void ConstructorAppliesCustomCacheSize()
         {
-            var config = new CmabConfig(42);
-            var service = new DefaultCmabService(config, logger: _logger);
-            var cache = GetInternalCache(service) as LruCache<CmabCacheEntry>;
+            var cache = new LruCache<CmabCacheEntry>(42, CmabConstants.DEFAULT_CACHE_TTL, _logger);
+            var client = new DefaultCmabClient(null,
+                new CmabRetryConfig(1, TimeSpan.FromMilliseconds(100)), _logger);
+            var service = new DefaultCmabService(cache, client, _logger);
+            var internalCache = GetInternalCache(service) as LruCache<CmabCacheEntry>;
 
-            Assert.IsNotNull(cache);
-            Assert.AreEqual(42, cache.MaxSizeForTesting);
-            Assert.AreEqual(CmabConstants.DEFAULT_CACHE_TTL, cache.TimeoutForTesting);
+            Assert.IsNotNull(internalCache);
+            Assert.AreEqual(42, internalCache.MaxSizeForTesting);
+            Assert.AreEqual(CmabConstants.DEFAULT_CACHE_TTL, internalCache.TimeoutForTesting);
         }
 
         [Test]
         public void ConstructorAppliesCustomCacheTtl()
         {
             var expectedTtl = TimeSpan.FromMinutes(3);
-            var config = new CmabConfig(cacheTtl: expectedTtl);
-            var service = new DefaultCmabService(config, logger: _logger);
-            var cache = GetInternalCache(service) as LruCache<CmabCacheEntry>;
+            var cache = new LruCache<CmabCacheEntry>(CmabConstants.DEFAULT_CACHE_SIZE, expectedTtl,
+                _logger);
+            var client = new DefaultCmabClient(null,
+                new CmabRetryConfig(1, TimeSpan.FromMilliseconds(100)), _logger);
+            var service = new DefaultCmabService(cache, client, _logger);
+            var internalCache = GetInternalCache(service) as LruCache<CmabCacheEntry>;
 
-            Assert.IsNotNull(cache);
-            Assert.AreEqual(CmabConstants.DEFAULT_CACHE_SIZE, cache.MaxSizeForTesting);
-            Assert.AreEqual(expectedTtl, cache.TimeoutForTesting);
+            Assert.IsNotNull(internalCache);
+            Assert.AreEqual(CmabConstants.DEFAULT_CACHE_SIZE, internalCache.MaxSizeForTesting);
+            Assert.AreEqual(expectedTtl, internalCache.TimeoutForTesting);
         }
 
         [Test]
         public void ConstructorAppliesCustomCacheSizeAndTtl()
         {
             var expectedTtl = TimeSpan.FromSeconds(90);
-            var config = new CmabConfig(5, expectedTtl);
-            var service = new DefaultCmabService(config, logger: _logger);
-            var cache = GetInternalCache(service) as LruCache<CmabCacheEntry>;
+            var cache = new LruCache<CmabCacheEntry>(5, expectedTtl, _logger);
+            var client = new DefaultCmabClient(null,
+                new CmabRetryConfig(1, TimeSpan.FromMilliseconds(100)), _logger);
+            var service = new DefaultCmabService(cache, client, _logger);
+            var internalCache = GetInternalCache(service) as LruCache<CmabCacheEntry>;
 
-            Assert.IsNotNull(cache);
-            Assert.AreEqual(5, cache.MaxSizeForTesting);
-            Assert.AreEqual(expectedTtl, cache.TimeoutForTesting);
+            Assert.IsNotNull(internalCache);
+            Assert.AreEqual(5, internalCache.MaxSizeForTesting);
+            Assert.AreEqual(expectedTtl, internalCache.TimeoutForTesting);
         }
 
         [Test]
         public void ConstructorUsesProvidedCustomCacheInstance()
         {
             var customCache = new LruCache<CmabCacheEntry>(3, TimeSpan.FromSeconds(5), _logger);
-            var service = new DefaultCmabService(new CmabConfig(customCache), logger: _logger);
+            var client = new DefaultCmabClient(null,
+                new CmabRetryConfig(1, TimeSpan.FromMilliseconds(100)), _logger);
+            var service = new DefaultCmabService(customCache, client, _logger);
             var cache = GetInternalCache(service);
 
             Assert.IsNotNull(cache);
@@ -441,7 +454,9 @@ namespace OptimizelySDK.Tests.CmabTests
         public void ConstructorAcceptsAnyICacheImplementation()
         {
             var fakeCache = new FakeCache();
-            var service = new DefaultCmabService(new CmabConfig(fakeCache), logger: _logger);
+            var client = new DefaultCmabClient(null,
+                new CmabRetryConfig(1, TimeSpan.FromMilliseconds(100)), _logger);
+            var service = new DefaultCmabService(fakeCache, client, _logger);
             var cache = GetInternalCache(service);
 
             Assert.IsNotNull(cache);
@@ -452,17 +467,23 @@ namespace OptimizelySDK.Tests.CmabTests
         [Test]
         public void ConstructorCreatesDefaultClientWhenNoneProvided()
         {
-            var service = new DefaultCmabService();
-            var client = GetInternalClient(service);
+            var cache = new LruCache<CmabCacheEntry>(CmabConstants.DEFAULT_CACHE_SIZE,
+                CmabConstants.DEFAULT_CACHE_TTL, _logger);
+            var client = new DefaultCmabClient(null,
+                new CmabRetryConfig(1, TimeSpan.FromMilliseconds(100)), _logger);
+            var service = new DefaultCmabService(cache, client, _logger);
+            var internalClient = GetInternalClient(service);
 
-            Assert.IsInstanceOf<DefaultCmabClient>(client);
+            Assert.IsInstanceOf<DefaultCmabClient>(internalClient);
         }
 
         [Test]
         public void ConstructorUsesProvidedClientInstance()
         {
             var mockClient = new Mock<ICmabClient>().Object;
-            var service = new DefaultCmabService(cmabClient: mockClient, logger: _logger);
+            var cache = new LruCache<CmabCacheEntry>(CmabConstants.DEFAULT_CACHE_SIZE,
+                CmabConstants.DEFAULT_CACHE_TTL, _logger);
+            var service = new DefaultCmabService(cache, mockClient, _logger);
             var client = GetInternalClient(service);
 
             Assert.AreSame(mockClient, client);

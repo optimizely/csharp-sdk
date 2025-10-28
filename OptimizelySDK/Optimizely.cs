@@ -286,26 +286,31 @@ namespace OptimizelySDK
             NotificationCenter = notificationCenter ?? new NotificationCenter(Logger);
 
 #if USE_CMAB
-            // Initialize CMAB Service with default implementation if not provided
-            var effectiveCmabService = cmabService;
-            if (effectiveCmabService == null)
+            if (cmabService == null)
             {
-                try
+                var config = cmabConfig ?? new CmabConfig();
+                ICache<CmabCacheEntry> cache;
+                
+                if (config.CustomCache != null)
                 {
-                    // Create CMAB service with configuration
-                    effectiveCmabService = new DefaultCmabService(cmabConfig, null, Logger);
+                    cache = config.CustomCache;
                 }
-                catch (Exception ex)
+                else
                 {
-                    Logger.Log(LogLevel.WARN,
-                        $"Failed to initialize CMAB service: {ex.Message}. CMAB experiments will not be available.");
-                    effectiveCmabService = null;
+                    var cacheSize = config.CacheSize ?? CmabConstants.DEFAULT_CACHE_SIZE;
+                    var cacheTtl = config.CacheTtl ?? CmabConstants.DEFAULT_CACHE_TTL;
+                    cache = new LruCache<CmabCacheEntry>(cacheSize, cacheTtl, Logger);
                 }
+
+                var cmabRetryConfig = new CmabRetryConfig(1, TimeSpan.FromMilliseconds(100));
+                var cmabClient = new DefaultCmabClient(null, cmabRetryConfig, Logger);
+
+                cmabService = new DefaultCmabService(cache, cmabClient, Logger);
             }
 
             DecisionService =
                 new DecisionService(Bucketer, ErrorHandler, userProfileService, Logger,
-                    effectiveCmabService);
+                    cmabService);
 #else
             DecisionService =
                 new DecisionService(Bucketer, ErrorHandler, userProfileService, Logger);

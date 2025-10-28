@@ -92,53 +92,14 @@ namespace OptimizelySDK.Cmab
         /// </summary>
         /// <param name="cmabCache">Cache for storing CMAB decisions.</param>
         /// <param name="cmabClient">Client for fetching decisions from the CMAB prediction service.</param>
-        /// <param name="logger">Optional logger for recording service operations.</param>
+        /// <param name="logger">Logger for recording service operations.</param>
         public DefaultCmabService(ICache<CmabCacheEntry> cmabCache,
             ICmabClient cmabClient,
-            ILogger logger = null)
+            ILogger logger)
         {
             _cmabCache = cmabCache;
             _cmabClient = cmabClient;
-            _logger = logger ?? new NoOpLogger();
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the DefaultCmabService class with configuration.
-        /// </summary>
-        /// <param name="cmabConfig">Configuration for CMAB cache. If null, default values are used.</param>
-        /// <param name="cmabClient">Client for fetching decisions from the CMAB prediction service. If null, a default client is created.</param>
-        /// <param name="logger">Optional logger for recording service operations.</param>
-        public DefaultCmabService(CmabConfig cmabConfig = null,
-            ICmabClient cmabClient = null,
-            ILogger logger = null
-        )
-        {
-            _logger = logger ?? new NoOpLogger();
-
-            var config = cmabConfig ?? new CmabConfig();
-
-            if (config.CustomCache != null)
-            {
-                _cmabCache = config.CustomCache;
-            }
-            else
-            {
-                var cacheSize = config.CacheSize ?? CmabConstants.DEFAULT_CACHE_SIZE;
-                var cacheTtl = config.CacheTtl ?? CmabConstants.DEFAULT_CACHE_TTL;
-                _cmabCache = new LruCache<CmabCacheEntry>(cacheSize, cacheTtl, _logger);
-            }
-
-            // Create client if not provided
-            if (cmabClient == null)
-            {
-                var cmabRetryConfig = new CmabRetryConfig(1,
-                    TimeSpan.FromMilliseconds(100));
-                _cmabClient = new DefaultCmabClient(null, cmabRetryConfig, _logger);
-            }
-            else
-            {
-                _cmabClient = cmabClient;
-            }
+            _logger = logger;
         }
 
         public CmabDecision GetDecision(ProjectConfig projectConfig,
