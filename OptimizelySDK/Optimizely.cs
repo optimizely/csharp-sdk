@@ -290,7 +290,7 @@ namespace OptimizelySDK
             {
                 var config = cmabConfig ?? new CmabConfig();
                 ICache<CmabCacheEntry> cache;
-                
+
                 if (config.CustomCache != null)
                 {
                     cache = config.CustomCache;
