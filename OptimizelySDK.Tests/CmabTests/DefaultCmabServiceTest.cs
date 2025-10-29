@@ -489,6 +489,103 @@ namespace OptimizelySDK.Tests.CmabTests
             Assert.AreSame(mockClient, client);
         }
 
+        [Test]
+        public void ConcurrentRequestsForSameUserUseCacheAfterFirstNetworkCall()
+        {
+            var experiment = CreateExperiment(TEST_RULE_ID, new List<string> { AGE_ATTRIBUTE_ID });
+            var attributeMap = new Dictionary<string, AttributeEntity>
+            {
+                { AGE_ATTRIBUTE_ID, new AttributeEntity { Id = AGE_ATTRIBUTE_ID, Key = "age" } },
+            };
+            var projectConfig = CreateProjectConfig(TEST_RULE_ID, experiment, attributeMap);
+            var userContext = CreateUserContext(TEST_USER_ID,
+                new Dictionary<string, object> { { "age", 25 } });
+
+            var clientCallCount = 0;
+            var clientCallLock = new object();
+
+            _mockCmabClient.Setup(c => c.FetchDecision(
+                TEST_RULE_ID,
+                TEST_USER_ID,
+                It.Is<IDictionary<string, object>>(attrs =>
+                    attrs != null && attrs.Count == 1 && attrs.ContainsKey("age") &&
+                    (int)attrs["age"] == 25),
+                It.IsAny<string>(),
+                It.IsAny<TimeSpan?>()))
+                .Returns(() =>
+                {
+                    lock (clientCallLock)
+                    {
+                        clientCallCount++;
+                    }
+                    System.Threading.Thread.Sleep(100);
+
+                    return "varConcurrent";
+                });
+
+            var tasks = new System.Threading.Tasks.Task<CmabDecision>[10];
+
+            for (int i = 0; i < tasks.Length; i++)
+            {
+                tasks[i] = System.Threading.Tasks.Task.Run(() =>
+                    _cmabService.GetDecision(projectConfig, userContext, TEST_RULE_ID));
+            }
+
+            System.Threading.Tasks.Task.WaitAll(tasks);
+
+            foreach (var task in tasks)
+            {
+                Assert.IsNotNull(task.Result);
+                Assert.AreEqual("varConcurrent", task.Result.VariationId);
+            }
+
+            Assert.AreEqual(1, clientCallCount,
+                "Client should only be called once - subsequent requests should use cache");
+
+            _mockCmabClient.VerifyAll();
+        }
+
+        [Test]
+        public void SameUserRuleCombinationUsesConsistentLock()
+        {
+            var userId = "test_user";
+            var ruleId = "test_rule";
+
+            var index1 = _cmabService.GetLockIndex(userId, ruleId);
+            var index2 = _cmabService.GetLockIndex(userId, ruleId);
+            var index3 = _cmabService.GetLockIndex(userId, ruleId);
+
+            Assert.AreEqual(index1, index2, "Same user/rule should always use same lock");
+            Assert.AreEqual(index2, index3, "Same user/rule should always use same lock");
+        }
+
+        [Test]
+        public void LockStripingDistribution()
+        {
+            var testCases = new[]
+            {
+                new { UserId = "user1", RuleId = "rule1" },
+                new { UserId = "user2", RuleId = "rule1" },
+                new { UserId = "user1", RuleId = "rule2" },
+                new { UserId = "user3", RuleId = "rule3" },
+                new { UserId = "user4", RuleId = "rule4" },
+            };
+
+            var lockIndices = new HashSet<int>();
+            foreach (var testCase in testCases)
+            {
+                var index = _cmabService.GetLockIndex(testCase.UserId, testCase.RuleId);
+
+                Assert.GreaterOrEqual(index, 0, "Lock index should be non-negative");
+                Assert.Less(index, 1000, "Lock index should be less than NUM_LOCK_STRIPES (1000)");
+
+                lockIndices.Add(index);
+            }
+
+            Assert.Greater(lockIndices.Count, 1,
+                "Different user/rule combinations should generally use different locks");
+        }
+
         private static ICache<CmabCacheEntry> GetInternalCache(DefaultCmabService service)
         {
             return Reflection.GetFieldValue<ICache<CmabCacheEntry>, DefaultCmabService>(service,
@@ -554,5 +651,9 @@ namespace OptimizelySDK.Tests.CmabTests
                 Cmab = attributeIds == null ? null : new Entity.Cmab(attributeIds),
             };
         }
+
+        
+
+        
     }
 }

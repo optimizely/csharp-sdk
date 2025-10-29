@@ -83,9 +83,16 @@ namespace OptimizelySDK.Cmab
     /// </summary>
     public class DefaultCmabService : ICmabService
     {
+        /// <summary>
+        /// Number of lock stripes to use for concurrency control.
+        /// Using multiple locks reduces contention while ensuring the same user/rule combination always uses the same lock.
+        /// </summary>
+        private const int NUM_LOCK_STRIPES = 1000;
+
         private readonly ICache<CmabCacheEntry> _cmabCache;
         private readonly ICmabClient _cmabClient;
         private readonly ILogger _logger;
+        private readonly object[] _locks;
 
         /// <summary>
         /// Initializes a new instance of the DefaultCmabService class.
@@ -100,9 +107,43 @@ namespace OptimizelySDK.Cmab
             _cmabCache = cmabCache;
             _cmabClient = cmabClient;
             _logger = logger;
+            _locks = Enumerable.Range(0, NUM_LOCK_STRIPES).Select(_ => new object()).ToArray();
+        }
+
+        /// <summary>
+        /// Calculate the lock index for a given user and rule combination.
+        /// Uses MurmurHash to ensure consistent lock selection for the same user/rule while distributing different combinations across locks.
+        /// </summary>
+        /// <param name="userId">The user ID.</param>
+        /// <param name="ruleId">The experiment/rule ID.</param>
+        /// <returns>The lock index in the range [0, NUM_LOCK_STRIPES).</returns>
+        internal int GetLockIndex(string userId, string ruleId)
+        {
+            var hashInput = $"{userId}{ruleId}";
+            var murmer32 = Murmur.MurmurHash.Create32(0, true);
+            var data = Encoding.UTF8.GetBytes(hashInput);
+            var hash = murmer32.ComputeHash(data);
+            var hashValue = BitConverter.ToUInt32(hash, 0);
+            return (int)(hashValue % NUM_LOCK_STRIPES);
         }
 
         public CmabDecision GetDecision(ProjectConfig projectConfig,
+            OptimizelyUserContext userContext,
+            string ruleId,
+            OptimizelyDecideOption[] options = null)
+        {
+            var lockIndex = GetLockIndex(userContext.GetUserId(), ruleId);
+            lock (_locks[lockIndex])
+            {
+                return GetDecisionInternal(projectConfig, userContext, ruleId, options);
+            }
+        }
+
+        /// <summary>
+        /// Internal implementation of GetDecision that performs the actual decision logic.
+        /// This method should only be called while holding the appropriate lock.
+        /// </summary>
+        private CmabDecision GetDecisionInternal(ProjectConfig projectConfig,
             OptimizelyUserContext userContext,
             string ruleId,
             OptimizelyDecideOption[] options = null)
