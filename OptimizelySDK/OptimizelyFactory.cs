@@ -96,7 +96,9 @@ namespace OptimizelySDK
         /// <param name="cacheTtl">Time-to-live for CMAB cache entries.</param>
         public static void SetCmabCacheConfig(int cacheSize, TimeSpan cacheTtl)
         {
-            CmabConfiguration = new CmabConfig(cacheSize, cacheTtl);
+            CmabConfiguration = new CmabConfig()
+                .SetCacheSize(cacheSize)
+                .SetCacheTtl(cacheTtl);
         }
 
         /// <summary>
@@ -105,7 +107,8 @@ namespace OptimizelySDK
         /// <param name="customCache">Custom cache implementation.</param>
         public static void SetCmabCustomCache(ICacheWithRemove<CmabCacheEntry> customCache)
         {
-            CmabConfiguration = new CmabConfig(customCache);
+            CmabConfiguration = new CmabConfig()
+                .SetCache(customCache);
         }
 #endif
 

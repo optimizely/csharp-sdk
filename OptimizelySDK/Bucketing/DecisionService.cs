@@ -227,34 +227,14 @@ namespace OptimizelySDK.Bucketing
                 var bucketingId = GetBucketingId(userId, user.GetAttributes()).ResultObject;
 
 #if USE_CMAB
-                // Check if this is a CMAB experiment
                 if (experiment.Cmab != null)
                 {
                     var cmabDecisionResult =
                         GetDecisionForCmabExperiment(experiment, user, config, bucketingId, options);
                     reasons += cmabDecisionResult.DecisionReasons;
 
-                    var cmabResult = cmabDecisionResult.ResultObject;
-                    if (cmabResult != null)
-                    {
-                        variation = cmabResult.Variation;
-
-                        // For CMAB experiments, we don't save to user profile
-                        // Return VariationDecisionResult with CMAB UUID
-                        if (variation != null)
-                        {
-                            return Result<VariationDecisionResult>.NewResult(cmabResult, reasons);
-                        }
-
-                        // If cmabResult.CmabError is true, it means there was an error fetching
-                        // Return null variation but log that it was an error, not just no bucketing
-                        if (cmabResult.CmabError)
-                        {
-                            return Result<VariationDecisionResult>.NullResult(reasons);
-                        }
-                    }
-
-                    return Result<VariationDecisionResult>.NullResult(reasons);
+                    return Result<VariationDecisionResult>.NewResult(
+                        cmabDecisionResult.ResultObject, reasons);
                 }
 #endif
 
@@ -312,7 +292,7 @@ namespace OptimizelySDK.Bucketing
             var reasons = new DecisionReasons();
             var userId = user.GetUserId();
 
-            // Create dummy traffic allocation for CMAB
+            // dummy traffic allocation for CMAB
             var cmabTrafficAllocation = new List<TrafficAllocation>
             {
                 new TrafficAllocation
@@ -322,7 +302,6 @@ namespace OptimizelySDK.Bucketing
                 },
             };
 
-            // Check if user is in CMAB traffic allocation
             var bucketResult = Bucketer.BucketToEntityId(config, experiment, bucketingId, userId,
                 cmabTrafficAllocation);
             reasons += bucketResult.DecisionReasons;
@@ -341,7 +320,6 @@ namespace OptimizelySDK.Bucketing
             {
                 var cmabDecision = CmabService.GetDecision(config, user, experiment.Id, options);
 
-                // Get the variation from the project config
                 var variation = config.GetVariationFromIdByExperimentId(experiment.Id,
                     cmabDecision.VariationId);
 

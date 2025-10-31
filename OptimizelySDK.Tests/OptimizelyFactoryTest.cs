@@ -271,7 +271,7 @@ namespace OptimizelySDK.Tests
             Assert.IsNotNull(config);
             Assert.AreEqual(cacheSize, config.CacheSize);
             Assert.AreEqual(cacheTtl, config.CacheTtl);
-            Assert.IsNull(config.CustomCache);
+            Assert.IsNull(config.Cache);
         }
 
         [Test]
@@ -284,7 +284,7 @@ namespace OptimizelySDK.Tests
             var config = GetCurrentCmabConfiguration();
 
             Assert.IsNotNull(config);
-            Assert.AreSame(customCache, config.CustomCache);
+            Assert.AreSame(customCache, config.Cache);
             Assert.IsNull(config.CacheSize);
             Assert.IsNull(config.CacheTtl);
         }

@@ -291,9 +291,9 @@ namespace OptimizelySDK
                 var config = cmabConfig ?? new CmabConfig();
                 ICacheWithRemove<CmabCacheEntry> cache;
 
-                if (config.CustomCache != null)
+                if (config.Cache != null)
                 {
-                    cache = config.CustomCache;
+                    cache = config.Cache;
                 }
                 else
                 {

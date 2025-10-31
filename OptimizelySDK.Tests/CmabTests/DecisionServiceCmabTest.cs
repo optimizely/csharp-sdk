@@ -138,8 +138,8 @@ namespace OptimizelySDK.Tests.CmabTests
             var result = _decisionService.GetVariation(experiment, userContext, mockConfig.Object);
 
             Assert.IsNotNull(result);
-            Assert.IsNull(result.ResultObject, "No variation should be returned with 0 traffic");
-            Assert.IsNull(result.ResultObject?.CmabUuid);
+            Assert.IsNull(result.ResultObject.Variation, "No variation should be returned with 0 traffic");
+            Assert.IsNull(result.ResultObject.CmabUuid);
 
             var reasons = result.DecisionReasons.ToReport(true);
             var expectedMessage =
@@ -183,8 +183,8 @@ namespace OptimizelySDK.Tests.CmabTests
             var result = _decisionService.GetVariation(experiment, userContext, mockConfig.Object);
 
             Assert.IsNotNull(result);
-            Assert.IsNull(result.ResultObject, "Should return null on error");
-            // CmabUuid is now in VariationDecisionResult, not DecisionReasons
+            Assert.IsNull(result.ResultObject.Variation, "Should return null on error");
+            Assert.IsTrue(result.ResultObject.CmabError);
 
             var reasonsList = result.DecisionReasons.ToReport(true);
             Assert.IsTrue(reasonsList.Exists(reason =>
@@ -232,8 +232,7 @@ namespace OptimizelySDK.Tests.CmabTests
             var result = _decisionService.GetVariation(experiment, userContext, mockConfig.Object);
 
             Assert.IsNotNull(result);
-            Assert.IsNull(result.ResultObject);
-            // CmabUuid is now in VariationDecisionResult, not DecisionReasons
+            Assert.IsNull(result.ResultObject.Variation, "Should return null on error");
 
             var reasons = result.DecisionReasons.ToReport(true);
             var expectedMessage =

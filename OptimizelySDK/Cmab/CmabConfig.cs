@@ -25,44 +25,55 @@ namespace OptimizelySDK.Cmab
     public class CmabConfig
     {
         /// <summary>
-        ///     Initializes a new instance of the CmabConfig class with default cache settings.
-        /// </summary>
-        /// <param name="cacheSize">Maximum number of entries in the cache. Default is 1000.</param>
-        /// <param name="cacheTtl">Time-to-live for cache entries. Default is 30 minutes.</param>
-        public CmabConfig(int? cacheSize = null, TimeSpan? cacheTtl = null)
-        {
-            CacheSize = cacheSize;
-            CacheTtl = cacheTtl;
-            CustomCache = null;
-        }
-
-        /// <summary>
-        ///     Initializes a new instance of the CmabConfig class with a custom cache implementation.
-        /// </summary>
-        /// <param name="customCache">Custom cache implementation for CMAB decisions.</param>
-        public CmabConfig(ICacheWithRemove<CmabCacheEntry> customCache)
-        {
-            CustomCache = customCache ?? throw new ArgumentNullException(nameof(customCache));
-            CacheSize = null;
-            CacheTtl = null;
-        }
-
-        /// <summary>
-        ///     Gets the maximum number of entries in the CMAB cache.
+        ///     Gets or sets the maximum number of entries in the CMAB cache.
         ///     If null, the default value (1000) will be used.
         /// </summary>
-        public int? CacheSize { get; }
+        public int? CacheSize { get; private set; }
 
         /// <summary>
-        ///     Gets the time-to-live for CMAB cache entries.
+        ///     Gets or sets the time-to-live for CMAB cache entries.
         ///     If null, the default value (30 minutes) will be used.
         /// </summary>
-        public TimeSpan? CacheTtl { get; }
+        public TimeSpan? CacheTtl { get; private set; }
 
         /// <summary>
-        ///     Gets the custom cache implementation for CMAB decisions.
+        ///     Gets or sets the custom cache implementation for CMAB decisions.
         ///     If provided, CacheSize and CacheTtl will be ignored.
         /// </summary>
-        public ICacheWithRemove<CmabCacheEntry> CustomCache { get; }
+        public ICacheWithRemove<CmabCacheEntry> Cache { get; private set; }
+
+        /// <summary>
+        ///     Sets the maximum number of entries in the CMAB cache.
+        /// </summary>
+        /// <param name="cacheSize">Maximum number of entries in the cache.</param>
+        /// <returns>This CmabConfig instance for method chaining.</returns>
+        public CmabConfig SetCacheSize(int cacheSize)
+        {
+            CacheSize = cacheSize;
+            return this;
+        }
+
+        /// <summary>
+        ///     Sets the time-to-live for CMAB cache entries.
+        /// </summary>
+        /// <param name="cacheTtl">Time-to-live for cache entries.</param>
+        /// <returns>This CmabConfig instance for method chaining.</returns>
+        public CmabConfig SetCacheTtl(TimeSpan cacheTtl)
+        {
+            CacheTtl = cacheTtl;
+            return this;
+        }
+
+        /// <summary>
+        ///     Sets a custom cache implementation for CMAB decisions.
+        ///     When set, CacheSize and CacheTtl will be ignored.
+        /// </summary>
+        /// <param name="cache">Custom cache implementation for CMAB decisions.</param>
+        /// <returns>This CmabConfig instance for method chaining.</returns>
+        public CmabConfig SetCache(ICacheWithRemove<CmabCacheEntry> cache)
+        {
+            Cache = cache ?? throw new ArgumentNullException(nameof(cache));
+            return this;
+        }
     }
 }
