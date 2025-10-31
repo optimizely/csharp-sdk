@@ -60,19 +60,13 @@ namespace OptimizelySDK.OptimizelyDecisions
         /// </summary>
         public string[] Reasons { get; private set; }
 
-        /// <summary>
-        /// CMAB UUID associated with the decision for contextual multi-armed bandit experiments.
-        /// </summary>
-        public string CmabUuid { get; private set; }
-
         public OptimizelyDecision(string variationKey,
             bool enabled,
             OptimizelyJSON variables,
             string ruleKey,
             string flagKey,
             OptimizelyUserContext userContext,
-            string[] reasons,
-            string cmabUuid = null
+            string[] reasons
         )
         {
             VariationKey = variationKey;
@@ -82,7 +76,6 @@ namespace OptimizelySDK.OptimizelyDecisions
             FlagKey = flagKey;
             UserContext = userContext;
             Reasons = reasons;
-            CmabUuid = cmabUuid;
         }
 
         /// <summary>

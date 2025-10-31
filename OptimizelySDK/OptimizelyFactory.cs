@@ -90,25 +90,12 @@ namespace OptimizelySDK
 
 #if USE_CMAB
         /// <summary>
-        /// Sets the CMAB cache configuration with custom size and time-to-live.
+        /// Sets the CMAB (Contextual Multi-Armed Bandit) configuration.
         /// </summary>
-        /// <param name="cacheSize">Maximum number of entries in the CMAB cache.</param>
-        /// <param name="cacheTtl">Time-to-live for CMAB cache entries.</param>
-        public static void SetCmabCacheConfig(int cacheSize, TimeSpan cacheTtl)
+        /// <param name="config">CMAB configuration with cache settings.</param>
+        public static void SetCmabConfig(CmabConfig config)
         {
-            CmabConfiguration = new CmabConfig()
-                .SetCacheSize(cacheSize)
-                .SetCacheTtl(cacheTtl);
-        }
-
-        /// <summary>
-        /// Sets a custom cache implementation for CMAB.
-        /// </summary>
-        /// <param name="customCache">Custom cache implementation.</param>
-        public static void SetCmabCustomCache(ICacheWithRemove<CmabCacheEntry> customCache)
-        {
-            CmabConfiguration = new CmabConfig()
-                .SetCache(customCache);
+            CmabConfiguration = config;
         }
 #endif
 

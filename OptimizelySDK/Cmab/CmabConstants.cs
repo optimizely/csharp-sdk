@@ -42,5 +42,8 @@ namespace OptimizelySDK.Cmab
 
         public static readonly TimeSpan MAX_TIMEOUT = TimeSpan.FromSeconds(10);
         public static readonly TimeSpan DEFAULT_CACHE_TTL = TimeSpan.FromMinutes(10);
+
+        public const int CMAB_MAX_RETRIES = 1;
+        public static readonly TimeSpan CMAB_INITIAL_BACKOFF = TimeSpan.FromMilliseconds(100);
     }
 }

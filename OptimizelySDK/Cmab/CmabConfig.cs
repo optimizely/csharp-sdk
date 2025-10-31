@@ -15,9 +15,10 @@
  */
 
 using System;
+using OptimizelySDK.Cmab;
 using OptimizelySDK.Utils;
 
-namespace OptimizelySDK.Cmab
+namespace OptimizelySDK
 {
     /// <summary>
     ///     Configuration options for CMAB (Contextual Multi-Armed Bandit) functionality.

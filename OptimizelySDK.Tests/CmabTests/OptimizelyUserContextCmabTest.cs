@@ -88,7 +88,7 @@ namespace OptimizelySDK.Tests.CmabTests
         }
 
         /// <summary>
-        /// Verifies Decide returns decision with CMAB UUID populated
+        /// Verifies Decide returns decision for CMAB experiment
         /// </summary>
         [Test]
         public void TestDecideWithCmabExperimentReturnsDecision()
@@ -101,7 +101,6 @@ namespace OptimizelySDK.Tests.CmabTests
             Assert.IsTrue(decision.Enabled, "Feature flag should be enabled for CMAB variation.");
             Assert.AreEqual(TEST_FEATURE_KEY, decision.FlagKey);
             Assert.AreEqual(TEST_EXPERIMENT_KEY, decision.RuleKey);
-            Assert.AreEqual(TEST_CMAB_UUID, decision.CmabUuid);
             Assert.IsTrue(decision.Reasons == null || decision.Reasons.Length == 0);
 
             Assert.AreEqual(1, _cmabService.CallCount);
@@ -123,7 +122,6 @@ namespace OptimizelySDK.Tests.CmabTests
             var decision = userContext.Decide(TEST_FEATURE_KEY);
 
             Assert.IsNotNull(decision);
-            Assert.AreEqual(TEST_CMAB_UUID, decision.CmabUuid);
             _eventDispatcherMock.Verify(d => d.DispatchEvent(It.IsAny<LogEvent>()), Times.Once);
             Assert.IsNotNull(impressionEvent, "Impression event should be dispatched.");
 
@@ -182,7 +180,6 @@ namespace OptimizelySDK.Tests.CmabTests
                 new[] { OptimizelyDecideOption.DISABLE_DECISION_EVENT });
 
             Assert.IsNotNull(decision);
-            Assert.AreEqual(TEST_CMAB_UUID, decision.CmabUuid);
             _eventDispatcherMock.Verify(d => d.DispatchEvent(It.IsAny<LogEvent>()), Times.Never,
                 "No impression event should be sent with DISABLE_DECISION_EVENT");
             Assert.AreEqual(1, _cmabService.CallCount);
@@ -210,10 +207,8 @@ namespace OptimizelySDK.Tests.CmabTests
 
             Assert.IsNotNull(cmabDecision);
             Assert.AreEqual(VARIATION_A_KEY, cmabDecision.VariationKey);
-            Assert.AreEqual(TEST_CMAB_UUID, cmabDecision.CmabUuid);
 
             Assert.IsNotNull(nonCmabDecision);
-            Assert.IsNull(nonCmabDecision.CmabUuid);
             Assert.AreEqual(1, _cmabService.CallCount);
         }
 
@@ -231,7 +226,6 @@ namespace OptimizelySDK.Tests.CmabTests
             Assert.IsTrue(decisions.TryGetValue(TEST_FEATURE_KEY, out var cmabDecision));
             Assert.IsNotNull(cmabDecision);
             Assert.AreEqual(VARIATION_A_KEY, cmabDecision.VariationKey);
-            Assert.AreEqual(TEST_CMAB_UUID, cmabDecision.CmabUuid);
             Assert.GreaterOrEqual(_cmabService.CallCount, 1);
         }
 
@@ -335,7 +329,6 @@ namespace OptimizelySDK.Tests.CmabTests
 
             Assert.IsNotNull(decision);
             Assert.AreEqual(VARIATION_A_KEY, decision.VariationKey);
-            Assert.AreEqual(TEST_CMAB_UUID, decision.CmabUuid);
             userProfileServiceMock.Verify(ups => ups.Save(It.IsAny<Dictionary<string, object>>()),
                 Times.Never);
             Assert.AreEqual(1, cmabService.CallCount);
@@ -369,7 +362,6 @@ namespace OptimizelySDK.Tests.CmabTests
 
             Assert.IsNotNull(decision);
             Assert.AreEqual(VARIATION_A_KEY, decision.VariationKey);
-            Assert.AreEqual(TEST_CMAB_UUID, decision.CmabUuid);
 
             userProfileServiceMock.Verify(ups => ups.Lookup(It.IsAny<string>()), Times.Never);
             Assert.AreEqual(1, cmabService.CallCount);
@@ -394,7 +386,6 @@ namespace OptimizelySDK.Tests.CmabTests
                 TEST_EXPERIMENT_KEY);
             Assert.IsTrue(decision.Reasons.Any(r => r.Contains(expectedMessage)),
                 "Decision reasons should include CMAB fetch success message.");
-            Assert.AreEqual(TEST_CMAB_UUID, decision.CmabUuid);
             Assert.AreEqual(1, _cmabService.CallCount);
         }
 
@@ -413,7 +404,6 @@ namespace OptimizelySDK.Tests.CmabTests
 
             Assert.IsNotNull(decision);
             Assert.IsNull(decision.VariationKey);
-            Assert.IsNull(decision.CmabUuid);
             Assert.IsTrue(decision.Reasons.Any(r => r.Contains(
                 string.Format(CmabConstants.CMAB_FETCH_FAILED, TEST_EXPERIMENT_KEY))));
             Assert.AreEqual(1, _cmabService.CallCount);
@@ -459,7 +449,6 @@ namespace OptimizelySDK.Tests.CmabTests
             Assert.IsNotNull(decision);
             Assert.AreEqual(TEST_FEATURE_KEY, decision.FlagKey);
             Assert.AreEqual(VARIATION_A_KEY, decision.VariationKey);
-            Assert.AreEqual(TEST_CMAB_UUID, decision.CmabUuid);
             _notificationCallbackMock.Verify(nc => nc.TestDecisionCallback(
                     DecisionNotificationTypes.FLAG,
                     TEST_USER_ID,

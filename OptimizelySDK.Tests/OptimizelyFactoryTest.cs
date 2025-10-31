@@ -259,12 +259,15 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
-        public void SetCmabCacheConfigStoresCacheSizeAndTtl()
+        public void SetCmabConfigStoresCacheSizeAndTtl()
         {
             const int cacheSize = 1234;
             var cacheTtl = TimeSpan.FromSeconds(45);
 
-            OptimizelyFactory.SetCmabCacheConfig(cacheSize, cacheTtl);
+            var cmabConfig = new CmabConfig()
+                .SetCacheSize(cacheSize)
+                .SetCacheTtl(cacheTtl);
+            OptimizelyFactory.SetCmabConfig(cmabConfig);
 
             var config = GetCurrentCmabConfiguration();
 
@@ -275,11 +278,13 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
-        public void SetCmabCustomCacheStoresCustomCacheInstance()
+        public void SetCmabConfigStoresCustomCacheInstance()
         {
             var customCache = new LruCache<CmabCacheEntry>(maxSize: 10, itemTimeout: TimeSpan.FromMinutes(2));
 
-            OptimizelyFactory.SetCmabCustomCache(customCache);
+            var cmabConfig = new CmabConfig()
+                .SetCache(customCache);
+            OptimizelyFactory.SetCmabConfig(cmabConfig);
 
             var config = GetCurrentCmabConfiguration();
 
@@ -294,7 +299,10 @@ namespace OptimizelySDK.Tests
         {
             const int cacheSize = 7;
             var cacheTtl = TimeSpan.FromSeconds(30);
-            OptimizelyFactory.SetCmabCacheConfig(cacheSize, cacheTtl);
+            var cmabConfig = new CmabConfig()
+                .SetCacheSize(cacheSize)
+                .SetCacheTtl(cacheTtl);
+            OptimizelyFactory.SetCmabConfig(cmabConfig);
 
             var logger = new NoOpLogger();
             var errorHandler = new NoOpErrorHandler();

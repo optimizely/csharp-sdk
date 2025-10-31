@@ -286,27 +286,25 @@ namespace OptimizelySDK
             NotificationCenter = notificationCenter ?? new NotificationCenter(Logger);
 
 #if USE_CMAB
-            if (cmabService == null)
+            var config = cmabConfig ?? new CmabConfig();
+            ICacheWithRemove<CmabCacheEntry> cache;
+
+            if (config.Cache != null)
             {
-                var config = cmabConfig ?? new CmabConfig();
-                ICacheWithRemove<CmabCacheEntry> cache;
-
-                if (config.Cache != null)
-                {
-                    cache = config.Cache;
-                }
-                else
-                {
-                    var cacheSize = config.CacheSize ?? CmabConstants.DEFAULT_CACHE_SIZE;
-                    var cacheTtl = config.CacheTtl ?? CmabConstants.DEFAULT_CACHE_TTL;
-                    cache = new LruCache<CmabCacheEntry>(cacheSize, cacheTtl, Logger);
-                }
-
-                var cmabRetryConfig = new CmabRetryConfig(1, TimeSpan.FromMilliseconds(100));
-                var cmabClient = new DefaultCmabClient(null, cmabRetryConfig, Logger);
-
-                cmabService = new DefaultCmabService(cache, cmabClient, Logger);
+                cache = config.Cache;
             }
+            else
+            {
+                var cacheSize = config.CacheSize ?? CmabConstants.DEFAULT_CACHE_SIZE;
+                var cacheTtl = config.CacheTtl ?? CmabConstants.DEFAULT_CACHE_TTL;
+                cache = new LruCache<CmabCacheEntry>(cacheSize, cacheTtl, Logger);
+            }
+
+            var cmabRetryConfig = new CmabRetryConfig(CmabConstants.CMAB_MAX_RETRIES,
+                CmabConstants.CMAB_INITIAL_BACKOFF);
+            var cmabClient = new DefaultCmabClient(null, cmabRetryConfig, Logger);
+
+            cmabService = new DefaultCmabService(cache, cmabClient, Logger);
 
             DecisionService =
                 new DecisionService(Bucketer, ErrorHandler, userProfileService, Logger,
@@ -1172,9 +1170,6 @@ namespace OptimizelySDK
                 flagKey,
                 user,
                 reasonsToReport
-#if USE_CMAB
-                , flagDecision.CmabUuid
-#endif
             );
         }
 
