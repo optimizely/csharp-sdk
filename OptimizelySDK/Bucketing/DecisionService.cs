@@ -815,6 +815,17 @@ namespace OptimizelySDK.Bucketing
                     decisionVariation = variationResult?.Variation;
 #if USE_CMAB
                     cmabUuid = variationResult?.CmabUuid;
+                    
+                    if (variationResult?.CmabError == true)
+                    {
+                        Logger.Log(LogLevel.ERROR,
+                            reasons.AddInfo(
+                                $"Failed to fetch CMAB decision for user \"{userId}\" in experiment \"{experiment.Key}\" of feature \"{featureFlag.Key}\"."));
+                        
+                        var errorDecision = new FeatureDecision(experiment, null,
+                            FeatureDecision.DECISION_SOURCE_FEATURE_TEST, null, error: true);
+                        return Result<FeatureDecision>.NewResult(errorDecision, reasons);
+                    }
 #endif
                 }
 
@@ -825,7 +836,6 @@ namespace OptimizelySDK.Bucketing
                             $"The user \"{userId}\" is bucketed into experiment \"{experiment.Key}\" of feature \"{featureFlag.Key}\"."));
 
 #if USE_CMAB
-                    // Extract CmabUuid from VariationDecisionResult
                     var featureDecision = new FeatureDecision(experiment, decisionVariation,
                         FeatureDecision.DECISION_SOURCE_FEATURE_TEST, cmabUuid);
 #else

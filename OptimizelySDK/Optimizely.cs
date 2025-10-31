@@ -1043,6 +1043,27 @@ namespace OptimizelySDK
                 var flagDecision = flagDecisions[key];
                 var decisionReasons = decisionReasonsMap[key];
 
+                if (flagDecision?.Error == true)
+                {
+                    var includeReasons = allOptions.Contains(OptimizelyDecideOption.INCLUDE_REASONS);
+                    var reasonsToReport = decisionReasons.ToReport(includeReasons).ToArray();
+                    
+                    var errorDecision = OptimizelyDecision.NewErrorDecision(
+                        key,
+                        user,
+                        reasonsToReport,
+                        ErrorHandler,
+                        Logger
+                    );
+                    
+                    if (!allOptions.Contains(OptimizelyDecideOption.ENABLED_FLAGS_ONLY) ||
+                        errorDecision.Enabled)
+                    {
+                        decisionDictionary.Add(key, errorDecision);
+                    }
+                    continue;
+                }
+
                 var optimizelyDecision = CreateOptimizelyDecision(user, key, flagDecision,
                     decisionReasons, allOptions.ToList(), projectConfig);
                 if (!allOptions.Contains(OptimizelyDecideOption.ENABLED_FLAGS_ONLY) ||

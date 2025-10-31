@@ -25,13 +25,15 @@ namespace OptimizelySDK.Entity
         public Variation Variation { get; }
         public string Source { get; }
         public string CmabUuid { get; }
+        public bool Error { get; }
 
-        public FeatureDecision(ExperimentCore experiment, Variation variation, string source, string cmabUuid = null)
+        public FeatureDecision(ExperimentCore experiment, Variation variation, string source, string cmabUuid = null, bool error = false)
         {
             Experiment = experiment;
             Variation = variation;
             Source = source;
             CmabUuid = cmabUuid;
+            Error = error;
         }
     }
 }

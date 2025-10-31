@@ -107,5 +107,28 @@ namespace OptimizelySDK.OptimizelyDecisions
                 optimizelyUserContext,
                 new string[] { error });
         }
+
+        /// <summary>
+        /// Static function to return OptimizelyDecision with multiple error reasons.
+        /// Similar to the single error overload but accepts an array of reasons.
+        /// OptimizelyDecision will have null variation key, false enabled, empty variables, null rule key
+        /// and the provided reasons array.
+        /// </summary>
+        public static OptimizelyDecision NewErrorDecision(string key,
+            OptimizelyUserContext optimizelyUserContext,
+            string[] reasons,
+            IErrorHandler errorHandler,
+            ILogger logger
+        )
+        {
+            return new OptimizelyDecision(
+                null,
+                false,
+                new OptimizelyJSON(new Dictionary<string, object>(), errorHandler, logger),
+                null,
+                key,
+                optimizelyUserContext,
+                reasons);
+        }
     }
 }
