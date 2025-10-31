@@ -26,6 +26,7 @@ using OptimizelySDK.Logger;
 using OptimizelySDK.Odp;
 using OptimizelySDK.OptimizelyDecisions;
 using OptimizelySDK.Tests.Utils;
+using OptimizelySDK.Utils;
 using AttributeEntity = OptimizelySDK.Entity.Attribute;
 
 namespace OptimizelySDK.Tests.CmabTests
@@ -461,7 +462,7 @@ namespace OptimizelySDK.Tests.CmabTests
 
             Assert.IsNotNull(cache);
             Assert.AreSame(fakeCache, cache);
-            Assert.IsInstanceOf<ICache<CmabCacheEntry>>(cache);
+            Assert.IsInstanceOf<ICacheWithRemove<CmabCacheEntry>>(cache);
         }
 
         [Test]
@@ -586,9 +587,9 @@ namespace OptimizelySDK.Tests.CmabTests
                 "Different user/rule combinations should generally use different locks");
         }
 
-        private static ICache<CmabCacheEntry> GetInternalCache(DefaultCmabService service)
+        private static ICacheWithRemove<CmabCacheEntry> GetInternalCache(DefaultCmabService service)
         {
-            return Reflection.GetFieldValue<ICache<CmabCacheEntry>, DefaultCmabService>(service,
+            return Reflection.GetFieldValue<ICacheWithRemove<CmabCacheEntry>, DefaultCmabService>(service,
                 "_cmabCache");
         }
 
@@ -598,7 +599,7 @@ namespace OptimizelySDK.Tests.CmabTests
                 "_cmabClient");
         }
 
-        private sealed class FakeCache : ICache<CmabCacheEntry>
+        private sealed class FakeCache : ICacheWithRemove<CmabCacheEntry>
         {
             public void Save(string key, CmabCacheEntry value) { }
 

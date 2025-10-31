@@ -375,6 +375,9 @@
     <Compile Include="..\OptimizelySDK\Utils\Validator.cs">
       <Link>Utils\Validator.cs</Link>
     </Compile>
+    <Compile Include="..\OptimizelySDK\Utils\ICacheWithRemove.cs">
+      <Link>Utils\ICacheWithRemove.cs</Link>
+    </Compile>
     <Compile Include="..\OptimizelySDK\Event\BatchEventProcessor.cs">
       <Link>Event\BatchEventProcessor.cs</Link>
     </Compile>

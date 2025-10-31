@@ -22,6 +22,5 @@ namespace OptimizelySDK.Odp
         void Save(string key, T value);
         T Lookup(string key);
         void Reset();
-        void Remove(string key);
     }
 }

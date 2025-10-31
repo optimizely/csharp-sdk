@@ -23,8 +23,8 @@ using Newtonsoft.Json;
 using OptimizelySDK;
 using OptimizelySDK.Entity;
 using OptimizelySDK.Logger;
-using OptimizelySDK.Odp;
 using OptimizelySDK.OptimizelyDecisions;
+using OptimizelySDK.Utils;
 using AttributeEntity = OptimizelySDK.Entity.Attribute;
 
 namespace OptimizelySDK.Cmab
@@ -89,7 +89,7 @@ namespace OptimizelySDK.Cmab
         /// </summary>
         private const int NUM_LOCK_STRIPES = 1000;
 
-        private readonly ICache<CmabCacheEntry> _cmabCache;
+        private readonly ICacheWithRemove<CmabCacheEntry> _cmabCache;
         private readonly ICmabClient _cmabClient;
         private readonly ILogger _logger;
         private readonly object[] _locks;
@@ -100,7 +100,7 @@ namespace OptimizelySDK.Cmab
         /// <param name="cmabCache">Cache for storing CMAB decisions.</param>
         /// <param name="cmabClient">Client for fetching decisions from the CMAB prediction service.</param>
         /// <param name="logger">Logger for recording service operations.</param>
-        public DefaultCmabService(ICache<CmabCacheEntry> cmabCache,
+        public DefaultCmabService(ICacheWithRemove<CmabCacheEntry> cmabCache,
             ICmabClient cmabClient,
             ILogger logger)
         {

@@ -15,7 +15,7 @@
  */
 
 using System;
-using OptimizelySDK.Odp;
+using OptimizelySDK.Utils;
 
 namespace OptimizelySDK.Cmab
 {
@@ -40,7 +40,7 @@ namespace OptimizelySDK.Cmab
         ///     Initializes a new instance of the CmabConfig class with a custom cache implementation.
         /// </summary>
         /// <param name="customCache">Custom cache implementation for CMAB decisions.</param>
-        public CmabConfig(ICache<CmabCacheEntry> customCache)
+        public CmabConfig(ICacheWithRemove<CmabCacheEntry> customCache)
         {
             CustomCache = customCache ?? throw new ArgumentNullException(nameof(customCache));
             CacheSize = null;
@@ -63,6 +63,6 @@ namespace OptimizelySDK.Cmab
         ///     Gets the custom cache implementation for CMAB decisions.
         ///     If provided, CacheSize and CacheTtl will be ignored.
         /// </summary>
-        public ICache<CmabCacheEntry> CustomCache { get; }
+        public ICacheWithRemove<CmabCacheEntry> CustomCache { get; }
     }
 }

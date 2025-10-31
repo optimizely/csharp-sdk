@@ -22,7 +22,7 @@ using OptimizelySDK.Utils;
 
 namespace OptimizelySDK.Odp
 {
-    public class LruCache<T> : ICache<T> where T : class
+    public class LruCache<T> : ICacheWithRemove<T> where T : class
     {
         /// <summary>
         /// The maximum number of elements that should be stored

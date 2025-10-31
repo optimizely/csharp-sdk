@@ -41,6 +41,7 @@ using OptimizelySDK.Odp;
 
 #if USE_CMAB
 using OptimizelySDK.Cmab;
+using OptimizelySDK.Utils;
 #endif
 
 
@@ -102,7 +103,7 @@ namespace OptimizelySDK
         /// Sets a custom cache implementation for CMAB.
         /// </summary>
         /// <param name="customCache">Custom cache implementation.</param>
-        public static void SetCmabCustomCache(ICache<CmabCacheEntry> customCache)
+        public static void SetCmabCustomCache(ICacheWithRemove<CmabCacheEntry> customCache)
         {
             CmabConfiguration = new CmabConfig(customCache);
         }

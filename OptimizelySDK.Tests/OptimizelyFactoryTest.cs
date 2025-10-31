@@ -29,6 +29,7 @@ using OptimizelySDK.Logger;
 using OptimizelySDK.Notifications;
 using OptimizelySDK.Odp;
 using OptimizelySDK.Tests.ConfigTest;
+using OptimizelySDK.Utils;
 using OptimizelySDK.Tests.EventTest;
 using OptimizelySDK.Tests.Utils;
 
@@ -308,7 +309,7 @@ namespace OptimizelySDK.Tests
             var cmabService = Reflection.GetFieldValue<ICmabService, DecisionService>(decisionService, "CmabService");
             Assert.IsInstanceOf<DefaultCmabService>(cmabService);
 
-            var cache = Reflection.GetFieldValue<ICache<CmabCacheEntry>, DefaultCmabService>((DefaultCmabService)cmabService, "_cmabCache") as LruCache<CmabCacheEntry>;
+            var cache = Reflection.GetFieldValue<ICacheWithRemove<CmabCacheEntry>, DefaultCmabService>((DefaultCmabService)cmabService, "_cmabCache") as LruCache<CmabCacheEntry>;
             Assert.IsNotNull(cache);
             Assert.AreEqual(cacheSize, cache.MaxSizeForTesting);
             Assert.AreEqual(cacheTtl, cache.TimeoutForTesting);
