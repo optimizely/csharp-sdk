@@ -494,8 +494,9 @@ namespace OptimizelySDK
             userAttributes = userAttributes ?? new UserAttributes();
 
             var userContext = CreateUserContextCopy(userId, userAttributes);
-            var variation = DecisionService.GetVariation(experiment, userContext, config)
+            var variationResult = DecisionService.GetVariation(experiment, userContext, config)
                 ?.ResultObject;
+            var variation = variationResult?.Variation;
             var decisionInfo = new Dictionary<string, object>
             {
                 { "experimentKey", experimentKey }, { "variationKey", variation?.Key },

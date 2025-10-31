@@ -24,11 +24,6 @@ namespace OptimizelySDK.OptimizelyDecisions
         protected List<string> Errors = new List<string>();
         private List<string> Infos = new List<string>();
 
-        /// <summary>
-        /// CMAB UUID associated with the decision for contextual multi-armed bandit experiments.
-        /// </summary>
-        public string CmabUuid { get; set; }
-
         public void AddError(string format, params object[] args)
         {
             var message = string.Format(format, args);
@@ -52,10 +47,6 @@ namespace OptimizelySDK.OptimizelyDecisions
 
             a.Errors.AddRange(b.Errors);
             a.Infos.AddRange(b.Infos);
-            if (a.CmabUuid == null && !string.IsNullOrEmpty(b.CmabUuid))
-            {
-                a.CmabUuid = b.CmabUuid;
-            }
 
             return a;
         }

@@ -97,10 +97,11 @@ namespace OptimizelySDK.Tests.CmabTests
             var result = _decisionService.GetVariation(experiment, userContext, mockConfig.Object);
 
             Assert.IsNotNull(result);
-            Assert.IsNotNull(result.ResultObject, "Variation should be returned");
-            Assert.AreEqual(VARIATION_A_KEY, result.ResultObject.Key);
-            Assert.AreEqual(VARIATION_A_ID, result.ResultObject.Id);
-            Assert.AreEqual(TEST_CMAB_UUID, result.DecisionReasons.CmabUuid);
+            Assert.IsNotNull(result.ResultObject, "VariationDecisionResult should be returned");
+            Assert.IsNotNull(result.ResultObject.Variation, "Variation should be returned");
+            Assert.AreEqual(VARIATION_A_KEY, result.ResultObject.Variation.Key);
+            Assert.AreEqual(VARIATION_A_ID, result.ResultObject.Variation.Id);
+            Assert.AreEqual(TEST_CMAB_UUID, result.ResultObject.CmabUuid);
 
             var reasons = result.DecisionReasons.ToReport(true);
             var expectedMessage =
@@ -138,7 +139,7 @@ namespace OptimizelySDK.Tests.CmabTests
 
             Assert.IsNotNull(result);
             Assert.IsNull(result.ResultObject, "No variation should be returned with 0 traffic");
-            Assert.IsNull(result.DecisionReasons.CmabUuid);
+            Assert.IsNull(result.ResultObject?.CmabUuid);
 
             var reasons = result.DecisionReasons.ToReport(true);
             var expectedMessage =
@@ -183,7 +184,7 @@ namespace OptimizelySDK.Tests.CmabTests
 
             Assert.IsNotNull(result);
             Assert.IsNull(result.ResultObject, "Should return null on error");
-            Assert.IsNull(result.DecisionReasons.CmabUuid);
+            // CmabUuid is now in VariationDecisionResult, not DecisionReasons
 
             var reasonsList = result.DecisionReasons.ToReport(true);
             Assert.IsTrue(reasonsList.Exists(reason =>
@@ -232,7 +233,7 @@ namespace OptimizelySDK.Tests.CmabTests
 
             Assert.IsNotNull(result);
             Assert.IsNull(result.ResultObject);
-            Assert.IsNull(result.DecisionReasons.CmabUuid);
+            // CmabUuid is now in VariationDecisionResult, not DecisionReasons
 
             var reasons = result.DecisionReasons.ToReport(true);
             var expectedMessage =
@@ -298,9 +299,9 @@ namespace OptimizelySDK.Tests.CmabTests
 
             Assert.IsNotNull(result1.ResultObject);
             Assert.IsNotNull(result2.ResultObject);
-            Assert.AreEqual(result1.ResultObject.Key, result2.ResultObject.Key);
-            Assert.IsNotNull(result1.DecisionReasons.CmabUuid);
-            Assert.AreEqual(result1.DecisionReasons.CmabUuid, result2.DecisionReasons.CmabUuid);
+            Assert.AreEqual(result1.ResultObject.Variation.Key, result2.ResultObject.Variation.Key);
+            Assert.IsNotNull(result1.ResultObject.CmabUuid);
+            Assert.AreEqual(result1.ResultObject.CmabUuid, result2.ResultObject.CmabUuid);
 
             cmabClientMock.Verify(c => c.FetchDecision(
                     TEST_EXPERIMENT_ID,
@@ -367,9 +368,9 @@ namespace OptimizelySDK.Tests.CmabTests
 
             Assert.IsNotNull(result1.ResultObject);
             Assert.IsNotNull(result2.ResultObject);
-            Assert.IsNotNull(result1.DecisionReasons.CmabUuid);
-            Assert.IsNotNull(result2.DecisionReasons.CmabUuid);
-            Assert.AreNotEqual(result1.DecisionReasons.CmabUuid, result2.DecisionReasons.CmabUuid);
+            Assert.IsNotNull(result1.ResultObject.CmabUuid);
+            Assert.IsNotNull(result2.ResultObject.CmabUuid);
+            Assert.AreNotEqual(result1.ResultObject.CmabUuid, result2.ResultObject.CmabUuid);
 
             cmabClientMock.Verify(c => c.FetchDecision(
                     TEST_EXPERIMENT_ID,
@@ -424,8 +425,8 @@ namespace OptimizelySDK.Tests.CmabTests
             // Assert
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.ResultObject);
-            Assert.AreEqual(VARIATION_A_KEY, result.ResultObject.Key);
-            Assert.AreEqual(TEST_CMAB_UUID, result.DecisionReasons.CmabUuid);
+            Assert.AreEqual(VARIATION_A_KEY, result.ResultObject.Variation.Key);
+            Assert.AreEqual(TEST_CMAB_UUID, result.ResultObject.CmabUuid);
         }
 
         /// <summary>
@@ -466,8 +467,8 @@ namespace OptimizelySDK.Tests.CmabTests
             // Assert
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.ResultObject);
-            Assert.IsTrue(result.ResultObject.FeatureEnabled == true);
-            Assert.AreEqual(TEST_CMAB_UUID, result.DecisionReasons.CmabUuid);
+            Assert.IsTrue(result.ResultObject.Variation.FeatureEnabled == true);
+            Assert.AreEqual(TEST_CMAB_UUID, result.ResultObject.CmabUuid);
         }
 
         /// <summary>
@@ -523,7 +524,7 @@ namespace OptimizelySDK.Tests.CmabTests
 
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.ResultObject);
-            Assert.IsNotNull(result.DecisionReasons.CmabUuid);
+            Assert.IsNotNull(result.ResultObject.CmabUuid);
 
             cmabClientMock.VerifyAll();
         }
@@ -572,7 +573,7 @@ namespace OptimizelySDK.Tests.CmabTests
 
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.ResultObject);
-            Assert.IsNotNull(result.DecisionReasons.CmabUuid);
+            Assert.IsNotNull(result.ResultObject.CmabUuid);
 
             cmabClientMock.VerifyAll();
         }
