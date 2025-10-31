@@ -36,14 +36,14 @@ namespace OptimizelySDK.Entity
         /// Determines what portion of traffic should be allocated to CMAB decision making.
         /// </summary>
         [JsonProperty("trafficAllocation")]
-        public int? TrafficAllocation { get; set; }
+        public int TrafficAllocation { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the Cmab class with specified values.
         /// </summary>
         /// <param name="attributeIds">List of attribute IDs for CMAB</param>
         /// <param name="trafficAllocation">Traffic allocation value</param>
-        public Cmab(List<string> attributeIds, int? trafficAllocation = null)
+        public Cmab(List<string> attributeIds, int trafficAllocation)
         {
             AttributeIds = attributeIds ?? new List<string>();
             TrafficAllocation = trafficAllocation;

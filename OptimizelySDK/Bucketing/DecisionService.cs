@@ -312,23 +312,13 @@ namespace OptimizelySDK.Bucketing
             var reasons = new DecisionReasons();
             var userId = user.GetUserId();
 
-            // Check if CMAB is properly configured
-            if (experiment.Cmab == null)
-            {
-                var message = string.Format(CmabConstants.CMAB_EXPERIMENT_NOT_PROPERLY_CONFIGURED,
-                    experiment.Key);
-                Logger.Log(LogLevel.ERROR, reasons.AddInfo(message));
-                return Result<VariationDecisionResult>.NewResult(
-                    new VariationDecisionResult(null, null, true), reasons);
-            }
-
             // Create dummy traffic allocation for CMAB
             var cmabTrafficAllocation = new List<TrafficAllocation>
             {
                 new TrafficAllocation
                 {
                     EntityId = "$",
-                    EndOfRange = experiment.Cmab.TrafficAllocation ?? 0,
+                    EndOfRange = experiment.Cmab.TrafficAllocation,
                 },
             };
 
@@ -347,26 +337,9 @@ namespace OptimizelySDK.Bucketing
                     new VariationDecisionResult(null), reasons);
             }
 
-            // User is in CMAB traffic allocation, fetch decision from CMAB service
-            if (CmabService == null)
-            {
-                var message = "CMAB service is not initialized.";
-                Logger.Log(LogLevel.ERROR, reasons.AddInfo(message));
-                return Result<VariationDecisionResult>.NewResult(
-                    new VariationDecisionResult(null, null, true), reasons);
-            }
-
             try
             {
                 var cmabDecision = CmabService.GetDecision(config, user, experiment.Id, options);
-
-                if (cmabDecision == null || string.IsNullOrEmpty(cmabDecision.VariationId))
-                {
-                    var message = string.Format(CmabConstants.CMAB_FETCH_FAILED, experiment.Key);
-                    Logger.Log(LogLevel.ERROR, reasons.AddInfo(message));
-                    return Result<VariationDecisionResult>.NewResult(
-                        new VariationDecisionResult(null, null, true), reasons);
-                }
 
                 // Get the variation from the project config
                 var variation = config.GetVariationFromIdByExperimentId(experiment.Id,

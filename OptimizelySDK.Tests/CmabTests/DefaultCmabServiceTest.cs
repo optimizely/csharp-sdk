@@ -649,7 +649,7 @@ namespace OptimizelySDK.Tests.CmabTests
             return new Experiment
             {
                 Id = ruleId,
-                Cmab = attributeIds == null ? null : new Entity.Cmab(attributeIds),
+                Cmab = attributeIds == null ? null : new Entity.Cmab(attributeIds, 10000),
             };
         }
 
