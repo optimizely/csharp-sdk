@@ -190,7 +190,7 @@ namespace OptimizelySDK.Tests.CmabTests
 
             Assert.IsTrue(reasonsList.Exists(reason =>
                     reason.Contains(
-                        $"Failed to fetch CMAB decision for experiment {TEST_EXPERIMENT_KEY}.")),
+                        $"Failed to fetch CMAB data for experiment {TEST_EXPERIMENT_KEY}.")),
                 $"Decision reasons should include CMAB fetch failure. Actual reasons: {string.Join(", ", reasonsList)}");
 
             _cmabServiceMock.Verify(c => c.GetDecision(
