@@ -1045,7 +1045,6 @@ namespace OptimizelySDK
                 {
                     var includeReasons = allOptions.Contains(OptimizelyDecideOption.INCLUDE_REASONS);
                     var reasonsToReport = decisionReasons.ToReport(includeReasons).ToArray();
-                    
                     var errorDecision = OptimizelyDecision.NewErrorDecision(
                         key,
                         user,
@@ -1053,12 +1052,13 @@ namespace OptimizelySDK
                         ErrorHandler,
                         Logger
                     );
-                    
+
                     if (!allOptions.Contains(OptimizelyDecideOption.ENABLED_FLAGS_ONLY) ||
                         errorDecision.Enabled)
                     {
                         decisionDictionary.Add(key, errorDecision);
                     }
+
                     continue;
                 }
 

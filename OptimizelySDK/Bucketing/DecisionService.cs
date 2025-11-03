@@ -58,12 +58,12 @@ namespace OptimizelySDK.Bucketing
 #if USE_CMAB
         private ICmabService CmabService;
 #endif
-
+        
         /// <summary>
-        /// Associative array of user IDs to an associative array
-        /// of experiments to variations.This contains all the forced variations
-        /// set by the user by calling setForcedVariation (it is not the same as the
-        /// whitelisting forcedVariations data structure in the Experiments class).
+        ///     Associative array of user IDs to an associative array
+        ///     of experiments to variations.This contains all the forced variations
+        ///     set by the user by calling setForcedVariation (it is not the same as the
+        ///     whitelisting forcedVariations data structure in the Experiments class).
         /// </summary>
 #if NET35
         private Dictionary<string, Dictionary<string, string>> ForcedVariationMap;
@@ -254,7 +254,7 @@ namespace OptimizelySDK.Bucketing
                         Logger.Log(LogLevel.INFO,
                             "This decision will not be saved since the UserProfileService is null.");
                     }
-                    
+
                     return Result<VariationDecisionResult>.NewResult(
                         new VariationDecisionResult(variation), reasons);
                 }
@@ -815,13 +815,13 @@ namespace OptimizelySDK.Bucketing
                     decisionVariation = variationResult?.Variation;
 #if USE_CMAB
                     cmabUuid = variationResult?.CmabUuid;
-                    
+
                     if (variationResult?.CmabError == true)
                     {
                         Logger.Log(LogLevel.ERROR,
                             reasons.AddInfo(
                                 $"Failed to fetch CMAB decision for user \"{userId}\" in experiment \"{experiment.Key}\" of feature \"{featureFlag.Key}\"."));
-                        
+
                         var errorDecision = new FeatureDecision(experiment, null,
                             FeatureDecision.DECISION_SOURCE_FEATURE_TEST, null, error: true);
                         return Result<FeatureDecision>.NewResult(errorDecision, reasons);
