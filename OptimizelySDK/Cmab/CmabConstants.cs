@@ -32,7 +32,7 @@ namespace OptimizelySDK.Cmab
             "User [{0}] not in CMAB experiment [{1}] due to traffic allocation.";
 
         public const string CMAB_FETCH_FAILED =
-            "Failed to fetch CMAB decision for experiment {0}.";
+            "Failed to fetch CMAB data for experiment {0}.";
 
         public const string CMAB_DECISION_FETCHED =
             "CMAB decision fetched for user {0} in experiment {1}.";
