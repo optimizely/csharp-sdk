@@ -32,13 +32,10 @@ namespace OptimizelySDK.Cmab
             "User [{0}] not in CMAB experiment [{1}] due to traffic allocation.";
 
         public const string CMAB_FETCH_FAILED =
-            "Failed to fetch CMAB decision for experiment [{0}].";
+            "Failed to fetch CMAB decision for experiment {0}.";
 
         public const string CMAB_DECISION_FETCHED =
-            "CMAB decision fetched for user [{0}] in experiment [{1}].";
-
-        public const string CMAB_EXPERIMENT_NOT_PROPERLY_CONFIGURED =
-            "CMAB experiment [{0}] is not properly configured.";
+            "CMAB decision fetched for user {0} in experiment {1}.";
 
         public static readonly TimeSpan MAX_TIMEOUT = TimeSpan.FromSeconds(10);
         public static readonly TimeSpan DEFAULT_CACHE_TTL = TimeSpan.FromMinutes(10);

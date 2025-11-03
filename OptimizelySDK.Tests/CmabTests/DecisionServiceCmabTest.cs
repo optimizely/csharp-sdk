@@ -105,7 +105,7 @@ namespace OptimizelySDK.Tests.CmabTests
 
             var reasons = result.DecisionReasons.ToReport(true);
             var expectedMessage =
-                $"CMAB decision fetched for user [{TEST_USER_ID}] in experiment [{TEST_EXPERIMENT_KEY}].";
+                $"CMAB decision fetched for user {TEST_USER_ID} in experiment {TEST_EXPERIMENT_KEY}.";
             Assert.Contains(expectedMessage, reasons);
 
             _cmabServiceMock.Verify(c => c.GetDecision(
@@ -187,12 +187,11 @@ namespace OptimizelySDK.Tests.CmabTests
             Assert.IsTrue(result.ResultObject.CmabError);
 
             var reasonsList = result.DecisionReasons.ToReport(true);
+
             Assert.IsTrue(reasonsList.Exists(reason =>
                     reason.Contains(
-                        $"Failed to fetch CMAB decision for experiment [{TEST_EXPERIMENT_KEY}].")),
+                        $"Failed to fetch CMAB decision for experiment {TEST_EXPERIMENT_KEY}.")),
                 $"Decision reasons should include CMAB fetch failure. Actual reasons: {string.Join(", ", reasonsList)}");
-            Assert.IsTrue(reasonsList.Exists(reason => reason.Contains("Error: CMAB service error")),
-                $"Decision reasons should include CMAB service error text. Actual reasons: {string.Join(", ", reasonsList)}");
 
             _cmabServiceMock.Verify(c => c.GetDecision(
                 It.IsAny<ProjectConfig>(),
@@ -313,7 +312,7 @@ namespace OptimizelySDK.Tests.CmabTests
 
             var reasons = result2.DecisionReasons.ToReport(true);
             var expectedMessage =
-                $"CMAB decision fetched for user [{TEST_USER_ID}] in experiment [{TEST_EXPERIMENT_KEY}].";
+                $"CMAB decision fetched for user {TEST_USER_ID} in experiment {TEST_EXPERIMENT_KEY}.";
             Assert.Contains(expectedMessage, reasons);
         }
 

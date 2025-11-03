@@ -338,10 +338,11 @@ namespace OptimizelySDK.Bucketing
                 return Result<VariationDecisionResult>.NewResult(
                     new VariationDecisionResult(variation, cmabDecision.CmabUuid), reasons);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 var message = string.Format(CmabConstants.CMAB_FETCH_FAILED, experiment.Key);
-                Logger.Log(LogLevel.ERROR, reasons.AddInfo($"{message} Error: {ex.Message}"));
+                reasons.AddError(message);
+                Logger.Log(LogLevel.ERROR, message);
                 return Result<VariationDecisionResult>.NewResult(
                     new VariationDecisionResult(null, null, true), reasons);
             }
