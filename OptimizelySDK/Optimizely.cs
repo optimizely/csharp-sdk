@@ -226,7 +226,12 @@ namespace OptimizelySDK
 #elif USE_CMAB
             InitializeComponents(eventDispatcher, logger, errorHandler, userProfileService,
                 notificationCenter, eventProcessor, defaultDecideOptions, null, cmabConfig);
+#else
+            InitializeComponents(eventDispatcher, logger, errorHandler, userProfileService,
+                notificationCenter, eventProcessor, defaultDecideOptions);
+#endif
 
+#if USE_ODP
             var projectConfig = ProjectConfigManager.CachedProjectConfig;
 
             if (ProjectConfigManager.CachedProjectConfig != null)
@@ -249,14 +254,6 @@ namespace OptimizelySDK
                                 projectConfig.Segments.ToList());
                         });
             }
-
-#else
-            InitializeComponents(eventDispatcher, logger, errorHandler, userProfileService,
-                notificationCenter, eventProcessor, defaultDecideOptions
-#if USE_CMAB
-                , null, cmabConfig
-#endif
-                );
 #endif
         }
 
