@@ -58,7 +58,7 @@ namespace OptimizelySDK.Bucketing
 #if USE_CMAB
         private ICmabService CmabService;
 #endif
-        
+
         /// <summary>
         ///     Associative array of user IDs to an associative array
         ///     of experiments to variations.This contains all the forced variations
@@ -68,8 +68,7 @@ namespace OptimizelySDK.Bucketing
 #if NET35
         private Dictionary<string, Dictionary<string, string>> ForcedVariationMap;
 #else
-        private System.Collections.Concurrent.ConcurrentDictionary<string,
-            Dictionary<string, string>> ForcedVariationMap;
+        private System.Collections.Concurrent.ConcurrentDictionary<string, Dictionary<string, string>> ForcedVariationMap;
 #endif
 
         /// <summary>

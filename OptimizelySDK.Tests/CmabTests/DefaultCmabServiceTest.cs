@@ -652,9 +652,5 @@ namespace OptimizelySDK.Tests.CmabTests
                 Cmab = attributeIds == null ? null : new Entity.Cmab(attributeIds, 10000),
             };
         }
-
-        
-
-        
     }
 }

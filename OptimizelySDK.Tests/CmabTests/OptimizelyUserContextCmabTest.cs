@@ -507,8 +507,8 @@ namespace OptimizelySDK.Tests.CmabTests
             Assert.IsNotNull(experiment, $"Experiment {experimentKey} should exist for CMAB tests.");
 
             experiment.Cmab = new Entity.Cmab(attributeList, trafficAllocation);
-            
             config.ExperimentIdMap[experiment.Id] = experiment;
+
             if (config.ExperimentKeyMap.ContainsKey(experiment.Key))
             {
                 config.ExperimentKeyMap[experiment.Key] = experiment;
