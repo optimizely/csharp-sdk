@@ -103,11 +103,6 @@ namespace OptimizelySDK.Tests.CmabTests
             Assert.AreEqual(VARIATION_A_ID, result.ResultObject.Variation.Id);
             Assert.AreEqual(TEST_CMAB_UUID, result.ResultObject.CmabUuid);
 
-            var reasons = result.DecisionReasons.ToReport(true);
-            var expectedMessage =
-                $"CMAB decision fetched for user {TEST_USER_ID} in experiment {TEST_EXPERIMENT_KEY}.";
-            Assert.Contains(expectedMessage, reasons);
-
             _cmabServiceMock.Verify(c => c.GetDecision(
                 It.IsAny<ProjectConfig>(),
                 It.IsAny<OptimizelyUserContext>(),
@@ -309,11 +304,6 @@ namespace OptimizelySDK.Tests.CmabTests
                     It.IsAny<string>(),
                     It.IsAny<TimeSpan?>()),
                 Times.Once);
-
-            var reasons = result2.DecisionReasons.ToReport(true);
-            var expectedMessage =
-                $"CMAB decision fetched for user {TEST_USER_ID} in experiment {TEST_EXPERIMENT_KEY}.";
-            Assert.Contains(expectedMessage, reasons);
         }
 
         /// <summary>

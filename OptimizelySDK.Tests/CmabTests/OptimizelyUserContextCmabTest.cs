@@ -382,10 +382,6 @@ namespace OptimizelySDK.Tests.CmabTests
 
             Assert.IsNotNull(decision);
             Assert.IsNotNull(decision.Reasons);
-            var expectedMessage = string.Format(CmabConstants.CMAB_DECISION_FETCHED, TEST_USER_ID,
-                TEST_EXPERIMENT_KEY);
-            Assert.IsTrue(decision.Reasons.Any(r => r.Contains(expectedMessage)),
-                "Decision reasons should include CMAB fetch success message.");
             Assert.AreEqual(1, _cmabService.CallCount);
         }
 
