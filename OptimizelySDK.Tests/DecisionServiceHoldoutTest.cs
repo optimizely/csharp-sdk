@@ -65,7 +65,7 @@ namespace OptimizelySDK.Tests
             // Use real Bucketer instead of mock
             var realBucketer = new Bucketer(LoggerMock.Object);
             DecisionService = new DecisionService(realBucketer,
-                new ErrorHandler.NoOpErrorHandler(), null, LoggerMock.Object);
+                new ErrorHandler.NoOpErrorHandler(), null, LoggerMock.Object, null);
 
             // Create an Optimizely instance for creating user contexts
             var eventDispatcher = new Event.Dispatcher.DefaultEventDispatcher(LoggerMock.Object);

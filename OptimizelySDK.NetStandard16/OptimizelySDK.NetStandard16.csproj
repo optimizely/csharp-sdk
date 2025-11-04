@@ -79,6 +79,7 @@
       <Compile Include="..\OptimizelySDK\Bucketing\UserProfileTracker.cs" />
 			<Compile Include="..\OptimizelySDK\Bucketing\UserProfileService.cs" />
 			<Compile Include="..\OptimizelySDK\Bucketing\UserProfileUtil.cs" />
+			<Compile Include="..\OptimizelySDK\Bucketing\VariationDecisionResult.cs" />
 			<Compile Include="..\OptimizelySDK\ProjectConfig.cs" />
 			<Compile Include="..\OptimizelySDK\Config\DatafileProjectConfig.cs" />
 			<Compile Include="..\OptimizelySDK\Entity\Integration.cs" />

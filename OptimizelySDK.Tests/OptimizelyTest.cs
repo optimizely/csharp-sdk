@@ -115,7 +115,7 @@ namespace OptimizelySDK.Tests
 
             DecisionServiceMock = new Mock<DecisionService>(new Bucketer(LoggerMock.Object),
                 ErrorHandlerMock.Object,
-                null, LoggerMock.Object);
+                null, LoggerMock.Object, null);
 
             NotificationCenter = new NotificationCenter(LoggerMock.Object);
             NotificationCallbackMock = new Mock<TestNotificationCallbacks>();
@@ -3371,12 +3371,13 @@ namespace OptimizelySDK.Tests
             var variationKey = "group_exp_1_var_1";
             var featureKey = "boolean_feature";
             var experiment = Config.GetExperimentFromKey(experimentKey);
-            var variation =
-                Result<Variation>.NewResult(Config.GetVariationFromKey(experimentKey, variationKey),
-                    DecisionReasons);
+            var variationObj = Config.GetVariationFromKey(experimentKey, variationKey);
+            var variation = Result<VariationDecisionResult>.NewResult(
+                new VariationDecisionResult(variationObj, null, false),
+                DecisionReasons);
             var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
             var decision = Result<FeatureDecision>.NewResult(
-                new FeatureDecision(experiment, variation.ResultObject,
+                new FeatureDecision(experiment, variationObj,
                     FeatureDecision.DECISION_SOURCE_FEATURE_TEST), DecisionReasons);
 
             // Mocking objects.
@@ -3424,10 +3425,10 @@ namespace OptimizelySDK.Tests
 
             NotificationCallbackMock.Verify(
                 nc => nc.TestActivateCallback(experiment, TestUserId, userAttributes,
-                    variation.ResultObject, It.IsAny<LogEvent>()), Times.Exactly(2));
+                    variation.ResultObject.Variation, It.IsAny<LogEvent>()), Times.Exactly(2));
             NotificationCallbackMock.Verify(
                 nc => nc.TestAnotherActivateCallback(experiment, TestUserId, userAttributes,
-                    variation.ResultObject, It.IsAny<LogEvent>()), Times.Exactly(2));
+                    variation.ResultObject.Variation, It.IsAny<LogEvent>()), Times.Exactly(2));
         }
 
         [Test]
@@ -3487,9 +3488,10 @@ namespace OptimizelySDK.Tests
             var variationKey = "control";
             var eventKey = "purchase";
             var experiment = Config.GetExperimentFromKey(experimentKey);
-            var variation =
-                Result<Variation>.NewResult(Config.GetVariationFromKey(experimentKey, variationKey),
-                    DecisionReasons);
+            var variationObj = Config.GetVariationFromKey(experimentKey, variationKey);
+            var variation = Result<VariationDecisionResult>.NewResult(
+                new VariationDecisionResult(variationObj, null, false),
+                DecisionReasons);
             var logEvent = new LogEvent(EventFactory.EventEndpoints["US"],
                 OptimizelyHelper.SingleParameter,
                 "POST", new Dictionary<string, string>());
@@ -3545,9 +3547,10 @@ namespace OptimizelySDK.Tests
             var experimentKey = "test_experiment";
             var variationKey = "variation";
             var experiment = Config.GetExperimentFromKey(experimentKey);
-            var variation =
-                Result<Variation>.NewResult(Config.GetVariationFromKey(experimentKey, variationKey),
-                    DecisionReasons);
+            var variationObj = Config.GetVariationFromKey(experimentKey, variationKey);
+            var variation = Result<VariationDecisionResult>.NewResult(
+                new VariationDecisionResult(variationObj, null, false),
+                DecisionReasons);
             var userAttributes = new UserAttributes
             {
                 {
@@ -3602,9 +3605,10 @@ namespace OptimizelySDK.Tests
             var experimentKey = "group_experiment_1";
             var variationKey = "group_exp_1_var_1";
             var experiment = Config.GetExperimentFromKey(experimentKey);
-            var variation =
-                Result<Variation>.NewResult(Config.GetVariationFromKey(experimentKey, variationKey),
-                    DecisionReasons);
+            var variationObj = Config.GetVariationFromKey(experimentKey, variationKey);
+            var variation = Result<VariationDecisionResult>.NewResult(
+                new VariationDecisionResult(variationObj, null, false),
+                DecisionReasons);
             var userAttributes = new UserAttributes
             {
                 {
@@ -3668,7 +3672,7 @@ namespace OptimizelySDK.Tests
             DecisionServiceMock.Setup(ds => ds.GetVariation(experiment,
                     It.IsAny<OptimizelyUserContext>(),
                     It.IsAny<ProjectConfig>(), null))
-                .Returns(Result<Variation>.NullResult(null));
+                .Returns(Result<VariationDecisionResult>.NullResult(null));
 
             optStronglyTyped.NotificationCenter.AddNotification(
                 NotificationCenter.NotificationType.Decision,
@@ -3697,9 +3701,10 @@ namespace OptimizelySDK.Tests
             var experimentKey = "test_experiment";
             var variationKey = "variation";
             var experiment = Config.GetExperimentFromKey(experimentKey);
-            var variation =
-                Result<Variation>.NewResult(Config.GetVariationFromKey(experimentKey, variationKey),
-                    DecisionReasons);
+            var variationObj = Config.GetVariationFromKey(experimentKey, variationKey);
+            var variation = Result<VariationDecisionResult>.NewResult(
+                new VariationDecisionResult(variationObj, null, false),
+                DecisionReasons);
             var userAttributes = new UserAttributes
             {
                 {
@@ -3760,9 +3765,10 @@ namespace OptimizelySDK.Tests
             var experimentKey = "group_experiment_1";
             var variationKey = "group_exp_1_var_1";
             var experiment = Config.GetExperimentFromKey(experimentKey);
-            var variation =
-                Result<Variation>.NewResult(Config.GetVariationFromKey(experimentKey, variationKey),
-                    DecisionReasons);
+            var variationObj = Config.GetVariationFromKey(experimentKey, variationKey);
+            var variation = Result<VariationDecisionResult>.NewResult(
+                new VariationDecisionResult(variationObj, null, false),
+                DecisionReasons);
             var userAttributes = new UserAttributes
             {
                 {
@@ -3830,7 +3836,7 @@ namespace OptimizelySDK.Tests
 
             DecisionServiceMock.Setup(ds => ds.GetVariation(It.IsAny<Experiment>(),
                     It.IsAny<OptimizelyUserContext>(), It.IsAny<ProjectConfig>()))
-                .Returns(Result<Variation>.NullResult(null));
+                .Returns(Result<VariationDecisionResult>.NullResult(null));
             //DecisionServiceMock.Setup(ds => ds.GetVariation(experiment, TestUserId, Config, null)).Returns(Result<Variation>.NullResult(null));
 
             optStronglyTyped.NotificationCenter.AddNotification(
@@ -3859,12 +3865,13 @@ namespace OptimizelySDK.Tests
         {
             var featureKey = "double_single_variable_feature";
             var experiment = Config.GetExperimentFromKey("test_experiment_double_feature");
-            var variation = Result<Variation>.NewResult(
-                Config.GetVariationFromKey("test_experiment_double_feature", "control"),
+            var variationObj = Config.GetVariationFromKey("test_experiment_double_feature", "control");
+            var variation = Result<VariationDecisionResult>.NewResult(
+                new VariationDecisionResult(variationObj, null, false),
                 DecisionReasons);
             var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
             var decision = Result<FeatureDecision>.NewResult(
-                new FeatureDecision(experiment, variation.ResultObject,
+                new FeatureDecision(experiment, variationObj,
                     FeatureDecision.DECISION_SOURCE_FEATURE_TEST), DecisionReasons);
 
             DecisionServiceMock.Setup(ds =>
@@ -3920,12 +3927,13 @@ namespace OptimizelySDK.Tests
         {
             var featureKey = "double_single_variable_feature";
             var experiment = Config.GetExperimentFromKey("test_experiment_double_feature");
-            var variation = Result<Variation>.NewResult(
-                Config.GetVariationFromKey("test_experiment_double_feature", "variation"),
+            var variationObj = Config.GetVariationFromKey("test_experiment_double_feature", "variation");
+            var variation = Result<VariationDecisionResult>.NewResult(
+                new VariationDecisionResult(variationObj, null, false),
                 DecisionReasons);
             var featureFlag = Config.GetFeatureFlagFromKey(featureKey);
             var decision = Result<FeatureDecision>.NewResult(
-                new FeatureDecision(experiment, variation.ResultObject,
+                new FeatureDecision(experiment, variationObj,
                     FeatureDecision.DECISION_SOURCE_FEATURE_TEST), DecisionReasons);
 
             DecisionServiceMock.Setup(ds =>

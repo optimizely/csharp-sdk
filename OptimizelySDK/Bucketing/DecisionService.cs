@@ -14,6 +14,11 @@
 * limitations under the License.
 */
 
+#if !(NET35 || NET40 || NETSTANDARD1_6)
+#define USE_CMAB
+#endif
+
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,6 +28,11 @@ using OptimizelySDK.Logger;
 using OptimizelySDK.OptimizelyDecisions;
 using OptimizelySDK.Utils;
 using static OptimizelySDK.Entity.Holdout;
+
+#if USE_CMAB
+using OptimizelySDK.Cmab;
+#endif
+
 
 namespace OptimizelySDK.Bucketing
 {
@@ -45,18 +55,20 @@ namespace OptimizelySDK.Bucketing
         private IErrorHandler ErrorHandler;
         private UserProfileService UserProfileService;
         private ILogger Logger;
+#if USE_CMAB
+        private ICmabService CmabService;
+#endif
 
         /// <summary>
-        /// Associative array of user IDs to an associative array
-        /// of experiments to variations.This contains all the forced variations
-        /// set by the user by calling setForcedVariation (it is not the same as the
-        /// whitelisting forcedVariations data structure in the Experiments class).
+        ///     Associative array of user IDs to an associative array
+        ///     of experiments to variations.This contains all the forced variations
+        ///     set by the user by calling setForcedVariation (it is not the same as the
+        ///     whitelisting forcedVariations data structure in the Experiments class).
         /// </summary>
 #if NET35
         private Dictionary<string, Dictionary<string, string>> ForcedVariationMap;
 #else
-        private System.Collections.Concurrent.ConcurrentDictionary<string,
-            Dictionary<string, string>> ForcedVariationMap;
+        private System.Collections.Concurrent.ConcurrentDictionary<string, Dictionary<string, string>> ForcedVariationMap;
 #endif
 
         /// <summary>
@@ -64,16 +76,23 @@ namespace OptimizelySDK.Bucketing
         /// </summary>
         /// <param name = "bucketer" > Base bucketer to allocate new users to an experiment.</param>
         /// <param name = "errorHandler" > The error handler of the Optimizely client.</param>
-        /// <param name = "userProfileService" ></ param >
-        /// < param name= "logger" > UserProfileService implementation for storing user info.</param>
+        /// <param name = "userProfileService" > UserProfileService implementation for storing user info.</param>
+        /// <param name = "logger" > Logger for logging messages.</param>
+        /// <param name = "cmabService" > CMAB service for fetching CMAB decisions. Optional.</param>
         public DecisionService(Bucketer bucketer, IErrorHandler errorHandler,
             UserProfileService userProfileService, ILogger logger
+#if USE_CMAB
+            , ICmabService cmabService = null
+#endif
         )
         {
             Bucketer = bucketer;
             ErrorHandler = errorHandler;
             UserProfileService = userProfileService;
             Logger = logger;
+#if USE_CMAB
+            CmabService = cmabService;
+#endif
 #if NET35
             ForcedVariationMap = new Dictionary<string, Dictionary<string, string>>();
 #else
@@ -89,8 +108,8 @@ namespace OptimizelySDK.Bucketing
         /// <param name="experiment">The Experiment the user will be bucketed into.</param>
         /// <param name="user">Optimizely user context.</param>
         /// <param name="config">Project config.</param>
-        /// <returns>The Variation the user is allocated into.</returns>
-        public virtual Result<Variation> GetVariation(Experiment experiment,
+        /// <returns>The VariationDecisionResult containing variation and CMAB metadata.</returns>
+        public virtual Result<VariationDecisionResult> GetVariation(Experiment experiment,
             OptimizelyUserContext user,
             ProjectConfig config
         )
@@ -105,8 +124,8 @@ namespace OptimizelySDK.Bucketing
         /// <param name="user">Optimizely user context.</param>
         /// <param name="config">Project Config.</param>
         /// <param name="options">An array of decision options.</param>
-        /// <returns></returns>
-        public virtual Result<Variation> GetVariation(Experiment experiment,
+        /// <returns>The VariationDecisionResult containing variation and CMAB metadata.</returns>
+        public virtual Result<VariationDecisionResult> GetVariation(Experiment experiment,
             OptimizelyUserContext user,
             ProjectConfig config,
             OptimizelyDecideOption[] options
@@ -145,8 +164,8 @@ namespace OptimizelySDK.Bucketing
         /// <param name="options">An array of decision options.</param>
         /// <param name="userProfileTracker">A UserProfileTracker object.</param>
         /// <param name="reasons">Set of reasons for the decision.</param>
-        /// <returns>The Variation the user is allocated into.</returns>
-        public virtual Result<Variation> GetVariation(Experiment experiment,
+        /// <returns>The VariationDecisionResult containing variation and CMAB metadata.</returns>
+        public virtual Result<VariationDecisionResult> GetVariation(Experiment experiment,
             OptimizelyUserContext user,
             ProjectConfig config,
             OptimizelyDecideOption[] options,
@@ -163,7 +182,7 @@ namespace OptimizelySDK.Bucketing
             {
                 var message = reasons.AddInfo($"Experiment {experiment.Key} is not running.");
                 Logger.Log(LogLevel.INFO, message);
-                return Result<Variation>.NullResult(reasons);
+                return Result<VariationDecisionResult>.NullResult(reasons);
             }
 
             var userId = user.GetUserId();
@@ -181,8 +200,8 @@ namespace OptimizelySDK.Bucketing
 
             if (variation != null)
             {
-                decisionVariation.SetReasons(reasons);
-                return decisionVariation;
+                return Result<VariationDecisionResult>.NewResult(
+                    new VariationDecisionResult(variation), reasons);
             }
 
             if (userProfileTracker != null)
@@ -193,7 +212,8 @@ namespace OptimizelySDK.Bucketing
                 variation = decisionVariation.ResultObject;
                 if (variation != null)
                 {
-                    return decisionVariation;
+                    return Result<VariationDecisionResult>.NewResult(
+                        new VariationDecisionResult(variation), reasons);
                 }
             }
 
@@ -205,6 +225,19 @@ namespace OptimizelySDK.Bucketing
             {
                 var bucketingId = GetBucketingId(userId, user.GetAttributes()).ResultObject;
 
+#if USE_CMAB
+                if (experiment.Cmab != null)
+                {
+                    var cmabDecisionResult =
+                        GetDecisionForCmabExperiment(experiment, user, config, bucketingId, options);
+                    reasons += cmabDecisionResult.DecisionReasons;
+
+                    return Result<VariationDecisionResult>.NewResult(
+                        cmabDecisionResult.ResultObject, reasons);
+                }
+#endif
+
+                // Standard (non-CMAB) bucketing
                 decisionVariation = Bucketer.Bucket(config, experiment, bucketingId, userId);
                 reasons += decisionVariation.DecisionReasons;
                 variation = decisionVariation.ResultObject;
@@ -220,17 +253,97 @@ namespace OptimizelySDK.Bucketing
                         Logger.Log(LogLevel.INFO,
                             "This decision will not be saved since the UserProfileService is null.");
                     }
+
+                    return Result<VariationDecisionResult>.NewResult(
+                        new VariationDecisionResult(variation), reasons);
                 }
 
-                return decisionVariation.SetReasons(reasons);
+                return Result<VariationDecisionResult>.NullResult(reasons);
             }
 
             Logger.Log(LogLevel.INFO,
                 reasons.AddInfo(
                     $"User \"{user.GetUserId()}\" does not meet conditions to be in experiment \"{experiment.Key}\"."));
 
-            return Result<Variation>.NullResult(reasons);
+            return Result<VariationDecisionResult>.NullResult(reasons);
         }
+
+        /// <summary>
+        /// Get decision for CMAB (Contextual Multi-Armed Bandit) experiment.
+        /// This method checks if the user is in the CMAB traffic allocation and fetches
+        /// the variation from the CMAB service.
+        /// </summary>
+        /// <param name="experiment">The CMAB experiment</param>
+        /// <param name="user">Optimizely user context</param>
+        /// <param name="config">Project config</param>
+        /// <param name="bucketingId">Bucketing ID for the user</param>
+        /// <param name="options">Decision options</param>
+        /// <returns>Result containing VariationDecisionResult with variation, CMAB UUID, and error status</returns>
+#if USE_CMAB
+        private Result<VariationDecisionResult> GetDecisionForCmabExperiment(
+            Experiment experiment,
+            OptimizelyUserContext user,
+            ProjectConfig config,
+            string bucketingId,
+            OptimizelyDecideOption[] options
+        )
+        {
+            var reasons = new DecisionReasons();
+            var userId = user.GetUserId();
+
+            // dummy traffic allocation for CMAB
+            var cmabTrafficAllocation = new List<TrafficAllocation>
+            {
+                new TrafficAllocation
+                {
+                    EntityId = "$",
+                    EndOfRange = experiment.Cmab.TrafficAllocation,
+                },
+            };
+
+            var bucketResult = Bucketer.BucketToEntityId(config, experiment, bucketingId, userId,
+                cmabTrafficAllocation);
+            reasons += bucketResult.DecisionReasons;
+
+            var entityId = bucketResult.ResultObject;
+            if (string.IsNullOrEmpty(entityId))
+            {
+                var message = string.Format(CmabConstants.USER_NOT_IN_CMAB_EXPERIMENT, userId,
+                    experiment.Key);
+                Logger.Log(LogLevel.INFO, reasons.AddInfo(message));
+                return Result<VariationDecisionResult>.NewResult(
+                    new VariationDecisionResult(null), reasons);
+            }
+
+            try
+            {
+                var cmabDecision = CmabService.GetDecision(config, user, experiment.Id, options);
+
+                var variation = config.GetVariationFromIdByExperimentId(experiment.Id,
+                    cmabDecision.VariationId);
+
+                if (variation == null)
+                {
+                    var message =
+                        $"User [{userId}] bucketed into invalid variation [{cmabDecision.VariationId}] for CMAB experiment [{experiment.Key}].";
+                    Logger.Log(LogLevel.INFO, reasons.AddInfo(message));
+                    return Result<VariationDecisionResult>.NewResult(
+                        new VariationDecisionResult(null), reasons);
+                }
+
+                return Result<VariationDecisionResult>.NewResult(
+                    new VariationDecisionResult(variation, cmabDecision.CmabUuid), reasons);
+            }
+            catch (Exception)
+            {
+                var message = string.Format(CmabConstants.CMAB_FETCH_FAILED, experiment.Key);
+                reasons.AddError(message);
+                Logger.Log(LogLevel.ERROR, message);
+                return Result<VariationDecisionResult>.NewResult(
+                    new VariationDecisionResult(null, null, true), reasons);
+            }
+        }
+#endif
 
         /// <summary>
         /// Gets the forced variation for the given user and experiment.
@@ -669,6 +782,9 @@ namespace OptimizelySDK.Bucketing
             {
                 var experiment = config.GetExperimentFromId(experimentId);
                 Variation decisionVariation = null;
+#if USE_CMAB
+                string cmabUuid = null;
+#endif
 
                 if (string.IsNullOrEmpty(experiment.Key))
                 {
@@ -691,7 +807,22 @@ namespace OptimizelySDK.Bucketing
                         userProfileTracker);
 
                     reasons += decisionResponse?.DecisionReasons;
-                    decisionVariation = decisionResponse.ResultObject;
+                    var variationResult = decisionResponse.ResultObject;
+                    decisionVariation = variationResult?.Variation;
+#if USE_CMAB
+                    cmabUuid = variationResult?.CmabUuid;
+
+                    if (variationResult?.Error == true)
+                    {
+                        Logger.Log(LogLevel.ERROR,
+                            reasons.AddInfo(
+                                $"Failed to fetch CMAB decision for user \"{userId}\" in experiment \"{experiment.Key}\" of feature \"{featureFlag.Key}\"."));
+
+                        var errorDecision = new FeatureDecision(experiment, null,
+                            FeatureDecision.DECISION_SOURCE_FEATURE_TEST, null, error: true);
+                        return Result<FeatureDecision>.NewResult(errorDecision, reasons);
+                    }
+#endif
                 }
 
                 if (!string.IsNullOrEmpty(decisionVariation?.Id))
@@ -700,8 +831,13 @@ namespace OptimizelySDK.Bucketing
                         reasons.AddInfo(
                             $"The user \"{userId}\" is bucketed into experiment \"{experiment.Key}\" of feature \"{featureFlag.Key}\"."));
 
+#if USE_CMAB
+                    var featureDecision = new FeatureDecision(experiment, decisionVariation,
+                        FeatureDecision.DECISION_SOURCE_FEATURE_TEST, cmabUuid);
+#else
                     var featureDecision = new FeatureDecision(experiment, decisionVariation,
                         FeatureDecision.DECISION_SOURCE_FEATURE_TEST);
+#endif
                     return Result<FeatureDecision>.NewResult(featureDecision, reasons);
                 }
             }

@@ -16,14 +16,20 @@
  */
 
 using System;
+using System.Reflection;
 using Moq;
 using NUnit.Framework;
+using OptimizelySDK.Bucketing;
+using OptimizelySDK.Cmab;
 using OptimizelySDK.Config;
 using OptimizelySDK.Event;
 using OptimizelySDK.Event.Dispatcher;
+using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Logger;
 using OptimizelySDK.Notifications;
+using OptimizelySDK.Odp;
 using OptimizelySDK.Tests.ConfigTest;
+using OptimizelySDK.Utils;
 using OptimizelySDK.Tests.EventTest;
 using OptimizelySDK.Tests.Utils;
 
@@ -39,6 +45,13 @@ namespace OptimizelySDK.Tests
         {
             LoggerMock = new Mock<ILogger>();
             LoggerMock.Setup(i => i.Log(It.IsAny<LogLevel>(), It.IsAny<string>()));
+            ResetCmabConfiguration();
+        }
+
+        [TearDown]
+        public void Cleanup()
+        {
+            ResetCmabConfiguration();
         }
 
         [Test]
@@ -243,6 +256,85 @@ namespace OptimizelySDK.Tests
             Assert.Null(optimizely.GetFeatureVariableJSON("no-feature-variable", "no-variable-key",
                 "userId"));
             optimizely.Dispose();
+        }
+
+        [Test]
+        public void SetCmabConfigStoresCacheSizeAndTtl()
+        {
+            const int cacheSize = 1234;
+            var cacheTtl = TimeSpan.FromSeconds(45);
+
+            var cmabConfig = new CmabConfig()
+                .SetCacheSize(cacheSize)
+                .SetCacheTtl(cacheTtl);
+            OptimizelyFactory.SetCmabConfig(cmabConfig);
+
+            var config = GetCurrentCmabConfiguration();
+
+            Assert.IsNotNull(config);
+            Assert.AreEqual(cacheSize, config.CacheSize);
+            Assert.AreEqual(cacheTtl, config.CacheTtl);
+            Assert.IsNull(config.Cache);
+        }
+
+        [Test]
+        public void SetCmabConfigStoresCustomCacheInstance()
+        {
+            var customCache = new LruCache<CmabCacheEntry>(maxSize: 10, itemTimeout: TimeSpan.FromMinutes(2));
+
+            var cmabConfig = new CmabConfig()
+                .SetCache(customCache);
+            OptimizelyFactory.SetCmabConfig(cmabConfig);
+
+            var config = GetCurrentCmabConfiguration();
+
+            Assert.IsNotNull(config);
+            Assert.AreSame(customCache, config.Cache);
+            Assert.IsNull(config.CacheSize);
+            Assert.IsNull(config.CacheTtl);
+        }
+
+        [Test]
+        public void NewDefaultInstanceUsesConfiguredCmabCache()
+        {
+            const int cacheSize = 7;
+            var cacheTtl = TimeSpan.FromSeconds(30);
+            var cmabConfig = new CmabConfig()
+                .SetCacheSize(cacheSize)
+                .SetCacheTtl(cacheTtl);
+            OptimizelyFactory.SetCmabConfig(cmabConfig);
+
+            var logger = new NoOpLogger();
+            var errorHandler = new NoOpErrorHandler();
+            var projectConfig = DatafileProjectConfig.Create(TestData.Datafile, logger, errorHandler);
+            var configManager = new FallbackProjectConfigManager(projectConfig);
+
+            var optimizely = OptimizelyFactory.NewDefaultInstance(configManager, logger: logger, errorHandler: errorHandler);
+
+            var decisionService = Reflection.GetFieldValue<DecisionService, Optimizely>(optimizely, "DecisionService");
+            Assert.IsNotNull(decisionService);
+
+            var cmabService = Reflection.GetFieldValue<ICmabService, DecisionService>(decisionService, "CmabService");
+            Assert.IsInstanceOf<DefaultCmabService>(cmabService);
+
+            var cache = Reflection.GetFieldValue<ICacheWithRemove<CmabCacheEntry>, DefaultCmabService>((DefaultCmabService)cmabService, "_cmabCache") as LruCache<CmabCacheEntry>;
+            Assert.IsNotNull(cache);
+            Assert.AreEqual(cacheSize, cache.MaxSizeForTesting);
+            Assert.AreEqual(cacheTtl, cache.TimeoutForTesting);
+
+            optimizely.Dispose();
+        }
+
+        private static void ResetCmabConfiguration()
+        {
+            var field = typeof(OptimizelyFactory).GetField("CmabConfiguration", BindingFlags.NonPublic | BindingFlags.Static);
+            field?.SetValue(null, null);
+        }
+
+        private static CmabConfig GetCurrentCmabConfiguration()
+        {
+            var field = typeof(OptimizelyFactory).GetField("CmabConfiguration", BindingFlags.NonPublic | BindingFlags.Static);
+            return field?.GetValue(null) as CmabConfig;
         }
     }
 }

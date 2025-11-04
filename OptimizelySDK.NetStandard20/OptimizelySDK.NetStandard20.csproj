@@ -142,6 +142,9 @@
     <Compile Include="..\OptimizelySDK\Bucketing\UserProfileUtil.cs">
       <Link>Bucketing\UserProfileUtil.cs</Link>
     </Compile>
+    <Compile Include="..\OptimizelySDK\Bucketing\VariationDecisionResult.cs">
+      <Link>Bucketing\VariationDecisionResult.cs</Link>
+    </Compile>
     <Compile Include="..\OptimizelySDK\Config\DatafileProjectConfig.cs">
       <Link>Config\DatafileProjectConfig.cs</Link>
     </Compile>
@@ -195,6 +198,9 @@
     </Compile>
     <Compile Include="..\OptimizelySDK\Cmab\CmabRetryConfig.cs">
       <Link>Cmab\CmabRetryConfig.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Cmab\CmabConfig.cs">
+      <Link>Cmab\CmabConfig.cs</Link>
     </Compile>
     <Compile Include="..\OptimizelySDK\Cmab\CmabModels.cs">
       <Link>Cmab\CmabModels.cs</Link>
@@ -368,6 +374,9 @@
     </Compile>
     <Compile Include="..\OptimizelySDK\Utils\Validator.cs">
       <Link>Utils\Validator.cs</Link>
+    </Compile>
+    <Compile Include="..\OptimizelySDK\Utils\ICacheWithRemove.cs">
+      <Link>Utils\ICacheWithRemove.cs</Link>
     </Compile>
     <Compile Include="..\OptimizelySDK\Event\BatchEventProcessor.cs">
       <Link>Event\BatchEventProcessor.cs</Link>

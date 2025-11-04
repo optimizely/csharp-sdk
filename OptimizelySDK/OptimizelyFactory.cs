@@ -18,6 +18,10 @@
 #define USE_ODP
 #endif
 
+#if !(NET35 || NET40 || NETSTANDARD1_6)
+#define USE_CMAB
+#endif
+
 using System;
 #if !NETSTANDARD1_6 && !NET35
 using System.Configuration;
@@ -35,6 +39,11 @@ using OptimizelySDK.Notifications;
 using OptimizelySDK.Odp;
 #endif
 
+#if USE_CMAB
+using OptimizelySDK.Cmab;
+using OptimizelySDK.Utils;
+#endif
+
 
 namespace OptimizelySDK
 {
@@ -49,6 +58,9 @@ namespace OptimizelySDK
         private static TimeSpan BlockingTimeOutPeriod;
         private static ILogger OptimizelyLogger;
         private const string ConfigSectionName = "optlySDKConfigSection";
+#if USE_CMAB
+        private static CmabConfig CmabConfiguration;
+#endif
 
 #if !NETSTANDARD1_6 && !NET35
         public static void SetBatchSize(int batchSize)
@@ -75,6 +87,17 @@ namespace OptimizelySDK
         {
             OptimizelyLogger = logger;
         }
+
+#if USE_CMAB
+        /// <summary>
+        /// Sets the CMAB (Contextual Multi-Armed Bandit) configuration.
+        /// </summary>
+        /// <param name="config">CMAB configuration with cache settings.</param>
+        public static void SetCmabConfig(CmabConfig config)
+        {
+            CmabConfiguration = config;
+        }
+#endif
 
         public static Optimizely NewDefaultInstance()
         {
@@ -224,13 +247,23 @@ namespace OptimizelySDK
             UserProfileService userprofileService = null, EventProcessor eventProcessor = null
         )
         {
-#if USE_ODP
+#if USE_ODP && USE_CMAB
+            var odpManager = new OdpManager.Builder()
+                                .WithErrorHandler(errorHandler)
+                                .WithLogger(logger)
+                                .Build();
+            return new Optimizely(configManager, notificationCenter, eventDispatcher, logger,
+                errorHandler, userprofileService, eventProcessor, null, odpManager, CmabConfiguration);
+#elif USE_ODP
             var odpManager = new OdpManager.Builder()
                                 .WithErrorHandler(errorHandler)
                                 .WithLogger(logger)
                                 .Build();
             return new Optimizely(configManager, notificationCenter, eventDispatcher, logger,
                 errorHandler, userprofileService, eventProcessor, null, odpManager);
+#elif USE_CMAB
+            return new Optimizely(configManager, notificationCenter, eventDispatcher, logger,
+                errorHandler, userprofileService, eventProcessor, null, CmabConfiguration);
 #else
             return new Optimizely(configManager, notificationCenter, eventDispatcher, logger,
                 errorHandler, userprofileService, eventProcessor);

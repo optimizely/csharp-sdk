@@ -58,9 +58,9 @@ namespace OptimizelySDK.Cmab
             string cmabUuid,
             TimeSpan? timeout = null)
         {
-            var url = $"{CmabConstants.PredictionUrl}/{ruleId}";
+            var url = $"{CmabConstants.PREDICTION_URL}/{ruleId}";
             var body = BuildRequestBody(ruleId, userId, attributes, cmabUuid);
-            var perAttemptTimeout = timeout ?? CmabConstants.MaxTimeout;
+            var perAttemptTimeout = timeout ?? CmabConstants.MAX_TIMEOUT;
 
             if (_retryConfig == null)
             {
@@ -90,7 +90,7 @@ namespace OptimizelySDK.Cmab
         private static StringContent BuildContent(object payload)
         {
             var json = JsonConvert.SerializeObject(payload);
-            return new StringContent(json, Encoding.UTF8, CmabConstants.ContentTypeJson);
+            return new StringContent(json, Encoding.UTF8, CmabConstants.CONTENT_TYPE);
         }
 
         private static CmabRequest BuildRequestBody(string ruleId, string userId, IDictionary<string, object> attributes, string cmabUuid)
@@ -135,8 +135,8 @@ namespace OptimizelySDK.Cmab
                     if (!response.IsSuccessStatusCode)
                     {
                         var status = (int)response.StatusCode;
-                        _logger.Log(LogLevel.ERROR, string.Format(CmabConstants.ErrorFetchFailedFmt, status));
-                        throw new CmabFetchException(string.Format(CmabConstants.ErrorFetchFailedFmt, status));
+                        _logger.Log(LogLevel.ERROR, string.Format(CmabConstants.ERROR_FETCH_FAILED_FMT, status));
+                        throw new CmabFetchException(string.Format(CmabConstants.ERROR_FETCH_FAILED_FMT, status));
                     }
 
                     var responseText = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
@@ -144,8 +144,8 @@ namespace OptimizelySDK.Cmab
                     var j = JObject.Parse(responseText);
                     if (!ValidateResponse(j))
                     {
-                        _logger.Log(LogLevel.ERROR, CmabConstants.ErrorInvalidResponse);
-                        throw new CmabInvalidResponseException(CmabConstants.ErrorInvalidResponse);
+                        _logger.Log(LogLevel.ERROR, CmabConstants.ERROR_INVALID_RESPONSE);
+                        throw new CmabInvalidResponseException(CmabConstants.ERROR_INVALID_RESPONSE);
                     }
 
                     var variationIdToken = j["predictions"][0]["variation_id"];
@@ -153,7 +153,7 @@ namespace OptimizelySDK.Cmab
                 }
                 catch (JsonException ex)
                 {
-                    _logger.Log(LogLevel.ERROR, CmabConstants.ErrorInvalidResponse);
+                    _logger.Log(LogLevel.ERROR, CmabConstants.ERROR_INVALID_RESPONSE);
                     throw new CmabInvalidResponseException(ex.Message);
                 }
                 catch (CmabInvalidResponseException)
@@ -162,13 +162,13 @@ namespace OptimizelySDK.Cmab
                 }
                 catch (HttpRequestException ex)
                 {
-                    _logger.Log(LogLevel.ERROR, string.Format(CmabConstants.ErrorFetchFailedFmt, ex.Message));
-                    throw new CmabFetchException(string.Format(CmabConstants.ErrorFetchFailedFmt, ex.Message));
+                    _logger.Log(LogLevel.ERROR, string.Format(CmabConstants.ERROR_FETCH_FAILED_FMT, ex.Message));
+                    throw new CmabFetchException(string.Format(CmabConstants.ERROR_FETCH_FAILED_FMT, ex.Message));
                 }
                 catch (Exception ex)
                 {
-                    _logger.Log(LogLevel.ERROR, string.Format(CmabConstants.ErrorFetchFailedFmt, ex.Message));
-                    throw new CmabFetchException(string.Format(CmabConstants.ErrorFetchFailedFmt, ex.Message));
+                    _logger.Log(LogLevel.ERROR, string.Format(CmabConstants.ERROR_FETCH_FAILED_FMT, ex.Message));
+                    throw new CmabFetchException(string.Format(CmabConstants.ERROR_FETCH_FAILED_FMT, ex.Message));
                 }
             }
         }
@@ -187,8 +187,8 @@ namespace OptimizelySDK.Cmab
                 {
                     if (attempt >= _retryConfig.MaxRetries)
                     {
-                        _logger.Log(LogLevel.ERROR, string.Format(CmabConstants.ErrorFetchFailedFmt, CmabConstants.ExhaustRetryMessage));
-                        throw new CmabFetchException(string.Format(CmabConstants.ErrorFetchFailedFmt, CmabConstants.ExhaustRetryMessage));
+                        _logger.Log(LogLevel.ERROR, string.Format(CmabConstants.ERROR_FETCH_FAILED_FMT, CmabConstants.EXHAUST_RETRY_MESSAGE));
+                        throw new CmabFetchException(string.Format(CmabConstants.ERROR_FETCH_FAILED_FMT, CmabConstants.EXHAUST_RETRY_MESSAGE));
                     }
 
                     _logger.Log(LogLevel.INFO, $"Retrying CMAB request (attempt: {attempt + 1}) after {backoff.TotalSeconds} seconds...");
