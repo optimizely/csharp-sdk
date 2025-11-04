@@ -179,7 +179,7 @@ namespace OptimizelySDK.Tests.CmabTests
 
             Assert.IsNotNull(result);
             Assert.IsNull(result.ResultObject.Variation, "Should return null on error");
-            Assert.IsTrue(result.ResultObject.CmabError);
+            Assert.IsTrue(result.ResultObject.Error);
 
             var reasonsList = result.DecisionReasons.ToReport(true);
 

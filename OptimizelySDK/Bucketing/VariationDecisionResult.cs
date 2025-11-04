@@ -24,12 +24,12 @@ namespace OptimizelySDK.Bucketing
     public class VariationDecisionResult
     {
         public VariationDecisionResult(Variation variation, string cmabUuid = null,
-            bool cmabError = false
+            bool error = false
         )
         {
             Variation = variation;
             CmabUuid = cmabUuid;
-            CmabError = cmabError;
+            Error = error;
         }
 
         /// <summary>
@@ -43,9 +43,9 @@ namespace OptimizelySDK.Bucketing
         public string CmabUuid { get; set; }
 
         /// <summary>
-        ///     Indicates whether an error occurred during the CMAB decision process.
-        ///     False for non-CMAB experiments or successful CMAB decisions.
+        ///     Indicates whether an error occurred during the decision process.
+        ///     False for successful decisions or when no error occurred.
         /// </summary>
-        public bool CmabError { get; set; }
+        public bool Error { get; set; }
     }
 }

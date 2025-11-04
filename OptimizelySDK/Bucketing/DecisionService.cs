@@ -812,7 +812,7 @@ namespace OptimizelySDK.Bucketing
 #if USE_CMAB
                     cmabUuid = variationResult?.CmabUuid;
 
-                    if (variationResult?.CmabError == true)
+                    if (variationResult?.Error == true)
                     {
                         Logger.Log(LogLevel.ERROR,
                             reasons.AddInfo(
