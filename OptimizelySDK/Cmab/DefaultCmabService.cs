@@ -149,8 +149,11 @@ namespace OptimizelySDK.Cmab
             OptimizelyDecideOption[] options = null)
         {
             var optionSet = options ?? new OptimizelyDecideOption[0];
+            // Check before filtering attributes
+            Console.WriteLine($"[SDK DEBUG]: Attributes before filtering: {JsonConvert.SerializeObject(userContext.GetAttributes())}");
             var filteredAttributes = FilterAttributes(projectConfig, userContext, ruleId);
-
+            // Log filtered attributes for debugging
+            Console.WriteLine($"[SDK DEBUG]: Filtered attributes for CMAB decision: {JsonConvert.SerializeObject(filteredAttributes)}");
             if (optionSet.Contains(OptimizelyDecideOption.IGNORE_CMAB_CACHE))
             {
                 _logger.Log(LogLevel.DEBUG, "Ignoring CMAB cache.");
@@ -173,7 +176,7 @@ namespace OptimizelySDK.Cmab
 
             var cachedValue = _cmabCache.Lookup(cacheKey);
             var attributesHash = HashAttributes(filteredAttributes);
-
+            Console.WriteLine($"[SDK DEBUG]: cached hash: {cachedValue?.AttributesHash}, current hash: {attributesHash}");
             if (cachedValue != null)
             {
                 if (string.Equals(cachedValue.AttributesHash, attributesHash, StringComparison.Ordinal))

@@ -425,6 +425,7 @@ namespace OptimizelySDK
 
             var userEvent = UserEventFactory.CreateConversionEvent(config, eventKey, userId,
                 userAttributes, eventTags);
+            Console.WriteLine($"UserEvent check: {userEvent}"); 
             EventProcessor.Process(userEvent);
             Logger.Log(LogLevel.INFO,
                 string.Format("Tracking event {0} for user {1}.", eventKey, userId));

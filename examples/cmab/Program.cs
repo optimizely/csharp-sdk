@@ -55,12 +55,12 @@ namespace CmabTests
         // ========================================
 
         // SDK Key from rc (prep) environment
-        private const string SDK_KEY = "M2FtWzpByUB8aQE7jos8w"; // rc (prep)
+        private const string SDK_KEY = "YOUR_SDK_KEY"; // rc (prep)
         private const string FLAG_KEY = "cmab_test";
 
         // Test user IDs
         private const string USER_QUALIFIED = "test_user_99"; // Will be bucketed into CMAB
-        private const string USER_NOT_BUCKETED = "test_user_1"; // Won't be bucketed (traffic allocation)
+        private const string USER_NOT_BUCKETED = "test_user"; // Won't be bucketed (traffic allocation)
         private const string USER_CACHE_TEST = "cache_user_123";
 
         // ========================================
@@ -192,7 +192,6 @@ namespace CmabTests
             // Second decision with changed valid attribute
             var userContext2 = optimizelyClient.CreateUserContext(USER_CACHE_TEST + "_attr", new UserAttributes
             {
-                { "hello", true },
                 { "world", true }
             });
 
@@ -203,7 +202,7 @@ namespace CmabTests
             // Third decision with same user and attributes
             var userContext3 = optimizelyClient.CreateUserContext(USER_CACHE_TEST + "_attr", new UserAttributes
             {
-                { "hello", true }
+                { "world", true }
             });
 
             Console.WriteLine("\nDecision with same user and attributes (cache hit expected):");
@@ -439,22 +438,23 @@ namespace CmabTests
         private static void TestEventTracking(Optimizely optimizelyClient)
         {
             Console.WriteLine("\n--- Test: Event Tracking with CMAB UUID ---");
-
-            var userContext = optimizelyClient.CreateUserContext("test", new UserAttributes
+            // Do this for 10 different users to see CMAB UUID in logs
+            for (int i = 0; i < 10; i++)
             {
-                { "hello", true }
-            });
+                var userId = $"{USER_NOT_BUCKETED}_{i}";
+                var userContextLoop = optimizelyClient.CreateUserContext(userId, new UserAttributes
+                {
+                    { "hello", true }
+                });
 
-            // Make CMAB decision
-            var decision = userContext.Decide(FLAG_KEY);
-            PrintDecision("Decision for Events", decision);
+                // Make CMAB decision
+                var decisionLoop = userContextLoop.Decide(FLAG_KEY);
+                PrintDecision($"Decision for Events - User {i + 1}", decisionLoop);
 
-            // Track a conversion event
-            userContext.TrackEvent("event1");
-
-            Console.WriteLine("\nConversion event tracked: 'event1'");
-            Console.WriteLine("Expected: Impression events contain CMAB UUID, conversion events do NOT contain CMAB UUID");
-            Console.WriteLine("Check event processor logs for CMAB UUID only in impression events");
+                // Track a conversion event
+                userContextLoop.TrackEvent("cmab_event");
+                Console.WriteLine($"Conversion event tracked: 'cmab_event' for user {userId}\n");
+            }
         }
 
         /// <summary>
