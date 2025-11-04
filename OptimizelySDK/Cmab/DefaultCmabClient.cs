@@ -59,6 +59,7 @@ namespace OptimizelySDK.Cmab
             TimeSpan? timeout = null)
         {
             var url = $"{CmabConstants.PREDICTION_URL}/{ruleId}";
+            Console.WriteLine($"[SDK DEBUG]: Fetching CMAB decision from {url}");
             var body = BuildRequestBody(ruleId, userId, attributes, cmabUuid);
             var perAttemptTimeout = timeout ?? CmabConstants.MAX_TIMEOUT;
 

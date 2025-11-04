@@ -178,6 +178,7 @@ namespace OptimizelySDK.Cmab
             {
                 if (string.Equals(cachedValue.AttributesHash, attributesHash, StringComparison.Ordinal))
                 {
+                    _logger.Log(LogLevel.DEBUG, "CMAB cache hit.");
                     return new CmabDecision(cachedValue.VariationId, cachedValue.CmabUuid);
                 }
                 else
