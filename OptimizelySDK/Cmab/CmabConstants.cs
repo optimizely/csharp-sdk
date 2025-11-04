@@ -34,9 +34,6 @@ namespace OptimizelySDK.Cmab
         public const string CMAB_FETCH_FAILED =
             "Failed to fetch CMAB data for experiment {0}.";
 
-        public const string CMAB_DECISION_FETCHED =
-            "CMAB decision fetched for user {0} in experiment {1}.";
-
         public static readonly TimeSpan MAX_TIMEOUT = TimeSpan.FromSeconds(10);
         public static readonly TimeSpan DEFAULT_CACHE_TTL = TimeSpan.FromMinutes(10);
 

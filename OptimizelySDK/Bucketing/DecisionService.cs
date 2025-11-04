@@ -331,10 +331,6 @@ namespace OptimizelySDK.Bucketing
                         new VariationDecisionResult(null), reasons);
                 }
 
-                var successMessage = string.Format(CmabConstants.CMAB_DECISION_FETCHED, userId,
-                    experiment.Key);
-                Logger.Log(LogLevel.INFO, reasons.AddInfo(successMessage));
-
                 return Result<VariationDecisionResult>.NewResult(
                     new VariationDecisionResult(variation, cmabDecision.CmabUuid), reasons);
             }
