@@ -49,10 +49,10 @@ public class CmabConfig
 |-----------|------|----------|---------|-------------|
 | CacheSize | int? | No | 10000 | Maximum number of decisions to cache. Increase for applications with many users or experiments. |
 | CacheTtl | TimeSpan? | No | 30 minutes | How long cache entries remain valid. Lower values ensure fresher decisions but increase API calls. |
-| Cache | ICacheWithRemove<CmabCacheEntry> | No | null | Custom cache implementation for distributed systems. If null, the SDK uses an in-memory cache. |
+| Cache | ICacheWithRemove<CmabCacheEntry> | No | `LruCache<CmabCacheEntry>` with default size and TTL | Custom cache implementation for distributed systems. When provided, `CacheSize` and `CacheTtl` are ignored. If not provided, the SDK uses an in-memory LRU cache with the configured size and TTL. |
 | PredictionEndpointTemplate | string | No | `https://prediction.cmab.optimizely.com/predict/{0}` | Custom prediction endpoint template. Use `{0}` as placeholder for rule ID. Useful for proxy configurations or custom routing scenarios. |
 
-Note: When CacheSize or CacheTtl are set to null, the SDK uses the default values.
+**Note**: When `CacheSize` or `CacheTtl` are set to null, the SDK uses the default values. If a custom `Cache` implementation is provided, it takes precedence and the `CacheSize` and `CacheTtl` settings are ignored.
 
 ## Returns
 
@@ -320,5 +320,5 @@ Consider implementing a custom cache when:
 
 Consider configuring a custom prediction endpoint when:
 
-- **Proxy requirements**: Route CMAB requests through a corporate proxy server
+- **Proxy requirements**: Route CMAB requests through a proxy server
 - **Monitoring and logging**: Route requests through intermediary services for observability
