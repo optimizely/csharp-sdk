@@ -44,6 +44,11 @@ namespace OptimizelySDK
         public ICacheWithRemove<CmabCacheEntry> Cache { get; private set; }
 
         /// <summary>
+        ///     Gets or sets the prediction endpoint URL template for CMAB requests.
+        /// </summary>
+        public string PredictionEndpointTemplate { get; private set; } = CmabConstants.DEFAULT_PREDICTION_URL_TEMPLATE;
+
+        /// <summary>
         ///     Sets the maximum number of entries in the CMAB cache.
         /// </summary>
         /// <param name="cacheSize">Maximum number of entries in the cache.</param>
@@ -58,7 +63,7 @@ namespace OptimizelySDK
         ///     Sets the time-to-live for CMAB cache entries.
         /// </summary>
         /// <param name="cacheTtl">Time-to-live for cache entries.</param>
-        /// <returns>This CmabConfig instance for method chaining.</returns>
+        /// <returns>CmabConfig instance</returns>
         public CmabConfig SetCacheTtl(TimeSpan cacheTtl)
         {
             CacheTtl = cacheTtl;
@@ -70,10 +75,21 @@ namespace OptimizelySDK
         ///     When set, CacheSize and CacheTtl will be ignored.
         /// </summary>
         /// <param name="cache">Custom cache implementation for CMAB decisions.</param>
-        /// <returns>This CmabConfig instance for method chaining.</returns>
+        /// <returns>CmabConfig Instance</returns>
         public CmabConfig SetCache(ICacheWithRemove<CmabCacheEntry> cache)
         {
             Cache = cache ?? throw new ArgumentNullException(nameof(cache));
+            return this;
+        }
+
+        /// <summary>
+        ///     Sets the prediction endpoint URL template for CMAB requests.
+        /// </summary>
+        /// <param name="template">The URL template</param>
+        /// <returns>CmabConfig Instance</returns>
+        public CmabConfig SetPredictionEndpointTemplate(string template)
+        {
+            PredictionEndpointTemplate = template;
             return this;
         }
     }

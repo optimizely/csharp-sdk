@@ -6268,5 +6268,77 @@ namespace OptimizelySDK.Tests
         }
 
         #endregion
+
+        #region Test Optimizely & CMAB
+
+        [Test]
+        public void TestInitializeCmabServiceWithCustomEndpointPropagatesCorrectly()
+        {
+            var customEndpoint = "https://custom.example.com/predict/{0}";
+            var cmabConfig = new CmabConfig().SetPredictionEndpointTemplate(customEndpoint);
+            
+            var configManager = new Mock<ProjectConfigManager>();
+            var datafileConfig = DatafileProjectConfig.Create(TestData.Datafile, LoggerMock.Object, ErrorHandlerMock.Object);
+            configManager.Setup(cm => cm.GetConfig()).Returns(datafileConfig);
+
+            var optimizely = new Optimizely(
+                configManager: configManager.Object,
+                notificationCenter: null,
+                eventDispatcher: EventDispatcherMock.Object,
+                logger: LoggerMock.Object,
+                errorHandler: ErrorHandlerMock.Object,
+                userProfileService: null,
+                eventProcessor: null,
+                defaultDecideOptions: null,
+                odpManager: null,
+                cmabConfig: cmabConfig
+            );
+
+            var decisionService = optimizely.GetType()
+                .GetField("DecisionService", BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(optimizely);
+            var cmabService = decisionService?.GetType()
+                .GetField("CmabService", BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(decisionService);
+            var client = cmabService?.GetType()
+                .GetField("_cmabClient", BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(cmabService);
+            var actualEndpoint = client?.GetType()
+                .GetField("_predictionEndpointTemplate", BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(client) as string;
+
+            Assert.AreEqual(customEndpoint, actualEndpoint, "Custom endpoint should propagate to CMAB client");
+        }
+
+        [Test]
+        public void TestInitializeCmabServiceWithoutCustomEndpointUsesDefault()
+        {
+            var configManager = new Mock<ProjectConfigManager>();
+            var datafileConfig = DatafileProjectConfig.Create(TestData.Datafile, LoggerMock.Object, ErrorHandlerMock.Object);
+            configManager.Setup(cm => cm.GetConfig()).Returns(datafileConfig);
+
+            var optimizely = new Optimizely(
+                configManager: configManager.Object,
+                notificationCenter: null,
+                eventDispatcher: EventDispatcherMock.Object,
+                logger: LoggerMock.Object,
+                errorHandler: ErrorHandlerMock.Object,
+                userProfileService: null,
+                eventProcessor: null,
+                defaultDecideOptions: null,
+                odpManager: null,
+                cmabConfig: null
+            );
+
+            var decisionService = optimizely.GetType()
+                .GetField("DecisionService", BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(optimizely);
+            var cmabService = decisionService?.GetType()
+                .GetField("CmabService", BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(decisionService);
+            var client = cmabService?.GetType()
+                .GetField("_cmabClient", BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(cmabService);
+            var actualEndpoint = client?.GetType()
+                .GetField("_predictionEndpointTemplate", BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(client) as string;
+
+            Assert.AreEqual(OptimizelySDK.Cmab.CmabConstants.DEFAULT_PREDICTION_URL_TEMPLATE, 
+                actualEndpoint, "Should use default endpoint when no config provided");
+        }
+
+        #endregion
     }
 }

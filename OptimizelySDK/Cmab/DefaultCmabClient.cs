@@ -38,13 +38,16 @@ namespace OptimizelySDK.Cmab
         private readonly CmabRetryConfig _retryConfig;
         private readonly ILogger _logger;
         private readonly IErrorHandler _errorHandler;
+        private readonly string _predictionEndpointTemplate;
 
         public DefaultCmabClient(
+            string predictionEndpointTemplate,
             HttpClient httpClient = null,
             CmabRetryConfig retryConfig = null,
             ILogger logger = null,
             IErrorHandler errorHandler = null)
         {
+            _predictionEndpointTemplate = predictionEndpointTemplate;
             _httpClient = httpClient ?? new HttpClient();
             _retryConfig = retryConfig;
             _logger = logger ?? new NoOpLogger();
@@ -58,7 +61,7 @@ namespace OptimizelySDK.Cmab
             string cmabUuid,
             TimeSpan? timeout = null)
         {
-            var url = $"{CmabConstants.PREDICTION_URL}/{ruleId}";
+            var url = string.Format(_predictionEndpointTemplate, ruleId);
             var body = BuildRequestBody(ruleId, userId, attributes, cmabUuid);
             var perAttemptTimeout = timeout ?? CmabConstants.MAX_TIMEOUT;
 
