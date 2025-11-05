@@ -209,7 +209,7 @@ namespace OptimizelySDK.Tests.CmabTests
             var result = client.FetchDecision("rule-456", "user-1", null, "uuid-1");
 
             Assert.AreEqual("variation123", result);
-            Assert.AreEqual("https://custom.example.com/api/rule-456", capturedUrl, 
+            Assert.AreEqual("https://custom.example.com/api/rule-456", capturedUrl,
                 "Should call custom endpoint with rule ID formatted into template");
         }
     }

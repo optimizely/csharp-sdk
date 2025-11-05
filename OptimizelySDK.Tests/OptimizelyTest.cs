@@ -22,6 +22,7 @@ using System.Threading;
 using Moq;
 using NUnit.Framework;
 using OptimizelySDK.Bucketing;
+using OptimizelySDK.Cmab;
 using OptimizelySDK.Config;
 using OptimizelySDK.Entity;
 using OptimizelySDK.ErrorHandler;
@@ -6276,7 +6277,6 @@ namespace OptimizelySDK.Tests
         {
             var customEndpoint = "https://custom.example.com/predict/{0}";
             var cmabConfig = new CmabConfig().SetPredictionEndpointTemplate(customEndpoint);
-            
             var configManager = new Mock<ProjectConfigManager>();
             var datafileConfig = DatafileProjectConfig.Create(TestData.Datafile, LoggerMock.Object, ErrorHandlerMock.Object);
             configManager.Setup(cm => cm.GetConfig()).Returns(datafileConfig);
@@ -6335,7 +6335,7 @@ namespace OptimizelySDK.Tests
             var actualEndpoint = client?.GetType()
                 .GetField("_predictionEndpointTemplate", BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(client) as string;
 
-            Assert.AreEqual(OptimizelySDK.Cmab.CmabConstants.DEFAULT_PREDICTION_URL_TEMPLATE, 
+            Assert.AreEqual(CmabConstants.DEFAULT_PREDICTION_URL_TEMPLATE,
                 actualEndpoint, "Should use default endpoint when no config provided");
         }
 
