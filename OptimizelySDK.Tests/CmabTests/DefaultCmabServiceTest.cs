@@ -383,7 +383,7 @@ namespace OptimizelySDK.Tests.CmabTests
         {
             var cache = new LruCache<CmabCacheEntry>(CmabConstants.DEFAULT_CACHE_SIZE,
                 CmabConstants.DEFAULT_CACHE_TTL, _logger);
-            var client = new DefaultCmabClient(null,
+            var client = new DefaultCmabClient(CmabConstants.DEFAULT_PREDICTION_URL_TEMPLATE, null,
                 new CmabRetryConfig(1, TimeSpan.FromMilliseconds(100)), _logger);
             var service = new DefaultCmabService(cache, client, _logger);
             var internalCache = GetInternalCache(service) as LruCache<CmabCacheEntry>;
@@ -397,7 +397,7 @@ namespace OptimizelySDK.Tests.CmabTests
         public void ConstructorAppliesCustomCacheSize()
         {
             var cache = new LruCache<CmabCacheEntry>(42, CmabConstants.DEFAULT_CACHE_TTL, _logger);
-            var client = new DefaultCmabClient(null,
+            var client = new DefaultCmabClient(CmabConstants.DEFAULT_PREDICTION_URL_TEMPLATE, null,
                 new CmabRetryConfig(1, TimeSpan.FromMilliseconds(100)), _logger);
             var service = new DefaultCmabService(cache, client, _logger);
             var internalCache = GetInternalCache(service) as LruCache<CmabCacheEntry>;
@@ -413,7 +413,7 @@ namespace OptimizelySDK.Tests.CmabTests
             var expectedTtl = TimeSpan.FromMinutes(3);
             var cache = new LruCache<CmabCacheEntry>(CmabConstants.DEFAULT_CACHE_SIZE, expectedTtl,
                 _logger);
-            var client = new DefaultCmabClient(null,
+            var client = new DefaultCmabClient(CmabConstants.DEFAULT_PREDICTION_URL_TEMPLATE, null,
                 new CmabRetryConfig(1, TimeSpan.FromMilliseconds(100)), _logger);
             var service = new DefaultCmabService(cache, client, _logger);
             var internalCache = GetInternalCache(service) as LruCache<CmabCacheEntry>;
@@ -428,7 +428,7 @@ namespace OptimizelySDK.Tests.CmabTests
         {
             var expectedTtl = TimeSpan.FromSeconds(90);
             var cache = new LruCache<CmabCacheEntry>(5, expectedTtl, _logger);
-            var client = new DefaultCmabClient(null,
+            var client = new DefaultCmabClient(CmabConstants.DEFAULT_PREDICTION_URL_TEMPLATE, null,
                 new CmabRetryConfig(1, TimeSpan.FromMilliseconds(100)), _logger);
             var service = new DefaultCmabService(cache, client, _logger);
             var internalCache = GetInternalCache(service) as LruCache<CmabCacheEntry>;
@@ -442,7 +442,7 @@ namespace OptimizelySDK.Tests.CmabTests
         public void ConstructorUsesProvidedCustomCacheInstance()
         {
             var customCache = new LruCache<CmabCacheEntry>(3, TimeSpan.FromSeconds(5), _logger);
-            var client = new DefaultCmabClient(null,
+            var client = new DefaultCmabClient(CmabConstants.DEFAULT_PREDICTION_URL_TEMPLATE, null,
                 new CmabRetryConfig(1, TimeSpan.FromMilliseconds(100)), _logger);
             var service = new DefaultCmabService(customCache, client, _logger);
             var cache = GetInternalCache(service);
@@ -455,7 +455,7 @@ namespace OptimizelySDK.Tests.CmabTests
         public void ConstructorAcceptsAnyICacheImplementation()
         {
             var fakeCache = new FakeCache();
-            var client = new DefaultCmabClient(null,
+            var client = new DefaultCmabClient(CmabConstants.DEFAULT_PREDICTION_URL_TEMPLATE, null,
                 new CmabRetryConfig(1, TimeSpan.FromMilliseconds(100)), _logger);
             var service = new DefaultCmabService(fakeCache, client, _logger);
             var cache = GetInternalCache(service);
@@ -470,7 +470,7 @@ namespace OptimizelySDK.Tests.CmabTests
         {
             var cache = new LruCache<CmabCacheEntry>(CmabConstants.DEFAULT_CACHE_SIZE,
                 CmabConstants.DEFAULT_CACHE_TTL, _logger);
-            var client = new DefaultCmabClient(null,
+            var client = new DefaultCmabClient(CmabConstants.DEFAULT_PREDICTION_URL_TEMPLATE, null,
                 new CmabRetryConfig(1, TimeSpan.FromMilliseconds(100)), _logger);
             var service = new DefaultCmabService(cache, client, _logger);
             var internalClient = GetInternalClient(service);

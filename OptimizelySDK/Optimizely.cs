@@ -299,7 +299,7 @@ namespace OptimizelySDK
 
             var cmabRetryConfig = new CmabRetryConfig(CmabConstants.CMAB_MAX_RETRIES,
                 CmabConstants.CMAB_INITIAL_BACKOFF);
-            var cmabClient = new DefaultCmabClient(null, cmabRetryConfig, Logger);
+            var cmabClient = new DefaultCmabClient(config.PredictionEndpointTemplate, null, cmabRetryConfig, Logger, null);
 
             cmabService = new DefaultCmabService(cache, cmabClient, Logger);
 

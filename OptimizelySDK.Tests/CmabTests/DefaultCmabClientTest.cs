@@ -96,7 +96,7 @@ namespace OptimizelySDK.Tests.CmabTests
         public void FetchDecisionReturnsSuccessNoRetry()
         {
             var http = MakeClient(new ResponseStep(HttpStatusCode.OK, ValidBody("v1")));
-            var client = new DefaultCmabClient(http, retryConfig: null, logger: new NoOpLogger(), errorHandler: new NoOpErrorHandler());
+            var client = new DefaultCmabClient(CmabConstants.DEFAULT_PREDICTION_URL_TEMPLATE, http, retryConfig: null, logger: new NoOpLogger(), errorHandler: new NoOpErrorHandler());
             var result = client.FetchDecision("rule-1", "user-1", null, "uuid-1");
 
             Assert.AreEqual("v1", result);
@@ -106,7 +106,7 @@ namespace OptimizelySDK.Tests.CmabTests
         public void FetchDecisionHttpExceptionNoRetry()
         {
             var http = MakeClientExceptionSequence(new HttpRequestException("boom"));
-            var client = new DefaultCmabClient(http, retryConfig: null);
+            var client = new DefaultCmabClient(CmabConstants.DEFAULT_PREDICTION_URL_TEMPLATE, http, retryConfig: null);
 
             Assert.Throws<CmabFetchException>(() =>
                 client.FetchDecision("rule-1", "user-1", null, "uuid-1"));
@@ -116,7 +116,7 @@ namespace OptimizelySDK.Tests.CmabTests
         public void FetchDecisionNon2xxNoRetry()
         {
             var http = MakeClient(new ResponseStep(HttpStatusCode.InternalServerError, null));
-            var client = new DefaultCmabClient(http, retryConfig: null);
+            var client = new DefaultCmabClient(CmabConstants.DEFAULT_PREDICTION_URL_TEMPLATE, http, retryConfig: null);
 
             Assert.Throws<CmabFetchException>(() =>
                 client.FetchDecision("rule-1", "user-1", null, "uuid-1"));
@@ -126,7 +126,7 @@ namespace OptimizelySDK.Tests.CmabTests
         public void FetchDecisionInvalidJsonNoRetry()
         {
             var http = MakeClient(new ResponseStep(HttpStatusCode.OK, "not json"));
-            var client = new DefaultCmabClient(http, retryConfig: null);
+            var client = new DefaultCmabClient(CmabConstants.DEFAULT_PREDICTION_URL_TEMPLATE, http, retryConfig: null);
 
             Assert.Throws<CmabInvalidResponseException>(() =>
                 client.FetchDecision("rule-1", "user-1", null, "uuid-1"));
@@ -136,7 +136,7 @@ namespace OptimizelySDK.Tests.CmabTests
         public void FetchDecisionInvalidStructureNoRetry()
         {
             var http = MakeClient(new ResponseStep(HttpStatusCode.OK, "{\"predictions\":[]}"));
-            var client = new DefaultCmabClient(http, retryConfig: null);
+            var client = new DefaultCmabClient(CmabConstants.DEFAULT_PREDICTION_URL_TEMPLATE, http, retryConfig: null);
 
             Assert.Throws<CmabInvalidResponseException>(() =>
                 client.FetchDecision("rule-1", "user-1", null, "uuid-1"));
@@ -147,7 +147,7 @@ namespace OptimizelySDK.Tests.CmabTests
         {
             var http = MakeClient(new ResponseStep(HttpStatusCode.OK, ValidBody("v2")));
             var retry = new CmabRetryConfig(maxRetries: 2, initialBackoff: TimeSpan.Zero, maxBackoff: TimeSpan.FromSeconds(1), backoffMultiplier: 2.0);
-            var client = new DefaultCmabClient(http, retry);
+            var client = new DefaultCmabClient(CmabConstants.DEFAULT_PREDICTION_URL_TEMPLATE, http, retry);
             var result = client.FetchDecision("rule-1", "user-1", null, "uuid-1");
 
             Assert.AreEqual("v2", result);
@@ -162,7 +162,7 @@ namespace OptimizelySDK.Tests.CmabTests
                 new ResponseStep(HttpStatusCode.OK, ValidBody("v3"))
             );
             var retry = new CmabRetryConfig(maxRetries: 2, initialBackoff: TimeSpan.Zero, maxBackoff: TimeSpan.FromSeconds(1), backoffMultiplier: 2.0);
-            var client = new DefaultCmabClient(http, retry);
+            var client = new DefaultCmabClient(CmabConstants.DEFAULT_PREDICTION_URL_TEMPLATE, http, retry);
             var result = client.FetchDecision("rule-1", "user-1", null, "uuid-1");
 
             Assert.AreEqual("v3", result);
@@ -177,10 +177,40 @@ namespace OptimizelySDK.Tests.CmabTests
                 new ResponseStep(HttpStatusCode.InternalServerError, null)
             );
             var retry = new CmabRetryConfig(maxRetries: 2, initialBackoff: TimeSpan.Zero, maxBackoff: TimeSpan.FromSeconds(1), backoffMultiplier: 2.0);
-            var client = new DefaultCmabClient(http, retry);
+            var client = new DefaultCmabClient(CmabConstants.DEFAULT_PREDICTION_URL_TEMPLATE, http, retry);
 
             Assert.Throws<CmabFetchException>(() =>
                 client.FetchDecision("rule-1", "user-1", null, "uuid-1"));
+        }
+
+        [Test]
+        public void FetchDecision_CustomEndpoint_CallsCorrectUrl()
+        {
+            var customEndpoint = "https://custom.example.com/api/{0}";
+            string capturedUrl = null;
+
+            var handler = new Mock<HttpMessageHandler>(MockBehavior.Strict);
+            handler.Protected()
+                .Setup<Task<HttpResponseMessage>>("SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>())
+                .Returns((HttpRequestMessage req, CancellationToken _) =>
+                {
+                    capturedUrl = req.RequestUri.ToString();
+                    var response = new HttpResponseMessage(HttpStatusCode.OK)
+                    {
+                        Content = new StringContent(ValidBody("variation123"))
+                    };
+                    return Task.FromResult(response);
+                });
+
+            var http = new HttpClient(handler.Object);
+            var client = new DefaultCmabClient(customEndpoint, http, retryConfig: null);
+            var result = client.FetchDecision("rule-456", "user-1", null, "uuid-1");
+
+            Assert.AreEqual("variation123", result);
+            Assert.AreEqual("https://custom.example.com/api/rule-456", capturedUrl,
+                "Should call custom endpoint with rule ID formatted into template");
         }
     }
 }

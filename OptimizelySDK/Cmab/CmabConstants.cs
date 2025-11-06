@@ -20,7 +20,7 @@ namespace OptimizelySDK.Cmab
 {
     internal static class CmabConstants
     {
-        public const string PREDICTION_URL = "https://prediction.cmab.optimizely.com/predict";
+        public const string DEFAULT_PREDICTION_URL_TEMPLATE = "https://prediction.cmab.optimizely.com/predict/{0}";
         public const int DEFAULT_CACHE_SIZE = 10_000;
         public const string CONTENT_TYPE = "application/json";
 
