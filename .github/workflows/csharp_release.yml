@@ -9,12 +9,15 @@ jobs:
   variables:
     name: Set Variables
     runs-on: ubuntu-latest
-    env:
-      TAG: ${{ github.event.release.tag_name }}
     steps:
+      - name: Set tag output
+        id: set_tag
+        run: echo "tag=${{ github.event.release.tag_name }}" >> $GITHUB_OUTPUT
+      
       - name: Extract semantic version from tag
         id: set_version
         run: |
+          TAG="${{ github.event.release.tag_name }}"
           # Remove the "v" prefix if it exists and extract the semantic version number
           SEMANTIC_VERSION=$(echo "${TAG}" | grep -Po "(?<=^|[^0-9])([0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+)?(-[a-zA-Z]+[0-9]*)?)")
           SEMANTIC_VERSION=${SEMANTIC_VERSION#"v"}
@@ -25,7 +28,7 @@ jobs:
           echo "Extracted semantic version: ${SEMANTIC_VERSION}"
           echo "semantic_version=${SEMANTIC_VERSION}" >> $GITHUB_OUTPUT
     outputs:
-      tag: $TAG
+      tag: ${{ steps.set_tag.outputs.tag }}
       semanticVersion: ${{ steps.set_version.outputs.semantic_version }}
   
   buildFrameworkVersions:
