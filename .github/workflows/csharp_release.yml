@@ -23,9 +23,11 @@ jobs:
             exit 1
           fi
           echo "Extracted semantic version: ${SEMANTIC_VERSION}"
+          echo "Resolved git ref: ${TAG}"
+          echo "tag=${TAG}" >> $GITHUB_OUTPUT
           echo "semantic_version=${SEMANTIC_VERSION}" >> $GITHUB_OUTPUT
     outputs:
-      tag: $TAG
+      tag: ${{ steps.set_version.outputs.tag }}
       semanticVersion: ${{ steps.set_version.outputs.semantic_version }}
   
   buildFrameworkVersions:
