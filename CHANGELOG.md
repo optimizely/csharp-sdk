@@ -1,5 +1,49 @@
 # Optimizely C# SDK Changelog
 
+## 4.2.0
+Nov 13, 2025
+
+### New Features
+
+- **Added support for Contextual Multi-Armed Bandit (CMAB)**: Added support for CMAB experiments(Contextual Bandits rules) with new configuration options and cache control. To get decision from CMAB rules, `decide` and related methods must be used.
+
+#### CMAB Configuration Options
+
+The following new configuration options have been added for CMAB:
+
+```csharp
+using OptimizelySDK;
+
+// Configure CMAB settings before creating the Optimizely instance
+var cmabConfig = new CmabConfig()
+    .SetCacheSize(1000)                        // Optional: Set CMAB cache size (default: 1000)
+    .SetCacheTtl(TimeSpan.FromMinutes(30));    // Optional: Set CMAB cache TTL (default: 30 minutes)
+    // .SetCache(customCache)                  // Optional: Custom cache implementation
+
+OptimizelyFactory.SetCmabConfig(cmabConfig);
+
+var optimizely = OptimizelyFactory.NewDefaultInstance("SDK_KEY_HERE");
+```
+
+#### CMAB-Related OptimizelyDecideOptions
+
+New decide options are available to control CMAB caching behavior:
+
+- `OptimizelyDecideOption.IGNORE_CMAB_CACHE`: Bypass CMAB cache for fresh decisions
+- `OptimizelyDecideOption.RESET_CMAB_CACHE`: Clear and reset CMAB cache before making decisions  
+- `OptimizelyDecideOption.INVALIDATE_USER_CMAB_CACHE`: Invalidate CMAB cache for the particular user and experiment
+
+```csharp
+using OptimizelySDK.OptimizelyDecisions;
+
+// Example usage with CMAB decide options
+var user = optimizely.CreateUserContext("user123");
+var decision = user.Decide("feature-flag-key", new[]
+{
+    OptimizelyDecideOption.IGNORE_CMAB_CACHE
+});
+```
+
 ## 4.1.0
 November 7th, 2024
 
