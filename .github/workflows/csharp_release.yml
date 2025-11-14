@@ -102,7 +102,7 @@ jobs:
 
   buildStandard16:
     name: Build Standard 1.6 version
-    needs: [ variables ]
+    needs: [ variables, buildFrameworkVersions ]
     runs-on: windows-2022
     steps:
       - name: Checkout code
@@ -124,7 +124,7 @@ jobs:
 
   buildStandard20:
     name: Build Standard 2.0 version
-    needs: [ variables ]
+    needs: [ variables, buildStandard16 ]
     runs-on: windows-2022
     steps:
       - name: Checkout code
