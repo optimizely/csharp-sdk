@@ -96,13 +96,13 @@ jobs:
       - name: Upload Framework artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: unsigned-dlls
+          name: unsigned-dlls-framework
           if-no-files-found: error
           path: ./**/bin/Release/**/Optimizely*.dll
 
   buildStandard16:
     name: Build Standard 1.6 version
-    needs: [ variables, buildFrameworkVersions ]
+    needs: [ variables ]
     runs-on: windows-2022
     steps:
       - name: Checkout code
@@ -118,13 +118,13 @@ jobs:
       - name: Upload Standard 1.6 artifact
         uses: actions/upload-artifact@v4
         with:
-          name: unsigned-dlls
+          name: unsigned-dlls-netstandard16
           if-no-files-found: error
           path: ./**/bin/Release/**/Optimizely*.dll
 
   buildStandard20:
     name: Build Standard 2.0 version
-    needs: [ variables, buildStandard16 ]
+    needs: [ variables ]
     runs-on: windows-2022
     steps:
       - name: Checkout code
@@ -137,10 +137,10 @@ jobs:
         run: dotnet restore OptimizelySDK.NetStandard20/OptimizelySDK.NetStandard20.csproj
       - name: Build and strongly name Standard 2.0 project
         run: dotnet build OptimizelySDK.NetStandard20/OptimizelySDK.NetStandard20.csproj /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=$(pwd)/keypair.snk -c Release
-      - name: Build and strongly name assemblies
+      - name: Upload Standard 2.0 artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: unsigned-dlls
+          name: unsigned-dlls-netstandard20
           if-no-files-found: error
           path: ./**/bin/Release/**/Optimizely*.dll
 
@@ -158,10 +158,20 @@ jobs:
       # TODO: Remove this when we're ready to automate 
       - name: Temporarily halt progress
         run: exit 1
-      - name: Download the unsigned files
+      - name: Download Framework DLLs
         uses: actions/download-artifact@v4
         with:
-          name: unsigned-dlls
+          name: unsigned-dlls-framework
+          path: ./unsigned-dlls
+      - name: Download NetStandard 1.6 DLLs
+        uses: actions/download-artifact@v4
+        with:
+          name: unsigned-dlls-netstandard16
+          path: ./unsigned-dlls
+      - name: Download NetStandard 2.0 DLLs
+        uses: actions/download-artifact@v4
+        with:
+          name: unsigned-dlls-netstandard20
           path: ./unsigned-dlls
       - name: Setup SSH
         uses: shimataro/ssh-key-action@v2
