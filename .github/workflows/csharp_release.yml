@@ -3,18 +3,28 @@
 on:
   release:
     types: [ published ] # Trigger on published pre-releases and releases
-  workflow_dispatch: 
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to build (e.g., v4.2.0)'
+        required: true
+        type: string 
 
 jobs:
   variables:
     name: Set Variables
     runs-on: ubuntu-latest
     env:
-      TAG: ${{ github.event.release.tag_name }}
+      TAG: ${{ github.event.release.tag_name || inputs.tag }}
     steps:
       - name: Extract semantic version from tag
         id: set_version
         run: |
+          if [ -z "${TAG}" ]; then
+            echo "Error: No release tag available. Please provide a tag when manually triggering the workflow."
+            exit 1
+          fi
+          echo "Processing tag: ${TAG}"
           # Remove the "v" prefix if it exists and extract the semantic version number
           SEMANTIC_VERSION=$(echo "${TAG}" | grep -Po "(?<=^|[^0-9])([0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+)?(-[a-zA-Z]+[0-9]*)?)")
           SEMANTIC_VERSION=${SEMANTIC_VERSION#"v"}
@@ -23,9 +33,11 @@ jobs:
             exit 1
           fi
           echo "Extracted semantic version: ${SEMANTIC_VERSION}"
+          echo "Resolved git ref: ${TAG}"
+          echo "tag=${TAG}" >> $GITHUB_OUTPUT
           echo "semantic_version=${SEMANTIC_VERSION}" >> $GITHUB_OUTPUT
     outputs:
-      tag: $TAG
+      tag: ${{ steps.set_version.outputs.tag }}
       semanticVersion: ${{ steps.set_version.outputs.semantic_version }}
   
   buildFrameworkVersions:
@@ -84,7 +96,7 @@ jobs:
       - name: Upload Framework artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: unsigned-dlls
+          name: unsigned-dlls-framework
           if-no-files-found: error
           path: ./**/bin/Release/**/Optimizely*.dll
 
@@ -106,7 +118,7 @@ jobs:
       - name: Upload Standard 1.6 artifact
         uses: actions/upload-artifact@v4
         with:
-          name: unsigned-dlls
+          name: unsigned-dlls-netstandard16
           if-no-files-found: error
           path: ./**/bin/Release/**/Optimizely*.dll
 
@@ -125,10 +137,10 @@ jobs:
         run: dotnet restore OptimizelySDK.NetStandard20/OptimizelySDK.NetStandard20.csproj
       - name: Build and strongly name Standard 2.0 project
         run: dotnet build OptimizelySDK.NetStandard20/OptimizelySDK.NetStandard20.csproj /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=$(pwd)/keypair.snk -c Release
-      - name: Build and strongly name assemblies
+      - name: Upload Standard 2.0 artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: unsigned-dlls
+          name: unsigned-dlls-netstandard20
           if-no-files-found: error
           path: ./**/bin/Release/**/Optimizely*.dll
 
@@ -146,10 +158,20 @@ jobs:
       # TODO: Remove this when we're ready to automate 
       - name: Temporarily halt progress
         run: exit 1
-      - name: Download the unsigned files
+      - name: Download Framework DLLs
         uses: actions/download-artifact@v4
         with:
-          name: unsigned-dlls
+          name: unsigned-dlls-framework
+          path: ./unsigned-dlls
+      - name: Download NetStandard 1.6 DLLs
+        uses: actions/download-artifact@v4
+        with:
+          name: unsigned-dlls-netstandard16
+          path: ./unsigned-dlls
+      - name: Download NetStandard 2.0 DLLs
+        uses: actions/download-artifact@v4
+        with:
+          name: unsigned-dlls-netstandard20
           path: ./unsigned-dlls
       - name: Setup SSH
         uses: shimataro/ssh-key-action@v2
