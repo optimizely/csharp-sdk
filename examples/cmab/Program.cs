@@ -55,7 +55,7 @@ namespace CmabTests
         // ========================================
 
         // SDK Key from rc (prep) environment
-        private const string SDK_KEY = "YOUR_SDK_KEY"; // rc (prep)
+        private const string SDK_KEY = "M2FtWzpByUB8aQE7jos8w"; // rc (prep)
         private const string FLAG_KEY = "cmab_test";
 
         // Test user IDs
