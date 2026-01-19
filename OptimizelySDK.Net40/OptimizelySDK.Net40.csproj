@@ -147,6 +147,9 @@
     <Compile Include="..\OptimizelySDK\Event\Dispatcher\WebRequestEventDispatcher35.cs">
       <Link>Event\WebRequestEventDispatcher35.cs</Link>
     </Compile>
+    <Compile Include="..\OptimizelySDK\Event\EventRetryConfig.cs">
+      <Link>Event\EventRetryConfig.cs</Link>
+    </Compile>
     <Compile Include="..\OptimizelySDK\Event\LogEvent.cs">
       <Link>Event\LogEvent.cs</Link>
     </Compile>

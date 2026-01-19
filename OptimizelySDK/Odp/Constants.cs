@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2022-2023 Optimizely
+ * Copyright 2022-2023, 2026, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,11 +76,6 @@ namespace OptimizelySDK.Odp
         /// Default message to log when sending ODP event fails
         /// </summary>
         public const string ODP_SEND_FAILURE_MESSAGE = "ODP event send failed";
-
-        /// <summary>
-        /// Maximum attempts to retry ODP communication
-        /// </summary>
-        public const int MAX_RETRIES = 3;
 
         /// <summary>
         /// Default ODP batch size
