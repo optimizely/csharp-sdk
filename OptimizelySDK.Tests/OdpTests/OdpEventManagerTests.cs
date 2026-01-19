@@ -547,6 +547,9 @@ namespace OptimizelySDK.Tests.OdpTests
         [Test]
         public void ShouldRetryFailedEvents()
         {
+            // With exponential backoff: 4 events × 3 attempts each × (200ms + 400ms) delays = ~2400ms+
+            // Need longer timeout to account for backoff delays
+            const int RETRY_TEST_TIMEOUT_MS = 5000;
             var cde = new CountdownEvent(12);
             _mockApiManager.Setup(a =>
                     a.SendEvents(It.IsAny<string>(), It.IsAny<string>(),
@@ -566,7 +569,7 @@ namespace OptimizelySDK.Tests.OdpTests
                 eventManager.SendEvent(MakeEvent(i));
             }
 
-            cde.Wait(MAX_COUNT_DOWN_EVENT_WAIT_MS);
+            cde.Wait(RETRY_TEST_TIMEOUT_MS);
 
             // retry 3x (default) 4 events (batches of 1) = 12 calls to attempt to process
             _mockApiManager.Verify(

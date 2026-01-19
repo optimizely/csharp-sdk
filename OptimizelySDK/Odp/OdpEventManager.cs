@@ -249,17 +249,17 @@ namespace OptimizelySDK.Odp
                 {
                     shouldRetry = _odpEventApiManager.SendEvents(_odpConfig.ApiKey,
                         _odpConfig.ApiHost, toProcessBatch);
-                    
+
                     if (shouldRetry && attemptNumber < maxAttempts - 1)
                     {
                         Thread.Sleep(backoffMs);
                         backoffMs = Math.Min(EventRetryConfig.MAX_BACKOFF_MS,
                             (int)(backoffMs * EventRetryConfig.BACKOFF_MULTIPLIER));
                     }
-                    
+
                     attemptNumber += 1;
                 } while (shouldRetry && attemptNumber < maxAttempts);
-                
+
                 if (shouldRetry)
                 {
                     _logger.Log(LogLevel.ERROR,

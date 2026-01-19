@@ -1,4 +1,4 @@
-﻿/* 
+﻿/*
  * Copyright 2017, 2026, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,6 +18,7 @@
 using System;
 using System.IO;
 using System.Net;
+using System.Text;
 using System.Threading;
 using OptimizelySDK.Logger;
 using OptimizelySDK.Utils;
@@ -26,12 +27,12 @@ namespace OptimizelySDK.Event.Dispatcher
 {
     public class WebRequestClientEventDispatcher35 : IEventDispatcher
     {
-        public Logger.ILogger Logger { get; set; }
+        public ILogger Logger { get; set; }
 
         /// <summary>
-        /// Dispatch the Event with retry and exponential backoff.
-        /// The call will not wait for the result, it returns after sending (fire and forget)
-        /// But it does get called back asynchronously when the response comes and handles
+        ///     Dispatch the Event with retry and exponential backoff.
+        ///     The call will not wait for the result, it returns after sending (fire and forget)
+        ///     But it does get called back asynchronously when the response comes and handles
         /// </summary>
         /// <param name="logEvent"></param>
         public void DispatchEvent(LogEvent logEvent)
@@ -40,7 +41,7 @@ namespace OptimizelySDK.Event.Dispatcher
         }
 
         /// <summary>
-        /// Dispatch event with retry logic and exponential backoff.
+        ///     Dispatch event with retry logic and exponential backoff.
         /// </summary>
         private void DispatchWithRetry(LogEvent logEvent)
         {
@@ -80,10 +81,12 @@ namespace OptimizelySDK.Event.Dispatcher
                     if (response.StatusCode == HttpStatusCode.OK)
                     {
                         using (var responseStream = response.GetResponseStream())
-                        using (var responseReader = new StreamReader(responseStream, System.Text.Encoding.UTF8))
+                        using (var responseReader =
+                               new StreamReader(responseStream, Encoding.UTF8))
                         {
                             responseReader.ReadToEnd();
                         }
+
                         // Success - exit the retry loop
                         return;
                     }
@@ -122,8 +125,8 @@ namespace OptimizelySDK.Event.Dispatcher
         }
 
         /// <summary>
-        /// Determines whether a request should be retried based on HTTP status code.
-        /// Retries on 5xx server errors and network failures (null status code).
+        ///     Determines whether a request should be retried based on HTTP status code.
+        ///     Retries on 5xx server errors and network failures (null status code).
         /// </summary>
         private static bool ShouldRetry(HttpStatusCode? statusCode)
         {
@@ -139,7 +142,7 @@ namespace OptimizelySDK.Event.Dispatcher
         }
 
         /// <summary>
-        /// Helper method to log messages safely when Logger might be null.
+        ///     Helper method to log messages safely when Logger might be null.
         /// </summary>
         private void LogMessage(LogLevel level, string message)
         {

@@ -1,4 +1,4 @@
-﻿/* 
+﻿/*
  * Copyright 2017, 2019, 2026, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,6 +18,7 @@
 using System;
 using System.Net;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 using OptimizelySDK.Logger;
 using OptimizelySDK.Utils;
@@ -26,24 +27,34 @@ namespace OptimizelySDK.Event.Dispatcher
 {
     public class HttpClientEventDispatcher45 : IEventDispatcher
     {
-        public ILogger Logger { get; set; } = new DefaultLogger();
-
         /// <summary>
-        /// HTTP client object.
+        ///     HTTP client object.
         /// </summary>
         private static readonly HttpClient Client;
 
         /// <summary>
-        /// Constructor for initializing static members.
+        ///     Constructor for initializing static members.
         /// </summary>
         static HttpClientEventDispatcher45()
         {
             Client = new HttpClient();
         }
 
+        public ILogger Logger { get; set; } = new DefaultLogger();
+
         /// <summary>
-        /// Dispatch an Event asynchronously with retry and exponential backoff.
-        /// Retries on 5xx server errors and network failures.
+        ///     Dispatch an event Asynchronously by creating a new task and calls the
+        ///     Async version of DispatchEvent
+        ///     This is a "Fire and Forget" option
+        /// </summary>
+        public void DispatchEvent(LogEvent logEvent)
+        {
+            Task.Run(() => DispatchEventAsync(logEvent));
+        }
+
+        /// <summary>
+        ///     Dispatch an Event asynchronously with retry and exponential backoff.
+        ///     Retries on 5xx server errors and network failures.
         /// </summary>
         private async Task DispatchEventAsync(LogEvent logEvent)
         {
@@ -63,7 +74,7 @@ namespace OptimizelySDK.Event.Dispatcher
                         Method = HttpMethod.Post,
                         // The Content-Type header applies to the Content, not the Request itself
                         Content =
-                            new StringContent(json, System.Text.Encoding.UTF8, "application/json"),
+                            new StringContent(json, Encoding.UTF8, "application/json"),
                     };
 
                     foreach (var h in logEvent.Headers)
@@ -76,7 +87,7 @@ namespace OptimizelySDK.Event.Dispatcher
 
                     response = await Client.SendAsync(request).ConfigureAwait(false);
                     response.EnsureSuccessStatusCode();
-                    
+
                     // Success - exit the retry loop
                     return;
                 }
@@ -109,8 +120,8 @@ namespace OptimizelySDK.Event.Dispatcher
         }
 
         /// <summary>
-        /// Determines whether a request should be retried based on HTTP status code.
-        /// Retries on 5xx server errors and network failures (null status code).
+        ///     Determines whether a request should be retried based on HTTP status code.
+        ///     Retries on 5xx server errors and network failures (null status code).
         /// </summary>
         /// <param name="statusCode">The HTTP status code, or null for network failures</param>
         /// <returns>True if the request should be retried</returns>
@@ -125,16 +136,6 @@ namespace OptimizelySDK.Event.Dispatcher
             // Retry on 5xx server errors
             var code = (int)statusCode.Value;
             return code >= 500 && code < 600;
-        }
-
-        /// <summary>
-        /// Dispatch an event Asynchronously by creating a new task and calls the 
-        /// Async version of DispatchEvent
-        /// This is a "Fire and Forget" option
-        /// </summary>
-        public void DispatchEvent(LogEvent logEvent)
-        {
-            Task.Run(() => DispatchEventAsync(logEvent));
         }
     }
 }
