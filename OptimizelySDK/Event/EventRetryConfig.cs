@@ -22,7 +22,7 @@ namespace OptimizelySDK.Event
     ///     - Max 3 total attempts (1 initial + 2 retries)
     ///     - Start at 200ms, exponentially grow to max 1 second
     /// </summary>
-    public static class EventRetryConfig
+    internal static class EventRetryConfig
     {
         /// <summary>
         ///     Maximum number of retry attempts after the initial attempt fails.
