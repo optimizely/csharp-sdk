@@ -42,7 +42,7 @@ namespace OptimizelySDK.Tests.EventTests
 
         private Mock<ILogger> _mockLogger;
         private List<DateTime> _requestTimestamps;
-        
+
         [Test]
         public void DispatchEvent_Success_SingleAttempt()
         {
