@@ -28,16 +28,29 @@ namespace OptimizelySDK.Event.Dispatcher
     public class HttpClientEventDispatcher45 : IEventDispatcher
     {
         /// <summary>
-        ///     HTTP client object.
+        ///     Default shared HTTP client instance for all dispatchers.
         /// </summary>
-        private static readonly HttpClient Client;
+        private static readonly HttpClient DefaultClient = new HttpClient();
 
         /// <summary>
-        ///     Constructor for initializing static members.
+        ///     HTTP client instance used by this dispatcher.
         /// </summary>
-        static HttpClientEventDispatcher45()
+        private readonly HttpClient _client;
+
+        /// <summary>
+        ///     Default constructor using the shared static HttpClient.
+        /// </summary>
+        public HttpClientEventDispatcher45() : this(null)
         {
-            Client = new HttpClient();
+        }
+
+        /// <summary>
+        ///     Constructor allowing injection of a custom HttpClient for testing.
+        /// </summary>
+        /// <param name="httpClient">Custom HttpClient instance, or null to use the default shared instance.</param>
+        internal HttpClientEventDispatcher45(HttpClient httpClient)
+        {
+            _client = httpClient ?? DefaultClient;
         }
 
         public ILogger Logger { get; set; } = new DefaultLogger();
@@ -85,7 +98,7 @@ namespace OptimizelySDK.Event.Dispatcher
                         }
                     }
 
-                    response = await Client.SendAsync(request).ConfigureAwait(false);
+                    response = await _client.SendAsync(request).ConfigureAwait(false);
                     response.EnsureSuccessStatusCode();
 
                     // Success - exit the retry loop

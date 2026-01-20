@@ -101,6 +101,7 @@
     <Compile Include="EventTests\DefaultEventDispatcherTest.cs"/>
     <Compile Include="EventTests\EventBuilderTest.cs"/>
     <Compile Include="EventTests\ForwardingEventProcessorTest.cs"/>
+    <Compile Include="EventTests\HttpClientEventDispatcher45Test.cs"/>
     <Compile Include="EventTests\LogEventTest.cs"/>
     <Compile Include="EventTests\TestEventDispatcher.cs"/>
     <Compile Include="EventTests\TestForwardingEventDispatcher.cs"/>
