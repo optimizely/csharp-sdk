@@ -77,8 +77,10 @@ namespace OptimizelySDK.Event.Dispatcher
                     }
 
                     response = (HttpWebResponse)request.GetResponse();
+                    var statusCode = (int)response.StatusCode;
 
-                    if (response.StatusCode == HttpStatusCode.OK)
+                    // Check for any 2xx success status code (200-299)
+                    if (statusCode >= 200 && statusCode < 300)
                     {
                         using (var responseStream = response.GetResponseStream())
                         using (var responseReader =
