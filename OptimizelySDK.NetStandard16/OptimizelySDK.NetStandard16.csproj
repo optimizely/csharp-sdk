@@ -50,6 +50,7 @@
 			<Compile Include="..\OptimizelySDK\Event\Dispatcher\WebRequestEventDispatcher35.cs" />
 			<Compile Include="..\OptimizelySDK\Event\Dispatcher\HttpClientEventDispatcher45.cs" />
 			<Compile Include="..\OptimizelySDK\Event\Dispatcher\IEventDispatcher.cs" />
+			<Compile Include="..\OptimizelySDK\Event\EventRetryConfig.cs" />
 			<Compile Include="..\OptimizelySDK\Event\LogEvent.cs" />
 			<Compile Include="..\OptimizelySDK\Event\ForwardingEventProcessor.cs" />
 			<Compile Include="..\OptimizelySDK\Exceptions\OptimizelyException.cs" />

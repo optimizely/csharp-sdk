@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2022-2023, Optimizely
+ * Copyright 2022-2023, 2026, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using OptimizelySDK.ErrorHandler;
+using OptimizelySDK.Event;
 using OptimizelySDK.Logger;
 using OptimizelySDK.Odp.Entity;
 using OptimizelySDK.Utils;
@@ -242,12 +243,28 @@ namespace OptimizelySDK.Odp
             {
                 bool shouldRetry;
                 var attemptNumber = 0;
+                var maxAttempts = 1 + EventRetryConfig.MAX_RETRIES; // 1 initial + retries = 3 total
+                var backoffMs = EventRetryConfig.INITIAL_BACKOFF_MS;
                 do
                 {
                     shouldRetry = _odpEventApiManager.SendEvents(_odpConfig.ApiKey,
                         _odpConfig.ApiHost, toProcessBatch);
+
+                    if (shouldRetry && attemptNumber < maxAttempts - 1)
+                    {
+                        Thread.Sleep(backoffMs);
+                        backoffMs = Math.Min(EventRetryConfig.MAX_BACKOFF_MS,
+                            (int)(backoffMs * EventRetryConfig.BACKOFF_MULTIPLIER));
+                    }
+
                     attemptNumber += 1;
-                } while (shouldRetry && attemptNumber < Constants.MAX_RETRIES);
+                } while (shouldRetry && attemptNumber < maxAttempts);
+
+                if (shouldRetry)
+                {
+                    _logger.Log(LogLevel.ERROR,
+                        $"ODP event dispatch failed after {attemptNumber} attempt(s).");
+                }
             }
             catch (Exception e)
             {

@@ -1,5 +1,5 @@
-﻿/* 
- * Copyright 2017, Optimizely
+﻿/*
+ * Copyright 2017, 2026, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,73 +18,137 @@
 using System;
 using System.IO;
 using System.Net;
+using System.Text;
+using System.Threading;
+using OptimizelySDK.Logger;
+using OptimizelySDK.Utils;
 
 namespace OptimizelySDK.Event.Dispatcher
 {
     public class WebRequestClientEventDispatcher35 : IEventDispatcher
     {
-        // TODO Catch and Log Errors
-        public Logger.ILogger Logger { get; set; }
-
-        private HttpWebRequest Request = null;
+        public ILogger Logger { get; set; }
 
         /// <summary>
-        /// Dispatch the Event
-        /// The call will not wait for the result, it returns after sending (fire and forget)
-        /// But it does get called back asynchronously when the response comes and handles
+        ///     Dispatch the Event with retry and exponential backoff.
+        ///     The call will not wait for the result, it returns after sending (fire and forget)
+        ///     But it does get called back asynchronously when the response comes and handles
         /// </summary>
         /// <param name="logEvent"></param>
         public void DispatchEvent(LogEvent logEvent)
         {
-            Request = (HttpWebRequest)WebRequest.Create(logEvent.Url);
+            ThreadPool.QueueUserWorkItem(_ => DispatchWithRetry(logEvent));
+        }
 
-            Request.UserAgent = "Optimizely-csharp-SDKv01";
-            Request.Method = logEvent.HttpVerb;
+        /// <summary>
+        ///     Dispatch event with retry logic and exponential backoff.
+        /// </summary>
+        private void DispatchWithRetry(LogEvent logEvent)
+        {
+            var attemptNumber = 0;
+            var backoffMs = EventRetryConfig.INITIAL_BACKOFF_MS;
+            var maxAttempts = 1 + EventRetryConfig.MAX_RETRIES;
 
-            foreach (var h in logEvent.Headers)
+            while (attemptNumber < maxAttempts)
             {
-                if (!WebHeaderCollection.IsRestricted(h.Key))
+                HttpWebRequest request = null;
+                HttpWebResponse response = null;
+                try
                 {
-                    Request.Headers[h.Key] = h.Value;
+                    request = (HttpWebRequest)WebRequest.Create(logEvent.Url);
+                    request.UserAgent = "Optimizely-csharp-SDKv01";
+                    request.Method = logEvent.HttpVerb;
+
+                    foreach (var h in logEvent.Headers)
+                    {
+                        if (!WebHeaderCollection.IsRestricted(h.Key))
+                        {
+                            request.Headers[h.Key] = h.Value;
+                        }
+                    }
+
+                    request.ContentType = "application/json";
+
+                    using (var streamWriter = new StreamWriter(request.GetRequestStream()))
+                    {
+                        streamWriter.Write(logEvent.GetParamsAsJson());
+                        streamWriter.Flush();
+                        streamWriter.Close();
+                    }
+
+                    response = (HttpWebResponse)request.GetResponse();
+                    var statusCode = (int)response.StatusCode;
+
+                    // Check for any 2xx success status code (200-299)
+                    if (statusCode >= 200 && statusCode < 300)
+                    {
+                        using (var responseStream = response.GetResponseStream())
+                        using (var responseReader =
+                               new StreamReader(responseStream, Encoding.UTF8))
+                        {
+                            responseReader.ReadToEnd();
+                        }
+
+                        // Success - exit the retry loop
+                        return;
+                    }
+                }
+                catch (WebException ex)
+                {
+                    var httpResponse = ex.Response as HttpWebResponse;
+                    var shouldRetry = ShouldRetry(httpResponse?.StatusCode);
+
+                    if (shouldRetry && attemptNumber < maxAttempts - 1)
+                    {
+                        Thread.Sleep(backoffMs);
+                        backoffMs = Math.Min(EventRetryConfig.MAX_BACKOFF_MS,
+                            (int)(backoffMs * EventRetryConfig.BACKOFF_MULTIPLIER));
+                        attemptNumber++;
+                    }
+                    else
+                    {
+                        LogMessage(LogLevel.ERROR,
+                            string.Format("Error Dispatching Event after {0} attempt(s): {1}",
+                                attemptNumber + 1, ex.GetAllMessages()));
+                        return;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // For non-web exceptions, log and don't retry
+                    LogMessage(LogLevel.ERROR, "Error Dispatching Event: " + ex.GetAllMessages());
+                    return;
+                }
+                finally
+                {
+                    response?.Close();
                 }
             }
-
-            Request.ContentType = "application/json";
-
-            using (var streamWriter = new StreamWriter(Request.GetRequestStream()))
-            {
-                streamWriter.Write(logEvent.GetParamsAsJson());
-                streamWriter.Flush();
-                streamWriter.Close();
-            }
-
-            var result =
-                Request.BeginGetResponse(new AsyncCallback(FinaliseHttpAsyncRequest), this);
         }
 
-        private static void FinaliseHttpAsyncRequest(IAsyncResult result)
+        /// <summary>
+        ///     Determines whether a request should be retried based on HTTP status code.
+        ///     Retries on 5xx server errors and network failures (null status code).
+        /// </summary>
+        private static bool ShouldRetry(HttpStatusCode? statusCode)
         {
-            var _this = (WebRequestClientEventDispatcher35)result.AsyncState;
-            _this.FinalizeRequest(result);
+            // Retry on network failures (no response)
+            if (statusCode == null)
+            {
+                return true;
+            }
+
+            // Retry on 5xx server errors
+            var code = (int)statusCode.Value;
+            return code >= 500 && code < 600;
         }
 
-        private void FinalizeRequest(IAsyncResult result)
+        /// <summary>
+        ///     Helper method to log messages safely when Logger might be null.
+        /// </summary>
+        private void LogMessage(LogLevel level, string message)
         {
-            var response = (HttpWebResponse)Request.EndGetResponse(result);
-
-            if (response.StatusCode == HttpStatusCode.OK)
-            {
-                // Read the results, even though we don't need it.
-                var responseStream = response.GetResponseStream();
-                var streamEncoder = System.Text.Encoding.UTF8;
-                var responseReader = new StreamReader(responseStream, streamEncoder);
-                var data = responseReader.ReadToEnd();
-            }
-            else
-            {
-                // TODO: Add Logger and capture exception
-                //throw new Exception(string.Format("Response Not Valid {0}", response.StatusCode));
-            }
+            Logger?.Log(level, message);
         }
     }
 }

@@ -288,6 +288,9 @@
     <Compile Include="..\OptimizelySDK\Event\Dispatcher\WebRequestEventDispatcher35.cs">
       <Link>Event\Dispatcher\WebRequestEventDispatcher35.cs</Link>
     </Compile>
+    <Compile Include="..\OptimizelySDK\Event\EventRetryConfig.cs">
+      <Link>Event\EventRetryConfig.cs</Link>
+    </Compile>
     <Compile Include="..\OptimizelySDK\Event\Entity\ConversionEvent.cs">
       <Link>Event\Entity\ConversionEvent.cs</Link>
     </Compile>
