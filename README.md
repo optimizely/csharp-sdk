@@ -1,38 +1,58 @@
 # Optimizely C# SDK
+
 ![Semantic](https://img.shields.io/badge/sem-ver-lightgrey.svg?style=plastic)
 ![CI](https://github.com/optimizely/csharp-sdk/actions/workflows/csharp.yml/badge.svg?branch=master)
 [![NuGet](https://img.shields.io/nuget/v/Optimizely.SDK.svg?style=plastic)](https://www.nuget.org/packages/Optimizely.SDK/)
 [![Apache 2.0](https://img.shields.io/github/license/nebula-plugins/gradle-extra-configurations-plugin.svg)](http://www.apache.org/licenses/LICENSE-2.0)
 
-This repository houses the .Net based C# SDK for use with Optimizely Feature Experimentation and Optimizely Full Stack (legacy).
+This is the official C# SDK for use with Optimizely Feature Experimentation and Optimizely Full Stack (legacy).
 
-Optimizely Feature Experimentation is an A/B testing and feature management tool for product development teams, letting you experiment at every step. Using Optimizely Feature Experimentation allows for every feature on your roadmap to be an opportunity to discover hidden insights. Learn more at [Optimizely.com](https://www.optimizely.com/products/experiment/feature-experimentation/), or see the [developer documentation](https://docs.developers.optimizely.com/experimentation/v4.0.0-full-stack/docs/welcome).
+Optimizely Feature Experimentation is an A/B testing and feature management tool for product development teams that enables you to experiment at every step. Using Optimizely Feature Experimentation allows for every feature on your roadmap to be an opportunity to discover hidden insights. Learn more at [Optimizely.com](https://www.optimizely.com/products/experiment/feature-experimentation/), or see the [developer documentation](https://docs.developers.optimizely.com/experimentation/v4.0.0-full-stack/docs/welcome).
 
 Optimizely Rollouts is [free feature flags](https://www.optimizely.com/free-feature-flagging/) for development teams. You can easily roll out and roll back features in any application without code deploys, mitigating risk for every feature on your roadmap.
 
+---
 
 ## Get Started
 
-Refer to the [C# SDK's developer documentation](https://docs.developers.optimizely.com/experimentation/v4.0.0-full-stack/docs/csharp-sdk) for detailed instructions on getting started with using the SDK.
+> Refer to the [C# SDK's developer documentation](https://docs.developers.optimizely.com/experimentation/v4.0.0-full-stack/docs/csharp-sdk) for detailed instructions on getting started with using the SDK.
 
-### Install the C# SDK
+### Prerequisites
 
-The SDK can be installed through [NuGet](https://www.nuget.org):
+Ensure the SDK supports the .NET platforms you're targeting. We officially support:
 
+- **.NET Framework**: 4.0, 4.5+
+- **.NET Standard**: 2.0+
+- **.NET Core**: 2.0+
+- **.NET**: 5.0+
+
+> **Note**: .NET Framework 3.5 and .NET Standard 1.6 are deprecated as of SDK version 4.0.0.
+
+> **Feature Availability**: ODP (Optimizely Data Platform) and CMAB (Contextual Multi-Armed Bandit) features require .NET Framework 4.5+ or .NET Standard 2.0+.
+
+### Install the SDK
+
+Install via [NuGet](https://www.nuget.org/packages/Optimizely.SDK/):
+
+**Package Manager Console:**
 ```
 PM> Install-Package Optimizely.SDK
 ```
 
-An ASP.Net MVC sample project demonstrating how to use the SDK is available as well:
+**.NET CLI:**
+```sh
+dotnet add package Optimizely.SDK
+```
 
+**PackageReference:**
+```xml
+<PackageReference Include="Optimizely.SDK" Version="4.2.0" />
+```
+
+An ASP.NET MVC sample project is also available:
 ```
 PM> Install-Package Optimizely.SDK.Sample
 ```
-
-Simply compile and run the Sample application to see it in use.
-Note that the way the Demo App stores data in memory is not recommended for production use
-and is merely illustrates how to use the SDK.
-
 
 ### Feature Management Access
 
@@ -40,181 +60,279 @@ To access the Feature Management configuration in the Optimizely dashboard, plea
 
 ## Use the C# SDK
 
-See the Optimizely Feature Experimentation [developer documentation](https://docs.developers.optimizely.com/experimentation/v4.0-full-stack/docs/csharp-sdk) to learn how to set up your first C# project and use the SDK.
+See the [developer documentation](https://docs.developers.optimizely.com/experimentation/v4.0-full-stack/docs/csharp-sdk) to learn how to set up your first C# project and use the SDK.
 
 ### Initialization
 
-Create the Optimizely Client, for example:
+Initialize the SDK using `OptimizelyFactory`:
 
-```
-private static Optimizely Optimizely =
-    new Optimizely(
-        datafile: myProjectConfig,
-        eventDispatcher: myEventDispatcher,
-        logger: myLogger,
-        errorHandler: myErrorHandler,
-        skipJsonValidation: false);
+```csharp
+using OptimizelySDK;
+
+// Initialize with SDK key - automatically polls for datafile updates
+var optimizely = OptimizelyFactory.NewDefaultInstance("YOUR_SDK_KEY");
 ```
 
-Since this class parses the Project Config file, you should not create this per request.
+For advanced initialization with custom components:
 
-#### APIs
+```csharp
+using OptimizelySDK.Config;
+using OptimizelySDK.Event;
 
-This class exposes three main calls:
-1. Activate
-2. Track
-3. GetVariation
+var httpConfigManager = new HttpProjectConfigManager.Builder()
+    .WithSdkKey("YOUR_SDK_KEY")
+    .WithPollingInterval(TimeSpan.FromMinutes(5))
+    .Build();
 
-Activate and Track are used in the demonstration app.  See the Optimizely documentation regarding how to use these.
+var batchEventProcessor = new BatchEventProcessor.Builder()
+    .WithMaxBatchSize(10)
+    .WithFlushInterval(TimeSpan.FromSeconds(30))
+    .Build();
 
-#### Plug-in Interfaces
-
-The Optimizely client object accepts the following plug-ins:
-1. `IEventDispatcher` handles the HTTP requests to Optimizely.  The default implementation is an asynchronous "fire and forget".
-2. `ILogger` exposes a single method, Log, to record activity in the SDK.  An example of a class to bridge the SDK's Log to Log4Net is provided in the Demo Application.
-3. `IErrorHandler` allows you to implement custom logic when Exceptions are thrown.  Note that Exception information is already included in the Log.
-4. `ProjectConfigManager` exposes method for retrieving ProjectConfig instance. Examples include `FallbackProjectConfigManager` and `HttpProjectConfigManager`.
-5. `EventProcessor` provides an intermediary processing stage within event production. It's assumed that the EventProcessor dispatches events via a provided EventDispatcher. Examples include `ForwardingEventProcessor` and `BatchEventProcessor`.
-These are optional plug-ins and default behavior is implement if none are provided.
-
-#### OptimizelyFactory
-
-[`OptimizelyFactory`](https://github.com/optimizely/csharp-sdk/blob/master/OptimizelySDK/OptimizelyFactory.cs)
-provides basic utility to instantiate the Optimizely SDK with a minimal number of configuration options.
-
-`OptimizelyFactory` does not capture all configuration and initialization options. For more use cases,
-build the resources via their respective builder classes.
-
-##### Use OptimizelyFactory
-
-You must provide the SDK key at runtime, either directly via the factory method:
-```
-Optimizely optimizely = OptimizelyFactory.newDefaultInstance(<<SDK_KEY>>);
+var optimizely = new Optimizely(
+    configManager: httpConfigManager,
+    eventProcessor: batchEventProcessor
+);
 ```
 
-You can also provide default datafile with the SDK key.
-```
-Optimizely optimizely = OptimizelyFactory.newDefaultInstance(<<SDK_KEY>>, <<Fallback>>);
-```
-##### Using App.config in OptimizelyFactory
+### Making Decisions
 
-OptimizelyFactory provides support of setting configuration variables in App.config:
-User can provide variables using following procedure:
-1. In App.config file of your project in **<configuration>** add following:
+Use the **User Context** and **Decide** methods for feature flag decisions:
+
+```csharp
+// Create a user context
+var user = optimizely.CreateUserContext("user123", new UserAttributes
+{
+    { "country", "US" },
+    { "subscription_tier", "premium" }
+});
+
+// Make a decision
+var decision = user.Decide("feature_flag_key");
+
+if (decision.Enabled)
+{
+    var theme = decision.Variables.ToDictionary()["theme"].ToString();
+    Console.WriteLine($"Feature enabled with theme: {theme}");
+}
+
+// Decide for multiple flags
+var decisions = user.DecideForKeys(new[] { "flag1", "flag2", "flag3" });
+
+// Decide for all flags
+var allDecisions = user.DecideAll();
 ```
-<configSections>
-    <section name="optlySDKConfigSection"
-             type="OptimizelySDK.OptimizelySDKConfigSection, OptimizelySDK, Version=4.2.0.0, Culture=neutral, PublicKeyToken=null" />
+
+#### Decide Options
+
+Customize decision behavior:
+
+```csharp
+var decision = user.Decide("feature_key", new[]
+{
+    OptimizelyDecideOption.DISABLE_DECISION_EVENT,
+    OptimizelyDecideOption.INCLUDE_REASONS
+});
+```
+
+**Available Options:**
+- `DISABLE_DECISION_EVENT` - Don't send impression events
+- `ENABLED_FLAGS_ONLY` - Return only enabled flags
+- `IGNORE_USER_PROFILE_SERVICE` - Skip user profile service
+- `INCLUDE_REASONS` - Include decision reasons for debugging
+- `EXCLUDE_VARIABLES` - Exclude feature variables
+- `IGNORE_CMAB_CACHE` - Bypass CMAB cache (CMAB only)
+- `RESET_CMAB_CACHE` - Clear CMAB cache (CMAB only)
+- `INVALIDATE_USER_CMAB_CACHE` - Invalidate user-specific CMAB cache (CMAB only)
+
+### CMAB (Contextual Multi-Armed Bandit)
+
+> Available in SDK 4.2.0+ for .NET Framework 4.5+ and .NET Standard 2.0+
+
+Configure CMAB for dynamic variation optimization:
+
+```csharp
+var cmabConfig = new CmabConfig()
+    .SetCacheSize(1000)
+    .SetCacheTtl(TimeSpan.FromMinutes(30));
+
+OptimizelyFactory.SetCmabConfig(cmabConfig);
+var optimizely = OptimizelyFactory.NewDefaultInstance("YOUR_SDK_KEY");
+```
+
+For details, see the [CMAB documentation](https://docs.developers.optimizely.com/feature-experimentation/docs/contextual-bandits).
+
+### ODP (Optimizely Data Platform)
+
+> Available in SDK 4.0.0+ for .NET Framework 4.5+ and .NET Standard 2.0+
+
+ODP enables Advanced Audience Targeting:
+
+```csharp
+// Fetch user segments
+var user = optimizely.CreateUserContext("user123");
+await user.FetchQualifiedSegments();
+var decision = user.Decide("personalized_feature");
+
+// Send custom events
+optimizely.SendOdpEvent(
+    action: "purchase_completed",
+    identifiers: new Dictionary<string, string> { { "vuid", "user123" } },
+    data: new Dictionary<string, object> { { "order_total", 99.99 } }
+);
+```
+
+For more details:
+- [Advanced Audience Targeting](https://docs.developers.optimizely.com/feature-experimentation/docs/optimizely-data-platform-advanced-audience-targeting)
+- [ODP segment qualification methods](https://docs.developers.optimizely.com/feature-experimentation/docs/advanced-audience-targeting-segment-qualification-methods-csharp)
+
+### Feature Flags
+
+```csharp
+// Check if feature is enabled
+bool isEnabled = optimizely.IsFeatureEnabled("feature_key", "user123");
+
+// Get feature variables
+string value = optimizely.GetFeatureVariableString("feature_key", "variable_key", "user123");
+int intValue = optimizely.GetFeatureVariableInteger("feature_key", "count", "user123");
+double doubleValue = optimizely.GetFeatureVariableDouble("feature_key", "price", "user123");
+bool boolValue = optimizely.GetFeatureVariableBoolean("feature_key", "enabled", "user123");
+var jsonValue = optimizely.GetFeatureVariableJSON("feature_key", "config", "user123");
+
+// Get all variables
+var allVariables = optimizely.GetAllFeatureVariables("feature_key", "user123");
+```
+
+### Event Tracking
+
+```csharp
+// Track a conversion event
+optimizely.Track("purchase", "user123");
+
+// Track with event tags
+optimizely.Track("purchase", "user123", userAttributes, new EventTags
+{
+    { "revenue", 4200 },
+    { "category", "electronics" }
+});
+```
+
+### Forced Decisions
+
+Override decisions for QA and testing:
+
+```csharp
+var user = optimizely.CreateUserContext("qa_user");
+var context = new OptimizelyDecisionContext("flag_key", "rule_key");
+var forcedDecision = new OptimizelyForcedDecision("variation_key");
+
+user.SetForcedDecision(context, forcedDecision);
+user.RemoveForcedDecision(context);
+user.RemoveAllForcedDecisions();
+```
+
+## Configuration
+
+### HttpProjectConfigManager
+
+```csharp
+var configManager = new HttpProjectConfigManager.Builder()
+    .WithSdkKey("YOUR_SDK_KEY")
+    .WithPollingInterval(TimeSpan.FromMinutes(5))
+    .WithBlockingTimeoutPeriod(TimeSpan.FromSeconds(15))
+    .WithDatafileAccessToken("token")  // For secure environments
+    .WithDatafile(fallbackDatafile)    // Fallback datafile
+    .Build();
+```
+
+| Parameter | Default |
+|-----------|---------|
+| PollingInterval | 5 minutes |
+| BlockingTimeoutPeriod | 15 seconds |
+| DatafileAccessToken | null |
+
+### BatchEventProcessor
+
+```csharp
+var eventProcessor = new BatchEventProcessor.Builder()
+    .WithMaxBatchSize(10)
+    .WithFlushInterval(TimeSpan.FromSeconds(30))
+    .Build();
+```
+
+| Parameter | Default |
+|-----------|---------|
+| MaxBatchSize | 10 |
+| FlushInterval | 30 seconds |
+| TimeoutInterval | 5 minutes |
+
+### App.config Configuration
+
+```xml
+<configuration>
+  <configSections>
+    <section name="optlySDKConfigSection" type="OptimizelySDK.OptimizelySDKConfigSection, OptimizelySDK" />
   </configSections>
-```
-2. Now add **optlySDKConfigSection** below **<configSections>**. In this section you can add and set following **HttpProjectConfigManager** and **BatchEventProcessor** variables: 
-```
-<optlySDKConfigSection>
-  
-    <HttpProjectConfig sdkKey="43214321" 
-                       url="www.testurl.com" 
-                       format="https://cdn.optimizely.com/data/{0}.json" 
-                       pollingInterval="2000" 
-                       blockingTimeOutPeriod="10000" 
-                       datafileAccessToken="testingtoken123"
-                       autoUpdate="true" 
-                       defaultStart="true">
-    </HttpProjectConfig>
-
-    <BatchEventProcessor batchSize="10"
-                         flushInterval="2000"
-                         timeoutInterval="10000"
-                         defaultStart="true">
-    </BatchEventProcessor>
-  
+  <optlySDKConfigSection>
+    <HttpProjectConfig sdkKey="YOUR_SDK_KEY" pollingInterval="300000" />
+    <BatchEventProcessor batchSize="10" flushInterval="30000" />
   </optlySDKConfigSection>
-```
-3. After setting these variables you can instantiate the Optimizely SDK using function:
-```
-Optimizely optimizely = OptimizelyFactory.newDefaultInstance();
+</configuration>
 ```
 
-#### BatchEventProcessor
-[BatchEventProcessor](https://github.com/optimizely/csharp-sdk/blob/master/OptimizelySDK/Event/BatchEventProcessor.cs) is a batched implementation of the [EventProcessor](https://github.com/optimizely/csharp-sdk/blob/master/OptimizelySDK/Event/EventProcessor.cs)
-     * Events passed to the BatchEventProcessor are immediately added to a BlockingQueue.
-     * The BatchEventProcessor maintains a single consumer thread that pulls events off of the BlockingQueue and buffers them for either a configured batch size or for a maximum duration before the resulting LogEvent is sent to the NotificationManager.
-##### Use BatchEventProcessor
-
-```
-EventProcessor eventProcessor = new BatchEventProcessor.Builder()
-                .WithMaxBatchSize(MaxEventBatchSize)
-                .WithFlushInterval(MaxEventFlushInterval)
-                .WithEventDispatcher(eventDispatcher)
-                .WithNotificationCenter(notificationCenter)
-                .Build();
+Then initialize:
+```csharp
+var optimizely = OptimizelyFactory.NewDefaultInstance();
 ```
 
-##### Max Event Batch Size
+## Advanced Features
 
-The Max event batch size is used to limit eventQueue batch size and events will be dispatched when limit reaches.
+### Notification Listeners
 
-##### Flush Interval
-
-The FlushInterval is used to specify a delay between consecutive flush events call. Event batch will be dispatched after meeting this specified timeSpan.
-
-##### Event Dispatcher 
-
-Custom EventDispatcher can be passed.
-
-##### Notification Center
-
-Custom NotificationCenter can be passed. 
-
-#### HttpProjectConfigManager
-
-[`HttpProjectConfigManager`](https://github.com/optimizely/csharp-sdk/blob/master/OptimizelySDK/Config/HttpProjectConfigManager.cs)
-is an implementation of the abstract [`PollingProjectConfigManager`](https://github.com/optimizely/csharp-sdk/blob/master/OptimizelySDK/Config/PollingProjectConfigManager.cs).
-The `Poll` method is extended and makes an HTTP GET request to the configured URL to asynchronously download the
-project datafile and initialize an instance of the ProjectConfig.
-
-By default, `HttpProjectConfigManager` will block until the first successful datafile retrieval, up to a configurable timeout.
-Set the frequency of the polling method and the blocking timeout with `HttpProjectConfigManager.Builder`.
-
-##### Use HttpProjectConfigManager
-
-```
-HttpProjectConfigManager httpManager = new HttpProjectConfigManager.Builder()
-	.WithSdkKey(sdkKey)
-	.WithPollingInterval(TimeSpan.FromMinutes(1))
-	.Build();
+```csharp
+optimizely.NotificationCenter.AddNotification(
+    NotificationCenter.NotificationType.Decision,
+    (DecisionNotification notification) => {
+        Console.WriteLine($"Decision: {notification.Type}");
+    }
+);
 ```
 
-##### SDK key
+**Notification Types:** `Decision`, `Track`, `LogEvent`, `OptimizelyConfigUpdate`
 
-The SDK key is used to compose the outbound HTTP request to the default datafile location on the Optimizely CDN.
+### User Profile Service
 
-##### Polling interval
+Implement `UserProfileService` for sticky bucketing:
 
-The polling interval is used to specify a fixed delay between consecutive HTTP requests for the datafile. Between 1 to 4294967294 miliseconds is valid duration. Otherwise default 5 minutes will be used.
+```csharp
+public class MyUserProfileService : UserProfileService
+{
+    public UserProfile Lookup(string userId) { /* ... */ }
+    public void Save(UserProfile userProfile) { /* ... */ }
+}
+```
 
-##### Blocking Timeout Period
+### OptimizelyConfig
 
-The blocking timeout period is used to specify a maximum time to wait for initial bootstrapping. Between 1 to 4294967294 miliseconds is valid blocking timeout period. Otherwise default value 15 seconds will be used.
+```csharp
+var config = optimizely.GetOptimizelyConfig();
+foreach (var feature in config.FeaturesMap.Values)
+{
+    Console.WriteLine($"Feature: {feature.Key}");
+}
+```
 
-##### Initial datafile
+### Disposal
 
-You can provide an initial datafile via the builder to bootstrap the `ProjectConfigManager` so that it can be used immediately without blocking execution.
+```csharp
+optimizely.Dispose();  // Clean up resources
 
-##### URL
-
-The URL is used to specify the location of datafile.
-
-##### Format
-
-This option enables user to provide a custom URL format to fetch the datafile.
-
-##### Start by default
-
-This option is used to specify whether to start the config manager on initialization or not. If no value is provided, by default it is true and will start polling datafile from remote immediately.
-
-##### Datafile access token
-
-This option is used to provide token for datafile belonging to a secure environment.
+// Or use with 'using' statement
+using (var optimizely = OptimizelyFactory.NewDefaultInstance("SDK_KEY"))
+{
+    // Use SDK
+}
+```
 
 ## SDK Development
 
@@ -222,33 +340,32 @@ This option is used to provide token for datafile belonging to a secure environm
 
 Please see [CONTRIBUTING](CONTRIBUTING.md).
 
+### Unit Tests
+
+```sh
+dotnet test
+```
+
 ### Third Party Licenses
 
-Optimizely SDK uses third party software:
-[murmurhash-signed](https://www.nuget.org/packages/murmurhash-signed/),
-[Newtonsoft.Json](https://www.nuget.org/packages/Newtonsoft.Json/), and
-[NJsonSchema](https://www.nuget.org/packages/NJsonSchema/).
+- [murmurhash-signed](https://www.nuget.org/packages/murmurhash-signed/)
+- [Newtonsoft.Json](https://www.nuget.org/packages/Newtonsoft.Json/)
+- [NJsonSchema](https://www.nuget.org/packages/NJsonSchema/)
 
-### Other Optimzely SDKs
+## Credits
+
+This SDK is developed and maintained by [Optimizely](https://optimizely.com) and many [contributors](https://github.com/optimizely/csharp-sdk/graphs/contributors).
+
+### Other Optimizely SDKs
 
 - Agent - https://github.com/optimizely/agent
-
 - Android - https://github.com/optimizely/android-sdk
-
 - Flutter - https://github.com/optimizely/optimizely-flutter-sdk
-
 - Go - https://github.com/optimizely/go-sdk
-
 - Java - https://github.com/optimizely/java-sdk
-
 - JavaScript - https://github.com/optimizely/javascript-sdk
-
 - PHP - https://github.com/optimizely/php-sdk
-
 - Python - https://github.com/optimizely/python-sdk
-
 - React - https://github.com/optimizely/react-sdk
-
 - Ruby - https://github.com/optimizely/ruby-sdk
-
 - Swift - https://github.com/optimizely/swift-sdk
