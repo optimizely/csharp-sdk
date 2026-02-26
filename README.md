@@ -169,10 +169,16 @@ For details, see the [CMAB documentation](https://docs.developers.optimizely.com
 ODP enables Advanced Audience Targeting:
 
 ```csharp
-// Fetch user segments
+// Synchronous fetch
 var user = optimizely.CreateUserContext("user123");
-await user.FetchQualifiedSegments();
+bool success = user.FetchQualifiedSegments();
 var decision = user.Decide("personalized_feature");
+
+// Asynchronous fetch with callback
+var task = user.FetchQualifiedSegments((success) =>
+{
+    Console.WriteLine($"Segments fetched: {success}");
+});
 
 // Send custom events
 optimizely.SendOdpEvent(
@@ -290,11 +296,16 @@ var optimizely = OptimizelyFactory.NewDefaultInstance();
 ### Notification Listeners
 
 ```csharp
+// Define a decision callback method
+void OnDecision(string type, string userId, UserAttributes userAttributes, Dictionary<string, object> decisionInfo)
+{
+    Console.WriteLine($"Decision type: {type}, User: {userId}");
+}
+
+// Subscribe to decision notifications
 optimizely.NotificationCenter.AddNotification(
     NotificationCenter.NotificationType.Decision,
-    (DecisionNotification notification) => {
-        Console.WriteLine($"Decision: {notification.Type}");
-    }
+    OnDecision
 );
 ```
 
@@ -307,8 +318,17 @@ Implement `UserProfileService` for sticky bucketing:
 ```csharp
 public class MyUserProfileService : UserProfileService
 {
-    public UserProfile Lookup(string userId) { /* ... */ }
-    public void Save(UserProfile userProfile) { /* ... */ }
+    public Dictionary<string, object> Lookup(string userId)
+    {
+        // Retrieve user profile from your database
+        return GetUserProfileFromDatabase(userId);
+    }
+
+    public void Save(Dictionary<string, object> userProfile)
+    {
+        // Save user profile to your database
+        SaveUserProfileToDatabase(userProfile);
+    }
 }
 ```
 
