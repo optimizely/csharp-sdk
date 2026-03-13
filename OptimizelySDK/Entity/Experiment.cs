@@ -50,6 +50,13 @@ namespace OptimizelySDK.Entity
             !string.IsNullOrEmpty(GroupPolicy) && GroupPolicy == MUTEX_GROUP_POLICY;
 
         /// <summary>
+        /// Type of the experiment (e.g., "a/b", "feature_rollout", "targeted_delivery", etc.)
+        /// Optional - old datafiles will not have this field.
+        /// </summary>
+        [JsonProperty("type")]
+        public string Type { get; set; }
+
+        /// <summary>
         /// CMAB (Contextual Multi-Armed Bandit) configuration for the experiment.
         /// </summary>
         [JsonProperty("cmab")]

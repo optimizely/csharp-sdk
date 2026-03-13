@@ -445,6 +445,73 @@ namespace OptimizelySDK.Config
                 }
             }
 
+            // Inject "everyone else" variation into feature_rollout experiments
+            foreach (var feature in FeatureFlags)
+            {
+                var everyoneElseVariation = GetEveryoneElseVariation(feature);
+                if (everyoneElseVariation == null)
+                {
+                    continue;
+                }
+
+                foreach (var experimentId in feature.ExperimentIds ?? new List<string>())
+                {
+                    if (!_ExperimentIdMap.ContainsKey(experimentId))
+                    {
+                        continue;
+                    }
+
+                    var experiment = _ExperimentIdMap[experimentId];
+                    if (experiment.Type != "feature_rollout")
+                    {
+                        continue;
+                    }
+
+                    // Append the everyone else variation
+                    var variationsList = experiment.Variations?.ToList() ?? new List<Variation>();
+                    variationsList.Add(everyoneElseVariation);
+                    experiment.Variations = variationsList.ToArray();
+
+                    // Append traffic allocation entry
+                    var trafficList = experiment.TrafficAllocation?.ToList() ??
+                                     new List<TrafficAllocation>();
+                    trafficList.Add(new TrafficAllocation
+                    {
+                        EntityId = everyoneElseVariation.Id,
+                        EndOfRange = 10000,
+                    });
+                    experiment.TrafficAllocation = trafficList.ToArray();
+
+                    // Regenerate variation key maps for this experiment
+                    experiment.GenerateVariationKeyMap();
+
+                    // Update global variation maps
+                    if (_VariationKeyMap.ContainsKey(experiment.Key))
+                    {
+                        _VariationKeyMap[experiment.Key][everyoneElseVariation.Key] =
+                            everyoneElseVariation;
+                    }
+
+                    if (_VariationIdMap.ContainsKey(experiment.Key))
+                    {
+                        _VariationIdMap[experiment.Key][everyoneElseVariation.Id] =
+                            everyoneElseVariation;
+                    }
+
+                    if (_VariationKeyMapByExperimentId.ContainsKey(experiment.Id))
+                    {
+                        _VariationKeyMapByExperimentId[experiment.Id]
+                            [everyoneElseVariation.Key] = everyoneElseVariation;
+                    }
+
+                    if (_VariationIdMapByExperimentId.ContainsKey(experiment.Id))
+                    {
+                        _VariationIdMapByExperimentId[experiment.Id]
+                            [everyoneElseVariation.Id] = everyoneElseVariation;
+                    }
+                }
+            }
+
             var integration = Integrations.FirstOrDefault(i => i.Key.ToLower() == "odp");
             HostForOdp = integration?.Host;
             PublicKeyForOdp = integration?.PublicKey;
@@ -916,5 +983,36 @@ namespace OptimizelySDK.Config
         /// </summary>
         /// <returns>the datafile string corresponding to ProjectConfig</returns>
         public string Region { get; set; }
+
+        /// <summary>
+        /// Get the "everyone else" variation from the last rule in the flag's rollout.
+        /// Returns null if the rollout cannot be resolved or has no variations.
+        /// </summary>
+        private Variation GetEveryoneElseVariation(FeatureFlag feature)
+        {
+            if (string.IsNullOrEmpty(feature.RolloutId))
+            {
+                return null;
+            }
+
+            if (!_RolloutIdMap.ContainsKey(feature.RolloutId))
+            {
+                return null;
+            }
+
+            var rollout = _RolloutIdMap[feature.RolloutId];
+            if (rollout.Experiments == null || rollout.Experiments.Count == 0)
+            {
+                return null;
+            }
+
+            var everyoneElseRule = rollout.Experiments[rollout.Experiments.Count - 1];
+            if (everyoneElseRule.Variations == null || everyoneElseRule.Variations.Length == 0)
+            {
+                return null;
+            }
+
+            return everyoneElseRule.Variations[0];
+        }
     }
 }
