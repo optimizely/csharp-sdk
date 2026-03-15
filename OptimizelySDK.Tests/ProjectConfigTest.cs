@@ -1491,4 +1491,251 @@ namespace OptimizelySDK.Tests
             Assert.IsNull(experimentWithoutCmab.Cmab);
         }
     }
+
+    [TestFixture]
+    public class FeatureRolloutProjectConfigTest
+    {
+        private string BuildFeatureRolloutDatafile(
+            string experimentType = "feature_rollout",
+            string rolloutId = "rollout_1",
+            bool includeRollout = true,
+            bool includeRolloutVariations = true)
+        {
+            var rolloutExperiments = new List<object>();
+            if (includeRollout && includeRolloutVariations)
+            {
+                rolloutExperiments.Add(new
+                {
+                    id = "rollout_rule_1",
+                    key = "rollout_rule_1_key",
+                    layerId = "rollout_layer_1",
+                    status = "Running",
+                    variations = new[]
+                    {
+                        new { id = "var_rr1", key = "variation_rr1", featureEnabled = true },
+                    },
+                    trafficAllocation = new[]
+                    {
+                        new { entityId = "var_rr1", endOfRange = 10000 },
+                    },
+                    audienceIds = new string[0],
+                    forcedVariations = new Dictionary<string, string>(),
+                });
+                rolloutExperiments.Add(new
+                {
+                    id = "rollout_everyone_else",
+                    key = "rollout_everyone_else_key",
+                    layerId = "rollout_layer_ee",
+                    status = "Running",
+                    variations = new[]
+                    {
+                        new
+                        {
+                            id = "var_ee", key = "variation_everyone_else",
+                            featureEnabled = false,
+                        },
+                    },
+                    trafficAllocation = new[]
+                    {
+                        new { entityId = "var_ee", endOfRange = 10000 },
+                    },
+                    audienceIds = new string[0],
+                    forcedVariations = new Dictionary<string, string>(),
+                });
+            }
+
+            var rollouts = new List<object>();
+            if (includeRollout)
+            {
+                rollouts.Add(new
+                {
+                    id = "rollout_1",
+                    experiments = rolloutExperiments,
+                });
+            }
+
+            var experiments = new List<object>
+            {
+                new
+                {
+                    id = "exp_ab",
+                    key = "ab_experiment",
+                    layerId = "layer_ab",
+                    status = "Running",
+                    variations = new[]
+                    {
+                        new { id = "var_ab_1", key = "variation_ab_1", featureEnabled = true },
+                    },
+                    trafficAllocation = new[]
+                    {
+                        new { entityId = "var_ab_1", endOfRange = 10000 },
+                    },
+                    audienceIds = new string[0],
+                    forcedVariations = new Dictionary<string, string>(),
+                },
+            };
+
+            if (experimentType != null)
+            {
+                experiments.Add(new
+                {
+                    id = "exp_rollout",
+                    key = "rollout_experiment",
+                    layerId = "layer_rollout",
+                    status = "Running",
+                    type = experimentType,
+                    variations = new[]
+                    {
+                        new
+                        {
+                            id = "var_rollout_1", key = "variation_rollout_1",
+                            featureEnabled = true,
+                        },
+                    },
+                    trafficAllocation = new[]
+                    {
+                        new { entityId = "var_rollout_1", endOfRange = 5000 },
+                    },
+                    audienceIds = new string[0],
+                    forcedVariations = new Dictionary<string, string>(),
+                });
+            }
+
+            var datafile = new
+            {
+                version = "4",
+                revision = "1",
+                projectId = "rollout_test",
+                accountId = "12345",
+                sdkKey = "test-key",
+                environmentKey = "production",
+                events = new object[0],
+                audiences = new object[0],
+                typedAudiences = new object[0],
+                attributes = new object[0],
+                groups = new object[0],
+                integrations = new object[0],
+                holdouts = new object[0],
+                experiments = experiments,
+                rollouts = rollouts,
+                featureFlags = new[]
+                {
+                    new
+                    {
+                        id = "feature_1",
+                        key = "feature_rollout_flag",
+                        rolloutId = rolloutId,
+                        experimentIds = experimentType != null
+                            ? new[] { "exp_ab", "exp_rollout" }
+                            : new[] { "exp_ab" },
+                        variables = new object[0],
+                    },
+                },
+            };
+
+            return JsonConvert.SerializeObject(datafile);
+        }
+
+        [Test]
+        public void TestBackwardCompatibilityExperimentsWithoutTypeField()
+        {
+            var datafile = BuildFeatureRolloutDatafile();
+            var config = DatafileProjectConfig.Create(datafile, new NoOpLogger(),
+                new NoOpErrorHandler());
+
+            var abExperiment = config.GetExperimentFromKey("ab_experiment");
+            Assert.IsNull(abExperiment.Type);
+        }
+
+        [Test]
+        public void TestFeatureRolloutInjectionAddsEveryoneElseVariation()
+        {
+            var datafile = BuildFeatureRolloutDatafile();
+            var config = DatafileProjectConfig.Create(datafile, new NoOpLogger(),
+                new NoOpErrorHandler());
+
+            var rolloutExperiment = config.GetExperimentFromKey("rollout_experiment");
+
+            // Should have 2 variations: original + injected everyone else
+            Assert.AreEqual(2, rolloutExperiment.Variations.Length);
+            Assert.AreEqual("var_ee", rolloutExperiment.Variations[1].Id);
+            Assert.AreEqual("variation_everyone_else", rolloutExperiment.Variations[1].Key);
+
+            // Should have injected traffic allocation entry
+            var lastAllocation =
+                rolloutExperiment.TrafficAllocation[rolloutExperiment.TrafficAllocation.Length - 1];
+            Assert.AreEqual("var_ee", lastAllocation.EntityId);
+            Assert.AreEqual(10000, lastAllocation.EndOfRange);
+        }
+
+        [Test]
+        public void TestVariationMapsUpdatedWithInjectedVariation()
+        {
+            var datafile = BuildFeatureRolloutDatafile();
+            var config = DatafileProjectConfig.Create(datafile, new NoOpLogger(),
+                new NoOpErrorHandler());
+
+            var rolloutExperiment = config.GetExperimentFromKey("rollout_experiment");
+
+            // VariationKeyToVariationMap should contain the injected variation
+            Assert.IsTrue(
+                rolloutExperiment.VariationKeyToVariationMap.ContainsKey(
+                    "variation_everyone_else"));
+            Assert.AreEqual("var_ee",
+                rolloutExperiment.VariationKeyToVariationMap["variation_everyone_else"].Id);
+
+            // VariationIdToVariationMap should contain the injected variation
+            Assert.IsTrue(
+                rolloutExperiment.VariationIdToVariationMap.ContainsKey("var_ee"));
+
+            // Global variation maps should also contain the injected variation
+            var variationByKey = config.GetVariationFromKey("rollout_experiment",
+                "variation_everyone_else");
+            Assert.AreEqual("var_ee", variationByKey.Id);
+
+            var variationById =
+                config.GetVariationFromId("rollout_experiment", "var_ee");
+            Assert.AreEqual("variation_everyone_else", variationById.Key);
+        }
+
+        [Test]
+        public void TestNonRolloutExperimentsNotModified()
+        {
+            var datafile = BuildFeatureRolloutDatafile();
+            var config = DatafileProjectConfig.Create(datafile, new NoOpLogger(),
+                new NoOpErrorHandler());
+
+            var abExperiment = config.GetExperimentFromKey("ab_experiment");
+
+            // A/B experiment should still have only 1 variation
+            Assert.AreEqual(1, abExperiment.Variations.Length);
+            Assert.AreEqual("var_ab_1", abExperiment.Variations[0].Id);
+            Assert.AreEqual(1, abExperiment.TrafficAllocation.Length);
+        }
+
+        [Test]
+        public void TestNoRolloutEdgeCaseSilentSkip()
+        {
+            var datafile = BuildFeatureRolloutDatafile(rolloutId: "");
+            var config = DatafileProjectConfig.Create(datafile, new NoOpLogger(),
+                new NoOpErrorHandler());
+
+            var rolloutExperiment = config.GetExperimentFromKey("rollout_experiment");
+
+            // Should still have only 1 variation (no injection)
+            Assert.AreEqual(1, rolloutExperiment.Variations.Length);
+            Assert.AreEqual("var_rollout_1", rolloutExperiment.Variations[0].Id);
+        }
+
+        [Test]
+        public void TestTypeFieldParsedCorrectly()
+        {
+            var datafile = BuildFeatureRolloutDatafile();
+            var config = DatafileProjectConfig.Create(datafile, new NoOpLogger(),
+                new NoOpErrorHandler());
+
+            var rolloutExperiment = config.GetExperimentFromKey("rollout_experiment");
+            Assert.AreEqual("feature_rollout", rolloutExperiment.Type);
+        }
+    }
 }
