@@ -23,6 +23,12 @@ namespace OptimizelySDK.Entity
     {
         private const string MUTEX_GROUP_POLICY = "random";
 
+        public const string ExperimentTypeAb = "ab";
+        public const string ExperimentTypeMab = "mab";
+        public const string ExperimentTypeCmab = "cmab";
+        public const string ExperimentTypeTd = "td";
+        public const string ExperimentTypeFr = "fr";
+
         /// <summary>
         /// Group ID for the experiment
         /// </summary>
@@ -50,7 +56,7 @@ namespace OptimizelySDK.Entity
             !string.IsNullOrEmpty(GroupPolicy) && GroupPolicy == MUTEX_GROUP_POLICY;
 
         /// <summary>
-        /// Type of the experiment (e.g., "a/b", "feature_rollout", "targeted_delivery", etc.)
+        /// Type of the experiment (e.g., "ab", "fr", "td", etc.)
         /// Optional - old datafiles will not have this field.
         /// </summary>
         [JsonProperty("type")]
