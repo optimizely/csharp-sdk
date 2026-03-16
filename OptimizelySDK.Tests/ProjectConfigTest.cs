@@ -1496,7 +1496,7 @@ namespace OptimizelySDK.Tests
     public class FeatureRolloutProjectConfigTest
     {
         private string BuildFeatureRolloutDatafile(
-            string experimentType = "feature_rollout",
+            string experimentType = "fr",
             string rolloutId = "rollout_1",
             bool includeRollout = true,
             bool includeRolloutVariations = true)
@@ -1735,7 +1735,7 @@ namespace OptimizelySDK.Tests
                 new NoOpErrorHandler());
 
             var rolloutExperiment = config.GetExperimentFromKey("rollout_experiment");
-            Assert.AreEqual("feature_rollout", rolloutExperiment.Type);
+            Assert.AreEqual("fr", rolloutExperiment.Type);
         }
     }
 }

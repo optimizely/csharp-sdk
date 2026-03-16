@@ -462,7 +462,7 @@ namespace OptimizelySDK.Config
                     }
 
                     var experiment = _ExperimentIdMap[experimentId];
-                    if (experiment.Type != "feature_rollout")
+                    if (experiment.Type != "fr")
                     {
                         continue;
                     }
