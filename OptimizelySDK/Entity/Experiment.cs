@@ -23,6 +23,12 @@ namespace OptimizelySDK.Entity
     {
         private const string MUTEX_GROUP_POLICY = "random";
 
+        public const string EXPERIMENT_TYPE_AB = "ab";
+        public const string EXPERIMENT_TYPE_MAB = "mab";
+        public const string EXPERIMENT_TYPE_CMAB = "cmab";
+        public const string EXPERIMENT_TYPE_TD = "td";
+        public const string EXPERIMENT_TYPE_FR = "fr";
+
         /// <summary>
         /// Group ID for the experiment
         /// </summary>
@@ -48,6 +54,13 @@ namespace OptimizelySDK.Entity
         /// </summary>
         public bool IsInMutexGroup =>
             !string.IsNullOrEmpty(GroupPolicy) && GroupPolicy == MUTEX_GROUP_POLICY;
+
+        /// <summary>
+        /// Type of the experiment (e.g., "ab", "fr", "td", etc.)
+        /// Optional - old datafiles will not have this field.
+        /// </summary>
+        [JsonProperty("type")]
+        public string Type { get; set; }
 
         /// <summary>
         /// CMAB (Contextual Multi-Armed Bandit) configuration for the experiment.
