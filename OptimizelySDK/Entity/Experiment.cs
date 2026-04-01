@@ -23,11 +23,11 @@ namespace OptimizelySDK.Entity
     {
         private const string MUTEX_GROUP_POLICY = "random";
 
-        public const string ExperimentTypeAb = "ab";
-        public const string ExperimentTypeMab = "mab";
-        public const string ExperimentTypeCmab = "cmab";
-        public const string ExperimentTypeTd = "td";
-        public const string ExperimentTypeFr = "fr";
+        public const string EXPERIMENT_TYPE_AB = "ab";
+        public const string EXPERIMENT_TYPE_MAB = "mab";
+        public const string EXPERIMENT_TYPE_CMAB = "cmab";
+        public const string EXPERIMENT_TYPE_TD = "td";
+        public const string EXPERIMENT_TYPE_FR = "fr";
 
         /// <summary>
         /// Group ID for the experiment

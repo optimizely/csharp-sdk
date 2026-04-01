@@ -377,11 +377,11 @@ namespace OptimizelySDK.Config
 
             var validExperimentTypes = new HashSet<string>
             {
-                Experiment.ExperimentTypeAb,
-                Experiment.ExperimentTypeMab,
-                Experiment.ExperimentTypeCmab,
-                Experiment.ExperimentTypeTd,
-                Experiment.ExperimentTypeFr,
+                Experiment.EXPERIMENT_TYPE_AB,
+                Experiment.EXPERIMENT_TYPE_MAB,
+                Experiment.EXPERIMENT_TYPE_CMAB,
+                Experiment.EXPERIMENT_TYPE_TD,
+                Experiment.EXPERIMENT_TYPE_FR,
             };
 
             foreach (var experiment in _ExperimentIdMap.Values)
@@ -480,7 +480,7 @@ namespace OptimizelySDK.Config
                     }
 
                     var experiment = _ExperimentIdMap[experimentId];
-                    if (experiment.Type != Experiment.ExperimentTypeFr)
+                    if (experiment.Type != Experiment.EXPERIMENT_TYPE_FR)
                     {
                         continue;
                     }

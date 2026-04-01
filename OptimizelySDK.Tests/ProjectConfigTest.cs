@@ -1490,11 +1490,9 @@ namespace OptimizelySDK.Tests
 
             Assert.IsNull(experimentWithoutCmab.Cmab);
         }
-    }
 
-    [TestFixture]
-    public class FeatureRolloutProjectConfigTest
-    {
+        #region Feature Rollout Tests
+
         private string BuildFeatureRolloutDatafile(
             string experimentType = "fr",
             string rolloutId = "rollout_1",
@@ -1640,8 +1638,8 @@ namespace OptimizelySDK.Tests
         public void TestBackwardCompatibilityExperimentsWithoutTypeField()
         {
             var datafile = BuildFeatureRolloutDatafile();
-            var config = DatafileProjectConfig.Create(datafile, new NoOpLogger(),
-                new NoOpErrorHandler());
+            var config = DatafileProjectConfig.Create(datafile, LoggerMock.Object,
+                ErrorHandlerMock.Object);
 
             var abExperiment = config.GetExperimentFromKey("ab_experiment");
             Assert.IsNull(abExperiment.Type);
@@ -1651,8 +1649,8 @@ namespace OptimizelySDK.Tests
         public void TestFeatureRolloutInjectionAddsEveryoneElseVariation()
         {
             var datafile = BuildFeatureRolloutDatafile();
-            var config = DatafileProjectConfig.Create(datafile, new NoOpLogger(),
-                new NoOpErrorHandler());
+            var config = DatafileProjectConfig.Create(datafile, LoggerMock.Object,
+                ErrorHandlerMock.Object);
 
             var rolloutExperiment = config.GetExperimentFromKey("rollout_experiment");
 
@@ -1672,8 +1670,8 @@ namespace OptimizelySDK.Tests
         public void TestVariationMapsUpdatedWithInjectedVariation()
         {
             var datafile = BuildFeatureRolloutDatafile();
-            var config = DatafileProjectConfig.Create(datafile, new NoOpLogger(),
-                new NoOpErrorHandler());
+            var config = DatafileProjectConfig.Create(datafile, LoggerMock.Object,
+                ErrorHandlerMock.Object);
 
             var rolloutExperiment = config.GetExperimentFromKey("rollout_experiment");
 
@@ -1702,8 +1700,8 @@ namespace OptimizelySDK.Tests
         public void TestNonRolloutExperimentsNotModified()
         {
             var datafile = BuildFeatureRolloutDatafile();
-            var config = DatafileProjectConfig.Create(datafile, new NoOpLogger(),
-                new NoOpErrorHandler());
+            var config = DatafileProjectConfig.Create(datafile, LoggerMock.Object,
+                ErrorHandlerMock.Object);
 
             var abExperiment = config.GetExperimentFromKey("ab_experiment");
 
@@ -1717,8 +1715,8 @@ namespace OptimizelySDK.Tests
         public void TestNoRolloutEdgeCaseSilentSkip()
         {
             var datafile = BuildFeatureRolloutDatafile(rolloutId: "");
-            var config = DatafileProjectConfig.Create(datafile, new NoOpLogger(),
-                new NoOpErrorHandler());
+            var config = DatafileProjectConfig.Create(datafile, LoggerMock.Object,
+                ErrorHandlerMock.Object);
 
             var rolloutExperiment = config.GetExperimentFromKey("rollout_experiment");
 
@@ -1731,11 +1729,13 @@ namespace OptimizelySDK.Tests
         public void TestTypeFieldParsedCorrectly()
         {
             var datafile = BuildFeatureRolloutDatafile();
-            var config = DatafileProjectConfig.Create(datafile, new NoOpLogger(),
-                new NoOpErrorHandler());
+            var config = DatafileProjectConfig.Create(datafile, LoggerMock.Object,
+                ErrorHandlerMock.Object);
 
             var rolloutExperiment = config.GetExperimentFromKey("rollout_experiment");
             Assert.AreEqual("fr", rolloutExperiment.Type);
         }
+
+        #endregion
     }
 }
