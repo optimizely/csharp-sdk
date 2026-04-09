@@ -375,26 +375,8 @@ namespace OptimizelySDK.Config
                 }
             }
 
-            var validExperimentTypes = new HashSet<string>
-            {
-                Experiment.EXPERIMENT_TYPE_AB,
-                Experiment.EXPERIMENT_TYPE_MAB,
-                Experiment.EXPERIMENT_TYPE_CMAB,
-                Experiment.EXPERIMENT_TYPE_TD,
-                Experiment.EXPERIMENT_TYPE_FR,
-            };
-
             foreach (var experiment in _ExperimentIdMap.Values)
             {
-                if (experiment.Type != null && !validExperimentTypes.Contains(experiment.Type))
-                {
-                    Logger.Log(LogLevel.ERROR,
-                        $@"Experiment ""{experiment.Key}"" has invalid type ""{experiment.Type}"".");
-                    ErrorHandler.HandleError(
-                        new InvalidExperimentException(
-                            $"Invalid experiment type: {experiment.Type}"));
-                }
-
                 _VariationKeyMap[experiment.Key] = new Dictionary<string, Variation>();
                 _VariationIdMap[experiment.Key] = new Dictionary<string, Variation>();
                 _VariationIdMapByExperimentId[experiment.Id] = new Dictionary<string, Variation>();

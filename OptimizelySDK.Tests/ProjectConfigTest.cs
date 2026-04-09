@@ -1736,6 +1736,19 @@ namespace OptimizelySDK.Tests
             Assert.AreEqual("fr", rolloutExperiment.Type);
         }
 
+        [Test]
+        public void TestUnknownExperimentTypeAccepted()
+        {
+            var datafile = BuildFeatureRolloutDatafile(experimentType: "new_unknown_type");
+            var config = DatafileProjectConfig.Create(datafile, LoggerMock.Object,
+                ErrorHandlerMock.Object);
+
+            Assert.IsNotNull(config);
+            var experiment = config.GetExperimentFromKey("rollout_experiment");
+            Assert.IsNotNull(experiment);
+            Assert.AreEqual("new_unknown_type", experiment.Type);
+        }
+
         #endregion
     }
 }
