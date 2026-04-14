@@ -1,5 +1,5 @@
-﻿/* 
- * Copyright 2025, Optimizely
+﻿/*
+ * Copyright 2025-2026, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,14 +35,19 @@ namespace OptimizelySDK.Entity
         }
 
         /// <summary>
-        /// Flags included in this holdout
+        /// Rule IDs included in this holdout. If null, this is a global holdout that applies to all rules.
+        /// If empty array, this is a local holdout with no rules (edge case).
+        /// If populated, this is a local holdout that applies only to the specified rules.
         /// </summary>
-        public string[] IncludedFlags { get; set; } = new string[0];
+        public string[] IncludedRules { get; set; }
 
         /// <summary>
-        /// Flags excluded from this holdout
+        /// Returns true if this is a global holdout (applies to all rules), false if it's a local holdout (specific rules only).
         /// </summary>
-        public string[] ExcludedFlags { get; set; } = new string[0];
+        public bool IsGlobal()
+        {
+            return IncludedRules == null;
+        }
 
         /// <summary>
         /// Layer ID is always empty for holdouts as they don't belong to any layer

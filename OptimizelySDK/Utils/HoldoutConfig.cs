@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright 2025, Optimizely
+ * Copyright 2025-2026, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,16 +21,14 @@ using OptimizelySDK.Entity;
 namespace OptimizelySDK.Utils
 {
     /// <summary>
-    /// Configuration manager for holdouts, providing flag-to-holdout relationship mapping and optimization logic.
+    /// Configuration manager for holdouts, providing rule-to-holdout relationship mapping and optimization logic.
     /// </summary>
     public class HoldoutConfig
     {
         private List<Holdout> _allHoldouts;
         private readonly List<Holdout> _globalHoldouts;
         private readonly Dictionary<string, Holdout> _holdoutIdMap;
-        private readonly Dictionary<string, List<Holdout>> _includedHoldouts;
-        private readonly Dictionary<string, List<Holdout>> _excludedHoldouts;
-        private readonly Dictionary<string, List<Holdout>> _flagHoldoutCache;
+        private readonly Dictionary<string, List<Holdout>> _ruleHoldoutsMap;
 
         /// <summary>
         /// Initializes a new instance of the HoldoutConfig class.
@@ -41,9 +39,7 @@ namespace OptimizelySDK.Utils
             _allHoldouts = allHoldouts?.ToList() ?? new List<Holdout>();
             _globalHoldouts = new List<Holdout>();
             _holdoutIdMap = new Dictionary<string, Holdout>();
-            _includedHoldouts = new Dictionary<string, List<Holdout>>();
-            _excludedHoldouts = new Dictionary<string, List<Holdout>>();
-            _flagHoldoutCache = new Dictionary<string, List<Holdout>>();
+            _ruleHoldoutsMap = new Dictionary<string, List<Holdout>>();
 
             UpdateHoldoutMapping();
         }
@@ -54,102 +50,64 @@ namespace OptimizelySDK.Utils
         public IDictionary<string, Holdout> HoldoutIdMap => _holdoutIdMap;
 
         /// <summary>
-        /// Updates internal mappings of holdouts including the id map, global list, and per-flag inclusion/exclusion maps.
+        /// Updates internal mappings of holdouts including the id map, global list, and per-rule mappings.
         /// </summary>
         private void UpdateHoldoutMapping()
         {
             // Clear existing mappings
             _holdoutIdMap.Clear();
             _globalHoldouts.Clear();
-            _includedHoldouts.Clear();
-            _excludedHoldouts.Clear();
-            _flagHoldoutCache.Clear();
+            _ruleHoldoutsMap.Clear();
 
             foreach (var holdout in _allHoldouts)
             {
                 // Build ID mapping
                 _holdoutIdMap[holdout.Id] = holdout;
 
-                var hasIncludedFlags = holdout.IncludedFlags != null && holdout.IncludedFlags.Length > 0;
-                var hasExcludedFlags = holdout.ExcludedFlags != null && holdout.ExcludedFlags.Length > 0;
-
-                if (hasIncludedFlags)
+                if (holdout.IsGlobal())
                 {
-                    // Local/targeted holdout - only applies to specific included flags
-                    foreach (var flagId in holdout.IncludedFlags)
-                    {
-                        if (!_includedHoldouts.ContainsKey(flagId))
-                            _includedHoldouts[flagId] = new List<Holdout>();
-
-                        _includedHoldouts[flagId].Add(holdout);
-                    }
-                }
-                else
-                {
-                    // Global holdout (applies to all flags)
+                    // Global holdout - applies to all rules
                     _globalHoldouts.Add(holdout);
-
-                    // If it has excluded flags, track which flags to exclude it from
-                    if (hasExcludedFlags)
+                }
+                else if (holdout.IncludedRules != null && holdout.IncludedRules.Length > 0)
+                {
+                    // Local holdout - applies only to specific rules
+                    foreach (var ruleId in holdout.IncludedRules)
                     {
-                        foreach (var flagId in holdout.ExcludedFlags)
-                        {
-                            if (!_excludedHoldouts.ContainsKey(flagId))
-                                _excludedHoldouts[flagId] = new List<Holdout>();
+                        if (!_ruleHoldoutsMap.ContainsKey(ruleId))
+                            _ruleHoldoutsMap[ruleId] = new List<Holdout>();
 
-                            _excludedHoldouts[flagId].Add(holdout);
-                        }
+                        _ruleHoldoutsMap[ruleId].Add(holdout);
                     }
                 }
+                // Note: If IncludedRules is an empty array, it's a local holdout with no rules (edge case)
+                // It won't be added to either global or rule maps
             }
         }
 
         /// <summary>
-        /// Returns the applicable holdouts for the given flag ID by combining global holdouts (excluding any specified) and included holdouts, in that order.
-        /// Caches the result for future calls.
+        /// Returns all global holdouts that apply to all rules.
         /// </summary>
-        /// <param name="flagId">The flag identifier</param>
-        /// <returns>A list of Holdout objects relevant to the given flag</returns>
-        public List<Holdout> GetHoldoutsForFlag(string flagId)
+        /// <returns>A list of global Holdout objects</returns>
+        public List<Holdout> GetGlobalHoldouts()
         {
-            if (string.IsNullOrEmpty(flagId) || _allHoldouts.Count == 0)
+            return new List<Holdout>(_globalHoldouts);
+        }
+
+        /// <summary>
+        /// Returns local holdouts that apply to a specific rule.
+        /// </summary>
+        /// <param name="ruleId">The rule identifier</param>
+        /// <returns>A list of Holdout objects that target this specific rule</returns>
+        public List<Holdout> GetHoldoutsForRule(string ruleId)
+        {
+            if (string.IsNullOrEmpty(ruleId))
                 return new List<Holdout>();
 
-            // Check cache first
-            if (_flagHoldoutCache.ContainsKey(flagId))
-                return _flagHoldoutCache[flagId];
+            if (_ruleHoldoutsMap.ContainsKey(ruleId))
+                return new List<Holdout>(_ruleHoldoutsMap[ruleId]);
 
-            var activeHoldouts = new List<Holdout>();
-            // Start with global holdouts, excluding any that are specifically excluded for this flag
-            var excludedForFlag = _excludedHoldouts.ContainsKey(flagId) ? _excludedHoldouts[flagId] : new List<Holdout>();
-
-            if (excludedForFlag.Count > 0)
-            {
-                // Only iterate if we have exclusions to check
-                foreach (var globalHoldout in _globalHoldouts)
-                {
-                    if (!excludedForFlag.Contains(globalHoldout))
-                    {
-                        activeHoldouts.Add(globalHoldout);
-                    }
-                }
-            }
-            else
-            {
-                // No exclusions, add all global holdouts directly
-                activeHoldouts.AddRange(_globalHoldouts);
-            }
-
-            // Add included holdouts for this flag
-            if (_includedHoldouts.ContainsKey(flagId))
-            {
-                activeHoldouts.AddRange(_includedHoldouts[flagId]);
-            }
-
-            // Cache the result
-            _flagHoldoutCache[flagId] = activeHoldouts;
-
-            return activeHoldouts;
+            return new List<Holdout>();
         }
 
         /// <summary>

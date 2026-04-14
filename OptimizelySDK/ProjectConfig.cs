@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright 2019-2022, Optimizely
+ * Copyright 2019-2022, 2026, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -333,11 +333,17 @@ namespace OptimizelySDK
         Holdout GetHoldout(string holdoutId);
 
         /// <summary>
-        /// Get holdout instances associated with the given feature flag Id.
+        /// Get all global holdouts that apply to all rules.
         /// </summary>
-        /// <param name="flagKey">Feature flag Id</param>
-        /// <returns>Array of holdouts associated with the flag, empty array if none</returns>
-        Holdout[] GetHoldoutsForFlag(string flagId);
+        /// <returns>Array of global holdouts</returns>
+        Holdout[] GetGlobalHoldouts();
+
+        /// <summary>
+        /// Get local holdouts that apply to a specific rule.
+        /// </summary>
+        /// <param name="ruleId">Rule identifier</param>
+        /// <returns>Array of holdouts targeting this specific rule</returns>
+        Holdout[] GetHoldoutsForRule(string ruleId);
 
         /// <summary>
         /// Returns the datafile corresponding to ProjectConfig

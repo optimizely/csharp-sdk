@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright 2019-2023, Optimizely
+ * Copyright 2019-2023, 2026, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -970,13 +970,23 @@ namespace OptimizelySDK.Config
         }
 
         /// <summary>
-        /// Get holdout instances associated with the given feature flag Id.
+        /// Get all global holdouts that apply to all rules.
         /// </summary>
-        /// <param name="flagId">Feature flag Id</param>
-        /// <returns>Array of holdouts associated with the flag, empty array if none</returns>
-        public Holdout[] GetHoldoutsForFlag(string flagId)
+        /// <returns>Array of global holdouts</returns>
+        public Holdout[] GetGlobalHoldouts()
         {
-            var holdouts = _holdoutConfig?.GetHoldoutsForFlag(flagId);
+            var holdouts = _holdoutConfig?.GetGlobalHoldouts();
+            return holdouts?.ToArray() ?? new Holdout[0];
+        }
+
+        /// <summary>
+        /// Get local holdouts that apply to a specific rule.
+        /// </summary>
+        /// <param name="ruleId">Rule identifier</param>
+        /// <returns>Array of holdouts targeting this specific rule</returns>
+        public Holdout[] GetHoldoutsForRule(string ruleId)
+        {
+            var holdouts = _holdoutConfig?.GetHoldoutsForRule(ruleId);
             return holdouts?.ToArray() ?? new Holdout[0];
         }
         /// Returns the datafile corresponding to ProjectConfig
