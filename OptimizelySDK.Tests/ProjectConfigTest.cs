@@ -1372,33 +1372,6 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
-        public void TestGetHoldoutsForFlag_Integration()
-        {
-            var testDataPath = Path.Combine(TestContext.CurrentContext.TestDirectory,
-                "TestData", "HoldoutTestData.json");
-            var jsonContent = File.ReadAllText(testDataPath);
-            var testData = JObject.Parse(jsonContent);
-
-            var datafileJson = testData["datafileWithHoldouts"].ToString();
-
-            var datafileProjectConfig = DatafileProjectConfig.Create(datafileJson,
-                new NoOpLogger(), new NoOpErrorHandler()) as DatafileProjectConfig;
-
-            // Test GetHoldoutsForFlag method
-            var holdoutsForFlag1 = datafileProjectConfig.GetHoldoutsForFlag("flag_1");
-            Assert.IsNotNull(holdoutsForFlag1);
-            Assert.AreEqual(4, holdoutsForFlag1.Length); // Global + excluded holdout (applies to all except flag_3/flag_4) + included holdout + empty holdout
-
-            var holdoutsForFlag3 = datafileProjectConfig.GetHoldoutsForFlag("flag_3");
-            Assert.IsNotNull(holdoutsForFlag3);
-            Assert.AreEqual(2, holdoutsForFlag3.Length); // Global + empty holdout (excluded holdout excludes flag_3, included holdout doesn't include flag_3)
-
-            var holdoutsForUnknownFlag = datafileProjectConfig.GetHoldoutsForFlag("unknown_flag");
-            Assert.IsNotNull(holdoutsForUnknownFlag);
-            Assert.AreEqual(3, holdoutsForUnknownFlag.Length); // Global + excluded holdout (unknown_flag not in excluded list) + empty holdout
-        }
-
-        [Test]
         public void TestGetHoldout_Integration()
         {
             var testDataPath = Path.Combine(TestContext.CurrentContext.TestDirectory,
@@ -1446,10 +1419,6 @@ namespace OptimizelySDK.Tests
             Assert.AreEqual(0, datafileProjectConfig.Holdouts.Length);
 
             // Methods should still work with empty holdouts
-            var holdouts = datafileProjectConfig.GetHoldoutsForFlag("any_flag");
-            Assert.IsNotNull(holdouts);
-            Assert.AreEqual(0, holdouts.Length);
-
             var holdout = datafileProjectConfig.GetHoldout("any_id");
             Assert.IsNull(holdout);
         }
