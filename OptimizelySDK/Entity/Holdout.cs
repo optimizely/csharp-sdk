@@ -35,16 +35,6 @@ namespace OptimizelySDK.Entity
         }
 
         /// <summary>
-        /// Flags included in this holdout
-        /// </summary>
-        public string[] IncludedFlags { get; set; } = new string[0];
-
-        /// <summary>
-        /// Flags excluded from this holdout
-        /// </summary>
-        public string[] ExcludedFlags { get; set; } = new string[0];
-
-        /// <summary>
         /// Layer ID is always empty for holdouts as they don't belong to any layer
         /// </summary>
         public override string LayerId
