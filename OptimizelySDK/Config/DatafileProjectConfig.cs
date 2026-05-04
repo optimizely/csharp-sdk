@@ -970,9 +970,8 @@ namespace OptimizelySDK.Config
         }
 
         /// <summary>
-        /// Returns the datafile region to ProjectConfig
+        /// Gets or sets the region for this ProjectConfig.
         /// </summary>
-        /// <returns>the datafile region corresponding to ProjectConfig</returns>
         public string Region { get; set; }
 
         /// <summary>
