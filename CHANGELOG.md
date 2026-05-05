@@ -1,13 +1,24 @@
 # Optimizely C# SDK Changelog
 
-## 4.2.0
+## 4.3.0
 May 4, 2026
 
 ### New Features
 
-**Feature Rollout**: Added support for Feature Rollouts, a new experiment type combining Targeted Delivery simplicity with A/B test measurement capabilities. Feature Rollouts enable progressive rollouts with full impact analytics, metric tracking, and confidence intervals. See [Feature Rollout docs](https://support.optimizely.com/hc/en-us/articles/45552846481037-Run-Feature-Rollouts-in-Feature-Experimentation) for more information.
+**Feature Rollout**: Added support for Feature Rollouts, a new experiment type
+combining Targeted Delivery simplicity with A/B test measurement capabilities.
+Feature Rollouts enable progressive rollouts with full impact analytics, metric tracking,
+and confidence intervals.
+See [Feature Rollout docs](https://support.optimizely.com/hc/en-us/articles/45552846481037-Run-Feature-Rollouts-in-Feature-Experimentation) for more information.
 
-## 4.1.0 (Previous)
+- Add Feature Rollout support ([#400](https://github.com/optimizely/csharp-sdk/pull/400))
+- Remove experiment type validation from config parsing ([#402](https://github.com/optimizely/csharp-sdk/pull/402))
+- Source clear removal ([#401](https://github.com/optimizely/csharp-sdk/pull/401))
+- Docs Bash - README update ([#399](https://github.com/optimizely/csharp-sdk/pull/399))
+- Event retry adjustment ([#398](https://github.com/optimizely/csharp-sdk/pull/398))
+- Pipeline update ([#397](https://github.com/optimizely/csharp-sdk/pull/397))
+
+## 4.2.0
 Nov 13, 2025
 
 ### New Features
