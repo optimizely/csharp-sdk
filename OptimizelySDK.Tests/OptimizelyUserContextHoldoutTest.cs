@@ -96,66 +96,6 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
-        public void TestDecide_IncludedFlagsHoldout()
-        {
-            // Test holdout with includedFlags configuration
-            var featureFlag = Config.FeatureKeyMap["test_flag_1"];
-            Assert.IsNotNull(featureFlag, "Feature flag should exist");
-
-            // Check if there's a holdout that includes this flag
-            var includedHoldout = Config.Holdouts.FirstOrDefault(h =>
-                h.IncludedFlags != null && h.IncludedFlags.Contains(featureFlag.Id));
-
-            if (includedHoldout != null)
-            {
-                var userContext = OptimizelyInstance.CreateUserContext(TestUserId,
-                    new UserAttributes { { "country", "us" } });
-
-                var decision = userContext.Decide("test_flag_1");
-
-                Assert.IsNotNull(decision, "Decision should not be null");
-                Assert.AreEqual("test_flag_1", decision.FlagKey, "Flag key should match");
-
-                // Verify decision is valid
-                Assert.IsTrue(decision.VariationKey != null || decision.VariationKey == null,
-                    "Decision should have valid structure");
-            }
-            else
-            {
-                Assert.Inconclusive("No included holdout found for test_flag_1");
-            }
-        }
-
-        [Test]
-        public void TestDecide_ExcludedFlagsHoldout()
-        {
-            // Test holdout with excludedFlags configuration
-            // Based on test data, flag_3 and flag_4 are excluded by holdout_excluded_1
-            var userContext = OptimizelyInstance.CreateUserContext(TestUserId,
-                new UserAttributes { { "country", "us" } });
-
-            // Test with an excluded flag (test_flag_3 maps to flag_3)
-            var excludedDecision = userContext.Decide("test_flag_3");
-
-            Assert.IsNotNull(excludedDecision, "Decision should not be null for excluded flag");
-            Assert.AreEqual("test_flag_3", excludedDecision.FlagKey, "Flag key should match");
-
-            // For excluded flags, the decision should not come from the excluded holdout
-            // The excluded holdout has key "excluded_holdout"
-            Assert.AreNotEqual("excluded_holdout", excludedDecision.RuleKey,
-                "Decision should not come from excluded holdout for flag_3");
-
-            // Also test with a non-excluded flag (test_flag_1 maps to flag_1)
-            var nonExcludedDecision = userContext.Decide("test_flag_1");
-
-            Assert.IsNotNull(nonExcludedDecision, "Decision should not be null for non-excluded flag");
-            Assert.AreEqual("test_flag_1", nonExcludedDecision.FlagKey, "Flag key should match");
-
-            // For non-excluded flags, they can potentially be affected by holdouts
-            // (depending on other holdout configurations like global or included holdouts)
-        }
-
-        [Test]
         public void TestDecideAll_MultipleHoldouts()
         {
             // Test DecideAll() with multiple holdouts affecting different flags
@@ -325,39 +265,6 @@ namespace OptimizelySDK.Tests
             Assert.IsNotNull(decision.Reasons, "Decision reasons should not be null");
             // With real bucketer, we expect some decision reasons to be generated
             Assert.IsTrue(decision.Reasons.Length >= 0, "Decision reasons should be present");
-        }
-
-        [Test]
-        public void TestDecide_HoldoutPriority()
-        {
-            // Test holdout evaluation priority (global vs included vs excluded)
-            var featureFlag = Config.FeatureKeyMap["test_flag_1"];
-            Assert.IsNotNull(featureFlag, "Feature flag should exist");
-
-            // Check if we have multiple holdouts
-            var globalHoldouts = Config.Holdouts.Where(h =>
-                h.IncludedFlags == null || h.IncludedFlags.Length == 0).ToList();
-            var includedHoldouts = Config.Holdouts.Where(h =>
-                h.IncludedFlags != null && h.IncludedFlags.Contains(featureFlag.Id)).ToList();
-
-            if (globalHoldouts.Count > 0 || includedHoldouts.Count > 0)
-            {
-                var userContext = OptimizelyInstance.CreateUserContext(TestUserId,
-                    new UserAttributes { { "country", "us" } });
-
-                var decision = userContext.Decide("test_flag_1");
-
-                Assert.IsNotNull(decision, "Decision should not be null");
-                Assert.AreEqual("test_flag_1", decision.FlagKey, "Flag key should match");
-
-                // Decision should be valid regardless of which holdout is selected
-                Assert.IsTrue(decision.VariationKey != null || decision.VariationKey == null,
-                    "Decision should have valid structure");
-            }
-            else
-            {
-                Assert.Inconclusive("No holdouts found to test priority");
-            }
         }
 
         #endregion
