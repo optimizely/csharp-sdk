@@ -53,57 +53,6 @@ namespace OptimizelySDK.Tests
             Assert.AreEqual(1, globalHoldout.Variations.Length);
             Assert.IsNotNull(globalHoldout.TrafficAllocation);
             Assert.AreEqual(1, globalHoldout.TrafficAllocation.Length);
-            Assert.IsNotNull(globalHoldout.IncludedFlags);
-            Assert.AreEqual(0, globalHoldout.IncludedFlags.Length);
-            Assert.IsNotNull(globalHoldout.ExcludedFlags);
-            Assert.AreEqual(0, globalHoldout.ExcludedFlags.Length);
-        }
-
-        [Test]
-        public void TestHoldoutWithIncludedFlags()
-        {
-            var includedHoldoutJson = testData["includedFlagsHoldout"].ToString();
-            var includedHoldout = JsonConvert.DeserializeObject<Holdout>(includedHoldoutJson);
-
-            Assert.IsNotNull(includedHoldout);
-            Assert.AreEqual("holdout_included_1", includedHoldout.Id);
-            Assert.AreEqual("included_holdout", includedHoldout.Key);
-            Assert.IsNotNull(includedHoldout.IncludedFlags);
-            Assert.AreEqual(2, includedHoldout.IncludedFlags.Length);
-            Assert.Contains("flag_1", includedHoldout.IncludedFlags);
-            Assert.Contains("flag_2", includedHoldout.IncludedFlags);
-            Assert.IsNotNull(includedHoldout.ExcludedFlags);
-            Assert.AreEqual(0, includedHoldout.ExcludedFlags.Length);
-        }
-
-        [Test]
-        public void TestHoldoutWithExcludedFlags()
-        {
-            var excludedHoldoutJson = testData["excludedFlagsHoldout"].ToString();
-            var excludedHoldout = JsonConvert.DeserializeObject<Holdout>(excludedHoldoutJson);
-
-            Assert.IsNotNull(excludedHoldout);
-            Assert.AreEqual("holdout_excluded_1", excludedHoldout.Id);
-            Assert.AreEqual("excluded_holdout", excludedHoldout.Key);
-            Assert.IsNotNull(excludedHoldout.IncludedFlags);
-            Assert.AreEqual(0, excludedHoldout.IncludedFlags.Length);
-            Assert.IsNotNull(excludedHoldout.ExcludedFlags);
-            Assert.AreEqual(2, excludedHoldout.ExcludedFlags.Length);
-            Assert.Contains("flag_3", excludedHoldout.ExcludedFlags);
-            Assert.Contains("flag_4", excludedHoldout.ExcludedFlags);
-        }
-
-        [Test]
-        public void TestHoldoutWithEmptyFlags()
-        {
-            var globalHoldoutJson = testData["globalHoldout"].ToString();
-            var globalHoldout = JsonConvert.DeserializeObject<Holdout>(globalHoldoutJson);
-
-            Assert.IsNotNull(globalHoldout);
-            Assert.IsNotNull(globalHoldout.IncludedFlags);
-            Assert.AreEqual(0, globalHoldout.IncludedFlags.Length);
-            Assert.IsNotNull(globalHoldout.ExcludedFlags);
-            Assert.AreEqual(0, globalHoldout.ExcludedFlags.Length);
         }
 
         [Test]
@@ -161,7 +110,7 @@ namespace OptimizelySDK.Tests
         [Test]
         public void TestHoldoutNullSafety()
         {
-            // Test that holdout can handle null/missing includedFlags and excludedFlags
+            // Test that holdout can handle minimal JSON
             var minimalHoldoutJson = @"{
                 ""id"": ""test_holdout"",
                 ""key"": ""test_key"",
@@ -177,8 +126,6 @@ namespace OptimizelySDK.Tests
             Assert.IsNotNull(holdout);
             Assert.AreEqual("test_holdout", holdout.Id);
             Assert.AreEqual("test_key", holdout.Key);
-            Assert.IsNotNull(holdout.IncludedFlags);
-            Assert.IsNotNull(holdout.ExcludedFlags);
         }
     }
 }

@@ -895,7 +895,7 @@ namespace OptimizelySDK.Bucketing
             var userId = user.GetUserId();
 
             // Check holdouts first (highest priority)
-            var holdouts = projectConfig.GetHoldoutsForFlag(featureFlag.Id);
+            var holdouts = projectConfig.Holdouts ?? new Holdout[0];
             foreach (var holdout in holdouts)
             {
                 var holdoutDecision = GetVariationForHoldout(holdout, user, projectConfig);

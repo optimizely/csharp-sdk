@@ -137,7 +137,6 @@
     <Compile Include="OptimizelyFactoryTest.cs"/>
     <Compile Include="Utils\TestData.cs"/>
     <Compile Include="Utils\Reflection.cs"/>
-    <Compile Include="UtilsTests\HoldoutConfigTests.cs"/>
     <Compile Include="ConfigTest\ProjectConfigProps.cs"/>
     <Compile Include="Utils\TestHttpProjectConfigManagerUtil.cs"/>
   </ItemGroup>
