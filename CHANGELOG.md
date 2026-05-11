@@ -13,10 +13,8 @@ See [Feature Rollout docs](https://support.optimizely.com/hc/en-us/articles/4555
 
 - Add Feature Rollout support ([#400](https://github.com/optimizely/csharp-sdk/pull/400))
 - Remove experiment type validation from config parsing ([#402](https://github.com/optimizely/csharp-sdk/pull/402))
-- Source clear removal ([#401](https://github.com/optimizely/csharp-sdk/pull/401))
-- Docs Bash - README update ([#399](https://github.com/optimizely/csharp-sdk/pull/399))
+- Documentation improvement ([#399](https://github.com/optimizely/csharp-sdk/pull/399))
 - Event retry adjustment ([#398](https://github.com/optimizely/csharp-sdk/pull/398))
-- Pipeline update ([#397](https://github.com/optimizely/csharp-sdk/pull/397))
 
 ## 4.2.0
 Nov 13, 2025
