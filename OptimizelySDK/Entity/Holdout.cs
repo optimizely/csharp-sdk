@@ -15,6 +15,7 @@
  */
 
 using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace OptimizelySDK.Entity
 {
@@ -44,6 +45,25 @@ namespace OptimizelySDK.Entity
             {
                 /* Holdouts don't have layer IDs, ignore any assignment */
             }
+        }
+
+        /// <summary>
+        /// List of rule IDs that this holdout targets (local holdouts only).
+        /// If null, the holdout is global and applies to all rules in the project.
+        /// If empty array, the holdout is local but targets no rules.
+        /// </summary>
+        [JsonProperty("includedRules")]
+        public string[] IncludedRules { get; set; }
+
+        /// <summary>
+        /// Determines if this is a global holdout.
+        /// Global holdouts have IncludedRules == null and apply to all rules.
+        /// Local holdouts have IncludedRules != null and apply only to specified rules.
+        /// </summary>
+        /// <returns>True if this is a global holdout, false if local</returns>
+        public bool IsGlobal()
+        {
+            return IncludedRules == null;
         }
     }
 }

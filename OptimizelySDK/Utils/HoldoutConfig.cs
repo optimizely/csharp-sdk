@@ -21,12 +21,14 @@ using OptimizelySDK.Entity;
 namespace OptimizelySDK.Utils
 {
     /// <summary>
-    /// Configuration manager for holdouts, providing holdout ID mapping.
+    /// Configuration manager for holdouts, providing holdout ID mapping and rule-to-holdout mapping.
     /// </summary>
     public class HoldoutConfig
     {
         private List<Holdout> _allHoldouts;
         private readonly Dictionary<string, Holdout> _holdoutIdMap;
+        private readonly List<Holdout> _globalHoldouts;
+        private readonly Dictionary<string, List<Holdout>> _ruleHoldoutsMap;
 
         /// <summary>
         /// Initializes a new instance of the HoldoutConfig class.
@@ -36,6 +38,8 @@ namespace OptimizelySDK.Utils
         {
             _allHoldouts = allHoldouts?.ToList() ?? new List<Holdout>();
             _holdoutIdMap = new Dictionary<string, Holdout>();
+            _globalHoldouts = new List<Holdout>();
+            _ruleHoldoutsMap = new Dictionary<string, List<Holdout>>();
 
             UpdateHoldoutMapping();
         }
@@ -46,17 +50,40 @@ namespace OptimizelySDK.Utils
         public IDictionary<string, Holdout> HoldoutIdMap => _holdoutIdMap;
 
         /// <summary>
-        /// Updates internal mappings of holdouts including the id map.
+        /// Updates internal mappings of holdouts including the id map, global holdouts, and rule-to-holdout map.
         /// </summary>
         private void UpdateHoldoutMapping()
         {
             // Clear existing mappings
             _holdoutIdMap.Clear();
+            _globalHoldouts.Clear();
+            _ruleHoldoutsMap.Clear();
 
             foreach (var holdout in _allHoldouts)
             {
                 // Build ID mapping
                 _holdoutIdMap[holdout.Id] = holdout;
+
+                // Classify holdout as global or local
+                if (holdout.IsGlobal())
+                {
+                    // Global holdout: IncludedRules == null
+                    _globalHoldouts.Add(holdout);
+                }
+                else if (holdout.IncludedRules != null)
+                {
+                    // Local holdout: IncludedRules != null
+                    // Add to rule-to-holdout map for each target rule
+                    foreach (var ruleId in holdout.IncludedRules)
+                    {
+                        if (!_ruleHoldoutsMap.ContainsKey(ruleId))
+                        {
+                            _ruleHoldoutsMap[ruleId] = new List<Holdout>();
+                        }
+
+                        _ruleHoldoutsMap[ruleId].Add(holdout);
+                    }
+                }
             }
         }
 
@@ -78,9 +105,45 @@ namespace OptimizelySDK.Utils
         }
 
         /// <summary>
+        /// Gets all global holdouts (holdouts where IncludedRules == null).
+        /// Global holdouts apply to all rules in the project and are evaluated at the flag level.
+        /// </summary>
+        /// <returns>List of global holdouts</returns>
+        public List<Holdout> GetGlobalHoldouts()
+        {
+            return _globalHoldouts;
+        }
+
+        /// <summary>
+        /// Gets all local holdouts targeting a specific rule.
+        /// Local holdouts are evaluated per-rule after forced decisions and before rule evaluation.
+        /// </summary>
+        /// <param name="ruleId">The rule ID to look up</param>
+        /// <returns>List of holdouts targeting this rule, or empty list if none found</returns>
+        public List<Holdout> GetHoldoutsForRule(string ruleId)
+        {
+            if (string.IsNullOrEmpty(ruleId))
+            {
+                return new List<Holdout>();
+            }
+
+            if (_ruleHoldoutsMap.TryGetValue(ruleId, out var holdouts))
+            {
+                return holdouts;
+            }
+
+            return new List<Holdout>();
+        }
+
+        /// <summary>
         /// Gets the total number of holdouts.
         /// </summary>
         public int HoldoutCount => _allHoldouts.Count;
+
+        /// <summary>
+        /// Gets the number of global holdouts.
+        /// </summary>
+        public int GlobalHoldoutCount => _globalHoldouts.Count;
 
         /// <summary>
         /// Updates the holdout configuration with a new set of holdouts.

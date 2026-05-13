@@ -333,6 +333,21 @@ namespace OptimizelySDK
         Holdout GetHoldout(string holdoutId);
 
         /// <summary>
+        /// Get all global holdouts (holdouts where IncludedRules == null).
+        /// Global holdouts apply to all rules and are evaluated at the flag level.
+        /// </summary>
+        /// <returns>List of global holdouts</returns>
+        List<Holdout> GetGlobalHoldouts();
+
+        /// <summary>
+        /// Get all local holdouts targeting a specific rule.
+        /// Local holdouts are evaluated per-rule after forced decisions and before rule evaluation.
+        /// </summary>
+        /// <param name="ruleId">The rule ID to look up</param>
+        /// <returns>List of holdouts targeting this rule, or empty list if none found</returns>
+        List<Holdout> GetHoldoutsForRule(string ruleId);
+
+        /// <summary>
         /// Returns the datafile corresponding to ProjectConfig
         /// </summary>
         string ToDatafile();

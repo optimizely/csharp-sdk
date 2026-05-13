@@ -686,6 +686,22 @@ namespace OptimizelySDK.Bucketing
                         reasons);
                 }
 
+                // Check local holdouts targeting this delivery rule (after forced decisions, before rule evaluation)
+                var localHoldouts = config.GetHoldoutsForRule(rule.Id);
+                foreach (var localHoldout in localHoldouts)
+                {
+                    var holdoutDecision = GetVariationForHoldout(localHoldout, user, config);
+                    reasons += holdoutDecision.DecisionReasons;
+
+                    if (holdoutDecision.ResultObject != null)
+                    {
+                        Logger.Log(LogLevel.INFO,
+                            reasons.AddInfo(
+                                $"The user \"{userId}\" is bucketed into local holdout \"{localHoldout.Key}\" for delivery rule \"{rule.Key}\" in feature flag \"{featureFlag.Key}\"."));
+                        return Result<FeatureDecision>.NewResult(holdoutDecision.ResultObject, reasons);
+                    }
+                }
+
                 // Regular decision
 
                 // Get Bucketing ID from user attributes.
@@ -803,6 +819,23 @@ namespace OptimizelySDK.Bucketing
                 }
                 else
                 {
+                    // Check local holdouts targeting this rule (after forced decisions, before rule evaluation)
+                    var localHoldouts = config.GetHoldoutsForRule(experimentId);
+                    foreach (var localHoldout in localHoldouts)
+                    {
+                        var holdoutDecision = GetVariationForHoldout(localHoldout, user, config);
+                        reasons += holdoutDecision.DecisionReasons;
+
+                        if (holdoutDecision.ResultObject != null)
+                        {
+                            Logger.Log(LogLevel.INFO,
+                                reasons.AddInfo(
+                                    $"The user \"{userId}\" is bucketed into local holdout \"{localHoldout.Key}\" for rule \"{experiment.Key}\" in feature flag \"{featureFlag.Key}\"."));
+                            return Result<FeatureDecision>.NewResult(holdoutDecision.ResultObject,
+                                reasons);
+                        }
+                    }
+
                     var decisionResponse = GetVariation(experiment, user, config, options,
                         userProfileTracker);
 
@@ -894,9 +927,10 @@ namespace OptimizelySDK.Bucketing
 
             var userId = user.GetUserId();
 
-            // Check holdouts first (highest priority)
-            var holdouts = projectConfig.Holdouts ?? new Holdout[0];
-            foreach (var holdout in holdouts)
+            // Check global holdouts first (highest priority)
+            // Global holdouts have IncludedRules == null and apply to all rules
+            var globalHoldouts = projectConfig.GetGlobalHoldouts();
+            foreach (var holdout in globalHoldouts)
             {
                 var holdoutDecision = GetVariationForHoldout(holdout, user, projectConfig);
                 reasons += holdoutDecision.DecisionReasons;
@@ -905,7 +939,7 @@ namespace OptimizelySDK.Bucketing
                 {
                     Logger.Log(LogLevel.INFO,
                         reasons.AddInfo(
-                            $"The user \"{userId}\" is bucketed into holdout \"{holdout.Key}\" for feature flag \"{featureFlag.Key}\"."));
+                            $"The user \"{userId}\" is bucketed into global holdout \"{holdout.Key}\" for feature flag \"{featureFlag.Key}\"."));
                     return Result<FeatureDecision>.NewResult(holdoutDecision.ResultObject, reasons);
                 }
             }

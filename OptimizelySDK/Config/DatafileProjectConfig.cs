@@ -910,6 +910,27 @@ namespace OptimizelySDK.Config
         }
 
         /// <summary>
+        /// Get all global holdouts (holdouts where IncludedRules == null).
+        /// Global holdouts apply to all rules and are evaluated at the flag level.
+        /// </summary>
+        /// <returns>List of global holdouts</returns>
+        public List<Holdout> GetGlobalHoldouts()
+        {
+            return _holdoutConfig.GetGlobalHoldouts();
+        }
+
+        /// <summary>
+        /// Get all local holdouts targeting a specific rule.
+        /// Local holdouts are evaluated per-rule after forced decisions and before rule evaluation.
+        /// </summary>
+        /// <param name="ruleId">The rule ID to look up</param>
+        /// <returns>List of holdouts targeting this rule, or empty list if none found</returns>
+        public List<Holdout> GetHoldoutsForRule(string ruleId)
+        {
+            return _holdoutConfig.GetHoldoutsForRule(ruleId);
+        }
+
+        /// <summary>
         /// Get attribute ID for the provided attribute key
         /// </summary>
         /// <param name="attributeKey">Key of the Attribute</param>

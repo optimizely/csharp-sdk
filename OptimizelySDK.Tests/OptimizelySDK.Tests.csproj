@@ -83,6 +83,7 @@
     <Compile Include="ConfigTest\PollingProjectConfigManagerTest.cs"/>
     <Compile Include="ConfigTest\FallbackProjectConfigManagerTest.cs"/>
     <Compile Include="DecisionServiceTest.cs"/>
+    <Compile Include="DecisionServiceLocalHoldoutTest.cs"/>
     <Compile Include="DefaultErrorHandlerTest.cs"/>
     <Compile Include="EntityTests\IntegrationTest.cs"/>
     <Compile Include="EventTests\EventProcessorProps.cs"/>
@@ -121,6 +122,8 @@
     <Compile Include="TestSetup.cs"/>
     <Compile Include="UtilsTests\ConditionParserTest.cs"/>
     <Compile Include="UtilsTests\EventTagUtilsTest.cs"/>
+    <Compile Include="UtilsTests\HoldoutConfigBasicTests.cs"/>
+    <Compile Include="UtilsTests\LocalHoldoutConfigTests.cs"/>
     <Compile Include="UtilsTests\ExceptionExtensionsTest.cs"/>
     <Compile Include="UtilsTests\ExperimentUtilsTest.cs"/>
     <Compile Include="UtilsTests\PrivateObject.cs"/>
@@ -130,6 +133,7 @@
     <Compile Include="ConfigTest\TestPollingProjectConfigManager.cs"/>
     <Compile Include="EntityTests\FeatureVariableTest.cs"/>
     <Compile Include="EntityTests\HoldoutTests.cs"/>
+    <Compile Include="EntityTests\LocalHoldoutTests.cs"/>
     <Compile Include="EventTests\EventEntitiesTest.cs"/>
     <Compile Include="EventTests\UserEventFactoryTest.cs"/>
     <Compile Include="EventTests\EventFactoryTest.cs"/>
