@@ -1,5 +1,5 @@
-﻿/*
- * Copyright 2025, Optimizely
+/*
+ * Copyright 2025-2026, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,12 +21,25 @@ using OptimizelySDK.Entity;
 namespace OptimizelySDK.Utils
 {
     /// <summary>
-    /// Configuration manager for holdouts, providing holdout ID mapping.
+    /// Configuration manager for holdouts, providing holdout ID mapping,
+    /// global holdout access, and rule-level local holdout lookups.
     /// </summary>
     public class HoldoutConfig
     {
         private List<Holdout> _allHoldouts;
         private readonly Dictionary<string, Holdout> _holdoutIdMap;
+
+        /// <summary>
+        /// Global holdouts — holdouts where IncludedRules is null.
+        /// These are evaluated at flag level, before any per-rule logic.
+        /// </summary>
+        private readonly List<Holdout> _globalHoldouts;
+
+        /// <summary>
+        /// Maps rule IDs to the local holdouts that target those rules.
+        /// A local holdout has IncludedRules set to a non-null array of rule IDs.
+        /// </summary>
+        private readonly Dictionary<string, List<Holdout>> _ruleHoldoutsMap;
 
         /// <summary>
         /// Initializes a new instance of the HoldoutConfig class.
@@ -36,6 +49,8 @@ namespace OptimizelySDK.Utils
         {
             _allHoldouts = allHoldouts?.ToList() ?? new List<Holdout>();
             _holdoutIdMap = new Dictionary<string, Holdout>();
+            _globalHoldouts = new List<Holdout>();
+            _ruleHoldoutsMap = new Dictionary<string, List<Holdout>>();
 
             UpdateHoldoutMapping();
         }
@@ -46,17 +61,40 @@ namespace OptimizelySDK.Utils
         public IDictionary<string, Holdout> HoldoutIdMap => _holdoutIdMap;
 
         /// <summary>
-        /// Updates internal mappings of holdouts including the id map.
+        /// Updates internal mappings of holdouts: ID map, global list, and rule-to-holdout map.
         /// </summary>
         private void UpdateHoldoutMapping()
         {
             // Clear existing mappings
             _holdoutIdMap.Clear();
+            _globalHoldouts.Clear();
+            _ruleHoldoutsMap.Clear();
 
             foreach (var holdout in _allHoldouts)
             {
                 // Build ID mapping
                 _holdoutIdMap[holdout.Id] = holdout;
+
+                // Classify as global or local based on IncludedRules
+                if (holdout.IsGlobal)
+                {
+                    // IncludedRules == null → global holdout (applies to all rules across all flags)
+                    _globalHoldouts.Add(holdout);
+                }
+                else
+                {
+                    // IncludedRules != null → local holdout (applies only to the specified rules)
+                    // An empty IncludedRules array means local but matches no rules (intentional).
+                    foreach (var ruleId in holdout.IncludedRules)
+                    {
+                        if (!_ruleHoldoutsMap.ContainsKey(ruleId))
+                        {
+                            _ruleHoldoutsMap[ruleId] = new List<Holdout>();
+                        }
+
+                        _ruleHoldoutsMap[ruleId].Add(holdout);
+                    }
+                }
             }
         }
 
@@ -75,6 +113,37 @@ namespace OptimizelySDK.Utils
             _holdoutIdMap.TryGetValue(holdoutId, out var holdout);
 
             return holdout;
+        }
+
+        /// <summary>
+        /// Returns all global holdouts (holdouts where IncludedRules is null).
+        /// These apply to all rules across all flags and are evaluated at flag level.
+        /// </summary>
+        /// <returns>List of global holdouts</returns>
+        public IReadOnlyList<Holdout> GetGlobalHoldouts()
+        {
+            return _globalHoldouts;
+        }
+
+        /// <summary>
+        /// Returns local holdouts that target a specific rule ID.
+        /// These are evaluated per-rule, after forced decisions but before regular rule evaluation.
+        /// </summary>
+        /// <param name="ruleId">The rule ID to look up holdouts for</param>
+        /// <returns>List of holdouts targeting the specified rule, or an empty list if none</returns>
+        public IReadOnlyList<Holdout> GetHoldoutsForRule(string ruleId)
+        {
+            if (string.IsNullOrEmpty(ruleId))
+            {
+                return new List<Holdout>();
+            }
+
+            if (_ruleHoldoutsMap.TryGetValue(ruleId, out var holdouts))
+            {
+                return holdouts;
+            }
+
+            return new List<Holdout>();
         }
 
         /// <summary>
