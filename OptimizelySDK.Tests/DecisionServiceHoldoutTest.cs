@@ -547,6 +547,55 @@ namespace OptimizelySDK.Tests
                 "rule_id_1 should be a delivery rule within rollout_1");
         }
 
+        /// <summary>
+        /// Mandatory enforcement test (cross-SDK): forced decision takes precedence over a 100% traffic local holdout.
+        /// Ordering: Forced Decision → Local Holdout → Regular Rule. If forced decision is set,
+        /// it must win even when a 100% local holdout targets the same rule.
+        /// </summary>
+        [Test]
+        public void TestForcedDecisionBeats100PercentLocalHoldout()
+        {
+            // Setup: local holdout 'holdout_local_exp_rule1' targets exp_rule_id_1 (experiment_rule_1) with 100% traffic.
+            // User also has a forced decision set for test_flag_2 / experiment_rule_1.
+            // Expected: forced decision wins; source is FEATURE_TEST, not HOLDOUT.
+            InitializeLocalHoldoutsConfig();
+
+            // Remove global holdout traffic so it doesn't interfere
+            var globalHoldout = LocalHoldoutsConfig.GetGlobalHoldouts()[0];
+            globalHoldout.TrafficAllocation = new TrafficAllocation[0];
+
+            var realBucketer = new Bucketer(LoggerMock.Object);
+            var decisionService = new DecisionService(realBucketer,
+                new NoOpErrorHandler(), null, LoggerMock.Object, null);
+
+            var featureFlag = LocalHoldoutsConfig.FeatureKeyMap["test_flag_2"];
+            var userContext = new OptimizelyUserContext(LocalHoldoutsOptimizely, TestUserId, null,
+                new NoOpErrorHandler(), LoggerMock.Object);
+
+            // Set forced decision for experiment_rule_1 → variation_a
+            userContext.SetForcedDecision(
+                new OptimizelyDecisionContext("test_flag_2", "experiment_rule_1"),
+                new OptimizelyForcedDecision("variation_a")
+            );
+
+            var result = decisionService.GetVariationsForFeatureList(
+                new List<FeatureFlag> { featureFlag },
+                userContext,
+                LocalHoldoutsConfig,
+                new UserAttributes(),
+                new OptimizelyDecideOption[0]);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(1, result.Count);
+
+            var decision = result[0].ResultObject;
+            Assert.IsNotNull(decision, "Forced decision should produce a result");
+            Assert.AreNotEqual(FeatureDecision.DECISION_SOURCE_HOLDOUT, decision.Source,
+                "Forced decision must NOT return holdout source — forced decision takes priority over local holdout");
+            Assert.AreEqual("variation_a", decision.Variation?.Key,
+                "Forced decision variation should be returned, not holdout variation");
+        }
+
         [Test]
         public void TestLocalHoldouts_AppliesToExperimentRules()
         {
