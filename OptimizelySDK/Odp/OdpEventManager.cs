@@ -378,7 +378,19 @@ namespace OptimizelySDK.Odp
                 { Constants.FS_USER_ID, userId },
             };
 
-            var odpEvent = new OdpEvent(Constants.ODP_EVENT_TYPE, "identified", identifiers);
+            // Filter out null/empty identifier values and require 2+ valid identifiers
+            var validIdentifiers = identifiers
+                .Where(kvp => !string.IsNullOrEmpty(kvp.Value))
+                .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+
+            if (validIdentifiers.Count < 2)
+            {
+                _logger.Log(LogLevel.DEBUG,
+                    "ODP identify event is not dispatched (only one identifier provided).");
+                return;
+            }
+
+            var odpEvent = new OdpEvent(Constants.ODP_EVENT_TYPE, "identified", validIdentifiers);
             SendEvent(odpEvent);
         }
 
