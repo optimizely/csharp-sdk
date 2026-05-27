@@ -210,7 +210,7 @@ namespace OptimizelySDK.Tests.OdpTests
                 Times.Exactly(2)); // during Start() and UpdateSettings()
             _mockLogger.Verify(
                 l => l.Log(LogLevel.DEBUG,
-                    "ODP identify event is not dispatched (only one identifier provided)."),
+                    "ODP identify event is not dispatched (fewer than 2 valid identifiers)."),
                 Times.Once); // IdentifyUser blocked before reaching SendEvent
         }
 
@@ -633,7 +633,7 @@ namespace OptimizelySDK.Tests.OdpTests
             Assert.IsEmpty(eventsCollector);
             _mockLogger.Verify(
                 l => l.Log(LogLevel.DEBUG,
-                    "ODP identify event is not dispatched (only one identifier provided)."),
+                    "ODP identify event is not dispatched (fewer than 2 valid identifiers)."),
                 Times.Once);
         }
 

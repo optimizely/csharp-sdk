@@ -386,7 +386,7 @@ namespace OptimizelySDK.Odp
             if (validIdentifiers.Count < 2)
             {
                 _logger.Log(LogLevel.DEBUG,
-                    "ODP identify event is not dispatched (only one identifier provided).");
+                    "ODP identify event is not dispatched (fewer than 2 valid identifiers).");
                 return;
             }
 
