@@ -383,6 +383,8 @@ namespace OptimizelySDK.Odp
                 .Where(kvp => !string.IsNullOrEmpty(kvp.Value))
                 .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 
+            // Identify requires 2+ identifiers to link (e.g., vuid + fs_user_id).
+            // A single identifier has no cross-reference value and generates unnecessary traffic.
             if (validIdentifiers.Count < 2)
             {
                 _logger.Log(LogLevel.DEBUG,
