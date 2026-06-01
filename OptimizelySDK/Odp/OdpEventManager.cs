@@ -368,16 +368,11 @@ namespace OptimizelySDK.Odp
         }
 
         /// <summary>
-        /// Associate a full-stack userid with an established VUID
+        /// Send an identify event with the provided identifiers
         /// </summary>
-        /// <param name="userId">Full-stack User ID</param>
-        public void IdentifyUser(string userId)
+        /// <param name="identifiers">Dictionary of identifier key-value pairs</param>
+        public void IdentifyUser(Dictionary<string, string> identifiers)
         {
-            var identifiers = new Dictionary<string, string>
-            {
-                { Constants.FS_USER_ID, userId },
-            };
-
             var odpEvent = new OdpEvent(Constants.ODP_EVENT_TYPE, "identified", identifiers);
             SendEvent(odpEvent);
         }

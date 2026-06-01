@@ -15,6 +15,7 @@
  */
 
 using System;
+using System.Collections.Generic;
 using OptimizelySDK.Odp.Entity;
 
 namespace OptimizelySDK.Odp
@@ -52,10 +53,10 @@ namespace OptimizelySDK.Odp
         void Dispose();
 
         /// <summary>
-        /// Associate a full-stack userid with an established VUID
+        /// Send an identify event with the provided identifiers
         /// </summary>
-        /// <param name="userId">Full-stack User ID</param>
-        void IdentifyUser(string userId);
+        /// <param name="identifiers">Dictionary of identifier key-value pairs</param>
+        void IdentifyUser(Dictionary<string, string> identifiers);
 
         /// <summary>
         /// Update ODP configuration settings
