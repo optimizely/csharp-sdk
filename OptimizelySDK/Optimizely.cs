@@ -1499,8 +1499,8 @@ namespace OptimizelySDK
         /// <summary>
         /// Send identification event to Optimizely Data Platform
         /// </summary>
-        /// <param name="userId">FS User ID to send</param>
-        internal void IdentifyUser(string userId)
+        /// <param name="identifiers">Dictionary of identifier key-value pairs</param>
+        internal void IdentifyUser(Dictionary<string, string> identifiers)
         {
             var config = ProjectConfigManager?.GetConfig();
 
@@ -1510,7 +1510,7 @@ namespace OptimizelySDK
                 return;
             }
 
-            OdpManager?.IdentifyUser(userId);
+            OdpManager?.IdentifyUser(identifiers);
         }
 
         /// <summary>

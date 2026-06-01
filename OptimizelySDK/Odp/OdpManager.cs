@@ -97,10 +97,10 @@ namespace OptimizelySDK.Odp
         }
 
         /// <summary>
-        /// Send identification event to ODP for a given full-stack User ID
+        /// Send identification event to ODP when 2+ valid identifiers exist
         /// </summary>
-        /// <param name="userId">User ID to send</param>
-        public void IdentifyUser(string userId)
+        /// <param name="identifiers">Dictionary of identifier key-value pairs</param>
+        public void IdentifyUser(Dictionary<string, string> identifiers)
         {
             if (EventManagerOrConfigNotReady())
             {
@@ -108,7 +108,25 @@ namespace OptimizelySDK.Odp
                 return;
             }
 
-            EventManager.IdentifyUser(userId);
+            // Filter out null and empty identifier values
+            var validIdentifiers = new Dictionary<string, string>();
+            foreach (var kvp in identifiers)
+            {
+                if (!string.IsNullOrEmpty(kvp.Value))
+                {
+                    validIdentifiers[kvp.Key] = kvp.Value;
+                }
+            }
+
+            // Only send identify event when 2+ valid identifiers exist
+            if (validIdentifiers.Count < 2)
+            {
+                _logger.Log(LogLevel.DEBUG,
+                    "ODP identify event not dispatched (fewer than 2 valid identifiers).");
+                return;
+            }
+
+            EventManager.IdentifyUser(validIdentifiers);
         }
 
         /// <summary>

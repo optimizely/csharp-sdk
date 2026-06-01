@@ -41,10 +41,10 @@ namespace OptimizelySDK.Odp
         string[] FetchQualifiedSegments(string userId, List<OdpSegmentOption> options);
 
         /// <summary>
-        /// Send identification event to ODP for a given full-stack User ID
+        /// Send identification event to ODP when 2+ valid identifiers exist
         /// </summary>
-        /// <param name="userId">User ID to send</param>
-        void IdentifyUser(string userId);
+        /// <param name="identifiers">Dictionary of identifier key-value pairs</param>
+        void IdentifyUser(Dictionary<string, string> identifiers);
 
         /// <summary>
         /// Add event to queue for sending to ODP

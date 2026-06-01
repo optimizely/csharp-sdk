@@ -6232,7 +6232,10 @@ namespace OptimizelySDK.Tests
         public void TestIdentifyUserInvalidOptimizelyObject()
         {
             var optly = new Optimizely("Random datafile", null, LoggerMock.Object);
-            optly.IdentifyUser("some_user");
+            optly.IdentifyUser(new Dictionary<string, string>
+            {
+                { "fs_user_id", "some_user" },
+            });
             LoggerMock.Verify(
                 l => l.Log(LogLevel.ERROR, "Datafile has invalid format. Failing 'IdentifyUser'."),
                 Times.Once);

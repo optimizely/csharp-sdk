@@ -91,7 +91,10 @@ namespace OptimizelySDK
 #if USE_ODP
             if (shouldIdentifyUser)
             {
-                optimizely.IdentifyUser(UserId);
+                optimizely.IdentifyUser(new Dictionary<string, string>
+                {
+                    { Odp.Constants.FS_USER_ID, UserId },
+                });
             }
 #endif
         }

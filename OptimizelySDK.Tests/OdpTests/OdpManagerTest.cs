@@ -283,9 +283,10 @@ namespace OptimizelySDK.Tests.OdpTests
         }
 
         [Test]
-        public void ShouldIdentifyUserWhenOdpIsIntegrated()
+        public void ShouldIdentifyUserWhenMultipleIdentifiers()
         {
-            _mockOdpEventManager.Setup(e => e.IdentifyUser(It.IsAny<string>()));
+            _mockOdpEventManager.Setup(e =>
+                e.IdentifyUser(It.IsAny<Dictionary<string, string>>()));
             _mockOdpEventManager.Setup(e => e.IsStarted).Returns(true);
             var manager = new OdpManager.Builder().
                 WithEventManager(_mockOdpEventManager.Object).
@@ -293,17 +294,51 @@ namespace OptimizelySDK.Tests.OdpTests
                 Build();
             manager.UpdateSettings(API_KEY, API_HOST, _emptySegmentsToCheck);
 
-            manager.IdentifyUser(VALID_FS_USER_ID);
+            var identifiers = new Dictionary<string, string>
+            {
+                { Constants.FS_USER_ID, VALID_FS_USER_ID },
+                { "email", "user@example.com" },
+            };
+            manager.IdentifyUser(identifiers);
             manager.Dispose();
 
-            _mockLogger.Verify(l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()), Times.Never);
-            _mockOdpEventManager.Verify(e => e.IdentifyUser(It.IsAny<string>()), Times.Once);
+            _mockLogger.Verify(
+                l => l.Log(It.IsAny<LogLevel>(), It.IsAny<string>()), Times.Never);
+            _mockOdpEventManager.Verify(
+                e => e.IdentifyUser(It.IsAny<Dictionary<string, string>>()), Times.Once);
+        }
+
+        [Test]
+        public void ShouldNotIdentifyUserWhenSingleIdentifier()
+        {
+            _mockOdpEventManager.Setup(e =>
+                e.IdentifyUser(It.IsAny<Dictionary<string, string>>()));
+            _mockOdpEventManager.Setup(e => e.IsStarted).Returns(true);
+            var manager = new OdpManager.Builder().
+                WithEventManager(_mockOdpEventManager.Object).
+                WithLogger(_mockLogger.Object).
+                Build();
+            manager.UpdateSettings(API_KEY, API_HOST, _emptySegmentsToCheck);
+
+            var identifiers = new Dictionary<string, string>
+            {
+                { Constants.FS_USER_ID, VALID_FS_USER_ID },
+            };
+            manager.IdentifyUser(identifiers);
+            manager.Dispose();
+
+            _mockLogger.Verify(l =>
+                l.Log(LogLevel.DEBUG,
+                    "ODP identify event not dispatched (fewer than 2 valid identifiers)."));
+            _mockOdpEventManager.Verify(
+                e => e.IdentifyUser(It.IsAny<Dictionary<string, string>>()), Times.Never);
         }
 
         [Test]
         public void ShouldNotIdentifyUserWhenOdpDisabled()
         {
-            _mockOdpEventManager.Setup(e => e.IdentifyUser(It.IsAny<string>()));
+            _mockOdpEventManager.Setup(e =>
+                e.IdentifyUser(It.IsAny<Dictionary<string, string>>()));
             _mockOdpEventManager.Setup(e => e.IsStarted).Returns(true);
             var manager = new OdpManager.Builder().
                 WithEventManager(_mockOdpEventManager.Object).
@@ -311,12 +346,46 @@ namespace OptimizelySDK.Tests.OdpTests
                 Build(false);
             manager.UpdateSettings(API_KEY, API_HOST, _emptySegmentsToCheck);
 
-            manager.IdentifyUser(VALID_FS_USER_ID);
+            var identifiers = new Dictionary<string, string>
+            {
+                { Constants.FS_USER_ID, VALID_FS_USER_ID },
+                { "email", "user@example.com" },
+            };
+            manager.IdentifyUser(identifiers);
             manager.Dispose();
 
             _mockLogger.Verify(l =>
                 l.Log(LogLevel.DEBUG, "ODP identify event not dispatched (ODP disabled)."));
-            _mockOdpEventManager.Verify(e => e.IdentifyUser(It.IsAny<string>()), Times.Never);
+            _mockOdpEventManager.Verify(
+                e => e.IdentifyUser(It.IsAny<Dictionary<string, string>>()), Times.Never);
+        }
+
+        [Test]
+        public void ShouldNotIdentifyUserWhenNullEmptyValues()
+        {
+            _mockOdpEventManager.Setup(e =>
+                e.IdentifyUser(It.IsAny<Dictionary<string, string>>()));
+            _mockOdpEventManager.Setup(e => e.IsStarted).Returns(true);
+            var manager = new OdpManager.Builder().
+                WithEventManager(_mockOdpEventManager.Object).
+                WithLogger(_mockLogger.Object).
+                Build();
+            manager.UpdateSettings(API_KEY, API_HOST, _emptySegmentsToCheck);
+
+            // Two identifiers but one is empty - should not send
+            var identifiers = new Dictionary<string, string>
+            {
+                { Constants.FS_USER_ID, VALID_FS_USER_ID },
+                { "email", "" },
+            };
+            manager.IdentifyUser(identifiers);
+            manager.Dispose();
+
+            _mockLogger.Verify(l =>
+                l.Log(LogLevel.DEBUG,
+                    "ODP identify event not dispatched (fewer than 2 valid identifiers)."));
+            _mockOdpEventManager.Verify(
+                e => e.IdentifyUser(It.IsAny<Dictionary<string, string>>()), Times.Never);
         }
 
         [Test]

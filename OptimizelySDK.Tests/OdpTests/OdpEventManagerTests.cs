@@ -203,7 +203,11 @@ namespace OptimizelySDK.Tests.OdpTests
             eventManager.UpdateSettings(mockOdpConfig.
                 Object); // auto-start after update; Logs 1x here
 
-            eventManager.IdentifyUser(FS_USER_ID); // Logs 1x here too
+            eventManager.IdentifyUser(new Dictionary<string, string>
+            {
+                { FS_USER_ID, "test-user" },
+                { "email", "user@example.com" },
+            }); // Logs 1x here too
 
             _mockLogger.Verify(
                 l => l.Log(LogLevel.WARN, Constants.ODP_NOT_INTEGRATED_MESSAGE),
@@ -622,7 +626,12 @@ namespace OptimizelySDK.Tests.OdpTests
                 Build();
             eventManager.UpdateSettings(_odpConfig);
 
-            eventManager.IdentifyUser(USER_ID);
+            var identifiers = new Dictionary<string, string>
+            {
+                { Constants.FS_USER_ID, USER_ID },
+                { "email", "user@example.com" },
+            };
+            eventManager.IdentifyUser(identifiers);
             cde.Wait(MAX_COUNT_DOWN_EVENT_WAIT_MS);
 
             var eventsSentToApi = eventsCollector.FirstOrDefault();
@@ -631,6 +640,7 @@ namespace OptimizelySDK.Tests.OdpTests
             Assert.AreEqual(Constants.ODP_EVENT_TYPE, actualEvent.Type);
             Assert.AreEqual("identified", actualEvent.Action);
             Assert.AreEqual(USER_ID, actualEvent.Identifiers[Constants.FS_USER_ID]);
+            Assert.AreEqual("user@example.com", actualEvent.Identifiers["email"]);
             var eventData = actualEvent.Data;
             Assert.AreEqual(Guid.NewGuid().ToString().Length,
                 eventData["idempotence_id"].ToString().Length);
