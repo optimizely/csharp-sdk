@@ -337,7 +337,7 @@ namespace OptimizelySDK
         /// Global holdouts apply to all rules across all flags and are evaluated at flag level.
         /// </summary>
         /// <returns>Read-only list of global holdouts</returns>
-        IReadOnlyList<Holdout> GetGlobalHoldouts();
+        List<Holdout> GetGlobalHoldouts();
 
         /// <summary>
         /// Returns local holdouts that target a specific rule ID.
@@ -345,7 +345,7 @@ namespace OptimizelySDK
         /// </summary>
         /// <param name="ruleId">The rule ID to look up holdouts for</param>
         /// <returns>Read-only list of local holdouts targeting the given rule, or empty list if none</returns>
-        IReadOnlyList<Holdout> GetHoldoutsForRule(string ruleId);
+        List<Holdout> GetHoldoutsForRule(string ruleId);
 
         /// <summary>
         /// Returns the datafile corresponding to ProjectConfig

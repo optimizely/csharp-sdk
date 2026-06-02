@@ -120,7 +120,7 @@ namespace OptimizelySDK.Utils
         /// These apply to all rules across all flags and are evaluated at flag level.
         /// </summary>
         /// <returns>List of global holdouts</returns>
-        public IReadOnlyList<Holdout> GetGlobalHoldouts()
+        public List<Holdout> GetGlobalHoldouts()
         {
             return _globalHoldouts;
         }
@@ -131,7 +131,7 @@ namespace OptimizelySDK.Utils
         /// </summary>
         /// <param name="ruleId">The rule ID to look up holdouts for</param>
         /// <returns>List of holdouts targeting the specified rule, or an empty list if none</returns>
-        public IReadOnlyList<Holdout> GetHoldoutsForRule(string ruleId)
+        public List<Holdout> GetHoldoutsForRule(string ruleId)
         {
             if (string.IsNullOrEmpty(ruleId))
             {

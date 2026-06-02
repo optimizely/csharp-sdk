@@ -445,7 +445,7 @@ namespace OptimizelySDK.Tests
             Assert.IsNotNull(decision, "Decision should not be null");
             Assert.AreEqual(FeatureDecision.DECISION_SOURCE_HOLDOUT, decision.Source,
                 "Decision source should be holdout for local holdout hit");
-            Assert.AreEqual("holdout_local_rule1", decision.Experiment?.Key,
+            Assert.AreEqual("local_holdout_rule1", decision.Experiment?.Key,
                 "Decision should be from local holdout targeting rule_id_1");
             Assert.AreEqual("local_holdout_off", decision.Variation?.Key,
                 "Variation should be the holdout's variation");
@@ -506,24 +506,24 @@ namespace OptimizelySDK.Tests
             var holdoutsForRule2 = LocalHoldoutsConfig.GetHoldoutsForRule("rule_id_2");
 
             Assert.AreEqual(1, holdoutsForRule1.Count, "rule_id_1 should have exactly one local holdout");
-            Assert.AreEqual("holdout_local_rule1", holdoutsForRule1[0].Key,
-                "Local holdout for rule_id_1 should be holdout_local_rule1");
+            Assert.AreEqual("local_holdout_rule1", holdoutsForRule1[0].Key,
+                "Local holdout for rule_id_1 should be local_holdout_rule1");
 
             Assert.AreEqual(1, holdoutsForRule2.Count, "rule_id_2 should have exactly one local holdout");
-            Assert.AreEqual("holdout_local_rule2", holdoutsForRule2[0].Key,
-                "Local holdout for rule_id_2 should be holdout_local_rule2");
+            Assert.AreEqual("local_holdout_rule2", holdoutsForRule2[0].Key,
+                "Local holdout for rule_id_2 should be local_holdout_rule2");
 
             // Verify the holdouts for rule_id_1 and rule_id_2 are distinct
             Assert.AreNotEqual(holdoutsForRule1[0].Id, holdoutsForRule2[0].Id,
                 "Holdouts for rule_id_1 and rule_id_2 should be different holdouts");
 
             // Verify holdout_local_rule1 does NOT appear in rule_id_2 list
-            Assert.IsFalse(holdoutsForRule2.Any(h => h.Key == "holdout_local_rule1"),
-                "holdout_local_rule1 should NOT target rule_id_2");
+            Assert.IsFalse(holdoutsForRule2.Any(h => h.Key == "local_holdout_rule1"),
+                "local_holdout_rule1 should NOT target rule_id_2");
 
             // Verify holdout_local_rule2 does NOT appear in rule_id_1 list
-            Assert.IsFalse(holdoutsForRule1.Any(h => h.Key == "holdout_local_rule2"),
-                "holdout_local_rule2 should NOT target rule_id_1");
+            Assert.IsFalse(holdoutsForRule1.Any(h => h.Key == "local_holdout_rule2"),
+                "local_holdout_rule2 should NOT target rule_id_1");
         }
 
         [Test]
@@ -536,8 +536,8 @@ namespace OptimizelySDK.Tests
             var holdoutsForDeliveryRule = LocalHoldoutsConfig.GetHoldoutsForRule("rule_id_1");
             Assert.AreEqual(1, holdoutsForDeliveryRule.Count,
                 "Delivery rule rule_id_1 should have one local holdout");
-            Assert.AreEqual("holdout_local_rule1", holdoutsForDeliveryRule[0].Key,
-                "The local holdout for delivery rule rule_id_1 should be holdout_local_rule1");
+            Assert.AreEqual("local_holdout_rule1", holdoutsForDeliveryRule[0].Key,
+                "The local holdout for delivery rule rule_id_1 should be local_holdout_rule1");
 
             // Verify the delivery rule exists in the rollout
             var rollout = LocalHoldoutsConfig.GetRolloutFromId("rollout_1");
@@ -606,8 +606,8 @@ namespace OptimizelySDK.Tests
             var holdoutsForExpRule = LocalHoldoutsConfig.GetHoldoutsForRule("exp_rule_id_1");
             Assert.AreEqual(1, holdoutsForExpRule.Count,
                 "Experiment rule exp_rule_id_1 should have one local holdout");
-            Assert.AreEqual("holdout_local_exp_rule1", holdoutsForExpRule[0].Key,
-                "The local holdout for experiment rule exp_rule_id_1 should be holdout_local_exp_rule1");
+            Assert.AreEqual("local_holdout_exp_rule1", holdoutsForExpRule[0].Key,
+                "The local holdout for experiment rule exp_rule_id_1 should be local_holdout_exp_rule1");
 
             // Verify the experiment exists as an experiment rule for test_flag_2
             var featureFlag = LocalHoldoutsConfig.FeatureKeyMap["test_flag_2"];
@@ -640,7 +640,7 @@ namespace OptimizelySDK.Tests
             Assert.IsNotNull(decision, "Decision should not be null");
             Assert.AreEqual(FeatureDecision.DECISION_SOURCE_HOLDOUT, decision.Source,
                 "Decision source should be holdout since local holdout targets the experiment rule");
-            Assert.AreEqual("holdout_local_exp_rule1", decision.Experiment?.Key,
+            Assert.AreEqual("local_holdout_exp_rule1", decision.Experiment?.Key,
                 "Decision experiment should be the local holdout targeting exp_rule_id_1");
         }
     }
