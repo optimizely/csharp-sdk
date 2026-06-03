@@ -203,11 +203,15 @@ namespace OptimizelySDK.Tests.OdpTests
             eventManager.UpdateSettings(mockOdpConfig.
                 Object); // auto-start after update; Logs 1x here
 
-            eventManager.IdentifyUser(FS_USER_ID); // Logs 1x here too
+            eventManager.IdentifyUser(FS_USER_ID); // Blocked by single identifier check
 
             _mockLogger.Verify(
                 l => l.Log(LogLevel.WARN, Constants.ODP_NOT_INTEGRATED_MESSAGE),
-                Times.Exactly(3)); // during Start() and SendEvent()
+                Times.Exactly(2)); // during Start() and UpdateSettings()
+            _mockLogger.Verify(
+                l => l.Log(LogLevel.DEBUG,
+                    "ODP identify event is not dispatched (fewer than 2 valid identifiers)."),
+                Times.Once); // IdentifyUser blocked before reaching SendEvent
         }
 
         [Test]
@@ -606,14 +610,12 @@ namespace OptimizelySDK.Tests.OdpTests
         }
 
         [Test]
-        public void ShouldPrepareCorrectPayloadForIdentifyUser()
+        public void ShouldNotSendIdentifyEventWithSingleIdentifier()
         {
             const string USER_ID = "test_fs_user_id";
-            var cde = new CountdownEvent(1);
             var eventsCollector = new List<List<OdpEvent>>();
             _mockApiManager.Setup(api => api.SendEvents(It.IsAny<string>(), It.IsAny<string>(),
-                    Capture.In(eventsCollector))).
-                Callback(() => cde.Signal());
+                    Capture.In(eventsCollector)));
             var eventManager = new OdpEventManager.Builder().
                 WithOdpEventApiManager(_mockApiManager.Object).
                 WithLogger(_mockLogger.Object).
@@ -623,20 +625,16 @@ namespace OptimizelySDK.Tests.OdpTests
             eventManager.UpdateSettings(_odpConfig);
 
             eventManager.IdentifyUser(USER_ID);
-            cde.Wait(MAX_COUNT_DOWN_EVENT_WAIT_MS);
 
-            var eventsSentToApi = eventsCollector.FirstOrDefault();
-            var actualEvent = eventsSentToApi?.FirstOrDefault();
-            Assert.IsNotNull(actualEvent);
-            Assert.AreEqual(Constants.ODP_EVENT_TYPE, actualEvent.Type);
-            Assert.AreEqual("identified", actualEvent.Action);
-            Assert.AreEqual(USER_ID, actualEvent.Identifiers[Constants.FS_USER_ID]);
-            var eventData = actualEvent.Data;
-            Assert.AreEqual(Guid.NewGuid().ToString().Length,
-                eventData["idempotence_id"].ToString().Length);
-            Assert.AreEqual("sdk", eventData["data_source_type"]);
-            Assert.AreEqual("csharp-sdk", eventData["data_source"]);
-            Assert.IsNotNull(eventData["data_source_version"]);
+            // Allow time for any async processing
+            Thread.Sleep(500);
+
+            // No events should be sent since only one identifier (fs_user_id) was provided
+            Assert.IsEmpty(eventsCollector);
+            _mockLogger.Verify(
+                l => l.Log(LogLevel.DEBUG,
+                    "ODP identify event is not dispatched (fewer than 2 valid identifiers)."),
+                Times.Once);
         }
 
         [Test]
