@@ -47,16 +47,18 @@ namespace OptimizelySDK.Entity
         }
 
         /// <summary>
-        /// Optional array of rule IDs that this holdout targets (local holdout).
-        /// When null, the holdout applies to all rules across all flags (global holdout).
-        /// When set to an array (even empty), the holdout only applies to the specified rules.
-        /// Rule IDs in this array are experiment/delivery rule IDs from the datafile, NOT flag IDs.
+        /// Per-rule targeting for local holdouts. Scope comes from the datafile
+        /// section, not this field; DatafileProjectConfig strips it on entries
+        /// from the 'holdouts' section so they remain unambiguously global.
+        /// Required (non-null) on entries from the 'localHoldouts' section.
         /// </summary>
         public string[] IncludedRules { get; set; }
 
         /// <summary>
-        /// Returns true if this is a global holdout (IncludedRules is null),
-        /// false if this is a local holdout (IncludedRules is a non-null array).
+        /// True if this is a global holdout (IncludedRules is null).
+        /// Scope is set by the datafile section ('holdouts' vs 'localHoldouts');
+        /// DatafileProjectConfig strips 'includedRules' on 'holdouts' entries, so
+        /// this property stays consistent with section membership.
         /// </summary>
         public bool IsGlobal => IncludedRules == null;
     }

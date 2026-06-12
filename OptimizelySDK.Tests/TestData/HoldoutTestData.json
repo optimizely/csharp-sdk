@@ -211,6 +211,123 @@
       }
     ]
   },
+  "datafileWithLocalHoldoutsSection": {
+    "version": "4",
+    "rollouts": [],
+    "projectId": "test_project",
+    "experiments": [],
+    "groups": [],
+    "attributes": [],
+    "audiences": [],
+    "layers": [],
+    "events": [],
+    "revision": "1",
+    "accountId": "12345",
+    "anonymizeIP": false,
+    "featureFlags": [
+      {
+        "id": "flag_1",
+        "key": "test_flag_1",
+        "experimentIds": [],
+        "rolloutId": "",
+        "variables": []
+      }
+    ],
+    "holdouts": [
+      {
+        "id": "section_global_1",
+        "key": "section_global_holdout_1",
+        "status": "Running",
+        "layerId": "layer_sg1",
+        "variations": [
+          {
+            "id": "sgvar_1",
+            "key": "section_global_off",
+            "featureEnabled": false,
+            "variables": []
+          }
+        ],
+        "trafficAllocation": [
+          {
+            "entityId": "sgvar_1",
+            "endOfRange": 10000
+          }
+        ],
+        "audienceIds": [],
+        "audienceConditions": []
+      },
+      {
+        "id": "section_global_with_stray_rules",
+        "key": "section_global_with_stray_rules_key",
+        "status": "Running",
+        "layerId": "layer_sg_stray",
+        "variations": [
+          {
+            "id": "sgstray_var_1",
+            "key": "section_global_stray_off",
+            "featureEnabled": false,
+            "variables": []
+          }
+        ],
+        "trafficAllocation": [
+          {
+            "entityId": "sgstray_var_1",
+            "endOfRange": 10000
+          }
+        ],
+        "audienceIds": [],
+        "audienceConditions": [],
+        "includedRules": ["should_be_ignored_rule"]
+      }
+    ],
+    "localHoldouts": [
+      {
+        "id": "section_local_1",
+        "key": "section_local_holdout_1",
+        "status": "Running",
+        "layerId": "layer_sl1",
+        "variations": [
+          {
+            "id": "slvar_1",
+            "key": "section_local_off",
+            "featureEnabled": false,
+            "variables": []
+          }
+        ],
+        "trafficAllocation": [
+          {
+            "entityId": "slvar_1",
+            "endOfRange": 10000
+          }
+        ],
+        "audienceIds": [],
+        "audienceConditions": [],
+        "includedRules": ["rule_a"]
+      },
+      {
+        "id": "section_local_invalid",
+        "key": "section_local_invalid_key",
+        "status": "Running",
+        "layerId": "layer_sl_invalid",
+        "variations": [
+          {
+            "id": "slinvalid_var_1",
+            "key": "section_local_invalid_off",
+            "featureEnabled": false,
+            "variables": []
+          }
+        ],
+        "trafficAllocation": [
+          {
+            "entityId": "slinvalid_var_1",
+            "endOfRange": 10000
+          }
+        ],
+        "audienceIds": [],
+        "audienceConditions": []
+      }
+    ]
+  },
   "datafileWithLocalHoldouts": {
     "version": "4",
     "rollouts": [

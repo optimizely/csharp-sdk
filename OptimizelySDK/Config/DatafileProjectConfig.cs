@@ -299,9 +299,22 @@ namespace OptimizelySDK.Config
         public Rollout[] Rollouts { get; set; }
 
         /// <summary>
-        /// Associative list of Holdouts.
+        /// Associative list of Holdouts (from the top-level 'holdouts' datafile section).
+        /// Per FSSDK-12760, ALL entries here are global holdouts. Any 'includedRules' field
+        /// on entries in this section is stripped at parse time so the entity is unambiguously
+        /// global. Section membership is the sole signal for scope.
         /// </summary>
         public Holdout[] Holdouts { get; set; }
+
+        /// <summary>
+        /// Associative list of Local Holdouts (from the top-level 'localHoldouts' datafile section).
+        /// Per FSSDK-12760, ALL entries here are local (rule-scoped via IncludedRules) and the
+        /// IncludedRules field is REQUIRED. Entries missing IncludedRules are logged and excluded
+        /// from evaluation. Older SDK versions ignore this unknown top-level key entirely, which
+        /// is the basis of the backward-compatible design.
+        /// </summary>
+        [JsonProperty("localHoldouts")]
+        public Holdout[] LocalHoldouts { get; set; }
 
         /// <summary>
         /// Associative list of Integrations.
@@ -327,6 +340,7 @@ namespace OptimizelySDK.Config
             FeatureFlags = FeatureFlags ?? new FeatureFlag[0];
             Rollouts = Rollouts ?? new Rollout[0];
             Holdouts = Holdouts ?? new Holdout[0];
+            LocalHoldouts = LocalHoldouts ?? new Holdout[0];
             Integrations = Integrations ?? new Integration[0];
             _ExperimentKeyMap = new Dictionary<string, Experiment>();
 
@@ -423,24 +437,25 @@ namespace OptimizelySDK.Config
             }
 
             // Adding Holdout variations in variation id and key maps.
-            if (Holdouts != null)
+            // Per FSSDK-12760, both sections ('holdouts' = global, 'localHoldouts' = local) need to
+            // have their variation maps populated so the decision service can resolve their variations.
+            var allHoldoutsForVariationMaps = (Holdouts ?? new Holdout[0])
+                .Concat(LocalHoldouts ?? new Holdout[0]);
+            foreach (var holdout in allHoldoutsForVariationMaps)
             {
-                foreach (var holdout in Holdouts)
-                {
-                    _VariationKeyMap[holdout.Key] = new Dictionary<string, Variation>();
-                    _VariationIdMap[holdout.Key] = new Dictionary<string, Variation>();
-                    _VariationIdMapByExperimentId[holdout.Id] = new Dictionary<string, Variation>();
-                    _VariationKeyMapByExperimentId[holdout.Id] = new Dictionary<string, Variation>();
+                _VariationKeyMap[holdout.Key] = new Dictionary<string, Variation>();
+                _VariationIdMap[holdout.Key] = new Dictionary<string, Variation>();
+                _VariationIdMapByExperimentId[holdout.Id] = new Dictionary<string, Variation>();
+                _VariationKeyMapByExperimentId[holdout.Id] = new Dictionary<string, Variation>();
 
-                    if (holdout.Variations != null)
+                if (holdout.Variations != null)
+                {
+                    foreach (var variation in holdout.Variations)
                     {
-                        foreach (var variation in holdout.Variations)
-                        {
-                            _VariationKeyMap[holdout.Key][variation.Key] = variation;
-                            _VariationIdMap[holdout.Key][variation.Id] = variation;
-                            _VariationKeyMapByExperimentId[holdout.Id][variation.Key] = variation;
-                            _VariationIdMapByExperimentId[holdout.Id][variation.Id] = variation;
-                        }
+                        _VariationKeyMap[holdout.Key][variation.Key] = variation;
+                        _VariationIdMap[holdout.Key][variation.Id] = variation;
+                        _VariationKeyMapByExperimentId[holdout.Id][variation.Key] = variation;
+                        _VariationIdMapByExperimentId[holdout.Id][variation.Id] = variation;
                     }
                 }
             }
@@ -561,8 +576,67 @@ namespace OptimizelySDK.Config
 
             _FlagVariationMap = flagToVariationsMap;
 
-            // Initialize HoldoutConfig for managing flag-to-holdout relationships
-            _holdoutConfig = new HoldoutConfig(Holdouts ?? new Holdout[0]);
+            // Initialize HoldoutConfig for managing flag-to-holdout relationships.
+            //
+            // Per FSSDK-12760, two top-level datafile sections drive holdout scoping (Gen 3+):
+            //   - 'holdouts'      → ALL entries are global holdouts (applied to every flag).
+            //                       Any 'includedRules' field on these entries is IGNORED;
+            //                       section membership alone determines scope.
+            //   - 'localHoldouts' → ALL entries are local holdouts (rule-scoped via
+            //                       'includedRules'). Entries missing 'includedRules' are
+            //                       invalid and skipped with an error log.
+            //
+            // Backward compatibility: older datafiles that only emit the 'holdouts' section
+            // continue to work — every entry is treated as global. The 'localHoldouts' key is
+            // simply absent and parsed as an empty list.
+            _holdoutConfig = new HoldoutConfig(BuildCombinedHoldouts());
+        }
+
+        /// <summary>
+        /// Combine the 'holdouts' (global) and 'localHoldouts' (local) sections into a single
+        /// array for HoldoutConfig. Enforces section-based scoping at parse time:
+        ///   - Strips 'IncludedRules' from entries in the global 'holdouts' section (so they
+        ///     always classify as global even if the datafile incorrectly includes that field).
+        ///   - Validates entries in 'localHoldouts': missing or null IncludedRules is invalid;
+        ///     such entries are logged and excluded (no fallback to global application).
+        /// </summary>
+        private Holdout[] BuildCombinedHoldouts()
+        {
+            var combined = new List<Holdout>();
+
+            // Global section: section membership is the sole signal for scope.
+            // Drop any IncludedRules on global-section entries so the entity is unambiguously global.
+            foreach (var holdout in Holdouts ?? new Holdout[0])
+            {
+                if (holdout == null)
+                {
+                    continue;
+                }
+
+                holdout.IncludedRules = null;
+                combined.Add(holdout);
+            }
+
+            // Local section: IncludedRules is REQUIRED. Invalid entries are logged and skipped.
+            foreach (var holdout in LocalHoldouts ?? new Holdout[0])
+            {
+                if (holdout == null)
+                {
+                    continue;
+                }
+
+                if (holdout.IncludedRules == null)
+                {
+                    var identifier = !string.IsNullOrEmpty(holdout.Key) ? holdout.Key : holdout.Id;
+                    Logger?.Log(LogLevel.ERROR,
+                        $"Local holdout \"{identifier}\" is missing required \"includedRules\" field and will be excluded from evaluation.");
+                    continue;
+                }
+
+                combined.Add(holdout);
+            }
+
+            return combined.ToArray();
         }
 
         /// <summary>
@@ -910,8 +984,10 @@ namespace OptimizelySDK.Config
         }
 
         /// <summary>
-        /// Returns all global holdouts (holdouts where IncludedRules is null).
+        /// Returns all global holdouts (parsed from the top-level 'holdouts' datafile section).
         /// Global holdouts apply to all rules across all flags and are evaluated at flag level.
+        /// Section membership is the sole signal for global scope — any 'includedRules' field
+        /// on entries in the 'holdouts' section is stripped at parse time and ignored.
         /// </summary>
         /// <returns>Read-only list of global holdouts</returns>
         public List<Holdout> GetGlobalHoldouts()
@@ -921,7 +997,9 @@ namespace OptimizelySDK.Config
 
         /// <summary>
         /// Returns local holdouts that target a specific rule ID.
-        /// Local holdouts are evaluated per-rule, after forced decisions but before regular rule evaluation.
+        /// Local holdouts come from the top-level 'localHoldouts' datafile section and are
+        /// scoped per-rule via their IncludedRules field. They are evaluated per-rule, after
+        /// forced decisions but before regular rule evaluation.
         /// </summary>
         /// <param name="ruleId">The rule ID to look up holdouts for</param>
         /// <returns>Read-only list of local holdouts targeting the given rule, or empty list if none</returns>
