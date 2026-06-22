@@ -1418,9 +1418,142 @@ namespace OptimizelySDK.Tests
             Assert.IsNotNull(datafileProjectConfig.Holdouts);
             Assert.AreEqual(0, datafileProjectConfig.Holdouts.Length);
 
+            Assert.IsNotNull(datafileProjectConfig.LocalHoldouts);
+            Assert.AreEqual(0, datafileProjectConfig.LocalHoldouts.Length);
+
             // Methods should still work with empty holdouts
             var holdout = datafileProjectConfig.GetHoldout("any_id");
             Assert.IsNull(holdout);
+        }
+
+        [Test]
+        public void TestLocalHoldoutsSection_ParsedSeparatelyFromHoldouts()
+        {
+            // Test that localHoldouts are parsed from the new datafile section
+            var testDataPath = Path.Combine(TestContext.CurrentContext.TestDirectory,
+                "TestData", "HoldoutTestData.json");
+            var jsonContent = File.ReadAllText(testDataPath);
+            var testData = JObject.Parse(jsonContent);
+
+            var datafileJson = testData["datafileWithLocalHoldouts"].ToString();
+            var datafileProjectConfig = DatafileProjectConfig.Create(datafileJson,
+                new NoOpLogger(), new NoOpErrorHandler()) as DatafileProjectConfig;
+
+            // holdouts section has 1 global holdout
+            Assert.AreEqual(1, datafileProjectConfig.Holdouts.Length,
+                "holdouts section should contain only global holdouts");
+            Assert.AreEqual("holdout_global_2", datafileProjectConfig.Holdouts[0].Id);
+
+            // Global holdout should have IncludedRules stripped to null
+            Assert.IsNull(datafileProjectConfig.Holdouts[0].IncludedRules,
+                "Global holdout should have IncludedRules stripped to null");
+            Assert.IsTrue(datafileProjectConfig.Holdouts[0].IsGlobal);
+
+            // localHoldouts section has 4 local holdouts (all with valid includedRules)
+            Assert.AreEqual(4, datafileProjectConfig.LocalHoldouts.Length,
+                "localHoldouts section should contain local holdouts with valid includedRules");
+
+            // Verify each local holdout has IncludedRules set
+            foreach (var localHoldout in datafileProjectConfig.LocalHoldouts)
+            {
+                Assert.IsNotNull(localHoldout.IncludedRules,
+                    $"Local holdout {localHoldout.Key} should have IncludedRules set");
+                Assert.IsFalse(localHoldout.IsGlobal,
+                    $"Local holdout {localHoldout.Key} should not be global");
+            }
+        }
+
+        [Test]
+        public void TestHoldoutsSection_IncludedRulesStrippedAtParseTime()
+        {
+            // Test that includedRules on entries in holdouts section is stripped.
+            // Even if the backend accidentally puts includedRules on a global holdout,
+            // the SDK ignores it because section membership is the sole signal.
+            var datafileWithIncludedRulesOnGlobal = @"{
+                ""version"": ""4"",
+                ""rollouts"": [],
+                ""projectId"": ""test_project"",
+                ""experiments"": [],
+                ""groups"": [],
+                ""attributes"": [],
+                ""audiences"": [],
+                ""layers"": [],
+                ""events"": [],
+                ""revision"": ""1"",
+                ""featureFlags"": [],
+                ""holdouts"": [
+                    {
+                        ""id"": ""ho_1"",
+                        ""key"": ""holdout_with_stale_rules"",
+                        ""status"": ""Running"",
+                        ""variations"": [],
+                        ""trafficAllocation"": [],
+                        ""audienceIds"": [],
+                        ""includedRules"": [""rule_123""]
+                    }
+                ]
+            }";
+
+            var config = DatafileProjectConfig.Create(datafileWithIncludedRulesOnGlobal,
+                new NoOpLogger(), new NoOpErrorHandler()) as DatafileProjectConfig;
+
+            Assert.AreEqual(1, config.Holdouts.Length);
+            Assert.IsNull(config.Holdouts[0].IncludedRules,
+                "includedRules on holdouts-section entries must be stripped at parse time");
+            Assert.IsTrue(config.Holdouts[0].IsGlobal,
+                "Holdout from holdouts section must be treated as global");
+        }
+
+        [Test]
+        public void TestLocalHoldoutsWithoutIncludedRules_ExcludedAndLogged()
+        {
+            // Test that localHoldouts entries without includedRules are excluded
+            var datafileWithInvalidLocal = @"{
+                ""version"": ""4"",
+                ""rollouts"": [],
+                ""projectId"": ""test_project"",
+                ""experiments"": [],
+                ""groups"": [],
+                ""attributes"": [],
+                ""audiences"": [],
+                ""layers"": [],
+                ""events"": [],
+                ""revision"": ""1"",
+                ""featureFlags"": [],
+                ""localHoldouts"": [
+                    {
+                        ""id"": ""ho_valid"",
+                        ""key"": ""valid_local"",
+                        ""status"": ""Running"",
+                        ""variations"": [],
+                        ""trafficAllocation"": [],
+                        ""audienceIds"": [],
+                        ""includedRules"": [""rule_1""]
+                    },
+                    {
+                        ""id"": ""ho_invalid"",
+                        ""key"": ""invalid_local_no_rules"",
+                        ""status"": ""Running"",
+                        ""variations"": [],
+                        ""trafficAllocation"": [],
+                        ""audienceIds"": []
+                    }
+                ]
+            }";
+
+            var loggerMock = new Mock<ILogger>();
+            var config = DatafileProjectConfig.Create(datafileWithInvalidLocal,
+                loggerMock.Object, new NoOpErrorHandler()) as DatafileProjectConfig;
+
+            // Only the valid local holdout should remain
+            Assert.AreEqual(1, config.LocalHoldouts.Length,
+                "Only valid local holdouts with includedRules should be kept");
+            Assert.AreEqual("ho_valid", config.LocalHoldouts[0].Id);
+
+            // Verify error was logged for the invalid entry
+            loggerMock.Verify(l => l.Log(LogLevel.ERROR,
+                It.Is<string>(s => s.Contains("invalid_local_no_rules") && s.Contains("no includedRules"))),
+                Times.Once);
         }
 
         #endregion

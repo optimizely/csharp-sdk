@@ -181,9 +181,16 @@ namespace OptimizelySDK
         Rollout[] Rollouts { get; set; }
 
         /// <summary>
-        /// Associative list of Holdouts.
+        /// Global holdouts from the datafile "holdouts" section.
+        /// All entries are treated as global; any includedRules on these entries is stripped at parse time.
         /// </summary>
         Holdout[] Holdouts { get; set; }
+
+        /// <summary>
+        /// Local holdouts from the datafile "localHoldouts" section.
+        /// Each entry must have includedRules; entries without it are invalid and excluded at parse time.
+        /// </summary>
+        Holdout[] LocalHoldouts { get; set; }
 
         /// <summary>
         /// Associative list of Integrations.
@@ -333,15 +340,13 @@ namespace OptimizelySDK
         Holdout GetHoldout(string holdoutId);
 
         /// <summary>
-        /// Returns all global holdouts (holdouts where IncludedRules is null).
-        /// Global holdouts apply to all rules across all flags and are evaluated at flag level.
+        /// Returns all global holdouts (from holdouts section, evaluated at flag level).
         /// </summary>
         /// <returns>Read-only list of global holdouts</returns>
         List<Holdout> GetGlobalHoldouts();
 
         /// <summary>
-        /// Returns local holdouts that target a specific rule ID.
-        /// Local holdouts are evaluated per-rule, after forced decisions but before regular rule evaluation.
+        /// Returns local holdouts (from localHoldouts section) targeting a specific rule ID.
         /// </summary>
         /// <param name="ruleId">The rule ID to look up holdouts for</param>
         /// <returns>Read-only list of local holdouts targeting the given rule, or empty list if none</returns>

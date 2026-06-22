@@ -21,8 +21,8 @@ using OptimizelySDK.Entity;
 namespace OptimizelySDK.Utils
 {
     /// <summary>
-    /// Configuration manager for holdouts, providing holdout ID mapping,
-    /// global holdout access, and rule-level local holdout lookups.
+    /// Manages holdout ID mapping, global holdout access, and rule-level local holdout lookups.
+    /// Scope is determined by datafile section: holdouts = global, localHoldouts = rule-scoped.
     /// </summary>
     public class HoldoutConfig
     {
@@ -30,14 +30,12 @@ namespace OptimizelySDK.Utils
         private readonly Dictionary<string, Holdout> _holdoutIdMap;
 
         /// <summary>
-        /// Global holdouts — holdouts where IncludedRules is null.
-        /// These are evaluated at flag level, before any per-rule logic.
+        /// Global holdouts (from holdouts section; IncludedRules is null).
         /// </summary>
         private readonly List<Holdout> _globalHoldouts;
 
         /// <summary>
-        /// Maps rule IDs to the local holdouts that target those rules.
-        /// A local holdout has IncludedRules set to a non-null array of rule IDs.
+        /// Maps rule IDs to the local holdouts (from localHoldouts section) that target those rules.
         /// </summary>
         private readonly Dictionary<string, List<Holdout>> _ruleHoldoutsMap;
 
@@ -75,16 +73,14 @@ namespace OptimizelySDK.Utils
                 // Build ID mapping
                 _holdoutIdMap[holdout.Id] = holdout;
 
-                // Classify as global or local based on IncludedRules
+                // Classify by IncludedRules: null = global (holdouts section),
+                // non-null = local (localHoldouts section).
                 if (holdout.IsGlobal)
                 {
-                    // IncludedRules == null → global holdout (applies to all rules across all flags)
                     _globalHoldouts.Add(holdout);
                 }
                 else
                 {
-                    // IncludedRules != null → local holdout (applies only to the specified rules)
-                    // An empty IncludedRules array means local but matches no rules (intentional).
                     foreach (var ruleId in holdout.IncludedRules)
                     {
                         if (!_ruleHoldoutsMap.ContainsKey(ruleId))
@@ -116,8 +112,7 @@ namespace OptimizelySDK.Utils
         }
 
         /// <summary>
-        /// Returns all global holdouts (holdouts where IncludedRules is null).
-        /// These apply to all rules across all flags and are evaluated at flag level.
+        /// Returns all global holdouts (from holdouts section, evaluated at flag level).
         /// </summary>
         /// <returns>List of global holdouts</returns>
         public List<Holdout> GetGlobalHoldouts()
@@ -126,8 +121,7 @@ namespace OptimizelySDK.Utils
         }
 
         /// <summary>
-        /// Returns local holdouts that target a specific rule ID.
-        /// These are evaluated per-rule, after forced decisions but before regular rule evaluation.
+        /// Returns local holdouts (from localHoldouts section) targeting a specific rule ID.
         /// </summary>
         /// <param name="ruleId">The rule ID to look up holdouts for</param>
         /// <returns>List of holdouts targeting the specified rule, or an empty list if none</returns>

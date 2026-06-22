@@ -299,9 +299,16 @@ namespace OptimizelySDK.Config
         public Rollout[] Rollouts { get; set; }
 
         /// <summary>
-        /// Associative list of Holdouts.
+        /// Global holdouts from the datafile "holdouts" section.
+        /// All entries are treated as global; any includedRules is stripped at parse time.
         /// </summary>
         public Holdout[] Holdouts { get; set; }
+
+        /// <summary>
+        /// Local holdouts from the datafile "localHoldouts" section.
+        /// Each entry must have includedRules; entries without it are invalid and excluded at parse time.
+        /// </summary>
+        public Holdout[] LocalHoldouts { get; set; }
 
         /// <summary>
         /// Associative list of Integrations.
@@ -327,6 +334,7 @@ namespace OptimizelySDK.Config
             FeatureFlags = FeatureFlags ?? new FeatureFlag[0];
             Rollouts = Rollouts ?? new Rollout[0];
             Holdouts = Holdouts ?? new Holdout[0];
+            LocalHoldouts = LocalHoldouts ?? new Holdout[0];
             Integrations = Integrations ?? new Integration[0];
             _ExperimentKeyMap = new Dictionary<string, Experiment>();
 
@@ -422,11 +430,16 @@ namespace OptimizelySDK.Config
                 }
             }
 
-            // Adding Holdout variations in variation id and key maps.
+            // Process holdouts section: entries are global by section membership.
+            // Strip any includedRules so they are treated as global holdouts.
             if (Holdouts != null)
             {
                 foreach (var holdout in Holdouts)
                 {
+                    // Section membership is the sole signal for scope.
+                    // Strip includedRules from holdouts-section entries at parse time.
+                    holdout.IncludedRules = null;
+
                     _VariationKeyMap[holdout.Key] = new Dictionary<string, Variation>();
                     _VariationIdMap[holdout.Key] = new Dictionary<string, Variation>();
                     _VariationIdMapByExperimentId[holdout.Id] = new Dictionary<string, Variation>();
@@ -444,6 +457,43 @@ namespace OptimizelySDK.Config
                     }
                 }
             }
+
+            // Process localHoldouts section: entries must have includedRules.
+            // Validate and skip entries without includedRules (log error).
+            var validLocalHoldouts = new List<Holdout>();
+            if (LocalHoldouts != null)
+            {
+                foreach (var localHoldout in LocalHoldouts)
+                {
+                    if (localHoldout.IncludedRules == null)
+                    {
+                        Logger.Log(LogLevel.ERROR,
+                            $"Local holdout \"{localHoldout.Key}\" (id: {localHoldout.Id}) in localHoldouts section has no includedRules. Excluding from evaluation.");
+                        continue;
+                    }
+
+                    validLocalHoldouts.Add(localHoldout);
+
+                    _VariationKeyMap[localHoldout.Key] = new Dictionary<string, Variation>();
+                    _VariationIdMap[localHoldout.Key] = new Dictionary<string, Variation>();
+                    _VariationIdMapByExperimentId[localHoldout.Id] = new Dictionary<string, Variation>();
+                    _VariationKeyMapByExperimentId[localHoldout.Id] = new Dictionary<string, Variation>();
+
+                    if (localHoldout.Variations != null)
+                    {
+                        foreach (var variation in localHoldout.Variations)
+                        {
+                            _VariationKeyMap[localHoldout.Key][variation.Key] = variation;
+                            _VariationIdMap[localHoldout.Key][variation.Id] = variation;
+                            _VariationKeyMapByExperimentId[localHoldout.Id][variation.Key] = variation;
+                            _VariationIdMapByExperimentId[localHoldout.Id][variation.Id] = variation;
+                        }
+                    }
+                }
+            }
+
+            // Store only valid local holdouts
+            LocalHoldouts = validLocalHoldouts.ToArray();
 
             // Inject "everyone else" variation into feature_rollout experiments
             foreach (var feature in FeatureFlags)
@@ -561,8 +611,11 @@ namespace OptimizelySDK.Config
 
             _FlagVariationMap = flagToVariationsMap;
 
-            // Initialize HoldoutConfig for managing flag-to-holdout relationships
-            _holdoutConfig = new HoldoutConfig(Holdouts ?? new Holdout[0]);
+            // Initialize HoldoutConfig with global holdouts (from holdouts section)
+            // and local holdouts (from localHoldouts section, validated above).
+            var allHoldoutsForConfig = (Holdouts ?? new Holdout[0])
+                .Concat(LocalHoldouts ?? new Holdout[0]).ToArray();
+            _holdoutConfig = new HoldoutConfig(allHoldoutsForConfig);
         }
 
         /// <summary>
@@ -910,8 +963,7 @@ namespace OptimizelySDK.Config
         }
 
         /// <summary>
-        /// Returns all global holdouts (holdouts where IncludedRules is null).
-        /// Global holdouts apply to all rules across all flags and are evaluated at flag level.
+        /// Returns all global holdouts (from holdouts section, evaluated at flag level).
         /// </summary>
         /// <returns>Read-only list of global holdouts</returns>
         public List<Holdout> GetGlobalHoldouts()
@@ -920,8 +972,7 @@ namespace OptimizelySDK.Config
         }
 
         /// <summary>
-        /// Returns local holdouts that target a specific rule ID.
-        /// Local holdouts are evaluated per-rule, after forced decisions but before regular rule evaluation.
+        /// Returns local holdouts (from localHoldouts section) targeting a specific rule ID.
         /// </summary>
         /// <param name="ruleId">The rule ID to look up holdouts for</param>
         /// <returns>Read-only list of local holdouts targeting the given rule, or empty list if none</returns>
