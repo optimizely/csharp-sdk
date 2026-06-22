@@ -916,7 +916,7 @@ namespace OptimizelySDK.Bucketing
 
             var userId = user.GetUserId();
 
-            // Check global holdouts first (highest priority — evaluated at flag level, before any rules)
+            // Check global holdouts first (from the "holdouts" section — evaluated at flag level, before any rules)
             var globalHoldouts = projectConfig.GetGlobalHoldouts();
             foreach (var holdout in globalHoldouts)
             {

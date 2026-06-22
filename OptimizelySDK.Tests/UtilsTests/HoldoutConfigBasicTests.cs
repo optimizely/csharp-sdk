@@ -126,47 +126,38 @@ namespace OptimizelySDK.Tests
         }
 
         // =====================================================================
-        // Level 1: Local Holdout / IsGlobal Classification Tests (FSSDK-12369)
+        // Level 1: IsGlobal Classification Tests (section-based scope)
         // =====================================================================
 
         [Test]
-        public void TestIsGlobal_NullIncludedRules_IsGlobal()
+        public void TestIsGlobal_DefaultIsTrue()
         {
-            // A holdout with IncludedRules == null is a global holdout
+            // By default, IsGlobal is true (holdout from "holdouts" section)
             var holdout = CreateTestHoldout("h1", "global_holdout");
-            holdout.IncludedRules = null;
 
-            Assert.IsTrue(holdout.IsGlobal, "Holdout with null IncludedRules should be global");
+            Assert.IsTrue(holdout.IsGlobal, "Holdout should default to global (IsGlobal=true)");
         }
 
         [Test]
-        public void TestIsGlobal_EmptyIncludedRules_IsNotGlobal()
+        public void TestIsGlobal_SetToFalse_IsLocal()
         {
-            // A holdout with IncludedRules == [] is LOCAL (empty array, not null)
-            var holdout = CreateTestHoldout("h1", "local_holdout_empty");
-            holdout.IncludedRules = new string[0];
-
-            Assert.IsFalse(holdout.IsGlobal, "Holdout with empty array IncludedRules should NOT be global");
-        }
-
-        [Test]
-        public void TestIsGlobal_NonEmptyIncludedRules_IsNotGlobal()
-        {
-            // A holdout with IncludedRules = ["rule_1"] is a local holdout
+            // Holdout from "localHoldouts" section has IsGlobal=false
             var holdout = CreateTestHoldout("h1", "local_holdout");
+            holdout.IsGlobal = false;
             holdout.IncludedRules = new[] { "rule_1" };
 
-            Assert.IsFalse(holdout.IsGlobal, "Holdout with non-empty IncludedRules should NOT be global");
+            Assert.IsFalse(holdout.IsGlobal, "Holdout with IsGlobal=false should be local");
         }
 
         [Test]
         public void TestGetGlobalHoldouts_ReturnsOnlyGlobalHoldouts()
         {
             var globalHoldout = CreateTestHoldout("global_id", "global_key");
-            globalHoldout.IncludedRules = null; // global
+            globalHoldout.IsGlobal = true;
 
             var localHoldout = CreateTestHoldout("local_id", "local_key");
-            localHoldout.IncludedRules = new[] { "rule_1" }; // local
+            localHoldout.IsGlobal = false;
+            localHoldout.IncludedRules = new[] { "rule_1" };
 
             var config = new HoldoutConfig(new[] { globalHoldout, localHoldout });
 
@@ -179,7 +170,8 @@ namespace OptimizelySDK.Tests
         public void TestGetGlobalHoldouts_NoGlobalHoldouts_ReturnsEmpty()
         {
             var localHoldout = CreateTestHoldout("local_id", "local_key");
-            localHoldout.IncludedRules = new[] { "rule_1" }; // local
+            localHoldout.IsGlobal = false;
+            localHoldout.IncludedRules = new[] { "rule_1" };
 
             var config = new HoldoutConfig(new[] { localHoldout });
 
@@ -191,6 +183,7 @@ namespace OptimizelySDK.Tests
         public void TestGetHoldoutsForRule_ReturnsMatchingLocalHoldout()
         {
             var localHoldout = CreateTestHoldout("local_id", "local_key");
+            localHoldout.IsGlobal = false;
             localHoldout.IncludedRules = new[] { "rule_1", "rule_2" };
 
             var config = new HoldoutConfig(new[] { localHoldout });
@@ -207,6 +200,7 @@ namespace OptimizelySDK.Tests
         public void TestGetHoldoutsForRule_UnknownRuleId_ReturnsEmpty()
         {
             var localHoldout = CreateTestHoldout("local_id", "local_key");
+            localHoldout.IsGlobal = false;
             localHoldout.IncludedRules = new[] { "rule_1" };
 
             var config = new HoldoutConfig(new[] { localHoldout });
@@ -219,6 +213,7 @@ namespace OptimizelySDK.Tests
         public void TestGetHoldoutsForRule_NullOrEmptyRuleId_ReturnsEmpty()
         {
             var localHoldout = CreateTestHoldout("local_id", "local_key");
+            localHoldout.IsGlobal = false;
             localHoldout.IncludedRules = new[] { "rule_1" };
 
             var config = new HoldoutConfig(new[] { localHoldout });
@@ -228,32 +223,30 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
-        public void TestGetHoldoutsForRule_EmptyIncludedRules_NoRuleMatches()
+        public void TestGetHoldoutsForRule_LocalWithNullIncludedRules_NoRuleMatches()
         {
-            // A local holdout with IncludedRules == [] matches NO rules
+            // A local holdout (IsGlobal=false) with null IncludedRules should not match any rules
             var localHoldout = CreateTestHoldout("local_id", "local_key");
-            localHoldout.IncludedRules = new string[0]; // empty array = local, but no rules
+            localHoldout.IsGlobal = false;
+            localHoldout.IncludedRules = null;
 
             var config = new HoldoutConfig(new[] { localHoldout });
 
-            // Should not appear in global holdouts
-            Assert.AreEqual(0, config.GetGlobalHoldouts().Count, "Empty-array holdout should not be global");
-
-            // Should not match any rule
-            Assert.AreEqual(0, config.GetHoldoutsForRule("any_rule").Count, "Empty-array holdout should match no rules");
+            Assert.AreEqual(0, config.GetGlobalHoldouts().Count, "Local holdout should not be global");
+            Assert.AreEqual(0, config.GetHoldoutsForRule("any_rule").Count, "Local holdout with null IncludedRules should match no rules");
         }
 
         [Test]
-        public void TestBackwardCompatibility_NullIncludedRulesDefaultsToGlobal()
+        public void TestBackwardCompatibility_DefaultIsGlobalIsTrue()
         {
-            // Old datafile holdouts have no includedRules field → IncludedRules is null → global
+            // Holdouts default to IsGlobal=true (matching "holdouts" section behavior)
             var legacyHoldout = CreateTestHoldout("legacy_id", "legacy_key");
-            // IncludedRules is null by default (not set)
+            // IsGlobal defaults to true
 
             var config = new HoldoutConfig(new[] { legacyHoldout });
 
             var globals = config.GetGlobalHoldouts();
-            Assert.AreEqual(1, globals.Count, "Legacy holdout (null IncludedRules) should be treated as global");
+            Assert.AreEqual(1, globals.Count, "Holdout with default IsGlobal=true should be treated as global");
             Assert.AreEqual("legacy_id", globals[0].Id);
         }
 
@@ -261,9 +254,11 @@ namespace OptimizelySDK.Tests
         public void TestMultipleLocalHoldoutsForSameRule()
         {
             var holdout1 = CreateTestHoldout("local_id_1", "local_key_1");
+            holdout1.IsGlobal = false;
             holdout1.IncludedRules = new[] { "rule_shared" };
 
             var holdout2 = CreateTestHoldout("local_id_2", "local_key_2");
+            holdout2.IsGlobal = false;
             holdout2.IncludedRules = new[] { "rule_shared" };
 
             var config = new HoldoutConfig(new[] { holdout1, holdout2 });
@@ -277,6 +272,7 @@ namespace OptimizelySDK.Tests
         {
             // A single local holdout can target rules from multiple flags
             var crossFlagHoldout = CreateTestHoldout("cross_id", "cross_key");
+            crossFlagHoldout.IsGlobal = false;
             crossFlagHoldout.IncludedRules = new[] { "rule_flag_a", "rule_flag_b", "rule_flag_c" };
 
             var config = new HoldoutConfig(new[] { crossFlagHoldout });

@@ -390,8 +390,11 @@
           }
         ],
         "audienceIds": [],
-        "audienceConditions": []
-      },
+        "audienceConditions": [],
+        "includedRules": ["should_be_stripped"]
+      }
+    ],
+    "localHoldouts": [
       {
         "id": "holdout_local_rule1",
         "key": "local_holdout_rule1",
@@ -460,6 +463,28 @@
         "audienceIds": [],
         "audienceConditions": [],
         "includedRules": []
+      },
+      {
+        "id": "holdout_local_no_rules",
+        "key": "local_holdout_no_rules",
+        "status": "Running",
+        "layerId": "layer_local_no_rules",
+        "variations": [
+          {
+            "id": "lvar_no_rules",
+            "key": "local_no_rules_off",
+            "featureEnabled": false,
+            "variables": []
+          }
+        ],
+        "trafficAllocation": [
+          {
+            "entityId": "lvar_no_rules",
+            "endOfRange": 10000
+          }
+        ],
+        "audienceIds": [],
+        "audienceConditions": []
       },
       {
         "id": "holdout_local_exp_rule1",

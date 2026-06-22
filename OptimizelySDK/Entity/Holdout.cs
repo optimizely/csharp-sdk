@@ -19,7 +19,9 @@ using System.Collections.Generic;
 namespace OptimizelySDK.Entity
 {
     /// <summary>
-    /// Represents a holdout in an Optimizely project
+    /// Represents a holdout in an Optimizely project.
+    /// Scope (global vs local) is determined by section membership in the datafile,
+    /// not by the IncludedRules field.
     /// </summary>
     public class Holdout : ExperimentCore
     {
@@ -47,17 +49,17 @@ namespace OptimizelySDK.Entity
         }
 
         /// <summary>
-        /// Optional array of rule IDs that this holdout targets (local holdout).
-        /// When null, the holdout applies to all rules across all flags (global holdout).
-        /// When set to an array (even empty), the holdout only applies to the specified rules.
-        /// Rule IDs in this array are experiment/delivery rule IDs from the datafile, NOT flag IDs.
+        /// Optional array of rule IDs that this holdout targets (used only for local holdouts).
+        /// For global holdouts (from the "holdouts" section), this is always stripped to null at parse time.
+        /// For local holdouts (from the "localHoldouts" section), this must be a non-empty array.
         /// </summary>
         public string[] IncludedRules { get; set; }
 
         /// <summary>
-        /// Returns true if this is a global holdout (IncludedRules is null),
-        /// false if this is a local holdout (IncludedRules is a non-null array).
+        /// True if this holdout was parsed from the "holdouts" section (global scope).
+        /// False if parsed from the "localHoldouts" section (rule scope).
+        /// Set by the config parser; section membership is the sole signal for scope.
         /// </summary>
-        public bool IsGlobal => IncludedRules == null;
+        public bool IsGlobal { get; internal set; } = true;
     }
 }

@@ -1418,6 +1418,9 @@ namespace OptimizelySDK.Tests
             Assert.IsNotNull(datafileProjectConfig.Holdouts);
             Assert.AreEqual(0, datafileProjectConfig.Holdouts.Length);
 
+            Assert.IsNotNull(datafileProjectConfig.LocalHoldouts);
+            Assert.AreEqual(0, datafileProjectConfig.LocalHoldouts.Length);
+
             // Methods should still work with empty holdouts
             var holdout = datafileProjectConfig.GetHoldout("any_id");
             Assert.IsNull(holdout);
