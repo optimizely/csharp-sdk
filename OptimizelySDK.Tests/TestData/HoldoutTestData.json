@@ -508,7 +508,9 @@
         ],
         "audienceIds": [],
         "audienceConditions": []
-      },
+      }
+    ],
+    "localHoldouts": [
       {
         "id": "holdout_local_rule1",
         "key": "local_holdout_rule1",
