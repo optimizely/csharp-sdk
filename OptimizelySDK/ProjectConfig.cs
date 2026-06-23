@@ -181,9 +181,14 @@ namespace OptimizelySDK
         Rollout[] Rollouts { get; set; }
 
         /// <summary>
-        /// Associative list of Holdouts.
+        /// Global holdouts (from the 'holdouts' datafile section).
         /// </summary>
         Holdout[] Holdouts { get; set; }
+
+        /// <summary>
+        /// Local holdouts (from the 'localHoldouts' datafile section). Rule-scoped via IncludedRules.
+        /// </summary>
+        Holdout[] LocalHoldouts { get; set; }
 
         /// <summary>
         /// Associative list of Integrations.
