@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright 2026, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,18 +27,7 @@ using OptimizelySDK.Logger;
 namespace OptimizelySDK.Tests
 {
     /// <summary>
-    /// Tests for the new top-level 'localHoldouts' datafile section (FSSDK-12760).
-    ///
-    /// Local holdouts now live in a dedicated 'localHoldouts' section, separate from
-    /// 'holdouts' which carries only global holdouts. Older SDK versions (Gen 1/Gen 2)
-    /// will ignore this unknown top-level key entirely — that's the whole point of the
-    /// backward-compatible design — but Gen 3 SDKs must parse it as the source of truth
-    /// for local (rule-scoped) holdouts.
-    ///
-    /// Contract:
-    ///   - 'holdouts'      → ALL entries are global. Any IncludedRules is stripped/ignored.
-    ///   - 'localHoldouts' → ALL entries are local. IncludedRules is REQUIRED;
-    ///                       entries missing it are logged and excluded.
+    /// Tests for the 'localHoldouts' datafile section: section-based scoping, validation, and backward compat.
     /// </summary>
     [TestFixture]
     public class LocalHoldoutsSectionTest
@@ -75,8 +64,8 @@ namespace OptimizelySDK.Tests
 
             Assert.IsNotNull(config.LocalHoldouts,
                 "LocalHoldouts property should be exposed on DatafileProjectConfig");
-            Assert.AreEqual(2, config.LocalHoldouts.Length,
-                "LocalHoldouts should contain both entries from the datafile (valid + invalid)");
+            Assert.AreEqual(1, config.LocalHoldouts.Length,
+                "LocalHoldouts should contain only valid entries (invalid ones are excluded at parse time)");
         }
 
         [Test]

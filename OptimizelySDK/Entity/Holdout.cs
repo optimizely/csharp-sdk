@@ -47,18 +47,13 @@ namespace OptimizelySDK.Entity
         }
 
         /// <summary>
-        /// Per-rule targeting for local holdouts. Scope comes from the datafile
-        /// section, not this field; DatafileProjectConfig strips it on entries
-        /// from the 'holdouts' section so they remain unambiguously global.
-        /// Required (non-null) on entries from the 'localHoldouts' section.
+        /// Rule IDs this holdout targets. Null for global holdouts (stripped at parse time).
         /// </summary>
         public string[] IncludedRules { get; set; }
 
         /// <summary>
-        /// True if this is a global holdout (IncludedRules is null).
-        /// Scope is set by the datafile section ('holdouts' vs 'localHoldouts');
-        /// DatafileProjectConfig strips 'includedRules' on 'holdouts' entries, so
-        /// this property stays consistent with section membership.
+        /// True when global (IncludedRules is null). Consistent with section membership
+        /// because the config parser strips IncludedRules on 'holdouts'-section entries.
         /// </summary>
         public bool IsGlobal => IncludedRules == null;
     }

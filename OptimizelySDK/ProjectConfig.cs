@@ -181,15 +181,12 @@ namespace OptimizelySDK
         Rollout[] Rollouts { get; set; }
 
         /// <summary>
-        /// Associative list of Holdouts.
-        /// Entries here are ALL global (section membership is the sole signal for scope).
+        /// Global holdouts (from the 'holdouts' datafile section).
         /// </summary>
         Holdout[] Holdouts { get; set; }
 
         /// <summary>
-        /// Associative list of Local Holdouts (top-level 'localHoldouts' datafile section).
-        /// Entries here are ALL local — rule-scoped via IncludedRules.
-        /// Older SDK versions ignore this unknown top-level key, providing backward compatibility.
+        /// Local holdouts (from the 'localHoldouts' datafile section). Rule-scoped via IncludedRules.
         /// </summary>
         Holdout[] LocalHoldouts { get; set; }
 
