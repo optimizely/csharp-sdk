@@ -130,13 +130,20 @@ namespace OptimizelySDK.Event.Builder
         {
             var impressionEvent = new Dictionary<string, object>();
 
+            // FSSDK-12813: Normalize campaign_id, variation_id, and entity_id (impression
+            // events only) uniformly across all decision types. Same rules as EventFactory.
+            var experimentId = experiment?.Id ?? string.Empty;
+            var normalizedCampaignId = EventIdNormalizer.NormalizeCampaignId(
+                experiment?.LayerId, experimentId);
+            var normalizedVariationId = EventIdNormalizer.NormalizeVariationId(variationId);
+
             var decisions = new object[]
             {
                 new Dictionary<string, object>
                 {
-                    { Params.CAMPAIGN_ID, experiment?.LayerId },
-                    { Params.EXPERIMENT_ID, experiment?.Id ?? string.Empty },
-                    { Params.VARIATION_ID, variationId },
+                    { Params.CAMPAIGN_ID, normalizedCampaignId },
+                    { Params.EXPERIMENT_ID, experimentId },
+                    { Params.VARIATION_ID, normalizedVariationId },
                 },
             };
 
@@ -145,7 +152,7 @@ namespace OptimizelySDK.Event.Builder
             {
                 new Dictionary<string, object>
                 {
-                    { "entity_id", experiment?.LayerId },
+                    { "entity_id", normalizedCampaignId },
                     { "timestamp", DateTimeUtils.SecondsSince1970 * 1000 },
                     { "key", ACTIVATE_EVENT_KEY },
                     { "uuid", Guid.NewGuid() },

@@ -145,13 +145,26 @@ namespace OptimizelySDK.Event
                 return null;
             }
 
-            var decision = new Decision(impressionEvent.Experiment?.LayerId,
-                impressionEvent.Experiment?.Id ?? string.Empty,
-                impressionEvent.Variation?.Id,
+            // FSSDK-12813: Normalize decision-event identifiers uniformly across all
+            // decision types (experiment, feature test, rollout, holdout). The
+            // normalization MUST NOT log, warn, throw, drop, or defer event dispatch.
+            //   - campaign_id: if invalid (null/empty/non-numeric), substitute experiment_id.
+            //   - variation_id: if invalid, substitute null.
+            //   - entity_id (impression events): same rule as campaign_id; MUST equal
+            //     the normalized campaign_id byte-for-byte for the same impression event.
+            var experimentId = impressionEvent.Experiment?.Id ?? string.Empty;
+            var normalizedCampaignId = EventIdNormalizer.NormalizeCampaignId(
+                impressionEvent.Experiment?.LayerId, experimentId);
+            var normalizedVariationId = EventIdNormalizer.NormalizeVariationId(
+                impressionEvent.Variation?.Id);
+
+            var decision = new Decision(normalizedCampaignId,
+                experimentId,
+                normalizedVariationId,
                 impressionEvent.Metadata);
 
             var snapshotEvent = new SnapshotEvent.Builder().WithUUID(impressionEvent.UUID).
-                WithEntityId(impressionEvent.Experiment?.LayerId).
+                WithEntityId(normalizedCampaignId).
                 WithKey(ACTIVATE_EVENT_KEY).
                 WithTimeStamp(impressionEvent.Timestamp).
                 Build();
