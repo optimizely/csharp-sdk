@@ -2874,11 +2874,31 @@ namespace OptimizelySDK.Tests.EventTests
         }
 
         [Test]
-        public void TestNormalize_NonNumericLayerId_CampaignIdFallsBackToExperimentId()
+        public void TestNormalize_OpaqueLayerId_CampaignIdPassesThroughUnchanged()
         {
-            // FR-001/FR-002: campaign_id non-numeric -> experiment_id substituted.
+            // FSSDK-12813 (relaxed contract): campaign_id accepts any non-empty string,
+            // including opaque IDs like "default-12345" or "layer_abc". The
+            // experiment_id fallback fires ONLY when campaign_id is null or "".
             var impressionEvent = BuildImpressionEvent(
-                layerId: "not_numeric_layer",
+                layerId: "default-12345",
+                experimentId: "1111111111",
+                variationId: "7722370027",
+                ruleType: "feature-test");
+            var logEvent = EventFactory.CreateLogEvent(impressionEvent, Logger);
+
+            var decision = ExtractDecisionJson(logEvent);
+            Assert.AreEqual("default-12345", (string)decision["campaign_id"]);
+            Assert.AreEqual((string)decision["campaign_id"],
+                (string)ExtractEventJson(logEvent)["entity_id"],
+                "entity_id must equal campaign_id byte-for-byte");
+        }
+
+        [Test]
+        public void TestNormalize_EmptyLayerId_CampaignIdFallsBackToExperimentId()
+        {
+            // FR-001/FR-002: empty-string campaign_id -> experiment_id substituted.
+            var impressionEvent = BuildImpressionEvent(
+                layerId: string.Empty,
                 experimentId: "1111111111",
                 variationId: "7722370027",
                 ruleType: "feature-test");
@@ -2922,9 +2942,14 @@ namespace OptimizelySDK.Tests.EventTests
         [Test]
         public void TestNormalize_AppliedUniformlyAcrossRuleTypes()
         {
-            // FR-005: rule applies uniformly to ALL decision types. Same invalid
-            // inputs must produce byte-equivalent wire output regardless of
-            // rule_type (experiment, feature-test, rollout, holdout).
+            // FR-005: rule applies uniformly to ALL decision types. Same inputs
+            // must produce byte-equivalent wire output regardless of rule_type
+            // (experiment, feature-test, rollout, holdout).
+            //
+            // Under the FSSDK-12813 relaxed contract:
+            //   - opaque non-empty campaign_id ("layer_abc") passes through unchanged.
+            //   - non-numeric variation_id ("also_not_numeric") falls back to null
+            //     (variation_id retains the strict numeric-string contract).
             var ruleTypes = new[] { "experiment", "feature-test", "rollout", "holdout" };
             string firstCampaignId = null;
             Newtonsoft.Json.Linq.JTokenType firstVariationIdType =
@@ -2934,7 +2959,7 @@ namespace OptimizelySDK.Tests.EventTests
             foreach (var ruleType in ruleTypes)
             {
                 var impressionEvent = BuildImpressionEvent(
-                    layerId: "not_numeric",
+                    layerId: "layer_abc",
                     experimentId: "1111111111",
                     variationId: "also_not_numeric",
                     ruleType: ruleType);
@@ -2947,7 +2972,7 @@ namespace OptimizelySDK.Tests.EventTests
                 var variationIdType = decision["variation_id"].Type;
                 var entityId = (string)ev["entity_id"];
 
-                Assert.AreEqual("1111111111", campaignId, "rule_type=" + ruleType);
+                Assert.AreEqual("layer_abc", campaignId, "rule_type=" + ruleType);
                 Assert.AreEqual(Newtonsoft.Json.Linq.JTokenType.Null, variationIdType,
                     "rule_type=" + ruleType);
                 Assert.AreEqual(campaignId, entityId,
@@ -2968,6 +2993,32 @@ namespace OptimizelySDK.Tests.EventTests
                     Assert.AreEqual(firstEntityId, entityId,
                         "entity_id must be uniform across rule types");
                 }
+            }
+        }
+
+        [Test]
+        public void TestNormalize_NullLayerIdAppliedUniformlyAcrossRuleTypes()
+        {
+            // Companion to TestNormalize_AppliedUniformlyAcrossRuleTypes: exercises
+            // the fallback branch (null campaign_id) uniformly across rule types.
+            var ruleTypes = new[] { "experiment", "feature-test", "rollout", "holdout" };
+            foreach (var ruleType in ruleTypes)
+            {
+                var impressionEvent = BuildImpressionEvent(
+                    layerId: null,
+                    experimentId: "1111111111",
+                    variationId: null,
+                    ruleType: ruleType);
+                var logEvent = EventFactory.CreateLogEvent(impressionEvent, Logger);
+
+                var decision = ExtractDecisionJson(logEvent);
+                var ev = ExtractEventJson(logEvent);
+                Assert.AreEqual("1111111111", (string)decision["campaign_id"],
+                    "rule_type=" + ruleType);
+                Assert.AreEqual((string)decision["campaign_id"], (string)ev["entity_id"],
+                    "entity_id must equal campaign_id (rule_type=" + ruleType + ")");
+                Assert.AreEqual(Newtonsoft.Json.Linq.JTokenType.Null,
+                    decision["variation_id"].Type, "rule_type=" + ruleType);
             }
         }
 
