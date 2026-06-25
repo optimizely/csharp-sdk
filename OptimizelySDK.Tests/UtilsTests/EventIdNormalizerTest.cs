@@ -20,7 +20,7 @@ using OptimizelySDK.Utils;
 namespace OptimizelySDK.Tests.UtilsTests
 {
     /// <summary>
-    /// Unit tests for FSSDK-12813 decision-event id normalization rules.
+    /// Unit tests for decision-event id normalization rules.
     ///
     /// Two distinct validity definitions are exercised here:
     ///   - IsNonEmptyString: campaign_id / entity_id contract (any non-empty string OK,
@@ -41,8 +41,8 @@ namespace OptimizelySDK.Tests.UtilsTests
         [Test]
         public void IsNonEmptyString_OpaqueString_ReturnsTrue()
         {
-            // FSSDK-12813 relaxed contract: any non-empty string is valid for
-            // campaign_id / entity_id. Opaque and prefixed IDs pass through.
+            // Any non-empty string is valid for campaign_id / entity_id.
+            // Opaque and prefixed IDs pass through.
             Assert.IsTrue(EventIdNormalizer.IsNonEmptyString("default-12345"));
             Assert.IsTrue(EventIdNormalizer.IsNonEmptyString("layer_abc"));
             Assert.IsTrue(EventIdNormalizer.IsNonEmptyString("abc"));
@@ -88,7 +88,7 @@ namespace OptimizelySDK.Tests.UtilsTests
         [Test]
         public void IsNumericIdString_LeadingZeros_ReturnsTrue()
         {
-            // Per FSSDK-12813 spec: leading zeros are allowed.
+            // Leading zeros are allowed.
             Assert.IsTrue(EventIdNormalizer.IsNumericIdString("0001"));
             Assert.IsTrue(EventIdNormalizer.IsNumericIdString("0000"));
         }
@@ -147,8 +147,8 @@ namespace OptimizelySDK.Tests.UtilsTests
         [Test]
         public void NormalizeCampaignId_OpaqueString_ReturnsAsIs()
         {
-            // FSSDK-12813 relaxed contract: any non-empty string is valid for
-            // campaign_id. Opaque IDs pass through unchanged — no fallback.
+            // Any non-empty string is valid for campaign_id. Opaque IDs
+            // pass through unchanged — no fallback.
             Assert.AreEqual("default-12345",
                 EventIdNormalizer.NormalizeCampaignId("default-12345", "1111111111"));
             Assert.AreEqual("layer_abc",
@@ -256,9 +256,7 @@ namespace OptimizelySDK.Tests.UtilsTests
         {
             // FR-009: entity_id (impression events) uses the same normalization rule
             // as campaign_id. Callers should pass the SAME inputs to NormalizeCampaignId
-            // for both fields to ensure byte-equivalence.
-            //
-            // Under the relaxed contract (FSSDK-12813), non-empty opaque/whitespace
+            // for both fields to ensure byte-equivalence. Non-empty opaque/whitespace
             // strings pass through; only null and "" trigger the experiment_id fallback.
             var inputs = new[] {
                 new { CampaignId = "7719770039", ExperimentId = "1111111111" },

@@ -767,9 +767,8 @@ namespace OptimizelySDK.Tests.EventTests
                                             {
                                                 new Dictionary<string, object>
                                                 {
-                                                    // FSSDK-12813: campaign_id was previously null when LayerId
-                                                    // was missing; the normalizer substitutes experiment_id
-                                                    // (string.Empty here). variation_id stays null when invalid.
+                                                    // campaign_id falls back to experiment_id (string.Empty
+                                                    // here) when LayerId is missing.
                                                     { "campaign_id", string.Empty },
                                                     { "experiment_id", string.Empty },
                                                     { "variation_id", null },
@@ -791,8 +790,8 @@ namespace OptimizelySDK.Tests.EventTests
                                             {
                                                 new Dictionary<string, object>
                                                 {
-                                                    // FSSDK-12813: entity_id (impression-event) follows the same
-                                                    // rule as campaign_id and must match it byte-for-byte.
+                                                    // entity_id mirrors campaign_id byte-for-byte for
+                                                    // impression events.
                                                     { "entity_id", string.Empty },
                                                     { "timestamp", timeStamp },
                                                     { "uuid", guid },
@@ -2766,7 +2765,7 @@ namespace OptimizelySDK.Tests.EventTests
         }
 
         // ======================================================================
-        // FSSDK-12813: Decision-event id normalization end-to-end tests.
+        // Decision-event id normalization end-to-end tests.
         //
         // These tests build ImpressionEvent payloads directly (bypassing
         // ProjectConfig lookups) so we can exercise the normalization branches
@@ -2837,7 +2836,7 @@ namespace OptimizelySDK.Tests.EventTests
         [Test]
         public void TestNormalize_ValidNumericIds_PassThroughUnchanged()
         {
-            // FSSDK-12813 happy path: valid numeric IDs flow through unchanged.
+            // Happy path: valid numeric IDs flow through unchanged.
             var impressionEvent = BuildImpressionEvent(
                 layerId: "7719770039",
                 experimentId: "1111111111",
@@ -2876,9 +2875,9 @@ namespace OptimizelySDK.Tests.EventTests
         [Test]
         public void TestNormalize_OpaqueLayerId_CampaignIdPassesThroughUnchanged()
         {
-            // FSSDK-12813 (relaxed contract): campaign_id accepts any non-empty string,
-            // including opaque IDs like "default-12345" or "layer_abc". The
-            // experiment_id fallback fires ONLY when campaign_id is null or "".
+            // campaign_id accepts any non-empty string, including opaque IDs
+            // like "default-12345" or "layer_abc". The experiment_id fallback
+            // fires ONLY when campaign_id is null or "".
             var impressionEvent = BuildImpressionEvent(
                 layerId: "default-12345",
                 experimentId: "1111111111",
@@ -2942,14 +2941,11 @@ namespace OptimizelySDK.Tests.EventTests
         [Test]
         public void TestNormalize_AppliedUniformlyAcrossRuleTypes()
         {
-            // FR-005: rule applies uniformly to ALL decision types. Same inputs
-            // must produce byte-equivalent wire output regardless of rule_type
-            // (experiment, feature-test, rollout, holdout).
-            //
-            // Under the FSSDK-12813 relaxed contract:
-            //   - opaque non-empty campaign_id ("layer_abc") passes through unchanged.
-            //   - non-numeric variation_id ("also_not_numeric") falls back to null
-            //     (variation_id retains the strict numeric-string contract).
+            // Rule applies uniformly to ALL decision types. Same inputs must
+            // produce byte-equivalent wire output regardless of rule_type
+            // (experiment, feature-test, rollout, holdout). Opaque non-empty
+            // campaign_id ("layer_abc") passes through; non-numeric
+            // variation_id falls back to null (strict numeric-string contract).
             var ruleTypes = new[] { "experiment", "feature-test", "rollout", "holdout" };
             string firstCampaignId = null;
             Newtonsoft.Json.Linq.JTokenType firstVariationIdType =

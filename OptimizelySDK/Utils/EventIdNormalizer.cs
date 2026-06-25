@@ -18,8 +18,8 @@ namespace OptimizelySDK.Utils
 {
     /// <summary>
     /// Normalizes decision-event identifier fields (campaign_id, variation_id, entity_id)
-    /// per FSSDK-12813 so that the wire output is byte-equivalent across SDKs for the
-    /// same input regardless of decision type (experiment, feature test, rollout, holdout).
+    /// so that the wire output is byte-equivalent across SDKs for the same input
+    /// regardless of decision type (experiment, feature test, rollout, holdout).
     ///
     /// Two distinct validity definitions apply:
     ///

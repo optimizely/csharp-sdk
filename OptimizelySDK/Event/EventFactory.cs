@@ -145,15 +145,6 @@ namespace OptimizelySDK.Event
                 return null;
             }
 
-            // FSSDK-12813: Normalize decision-event identifiers uniformly across all
-            // decision types (experiment, feature test, rollout, holdout). The
-            // normalization MUST NOT log, warn, throw, drop, or defer event dispatch.
-            //   - campaign_id: if not a non-empty string (null or ""), substitute
-            //     experiment_id. Any non-empty string value passes through unchanged
-            //     (IDs may be opaque, e.g. "default-12345", "layer_abc").
-            //   - variation_id: if not a non-empty numeric string, substitute null.
-            //   - entity_id (impression events): same rule as campaign_id; MUST equal
-            //     the normalized campaign_id byte-for-byte for the same impression event.
             var experimentId = impressionEvent.Experiment?.Id ?? string.Empty;
             var normalizedCampaignId = EventIdNormalizer.NormalizeCampaignId(
                 impressionEvent.Experiment?.LayerId, experimentId);

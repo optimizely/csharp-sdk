@@ -130,11 +130,6 @@ namespace OptimizelySDK.Event.Builder
         {
             var impressionEvent = new Dictionary<string, object>();
 
-            // FSSDK-12813: Normalize campaign_id, variation_id, and entity_id (impression
-            // events only) uniformly across all decision types. Same rules as EventFactory:
-            // campaign_id/entity_id fall back to experiment_id only when null or "" (any
-            // other non-empty string passes through); variation_id keeps the strict
-            // numeric-string contract and falls back to null otherwise.
             var experimentId = experiment?.Id ?? string.Empty;
             var normalizedCampaignId = EventIdNormalizer.NormalizeCampaignId(
                 experiment?.LayerId, experimentId);
