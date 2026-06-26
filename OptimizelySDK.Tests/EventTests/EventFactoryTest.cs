@@ -2805,7 +2805,7 @@ namespace OptimizelySDK.Tests.EventTests
                 .WithExperiment(experiment)
                 .WithVariation(variation)
                 .WithMetadata(metadata)
-                .WithUserId(TestUserId)
+                .WithUserId("testUserId")
                 .WithVisitorAttributes(new OptimizelySDK.Event.Entity.VisitorAttribute[0])
                 .Build();
         }
