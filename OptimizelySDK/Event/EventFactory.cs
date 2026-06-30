@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2019-2020, Optimizely
+ * Copyright 2019-2020, 2026, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -145,13 +145,19 @@ namespace OptimizelySDK.Event
                 return null;
             }
 
-            var decision = new Decision(impressionEvent.Experiment?.LayerId,
-                impressionEvent.Experiment?.Id ?? string.Empty,
-                impressionEvent.Variation?.Id,
+            var experimentId = impressionEvent.Experiment?.Id ?? string.Empty;
+            var normalizedCampaignId = EventIdNormalizer.NormalizeCampaignId(
+                impressionEvent.Experiment?.LayerId, experimentId);
+            var normalizedVariationId = EventIdNormalizer.NormalizeVariationId(
+                impressionEvent.Variation?.Id);
+
+            var decision = new Decision(normalizedCampaignId,
+                experimentId,
+                normalizedVariationId,
                 impressionEvent.Metadata);
 
             var snapshotEvent = new SnapshotEvent.Builder().WithUUID(impressionEvent.UUID).
-                WithEntityId(impressionEvent.Experiment?.LayerId).
+                WithEntityId(normalizedCampaignId).
                 WithKey(ACTIVATE_EVENT_KEY).
                 WithTimeStamp(impressionEvent.Timestamp).
                 Build();

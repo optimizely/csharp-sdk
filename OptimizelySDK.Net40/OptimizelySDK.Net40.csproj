@@ -180,6 +180,9 @@
     <Compile Include="..\OptimizelySDK\Utils\ConditionParser.cs">
       <Link>Utils\ConditionParser.cs</Link>
     </Compile>
+    <Compile Include="..\OptimizelySDK\Utils\EventIdNormalizer.cs">
+      <Link>Utils\EventIdNormalizer.cs</Link>
+    </Compile>
     <Compile Include="..\OptimizelySDK\Utils\EventTagUtils.cs">
       <Link>Utils\EventTagUtils.cs</Link>
     </Compile>

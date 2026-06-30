@@ -1,6 +1,6 @@
 ﻿/**
  *
- *    Copyright 2019-2020, Optimizely and contributors
+ *    Copyright 2019-2020, 2026, Optimizely and contributors
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ using OptimizelySDK.Config;
 using OptimizelySDK.Entity;
 using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Event;
+using OptimizelySDK.Event.Entity;
 using OptimizelySDK.Logger;
 using OptimizelySDK.Utils;
 
@@ -767,7 +768,9 @@ namespace OptimizelySDK.Tests.EventTests
                                             {
                                                 new Dictionary<string, object>
                                                 {
-                                                    { "campaign_id", null },
+                                                    // campaign_id falls back to experiment_id (string.Empty
+                                                    // here) when LayerId is missing.
+                                                    { "campaign_id", string.Empty },
                                                     { "experiment_id", string.Empty },
                                                     { "variation_id", null },
                                                     {
@@ -788,7 +791,9 @@ namespace OptimizelySDK.Tests.EventTests
                                             {
                                                 new Dictionary<string, object>
                                                 {
-                                                    { "entity_id", null },
+                                                    // entity_id mirrors campaign_id byte-for-byte for
+                                                    // impression events.
+                                                    { "entity_id", string.Empty },
                                                     { "timestamp", timeStamp },
                                                     { "uuid", guid },
                                                     { "key", "campaign_activated" },
@@ -2758,6 +2763,281 @@ namespace OptimizelySDK.Tests.EventTests
             TestData.ChangeGUIDAndTimeStamp(expectedEvent.Params, conversionEvent.Timestamp,
                 Guid.Parse(conversionEvent.UUID));
             Assert.IsTrue(TestData.CompareObjects(expectedEvent, logEvent));
+        }
+
+        // ======================================================================
+        // Decision-event id normalization end-to-end tests.
+        //
+        // These tests build ImpressionEvent payloads directly (bypassing
+        // ProjectConfig lookups) so we can exercise the normalization branches
+        // for each invalid-input variant uniformly across decision types
+        // (experiment, feature test, rollout, holdout) without per-type
+        // branching in the normalization path.
+        // ======================================================================
+
+        private static OptimizelySDK.Event.Entity.EventContext NormalizationTestEventContext()
+        {
+            return new OptimizelySDK.Event.Entity.EventContext.Builder()
+                .WithProjectId("7720880029")
+                .WithAccountId("1592310167")
+                .WithAnonymizeIP(false)
+                .WithRevision("15")
+                .Build();
+        }
+
+        private static ImpressionEvent BuildImpressionEvent(
+            string layerId, string experimentId, string variationId, string ruleType)
+        {
+            var experiment = new Experiment
+            {
+                Id = experimentId,
+                Key = "test_experiment",
+                LayerId = layerId,
+            };
+            var variation = variationId == null
+                ? null
+                : new Variation { Id = variationId, Key = "v" };
+            var metadata = new OptimizelySDK.Event.Entity.DecisionMetadata(
+                "test_flag", "test_experiment", ruleType, variation?.Key ?? string.Empty, true);
+
+            return new ImpressionEvent.Builder()
+                .WithEventContext(NormalizationTestEventContext())
+                .WithExperiment(experiment)
+                .WithVariation(variation)
+                .WithMetadata(metadata)
+                .WithUserId("testUserId")
+                .WithVisitorAttributes(new OptimizelySDK.Event.Entity.VisitorAttribute[0])
+                .Build();
+        }
+
+        // Re-serialize the LogEvent params to a JObject so we can navigate without
+        // having to know whether the underlying values are object[], JArray, Snapshot,
+        // or Dictionary instances. This mirrors what the wire payload looks like.
+        private static Newtonsoft.Json.Linq.JObject AsJson(LogEvent logEvent)
+        {
+            var json = Newtonsoft.Json.JsonConvert.SerializeObject(logEvent.Params);
+            return Newtonsoft.Json.Linq.JObject.Parse(json);
+        }
+
+        private static Newtonsoft.Json.Linq.JObject ExtractDecisionJson(LogEvent logEvent)
+        {
+            var root = AsJson(logEvent);
+            return (Newtonsoft.Json.Linq.JObject)
+                root["visitors"][0]["snapshots"][0]["decisions"][0];
+        }
+
+        private static Newtonsoft.Json.Linq.JObject ExtractEventJson(LogEvent logEvent)
+        {
+            var root = AsJson(logEvent);
+            return (Newtonsoft.Json.Linq.JObject)
+                root["visitors"][0]["snapshots"][0]["events"][0];
+        }
+
+
+        [Test]
+        public void TestNormalize_ValidNumericIds_PassThroughUnchanged()
+        {
+            // Happy path: valid numeric IDs flow through unchanged.
+            var impressionEvent = BuildImpressionEvent(
+                layerId: "7719770039",
+                experimentId: "1111111111",
+                variationId: "7722370027",
+                ruleType: "experiment");
+            var logEvent = EventFactory.CreateLogEvent(impressionEvent, Logger);
+
+            var decision = ExtractDecisionJson(logEvent);
+            Assert.AreEqual("7719770039", (string)decision["campaign_id"]);
+            Assert.AreEqual("1111111111", (string)decision["experiment_id"]);
+            Assert.AreEqual("7722370027", (string)decision["variation_id"]);
+
+            var ev = ExtractEventJson(logEvent);
+            Assert.AreEqual("7719770039", (string)ev["entity_id"]);
+            Assert.AreEqual((string)decision["campaign_id"], (string)ev["entity_id"],
+                "entity_id must equal campaign_id byte-for-byte");
+        }
+
+        [Test]
+        public void TestNormalize_NullLayerId_CampaignIdFallsBackToExperimentId()
+        {
+            // FR-001/FR-002: campaign_id null -> experiment_id substituted.
+            var impressionEvent = BuildImpressionEvent(
+                layerId: null,
+                experimentId: "1111111111",
+                variationId: "7722370027",
+                ruleType: "experiment");
+            var logEvent = EventFactory.CreateLogEvent(impressionEvent, Logger);
+
+            var decision = ExtractDecisionJson(logEvent);
+            Assert.AreEqual("1111111111", (string)decision["campaign_id"]);
+            Assert.AreEqual((string)decision["campaign_id"],
+                (string)ExtractEventJson(logEvent)["entity_id"]);
+        }
+
+        [Test]
+        public void TestNormalize_OpaqueLayerId_CampaignIdPassesThroughUnchanged()
+        {
+            // campaign_id accepts any non-empty string, including opaque IDs
+            // like "default-12345" or "layer_abc". The experiment_id fallback
+            // fires ONLY when campaign_id is null or "".
+            var impressionEvent = BuildImpressionEvent(
+                layerId: "default-12345",
+                experimentId: "1111111111",
+                variationId: "7722370027",
+                ruleType: "feature-test");
+            var logEvent = EventFactory.CreateLogEvent(impressionEvent, Logger);
+
+            var decision = ExtractDecisionJson(logEvent);
+            Assert.AreEqual("default-12345", (string)decision["campaign_id"]);
+            Assert.AreEqual((string)decision["campaign_id"],
+                (string)ExtractEventJson(logEvent)["entity_id"],
+                "entity_id must equal campaign_id byte-for-byte");
+        }
+
+        [Test]
+        public void TestNormalize_EmptyLayerId_CampaignIdFallsBackToExperimentId()
+        {
+            // FR-001/FR-002: empty-string campaign_id -> experiment_id substituted.
+            var impressionEvent = BuildImpressionEvent(
+                layerId: string.Empty,
+                experimentId: "1111111111",
+                variationId: "7722370027",
+                ruleType: "feature-test");
+            var logEvent = EventFactory.CreateLogEvent(impressionEvent, Logger);
+
+            var decision = ExtractDecisionJson(logEvent);
+            Assert.AreEqual("1111111111", (string)decision["campaign_id"]);
+            Assert.AreEqual((string)decision["campaign_id"],
+                (string)ExtractEventJson(logEvent)["entity_id"]);
+        }
+
+        [Test]
+        public void TestNormalize_NonNumericVariationId_VariationIdBecomesNull()
+        {
+            // FR-003/FR-004: variation_id non-numeric -> null.
+            var impressionEvent = BuildImpressionEvent(
+                layerId: "7719770039",
+                experimentId: "1111111111",
+                variationId: "variation_a",
+                ruleType: "experiment");
+            var logEvent = EventFactory.CreateLogEvent(impressionEvent, Logger);
+
+            var decision = ExtractDecisionJson(logEvent);
+            Assert.AreEqual(Newtonsoft.Json.Linq.JTokenType.Null, decision["variation_id"].Type);
+        }
+
+        [Test]
+        public void TestNormalize_EmptyVariationId_VariationIdBecomesNull()
+        {
+            var impressionEvent = BuildImpressionEvent(
+                layerId: "7719770039",
+                experimentId: "1111111111",
+                variationId: string.Empty,
+                ruleType: "experiment");
+            var logEvent = EventFactory.CreateLogEvent(impressionEvent, Logger);
+
+            var decision = ExtractDecisionJson(logEvent);
+            Assert.AreEqual(Newtonsoft.Json.Linq.JTokenType.Null, decision["variation_id"].Type);
+        }
+
+        [Test]
+        public void TestNormalize_AppliedUniformlyAcrossRuleTypes()
+        {
+            // Rule applies uniformly to ALL decision types. Same inputs must
+            // produce byte-equivalent wire output regardless of rule_type
+            // (experiment, feature-test, rollout, holdout). Opaque non-empty
+            // campaign_id ("layer_abc") passes through; non-numeric
+            // variation_id falls back to null (strict numeric-string contract).
+            var ruleTypes = new[] { "experiment", "feature-test", "rollout", "holdout" };
+            string firstCampaignId = null;
+            Newtonsoft.Json.Linq.JTokenType firstVariationIdType =
+                Newtonsoft.Json.Linq.JTokenType.None;
+            string firstEntityId = null;
+
+            foreach (var ruleType in ruleTypes)
+            {
+                var impressionEvent = BuildImpressionEvent(
+                    layerId: "layer_abc",
+                    experimentId: "1111111111",
+                    variationId: "also_not_numeric",
+                    ruleType: ruleType);
+                var logEvent = EventFactory.CreateLogEvent(impressionEvent, Logger);
+
+                var decision = ExtractDecisionJson(logEvent);
+                var ev = ExtractEventJson(logEvent);
+
+                var campaignId = (string)decision["campaign_id"];
+                var variationIdType = decision["variation_id"].Type;
+                var entityId = (string)ev["entity_id"];
+
+                Assert.AreEqual("layer_abc", campaignId, "rule_type=" + ruleType);
+                Assert.AreEqual(Newtonsoft.Json.Linq.JTokenType.Null, variationIdType,
+                    "rule_type=" + ruleType);
+                Assert.AreEqual(campaignId, entityId,
+                    "entity_id must equal campaign_id (rule_type=" + ruleType + ")");
+
+                if (firstCampaignId == null)
+                {
+                    firstCampaignId = campaignId;
+                    firstVariationIdType = variationIdType;
+                    firstEntityId = entityId;
+                }
+                else
+                {
+                    Assert.AreEqual(firstCampaignId, campaignId,
+                        "campaign_id must be uniform across rule types");
+                    Assert.AreEqual(firstVariationIdType, variationIdType,
+                        "variation_id must be uniform across rule types");
+                    Assert.AreEqual(firstEntityId, entityId,
+                        "entity_id must be uniform across rule types");
+                }
+            }
+        }
+
+        [Test]
+        public void TestNormalize_NullLayerIdAppliedUniformlyAcrossRuleTypes()
+        {
+            // Companion to TestNormalize_AppliedUniformlyAcrossRuleTypes: exercises
+            // the fallback branch (null campaign_id) uniformly across rule types.
+            var ruleTypes = new[] { "experiment", "feature-test", "rollout", "holdout" };
+            foreach (var ruleType in ruleTypes)
+            {
+                var impressionEvent = BuildImpressionEvent(
+                    layerId: null,
+                    experimentId: "1111111111",
+                    variationId: null,
+                    ruleType: ruleType);
+                var logEvent = EventFactory.CreateLogEvent(impressionEvent, Logger);
+
+                var decision = ExtractDecisionJson(logEvent);
+                var ev = ExtractEventJson(logEvent);
+                Assert.AreEqual("1111111111", (string)decision["campaign_id"],
+                    "rule_type=" + ruleType);
+                Assert.AreEqual((string)decision["campaign_id"], (string)ev["entity_id"],
+                    "entity_id must equal campaign_id (rule_type=" + ruleType + ")");
+                Assert.AreEqual(Newtonsoft.Json.Linq.JTokenType.Null,
+                    decision["variation_id"].Type, "rule_type=" + ruleType);
+            }
+        }
+
+        [Test]
+        public void TestNormalize_DoesNotDropEventDispatch()
+        {
+            // FR-006: do not drop, defer, or fail event dispatch.
+            // Even when every id is invalid, a LogEvent must still be produced.
+            var impressionEvent = BuildImpressionEvent(
+                layerId: null,
+                experimentId: string.Empty,
+                variationId: null,
+                ruleType: "rollout");
+            var logEvent = EventFactory.CreateLogEvent(impressionEvent, Logger);
+
+            Assert.IsNotNull(logEvent, "Event dispatch must NOT be dropped during normalization");
+            var decision = ExtractDecisionJson(logEvent);
+            Assert.AreEqual(string.Empty, (string)decision["campaign_id"]);
+            Assert.AreEqual(string.Empty, (string)decision["experiment_id"]);
+            Assert.AreEqual(Newtonsoft.Json.Linq.JTokenType.Null, decision["variation_id"].Type);
+            Assert.AreEqual(string.Empty,
+                (string)ExtractEventJson(logEvent)["entity_id"]);
         }
     }
 }

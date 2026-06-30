@@ -60,6 +60,7 @@
 			<Compile Include="..\OptimizelySDK\Logger\NoOpLogger.cs" />
 			<Compile Include="..\OptimizelySDK\Notifications\NotificationCenter.cs" />
 			<Compile Include="..\OptimizelySDK\Optimizely.cs" />
+			<Compile Include="..\OptimizelySDK\Utils\EventIdNormalizer.cs" />
 			<Compile Include="..\OptimizelySDK\Utils\EventTagUtils.cs" />
 			<Compile Include="..\OptimizelySDK\Utils\Validator.cs" />
 			<Compile Include=".\Properties\AssemblyInfo.cs" />
