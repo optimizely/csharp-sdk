@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2017-2019, Optimizely
+ * Copyright 2017-2019, 2026, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -130,13 +130,18 @@ namespace OptimizelySDK.Event.Builder
         {
             var impressionEvent = new Dictionary<string, object>();
 
+            var experimentId = experiment?.Id ?? string.Empty;
+            var normalizedCampaignId = EventIdNormalizer.NormalizeCampaignId(
+                experiment?.LayerId, experimentId);
+            var normalizedVariationId = EventIdNormalizer.NormalizeVariationId(variationId);
+
             var decisions = new object[]
             {
                 new Dictionary<string, object>
                 {
-                    { Params.CAMPAIGN_ID, experiment?.LayerId },
-                    { Params.EXPERIMENT_ID, experiment?.Id ?? string.Empty },
-                    { Params.VARIATION_ID, variationId },
+                    { Params.CAMPAIGN_ID, normalizedCampaignId },
+                    { Params.EXPERIMENT_ID, experimentId },
+                    { Params.VARIATION_ID, normalizedVariationId },
                 },
             };
 
@@ -145,7 +150,7 @@ namespace OptimizelySDK.Event.Builder
             {
                 new Dictionary<string, object>
                 {
-                    { "entity_id", experiment?.LayerId },
+                    { "entity_id", normalizedCampaignId },
                     { "timestamp", DateTimeUtils.SecondsSince1970 * 1000 },
                     { "key", ACTIVATE_EVENT_KEY },
                     { "uuid", Guid.NewGuid() },
