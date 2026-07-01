@@ -248,7 +248,7 @@ namespace OptimizelySDK.Cmab
                 if (attributeIdMap.TryGetValue(attributeId, out var attribute) &&
                     userAttributes.TryGetValue(attribute.Key, out var value))
                 {
-                    filtered[attribute.Key] = value;
+                    filtered[attribute.Id] = value;
                 }
             }
 

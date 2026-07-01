@@ -271,8 +271,8 @@ namespace OptimizelySDK.Tests.CmabTests
                     TEST_EXPERIMENT_ID,
                     TEST_USER_ID,
                     It.Is<IDictionary<string, object>>(attrs =>
-                        attrs.Count == 1 && attrs.ContainsKey(AGE_ATTRIBUTE_KEY) &&
-                        (int)attrs[AGE_ATTRIBUTE_KEY] == 25),
+                        attrs.Count == 1 && attrs.ContainsKey("age_attr_id") &&
+                        (int)attrs["age_attr_id"] == 25),
                     It.IsAny<string>(),
                     It.IsAny<TimeSpan?>()))
                 .Returns(VARIATION_A_ID);
@@ -300,7 +300,7 @@ namespace OptimizelySDK.Tests.CmabTests
                     TEST_EXPERIMENT_ID,
                     TEST_USER_ID,
                     It.Is<IDictionary<string, object>>(attrs =>
-                        attrs.Count == 1 && (int)attrs[AGE_ATTRIBUTE_KEY] == 25),
+                        attrs.Count == 1 && (int)attrs["age_attr_id"] == 25),
                     It.IsAny<string>(),
                     It.IsAny<TimeSpan?>()),
                 Times.Once);
@@ -334,7 +334,7 @@ namespace OptimizelySDK.Tests.CmabTests
             cmabClientMock.Setup(c => c.FetchDecision(
                     TEST_EXPERIMENT_ID,
                     TEST_USER_ID,
-                    It.Is<IDictionary<string, object>>(attrs => attrs.ContainsKey(AGE_ATTRIBUTE_KEY)),
+                    It.Is<IDictionary<string, object>>(attrs => attrs.ContainsKey("age_attr_id")),
                     It.IsAny<string>(),
                     It.IsAny<TimeSpan?>()))
                 .Returns(VARIATION_A_ID);
@@ -364,7 +364,7 @@ namespace OptimizelySDK.Tests.CmabTests
                     TEST_EXPERIMENT_ID,
                     TEST_USER_ID,
                     It.Is<IDictionary<string, object>>(attrs =>
-                        attrs.ContainsKey(AGE_ATTRIBUTE_KEY) && (int)attrs[AGE_ATTRIBUTE_KEY] == 25),
+                        attrs.ContainsKey("age_attr_id") && (int)attrs["age_attr_id"] == 25),
                     It.IsAny<string>(),
                     It.IsAny<TimeSpan?>()),
                 Times.Once);
@@ -372,7 +372,7 @@ namespace OptimizelySDK.Tests.CmabTests
                     TEST_EXPERIMENT_ID,
                     TEST_USER_ID,
                     It.Is<IDictionary<string, object>>(attrs =>
-                        attrs.ContainsKey(AGE_ATTRIBUTE_KEY) && (int)attrs[AGE_ATTRIBUTE_KEY] == 30),
+                        attrs.ContainsKey("age_attr_id") && (int)attrs["age_attr_id"] == 30),
                     It.IsAny<string>(),
                     It.IsAny<TimeSpan?>()),
                 Times.Once);
@@ -489,8 +489,8 @@ namespace OptimizelySDK.Tests.CmabTests
                     TEST_EXPERIMENT_ID,
                     TEST_USER_ID,
                     It.Is<IDictionary<string, object>>(attrs =>
-                        attrs.Count == 2 && (int)attrs["age"] == 25 &&
-                        (string)attrs["location"] == "USA" &&
+                        attrs.Count == 2 && (int)attrs["age_attr_id"] == 25 &&
+                        (string)attrs["location_attr_id"] == "USA" &&
                         !attrs.ContainsKey("extra")),
                     It.IsAny<string>(),
                     It.IsAny<TimeSpan?>()))
