@@ -144,67 +144,9 @@ jobs:
           if-no-files-found: error
           path: ./**/bin/Release/**/Optimizely*.dll
 
-  sign:
-    name: Send DLLs for signing
-    needs: [ variables, buildFrameworkVersions, buildStandard16, buildStandard20 ]
-    runs-on: ubuntu-latest
-    env:
-      # TODO: Replace actual values
-      SIGNING_SERVER_PRIVATE_KEY: ${{ secrets.SIGNING_SERVER_PRIVATE_KEY }}
-      SIGNING_SERVER_HOST: ${{ secrets.SIGNING_SERVER_HOST }}
-      SIGNING_SERVER_UPLOAD_PATH: /path/to/UPLOAD/directory
-      SIGNING_SERVER_DOWNLOAD_PATH: /path/to/DOWNLOAD/directory
-    steps:
-      # TODO: Remove this when we're ready to automate 
-      - name: Temporarily halt progress
-        run: exit 1
-      - name: Download Framework DLLs
-        uses: actions/download-artifact@v4
-        with:
-          name: unsigned-dlls-framework
-          path: ./unsigned-dlls
-      - name: Download NetStandard 1.6 DLLs
-        uses: actions/download-artifact@v4
-        with:
-          name: unsigned-dlls-netstandard16
-          path: ./unsigned-dlls
-      - name: Download NetStandard 2.0 DLLs
-        uses: actions/download-artifact@v4
-        with:
-          name: unsigned-dlls-netstandard20
-          path: ./unsigned-dlls
-      - name: Setup SSH
-        uses: shimataro/ssh-key-action@v2
-        with:
-          key: $SIGNING_SERVER_PRIVATE_KEY
-      - name: Send files to signing server
-        run: scp -r ./unsigned-dlls $SIGNING_SERVER_HOST:$SIGNING_SERVER_UPLOAD_PATH
-      - name: Wait for artifact to be published
-        run: |
-          for i in {1..60}; do
-              # Replace with actual path
-              if ssh $SIGNING_SERVER_HOST "ls $SIGNING_SERVER_DOWNLOAD_PATH"; then
-              exit 0
-              fi
-              sleep 10
-          done
-          exit 1
-      - name: Download signed files
-        run: |
-          mkdir ./signed-dlls
-          scp -r $SIGNING_SERVER_HOST:$SIGNING_SERVER_DOWNLOAD_PATH ./signed-dlls
-      - name: Delete signed files from server
-        run: ssh $SIGNING_SERVER_HOST "rm -rf $SIGNING_SERVER_DOWNLOAD_PATH/*"
-      - name: Upload signed files
-        uses: actions/upload-artifact@v4
-        with:
-          name: signed-dlls
-          if-no-files-found: error
-          path: ./signed-dlls
-
   pack:
     name: Pack NuGet package
-    needs: [ variables, sign ]
+    needs: [ variables, buildFrameworkVersions, buildStandard16, buildStandard20 ]
     runs-on: ubuntu-latest
     env:
       VERSION: ${{ needs.variables.outputs.semanticVersion }}
@@ -217,14 +159,24 @@ jobs:
         run: |
           sudo apt update
           sudo apt install -y mono-devel
-      - name: Download NuGet files
+      - name: Download Framework DLLs
         uses: actions/download-artifact@v4
         with:
-          name: signed-dlls
-          path: ./signed-dlls
+          name: unsigned-dlls-framework
+          path: ./dlls
+      - name: Download NetStandard 1.6 DLLs
+        uses: actions/download-artifact@v4
+        with:
+          name: unsigned-dlls-netstandard16
+          path: ./dlls
+      - name: Download NetStandard 2.0 DLLs
+        uses: actions/download-artifact@v4
+        with:
+          name: unsigned-dlls-netstandard20
+          path: ./dlls
       - name: Organize files
         run: |
-          pushd ./signed-dlls
+          pushd ./dlls
           # Move all dlls to the root directory
           find . -type f -name "*.dll" -exec mv {} .
           popd
@@ -232,11 +184,11 @@ jobs:
           mkdir -p nuget/lib/net35/ nuget/lib/net40/ nuget/lib/net45/ nuget/lib/netstandard1.6/ nuget/lib/netstandard2.0/
           pushd ./nuget
           # Move files to directories
-          mv ../signed-dlls/OptimizelySDK.Net35.dll lib/net35/
-          mv ../signed-dlls/OptimizelySDK.Net40.dll lib/net40/
-          mv ../signed-dlls/OptimizelySDK.dll lib/net45/
-          mv ../signed-dlls/OptimizelySDK.NetStandard16.dll lib/netstandard1.6/
-          mv ../signed-dlls/OptimizelySDK.NetStandard20.dll lib/netstandard2.0/
+          mv ../dlls/OptimizelySDK.Net35.dll lib/net35/
+          mv ../dlls/OptimizelySDK.Net40.dll lib/net40/
+          mv ../dlls/OptimizelySDK.dll lib/net45/
+          mv ../dlls/OptimizelySDK.NetStandard16.dll lib/netstandard1.6/
+          mv ../dlls/OptimizelySDK.NetStandard20.dll lib/netstandard2.0/
           popd
       - name: Create nuspec
         # Uses env.VERSION in OptimizelySDK.nuspec.template
@@ -259,8 +211,8 @@ jobs:
     name: Publish package to NuGet after reviewing the artifact
     needs: [ variables, pack ]
     runs-on: ubuntu-latest
-    # Review the `nuget-package` artifact ensuring the dlls are 
-    # organized and signed before approving.
+    # Review the `nuget-package` artifact ensuring the dlls are
+    # organized before approving.
     environment: 'i-reviewed-nuget-package-artifact'
     env:
       VERSION: ${{ needs.variables.outputs.semanticVersion }}
