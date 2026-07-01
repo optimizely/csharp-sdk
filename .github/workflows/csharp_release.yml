@@ -178,7 +178,7 @@ jobs:
         run: |
           pushd ./dlls
           # Move all dlls to the root directory
-          find . -type f -name "*.dll" -exec mv {} .
+          find . -type f -name "*.dll" | xargs -I{} mv {} .
           popd
           # Create directories
           mkdir -p nuget/lib/net35/ nuget/lib/net40/ nuget/lib/net45/ nuget/lib/netstandard1.6/ nuget/lib/netstandard2.0/
