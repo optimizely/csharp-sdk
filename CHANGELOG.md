@@ -1,5 +1,28 @@
 # Optimizely C# SDK Changelog
 
+## 4.4.0
+July 10, 2026
+
+### New Features
+
+**Local Holdouts**: Added support for Local Holdouts, enabling holdout experiments
+to be scoped to specific feature flag rules rather than applied globally.
+Local Holdouts let you measure the true incremental impact of individual features
+by holding out a subset of users from specific rollouts while still serving them other experiences.
+See [Holdouts docs](https://support.optimizely.com/hc/en-us/articles/38941939408269-Global-holdouts) for more information.
+
+- Add local holdouts support ([#408](https://github.com/optimizely/csharp-sdk/pull/408))
+- Add localHoldouts to datafile for backward compatibility ([#412](https://github.com/optimizely/csharp-sdk/pull/412))
+
+### Changed
+
+- Don't send ODP identify event for single identifier ([#409](https://github.com/optimizely/csharp-sdk/pull/409))
+
+### Bug Fixes
+
+- Use attribute id instead of key for CMAB prediction requests ([#416](https://github.com/optimizely/csharp-sdk/pull/416))
+- Normalize decision event campaign_id, variation_id, and entity_id ([#415](https://github.com/optimizely/csharp-sdk/pull/415))
+
 ## 4.3.0
 May 4, 2026
 
