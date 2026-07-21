@@ -15,6 +15,7 @@
  */
 
 using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace OptimizelySDK.Entity
 {
@@ -50,6 +51,9 @@ namespace OptimizelySDK.Entity
         /// Rule IDs this holdout targets. Null for global holdouts (stripped at parse time).
         /// </summary>
         public string[] IncludedRules { get; set; }
+
+        [JsonProperty("exclude_targeted_deliveries")]
+        public bool ExcludeTargetedDeliveries { get; set; }
 
         /// <summary>
         /// True when global (IncludedRules is null). Consistent with section membership

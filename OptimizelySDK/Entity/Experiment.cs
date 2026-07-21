@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2017-2019, Optimizely
+ * Copyright 2017-2019, 2026 Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,8 @@ namespace OptimizelySDK.Entity
         private const string MUTEX_GROUP_POLICY = "random";
 
         public const string EXPERIMENT_TYPE_FR = "fr";
+
+        public const string EXPERIMENT_TYPE_TD = "td";
 
         /// <summary>
         /// Group ID for the experiment

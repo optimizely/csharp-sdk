@@ -334,7 +334,7 @@ namespace OptimizelySDK.Tests
         }
 
         // =====================================================================
-        // Level 2: Decision Service Tests for Local Holdouts (FSSDK-12369)
+        // Level 2: Decision Service Tests for Local Holdouts
         // =====================================================================
 
         private DatafileProjectConfig LocalHoldoutsConfig;
@@ -643,5 +643,252 @@ namespace OptimizelySDK.Tests
             Assert.AreEqual("local_holdout_exp_rule1", decision.Experiment?.Key,
                 "Decision experiment should be the local holdout targeting exp_rule_id_1");
         }
+
+        // =====================================================================
+        // Exclude Targeted Deliveries Tests
+        // =====================================================================
+
+        private DatafileProjectConfig ExcludeTDConfig;
+        private Optimizely ExcludeTDOptimizely;
+        private DatafileProjectConfig NoExcludeTDConfig;
+        private Optimizely NoExcludeTDOptimizely;
+
+        private void InitializeExcludeTDConfig()
+        {
+            var datafile = TestData["datafileWithExcludeTargetedDeliveries"].ToString();
+            ExcludeTDConfig = DatafileProjectConfig.Create(
+                datafile, LoggerMock.Object,
+                new NoOpErrorHandler()) as DatafileProjectConfig;
+
+            var eventDispatcher = new Event.Dispatcher.DefaultEventDispatcher(LoggerMock.Object);
+            ExcludeTDOptimizely = new Optimizely(
+                datafile, eventDispatcher, LoggerMock.Object, new NoOpErrorHandler());
+        }
+
+        private void InitializeNoExcludeTDConfig()
+        {
+            var datafile = TestData["datafileWithoutExcludeTargetedDeliveries"].ToString();
+            NoExcludeTDConfig = DatafileProjectConfig.Create(
+                datafile, LoggerMock.Object,
+                new NoOpErrorHandler()) as DatafileProjectConfig;
+
+            var eventDispatcher = new Event.Dispatcher.DefaultEventDispatcher(LoggerMock.Object);
+            NoExcludeTDOptimizely = new Optimizely(
+                datafile, eventDispatcher, LoggerMock.Object, new NoOpErrorHandler());
+        }
+
+        [Test]
+        public void TestExcludeTargetedDeliveries_DefaultFalse_HoldoutAppliesNormally()
+        {
+            InitializeNoExcludeTDConfig();
+
+            var globalHoldout = NoExcludeTDConfig.GetGlobalHoldouts()[0];
+            Assert.IsFalse(globalHoldout.ExcludeTargetedDeliveries);
+
+            var realBucketer = new Bucketer(LoggerMock.Object);
+            var decisionService = new DecisionService(realBucketer,
+                new NoOpErrorHandler(), null, LoggerMock.Object, null);
+
+            var featureFlag = NoExcludeTDConfig.FeatureKeyMap["test_flag_1"];
+            var userContext = new OptimizelyUserContext(NoExcludeTDOptimizely, TestUserId, null,
+                new NoOpErrorHandler(), LoggerMock.Object);
+
+            var result = decisionService.GetVariationsForFeatureList(
+                new List<FeatureFlag> { featureFlag }, userContext, NoExcludeTDConfig,
+                new UserAttributes(), new OptimizelyDecideOption[0]);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(1, result.Count);
+
+            var decision = result[0].ResultObject;
+            Assert.IsNotNull(decision);
+            Assert.AreEqual(FeatureDecision.DECISION_SOURCE_HOLDOUT, decision.Source,
+                "Global holdout with exclude_targeted_deliveries=false should apply to TD rules");
+        }
+
+        [Test]
+        public void TestExcludeTargetedDeliveries_True_TDRuleEvaluatesNormally()
+        {
+            InitializeExcludeTDConfig();
+
+            var globalHoldout = ExcludeTDConfig.GetGlobalHoldouts()[0];
+            Assert.IsTrue(globalHoldout.ExcludeTargetedDeliveries);
+
+            var realBucketer = new Bucketer(LoggerMock.Object);
+            var decisionService = new DecisionService(realBucketer,
+                new NoOpErrorHandler(), null, LoggerMock.Object, null);
+
+            var featureFlag = ExcludeTDConfig.FeatureKeyMap["test_flag_1"];
+            var userContext = new OptimizelyUserContext(ExcludeTDOptimizely, TestUserId, null,
+                new NoOpErrorHandler(), LoggerMock.Object);
+
+            var result = decisionService.GetVariationsForFeatureList(
+                new List<FeatureFlag> { featureFlag }, userContext, ExcludeTDConfig,
+                new UserAttributes(), new OptimizelyDecideOption[0]);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(1, result.Count);
+
+            var decision = result[0].ResultObject;
+            Assert.IsNotNull(decision);
+            Assert.AreEqual(FeatureDecision.DECISION_SOURCE_ROLLOUT, decision.Source,
+                "With exclude_targeted_deliveries=true, TD rules should evaluate normally (not blocked by holdout)");
+        }
+
+        [Test]
+        public void TestExcludeTargetedDeliveries_True_ABRuleStillBlocked()
+        {
+            InitializeExcludeTDConfig();
+
+            var globalHoldout = ExcludeTDConfig.GetGlobalHoldouts()[0];
+            Assert.IsTrue(globalHoldout.ExcludeTargetedDeliveries);
+
+            var realBucketer = new Bucketer(LoggerMock.Object);
+            var decisionService = new DecisionService(realBucketer,
+                new NoOpErrorHandler(), null, LoggerMock.Object, null);
+
+            var featureFlag = ExcludeTDConfig.FeatureKeyMap["test_flag_2"];
+            var userContext = new OptimizelyUserContext(ExcludeTDOptimizely, TestUserId, null,
+                new NoOpErrorHandler(), LoggerMock.Object);
+
+            var result = decisionService.GetVariationsForFeatureList(
+                new List<FeatureFlag> { featureFlag }, userContext, ExcludeTDConfig,
+                new UserAttributes(), new OptimizelyDecideOption[0]);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(1, result.Count);
+
+            var decision = result[0].ResultObject;
+            Assert.IsNotNull(decision);
+
+            Assert.AreEqual(FeatureDecision.DECISION_SOURCE_HOLDOUT, decision.Source,
+                "With exclude_targeted_deliveries=true, A/B experiment rules should still be blocked by holdout");
+        }
+
+        [Test]
+        public void TestExcludeTargetedDeliveries_MissingField_DefaultsFalse()
+        {
+            InitializeNoExcludeTDConfig();
+
+            var globalHoldout = NoExcludeTDConfig.GetGlobalHoldouts()[0];
+            Assert.IsFalse(globalHoldout.ExcludeTargetedDeliveries,
+                "Missing exclude_targeted_deliveries should default to false");
+
+            foreach (var localHoldout in NoExcludeTDConfig.LocalHoldouts)
+            {
+                Assert.IsFalse(localHoldout.ExcludeTargetedDeliveries,
+                    $"Local holdout {localHoldout.Key} should default exclude_targeted_deliveries to false");
+            }
+        }
+
+        [Test]
+        public void TestLocalHoldout_ExcludeTargetedDeliveries_True_SkippedForTDRule()
+        {
+            InitializeExcludeTDConfig();
+
+            var globalHoldout = ExcludeTDConfig.GetGlobalHoldouts()[0];
+            globalHoldout.TrafficAllocation = new TrafficAllocation[0];
+
+            var realBucketer = new Bucketer(LoggerMock.Object);
+            var decisionService = new DecisionService(realBucketer,
+                new NoOpErrorHandler(), null, LoggerMock.Object, null);
+
+            var featureFlag = ExcludeTDConfig.FeatureKeyMap["test_flag_1"];
+            var userContext = new OptimizelyUserContext(ExcludeTDOptimizely, TestUserId, null,
+                new NoOpErrorHandler(), LoggerMock.Object);
+
+            var result = decisionService.GetVariationsForFeatureList(
+                new List<FeatureFlag> { featureFlag }, userContext, ExcludeTDConfig,
+                new UserAttributes(), new OptimizelyDecideOption[0]);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(1, result.Count);
+
+            var decision = result[0].ResultObject;
+            Assert.IsNotNull(decision);
+            Assert.AreNotEqual(FeatureDecision.DECISION_SOURCE_HOLDOUT, decision.Source,
+                "Local holdout with exclude_targeted_deliveries=true should be skipped for TD rules");
+            Assert.AreEqual(FeatureDecision.DECISION_SOURCE_ROLLOUT, decision.Source,
+                "TD rule should evaluate normally when local holdout excludes targeted deliveries");
+        }
+
+        [Test]
+        public void TestLocalHoldout_ExcludeTargetedDeliveries_True_StillAppliesForABRule()
+        {
+            InitializeExcludeTDConfig();
+
+            var globalHoldout = ExcludeTDConfig.GetGlobalHoldouts()[0];
+            globalHoldout.TrafficAllocation = new TrafficAllocation[0];
+
+            var realBucketer = new Bucketer(LoggerMock.Object);
+            var decisionService = new DecisionService(realBucketer,
+                new NoOpErrorHandler(), null, LoggerMock.Object, null);
+
+            var featureFlag = ExcludeTDConfig.FeatureKeyMap["test_flag_2"];
+            var userContext = new OptimizelyUserContext(ExcludeTDOptimizely, TestUserId, null,
+                new NoOpErrorHandler(), LoggerMock.Object);
+
+            var result = decisionService.GetVariationsForFeatureList(
+                new List<FeatureFlag> { featureFlag }, userContext, ExcludeTDConfig,
+                new UserAttributes(), new OptimizelyDecideOption[0]);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(1, result.Count);
+
+            var decision = result[0].ResultObject;
+            Assert.IsNotNull(decision);
+            Assert.AreEqual(FeatureDecision.DECISION_SOURCE_HOLDOUT, decision.Source,
+                "Local holdout with exclude_targeted_deliveries=true should still apply for A/B rules");
+        }
+
+        [Test]
+        public void TestGlobalHoldout_ExcludeTargetedDeliveries_NoTDRuleMatch_FallsBackToHoldout()
+        {
+            InitializeExcludeTDConfig();
+
+            var globalHoldout = ExcludeTDConfig.GetGlobalHoldouts()[0];
+            Assert.IsTrue(globalHoldout.ExcludeTargetedDeliveries);
+
+            var realBucketer = new Bucketer(LoggerMock.Object);
+            var decisionService = new DecisionService(realBucketer,
+                new NoOpErrorHandler(), null, LoggerMock.Object, null);
+
+            // test_flag_1 has only rollout (TD) rules, no experiments.
+            // With exclude_targeted_deliveries=true, TD rules evaluate normally.
+            // But test_flag_2 has experiments. If no experiment matches traffic,
+            // the holdout decision should still be returned.
+            var featureFlag = ExcludeTDConfig.FeatureKeyMap["test_flag_2"];
+
+            // Zero out experiment traffic so no experiment matches
+            foreach (var exp in ExcludeTDConfig.ExperimentIdMap.Values)
+            {
+                if (featureFlag.ExperimentIds.Contains(exp.Id))
+                {
+                    exp.TrafficAllocation = new List<TrafficAllocation>().ToArray();
+                }
+            }
+
+            // Zero out local holdout traffic
+            foreach (var lh in ExcludeTDConfig.LocalHoldouts)
+            {
+                lh.TrafficAllocation = new TrafficAllocation[0];
+            }
+
+            var userContext = new OptimizelyUserContext(ExcludeTDOptimizely, TestUserId, null,
+                new NoOpErrorHandler(), LoggerMock.Object);
+
+            var result = decisionService.GetVariationsForFeatureList(
+                new List<FeatureFlag> { featureFlag }, userContext, ExcludeTDConfig,
+                new UserAttributes(), new OptimizelyDecideOption[0]);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(1, result.Count);
+
+            var decision = result[0].ResultObject;
+            Assert.IsNotNull(decision);
+            Assert.AreEqual(FeatureDecision.DECISION_SOURCE_HOLDOUT, decision.Source,
+                "When no TD rule matches and experiments are blocked, holdout decision should be returned as fallback");
+        }
     }
 }
+
