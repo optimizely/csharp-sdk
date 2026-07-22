@@ -126,7 +126,7 @@ namespace OptimizelySDK.Tests
         }
 
         // =====================================================================
-        // Level 1: Local Holdout / IsGlobal Classification Tests (FSSDK-12369)
+        // Level 1: Local Holdout / IsGlobal Classification Tests
         // =====================================================================
 
         [Test]

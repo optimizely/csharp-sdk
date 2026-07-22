@@ -1126,6 +1126,18 @@ namespace OptimizelySDK
             var ruleKey = flagDecision.Experiment?.Key;
 
             var decisionEventDispatched = false;
+            if (flagDecision?.HoldoutDecision != null && !allOptions.Contains(OptimizelyDecideOption.DISABLE_DECISION_EVENT))
+            {
+                decisionEventDispatched = SendImpressionEvent(
+                    flagDecision.HoldoutDecision.Experiment,
+                    flagDecision.HoldoutDecision.Variation,
+                    userId, user.GetAttributes(), projectConfig,
+                    flagKey, FeatureDecision.DECISION_SOURCE_HOLDOUT, true
+#if USE_CMAB
+                    , null
+#endif
+                ) || decisionEventDispatched;
+            }
             if (!allOptions.Contains(OptimizelyDecideOption.DISABLE_DECISION_EVENT))
             {
                 decisionEventDispatched = SendImpressionEvent(
