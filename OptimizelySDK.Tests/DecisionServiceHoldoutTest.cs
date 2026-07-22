@@ -711,6 +711,11 @@ namespace OptimizelySDK.Tests
         {
             InitializeExcludeTDConfig();
 
+            foreach (var lh in ExcludeTDConfig.LocalHoldouts)
+            {
+                lh.TrafficAllocation = new TrafficAllocation[0];
+            }
+
             var globalHoldout = ExcludeTDConfig.GetGlobalHoldouts()[0];
             Assert.IsTrue(globalHoldout.ExcludeTargetedDeliveries);
 
@@ -740,6 +745,11 @@ namespace OptimizelySDK.Tests
         {
             InitializeExcludeTDConfig();
 
+            foreach (var lh in ExcludeTDConfig.LocalHoldouts)
+            {
+                lh.TrafficAllocation = new TrafficAllocation[0];
+            }
+
             var globalHoldout = ExcludeTDConfig.GetGlobalHoldouts()[0];
             Assert.IsTrue(globalHoldout.ExcludeTargetedDeliveries);
 
@@ -761,8 +771,12 @@ namespace OptimizelySDK.Tests
             var decision = result[0].ResultObject;
             Assert.IsNotNull(decision);
 
-            Assert.AreEqual(FeatureDecision.DECISION_SOURCE_HOLDOUT, decision.Source,
-                "With exclude_targeted_deliveries=true, A/B experiment rules should still be blocked by holdout");
+            Assert.AreNotEqual(FeatureDecision.DECISION_SOURCE_FEATURE_TEST, decision.Source,
+                "With exclude_targeted_deliveries=true, A/B experiment rules should be skipped (not evaluated)");
+            Assert.IsNull(decision.Variation,
+                "Variation should be null since A/B was blocked and no TD rule matched");
+            Assert.IsNotNull(decision.HoldoutDecision,
+                "HoldoutDecision should be attached showing the user was in a holdout that blocked A/B rules");
         }
 
         [Test]
@@ -782,7 +796,7 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
-        public void TestLocalHoldout_ExcludeTargetedDeliveries_True_SkippedForTDRule()
+        public void TestLocalHoldout_ExcludeTargetedDeliveries_True_StillAppliesForTDRule()
         {
             InitializeExcludeTDConfig();
 
@@ -806,10 +820,8 @@ namespace OptimizelySDK.Tests
 
             var decision = result[0].ResultObject;
             Assert.IsNotNull(decision);
-            Assert.AreNotEqual(FeatureDecision.DECISION_SOURCE_HOLDOUT, decision.Source,
-                "Local holdout with exclude_targeted_deliveries=true should be skipped for TD rules");
-            Assert.AreEqual(FeatureDecision.DECISION_SOURCE_ROLLOUT, decision.Source,
-                "TD rule should evaluate normally when local holdout excludes targeted deliveries");
+            Assert.AreEqual(FeatureDecision.DECISION_SOURCE_HOLDOUT, decision.Source,
+                "Local holdout must apply to TD rules even when exclude_targeted_deliveries=true (flag is only for global holdouts)");
         }
 
         [Test]
@@ -842,7 +854,7 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
-        public void TestGlobalHoldout_ExcludeTargetedDeliveries_NoTDRuleMatch_FallsBackToHoldout()
+        public void TestGlobalHoldout_ExcludeTargetedDeliveries_NoTDRuleMatch_ReturnsNullDecision()
         {
             InitializeExcludeTDConfig();
 
@@ -853,22 +865,14 @@ namespace OptimizelySDK.Tests
             var decisionService = new DecisionService(realBucketer,
                 new NoOpErrorHandler(), null, LoggerMock.Object, null);
 
-            // test_flag_1 has only rollout (TD) rules, no experiments.
-            // With exclude_targeted_deliveries=true, TD rules evaluate normally.
-            // But test_flag_2 has experiments. If no experiment matches traffic,
-            // the holdout decision should still be returned.
-            var featureFlag = ExcludeTDConfig.FeatureKeyMap["test_flag_2"];
+            var featureFlag = ExcludeTDConfig.FeatureKeyMap["test_flag_1"];
 
-            // Zero out experiment traffic so no experiment matches
-            foreach (var exp in ExcludeTDConfig.ExperimentIdMap.Values)
+            var rollout = ExcludeTDConfig.GetRolloutFromId(featureFlag.RolloutId);
+            foreach (var rule in rollout.Experiments)
             {
-                if (featureFlag.ExperimentIds.Contains(exp.Id))
-                {
-                    exp.TrafficAllocation = new List<TrafficAllocation>().ToArray();
-                }
+                rule.TrafficAllocation = new List<TrafficAllocation>().ToArray();
             }
 
-            // Zero out local holdout traffic
             foreach (var lh in ExcludeTDConfig.LocalHoldouts)
             {
                 lh.TrafficAllocation = new TrafficAllocation[0];
@@ -886,8 +890,84 @@ namespace OptimizelySDK.Tests
 
             var decision = result[0].ResultObject;
             Assert.IsNotNull(decision);
-            Assert.AreEqual(FeatureDecision.DECISION_SOURCE_HOLDOUT, decision.Source,
-                "When no TD rule matches and experiments are blocked, holdout decision should be returned as fallback");
+            Assert.IsNull(decision.Variation,
+                "When TD returns no match with exclude_targeted_deliveries=true, variation should be null (no holdout fallback)");
+            Assert.IsNull(decision.Experiment,
+                "When TD returns no match with exclude_targeted_deliveries=true, experiment should be null (no holdout fallback)");
+            Assert.IsNotNull(decision.HoldoutDecision,
+                "HoldoutDecision should be attached for event dispatch even when decision is null");
+        }
+        [Test]
+        public void TestExcludeTargetedDeliveries_HoldoutEventSentWhenTDBypasses()
+        {
+            InitializeExcludeTDConfig();
+
+            var globalHoldout = ExcludeTDConfig.GetGlobalHoldouts()[0];
+            Assert.IsTrue(globalHoldout.ExcludeTargetedDeliveries);
+
+            var eventDispatcher = new Event.Dispatcher.DefaultEventDispatcher(LoggerMock.Object);
+            var optimizelyWithMockedEvents = new Optimizely(
+                TestData["datafileWithExcludeTargetedDeliveries"].ToString(),
+                eventDispatcher,
+                LoggerMock.Object,
+                new NoOpErrorHandler(),
+                null,
+                false,
+                EventProcessorMock.Object
+            );
+
+            EventProcessorMock.Setup(ep => ep.Process(It.IsAny<ImpressionEvent>()));
+
+            var userContext = optimizelyWithMockedEvents.CreateUserContext(TestUserId, new UserAttributes());
+            var featureFlag = ExcludeTDConfig.FeatureKeyMap["test_flag_1"];
+            var decision = userContext.Decide(featureFlag.Key);
+
+            Assert.IsNotNull(decision);
+
+            EventProcessorMock.Verify(ep => ep.Process(It.IsAny<ImpressionEvent>()), Times.AtLeast(2),
+                "Both holdout and TD impression events should be sent when holdout is bypassed for TD rules");
+
+            EventProcessorMock.Verify(ep => ep.Process(It.Is<ImpressionEvent>(ie =>
+                ie.Experiment.Key == globalHoldout.Key
+            )), Times.Once, "Holdout impression event should be sent even when holdout is bypassed for TD rules");
+        }
+
+        [Test]
+        public void TestExcludeTargetedDeliveries_HoldoutDecisionAttachedToTDResult()
+        {
+            InitializeExcludeTDConfig();
+
+            foreach (var lh in ExcludeTDConfig.LocalHoldouts)
+            {
+                lh.TrafficAllocation = new TrafficAllocation[0];
+            }
+
+            var globalHoldout = ExcludeTDConfig.GetGlobalHoldouts()[0];
+            Assert.IsTrue(globalHoldout.ExcludeTargetedDeliveries);
+
+            var realBucketer = new Bucketer(LoggerMock.Object);
+            var decisionService = new DecisionService(realBucketer,
+                new NoOpErrorHandler(), null, LoggerMock.Object, null);
+
+            var featureFlag = ExcludeTDConfig.FeatureKeyMap["test_flag_1"];
+            var userContext = new OptimizelyUserContext(ExcludeTDOptimizely, TestUserId, null,
+                new NoOpErrorHandler(), LoggerMock.Object);
+
+            var result = decisionService.GetVariationsForFeatureList(
+                new List<FeatureFlag> { featureFlag }, userContext, ExcludeTDConfig,
+                new UserAttributes(), new OptimizelyDecideOption[0]);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(1, result.Count);
+
+            var decision = result[0].ResultObject;
+            Assert.IsNotNull(decision);
+            Assert.AreEqual(FeatureDecision.DECISION_SOURCE_ROLLOUT, decision.Source,
+                "TD rule should be returned as the decision");
+            Assert.IsNotNull(decision.HoldoutDecision,
+                "HoldoutDecision should be attached when holdout was bypassed for TD");
+            Assert.AreEqual(FeatureDecision.DECISION_SOURCE_HOLDOUT, decision.HoldoutDecision.Source,
+                "Attached HoldoutDecision should have holdout source");
         }
     }
 }

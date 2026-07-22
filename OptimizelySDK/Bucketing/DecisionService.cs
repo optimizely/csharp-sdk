@@ -686,7 +686,7 @@ namespace OptimizelySDK.Bucketing
                         reasons);
                 }
 
-                var localHoldoutResult = EvaluateLocalHoldouts(rule.Id, user, config, rule.Type);
+                var localHoldoutResult = EvaluateLocalHoldouts(rule.Id, user, config);
                 reasons += localHoldoutResult.DecisionReasons;
                 if (localHoldoutResult.ResultObject != null)
                 {
@@ -813,7 +813,7 @@ namespace OptimizelySDK.Bucketing
                 }
                 else
                 {
-                    var localHoldoutResult = EvaluateLocalHoldouts(experiment.Id, user, config, experiment.Type);
+                    var localHoldoutResult = EvaluateLocalHoldouts(experiment.Id, user, config);
                     reasons += localHoldoutResult.DecisionReasons;
                     if (localHoldoutResult.ResultObject != null)
                     {
@@ -967,12 +967,21 @@ namespace OptimizelySDK.Bucketing
                 Logger.Log(LogLevel.INFO,
                     reasons.AddInfo(
                         $"The user \"{userId}\" is bucketed into a rollout for feature flag \"{featureFlag.Key}\"."));
+                if (globalHoldoutDecision != null)
+                {
+                    rolloutDecision.ResultObject.HoldoutDecision = globalHoldoutDecision;
+                }
                 return Result<FeatureDecision>.NewResult(rolloutDecision.ResultObject, reasons);
             }
 
             if (globalHoldoutDecision != null)
             {
-                return Result<FeatureDecision>.NewResult(globalHoldoutDecision, reasons);
+                var nullDecision = new FeatureDecision(null, null, FeatureDecision.DECISION_SOURCE_ROLLOUT);
+                nullDecision.HoldoutDecision = globalHoldoutDecision;
+                Logger.Log(LogLevel.INFO,
+                    reasons.AddInfo(
+                        $"The user \"{userId}\" is not bucketed into any targeted delivery for feature flag \"{featureFlag.Key}\". Holdout impression will be sent but holdout variation is not applied as fallback."));
+                return Result<FeatureDecision>.NewResult(nullDecision, reasons);
             }
 
             Logger.Log(LogLevel.INFO,
@@ -1081,19 +1090,13 @@ namespace OptimizelySDK.Bucketing
         private Result<FeatureDecision> EvaluateLocalHoldouts(
             string ruleId,
             OptimizelyUserContext user,
-            ProjectConfig config,
-            string ruleType
+            ProjectConfig config
         )
         {
             var reasons = new DecisionReasons();
             var localHoldouts = config.GetHoldoutsForRule(ruleId);
             foreach (var localHoldout in localHoldouts)
             {
-                if (localHoldout.ExcludeTargetedDeliveries && ruleType == Experiment.EXPERIMENT_TYPE_TD)
-                {
-                    reasons.AddInfo($"Holdout \"{localHoldout.Key}\" excludes targeted deliveries — skipping for TD rule.");
-                    continue;
-                }
                 var holdoutDecision = GetVariationForHoldout(localHoldout, user, config);
                 reasons += holdoutDecision.DecisionReasons;
                 if (holdoutDecision.ResultObject != null)
