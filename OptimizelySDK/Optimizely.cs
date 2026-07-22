@@ -1125,9 +1125,10 @@ namespace OptimizelySDK
             //       add to event metadata as well (currently set to experimentKey)
             var ruleKey = flagDecision.Experiment?.Key;
 
+            var decisionEventDispatched = false;
             if (flagDecision?.HoldoutDecision != null && !allOptions.Contains(OptimizelyDecideOption.DISABLE_DECISION_EVENT))
             {
-                SendImpressionEvent(
+                decisionEventDispatched = SendImpressionEvent(
                     flagDecision.HoldoutDecision.Experiment,
                     flagDecision.HoldoutDecision.Variation,
                     userId, user.GetAttributes(), projectConfig,
@@ -1135,10 +1136,8 @@ namespace OptimizelySDK
 #if USE_CMAB
                     , null
 #endif
-                );
+                ) || decisionEventDispatched;
             }
-
-            var decisionEventDispatched = false;
             if (!allOptions.Contains(OptimizelyDecideOption.DISABLE_DECISION_EVENT))
             {
                 decisionEventDispatched = SendImpressionEvent(

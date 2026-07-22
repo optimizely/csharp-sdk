@@ -915,6 +915,7 @@ namespace OptimizelySDK.Bucketing
             var userId = user.GetUserId();
 
             FeatureDecision globalHoldoutDecision = null;
+            Holdout matchedHoldout = null;
             var globalHoldouts = projectConfig.GetGlobalHoldouts();
             foreach (var holdout in globalHoldouts)
             {
@@ -929,6 +930,7 @@ namespace OptimizelySDK.Bucketing
                             reasons.AddInfo(
                                 $"User \"{userId}\" is in holdout \"{holdout.Key}\" which excludes targeted deliveries. Targeted delivery rules will be evaluated normally."));
                         globalHoldoutDecision = holdoutDecision.ResultObject;
+                        matchedHoldout = holdout;
                     }
                     else
                     {
@@ -957,6 +959,13 @@ namespace OptimizelySDK.Bucketing
                 Logger.Log(LogLevel.INFO,
                     reasons.AddInfo(
                         $"Skipping experiment rules for user \"{userId}\" — holdout applies to A/B and MAB rules."));
+
+                if (matchedHoldout != null && matchedHoldout.ExcludeTargetedDeliveries)
+                {
+                    Logger.Log(LogLevel.INFO,
+                        reasons.AddInfo(
+                            $"Holdout \"{matchedHoldout.Key}\" has excludeTargetedDeliveries enabled, continuing to rollout evaluation."));
+                }
             }
 
             var rolloutDecision = GetVariationForFeatureRollout(featureFlag, user, projectConfig);

@@ -28,6 +28,7 @@ using OptimizelySDK.ErrorHandler;
 using OptimizelySDK.Event;
 using OptimizelySDK.Event.Entity;
 using OptimizelySDK.Logger;
+using OptimizelySDK.Notifications;
 using OptimizelySDK.OptimizelyDecisions;
 using OptimizelySDK.Utils;
 
@@ -738,6 +739,14 @@ namespace OptimizelySDK.Tests
             Assert.IsNotNull(decision);
             Assert.AreEqual(FeatureDecision.DECISION_SOURCE_ROLLOUT, decision.Source,
                 "With exclude_targeted_deliveries=true, TD rules should evaluate normally (not blocked by holdout)");
+
+            var reasons = result[0].DecisionReasons.ToReport(true);
+            var excludeTDReason = reasons.FirstOrDefault(r =>
+                r.Contains("has excludeTargetedDeliveries enabled, continuing to rollout evaluation"));
+            Assert.IsNotNull(excludeTDReason,
+                "Reasons should include excludeTargetedDeliveries bypass message");
+            Assert.IsTrue(excludeTDReason.Contains(globalHoldout.Key),
+                "Reason should reference the holdout name");
         }
 
         [Test]
@@ -930,6 +939,21 @@ namespace OptimizelySDK.Tests
             EventProcessorMock.Verify(ep => ep.Process(It.Is<ImpressionEvent>(ie =>
                 ie.Experiment.Key == globalHoldout.Key
             )), Times.Once, "Holdout impression event should be sent even when holdout is bypassed for TD rules");
+
+            Dictionary<string, object> lastNotification = null;
+            optimizelyWithMockedEvents.NotificationCenter.AddNotification(
+                NotificationCenter.NotificationType.Decision,
+                (NotificationCenter.DecisionCallback)((type, userId, userAttributes, decisionInfo) =>
+                {
+                    lastNotification = decisionInfo;
+                }));
+
+            var decision2 = userContext.Decide(featureFlag.Key);
+            Assert.IsNotNull(lastNotification, "Decision notification should have been sent");
+            Assert.IsTrue(lastNotification.ContainsKey("decisionEventDispatched"),
+                "Notification should contain decisionEventDispatched");
+            Assert.IsTrue((bool)lastNotification["decisionEventDispatched"],
+                "decisionEventDispatched should be true when holdout impression is sent");
         }
 
         [Test]
