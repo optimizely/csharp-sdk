@@ -1152,7 +1152,7 @@ namespace OptimizelySDK
 #if USE_CMAB
                     , flagDecision.CmabUuid
 #endif
-                );
+                ) || decisionEventDispatched;
             }
 
             var decisionInfo = new Dictionary<string, object>

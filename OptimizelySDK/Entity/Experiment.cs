@@ -25,8 +25,6 @@ namespace OptimizelySDK.Entity
 
         public const string EXPERIMENT_TYPE_FR = "fr";
 
-        public const string EXPERIMENT_TYPE_TD = "td";
-
         /// <summary>
         /// Group ID for the experiment
         /// </summary>

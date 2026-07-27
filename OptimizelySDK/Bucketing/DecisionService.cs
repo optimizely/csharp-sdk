@@ -964,7 +964,7 @@ namespace OptimizelySDK.Bucketing
                 {
                     Logger.Log(LogLevel.INFO,
                         reasons.AddInfo(
-                            $"Holdout \"{matchedHoldout.Key}\" has excludeTargetedDeliveries enabled, continuing to rollout evaluation."));
+                            $"Holdout \"{matchedHoldout.Key}\" has exclude_targeted_deliveries enabled, continuing to rollout evaluation."));
                 }
             }
 
