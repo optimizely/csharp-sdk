@@ -52,7 +52,7 @@ namespace OptimizelySDK.Entity
         /// </summary>
         public string[] IncludedRules { get; set; }
 
-        [JsonProperty("exclude_targeted_deliveries")]
+        [JsonProperty("excludeTargetedDeliveries")]
         public bool ExcludeTargetedDeliveries { get; set; }
 
         /// <summary>

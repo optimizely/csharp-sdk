@@ -816,7 +816,7 @@
         ],
         "audienceIds": [],
         "audienceConditions": [],
-        "exclude_targeted_deliveries": true
+        "excludeTargetedDeliveries": true
       }
     ],
     "localHoldouts": [
@@ -844,7 +844,7 @@
         "includedRules": [
           "rule_id_1"
         ],
-        "exclude_targeted_deliveries": true
+        "excludeTargetedDeliveries": true
       },
       {
         "id": "holdout_local_rule2",
@@ -870,7 +870,7 @@
         "includedRules": [
           "rule_id_2"
         ],
-        "exclude_targeted_deliveries": true
+        "excludeTargetedDeliveries": true
       },
       {
         "id": "holdout_local_empty_rules",
@@ -894,7 +894,7 @@
         "audienceIds": [],
         "audienceConditions": [],
         "includedRules": [],
-        "exclude_targeted_deliveries": true
+        "excludeTargetedDeliveries": true
       },
       {
         "id": "holdout_local_exp_rule1",
@@ -920,7 +920,7 @@
         "includedRules": [
           "exp_rule_id_1"
         ],
-        "exclude_targeted_deliveries": true
+        "excludeTargetedDeliveries": true
       }
     ]
   },

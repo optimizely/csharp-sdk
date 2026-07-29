@@ -704,7 +704,7 @@ namespace OptimizelySDK.Tests
             var decision = result[0].ResultObject;
             Assert.IsNotNull(decision);
             Assert.AreEqual(FeatureDecision.DECISION_SOURCE_HOLDOUT, decision.Source,
-                "Global holdout with exclude_targeted_deliveries=false should apply to TD rules");
+                "Global holdout with excludeTargetedDeliveries=false should apply to TD rules");
         }
 
         [Test]
@@ -738,11 +738,11 @@ namespace OptimizelySDK.Tests
             var decision = result[0].ResultObject;
             Assert.IsNotNull(decision);
             Assert.AreEqual(FeatureDecision.DECISION_SOURCE_ROLLOUT, decision.Source,
-                "With exclude_targeted_deliveries=true, TD rules should evaluate normally (not blocked by holdout)");
+                "With excludeTargetedDeliveries=true, TD rules should evaluate normally (not blocked by holdout)");
 
             var reasons = result[0].DecisionReasons.ToReport(true);
             var excludeTDReason = reasons.FirstOrDefault(r =>
-                r.Contains("has exclude_targeted_deliveries enabled, continuing to rollout evaluation"));
+                r.Contains("has excludeTargetedDeliveries enabled, continuing to rollout evaluation"));
             Assert.IsNotNull(excludeTDReason,
                 "Reasons should include excludeTargetedDeliveries bypass message");
             Assert.IsTrue(excludeTDReason.Contains(globalHoldout.Key),
@@ -781,7 +781,7 @@ namespace OptimizelySDK.Tests
             Assert.IsNotNull(decision);
 
             Assert.AreNotEqual(FeatureDecision.DECISION_SOURCE_FEATURE_TEST, decision.Source,
-                "With exclude_targeted_deliveries=true, A/B experiment rules should be skipped (not evaluated)");
+                "With excludeTargetedDeliveries=true, A/B experiment rules should be skipped (not evaluated)");
             Assert.IsNull(decision.Variation,
                 "Variation should be null since A/B was blocked and no TD rule matched");
             Assert.IsNotNull(decision.HoldoutDecision,
@@ -795,12 +795,12 @@ namespace OptimizelySDK.Tests
 
             var globalHoldout = NoExcludeTDConfig.GetGlobalHoldouts()[0];
             Assert.IsFalse(globalHoldout.ExcludeTargetedDeliveries,
-                "Missing exclude_targeted_deliveries should default to false");
+                "Missing excludeTargetedDeliveries should default to false");
 
             foreach (var localHoldout in NoExcludeTDConfig.LocalHoldouts)
             {
                 Assert.IsFalse(localHoldout.ExcludeTargetedDeliveries,
-                    $"Local holdout {localHoldout.Key} should default exclude_targeted_deliveries to false");
+                    $"Local holdout {localHoldout.Key} should default excludeTargetedDeliveries to false");
             }
         }
 
@@ -830,7 +830,7 @@ namespace OptimizelySDK.Tests
             var decision = result[0].ResultObject;
             Assert.IsNotNull(decision);
             Assert.AreEqual(FeatureDecision.DECISION_SOURCE_HOLDOUT, decision.Source,
-                "Local holdout must apply to TD rules even when exclude_targeted_deliveries=true (flag is only for global holdouts)");
+                "Local holdout must apply to TD rules even when excludeTargetedDeliveries=true (flag is only for global holdouts)");
         }
 
         [Test]
@@ -859,7 +859,7 @@ namespace OptimizelySDK.Tests
             var decision = result[0].ResultObject;
             Assert.IsNotNull(decision);
             Assert.AreEqual(FeatureDecision.DECISION_SOURCE_HOLDOUT, decision.Source,
-                "Local holdout with exclude_targeted_deliveries=true should still apply for A/B rules");
+                "Local holdout with excludeTargetedDeliveries=true should still apply for A/B rules");
         }
 
         [Test]
@@ -900,9 +900,9 @@ namespace OptimizelySDK.Tests
             var decision = result[0].ResultObject;
             Assert.IsNotNull(decision);
             Assert.IsNull(decision.Variation,
-                "When TD returns no match with exclude_targeted_deliveries=true, variation should be null (no holdout fallback)");
+                "When TD returns no match with excludeTargetedDeliveries=true, variation should be null (no holdout fallback)");
             Assert.IsNull(decision.Experiment,
-                "When TD returns no match with exclude_targeted_deliveries=true, experiment should be null (no holdout fallback)");
+                "When TD returns no match with excludeTargetedDeliveries=true, experiment should be null (no holdout fallback)");
             Assert.IsNotNull(decision.HoldoutDecision,
                 "HoldoutDecision should be attached for event dispatch even when decision is null");
         }
