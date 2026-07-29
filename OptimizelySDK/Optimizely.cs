@@ -1132,7 +1132,8 @@ namespace OptimizelySDK
                     flagDecision.HoldoutDecision.Experiment,
                     flagDecision.HoldoutDecision.Variation,
                     userId, user.GetAttributes(), projectConfig,
-                    flagKey, FeatureDecision.DECISION_SOURCE_HOLDOUT, true
+                    flagKey, FeatureDecision.DECISION_SOURCE_HOLDOUT,
+                    flagDecision.HoldoutDecision.Variation?.FeatureEnabled ?? false
 #if USE_CMAB
                     , null
 #endif
