@@ -26,6 +26,7 @@ namespace OptimizelySDK.Entity
         public string Source { get; }
         public string CmabUuid { get; }
         public bool Error { get; }
+        public FeatureDecision HoldoutDecision { get; set; }
 
         public FeatureDecision(ExperimentCore experiment, Variation variation, string source, string cmabUuid = null, bool error = false)
         {

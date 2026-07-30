@@ -1126,6 +1126,19 @@ namespace OptimizelySDK
             var ruleKey = flagDecision.Experiment?.Key;
 
             var decisionEventDispatched = false;
+            if (flagDecision?.HoldoutDecision != null && !allOptions.Contains(OptimizelyDecideOption.DISABLE_DECISION_EVENT))
+            {
+                decisionEventDispatched = SendImpressionEvent(
+                    flagDecision.HoldoutDecision.Experiment,
+                    flagDecision.HoldoutDecision.Variation,
+                    userId, user.GetAttributes(), projectConfig,
+                    flagKey, FeatureDecision.DECISION_SOURCE_HOLDOUT,
+                    flagDecision.HoldoutDecision.Variation?.FeatureEnabled ?? false
+#if USE_CMAB
+                    , null
+#endif
+                ) || decisionEventDispatched;
+            }
             if (!allOptions.Contains(OptimizelyDecideOption.DISABLE_DECISION_EVENT))
             {
                 decisionEventDispatched = SendImpressionEvent(
@@ -1140,7 +1153,7 @@ namespace OptimizelySDK
 #if USE_CMAB
                     , flagDecision.CmabUuid
 #endif
-                );
+                ) || decisionEventDispatched;
             }
 
             var decisionInfo = new Dictionary<string, object>
