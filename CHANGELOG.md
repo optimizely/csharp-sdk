@@ -1,7 +1,7 @@
 # Optimizely C# SDK Changelog
 
 ## 4.5.0
-September 2, 2026
+September 3, 2026
 
 ### New Features
 
