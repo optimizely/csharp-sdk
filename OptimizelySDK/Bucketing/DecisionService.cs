@@ -845,8 +845,7 @@ namespace OptimizelySDK.Bucketing
 
                         var errorDecision = new FeatureDecision(experiment, null,
                             FeatureDecision.DECISION_SOURCE_FEATURE_TEST, null, error: true);
-                        return Result<FeatureDecision>.NewResult(
-                            WithHoldoutHits(errorDecision, holdoutHits), reasons);
+                        return Result<FeatureDecision>.NewResult(errorDecision, reasons);
                     }
 #endif
                 }

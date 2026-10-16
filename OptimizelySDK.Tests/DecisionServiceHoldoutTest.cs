@@ -1270,7 +1270,7 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
-        public void TestLocalHoldouts_ErrorDecisionStillSendsHoldoutEvents()
+        public void TestLocalHoldouts_DecisionErrorSuppressesHoldoutEvents()
         {
             var optimizely = CreateLocalHoldoutsOptimizelyWithMockedEvents();
             var config = optimizely.ProjectConfigManager.GetConfig() as DatafileProjectConfig;
@@ -1298,8 +1298,9 @@ namespace OptimizelySDK.Tests
             var decision = optimizely.CreateUserContext(TestUserId).Decide("test_flag_2");
 
             Assert.IsNull(decision.VariationKey);
-            VerifyHoldoutImpression("local_holdout_exp_rule1", Times.Once());
-            EventProcessorMock.Verify(ep => ep.Process(It.IsAny<ImpressionEvent>()), Times.Once());
+            Assert.IsFalse(decision.Enabled);
+            VerifyHoldoutImpression("local_holdout_exp_rule1", Times.Never());
+            EventProcessorMock.Verify(ep => ep.Process(It.IsAny<ImpressionEvent>()), Times.Never());
         }
 
         [Test]

@@ -1050,11 +1050,6 @@ namespace OptimizelySDK
                         Logger
                     );
 
-                    if (!allOptions.Contains(OptimizelyDecideOption.DISABLE_DECISION_EVENT))
-                    {
-                        SendHoldoutImpressions(user, key, flagDecision, projectConfig);
-                    }
-
                     if (!allOptions.Contains(OptimizelyDecideOption.ENABLED_FLAGS_ONLY) ||
                         errorDecision.Enabled)
                     {
