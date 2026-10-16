@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright 2017-2024, Optimizely
+ * Copyright 2017-2024, 2026, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use file except in compliance with the License.
@@ -1050,6 +1050,11 @@ namespace OptimizelySDK
                         Logger
                     );
 
+                    if (!allOptions.Contains(OptimizelyDecideOption.DISABLE_DECISION_EVENT))
+                    {
+                        SendHoldoutImpressions(user, key, flagDecision, projectConfig);
+                    }
+
                     if (!allOptions.Contains(OptimizelyDecideOption.ENABLED_FLAGS_ONLY) ||
                         errorDecision.Enabled)
                     {
@@ -1126,21 +1131,10 @@ namespace OptimizelySDK
             var ruleKey = flagDecision.Experiment?.Key;
 
             var decisionEventDispatched = false;
-            if (flagDecision?.HoldoutDecision != null && !allOptions.Contains(OptimizelyDecideOption.DISABLE_DECISION_EVENT))
-            {
-                decisionEventDispatched = SendImpressionEvent(
-                    flagDecision.HoldoutDecision.Experiment,
-                    flagDecision.HoldoutDecision.Variation,
-                    userId, user.GetAttributes(), projectConfig,
-                    flagKey, FeatureDecision.DECISION_SOURCE_HOLDOUT,
-                    flagDecision.HoldoutDecision.Variation?.FeatureEnabled ?? false
-#if USE_CMAB
-                    , null
-#endif
-                ) || decisionEventDispatched;
-            }
             if (!allOptions.Contains(OptimizelyDecideOption.DISABLE_DECISION_EVENT))
             {
+                decisionEventDispatched = SendHoldoutImpressions(user, flagKey, flagDecision,
+                    projectConfig);
                 decisionEventDispatched = SendImpressionEvent(
                     flagDecision.Experiment,
                     flagDecision.Variation,
@@ -1225,6 +1219,28 @@ namespace OptimizelySDK
             }
 
             return copiedOptions;
+        }
+
+        private bool SendHoldoutImpressions(OptimizelyUserContext user, string flagKey,
+            FeatureDecision flagDecision, ProjectConfig projectConfig
+        )
+        {
+            var dispatched = false;
+            foreach (var holdoutDecision in flagDecision.HoldoutDecisions)
+            {
+                dispatched = SendImpressionEvent(
+                    holdoutDecision.Experiment,
+                    holdoutDecision.Variation,
+                    user.GetUserId(), user.GetAttributes(), projectConfig,
+                    flagKey, FeatureDecision.DECISION_SOURCE_HOLDOUT,
+                    holdoutDecision.Variation?.FeatureEnabled ?? false
+#if USE_CMAB
+                    , null
+#endif
+                ) || dispatched;
+            }
+
+            return dispatched;
         }
 
         /// <summary>
