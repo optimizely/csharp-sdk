@@ -623,7 +623,7 @@ namespace OptimizelySDK.Bucketing
         /// <param name = "featureFlag" >The feature flag the user wants to access.</param>
         /// <param name = "user" >The user context.</param>
         /// <returns>null if the user is not bucketed into the rollout or if the feature flag was not attached to a rollout.
-        /// otherwise the FeatureDecision entity</returns>
+        /// otherwise the FeatureDecision entity. If only local holdouts were hit, a decision with null Experiment/Variation carrying HoldoutDecisions.</returns>
         public virtual Result<FeatureDecision> GetVariationForFeatureRollout(
             FeatureFlag featureFlag,
             OptimizelyUserContext user,
@@ -666,6 +666,7 @@ namespace OptimizelySDK.Bucketing
 
             var userId = user.GetUserId();
             var attributes = user.GetAttributes();
+            var holdoutHits = new List<FeatureDecision>();
 
             var index = 0;
             while (index < rolloutRulesLength)
@@ -682,8 +683,8 @@ namespace OptimizelySDK.Bucketing
                 if (forcedDecisionResponse.ResultObject != null)
                 {
                     return Result<FeatureDecision>.NewResult(
-                        new FeatureDecision(rule, forcedDecisionResponse.ResultObject, null),
-                        reasons);
+                        WithHoldoutHits(new FeatureDecision(rule, forcedDecisionResponse.ResultObject, null),
+                            holdoutHits), reasons);
                 }
 
                 var localHoldoutResult = EvaluateLocalHoldouts(rule.Id, user, config);
@@ -692,8 +693,10 @@ namespace OptimizelySDK.Bucketing
                 {
                     Logger.Log(LogLevel.INFO,
                         reasons.AddInfo(
-                            $"The user \"{userId}\" is bucketed into local holdout for delivery rule \"{rule.Key}\"."));
-                    return Result<FeatureDecision>.NewResult(localHoldoutResult.ResultObject, reasons);
+                            $"The user \"{userId}\" is bucketed into local holdout for delivery rule \"{rule.Key}\". Skipping this rule."));
+                    holdoutHits.Add(localHoldoutResult.ResultObject);
+                    index++;
+                    continue;
                 }
 
                 // Regular decision
@@ -728,8 +731,8 @@ namespace OptimizelySDK.Bucketing
                                 $"User \"{userId}\" is in the traffic group of targeting rule \"{loggingKey}\"."));
 
                         return Result<FeatureDecision>.NewResult(
-                            new FeatureDecision(rule, bucketedVariation.ResultObject,
-                                FeatureDecision.DECISION_SOURCE_ROLLOUT), reasons);
+                            WithHoldoutHits(new FeatureDecision(rule, bucketedVariation.ResultObject,
+                                FeatureDecision.DECISION_SOURCE_ROLLOUT), holdoutHits), reasons);
                     }
                     else if (!everyoneElse)
                     {
@@ -751,7 +754,7 @@ namespace OptimizelySDK.Bucketing
                 index = skipToEveryoneElse ? rolloutRulesLength - 1 : index + 1;
             }
 
-            return Result<FeatureDecision>.NullResult(reasons);
+            return HoldoutCarrierOrNull(holdoutHits, reasons);
         }
 
 
@@ -762,7 +765,7 @@ namespace OptimizelySDK.Bucketing
         /// <param name = "userId" >User Identifier</param>
         /// <param name = "filteredAttributes" >The user's attributes. This should be filtered to just attributes in the Datafile.</param>
         /// <returns>null if the user is not bucketed into the rollout or if the feature flag was not attached to a rollout.
-        /// Otherwise the FeatureDecision entity</returns>
+        /// Otherwise the FeatureDecision entity. If only local holdouts were hit, a decision with null Experiment/Variation carrying HoldoutDecisions.</returns>
         public virtual Result<FeatureDecision> GetVariationForFeatureExperiment(
             FeatureFlag featureFlag,
             OptimizelyUserContext user,
@@ -788,6 +791,7 @@ namespace OptimizelySDK.Bucketing
                 return Result<FeatureDecision>.NullResult(reasons);
             }
 
+            var holdoutHits = new List<FeatureDecision>();
             foreach (var experimentId in featureFlag.ExperimentIds)
             {
                 var experiment = config.GetExperimentFromId(experimentId);
@@ -819,8 +823,9 @@ namespace OptimizelySDK.Bucketing
                     {
                         Logger.Log(LogLevel.INFO,
                             reasons.AddInfo(
-                                $"The user \"{userId}\" is bucketed into local holdout for experiment rule \"{experiment.Key}\"."));
-                        return Result<FeatureDecision>.NewResult(localHoldoutResult.ResultObject, reasons);
+                                $"The user \"{userId}\" is bucketed into local holdout for experiment rule \"{experiment.Key}\". Skipping this rule."));
+                        holdoutHits.Add(localHoldoutResult.ResultObject);
+                        continue;
                     }
 
                     var decisionResponse = GetVariation(experiment, user, config, options,
@@ -858,14 +863,15 @@ namespace OptimizelySDK.Bucketing
                     var featureDecision = new FeatureDecision(experiment, decisionVariation,
                         FeatureDecision.DECISION_SOURCE_FEATURE_TEST);
 #endif
-                    return Result<FeatureDecision>.NewResult(featureDecision, reasons);
+                    return Result<FeatureDecision>.NewResult(
+                        WithHoldoutHits(featureDecision, holdoutHits), reasons);
                 }
             }
 
             Logger.Log(LogLevel.INFO,
                 reasons.AddInfo(
                     $"The user \"{userId}\" is not bucketed into any of the experiments on the feature \"{featureFlag.Key}\"."));
-            return Result<FeatureDecision>.NullResult(reasons);
+            return HoldoutCarrierOrNull(holdoutHits, reasons);
         }
 
         /// <summary>
@@ -916,6 +922,7 @@ namespace OptimizelySDK.Bucketing
 
             FeatureDecision globalHoldoutDecision = null;
             Holdout matchedHoldout = null;
+            var holdoutHits = new List<FeatureDecision>();
             var globalHoldouts = projectConfig.GetGlobalHoldouts();
             foreach (var holdout in globalHoldouts)
             {
@@ -931,6 +938,7 @@ namespace OptimizelySDK.Bucketing
                                 $"User \"{userId}\" is in holdout \"{holdout.Key}\" which excludes targeted deliveries. Targeted delivery rules will be evaluated normally."));
                         globalHoldoutDecision = holdoutDecision.ResultObject;
                         matchedHoldout = holdout;
+                        holdoutHits.Add(globalHoldoutDecision);
                     }
                     else
                     {
@@ -949,7 +957,11 @@ namespace OptimizelySDK.Bucketing
                     filteredAttributes, projectConfig, options, userProfileTracker);
                 reasons += experimentDecision.DecisionReasons;
 
-                if (experimentDecision.ResultObject != null)
+                if (IsHoldoutCarrier(experimentDecision.ResultObject))
+                {
+                    holdoutHits.AddRange(experimentDecision.ResultObject.HoldoutDecisions);
+                }
+                else if (experimentDecision.ResultObject != null)
                 {
                     return Result<FeatureDecision>.NewResult(experimentDecision.ResultObject, reasons);
                 }
@@ -971,34 +983,35 @@ namespace OptimizelySDK.Bucketing
             var rolloutDecision = GetVariationForFeatureRollout(featureFlag, user, projectConfig);
             reasons += rolloutDecision.DecisionReasons;
 
-            if (rolloutDecision.ResultObject != null)
+            if (IsHoldoutCarrier(rolloutDecision.ResultObject))
+            {
+                holdoutHits.AddRange(rolloutDecision.ResultObject.HoldoutDecisions);
+            }
+            else if (rolloutDecision.ResultObject != null)
             {
                 Logger.Log(LogLevel.INFO,
                     reasons.AddInfo(
                         $"The user \"{userId}\" is bucketed into a rollout for feature flag \"{featureFlag.Key}\"."));
-                if (globalHoldoutDecision != null)
-                {
-                    rolloutDecision.ResultObject.HoldoutDecision = globalHoldoutDecision;
-                }
+                rolloutDecision.ResultObject.HoldoutDecisions.InsertRange(0, holdoutHits);
                 return Result<FeatureDecision>.NewResult(rolloutDecision.ResultObject, reasons);
             }
 
+            var nullDecision = WithHoldoutHits(
+                new FeatureDecision(null, null, FeatureDecision.DECISION_SOURCE_ROLLOUT), holdoutHits);
             if (globalHoldoutDecision != null)
             {
-                var nullDecision = new FeatureDecision(null, null, FeatureDecision.DECISION_SOURCE_ROLLOUT);
-                nullDecision.HoldoutDecision = globalHoldoutDecision;
                 Logger.Log(LogLevel.INFO,
                     reasons.AddInfo(
                         $"The user \"{userId}\" is not bucketed into any targeted delivery for feature flag \"{featureFlag.Key}\". Holdout impression will be sent but holdout variation is not applied as fallback."));
-                return Result<FeatureDecision>.NewResult(nullDecision, reasons);
+            }
+            else
+            {
+                Logger.Log(LogLevel.INFO,
+                    reasons.AddInfo(
+                        $"The user \"{userId}\" is not bucketed into a rollout for feature flag \"{featureFlag.Key}\"."));
             }
 
-            Logger.Log(LogLevel.INFO,
-                reasons.AddInfo(
-                    $"The user \"{userId}\" is not bucketed into a rollout for feature flag \"{featureFlag.Key}\"."));
-            return Result<FeatureDecision>.NewResult(
-                new FeatureDecision(null, null, FeatureDecision.DECISION_SOURCE_ROLLOUT),
-                reasons);
+            return Result<FeatureDecision>.NewResult(nullDecision, reasons);
         }
 
         public virtual List<Result<FeatureDecision>> GetVariationsForFeatureList(
@@ -1094,6 +1107,34 @@ namespace OptimizelySDK.Bucketing
             }
 
             return Result<string>.NewResult(bucketingId, reasons);
+        }
+
+        private static FeatureDecision WithHoldoutHits(FeatureDecision decision,
+            List<FeatureDecision> holdoutHits
+        )
+        {
+            decision.HoldoutDecisions.AddRange(holdoutHits);
+            return decision;
+        }
+
+        private static Result<FeatureDecision> HoldoutCarrierOrNull(
+            List<FeatureDecision> holdoutHits,
+            DecisionReasons reasons
+        )
+        {
+            if (holdoutHits.Count == 0)
+            {
+                return Result<FeatureDecision>.NullResult(reasons);
+            }
+
+            return Result<FeatureDecision>.NewResult(
+                WithHoldoutHits(new FeatureDecision(null, null, null), holdoutHits), reasons);
+        }
+
+        private static bool IsHoldoutCarrier(FeatureDecision decision)
+        {
+            return decision != null && decision.Experiment == null && decision.Variation == null &&
+                   decision.Source == null && decision.HoldoutDecisions.Count > 0;
         }
 
         private Result<FeatureDecision> EvaluateLocalHoldouts(

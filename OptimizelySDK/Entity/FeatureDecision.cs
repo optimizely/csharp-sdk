@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright 2017, 2019, Optimizely
+ * Copyright 2017, 2019, 2026, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+using System;
+using System.Collections.Generic;
+
 namespace OptimizelySDK.Entity
 {
     public class FeatureDecision
@@ -26,7 +29,24 @@ namespace OptimizelySDK.Entity
         public string Source { get; }
         public string CmabUuid { get; }
         public bool Error { get; }
-        public FeatureDecision HoldoutDecision { get; set; }
+        public List<FeatureDecision> HoldoutDecisions { get; } = new List<FeatureDecision>();
+
+        [Obsolete("Use HoldoutDecisions instead.")]
+        public FeatureDecision HoldoutDecision
+        {
+            get
+            {
+                return HoldoutDecisions.Count > 0 ? HoldoutDecisions[0] : null;
+            }
+            set
+            {
+                HoldoutDecisions.Clear();
+                if (value != null)
+                {
+                    HoldoutDecisions.Add(value);
+                }
+            }
+        }
 
         public FeatureDecision(ExperimentCore experiment, Variation variation, string source, string cmabUuid = null, bool error = false)
         {

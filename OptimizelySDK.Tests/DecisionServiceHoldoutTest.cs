@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright 2025, Optimizely
+ * Copyright 2025, 2026, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -411,18 +411,13 @@ namespace OptimizelySDK.Tests
         }
 
         [Test]
-        public void TestLocalHoldouts_UserBucketedIntoLocalHoldoutForDeliveryRuleReturnsHoldoutVariation()
+        public void TestLocalHoldouts_DeliveryRuleHoldoutHitSkipsRuleAndLaterRuleServes()
         {
-            // When a user hits a local holdout targeting delivery rule X, the holdout variation
-            // is returned and the rule's own audience/traffic checks are not evaluated.
-            // holdout_local_rule1 targets rule_id_1 with 100% traffic.
-            // To test this without global holdout interference, we use a config where
-            // global holdout has 0% traffic — we manipulate the global holdout in-place.
             InitializeLocalHoldoutsConfig();
 
-            // Remove global holdout traffic so it doesn't intercept
-            var globalHoldout = LocalHoldoutsConfig.GetGlobalHoldouts()[0];
-            globalHoldout.TrafficAllocation = new TrafficAllocation[0]; // 0% traffic
+            LocalHoldoutsConfig.GetGlobalHoldouts()[0].TrafficAllocation = new TrafficAllocation[0];
+            LocalHoldoutsConfig.GetHoldoutsForRule("rule_id_2")[0].TrafficAllocation =
+                new TrafficAllocation[0];
 
             var realBucketer = new Bucketer(LoggerMock.Object);
             var decisionService = new DecisionService(realBucketer,
@@ -444,12 +439,15 @@ namespace OptimizelySDK.Tests
 
             var decision = result[0].ResultObject;
             Assert.IsNotNull(decision, "Decision should not be null");
-            Assert.AreEqual(FeatureDecision.DECISION_SOURCE_HOLDOUT, decision.Source,
-                "Decision source should be holdout for local holdout hit");
-            Assert.AreEqual("local_holdout_rule1", decision.Experiment?.Key,
-                "Decision should be from local holdout targeting rule_id_1");
-            Assert.AreEqual("local_holdout_off", decision.Variation?.Key,
-                "Variation should be the holdout's variation");
+            Assert.AreEqual(FeatureDecision.DECISION_SOURCE_ROLLOUT, decision.Source);
+            Assert.AreEqual("rule_id_2", decision.Experiment?.Id,
+                "Held-out rule_id_1 should be skipped and rule_id_2 should serve");
+            Assert.AreEqual("rule2_var_1", decision.Variation?.Id);
+            Assert.AreEqual(1, decision.HoldoutDecisions.Count);
+            Assert.AreEqual("local_holdout_rule1", decision.HoldoutDecisions[0].Experiment.Key);
+            Assert.AreEqual("local_holdout_off", decision.HoldoutDecisions[0].Variation.Key);
+            Assert.AreEqual(FeatureDecision.DECISION_SOURCE_HOLDOUT,
+                decision.HoldoutDecisions[0].Source);
         }
 
         [Test]
@@ -595,6 +593,7 @@ namespace OptimizelySDK.Tests
                 "Forced decision must NOT return holdout source — forced decision takes priority over local holdout");
             Assert.AreEqual("variation_a", decision.Variation?.Key,
                 "Forced decision variation should be returned, not holdout variation");
+            Assert.AreEqual(0, decision.HoldoutDecisions.Count);
         }
 
         [Test]
@@ -639,10 +638,12 @@ namespace OptimizelySDK.Tests
 
             var decision = result[0].ResultObject;
             Assert.IsNotNull(decision, "Decision should not be null");
-            Assert.AreEqual(FeatureDecision.DECISION_SOURCE_HOLDOUT, decision.Source,
-                "Decision source should be holdout since local holdout targets the experiment rule");
-            Assert.AreEqual("local_holdout_exp_rule1", decision.Experiment?.Key,
-                "Decision experiment should be the local holdout targeting exp_rule_id_1");
+            Assert.AreEqual(FeatureDecision.DECISION_SOURCE_FEATURE_TEST, decision.Source);
+            Assert.AreEqual("experiment_rule_2", decision.Experiment?.Key,
+                "Held out of experiment_rule_1, user should be served by experiment_rule_2");
+            Assert.AreEqual("variation_b", decision.Variation?.Key);
+            Assert.AreEqual(1, decision.HoldoutDecisions.Count);
+            Assert.AreEqual("local_holdout_exp_rule1", decision.HoldoutDecisions[0].Experiment.Key);
         }
 
         // =====================================================================
@@ -784,8 +785,8 @@ namespace OptimizelySDK.Tests
                 "With excludeTargetedDeliveries=true, A/B experiment rules should be skipped (not evaluated)");
             Assert.IsNull(decision.Variation,
                 "Variation should be null since A/B was blocked and no TD rule matched");
-            Assert.IsNotNull(decision.HoldoutDecision,
-                "HoldoutDecision should be attached showing the user was in a holdout that blocked A/B rules");
+            Assert.AreEqual(1, decision.HoldoutDecisions.Count,
+                "HoldoutDecisions should be attached showing the user was in a holdout that blocked A/B rules");
         }
 
         [Test]
@@ -829,8 +830,11 @@ namespace OptimizelySDK.Tests
 
             var decision = result[0].ResultObject;
             Assert.IsNotNull(decision);
-            Assert.AreEqual(FeatureDecision.DECISION_SOURCE_HOLDOUT, decision.Source,
-                "Local holdout must apply to TD rules even when excludeTargetedDeliveries=true (flag is only for global holdouts)");
+            Assert.AreEqual(FeatureDecision.DECISION_SOURCE_ROLLOUT, decision.Source);
+            Assert.AreEqual("rule_id_everyone_else", decision.Experiment?.Id);
+            CollectionAssert.AreEqual(new[] { "local_holdout_rule1", "local_holdout_rule2" },
+                decision.HoldoutDecisions.Select(h => h.Experiment.Key).ToArray(),
+                "Local holdouts must apply to TD rules even when excludeTargetedDeliveries=true (flag is only for global holdouts)");
         }
 
         [Test]
@@ -858,7 +862,9 @@ namespace OptimizelySDK.Tests
 
             var decision = result[0].ResultObject;
             Assert.IsNotNull(decision);
-            Assert.AreEqual(FeatureDecision.DECISION_SOURCE_HOLDOUT, decision.Source,
+            Assert.AreEqual("experiment_rule_2", decision.Experiment?.Key);
+            CollectionAssert.AreEqual(new[] { "local_holdout_exp_rule1" },
+                decision.HoldoutDecisions.Select(h => h.Experiment.Key).ToArray(),
                 "Local holdout with excludeTargetedDeliveries=true should still apply for A/B rules");
         }
 
@@ -903,8 +909,8 @@ namespace OptimizelySDK.Tests
                 "When TD returns no match with excludeTargetedDeliveries=true, variation should be null (no holdout fallback)");
             Assert.IsNull(decision.Experiment,
                 "When TD returns no match with excludeTargetedDeliveries=true, experiment should be null (no holdout fallback)");
-            Assert.IsNotNull(decision.HoldoutDecision,
-                "HoldoutDecision should be attached for event dispatch even when decision is null");
+            Assert.AreEqual(1, decision.HoldoutDecisions.Count,
+                "HoldoutDecisions should be attached for event dispatch even when decision is null");
         }
         [Test]
         public void TestExcludeTargetedDeliveries_HoldoutEventSentWhenTDBypasses()
@@ -988,10 +994,10 @@ namespace OptimizelySDK.Tests
             Assert.IsNotNull(decision);
             Assert.AreEqual(FeatureDecision.DECISION_SOURCE_ROLLOUT, decision.Source,
                 "TD rule should be returned as the decision");
-            Assert.IsNotNull(decision.HoldoutDecision,
-                "HoldoutDecision should be attached when holdout was bypassed for TD");
-            Assert.AreEqual(FeatureDecision.DECISION_SOURCE_HOLDOUT, decision.HoldoutDecision.Source,
-                "Attached HoldoutDecision should have holdout source");
+            Assert.AreEqual(1, decision.HoldoutDecisions.Count,
+                "HoldoutDecisions should be attached when holdout was bypassed for TD");
+            Assert.AreEqual(FeatureDecision.DECISION_SOURCE_HOLDOUT, decision.HoldoutDecisions[0].Source,
+                "Attached holdout decision should have holdout source");
         }
 
         [Test]
@@ -1055,6 +1061,261 @@ namespace OptimizelySDK.Tests
                 "decisionEventDispatched should be true when the holdout impression is dispatched, " +
                 "even if the primary (TD) decision is null");
         }
+
+        private Optimizely CreateLocalHoldoutsOptimizelyWithMockedEvents(
+            Action<JObject> mutateDatafile = null
+        )
+        {
+            var datafile = (JObject)TestData["datafileWithLocalHoldouts"].DeepClone();
+            datafile["holdouts"][0]["trafficAllocation"] = new JArray();
+            mutateDatafile?.Invoke(datafile);
+
+            EventProcessorMock.Setup(ep => ep.Process(It.IsAny<ImpressionEvent>()));
+            return new Optimizely(datafile.ToString(), null, LoggerMock.Object,
+                new NoOpErrorHandler(), null, false, EventProcessorMock.Object);
+        }
+
+        private static void ZeroTraffic(JObject datafile, string section, string id)
+        {
+            var entity = datafile[section].First(e => (string)e["id"] == id);
+            entity["trafficAllocation"] = new JArray();
+        }
+
+        private void VerifyHoldoutImpression(string holdoutKey, Times times)
+        {
+            EventProcessorMock.Verify(ep => ep.Process(It.Is<ImpressionEvent>(ie =>
+                ie.Experiment.Key == holdoutKey &&
+                ie.Metadata.RuleType == FeatureDecision.DECISION_SOURCE_HOLDOUT
+            )), times);
+        }
+
+        [Test]
+        public void TestLocalHoldouts_HitsOnSeveralRulesSendSeveralHoldoutEvents()
+        {
+            var optimizely = CreateLocalHoldoutsOptimizelyWithMockedEvents();
+
+            var decision = optimizely.CreateUserContext(TestUserId).Decide("test_flag_1");
+
+            Assert.AreEqual("everyone_else_rule", decision.RuleKey);
+            Assert.IsTrue(decision.Enabled);
+            VerifyHoldoutImpression("local_holdout_rule1", Times.Once());
+            VerifyHoldoutImpression("local_holdout_rule2", Times.Once());
+            EventProcessorMock.Verify(ep => ep.Process(It.IsAny<ImpressionEvent>()), Times.Exactly(2));
+        }
+
+        [Test]
+        public void TestLocalHoldouts_HoldoutHitThenNoRuleServes()
+        {
+            var optimizely = CreateLocalHoldoutsOptimizelyWithMockedEvents(df =>
+            {
+                foreach (var rule in df["rollouts"][0]["experiments"])
+                {
+                    rule["trafficAllocation"] = new JArray();
+                }
+            });
+            var config = optimizely.ProjectConfigManager.GetConfig() as DatafileProjectConfig;
+            var decisionService = new DecisionService(new Bucketer(LoggerMock.Object),
+                new NoOpErrorHandler(), null, LoggerMock.Object, null);
+            var userContext = optimizely.CreateUserContext(TestUserId);
+
+            var result = decisionService.GetVariationsForFeatureList(
+                new List<FeatureFlag> { config.FeatureKeyMap["test_flag_1"] }, userContext, config,
+                new UserAttributes(), new OptimizelyDecideOption[0]);
+
+            var featureDecision = result[0].ResultObject;
+            Assert.IsNull(featureDecision.Variation);
+            Assert.IsNull(featureDecision.Experiment);
+            Assert.AreEqual(FeatureDecision.DECISION_SOURCE_ROLLOUT, featureDecision.Source);
+            Assert.AreEqual(2, featureDecision.HoldoutDecisions.Count);
+
+            var decision = userContext.Decide("test_flag_1");
+
+            Assert.IsFalse(decision.Enabled);
+            Assert.IsNull(decision.VariationKey);
+            Assert.IsNull(decision.RuleKey);
+            VerifyHoldoutImpression("local_holdout_rule1", Times.Once());
+            VerifyHoldoutImpression("local_holdout_rule2", Times.Once());
+        }
+
+        [Test]
+        public void TestLocalHoldouts_DeliveryRuleHitWithSendFlagDecisionsOffStillSendsHoldoutEvent()
+        {
+            var optimizely = CreateLocalHoldoutsOptimizelyWithMockedEvents(df =>
+            {
+                df["sendFlagDecisions"] = false;
+                ZeroTraffic(df, "localHoldouts", "holdout_local_rule2");
+            });
+
+            var decision = optimizely.CreateUserContext(TestUserId).Decide("test_flag_1");
+
+            Assert.AreEqual("delivery_rule_2", decision.RuleKey);
+            VerifyHoldoutImpression("local_holdout_rule1", Times.Once());
+            EventProcessorMock.Verify(ep => ep.Process(It.IsAny<ImpressionEvent>()), Times.Once(),
+                "Only the holdout event should be sent; the rollout event is suppressed by sendFlagDecisions=false");
+        }
+
+        [Test]
+        public void TestLocalHoldouts_DisableDecisionEventSuppressesHoldoutEvents()
+        {
+            var optimizely = CreateLocalHoldoutsOptimizelyWithMockedEvents();
+
+            var decision = optimizely.CreateUserContext(TestUserId).Decide("test_flag_1",
+                new[] { OptimizelyDecideOption.DISABLE_DECISION_EVENT });
+
+            Assert.AreEqual("everyone_else_rule", decision.RuleKey);
+            EventProcessorMock.Verify(ep => ep.Process(It.IsAny<ImpressionEvent>()), Times.Never());
+        }
+
+        [Test]
+        public void TestLocalHoldouts_HeldOutOfFirstExperimentRuleServedBySecond()
+        {
+            var optimizely = CreateLocalHoldoutsOptimizelyWithMockedEvents();
+
+            var decision = optimizely.CreateUserContext(TestUserId).Decide("test_flag_2");
+
+            Assert.AreEqual("experiment_rule_2", decision.RuleKey);
+            Assert.AreEqual("variation_b", decision.VariationKey);
+            VerifyHoldoutImpression("local_holdout_exp_rule1", Times.Once());
+            EventProcessorMock.Verify(ep => ep.Process(It.Is<ImpressionEvent>(ie =>
+                ie.Experiment.Key == "experiment_rule_2" &&
+                ie.Metadata.RuleType == FeatureDecision.DECISION_SOURCE_FEATURE_TEST
+            )), Times.Once());
+        }
+
+        [Test]
+        public void TestLocalHoldouts_OneHoldoutTargetingTwoRulesSendsTwoHoldoutEvents()
+        {
+            var optimizely = CreateLocalHoldoutsOptimizelyWithMockedEvents(df =>
+            {
+                var holdouts = (JArray)df["localHoldouts"];
+                holdouts.First(h => (string)h["id"] == "holdout_local_rule1")["includedRules"] =
+                    new JArray("rule_id_1", "rule_id_2");
+                holdouts.First(h => (string)h["id"] == "holdout_local_rule2")["includedRules"] =
+                    new JArray();
+            });
+
+            var decision = optimizely.CreateUserContext(TestUserId).Decide("test_flag_1");
+
+            Assert.AreEqual("everyone_else_rule", decision.RuleKey);
+            VerifyHoldoutImpression("local_holdout_rule1", Times.Exactly(2));
+            VerifyHoldoutImpression("local_holdout_rule2", Times.Never());
+            EventProcessorMock.Verify(ep => ep.Process(It.IsAny<ImpressionEvent>()), Times.Exactly(2));
+        }
+
+        [Test]
+        public void TestLocalHoldouts_HoldoutBeatsStickyUserProfileVariation()
+        {
+            InitializeLocalHoldoutsConfig();
+            LocalHoldoutsConfig.GetGlobalHoldouts()[0].TrafficAllocation = new TrafficAllocation[0];
+
+            var userProfile = new UserProfile(TestUserId, new Dictionary<string, Bucketing.Decision>
+            {
+                { "exp_rule_id_1", new Bucketing.Decision("exp1_var_1") },
+            });
+            var userProfileServiceMock = new Mock<UserProfileService>();
+            userProfileServiceMock.Setup(ups => ups.Lookup(TestUserId)).Returns(userProfile.ToMap());
+
+            var decisionService = new DecisionService(new Bucketer(LoggerMock.Object),
+                new NoOpErrorHandler(), userProfileServiceMock.Object, LoggerMock.Object, null);
+            var userContext = new OptimizelyUserContext(LocalHoldoutsOptimizely, TestUserId, null,
+                new NoOpErrorHandler(), LoggerMock.Object);
+
+            var result = decisionService.GetVariationsForFeatureList(
+                new List<FeatureFlag> { LocalHoldoutsConfig.FeatureKeyMap["test_flag_2"] },
+                userContext, LocalHoldoutsConfig, new UserAttributes(),
+                new OptimizelyDecideOption[0]);
+
+            var decision = result[0].ResultObject;
+            Assert.AreEqual("experiment_rule_2", decision.Experiment?.Key);
+            Assert.AreEqual("variation_b", decision.Variation?.Key);
+            Assert.AreEqual(1, decision.HoldoutDecisions.Count);
+            Assert.AreEqual("local_holdout_exp_rule1", decision.HoldoutDecisions[0].Experiment.Key);
+        }
+
+        [Test]
+        public void TestLocalHoldouts_GlobalExcludeTDHitThenLocalHitOrderedGlobalFirst()
+        {
+            var optimizely = CreateLocalHoldoutsOptimizelyWithMockedEvents(df =>
+            {
+                var globalHoldout = df["holdouts"][0];
+                globalHoldout["trafficAllocation"] = new JArray(new JObject
+                {
+                    { "entityId", "gvar_1" },
+                    { "endOfRange", 10000 },
+                });
+                globalHoldout["excludeTargetedDeliveries"] = true;
+                ZeroTraffic(df, "localHoldouts", "holdout_local_rule2");
+            });
+            var config = optimizely.ProjectConfigManager.GetConfig() as DatafileProjectConfig;
+            var decisionService = new DecisionService(new Bucketer(LoggerMock.Object),
+                new NoOpErrorHandler(), null, LoggerMock.Object, null);
+            var userContext = optimizely.CreateUserContext(TestUserId);
+
+            var result = decisionService.GetVariationsForFeatureList(
+                new List<FeatureFlag> { config.FeatureKeyMap["test_flag_1"] }, userContext, config,
+                new UserAttributes(), new OptimizelyDecideOption[0]);
+
+            var featureDecision = result[0].ResultObject;
+            Assert.AreEqual("delivery_rule_2", featureDecision.Experiment?.Key);
+            Assert.AreEqual(2, featureDecision.HoldoutDecisions.Count);
+            Assert.AreEqual("global_holdout_2", featureDecision.HoldoutDecisions[0].Experiment.Key);
+            Assert.AreEqual("local_holdout_rule1", featureDecision.HoldoutDecisions[1].Experiment.Key);
+
+            var decision = userContext.Decide("test_flag_1");
+
+            Assert.AreEqual("delivery_rule_2", decision.RuleKey);
+            VerifyHoldoutImpression("global_holdout_2", Times.Once());
+            VerifyHoldoutImpression("local_holdout_rule1", Times.Once());
+            EventProcessorMock.Verify(ep => ep.Process(It.IsAny<ImpressionEvent>()), Times.Exactly(2));
+        }
+
+        [Test]
+        public void TestLocalHoldouts_DecisionErrorSuppressesHoldoutEvents()
+        {
+            var optimizely = CreateLocalHoldoutsOptimizelyWithMockedEvents();
+            var config = optimizely.ProjectConfigManager.GetConfig() as DatafileProjectConfig;
+            var holdout = config.LocalHoldouts.First(h => h.Key == "local_holdout_exp_rule1");
+            var errorDecision = new FeatureDecision(config.GetExperimentFromKey("experiment_rule_2"),
+                null, FeatureDecision.DECISION_SOURCE_FEATURE_TEST, null, error: true);
+            errorDecision.HoldoutDecisions.Add(new FeatureDecision(holdout, holdout.Variations[0],
+                FeatureDecision.DECISION_SOURCE_HOLDOUT));
+
+            var decisionServiceMock = new Mock<DecisionService>(new Bucketer(LoggerMock.Object),
+                new NoOpErrorHandler(), null, LoggerMock.Object, null);
+            decisionServiceMock.Setup(ds => ds.GetVariationsForFeatureList(
+                    It.IsAny<List<FeatureFlag>>(), It.IsAny<OptimizelyUserContext>(),
+                    It.IsAny<ProjectConfig>(), It.IsAny<UserAttributes>(),
+                    It.IsAny<OptimizelyDecideOption[]>())).
+                Returns(new List<Result<FeatureDecision>>
+                {
+                    Result<FeatureDecision>.NewResult(errorDecision, new DecisionReasons()),
+                });
+            typeof(Optimizely).GetField("DecisionService",
+                    System.Reflection.BindingFlags.NonPublic |
+                    System.Reflection.BindingFlags.Instance).
+                SetValue(optimizely, decisionServiceMock.Object);
+
+            var decision = optimizely.CreateUserContext(TestUserId).Decide("test_flag_2");
+
+            Assert.IsNull(decision.VariationKey);
+            Assert.IsFalse(decision.Enabled);
+            VerifyHoldoutImpression("local_holdout_exp_rule1", Times.Never());
+            EventProcessorMock.Verify(ep => ep.Process(It.IsAny<ImpressionEvent>()), Times.Never());
+        }
+
+        [Test]
+        public void TestLocalHoldouts_LegacyApiSkipsHeldOutRuleWithoutHoldoutEvent()
+        {
+            var optimizely = CreateLocalHoldoutsOptimizelyWithMockedEvents(df =>
+            {
+                df["sendFlagDecisions"] = true;
+            });
+
+            Assert.IsTrue(optimizely.IsFeatureEnabled("test_flag_1", TestUserId));
+            Assert.IsTrue(optimizely.IsFeatureEnabled("test_flag_2", TestUserId));
+
+            EventProcessorMock.Verify(ep => ep.Process(It.Is<ImpressionEvent>(ie =>
+                ie.Metadata.RuleType == FeatureDecision.DECISION_SOURCE_HOLDOUT)), Times.Never());
+        }
     }
 }
-
