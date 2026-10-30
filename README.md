@@ -46,7 +46,7 @@ dotnet add package Optimizely.SDK
 
 **PackageReference:**
 ```xml
-<PackageReference Include="Optimizely.SDK" Version="4.2.0" />
+<PackageReference Include="Optimizely.SDK" Version="4.6.0" />
 ```
 
 An ASP.NET MVC sample project is also available:
